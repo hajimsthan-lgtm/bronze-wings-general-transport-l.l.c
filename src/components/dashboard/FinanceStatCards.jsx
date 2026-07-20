@@ -4,6 +4,7 @@ import { Banknote, Landmark, TrendingUp, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { computeBalancesFromTransactions, computePeriodStats } from '@/lib/accounting';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import SatinCard from '@/components/common/SatinCard';
 
 const TONES = {
   amber: { value: 'text-amber-400', label: 'text-amber-400/60', card: 'bg-amber-500/[0.04] border-amber-500/20' },
@@ -15,13 +16,13 @@ const TONES = {
 function StatCard({ icon: Icon, label, value, tone }) {
   const t = TONES[tone];
   return (
-    <div className={`rounded-2xl border p-5 ${t.card}`}>
+    <SatinCard className="p-5">
       <div className="flex items-center justify-between mb-3">
-        <span className={`text-[10px] font-bold uppercase tracking-widest ${t.label}`}>{label}</span>
-        <Icon className={`w-3.5 h-3.5 ${t.value}`} />
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8a8a8a' }}>{label}</span>
+        <Icon className={`w-4 h-4 ${t.value}`} />
       </div>
-      <p className={`text-2xl font-extrabold font-mono ${t.value}`}>{value}</p>
-    </div>
+      <p className="text-2xl font-bold" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{value}</p>
+    </SatinCard>
   );
 }
 

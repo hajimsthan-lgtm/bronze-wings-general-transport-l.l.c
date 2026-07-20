@@ -11,6 +11,7 @@ import { Plus, Search, Receipt, Pencil, Wallet } from 'lucide-react';
 import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useClientPayments } from '@/hooks/useEntityQueries';
+import SatinCard from '@/components/common/SatinCard';
 
 export default function Payments() {
   const { data: items = [], isLoading: loading, refetch } = useClientPayments();
@@ -59,20 +60,20 @@ export default function Payments() {
         />
 
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="glass-card p-3">
+          <SatinCard className="p-3">
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-emerald-400" />
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Total Allocated</p>
+              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Total Allocated</p>
             </div>
-            <p className="text-lg font-display font-bold text-emerald-400 mt-1">{formatCurrency(totalAllocated)}</p>
-          </div>
-          <div className="glass-card p-3">
+            <p className="text-lg font-bold mt-1" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalAllocated)}</p>
+          </SatinCard>
+          <SatinCard className="p-3">
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-amber-400" />
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Unapplied Balance</p>
+              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Unapplied Balance</p>
             </div>
-            <p className="text-lg font-display font-bold text-amber-400 mt-1">{formatCurrency(totalUnapplied)}</p>
-          </div>
+            <p className="text-lg font-bold mt-1" style={{ color: '#fbbf24', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalUnapplied)}</p>
+          </SatinCard>
         </div>
 
         <div className="relative mb-5">

@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import SatinCard from '@/components/common/SatinCard';
 
 export default function Cash() {
   const { t } = useI18n();
@@ -36,9 +37,9 @@ export default function Cash() {
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
 
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('inflow')}</p><p className="text-lg font-display font-bold text-emerald-400">{formatCurrency(inflows)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('outflow')}</p><p className="text-lg font-display font-bold text-red-400">{formatCurrency(outflows)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Balance</p><p className="text-lg font-display font-bold text-foreground">{formatCurrency(inflows - outflows)}</p></div>
+        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('inflow')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(inflows)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('outflow')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f87171', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(outflows)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Balance</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(inflows - outflows)}</p></SatinCard>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">

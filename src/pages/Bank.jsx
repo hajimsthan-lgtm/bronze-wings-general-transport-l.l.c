@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Search, Landmark, ArrowUpRight, ArrowDownLeft, CheckCircle2 } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import SatinCard from '@/components/common/SatinCard';
 
 export default function Bank() {
   const { t } = useI18n();
@@ -46,9 +47,9 @@ export default function Bank() {
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('credit')}</p><p className="text-lg font-display font-bold text-emerald-400">{formatCurrency(totalCredits)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('debit')}</p><p className="text-lg font-display font-bold text-red-400">{formatCurrency(totalDebits)}</p></div>
-        <div className="glass-card p-3 col-span-2 md:col-span-1"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Net</p><p className="text-lg font-display font-bold text-foreground">{formatCurrency(totalCredits - totalDebits)}</p></div>
+        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('credit')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalCredits)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('debit')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f87171', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalDebits)}</p></SatinCard>
+        <SatinCard className="p-3 col-span-2 md:col-span-1"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Net</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalCredits - totalDebits)}</p></SatinCard>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
