@@ -26,14 +26,14 @@ export default function DesktopNav() {
   };
 
   return (
-    <nav className="hidden md:flex items-center justify-between px-6 lg:px-8 h-14 sticky top-0 z-50">
-      <div className="clay-rail flex items-center gap-1.5">
+    <nav className="hidden md:flex items-center justify-between px-6 lg:px-8 h-16 sticky top-0 z-50">
+      <div className="glass-panel rounded-full flex items-center gap-1.5 pl-2 pr-2 py-1.5">
         <Link to="/" className="flex items-center gap-2.5 mr-2 pl-1.5 pr-3 py-1">
           {logoUrl ? (
-            <img src={logoUrl} alt="Bronze Wings" className="w-9 h-9 rounded-full object-contain" />
+            <img src={logoUrl} alt="Bronze Wings" className="w-8 h-8 rounded-full object-contain" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]">
-              <span className="text-white font-display font-bold text-xs">BW</span>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]">
+              <span className="text-white font-display font-bold text-[10px]">BW</span>
             </div>
           )}
           <span className="font-display font-semibold text-foreground text-sm tracking-tight">
@@ -47,12 +47,13 @@ export default function DesktopNav() {
             <Link
               key={item.key}
               to={item.path}
-              className={`flex items-center px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
                 active
-                  ? 'clay-nav-chip clay-nav-chip-active text-primary'
-                  : 'clay-nav-chip text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary/15 text-primary border border-primary/25'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05] border border-transparent'
               }`}
             >
+              <item.icon className="w-3.5 h-3.5" />
               <span>{t(item.key)}</span>
             </Link>
           );
@@ -61,12 +62,12 @@ export default function DesktopNav() {
 
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <Link to="/settings" className="flex items-center px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors" aria-label="Settings">
+        <Link to="/settings" className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Settings">
           <Settings className="w-4 h-4" />
         </Link>
         <button
           onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full glass-panel text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Toggle language"
         >
           <Globe className="w-3.5 h-3.5" />

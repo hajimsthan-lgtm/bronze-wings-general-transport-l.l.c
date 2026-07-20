@@ -7,21 +7,23 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import SatinCard from '@/components/common/SatinCard';
 
 const TONES = {
-  amber: { value: 'text-amber-400', label: 'text-amber-400/60', card: 'bg-amber-500/[0.04] border-amber-500/20' },
-  teal: { value: 'text-teal-400', label: 'text-teal-400/60', card: 'bg-teal-500/[0.04] border-teal-500/20' },
-  emerald: { value: 'text-emerald-400', label: 'text-emerald-400/60', card: 'bg-emerald-500/[0.04] border-emerald-500/20' },
-  red: { value: 'text-red-400', label: 'text-red-400/60', card: 'bg-red-500/[0.04] border-red-500/20' },
+  amber: { value: 'text-amber-300', icon: 'text-amber-300' },
+  teal: { value: 'text-teal-300', icon: 'text-teal-300' },
+  emerald: { value: 'text-emerald-300', icon: 'text-emerald-300' },
+  red: { value: 'text-rose-300', icon: 'text-rose-300' },
 };
 
 function StatCard({ icon: Icon, label, value, tone }) {
   const t = TONES[tone];
   return (
     <SatinCard className="p-5">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#8a8a8a' }}>{label}</span>
-        <Icon className={`w-4 h-4 ${t.value}`} />
+      <div className="flex items-center justify-between mb-3.5">
+        <span className="eyebrow pt-1">{label}</span>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center glass-panel">
+          <Icon className={`w-4 h-4 ${t.icon}`} />
+        </div>
       </div>
-      <p className="text-2xl font-bold" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{value}</p>
+      <p className={`text-2xl font-bold tracking-tight tabular-nums font-display ${t.value}`}>{value}</p>
     </SatinCard>
   );
 }
@@ -36,10 +38,7 @@ export default function FinanceStatCards({ invoices }) {
       base44.entities.CashTransaction.list('-created_date', 200),
       base44.entities.BankTransaction.list('-created_date', 200),
     ])
-      .then(([c, b]) => {
-        setCashTxns(c);
-        setBankTxns(b);
-      })
+      .then(([c, b]) => { setCashTxns(c); setBankTxns(b); })
       .finally(() => setLoading(false));
   }, []);
 

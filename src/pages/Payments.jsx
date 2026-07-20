@@ -63,16 +63,16 @@ export default function Payments() {
           <SatinCard className="p-3">
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-emerald-400" />
-              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Total Allocated</p>
+              <p className="eyebrow">Total Allocated</p>
             </div>
-            <p className="text-lg font-bold mt-1" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalAllocated)}</p>
+            <p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(totalAllocated)}</p>
           </SatinCard>
           <SatinCard className="p-3">
             <div className="flex items-center gap-2">
               <Wallet className="w-4 h-4 text-amber-400" />
-              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Unapplied Balance</p>
+              <p className="eyebrow">Unapplied Balance</p>
             </div>
-            <p className="text-lg font-bold mt-1" style={{ color: '#fbbf24', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalUnapplied)}</p>
+            <p className="text-lg font-bold mt-1 text-amber-300 tabular-nums font-display">{formatCurrency(totalUnapplied)}</p>
           </SatinCard>
         </div>
 

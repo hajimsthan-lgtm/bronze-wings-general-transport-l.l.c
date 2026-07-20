@@ -95,9 +95,9 @@ export default function Invoices() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {(['draft', 'sent', 'paid', 'overdue']).map(s => (
             <SatinCard key={s} as="button" active={filter === s} onClick={() => setFilter(s)} className="p-3 text-left transition-all duration-200">
-              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t(s)}</p>
-              <p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totals[s])}</p>
-              <p className="text-xs" style={{ color: '#7a7a7a' }}>{dateFiltered.filter(i => i.status === s).length} invoices</p>
+              <p className="eyebrow">{t(s)}</p>
+              <p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(totals[s])}</p>
+              <p className="text-xs text-muted-foreground/70 mt-0.5">{dateFiltered.filter(i => i.status === s).length} invoices</p>
             </SatinCard>
           ))}
         </div>

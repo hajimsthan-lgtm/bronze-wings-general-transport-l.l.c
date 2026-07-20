@@ -47,9 +47,9 @@ export default function Bank() {
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('credit')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalCredits)}</p></SatinCard>
-        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('debit')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f87171', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalDebits)}</p></SatinCard>
-        <SatinCard className="p-3 col-span-2 md:col-span-1"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Net</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totalCredits - totalDebits)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="eyebrow">{t('credit')}</p><p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(totalCredits)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="eyebrow">{t('debit')}</p><p className="text-lg font-bold mt-1 text-rose-300 tabular-nums font-display">{formatCurrency(totalDebits)}</p></SatinCard>
+        <SatinCard className="p-3 col-span-2 md:col-span-1"><p className="eyebrow">Net</p><p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(totalCredits - totalDebits)}</p></SatinCard>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">

@@ -37,9 +37,9 @@ export default function Cash() {
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
 
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('inflow')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#34d399', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(inflows)}</p></SatinCard>
-        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t('outflow')}</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f87171', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(outflows)}</p></SatinCard>
-        <SatinCard className="p-3"><p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>Balance</p><p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(inflows - outflows)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="eyebrow">{t('inflow')}</p><p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(inflows)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="eyebrow">{t('outflow')}</p><p className="text-lg font-bold mt-1 text-rose-300 tabular-nums font-display">{formatCurrency(outflows)}</p></SatinCard>
+        <SatinCard className="p-3"><p className="eyebrow">Balance</p><p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(inflows - outflows)}</p></SatinCard>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">

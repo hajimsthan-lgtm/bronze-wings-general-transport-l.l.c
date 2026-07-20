@@ -16,8 +16,8 @@ export default function MobileNav() {
   const { activeTab, switchTab } = useTabHistory();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] pt-2">
-      <div className="flex items-center justify-center gap-2.5 px-4">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] pt-2 px-4">
+      <div className="glass-panel rounded-full flex items-center justify-between gap-1 px-2 py-1.5 max-w-md mx-auto">
         {navItems.map(item => {
           const Icon = item.icon;
           const active = activeTab === item.key;
@@ -25,10 +25,10 @@ export default function MobileNav() {
             <button
               key={item.key}
               onClick={() => switchTab(item.key)}
-              className={`flex items-center justify-center h-14 w-14 rounded-full transition-all duration-200 ${
+              className={`flex items-center justify-center h-11 w-11 rounded-full transition-all duration-200 ${
                 active
-                  ? 'glass-panel text-primary glow-primary'
-                  : 'glass-panel text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary/15 text-primary border border-primary/25'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
               aria-label={t(item.key)}
             >
