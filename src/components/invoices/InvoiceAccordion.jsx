@@ -145,14 +145,17 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                       </button>
 
                       {monthExpanded &&
-                    <div className="bg-slate-950/20">
+                    <div className="mt-2 space-y-2 rounded-xl px-1 pb-1" style={{ background: '#1a1a1a', boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.5), inset -2px -2px 6px rgba(255,255,255,0.02)' }}>
                           {Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0])).map(([dayKey, dayInvoices]) =>
-                      <div key={dayKey} className="border-l-2 border-emerald-500/20 ml-4">
-                              <p className="text-[10px] text-muted-foreground font-mono px-3 py-2">{formatDate(dayKey)}</p>
+                      <div key={dayKey} className="ml-3 mr-3">
+                              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full my-2" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#32CD32', boxShadow: '0 0 6px rgba(50,205,50,0.6)' }} />
+                                <span className="text-[10px] font-mono tracking-wider uppercase" style={{ color: '#A9A9A9' }}>{formatDate(dayKey)}</span>
+                              </div>
                               {dayInvoices.map((inv) => {
                           const tripNum = inv.trip_id ? getTripNumber(clientName, inv.trip_id) : null;
                           return (
-                            <div key={inv.id} className="flex items-center gap-3 px-3 py-2 hover:bg-white/[0.02] transition-colors">
+                            <div key={inv.id} className="flex items-center gap-3 px-3 py-2 border-t transition-colors hover:bg-white/[0.04]" style={{ borderColor: '#333333' }}>
                                     <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                                     <button onClick={() => onEdit(inv)} className="text-xs font-medium text-foreground hover:text-primary transition-colors">
                                       {inv.invoice_number || '—'}
