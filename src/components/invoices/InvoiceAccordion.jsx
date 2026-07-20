@@ -113,7 +113,7 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
         });
 
         return (
-          <div key={clientName} className="glass-card-hover overflow-hidden border-t border-primary/20">
+          <div key={clientName} className="glass-card overflow-hidden">
             <button
               onClick={() => toggleClient(clientName)}
               className="flex items-center w-full gap-3 px-4 py-3.5 hover:bg-white/[0.04] transition-colors duration-150"

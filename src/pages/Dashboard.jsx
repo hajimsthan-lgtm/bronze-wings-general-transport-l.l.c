@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
-  Plus, Truck, FileText, DollarSign, Activity, AlertTriangle, Wrench,
-  FileWarning, ChevronRight
+  Truck, FileText, Activity, AlertTriangle, Wrench, FileWarning, ChevronRight
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { formatCurrency } from '@/lib/formatters';
-import KpiCard from '@/components/common/KpiCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import KpiCard from '@/components/common/KpiCard';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
-import FinanceStatCards from '@/components/dashboard/FinanceStatCards';
+import ProfitAnalytics from '@/components/dashboard/ProfitAnalytics';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
-import GovtFeePendingPanel from '@/components/dashboard/GovtFeePendingPanel';
 import PageInfo from '@/components/common/PageInfo';
 
 export default function Dashboard() {
@@ -39,7 +36,6 @@ export default function Dashboard() {
 
   if (loading) return <LoadingSpinner />;
 
-  const totalRevenue = trips.reduce((sum, t) => sum + (t.revenue || 0), 0);
   const activeTrips = trips.filter(t => t.status === 'in_transit' || t.status === 'scheduled').length;
   const pendingInvoices = invoices.filter(i => i.status === 'draft' || i.status === 'sent').length;
   const activeVehicles = vehicles.filter(v => v.status === 'active').length;
@@ -50,43 +46,31 @@ export default function Dashboard() {
   const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance');
   const expiringDocs = documents.filter(d => d.status === 'expiring_soon' || d.status === 'expired');
 
-  const outstandingAmount = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled').reduce((s, i) => s + (i.total_amount || 0), 0);
-  const now = new Date();
-  const paidThisMonth = invoices.filter(i => i.status === 'paid' && i.issue_date && i.issue_date.substring(0, 7) === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`).reduce((s, i) => s + (i.total_amount || 0), 0);
-  const overdueCount = invoices.filter(i => i.status === 'overdue').length;
   return (
     <div className="space-y-6 pt-5">
-      <PageInfo text="Your business at a glance — revenue, active trips, invoice balances, fleet health and items needing attention. Tap any alert to jump straight to the relevant page." />
-      {/* KPI Cards */}
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-        <KpiCard
-          title={t('total_revenue')}
-          value={formatCurrency(totalRevenue)}
-          icon={DollarSign}
-          subtitle="this month"
-        />
-        <KpiCard
-          title={t('active_trips')}
-          value={activeTrips}
-          icon={Truck}
-          subtitle={`of ${trips.length} total`}
-        />
-        <KpiCard
-          title={t('pending_invoices')}
-          value={pendingInvoices}
-          icon={FileText}
-          subtitle={`${formatCurrency(invoices.filter(i => i.status !== 'paid').reduce((s, i) => s + (i.total_amount || 0), 0))} outstanding`}
-        />
-        <KpiCard
-          title={t('fleet_health')}
-          value={`${healthPct}%`}
-          icon={Activity}
-          subtitle={`${activeVehicles}/${totalVehicles} active`}
-        />
+      <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and profitability. Tap any card to jump to the related section." />
+
+      {/* Clickable KPI cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link to="/trips" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
+            <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length} total`} />
+          </div>
+        </Link>
+        <Link to="/invoices" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
+            <KpiCard title={t('pending_invoices')} value={pendingInvoices} icon={FileText} subtitle="tap to review" />
+          </div>
+        </Link>
+        <Link to="/admin/vehicles" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
+            <KpiCard title={t('fleet_health')} value={`${healthPct}%`} icon={Activity} subtitle={`${activeVehicles}/${totalVehicles} active`} />
+          </div>
+        </Link>
       </div>
 
-      {/* Finance balances */}
-      <FinanceStatCards invoices={invoices} />
+      {/* Pending customers (clickable card) */}
+      <PendingCustomers />
 
       {/* Alerts */}
       {(overdueInvoices.length > 0 || maintenanceVehicles.length > 0 || expiringDocs.length > 0) && (
@@ -127,29 +111,11 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Pending customers & govt fees */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-        <PendingCustomers />
-        <GovtFeePendingPanel />
-      </div>
-
-      {/* Invoice KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-        <KpiCard title="Outstanding" value={formatCurrency(outstandingAmount)} icon={FileText} subtitle={`${invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled').length} unpaid`} />
-        <KpiCard title="Paid This Month" value={formatCurrency(paidThisMonth)} icon={DollarSign} subtitle={`${invoices.filter(i => i.status === 'paid').length} total paid`} />
-        <KpiCard title="Overdue" value={overdueCount} icon={AlertTriangle} subtitle="needs attention" />
-      </div>
+      {/* Profit analytics */}
+      <ProfitAnalytics />
 
       {/* Charts */}
       <DashboardCharts invoices={invoices} trips={trips} />
-
-      {/* Quick Actions */}
-      <div className="flex gap-2">
-        <Link to="/invoices" className="flex-1 glass-card-hover p-3 flex items-center justify-center gap-2 text-sm font-medium text-foreground">
-          <Plus className="w-4 h-4 text-primary" /> New Invoice
-        </Link>
-      </div>
-
     </div>
   );
 }

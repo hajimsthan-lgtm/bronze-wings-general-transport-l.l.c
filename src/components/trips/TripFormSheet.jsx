@@ -39,6 +39,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
   const [autoFilled, setAutoFilled] = useState(false);
   const [createdFlags, setCreatedFlags] = useState({ client: false, vehicle: false, driver: false });
   const [creating, setCreating] = useState(null);
+  const [revenueOverride, setRevenueOverride] = useState(false);
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
 
@@ -60,6 +61,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
 
   useEffect(() => {
     if (open) {
+      setRevenueOverride(false);
       if (editTrip) {
         setForm({
           ...DEFAULT_FORM,
@@ -106,9 +108,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
     } else { setAutoFilled(false); }
   }, [form.from_location, form.to_location, fixedCharges]);
 
+  // Calculated duration only (date handled in backend from load/offload)
   useEffect(() => {
-    const baseFare = Number(form.base_fare) || 0;
-    let totalRevenue = baseFare;
     let calculatedDuration = '';
     if (form.load_datetime && form.offload_datetime) {
       const load = new Date(form.load_datetime).getTime();
@@ -117,14 +118,34 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
       if (diffMs > 0) {
         const duration = form.duration_unit === 'days' ? diffMs / 86400000 : diffMs / 3600000;
         calculatedDuration = Math.round(duration * 100) / 100;
-        const maxAllowed = Number(form.max_allowed_duration) || 0;
-        const otRate = Number(form.overtime_rate) || 0;
-        const overtime = Math.max(0, calculatedDuration - maxAllowed);
-        totalRevenue = baseFare + overtime * otRate;
       }
     }
-    setForm(prev => ({ ...prev, calculated_duration: calculatedDuration, revenue: totalRevenue || '' }));
-  }, [form.load_datetime, form.offload_datetime, form.duration_unit, form.base_fare, form.max_allowed_duration, form.overtime_rate]);
+    setForm(prev => ({ ...prev, calculated_duration: calculatedDuration }));
+  }, [form.load_datetime, form.offload_datetime, form.duration_unit]);
+
+  // Auto revenue (overridable)
+  const autoRevenue = (() => {
+    const baseFare = Number(form.base_fare) || 0;
+    let total = baseFare;
+    if (form.load_datetime && form.offload_datetime) {
+      const load = new Date(form.load_datetime).getTime();
+      const offload = new Date(form.offload_datetime).getTime();
+      const diffMs = offload - load;
+      if (diffMs > 0) {
+        const duration = form.duration_unit === 'days' ? diffMs / 86400000 : diffMs / 3600000;
+        const calc = Math.round(duration * 100) / 100;
+        const maxAllowed = Number(form.max_allowed_duration) || 0;
+        const otRate = Number(form.overtime_rate) || 0;
+        const overtime = Math.max(0, calc - maxAllowed);
+        total = baseFare + overtime * otRate;
+      }
+    }
+    return total;
+  })();
+
+  useEffect(() => {
+    if (!revenueOverride) setForm(prev => ({ ...prev, revenue: autoRevenue || '' }));
+  }, [autoRevenue, revenueOverride]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -152,10 +173,15 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
     return `${prefix}${String(maxSeq + 1).padStart(2, '0')}`;
   };
 
+  const autoTripNumber = editTrip ? (editTrip.trip_number || '') : generateTripNumber();
+
   const buildData = (isDraft = false) => ({
     ...form,
     is_draft: isDraft,
-    trip_number: editTrip ? form.trip_number : generateTripNumber(),
+    trip_number: form.trip_number || autoTripNumber,
+    trip_date: form.load_datetime
+      ? form.load_datetime.split('T')[0]
+      : (form.offload_datetime ? form.offload_datetime.split('T')[0] : new Date().toISOString().split('T')[0]),
     hours: form.trip_type === 'hourly' ? (Number(form.hours) || 0) : 0,
     revenue: Number(form.revenue) || 0,
     distance_km: Number(form.distance_km) || 0,
@@ -177,16 +203,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
           await base44.entities.FixedCharge.create({ client_name: form.client_name, description: routeDesc, amount: Number(form.revenue) || 0, frequency: 'one_time', status: 'active' }).catch(() => {});
         }
       }
-      onOpenChange(false);
-    } finally { setSaving(false); }
-  };
-
-  const handleDraft = async () => {
-    setSaving(true);
-    try {
-      const data = buildData(true);
-      if (editTrip) await updateTrip.mutateAsync({ id: editTrip.id, data });
-      else await createTrip.mutateAsync(data);
       onOpenChange(false);
     } finally { setSaving(false); }
   };
@@ -226,9 +242,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
   const isOvertime = overtimeMetric > 0 && form.load_datetime && form.offload_datetime;
   const inputCls = "bg-background/50 border-border backdrop-blur-sm";
 
+  const tripNumberOverridden = !!form.trip_number && form.trip_number !== autoTripNumber;
+  const revenueOverridden = revenueOverride && Number(form.revenue) !== autoRevenue;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
+      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] max-w-4xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
         <DialogHeader className="mb-4">
           <DialogTitle className="font-display text-foreground text-lg">
             {editTrip ? t('edit') : t('new_trip')}
@@ -280,22 +299,19 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
                 <datalist id="to-suggestions">{toSuggestions.map(loc => <option key={loc} value={loc} />)}</datalist>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label>
-                <Input type="date" value={form.trip_date} onChange={e => update('trip_date', e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">{t('trip_type')}</Label>
-                <Select value={form.trip_type} onValueChange={v => update('trip_type', v)}>
-                  <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                  <SelectContent>{TRIP_TYPES.map(tp => <SelectItem key={tp} value={tp}>{t(tp)}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1.5">{t('trip_type')}</Label>
+              <Select value={form.trip_type} onValueChange={v => update('trip_type', v)}>
+                <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                <SelectContent>{TRIP_TYPES.map(tp => <SelectItem key={tp} value={tp}>{t(tp)}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5">Trip #</Label>
-              <Input value={editTrip ? form.trip_number : generateTripNumber()} readOnly className={`${inputCls} opacity-60 font-mono text-xs`} />
+              <Input value={form.trip_number || autoTripNumber} onChange={e => update('trip_number', e.target.value)} className={`${inputCls} font-mono text-xs`} />
+              {tripNumberOverridden && (
+                <p className="text-[10px] text-red-400 font-semibold mt-1">⚠ Overwritten — auto value was {autoTripNumber}</p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -424,8 +440,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">{t('amount')} (Revenue)</Label>
-                <Input type="number" value={form.revenue} readOnly className={`${inputCls} opacity-60`} />
-                <p className="text-[10px] text-primary mt-1">Auto-calculated: base fare + overtime</p>
+                <Input type="number" value={form.revenue} onChange={e => { update('revenue', e.target.value); setRevenueOverride(true); }} className={inputCls} />
+                {revenueOverridden ? (
+                  <p className="text-[10px] text-red-400 font-semibold mt-1">⚠ Overwritten — calculated value was {formatCurrency(autoRevenue)}</p>
+                ) : (
+                  <p className="text-[10px] text-primary mt-1">Auto-calculated: base fare + overtime (editable)</p>
+                )}
               </div>
               {form.trip_type === 'hourly' && (
                 <div>
@@ -476,12 +496,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
               <div className="border-t border-white/10 pt-3">
                 <div className="flex justify-between items-baseline">
                   <span className="text-sm font-semibold text-foreground">Revenue</span>
-                  <span className="text-xl font-bold text-primary tabular-nums font-display">{formatCurrency(Number(form.revenue) || 0)}</span>
+                  <span className={`text-xl font-bold tabular-nums font-display ${revenueOverridden ? 'text-red-400' : 'text-primary'}`}>{formatCurrency(Number(form.revenue) || 0)}</span>
                 </div>
               </div>
             </div>
             <div className="glass-card p-3">
-              <p className="text-[10px] text-muted-foreground leading-relaxed">Revenue = base fare + overtime. Fixed charges for this client/route auto-fill the base fare.</p>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">Trip date is set automatically from the load time. Revenue is auto-calculated and can be overwritten.</p>
             </div>
           </div>
         </div>
@@ -494,7 +514,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
           {isOvertime && <CalcRow label="Overtime" value={`+${formatCurrency(extraCharges)}`} tone="text-rose-300" />}
           <div className="border-t border-white/10 pt-2 flex justify-between items-baseline">
             <span className="text-sm font-semibold text-foreground">Revenue</span>
-            <span className="text-lg font-bold text-primary tabular-nums font-display">{formatCurrency(Number(form.revenue) || 0)}</span>
+            <span className={`text-lg font-bold tabular-nums font-display ${revenueOverridden ? 'text-red-400' : 'text-primary'}`}>{formatCurrency(Number(form.revenue) || 0)}</span>
           </div>
         </div>
 
@@ -502,9 +522,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
         <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border/50">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border">{t('cancel')}</Button>
           <div className="flex-1" />
-          <Button variant="ghost" onClick={handleDraft} disabled={saving} className="text-muted-foreground hover:text-foreground">
-            {t('save_draft')}
-          </Button>
           <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90">
             {saving ? t('loading') : t('submit')}
           </Button>

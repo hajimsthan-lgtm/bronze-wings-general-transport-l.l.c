@@ -24,8 +24,6 @@ import Dashboard from '@/pages/Dashboard';
 import Trips from '@/pages/Trips';
 import Invoices from '@/pages/Invoices';
 import Expenses from '@/pages/Expenses';
-import Bank from '@/pages/Bank';
-import Cash from '@/pages/Cash';
 import Fuel from '@/pages/Fuel';
 import DailyReport from '@/pages/DailyReport';
 import ProfitLoss from '@/pages/ProfitLoss';
@@ -77,8 +75,6 @@ const AuthenticatedApp = () => {
           <Route path="/trips" element={<Trips />} />
           <Route path="/invoices" element={<Invoices />} />
           <Route path="/expenses" element={<Expenses />} />
-          <Route path="/bank" element={<Bank />} />
-          <Route path="/cash" element={<Cash />} />
           <Route path="/fuel" element={<Fuel />} />
           <Route path="/reports/daily" element={<DailyReport />} />
           <Route path="/reports/pnl" element={<ProfitLoss />} />

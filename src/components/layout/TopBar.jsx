@@ -16,8 +16,6 @@ const adminSubNav = [
 const financialSubNav = [
   { key: 'invoices', path: '/invoices' },
   { key: 'payments', path: '/payments' },
-  { key: 'bank', path: '/bank' },
-  { key: 'cash', path: '/cash' },
 ];
 
 const reportsSubNav = [
@@ -39,8 +37,6 @@ const subNavMap = {
   ],
   '/invoices': financialSubNav,
   '/payments': financialSubNav,
-  '/bank': financialSubNav,
-  '/cash': financialSubNav,
   '/reports/daily': reportsSubNav,
   '/reports/pnl': reportsSubNav,
   '/reports/soa': reportsSubNav,

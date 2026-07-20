@@ -40,3 +40,40 @@ export function computeUserBalances(transactions) {
     .filter((v) => v.balance > 0)
     .sort((a, b) => b.balance - a.balance);
 }
+
+// Vehicle profit = total trip revenue - (fuel + expenses + services)
+export function computeVehicleProfit({ trips, fuelRecords, expenses, serviceRecords }) {
+  const map = {};
+  const ensure = (plate) => {
+    const key = plate || 'Unknown';
+    if (!map[key]) map[key] = { vehicle_plate: key, revenue: 0, fuel: 0, expenses: 0, services: 0, trips: 0 };
+    return map[key];
+  };
+  (trips || []).forEach((t) => { const v = ensure(t.vehicle_plate); v.revenue += t.revenue || 0; v.trips += 1; });
+  (fuelRecords || []).forEach((f) => { ensure(f.vehicle_plate).fuel += f.total_cost || 0; });
+  (expenses || []).forEach((e) => { ensure(e.vehicle_plate).expenses += e.amount || 0; });
+  (serviceRecords || []).forEach((s) => { ensure(s.vehicle_plate).services += s.cost || 0; });
+  return Object.values(map).map((v) => ({
+    ...v,
+    cost: v.fuel + v.expenses + v.services,
+    profit: v.revenue - (v.fuel + v.expenses + v.services),
+  }));
+}
+
+// Driver profit = total trip revenue - (base salary + overtime + expenses)
+export function computeDriverProfit({ trips, salaryRecords, expenses }) {
+  const map = {};
+  const ensure = (name) => {
+    const key = name || 'Unknown';
+    if (!map[key]) map[key] = { driver_name: key, revenue: 0, salary: 0, overtime: 0, expenses: 0, trips: 0 };
+    return map[key];
+  };
+  (trips || []).forEach((t) => { const d = ensure(t.driver_name); d.revenue += t.revenue || 0; d.trips += 1; });
+  (salaryRecords || []).forEach((s) => { const d = ensure(s.driver_name); d.salary += s.base_salary || 0; d.overtime += s.overtime || 0; });
+  (expenses || []).forEach((e) => { ensure(e.driver_name).expenses += e.amount || 0; });
+  return Object.values(map).map((d) => ({
+    ...d,
+    cost: d.salary + d.overtime + d.expenses,
+    profit: d.revenue - (d.salary + d.overtime + d.expenses),
+  }));
+}
