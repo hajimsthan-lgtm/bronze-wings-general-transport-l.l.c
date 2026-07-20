@@ -19,6 +19,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import SatinCard from '@/components/common/SatinCard';
 
 const STATUSES = ['all', 'draft', 'sent', 'paid', 'overdue', 'cancelled'];
 
@@ -93,11 +94,11 @@ export default function Invoices() {
         {/* Summary row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {(['draft', 'sent', 'paid', 'overdue']).map(s => (
-            <button key={s} onClick={() => setFilter(s)} className={`glass-card p-3 text-left transition-colors ${filter === s ? 'border-primary/30' : ''}`}>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t(s)}</p>
-              <p className="text-lg font-display font-bold text-foreground mt-0.5">{formatCurrency(totals[s])}</p>
-              <p className="text-xs text-muted-foreground">{dateFiltered.filter(i => i.status === s).length} invoices</p>
-            </button>
+            <SatinCard key={s} as="button" active={filter === s} onClick={() => setFilter(s)} className="p-3 text-left transition-all duration-200">
+              <p className="text-[10px] uppercase tracking-wider font-medium" style={{ color: '#8a8a8a' }}>{t(s)}</p>
+              <p className="text-lg font-bold mt-0.5" style={{ color: '#f4f4f4', fontFamily: 'Georgia, "Times New Roman", serif' }}>{formatCurrency(totals[s])}</p>
+              <p className="text-xs" style={{ color: '#7a7a7a' }}>{dateFiltered.filter(i => i.status === s).length} invoices</p>
+            </SatinCard>
           ))}
         </div>
 
