@@ -10,8 +10,8 @@ export default function AppLayout() {
     <div className="min-h-screen professional-page-bg flex flex-col">
       <DesktopNav />
       <TopBar />
-<main className="flex-1 pb-20 md:pb-6 px-4 md:px-6 lg:px-8 max-w-[1440px] mx-auto w-full">
-<div className="animate-fade-in" key={location.pathname}>
+<main className="flex-1 pb-20 md:pb-6 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full pt-3 md:pt-4">
+<div className="clay animate-fade-in rounded-3xl p-4 md:p-6" key={location.pathname} style={{ boxShadow: '9px 9px 22px hsl(var(--clay-shadow-dark)), -9px -9px 22px hsl(var(--clay-shadow-light)), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
   <Outlet />
   </div>
 </main>
