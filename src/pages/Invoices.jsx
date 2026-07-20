@@ -102,25 +102,24 @@ export default function Invoices() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <DateRangeFilter
-            fromValue={dateFrom}
-            onFromChange={setDateFrom}
-            toValue={dateTo}
-            onToChange={setDateTo}
-            onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-          />
-        </div>
-
-        {/* Search + Filter */}
-        <div className="space-y-3 mb-5">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" />
+        {/* Unified toolbar */}
+        <div className="glass-card p-3 mb-5 space-y-3">
+          <div className="flex flex-col lg:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')} invoices, clients...`} className="pl-9 h-10" />
+            </div>
+            <DateRangeFilter
+              fromValue={dateFrom}
+              onFromChange={setDateFrom}
+              toValue={dateTo}
+              onToChange={setDateTo}
+              onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
+            />
           </div>
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
             {STATUSES.map(s => (
-              <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filter === s ? 'bg-primary/15 text-primary border border-primary/20' : 'bg-muted/50 text-muted-foreground border border-transparent'}`}>
+              <button key={s} onClick={() => setFilter(s)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border ${filter === s ? 'bg-primary/15 text-primary border-primary/25 shadow-[0_0_12px_rgba(59,130,246,0.25)]' : 'bg-white/[0.04] text-muted-foreground border-white/10 hover:bg-white/[0.08] hover:text-foreground'}`}>
                 {s === 'all' ? 'All' : t(s)}
               </button>
             ))}

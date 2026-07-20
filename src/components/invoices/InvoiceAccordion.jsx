@@ -39,8 +39,7 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
 
   const toggleMonth = (key) => {
     const next = new Set(expandedMonths);
-    if (next.has(key)) next.delete(key);else
-    next.add(key);
+    if (next.has(key)) next.delete(key); else next.add(key);
     setExpandedMonths(next);
   };
 
@@ -56,8 +55,15 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
     return trips.find((t) => t.id === tripId)?.trip_number;
   };
 
+  const Metric = ({ label, value, tone }) => (
+    <div className="px-4 py-2 flex flex-col justify-center text-center min-w-[68px]">
+      <span className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className={`text-sm font-semibold mt-1 tabular-nums font-display ${tone}`}>{value}</span>
+    </div>
+  );
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {Object.entries(byClient).map(([clientName, clientInvoices]) => {
         const isExpanded = expandedClients.has(clientName);
         const outstanding = clientInvoices.filter((i) => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + (i.total_amount || 0), 0);
@@ -74,127 +80,143 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
         });
 
         return (
-          <div key={clientName} className="mb-4 w-full rounded-xl overflow-hidden shadow-[0_10px_30px_-8px_rgba(0,0,0,0.55)]" style={{ background: '#151921' }}>
-            <button onClick={() => toggleClient(clientName)} className="flex items-stretch w-full transition-colors">
-              <span className="w-1.5 flex-shrink-0 my-3 mx-2 rounded-full" style={{ background: 'linear-gradient(180deg, #007BFF 0%, #00C4A7 100%)' }} />
-              <div className="flex items-center px-2 py-3.5 min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white uppercase tracking-wider truncate">{clientName}</p>
-              </div>
-              <div className="flex items-stretch my-2.5 mr-2.5 rounded-lg overflow-hidden" style={{ background: '#0A0D12' }}>
-                <div className="px-4 py-2 flex flex-col justify-center text-center min-w-[64px]">
-                  <span className="text-base font-bold text-white leading-none">{clientInvoices.length}</span>
-                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide mt-1.5">Invoices</span>
-                </div>
+          <div key={clientName} className="glass-card-hover overflow-hidden">
+            <button
+              onClick={() => toggleClient(clientName)}
+              className="flex items-center w-full gap-3 px-3 py-3"
+            >
+              <span
+                className="w-1.5 flex-shrink-0 self-stretch rounded-full"
+                style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.9) 0%, rgba(45,212,191,0.7) 100%)' }}
+              />
+              <p className="text-sm font-semibold text-foreground uppercase tracking-wider truncate font-display flex-1 text-left">
+                {clientName}
+              </p>
+              <div className="hidden sm:flex items-stretch rounded-xl overflow-hidden glass-panel">
+                <Metric label="Invoices" value={clientInvoices.length} tone="text-foreground" />
                 <span className="w-px bg-white/10 my-2.5" />
-                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[96px]">
-                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Outstanding</span>
-                  <span className="text-sm font-semibold text-amber-400 mt-1">{formatCurrency(outstanding)}</span>
-                </div>
+                <Metric label="Outstanding" value={formatCurrency(outstanding)} tone="text-amber-300" />
                 <span className="w-px bg-white/10 my-2.5" />
-                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[80px]">
-                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Paid</span>
-                  <span className="text-sm font-semibold text-emerald-400 mt-1">{formatCurrency(paid)}</span>
-                </div>
+                <Metric label="Paid" value={formatCurrency(paid)} tone="text-emerald-300" />
                 <span className="w-px bg-white/10 my-2.5" />
-                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[60px]">
-                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Drafts</span>
-                  <span className="text-sm font-semibold text-white mt-1">{drafts}</span>
-                </div>
+                <Metric label="Drafts" value={drafts} tone="text-foreground" />
               </div>
-              <div className="flex items-center pr-3">
-                <span className="flex items-center justify-center w-9 h-9 rounded-lg" style={{ background: '#007BFF' }}>
-                  <ChevronRight className={`w-4 h-4 text-white transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
-                </span>
-              </div>
+              <span
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 ${
+                  isExpanded ? 'bg-primary/20 text-primary' : 'glass-panel text-muted-foreground'
+                }`}
+              >
+                <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+              </span>
             </button>
 
-            {isExpanded &&
-            <div className="border-t border-white/[0.04] bg-slate-950/30">
-                {loadingTrips[clientName] ?
-              <div className="p-4 flex items-center gap-2">
+            {/* Mobile metrics */}
+            <div className="sm:hidden grid grid-cols-4 gap-px px-3 pb-3 glass-panel mx-3 rounded-xl overflow-hidden">
+              <Metric label="Inv" value={clientInvoices.length} tone="text-foreground" />
+              <Metric label="Out" value={formatCurrency(outstanding)} tone="text-amber-300" />
+              <Metric label="Paid" value={formatCurrency(paid)} tone="text-emerald-300" />
+              <Metric label="Drafts" value={drafts} tone="text-foreground" />
+            </div>
+
+            {isExpanded && (
+              <div className="border-t border-white/[0.06] px-3 py-3 space-y-2">
+                {loadingTrips[clientName] ? (
+                  <div className="p-4 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
                     <span className="text-xs text-muted-foreground">Loading trips...</span>
-                  </div> :
-              Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0])).map(([monthKey, monthInvoices]) => {
-                const monthExpandedKey = `${clientName}-${monthKey}`;
-                const monthExpanded = expandedMonths.has(monthExpandedKey);
-                const monthTotal = monthInvoices.reduce((s, i) => s + (i.total_amount || 0), 0);
+                  </div>
+                ) : (
+                  Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0])).map(([monthKey, monthInvoices]) => {
+                    const monthExpandedKey = `${clientName}-${monthKey}`;
+                    const monthExpanded = expandedMonths.has(monthExpandedKey);
+                    const monthTotal = monthInvoices.reduce((s, i) => s + (i.total_amount || 0), 0);
 
-                const byDay = {};
-                monthInvoices.forEach((inv) => {
-                  if (!inv.issue_date) return;
-                  if (!byDay[inv.issue_date]) byDay[inv.issue_date] = [];
-                  byDay[inv.issue_date].push(inv);
-                });
+                    const byDay = {};
+                    monthInvoices.forEach((inv) => {
+                      if (!inv.issue_date) return;
+                      if (!byDay[inv.issue_date]) byDay[inv.issue_date] = [];
+                      byDay[inv.issue_date].push(inv);
+                    });
 
-                return (
-                  <div key={monthKey} className="ml-4">
-                      <button onClick={() => toggleMonth(monthExpandedKey)} className="w-full flex items-center gap-2 p-2 rounded-full text-left transition-shadow" style={{ background: '#262627', boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.5), inset -3px -3px 6px rgba(255,255,255,0.03)' }}>
-                        <span className="px-3 py-1.5 rounded-full text-xs font-mono" style={{ background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
-                          INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}
-                        </span>
-                        <span className="px-3 py-1.5 rounded-full text-xs font-medium" style={{  background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
-                          {monthInvoices.length} invoices
-                        </span>
-                        <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{  background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
-                          {formatCurrency(monthTotal)}
-                        </span>
-                        <span className="ml-auto flex items-center justify-center w-8 h-8 rounded-full transition-all" style={{ background: '#262627', boxShadow: monthExpanded ? 'inset -2px -2px 5px rgba(0,242,255,0.5), inset 2px 2px 4px rgba(0,0,0,0.5)' : 'inset -2px -2px 4px rgba(0,242,255,0.25), inset 2px 2px 4px rgba(0,0,0,0.5)' }}>
-                          <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${monthExpanded ? 'rotate-90' : ''}`} style={{ color: '#a5aab0' }} />
-                        </span>
-                      </button>
+                    return (
+                      <div key={monthKey}>
+                        <button
+                          onClick={() => toggleMonth(monthExpandedKey)}
+                          className="w-full flex items-center gap-2 p-2 rounded-full glass-panel hover:border-white/20 transition-all duration-200"
+                        >
+                          <span className="px-3 py-1 rounded-full text-[11px] font-mono text-muted-foreground bg-white/[0.04]">
+                            INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}
+                          </span>
+                          <span className="px-3 py-1 rounded-full text-[11px] font-medium text-muted-foreground bg-white/[0.04]">
+                            {monthInvoices.length} invoices
+                          </span>
+                          <span className="px-3 py-1 rounded-full text-[11px] font-semibold text-foreground bg-white/[0.04] tabular-nums">
+                            {formatCurrency(monthTotal)}
+                          </span>
+                          <span
+                            className={`ml-auto flex items-center justify-center w-7 h-7 rounded-full transition-all duration-200 ${
+                              monthExpanded ? 'bg-primary/20 text-primary' : 'bg-white/[0.04] text-muted-foreground'
+                            }`}
+                          >
+                            <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${monthExpanded ? 'rotate-90' : ''}`} />
+                          </span>
+                        </button>
 
-                      {monthExpanded &&
-                    <div className="mt-2 space-y-2 rounded-xl px-1 pb-1" style={{ background: '#1a1a1a', boxShadow: 'inset 2px 2px 6px rgba(0,0,0,0.5), inset -2px -2px 6px rgba(255,255,255,0.02)' }}>
-                          {Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0])).map(([dayKey, dayInvoices]) =>
-                      <div key={dayKey} className="ml-3 mr-3">
-                              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full my-2" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#32CD32', boxShadow: '0 0 6px rgba(50,205,50,0.6)' }} />
-                                <span className="text-[10px] font-mono tracking-wider uppercase" style={{ color: '#A9A9A9' }}>{formatDate(dayKey)}</span>
-                              </div>
-                              {dayInvoices.map((inv) => {
-                          const tripNum = inv.trip_id ? getTripNumber(clientName, inv.trip_id) : null;
-                          return (
-                            <div key={inv.id} className="flex items-center gap-3 px-3 py-2 border-t transition-colors hover:bg-white/[0.04]" style={{ borderColor: '#333333' }}>
-                                    <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                                    <button onClick={() => onEdit(inv)} className="text-xs font-medium text-foreground hover:text-primary transition-colors">
-                                      {inv.invoice_number || '—'}
-                                    </button>
-                                    <StatusBadge status={inv.status} />
-                                    {tripNum &&
-                              <button onClick={() => copyToClipboard(tripNum)} className="text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
-                                        {tripNum} <Copy className="w-2.5 h-2.5" />
+                        {monthExpanded && (
+                          <div className="mt-2 space-y-1 rounded-xl bg-white/[0.02] border border-white/[0.05] p-2">
+                            {Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0])).map(([dayKey, dayInvoices]) => (
+                              <div key={dayKey}>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel my-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
+                                  <span className="text-[10px] font-mono tracking-wider uppercase text-muted-foreground">{formatDate(dayKey)}</span>
+                                </div>
+                                {dayInvoices.map((inv) => {
+                                  const tripNum = inv.trip_id ? getTripNumber(clientName, inv.trip_id) : null;
+                                  return (
+                                    <div
+                                      key={inv.id}
+                                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:bg-white/[0.04] hover:border-white/10 transition-all duration-200"
+                                    >
+                                      <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                                      <button onClick={() => onEdit(inv)} className="text-xs font-medium text-foreground hover:text-primary transition-colors">
+                                        {inv.invoice_number || '—'}
                                       </button>
-                              }
-                                    <span className="text-xs text-muted-foreground ml-auto">{formatCurrency(inv.total_amount)}</span>
-                                    <div className="flex items-center gap-1">
-                                      <button onClick={() => onDownload(inv)} className="text-muted-foreground hover:text-foreground p-1">
-                                        {downloadingId === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
-                                      </button>
-                                      {inv.status !== 'paid' &&
-                                <button onClick={() => onMarkPaid(inv)} className="text-muted-foreground hover:text-green-400 p-1">
-                                          <CheckCircle className="w-3 h-3" />
+                                      <StatusBadge status={inv.status} />
+                                      {tripNum && (
+                                        <button onClick={() => copyToClipboard(tripNum)} className="text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
+                                          {tripNum} <Copy className="w-2.5 h-2.5" />
                                         </button>
-                                }
-                                      <button onClick={() => onDelete(inv)} className="text-muted-foreground hover:text-red-400 p-1">
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
+                                      )}
+                                      <span className="text-xs text-muted-foreground ml-auto tabular-nums">{formatCurrency(inv.total_amount)}</span>
+                                      <div className="flex items-center gap-1">
+                                        <button onClick={() => onDownload(inv)} className="text-muted-foreground hover:text-foreground p-1 transition-colors">
+                                          {downloadingId === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                                        </button>
+                                        {inv.status !== 'paid' && (
+                                          <button onClick={() => onMarkPaid(inv)} className="text-muted-foreground hover:text-emerald-400 p-1 transition-colors">
+                                            <CheckCircle className="w-3 h-3" />
+                                          </button>
+                                        )}
+                                        <button onClick={() => onDelete(inv)} className="text-muted-foreground hover:text-rose-400 p-1 transition-colors">
+                                          <Trash2 className="w-3 h-3" />
+                                        </button>
+                                      </div>
                                     </div>
-                                  </div>);
-
-                        })}
-                            </div>
-                      )}
-                        </div>
-                    }
-                    </div>);
-
-              })}
+                                  );
+                                })}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            }
-          </div>);
-
+            )}
+          </div>
+        );
       })}
-    </div>);
-
+    </div>
+  );
 }
