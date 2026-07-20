@@ -3,6 +3,29 @@ import { useI18n } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
+const adminSubNav = [
+  { key: 'vehicles', path: '/admin/vehicles' },
+  { key: 'services', path: '/admin/services' },
+  { key: 'drivers', path: '/admin/drivers' },
+  { key: 'salary', path: '/admin/salary' },
+  { key: 'clients', path: '/admin/clients' },
+  { key: 'vendors', path: '/admin/vendors' },
+  { key: 'documents', path: '/admin/documents' },
+];
+
+const financialSubNav = [
+  { key: 'invoices', path: '/invoices' },
+  { key: 'payments', path: '/payments' },
+  { key: 'bank', path: '/bank' },
+  { key: 'cash', path: '/cash' },
+];
+
+const reportsSubNav = [
+  { key: 'daily_report', path: '/reports/daily' },
+  { key: 'profit_loss', path: '/reports/pnl' },
+  { key: 'soa', path: '/reports/soa' },
+];
+
 const subNavMap = {
   '/': [],
   '/settings': [],
@@ -14,104 +37,20 @@ const subNavMap = {
     { key: 'trips', path: '/trips' },
     { key: 'expenses', path: '/expenses' },
   ],
-  '/invoices': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
-  '/payments': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
-  '/bank': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
-  '/cash': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
-  '/reports/daily': [
-    { key: 'daily_report', path: '/reports/daily' },
-    { key: 'profit_loss', path: '/reports/pnl' },
-    { key: 'soa', path: '/reports/soa' },
-  ],
-  '/reports/pnl': [
-    { key: 'daily_report', path: '/reports/daily' },
-    { key: 'profit_loss', path: '/reports/pnl' },
-    { key: 'soa', path: '/reports/soa' },
-  ],
-  '/reports/soa': [
-    { key: 'daily_report', path: '/reports/daily' },
-    { key: 'profit_loss', path: '/reports/pnl' },
-    { key: 'soa', path: '/reports/soa' },
-  ],
-  '/admin/vehicles': [
-    { key: 'vehicles', path: '/admin/vehicles' },
-    { key: 'drivers', path: '/admin/drivers' },
-    { key: 'clients', path: '/admin/clients' },
-    { key: 'vendors', path: '/admin/vendors' },
-    { key: 'documents', path: '/admin/documents' },
-  ],
-  '/admin/drivers': [
-    { key: 'vehicles', path: '/admin/vehicles' },
-    { key: 'drivers', path: '/admin/drivers' },
-    { key: 'clients', path: '/admin/clients' },
-    { key: 'vendors', path: '/admin/vendors' },
-    { key: 'documents', path: '/admin/documents' },
-  ],
-  '/admin/clients': [
-    { key: 'vehicles', path: '/admin/vehicles' },
-    { key: 'drivers', path: '/admin/drivers' },
-    { key: 'clients', path: '/admin/clients' },
-    { key: 'vendors', path: '/admin/vendors' },
-    { key: 'documents', path: '/admin/documents' },
-  ],
-  '/admin/vendors': [
-    { key: 'vehicles', path: '/admin/vehicles' },
-    { key: 'drivers', path: '/admin/drivers' },
-    { key: 'clients', path: '/admin/clients' },
-    { key: 'vendors', path: '/admin/vendors' },
-    { key: 'documents', path: '/admin/documents' },
-  ],
-  '/admin/documents': [
-    { key: 'vehicles', path: '/admin/vehicles' },
-    { key: 'drivers', path: '/admin/drivers' },
-    { key: 'clients', path: '/admin/clients' },
-    { key: 'vendors', path: '/admin/vendors' },
-    { key: 'documents', path: '/admin/documents' },
-  ],
-  '/admin/salary': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
-  '/admin/services': [
-    { key: 'invoices', path: '/invoices' },
-    { key: 'payments', path: '/payments' },
-    { key: 'bank', path: '/bank' },
-    { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
-    { key: 'services', path: '/admin/services' },
-  ],
+  '/invoices': financialSubNav,
+  '/payments': financialSubNav,
+  '/bank': financialSubNav,
+  '/cash': financialSubNav,
+  '/reports/daily': reportsSubNav,
+  '/reports/pnl': reportsSubNav,
+  '/reports/soa': reportsSubNav,
+  '/admin/vehicles': adminSubNav,
+  '/admin/drivers': adminSubNav,
+  '/admin/clients': adminSubNav,
+  '/admin/vendors': adminSubNav,
+  '/admin/documents': adminSubNav,
+  '/admin/services': adminSubNav,
+  '/admin/salary': adminSubNav,
 };
 
 export default function TopBar() {

@@ -21,7 +21,6 @@ export default function DesktopNav() {
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
-    if ((location.pathname.startsWith('/admin/salary') || location.pathname.startsWith('/admin/services')) && path === '/invoices') return true;
     return location.pathname.startsWith(path.split('/').slice(0, 2).join('/'));
   };
 

@@ -1,9 +1,40 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import StatusBadge from '@/components/common/StatusBadge';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight, FileText, Copy, Download, Trash2, CheckCircle, Loader2 } from 'lucide-react';
+import {
+  ChevronDown, FileText, Copy, Download, Trash2, CheckCircle, Loader2, Calendar, MoreHorizontal, Inbox,
+} from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+
+const statusStyles = {
+  paid: 'bg-emerald-500/20 text-emerald-400',
+  draft: 'bg-amber-500/20 text-amber-400',
+  partially_paid: 'bg-orange-500/20 text-orange-400',
+  sent: 'bg-blue-500/20 text-blue-400',
+  overdue: 'bg-red-500/20 text-red-400',
+  cancelled: 'bg-white/10 text-white/50',
+};
+
+function StatusPill({ status }) {
+  const cls = statusStyles[status] || 'bg-white/10 text-white/50';
+  return (
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${cls}`}>
+      {status?.replace(/_/g, ' ')}
+    </span>
+  );
+}
+
+function StatPill({ label, value, tone }) {
+  return (
+    <div className="bg-white/[0.06] rounded-lg px-3 py-1.5 flex flex-col">
+      <span className="text-[10px] text-white/40 uppercase tracking-wider">{label}</span>
+      <span className={`text-sm font-bold tabular-nums ${tone}`}>{value}</span>
+    </div>
+  );
+}
 
 export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownload, downloadingId, onMarkPaid }) {
   const { toast } = useToast();
@@ -55,12 +86,14 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
     return trips.find((t) => t.id === tripId)?.trip_number;
   };
 
-  const Metric = ({ label, value, tone }) => (
-    <div className="px-4 py-2 flex flex-col justify-center text-center min-w-[68px]">
-      <span className="text-[9px] uppercase tracking-wide text-muted-foreground">{label}</span>
-      <span className={`text-sm font-semibold mt-1 tabular-nums font-display ${tone}`}>{value}</span>
-    </div>
-  );
+  if (!invoices || invoices.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <Inbox className="w-12 h-12 text-white/30 animate-pulse mb-3" />
+        <p className="text-sm text-white/50">No invoices found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -80,46 +113,43 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
         });
 
         return (
-          <div key={clientName} className="glass-card-hover overflow-hidden">
+          <div key={clientName} className="glass-card-hover overflow-hidden border-t border-primary/20">
             <button
               onClick={() => toggleClient(clientName)}
-              className="flex items-center w-full gap-3 px-3 py-3"
+              className="flex items-center w-full gap-3 px-4 py-3.5 hover:bg-white/[0.04] transition-colors duration-150"
             >
               <span
                 className="w-1.5 flex-shrink-0 self-stretch rounded-full"
                 style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.9) 0%, rgba(45,212,191,0.7) 100%)' }}
               />
-              <p className="text-sm font-semibold text-foreground uppercase tracking-wider truncate font-display flex-1 text-left">
+              <p className="text-sm font-semibold text-white uppercase tracking-wider truncate font-display flex-1 text-left">
                 {clientName}
               </p>
-              <div className="hidden sm:flex items-stretch rounded-xl overflow-hidden glass-panel">
-                <Metric label="Invoices" value={clientInvoices.length} tone="text-foreground" />
-                <span className="w-px bg-white/10 my-2.5" />
-                <Metric label="Outstanding" value={formatCurrency(outstanding)} tone="text-amber-300" />
-                <span className="w-px bg-white/10 my-2.5" />
-                <Metric label="Paid" value={formatCurrency(paid)} tone="text-emerald-300" />
-                <span className="w-px bg-white/10 my-2.5" />
-                <Metric label="Drafts" value={drafts} tone="text-foreground" />
+              <div className="hidden sm:flex items-center gap-2">
+                <StatPill label="Invoices" value={clientInvoices.length} tone="text-white" />
+                <StatPill label="Outstanding" value={formatCurrency(outstanding)} tone="text-amber-400" />
+                <StatPill label="Paid" value={formatCurrency(paid)} tone="text-emerald-400" />
+                <StatPill label="Drafts" value={drafts} tone="text-white/60" />
               </div>
               <span
                 className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 ${
                   isExpanded ? 'bg-primary/20 text-primary' : 'glass-panel text-muted-foreground'
                 }`}
               >
-                <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
               </span>
             </button>
 
-            {/* Mobile metrics */}
-            <div className="sm:hidden grid grid-cols-4 gap-px px-3 pb-3 glass-panel mx-3 rounded-xl overflow-hidden">
-              <Metric label="Inv" value={clientInvoices.length} tone="text-foreground" />
-              <Metric label="Out" value={formatCurrency(outstanding)} tone="text-amber-300" />
-              <Metric label="Paid" value={formatCurrency(paid)} tone="text-emerald-300" />
-              <Metric label="Drafts" value={drafts} tone="text-foreground" />
+            {/* Mobile stats stacked */}
+            <div className="sm:hidden grid grid-cols-2 gap-2 px-4 pb-3">
+              <StatPill label="Invoices" value={clientInvoices.length} tone="text-white" />
+              <StatPill label="Outstanding" value={formatCurrency(outstanding)} tone="text-amber-400" />
+              <StatPill label="Paid" value={formatCurrency(paid)} tone="text-emerald-400" />
+              <StatPill label="Drafts" value={drafts} tone="text-white/60" />
             </div>
 
             {isExpanded && (
-              <div className="border-t border-white/[0.06] px-3 py-3 space-y-2">
+              <div className="border-t border-white/[0.06] px-3 py-3 space-y-2 max-h-[60vh] overflow-y-auto thin-scroll">
                 {loadingTrips[clientName] ? (
                   <div className="p-4 flex items-center gap-2">
                     <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
@@ -142,64 +172,83 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                       <div key={monthKey}>
                         <button
                           onClick={() => toggleMonth(monthExpandedKey)}
-                          className="w-full flex items-center gap-2 p-2 rounded-full glass-panel hover:border-white/20 transition-all duration-200"
+                          className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] border-l-2 border-primary/50 hover:bg-white/[0.06] transition-colors duration-150"
                         >
-                          <span className="px-3 py-1 rounded-full text-[11px] font-mono text-muted-foreground bg-white/[0.04]">
+                          <span className="text-[11px] font-bold text-primary font-mono">
                             INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}
                           </span>
-                          <span className="px-3 py-1 rounded-full text-[11px] font-medium text-muted-foreground bg-white/[0.04]">
-                            {monthInvoices.length} invoices
-                          </span>
-                          <span className="px-3 py-1 rounded-full text-[11px] font-semibold text-foreground bg-white/[0.04] tabular-nums">
+                          <span className="text-[11px] text-white/40">{monthInvoices.length} invoices</span>
+                          <span className="ml-auto text-sm font-extrabold text-white tabular-nums">
                             {formatCurrency(monthTotal)}
                           </span>
-                          <span
-                            className={`ml-auto flex items-center justify-center w-7 h-7 rounded-full transition-all duration-200 ${
-                              monthExpanded ? 'bg-primary/20 text-primary' : 'bg-white/[0.04] text-muted-foreground'
-                            }`}
-                          >
-                            <ChevronRight className={`w-3.5 h-3.5 transition-transform duration-200 ${monthExpanded ? 'rotate-90' : ''}`} />
-                          </span>
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${monthExpanded ? 'rotate-180' : ''}`} />
                         </button>
 
                         {monthExpanded && (
-                          <div className="mt-2 space-y-1 rounded-xl bg-white/[0.02] border border-white/[0.05] p-2">
+                          <div className="mt-2 space-y-0 rounded-xl bg-white/[0.02] border border-white/[0.05] p-2">
                             {Object.entries(byDay).sort((a, b) => b[0].localeCompare(a[0])).map(([dayKey, dayInvoices]) => (
                               <div key={dayKey}>
-                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-panel my-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
-                                  <span className="text-[10px] font-mono tracking-wider uppercase text-muted-foreground">{formatDate(dayKey)}</span>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-panel my-1.5">
+                                  <Calendar className="w-3 h-3 text-white/50" />
+                                  <span className="text-[10px] font-mono tracking-wider uppercase text-white/50">{formatDate(dayKey)}</span>
                                 </div>
                                 {dayInvoices.map((inv) => {
                                   const tripNum = inv.trip_id ? getTripNumber(clientName, inv.trip_id) : null;
                                   return (
                                     <div
                                       key={inv.id}
-                                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-transparent hover:bg-white/[0.04] hover:border-white/10 transition-all duration-200"
+                                      className="flex items-center gap-3 pl-8 pr-3 py-3.5 bg-white/[0.04] border-l-2 border-primary/30 border-b border-white/[0.06] hover:bg-white/[0.06] transition-colors duration-150"
                                     >
                                       <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                                      <button onClick={() => onEdit(inv)} className="text-xs font-medium text-foreground hover:text-primary transition-colors">
+                                      <button onClick={() => onEdit(inv)} className="text-xs font-semibold text-white/70 hover:text-primary transition-colors">
                                         {inv.invoice_number || '—'}
                                       </button>
-                                      <StatusBadge status={inv.status} />
+                                      <StatusPill status={inv.status} />
                                       {tripNum && (
-                                        <button onClick={() => copyToClipboard(tripNum)} className="text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
+                                        <button onClick={() => copyToClipboard(tripNum)} className="text-[10px] font-mono text-white/40 hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
                                           {tripNum} <Copy className="w-2.5 h-2.5" />
                                         </button>
                                       )}
-                                      <span className="text-xs text-muted-foreground ml-auto tabular-nums">{formatCurrency(inv.total_amount)}</span>
-                                      <div className="flex items-center gap-1">
-                                        <button onClick={() => onDownload(inv)} className="text-muted-foreground hover:text-foreground p-1 transition-colors">
-                                          {downloadingId === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                                      <span className="text-sm font-bold text-white tabular-nums ml-auto text-right">{formatCurrency(inv.total_amount)}</span>
+                                      {/* Desktop actions */}
+                                      <div className="hidden sm:flex items-center gap-1">
+                                        <button onClick={() => onDownload(inv)} className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                          {downloadingId === inv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                                         </button>
                                         {inv.status !== 'paid' && (
-                                          <button onClick={() => onMarkPaid(inv)} className="text-muted-foreground hover:text-emerald-400 p-1 transition-colors">
-                                            <CheckCircle className="w-3 h-3" />
+                                          <button onClick={() => onMarkPaid(inv)} className="text-muted-foreground hover:text-emerald-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                            <CheckCircle className="w-4 h-4" />
                                           </button>
                                         )}
-                                        <button onClick={() => onDelete(inv)} className="text-muted-foreground hover:text-rose-400 p-1 transition-colors">
-                                          <Trash2 className="w-3 h-3" />
+                                        <button onClick={() => onDelete(inv)} className="text-muted-foreground hover:text-rose-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                          <Trash2 className="w-4 h-4" />
                                         </button>
+                                      </div>
+                                      {/* Mobile ⋯ menu */}
+                                      <div className="sm:hidden">
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                            <button className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                              <MoreHorizontal className="w-4 h-4" />
+                                            </button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => onEdit(inv)}>
+                                              <FileText className="w-4 h-4 mr-2" /> Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => onDownload(inv)}>
+                                              <Download className="w-4 h-4 mr-2" /> Download
+                                            </DropdownMenuItem>
+                                            {inv.status !== 'paid' && (
+                                              <DropdownMenuItem onClick={() => onMarkPaid(inv)}>
+                                                <CheckCircle className="w-4 h-4 mr-2" /> Mark Paid
+                                              </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuItem onClick={() => onDelete(inv)} className="text-rose-400">
+                                              <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                            </DropdownMenuItem>
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
                                       </div>
                                     </div>
                                   );
