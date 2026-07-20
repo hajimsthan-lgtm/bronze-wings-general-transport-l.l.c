@@ -251,31 +251,6 @@
   background-blend-mode: normal, normal, soft-light;
 }
 
-/* ===== Atmospheric Glass Prism ===== */
-.glass-prism {
-  position: relative;
-  background: rgba(26, 26, 26, 0.6);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(45, 36, 90, 0.9);
-  border-radius: 1.5rem;
-  box-shadow:
-    0 0 0 1px rgba(26, 22, 51, 0.9),
-    0 0 18px 2px rgba(45, 36, 90, 0.35),
-    0 0 40px 4px rgba(45, 36, 90, 0.18),
-    inset 0 0 0 1px rgba(45, 36, 90, 0.35);
-}
-.glass-prism::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  border-radius: 1.5rem 1.5rem 0 0;
-  background: linear-gradient(90deg, rgba(0, 255, 255, 0.55), rgba(255, 0, 255, 0.45), rgba(255, 255, 0, 0.5));
-  opacity: 0.7;
-  pointer-events: none;
-}
-
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
