@@ -40,16 +40,24 @@ export default function ProfitAnalytics() {
   const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Trip.list('-created_date', 500).catch(() => []),
-      base44.entities.FuelRecord.list('-created_date', 500).catch(() => []),
-      base44.entities.Expense.list('-created_date', 500).catch(() => []),
-      base44.entities.ServiceRecord.list('-created_date', 500).catch(() => []),
-      base44.entities.SalaryRecord.list('-created_date', 500).catch(() => []),
-    ]).then(([trips, fuel, expenses, services, salaries]) => {
-      setVehicles(computeVehicleProfit({ trips, fuelRecords: fuel, expenses, serviceRecords: services }));
-      setDrivers(computeDriverProfit({ trips, salaryRecords: salaries, expenses }));
-    }).finally(() => setLoading(false));
+    const safe = (fn) => fn.catch(() => []);
+    let cancelled = false;
+    (async () => {
+      try {
+        // Fetch sequentially to avoid bursting the API rate limit
+        const trips = await safe(base44.entities.Trip.list('-created_date', 500));
+        const fuel = await safe(base44.entities.FuelRecord.list('-created_date', 500));
+        const expenses = await safe(base44.entities.Expense.list('-created_date', 500));
+        const services = await safe(base44.entities.ServiceRecord.list('-created_date', 500));
+        const salaries = await safe(base44.entities.SalaryRecord.list('-created_date', 500));
+        if (cancelled) return;
+        setVehicles(computeVehicleProfit({ trips, fuelRecords: fuel, expenses, serviceRecords: services }));
+        setDrivers(computeDriverProfit({ trips, salaryRecords: salaries, expenses }));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const topVehicles = useMemo(() => [...vehicles].sort((a, b) => b.profit - a.profit).slice(0, 6), [vehicles]);

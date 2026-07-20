@@ -21,17 +21,24 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Trip.list('-created_date', 50),
-      base44.entities.Invoice.list('-created_date', 50),
-      base44.entities.Vehicle.list(),
-      base44.entities.Document.list(),
-    ]).then(([t, i, v, d]) => {
-      setTrips(t);
-      setInvoices(i);
-      setVehicles(v);
-      setDocuments(d);
-    }).finally(() => setLoading(false));
+    let cancelled = false;
+    (async () => {
+      try {
+        // Fetch sequentially to avoid the API rate limit
+        const t = await base44.entities.Trip.list('-created_date', 50).catch(() => []);
+        const i = await base44.entities.Invoice.list('-created_date', 50).catch(() => []);
+        const v = await base44.entities.Vehicle.list().catch(() => []);
+        const d = await base44.entities.Document.list().catch(() => []);
+        if (cancelled) return;
+        setTrips(t);
+        setInvoices(i);
+        setVehicles(v);
+        setDocuments(d);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   if (loading) return <LoadingSpinner />;
