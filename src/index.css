@@ -210,6 +210,33 @@
     inset -3px -3px 7px hsl(var(--clay-shadow-light)) !important;
 }
 
+/* Claymorphism nav rail */
+.clay-rail {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  border-radius: 9999px;
+  box-shadow:
+    6px 6px 14px hsl(var(--clay-shadow-dark)),
+    -6px -6px 14px hsl(var(--clay-shadow-light)),
+    inset 1px 1px 1px hsl(var(--clay-shadow-light));
+}
+.clay-nav-chip {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  border-radius: 9999px;
+  box-shadow:
+    4px 4px 9px hsl(var(--clay-shadow-dark)),
+    -4px -4px 9px hsl(var(--clay-shadow-light));
+  transition: box-shadow 0.2s ease, color 0.2s ease;
+}
+.clay-nav-chip-active {
+  box-shadow:
+    inset 3px 3px 7px hsl(var(--clay-shadow-dark)),
+    inset -3px -3px 7px hsl(var(--clay-shadow-light)),
+    0 0 0 1px hsl(var(--primary) / 0.5),
+    0 0 16px hsl(var(--primary) / 0.45) !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

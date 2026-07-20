@@ -27,13 +27,13 @@ export default function DesktopNav() {
 
   return (
     <nav className="hidden md:flex items-center justify-between px-6 lg:px-8 h-14 sticky top-0 z-50">
-      <div className="flex items-center gap-1">
-        <Link to="/" className="flex items-center gap-2.5 mr-8">
+      <div className="clay-rail flex items-center gap-1.5">
+        <Link to="/" className="flex items-center gap-2.5 mr-2 pl-1.5 pr-3 py-1">
           {logoUrl ? (
-            <img src={logoUrl} alt="Bronze Wings" className="w-8 h-8 rounded-lg object-contain" />
+            <img src={logoUrl} alt="Bronze Wings" className="w-9 h-9 rounded-full object-contain" />
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center">
-              <span className="text-white font-display font-bold text-sm">BW</span>
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]">
+              <span className="text-white font-display font-bold text-xs">BW</span>
             </div>
           )}
           <span className="font-display font-semibold text-foreground text-sm tracking-tight">
@@ -42,19 +42,17 @@ export default function DesktopNav() {
         </Link>
 
         {navItems.map(item => {
-          const Icon = item.icon;
           const active = isActive(item.path);
           return (
             <Link
               key={item.key}
               to={item.path}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
+              className={`flex items-center px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
                 active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]'
+                  ? 'clay-nav-chip clay-nav-chip-active text-primary'
+                  : 'clay-nav-chip text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon className="w-4 h-4" />
               <span>{t(item.key)}</span>
             </Link>
           );
