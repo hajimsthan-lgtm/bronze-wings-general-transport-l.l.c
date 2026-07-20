@@ -237,6 +237,20 @@
     0 0 16px hsl(var(--primary) / 0.45) !important;
 }
 
+/* Professional page shell backdrop */
+.professional-page-bg {
+  background-color: #050810;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 12% 8%, rgba(0, 122, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 92%, rgba(0, 196, 167, 0.08) 0%, transparent 60%),
+    url('https://media.base44.com/images/public/6a5e20fffaa71b55806cccc8/aa2f17bfb_generated_image.png');
+  background-size: cover, cover, cover;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed, fixed, fixed;
+  background-position: center, center, center;
+  background-blend-mode: normal, normal, soft-light;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
