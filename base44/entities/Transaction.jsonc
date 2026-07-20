@@ -1,0 +1,217 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "reference_number": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "emirates_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "sub_category": {
+      "type": "string"
+    },
+    "service_type": {
+      "type": "string"
+    },
+    "staff_name": {
+      "type": "string"
+    },
+    "service_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "service_mode": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "hourly",
+        "recurring"
+      ],
+      "default": "one_time"
+    },
+    "hours": {
+      "type": "number",
+      "default": 0
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "amount_received": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "paid",
+        "pending",
+        "partial",
+        "advance",
+        "reversal"
+      ],
+      "default": "pending"
+    },
+    "payment_mode": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "bank_transfer",
+        "card",
+        "split"
+      ],
+      "default": "cash"
+    },
+    "transaction_status": {
+      "type": "string",
+      "enum": [
+        "done",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "cash_received": {
+      "type": "number",
+      "default": 0
+    },
+    "bank_received": {
+      "type": "number",
+      "default": 0
+    },
+    "advance_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "advance_received_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "advance_reference": {
+      "type": "string"
+    },
+    "advance_applied_ref": {
+      "type": "string"
+    },
+    "refund_reason": {
+      "type": "string"
+    },
+    "refund_mode": {
+      "type": "string"
+    },
+    "refund_notes": {
+      "type": "string"
+    },
+    "government_fee": {
+      "type": "number",
+      "default": 0
+    },
+    "govt_fee_status": {
+      "type": "string",
+      "enum": [
+        "paid",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "vendor_expenses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vendor_name": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "payment_breakdown": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "profit": {
+      "type": "number",
+      "default": 0
+    },
+    "is_muted": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_draft": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_deduction": {
+      "type": "boolean",
+      "default": false
+    },
+    "deduction_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "linked_txn_ref": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_name",
+    "service_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

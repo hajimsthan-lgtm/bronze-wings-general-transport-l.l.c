@@ -1,0 +1,99 @@
+{
+  "name": "Vehicle",
+  "type": "object",
+  "properties": {
+    "plate_number": {
+      "type": "string"
+    },
+    "make": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "year": {
+      "type": "number"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "truck",
+        "trailer",
+        "tanker",
+        "pickup",
+        "other"
+      ],
+      "default": "truck"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "maintenance",
+        "inactive"
+      ],
+      "default": "active"
+    },
+    "assigned_driver": {
+      "type": "string"
+    },
+    "registration_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "insurance_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_service_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_service_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "odometer_km": {
+      "type": "number",
+      "default": 0
+    },
+    "fuel_type": {
+      "type": "string",
+      "enum": [
+        "diesel",
+        "petrol"
+      ],
+      "default": "diesel"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "plate_number",
+    "make",
+    "model"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

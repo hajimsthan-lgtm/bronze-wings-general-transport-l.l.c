@@ -1,0 +1,176 @@
+{
+  "name": "Trip",
+  "type": "object",
+  "properties": {
+    "trip_number": {
+      "type": "string"
+    },
+    "from_location": {
+      "type": "string"
+    },
+    "to_location": {
+      "type": "string"
+    },
+    "vehicle_plate": {
+      "type": "string"
+    },
+    "driver_name": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string"
+    },
+    "trip_type": {
+      "type": "string",
+      "enum": [
+        "one_way",
+        "hourly",
+        "contract",
+        "return"
+      ],
+      "default": "one_way"
+    },
+    "delivery_note_number": {
+      "type": "string"
+    },
+    "delivery_note_url": {
+      "type": "string"
+    },
+    "hours": {
+      "type": "number",
+      "default": 0
+    },
+    "return_trip_number": {
+      "type": "string"
+    },
+    "load_time": {
+      "type": "string"
+    },
+    "offload_time": {
+      "type": "string"
+    },
+    "load_datetime": {
+      "type": "string"
+    },
+    "offload_datetime": {
+      "type": "string"
+    },
+    "duration_unit": {
+      "type": "string",
+      "enum": [
+        "hours",
+        "days"
+      ],
+      "default": "hours"
+    },
+    "calculated_duration": {
+      "type": "number",
+      "default": 0
+    },
+    "base_fare": {
+      "type": "number",
+      "default": 0
+    },
+    "max_allowed_duration": {
+      "type": "number",
+      "default": 0
+    },
+    "overtime_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "corporate_credit",
+        "cash_received",
+        "bank_received"
+      ],
+      "default": "corporate_credit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "in_transit",
+        "completed",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "trip_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "delivery_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "revenue": {
+      "type": "number",
+      "default": 0
+    },
+    "fuel_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "toll_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "other_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "distance_km": {
+      "type": "number"
+    },
+    "is_draft": {
+      "type": "boolean",
+      "default": false
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "ar"
+      ],
+      "default": "en"
+    }
+  },
+  "required": [
+    "from_location",
+    "to_location",
+    "vehicle_plate",
+    "driver_name",
+    "trip_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

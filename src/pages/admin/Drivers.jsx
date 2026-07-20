@@ -1,0 +1,102 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
+import { useI18n } from '@/lib/i18n';
+import PageHeader from '@/components/common/PageHeader';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import EmptyState from '@/components/common/EmptyState';
+import StatusBadge from '@/components/common/StatusBadge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { formatDate, getInitials } from '@/lib/formatters';
+import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
+
+export default function Drivers() {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
+  const [search, setSearch] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+
+  const load = () => {setLoading(true);base44.entities.Driver.list('-created_date', 100).then(setItems).finally(() => setLoading(false));};
+  useEffect(() => {load();}, []);
+
+  const filtered = items.filter((d) => !search || d.name?.toLowerCase().includes(search.toLowerCase()) || d.phone?.includes(search));
+
+  return (
+    <div>
+      <PageHeader title={t('drivers')} description={`${items.length} drivers`}
+      action={<Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+      
+      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" /></div>
+
+      {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={User} title={t('no_data')} /> :
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((d) =>
+        <div key={d.id} className="glass-card-hover p-4 cursor-pointer glow: 'hover:shadow-violet-400/30 color: 'from-violet-300/28 via-indigo-500/14 to-slate-950/30'," onClick={() => navigate(`/admin/drivers/${d.id}`)}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-semibold">{getInitials(d.name)}</div>
+                  <div><p className="text-sm font-semibold text-foreground">{d.name}</p><p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" />{d.phone}</p></div>
+                </div>
+                <StatusBadge status={d.status} />
+              </div>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                {d.assigned_vehicle && <p>{t('vehicle')}: <span className="text-foreground">{d.assigned_vehicle}</span></p>}
+                {d.license_expiry && <p>License: <span className="text-foreground">{formatDate(d.license_expiry)}</span></p>}
+              </div>
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm" onClick={() => {setEditItem(d);setFormOpen(true);}} className="text-muted-foreground hover:text-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
+                <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger>
+                  <AlertDialogContent className="bg-card border-border"><AlertDialogHeader><AlertDialogTitle className="text-foreground">{t('delete')} Driver?</AlertDialogTitle><AlertDialogDescription>This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={async () => {await base44.entities.Driver.delete(d.id);load();}} className="bg-destructive">{t('delete')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+        )}
+        </div>
+      }
+
+      <Sheet open={formOpen} onOpenChange={setFormOpen}>
+        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
+          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Driver</SheetTitle></SheetHeader>
+          <DriverForm editItem={editItem} onSave={async (data) => {if (editItem) await base44.entities.Driver.update(editItem.id, data);else await base44.entities.Driver.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    </div>);
+
+}
+
+function DriverForm({ editItem, onSave, onCancel }) {
+  const { t } = useI18n();
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ name: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' });else setForm({ name: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });}, [editItem]);
+  const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
+  const handle = async () => {setSaving(true);await onSave({ ...form, base_salary: Number(form.base_salary) || 0 });setSaving(false);};
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Name</Label><Input value={form.name} onChange={(e) => update('name', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={(e) => update('phone', e.target.value)} className="bg-background border-border" /></div>
+      </div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={(e) => update('email', e.target.value)} className="bg-background border-border" /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">License #</Label><Input value={form.license_number} onChange={(e) => update('license_number', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">License Expiry</Label><Input type="date" value={form.license_expiry} onChange={(e) => update('license_expiry', e.target.value)} className="bg-background border-border" /></div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['active', 'inactive', 'on_leave'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Salary</Label><Input type="number" value={form.base_salary} onChange={(e) => update('base_salary', e.target.value)} className="bg-background border-border" /></div>
+      </div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input value={form.assigned_vehicle} onChange={(e) => update('assigned_vehicle', e.target.value)} className="bg-background border-border" /></div>
+      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
+    </div>);
+
+}

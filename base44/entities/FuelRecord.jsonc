@@ -1,0 +1,82 @@
+{
+  "name": "FuelRecord",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "vehicle_plate": {
+      "type": "string"
+    },
+    "driver_name": {
+      "type": "string"
+    },
+    "liters": {
+      "type": "number"
+    },
+    "price_per_liter": {
+      "type": "number"
+    },
+    "total_cost": {
+      "type": "number"
+    },
+    "odometer_reading": {
+      "type": "number"
+    },
+    "station_name": {
+      "type": "string"
+    },
+    "fuel_type": {
+      "type": "string",
+      "enum": [
+        "diesel",
+        "petrol"
+      ],
+      "default": "diesel"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "card",
+        "account"
+      ],
+      "default": "cash"
+    },
+    "receipt_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "date",
+    "vehicle_plate",
+    "liters",
+    "total_cost"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
