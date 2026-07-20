@@ -197,30 +197,31 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                                   return (
                                     <div
                                       key={inv.id}
-                                      className="flex items-center gap-3 pl-8 pr-3 py-3.5 bg-white/[0.04] border-l-2 border-primary/30 border-b border-white/[0.06] hover:bg-white/[0.06] transition-colors duration-150"
+                                      onClick={() => onEdit(inv)}
+                                      className="flex items-center gap-3 pl-8 pr-3 py-3.5 bg-white/[0.04] border-l-2 border-primary/30 border-b border-white/[0.06] hover:bg-white/[0.06] cursor-pointer transition-colors duration-150"
                                     >
                                       <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                                      <button onClick={() => onEdit(inv)} className="text-xs font-semibold text-white/70 hover:text-primary transition-colors">
+                                      <span className="text-xs font-semibold text-white/70 hover:text-primary transition-colors">
                                         {inv.invoice_number || '—'}
-                                      </button>
+                                      </span>
                                       <StatusPill status={inv.status} />
                                       {tripNum && (
-                                        <button onClick={() => copyToClipboard(tripNum)} className="text-[10px] font-mono text-white/40 hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
+                                        <button onClick={(e) => { e.stopPropagation(); copyToClipboard(tripNum); }} className="text-[10px] font-mono text-white/40 hover:text-primary transition-colors flex items-center gap-1" title="Copy trip number">
                                           {tripNum} <Copy className="w-2.5 h-2.5" />
                                         </button>
                                       )}
                                       <span className="text-sm font-bold text-white tabular-nums ml-auto text-right">{formatCurrency(inv.total_amount)}</span>
                                       {/* Desktop actions */}
                                       <div className="hidden sm:flex items-center gap-1">
-                                        <button onClick={() => onDownload(inv)} className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                        <button onClick={(e) => { e.stopPropagation(); onDownload(inv); }} className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
                                           {downloadingId === inv.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                                         </button>
                                         {inv.status !== 'paid' && (
-                                          <button onClick={() => onMarkPaid(inv)} className="text-muted-foreground hover:text-emerald-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                          <button onClick={(e) => { e.stopPropagation(); onMarkPaid(inv); }} className="text-muted-foreground hover:text-emerald-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
                                             <CheckCircle className="w-4 h-4" />
                                           </button>
                                         )}
-                                        <button onClick={() => onDelete(inv)} className="text-muted-foreground hover:text-rose-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                        <button onClick={(e) => { e.stopPropagation(); onDelete(inv); }} className="text-muted-foreground hover:text-rose-400 hover:bg-white/10 rounded-full p-1.5 transition-colors">
                                           <Trash2 className="w-4 h-4" />
                                         </button>
                                       </div>
@@ -228,7 +229,7 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                                       <div className="sm:hidden">
                                         <DropdownMenu>
                                           <DropdownMenuTrigger asChild>
-                                            <button className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
+                                            <button onClick={(e) => e.stopPropagation()} className="text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-full p-1.5 transition-colors">
                                               <MoreHorizontal className="w-4 h-4" />
                                             </button>
                                           </DropdownMenuTrigger>

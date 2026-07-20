@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -177,23 +177,23 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] max-w-4xl max-h-[92vh] overflow-y-auto p-0 rounded-2xl shadow-2xl">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] p-0 max-h-screen overflow-y-auto w-full sm:max-w-2xl lg:max-w-5xl rounded-l-2xl shadow-2xl">
         {/* Hero header */}
-        <div className="relative overflow-hidden px-6 pt-6 pb-5 border-b border-white/[0.06]">
+        <div className="relative overflow-hidden px-6 pt-6 pb-5 pl-14 border-b border-white/[0.06]">
           <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 0% 0%, rgba(59,130,246,0.15), transparent 70%)' }} />
-          <DialogHeader className="relative">
-            <div className="flex items-center justify-between">
+          <SheetHeader className="relative">
+            <div className="flex items-center justify-between pr-12">
               <div>
-                <DialogTitle className="font-display text-foreground text-lg flex items-center gap-2">
+                <SheetTitle className="font-display text-foreground text-lg flex items-center gap-2">
                   <Receipt className="w-5 h-5 text-primary" />
                   {editInvoice ? 'Edit Invoice' : t('new_invoice')}
-                </DialogTitle>
+                </SheetTitle>
                 <p className="text-[11px] text-muted-foreground mt-1 font-mono">{form.invoice_number || '—'}</p>
               </div>
               <StatusPill status={resultingStatus} />
             </div>
-          </DialogHeader>
+          </SheetHeader>
         </div>
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start px-6 pt-5">
@@ -447,8 +447,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             {saving ? t('loading') : (editInvoice ? 'Save Invoice' : 'Create Invoice')}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
 

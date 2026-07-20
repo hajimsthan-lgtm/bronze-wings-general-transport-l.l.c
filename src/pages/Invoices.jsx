@@ -22,7 +22,8 @@ import DateRangeFilter from '@/components/common/DateRangeFilter';
 import SatinCard from '@/components/common/SatinCard';
 import PageInfo from '@/components/common/PageInfo';
 
-const STATUSES = ['all', 'draft', 'sent', 'paid', 'overdue', 'cancelled'];
+const STATUSES = ['all', 'draft', 'sent', 'partially_paid', 'paid', 'overdue', 'cancelled'];
+const UNPAID_STATUSES = ['draft', 'sent', 'overdue', 'partially_paid'];
 
 export default function Invoices() {
   const { t } = useI18n();
@@ -43,7 +44,9 @@ export default function Invoices() {
 
   const dateFiltered = invoices.filter((inv) => !inv.issue_date || inv.issue_date >= dateFrom && inv.issue_date <= dateTo);
   const filtered = dateFiltered.filter((inv) => {
-    if (filter !== 'all' && inv.status !== filter) return false;
+    if (filter === 'all') {
+      if (!UNPAID_STATUSES.includes(inv.status)) return false;
+    } else if (inv.status !== filter) return false;
     if (search) {
       const q = search.toLowerCase();
       return inv.invoice_number?.toLowerCase().includes(q) || inv.client_name?.toLowerCase().includes(q);
