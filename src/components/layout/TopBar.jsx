@@ -132,9 +132,9 @@ export default function TopBar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`clay-nav-chip px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap transition-all duration-200 ${
                   location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-                    ? 'bg-white/[0.08] text-foreground'
+                    ? 'clay-nav-chip-active text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
