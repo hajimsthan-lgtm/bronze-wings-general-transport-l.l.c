@@ -74,26 +74,37 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
         });
 
         return (
-          <div key={clientName} className="flex items-center gap-2 mb-4 w-fit rounded-xl bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-lg">
-            <button onClick={() => toggleClient(clientName)} className="flex items-center gap-2 w-full px-4 py-2.5 border-b border-border/50 bg-blue-500/[0.06] hover:bg-blue-500/[0.10] transition-colors text-3xl">
-              <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform flex-shrink-0 ${isExpanded ? 'rotate-90' : ''}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{clientName}</p>
-                <p className="text-xs text-muted-foreground">{clientInvoices.length} invoices</p>
+          <div key={clientName} className="mb-4 w-full rounded-xl overflow-hidden shadow-[0_10px_30px_-8px_rgba(0,0,0,0.55)]" style={{ background: '#151921' }}>
+            <button onClick={() => toggleClient(clientName)} className="flex items-stretch w-full transition-colors">
+              <span className="w-1.5 flex-shrink-0 my-3 mx-2 rounded-full" style={{ background: 'linear-gradient(180deg, #007BFF 0%, #00C4A7 100%)' }} />
+              <div className="flex items-center px-2 py-3.5 min-w-0 flex-1">
+                <p className="text-sm font-semibold text-white uppercase tracking-wider truncate">{clientName}</p>
               </div>
-              <div className="flex items-center gap-4 text-xs flex-shrink-0">
-                <div className="text-right">
-                  <p className="text-[9px] text-muted-foreground uppercase">Outstanding</p>
-                  <p className="text-amber-400 font-medium">{formatCurrency(outstanding)}</p>
+              <div className="flex items-stretch my-2.5 mr-2.5 rounded-lg overflow-hidden" style={{ background: '#0A0D12' }}>
+                <div className="px-4 py-2 flex flex-col justify-center text-center min-w-[64px]">
+                  <span className="text-base font-bold text-white leading-none">{clientInvoices.length}</span>
+                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide mt-1.5">Invoices</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-[9px] text-muted-foreground uppercase">Paid</p>
-                  <p className="text-emerald-400 font-medium">{formatCurrency(paid)}</p>
+                <span className="w-px bg-white/10 my-2.5" />
+                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[96px]">
+                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Outstanding</span>
+                  <span className="text-sm font-semibold text-amber-400 mt-1">{formatCurrency(outstanding)}</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-[9px] text-muted-foreground uppercase">Drafts</p>
-                  <p className="text-foreground font-medium">{drafts}</p>
+                <span className="w-px bg-white/10 my-2.5" />
+                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[80px]">
+                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Paid</span>
+                  <span className="text-sm font-semibold text-emerald-400 mt-1">{formatCurrency(paid)}</span>
                 </div>
+                <span className="w-px bg-white/10 my-2.5" />
+                <div className="px-4 py-2 flex flex-col justify-center text-right min-w-[60px]">
+                  <span className="text-[9px] text-[#8892B0] uppercase tracking-wide">Drafts</span>
+                  <span className="text-sm font-semibold text-white mt-1">{drafts}</span>
+                </div>
+              </div>
+              <div className="flex items-center pr-3">
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg" style={{ background: '#007BFF' }}>
+                  <ChevronRight className={`w-4 h-4 text-white transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                </span>
               </div>
             </button>
 
