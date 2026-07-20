@@ -16,6 +16,7 @@ import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useTrips, useTripDelete } from '@/hooks/useEntityQueries';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import PageInfo from '@/components/common/PageInfo';
 import { formatDate } from '@/lib/formatters';
 
 const STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
@@ -78,7 +79,7 @@ export default function Trips() {
             <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
           </Button>
           } />
-        
+        <PageInfo text="Record every transport job here. Enter client, route and times — revenue and overtime calculate automatically. Tap a driver, vehicle or client name to jump to their profile." />
 
       {/* Date filter + Export */}
       <div className="flex flex-wrap items-center gap-3 mb-4">

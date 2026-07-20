@@ -13,6 +13,7 @@ import DashboardCharts from '@/components/dashboard/DashboardCharts';
 import FinanceStatCards from '@/components/dashboard/FinanceStatCards';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
 import GovtFeePendingPanel from '@/components/dashboard/GovtFeePendingPanel';
+import PageInfo from '@/components/common/PageInfo';
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -55,6 +56,7 @@ export default function Dashboard() {
   const overdueCount = invoices.filter(i => i.status === 'overdue').length;
   return (
     <div className="space-y-6 pt-5">
+      <PageInfo text="Your business at a glance — revenue, active trips, invoice balances, fleet health and items needing attention. Tap any alert to jump straight to the relevant page." />
       {/* KPI Cards */}
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         <KpiCard

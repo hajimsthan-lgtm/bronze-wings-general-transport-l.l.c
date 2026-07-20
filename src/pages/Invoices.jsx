@@ -20,6 +20,7 @@ import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import SatinCard from '@/components/common/SatinCard';
+import PageInfo from '@/components/common/PageInfo';
 
 const STATUSES = ['all', 'draft', 'sent', 'paid', 'overdue', 'cancelled'];
 
@@ -90,6 +91,7 @@ export default function Invoices() {
             </div>
           }
         />
+        <PageInfo text="Create and track invoices for your clients. The form shows live subtotal, VAT and total as you add line items. Mark invoices sent or paid to keep balances current." />
 
         {/* Summary row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">

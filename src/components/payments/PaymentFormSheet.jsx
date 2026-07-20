@@ -253,11 +253,12 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
           {form.client_name && !editItem && (
             <div className="pt-2">
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Invoice Allocation</Label>
+                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Invoice Allocation — FIFO</Label>
                 {outstandingInvoices.length > 0 && (
                   <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} outstanding</span>
                 )}
               </div>
+              <p className="text-[10px] text-muted-foreground -mt-1 mb-2">Oldest invoice paid first. Toggle invoices to include — amounts auto-allocate in order.</p>
               <InvoiceAllocationList
                 allocations={allocations}
                 outstandingInvoices={outstandingInvoices}

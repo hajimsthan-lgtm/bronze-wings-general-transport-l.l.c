@@ -12,6 +12,7 @@ import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useClientPayments } from '@/hooks/useEntityQueries';
 import SatinCard from '@/components/common/SatinCard';
+import PageInfo from '@/components/common/PageInfo';
 
 export default function Payments() {
   const { data: items = [], isLoading: loading, refetch } = useClientPayments();
@@ -58,6 +59,7 @@ export default function Payments() {
             </div>
           }
         />
+        <PageInfo text="Record client payments here. Enter the amount and the system auto-allocates it across outstanding invoices using FIFO (oldest first). Select or deselect invoices to control allocation." />
 
         <div className="grid grid-cols-2 gap-3 mb-5">
           <SatinCard className="p-3">
