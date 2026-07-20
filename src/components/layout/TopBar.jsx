@@ -19,7 +19,6 @@ const subNavMap = {
     { key: 'payments', path: '/payments' },
     { key: 'bank', path: '/bank' },
     { key: 'cash', path: '/cash' },
-    { key: 'salary', path: '/admin/salary' },
     { key: 'services', path: '/admin/services' },
   ],
   '/payments': [
