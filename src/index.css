@@ -6,10 +6,53 @@
 
 @layer base {
   :root {
+    /* Light theme */
     --font-sans: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* Dark premium theme as default */
+    --background: 210 40% 98%;
+    --foreground: 224 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 30% 12%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 25% 94%;
+    --secondary-foreground: 224 30% 20%;
+    --muted: 220 25% 95%;
+    --muted-foreground: 220 16% 42%;
+    --accent: 195 100% 42%;
+    --accent-foreground: 224 30% 12%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 25% 88%;
+    --input: 220 25% 90%;
+    --ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 160 84% 40%;
+    --chart-3: 43 96% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 55%;
+    --radius: 0.85rem;
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 224 30% 20%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 94%;
+    --sidebar-accent-foreground: 224 30% 20%;
+    --sidebar-border: 220 25% 88%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Clay tokens (light) */
+    --clay-bg: 220 40% 96%;
+    --clay-border: 220 22% 87%;
+    --clay-shadow-dark: 220 22% 74%;
+    --clay-shadow-light: 0 0% 100%;
+  }
+
+  .dark {
+    /* Dark theme (current default aesthetic) */
     --background: 224 30% 7%;
     --foreground: 210 40% 95%;
     --card: 224 28% 10%;
@@ -34,7 +77,6 @@
     --chart-3: 43 96% 56%;
     --chart-4: 280 65% 65%;
     --chart-5: 0 84% 60%;
-    --radius: 0.85rem;
     --sidebar-background: 224 30% 6%;
     --sidebar-foreground: 210 40% 85%;
     --sidebar-primary: 210 100% 56%;
@@ -43,6 +85,12 @@
     --sidebar-accent-foreground: 210 40% 85%;
     --sidebar-border: 224 25% 14%;
     --sidebar-ring: 210 100% 56%;
+
+    /* Clay tokens (dark) */
+    --clay-bg: 224 28% 13%;
+    --clay-border: 224 25% 20%;
+    --clay-shadow-dark: 224 50% 3%;
+    --clay-shadow-light: 225 22% 19%;
   }
 }
 
@@ -52,7 +100,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    background-image: 
+    background-image:
       radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
       radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
     background-attachment: fixed;
@@ -116,8 +164,54 @@
   border: 1px solid rgba(255,255,255,0.07);
 }
 
+/* ===== Claymorphism ===== */
+.clay {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  border-radius: 1.25rem;
+  box-shadow:
+    6px 6px 14px hsl(var(--clay-shadow-dark)),
+    -6px -6px 14px hsl(var(--clay-shadow-light));
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+.clay-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    9px 9px 18px hsl(var(--clay-shadow-dark)),
+    -9px -9px 18px hsl(var(--clay-shadow-light));
+}
+.clay-sm {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  border-radius: 1rem;
+  box-shadow:
+    4px 4px 9px hsl(var(--clay-shadow-dark)),
+    -4px -4px 9px hsl(var(--clay-shadow-light));
+}
+.clay-input {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  box-shadow:
+    inset 3px 3px 6px hsl(var(--clay-shadow-dark)),
+    inset -3px -3px 6px hsl(var(--clay-shadow-light));
+}
+.clay-chip {
+  background: hsl(var(--clay-bg));
+  border: 1px solid hsl(var(--clay-border));
+  box-shadow:
+    4px 4px 9px hsl(var(--clay-shadow-dark)),
+    -4px -4px 9px hsl(var(--clay-shadow-light));
+  transition: box-shadow 0.2s ease, color 0.2s ease;
+}
+.clay-pressed,
+.clay-chip-active {
+  box-shadow:
+    inset 3px 3px 7px hsl(var(--clay-shadow-dark)),
+    inset -3px -3px 7px hsl(var(--clay-shadow-light)) !important;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+::-webkit-scrollbar-thumb { background: rgba(142,142,160,0.25); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(142,142,160,0.4); }

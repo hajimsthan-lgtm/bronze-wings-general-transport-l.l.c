@@ -3,6 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { LayoutDashboard, Truck, DollarSign, BarChart3, Shield, Globe, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
+import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
   { key: 'dashboard', icon: LayoutDashboard, path: '/' },
@@ -61,6 +62,7 @@ export default function DesktopNav() {
       </div>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <Link to="/settings" className="flex items-center px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors" aria-label="Settings">
           <Settings className="w-4 h-4" />
         </Link>

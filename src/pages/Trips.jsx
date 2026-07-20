@@ -116,43 +116,38 @@ export default function Trips() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={`${t('search')}...`}
-              className="w-full rounded-md px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 bg-card border-border h-10" />
+              className="w-full clay-input rounded-xl px-3 pl-9 h-11 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40" />
             
         </div>
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-          {STATUSES.map((s) =>
+        <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+          {STATUSES.map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`flex items-center gap-2 mb-4 w-fit rounded-xl bg-white/10 backdrop-blur-md border-white/20 px-4 py-2 shadow-lg ${
-              filter === s ?
-              'bg-primary/15 text-primary border border-primary/20' :
-              "border"}`
-              }>
-              
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                filter === s
+                  ? 'clay-chip clay-chip-active text-primary border-primary/30'
+                  : 'clay-chip text-muted-foreground hover:text-foreground'
+              }`}>
               {s === 'all' ? 'All' : t(s)}
-              {s !== 'all' &&
-              <span className="ml-1.5 opacity-60">
-                  {trips.filter((tr) => tr.status === s).length}
-                </span>
-              }
+              {s !== 'all' && (
+                <span className="ml-1 opacity-60">{trips.filter((tr) => tr.status === s).length}</span>
+              )}
             </button>
-            )}
+          ))}
         </div>
       </div>
 
       {/* View toggle */}
-      <div className="flex items-center gap-2 mb-4 w-fit rounded-xl bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 shadow-lg">
+      <div className="clay-sm inline-flex items-center gap-1 p-1 mb-4">
         <button
-            onClick={() => setViewMode('card')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === 'card' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-            
+          onClick={() => setViewMode('card')}
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'card' ? 'clay-pressed text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
           <LayoutGrid className="w-3.5 h-3.5" /> Cards
         </button>
         <button
-            onClick={() => setViewMode('list')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${viewMode === 'list' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-            
+          onClick={() => setViewMode('list')}
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'list' ? 'clay-pressed text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
           <List className="w-3.5 h-3.5" /> List
         </button>
       </div>

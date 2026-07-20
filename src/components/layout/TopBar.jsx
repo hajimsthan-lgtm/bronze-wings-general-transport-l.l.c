@@ -1,6 +1,7 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { ChevronRight, Globe } from 'lucide-react';
+import ThemeToggle from '@/components/common/ThemeToggle';
 
 const subNavMap = {
   '/': [],
@@ -141,14 +142,17 @@ export default function TopBar() {
               </Link>
             ))}
           </div>
-          <button
-            onClick={toggleLanguage}
-            className="md:hidden flex items-center gap-1 px-2 py-1 rounded text-[10px] text-muted-foreground"
-            aria-label="Toggle language"
-          >
-            <Globe className="w-3 h-3" />
-            {language === 'en' ? 'AR' : 'EN'}
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle className="md:hidden" />
+            <button
+              onClick={toggleLanguage}
+              className="md:hidden flex items-center gap-1 px-2 py-1 rounded text-[10px] text-muted-foreground"
+              aria-label="Toggle language"
+            >
+              <Globe className="w-3 h-3" />
+              {language === 'en' ? 'AR' : 'EN'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
