@@ -128,12 +128,20 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                 });
 
                 return (
-                  <div key={monthKey} className="border-l-2 border-primary/20 ml-4">
-                      <button onClick={() => toggleMonth(monthExpandedKey)} className="w-full flex items-center gap-3 p-3 text-left hover:bg-white/[0.02] transition-colors">
-                        <ChevronRight className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${monthExpanded ? 'rotate-90' : ''}`} />
-                        <span className="text-xs font-mono text-foreground">INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}</span>
-                        <span className="text-xs text-muted-foreground">{monthInvoices.length} invoices</span>
-                        <span className="text-xs text-muted-foreground ml-auto">{formatCurrency(monthTotal)}</span>
+                  <div key={monthKey} className="ml-4">
+                      <button onClick={() => toggleMonth(monthExpandedKey)} className="w-full flex items-center gap-2 p-2 rounded-full text-left transition-shadow" style={{ background: '#262627', boxShadow: 'inset 3px 3px 6px rgba(0,0,0,0.5), inset -3px -3px 6px rgba(255,255,255,0.03)' }}>
+                        <span className="px-3 py-1.5 rounded-full text-xs font-mono" style={{ background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
+                          INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-full text-xs font-medium" style={{ background: '#7f8489', color: '#a5aab0' }}>
+                          {monthInvoices.length} invoices
+                        </span>
+                        <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: '#7f8489', color: '#a5aab0' }}>
+                          {formatCurrency(monthTotal)}
+                        </span>
+                        <span className="ml-auto flex items-center justify-center w-8 h-8 rounded-full transition-all" style={{ background: '#262627', boxShadow: monthExpanded ? 'inset -2px -2px 5px rgba(0,242,255,0.5), inset 2px 2px 4px rgba(0,0,0,0.5)' : 'inset -2px -2px 4px rgba(0,242,255,0.25), inset 2px 2px 4px rgba(0,0,0,0.5)' }}>
+                          <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${monthExpanded ? 'rotate-90' : ''}`} style={{ color: '#a5aab0' }} />
+                        </span>
                       </button>
 
                       {monthExpanded &&
