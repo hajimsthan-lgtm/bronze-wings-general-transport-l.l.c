@@ -15,6 +15,9 @@ import KpiCard from '@/components/common/KpiCard';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
+import FinanceStatCards from '@/components/dashboard/FinanceStatCards';
+import PendingCustomers from '@/components/dashboard/PendingCustomers';
+import GovtFeePendingPanel from '@/components/dashboard/GovtFeePendingPanel';
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -88,6 +91,9 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Finance balances */}
+      <FinanceStatCards invoices={invoices} />
+
       {/* Alerts */}
       {(overdueInvoices.length > 0 || maintenanceVehicles.length > 0 || expiringDocs.length > 0) && (
         <div className="glass-card p-4 md:p-5">
@@ -126,6 +132,12 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Pending customers & govt fees */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+        <PendingCustomers />
+        <GovtFeePendingPanel />
+      </div>
 
       {/* Invoice KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
