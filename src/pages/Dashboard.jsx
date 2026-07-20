@@ -1,38 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Banknote, Landmark, TrendingUp, Clock, ArrowRightLeft,
-  Plus, AlertCircle, Users, CalendarDays, BarChart2
+  Plus, AlertCircle, Users, CalendarDays, BarChart2,
+  Truck, FileText, DollarSign, Activity, AlertTriangle, Wrench,
+  FileWarning, ArrowRight, ChevronRight
 } from 'lucide-react';
-import PendingCustomers from '@/components/dashboard/PendingCustomers';
-import GovtFeePendingPanel from '@/components/dashboard/GovtFeePendingPanel';
-import { Button } from '@/components/ui/button';
-import StatCard from '@/components/dashboard/StatCard';
-import BalanceAdjustDialog from '@/components/dashboard/BalanceAdjustDialog';
-import DateFilterBar from '@/components/dashboard/DateFilterBar';
-import PendingModal from '@/components/dashboard/PendingModal';
-import TransactionForm from '@/components/transactions/TransactionForm';
-import ReceiptModal from '@/components/transactions/ReceiptModal';
-import { useToast } from '@/components/ui/use-toast';
-import {
-  computeBalancesFromTransactions,
-  computeUserBalances,
-  computePeriodStats,
-  computeDailyBalances,
-  writeAuditLog,
-} from '@/lib/accounting';
-import moment from 'moment';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { formatCurrency, formatDate, getStatusColor } from '@/lib/formatters';
 import KpiCard from '@/components/common/KpiCard';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Truck, FileText, DollarSign, Activity, AlertTriangle, Wrench, FileWarning, ArrowRight, ChevronRight, Plus } from 'lucide-react';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
 
 export default function Dashboard() {
