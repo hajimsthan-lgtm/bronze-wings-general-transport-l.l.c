@@ -40,65 +40,65 @@ export default function Bank() {
   const totalCredits = dateFiltered.filter((t) => t.type === 'credit').reduce((s, t) => s + (t.amount || 0), 0);
   const totalDebits = dateFiltered.filter((t) => t.type === 'debit').reduce((s, t) => s + (t.amount || 0), 0);
 
-  return (
-    <div className="hidden">
-      <PageHeader title={t('bank')} description="Bank transactions & reconciliation"
-      action={<Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+  return null;
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('credit')}</p><p className="text-lg font-display font-bold text-emerald-400">{formatCurrency(totalCredits)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('debit')}</p><p className="text-lg font-display font-bold text-red-400">{formatCurrency(totalDebits)}</p></div>
-        <div className="glass-card p-3 col-span-2 md:col-span-1"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Net</p><p className="text-lg font-display font-bold text-foreground">{formatCurrency(totalCredits - totalDebits)}</p></div>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => {const today = new Date().toISOString().split('T')[0];setDateFrom(today);setDateTo(today);}} />
-        
-      </div>
 
-      <div className="space-y-3 mb-5">
-        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" /></div>
-        <div className="flex gap-1.5">
-          {['all', 'credit', 'debit', 'reconciled'].map((f) =>
-          <button key={f} onClick={() => setFilter(f)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${filter === f ? 'bg-primary/15 text-primary border border-primary/20' : 'bg-muted/50 text-muted-foreground border border-transparent'}`}>
-              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          )}
-        </div>
-      </div>
 
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Landmark} title={t('no_data')} /> :
-      <div className="space-y-2">
-          {filtered.map((tx) =>
-        <button key={tx.id} onClick={() => {setEditItem(tx);setFormOpen(true);}} className="w-full text-left glass-card-hover p-4 flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${tx.type === 'credit' ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
-                {tx.type === 'credit' ? <ArrowDownLeft className="w-4 h-4 text-emerald-400" /> : <ArrowUpRight className="w-4 h-4 text-red-400" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{tx.description || '—'}</p>
-                <p className="text-xs text-muted-foreground">{tx.reference || '—'} · {formatDate(tx.date)}</p>
-              </div>
-              <div className="text-right flex-shrink-0 flex items-center gap-2">
-                <span className={`text-sm font-semibold ${tx.type === 'credit' ? 'text-emerald-400' : 'text-red-400'}`}>{tx.type === 'credit' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
-                {tx.reconciled && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-              </div>
-            </button>
-        )}
-        </div>
-      }
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Transaction</SheetTitle></SheetHeader>
-          <BankForm editItem={editItem} onSave={async (data) => {if (editItem) await base44.entities.BankTransaction.update(editItem.id, data);else await base44.entities.BankTransaction.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
-    </div>);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
