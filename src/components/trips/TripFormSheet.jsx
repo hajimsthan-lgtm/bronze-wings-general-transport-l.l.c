@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, FileText, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
+import DateTimePicker from '@/components/common/DateTimePicker';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
 
 const TRIP_TYPES = ['one_way', 'hourly', 'contract', 'return'];
@@ -316,11 +317,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">Load Date & Time</Label>
-                <Input type="datetime-local" value={form.load_datetime} onChange={e => update('load_datetime', e.target.value)} className={inputCls} />
+                <DateTimePicker value={form.load_datetime} onChange={v => update('load_datetime', v)} placeholder="Load time" />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">Offload Date & Time</Label>
-                <Input type="datetime-local" value={form.offload_datetime} onChange={e => update('offload_datetime', e.target.value)} className={inputCls} />
+                <DateTimePicker value={form.offload_datetime} onChange={v => update('offload_datetime', v)} placeholder="Offload time" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
