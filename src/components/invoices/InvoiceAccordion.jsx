@@ -133,10 +133,10 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
                         <span className="px-3 py-1.5 rounded-full text-xs font-mono" style={{ background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
                           INV-{monthKey}-{String(monthInvoices.length).padStart(3, '0')}
                         </span>
-                        <span className="px-3 py-1.5 rounded-full text-xs font-mono" style={{ background: '#7f8489', color: '#a5aab0' }}>
+                        <span className="px-3 py-1.5 rounded-full text-xs font-medium" style={{  background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
                           {monthInvoices.length} invoices
                         </span>
-                        <span className="px-3 py-1.5 rounded-full text-xs font-mono" style={{ background: '#7f8489', color: '#a5aab0' }}>
+                        <span className="px-3 py-1.5 rounded-full text-xs font-semibold" style={{  background: '#1a1a1a', color: '#a5aab0', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.6)' }}>
                           {formatCurrency(monthTotal)}
                         </span>
                         <span className="ml-auto flex items-center justify-center w-8 h-8 rounded-full transition-all" style={{ background: '#262627', boxShadow: monthExpanded ? 'inset -2px -2px 5px rgba(0,242,255,0.5), inset 2px 2px 4px rgba(0,0,0,0.5)' : 'inset -2px -2px 4px rgba(0,242,255,0.25), inset 2px 2px 4px rgba(0,0,0,0.5)' }}>
