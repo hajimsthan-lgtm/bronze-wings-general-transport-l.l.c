@@ -1,18 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import {
-  Banknote, Landmark, TrendingUp, Clock, ArrowRightLeft,
-  Plus, AlertCircle, Users, CalendarDays, BarChart2,
-  Truck, FileText, DollarSign, Activity, AlertTriangle, Wrench,
-  FileWarning, ArrowRight, ChevronRight
+  Plus, Truck, FileText, DollarSign, Activity, AlertTriangle, Wrench,
+  FileWarning, ChevronRight
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { formatCurrency, formatDate, getStatusColor } from '@/lib/formatters';
+import { formatCurrency } from '@/lib/formatters';
 import KpiCard from '@/components/common/KpiCard';
-import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DashboardCharts from '@/components/dashboard/DashboardCharts';
 import FinanceStatCards from '@/components/dashboard/FinanceStatCards';
@@ -54,13 +49,10 @@ export default function Dashboard() {
   const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance');
   const expiringDocs = documents.filter(d => d.status === 'expiring_soon' || d.status === 'expired');
 
-  const recentTrips = trips.slice(0, 5);
   const outstandingAmount = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled').reduce((s, i) => s + (i.total_amount || 0), 0);
   const now = new Date();
   const paidThisMonth = invoices.filter(i => i.status === 'paid' && i.issue_date && i.issue_date.substring(0, 7) === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`).reduce((s, i) => s + (i.total_amount || 0), 0);
   const overdueCount = invoices.filter(i => i.status === 'overdue').length;
-  const recentInvoices = invoices.slice(0, 5);
-
   return (
     <div className="space-y-6 pt-5">
       {/* KPI Cards */}
@@ -156,72 +148,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Recent Activity */}
-      <div className="glass-card p-4 md:p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-foreground">{t('recent_activity')}</h2>
-          <Link to="/trips" className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-            {t('view_all')} <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-        {recentTrips.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">{t('no_data')}</p>
-        ) : (
-          <div className="space-y-2">
-            {recentTrips.map(trip => (
-              <div key={trip.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Truck className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {trip.from_location} → {trip.to_location}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{trip.driver_name} · {formatDate(trip.trip_date)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <StatusBadge status={trip.status} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Recent Invoices */}
-      <div className="glass-card p-4 md:p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-foreground">Recent Invoices</h2>
-          <Link to="/invoices" className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1">
-            View All <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-        {recentInvoices.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-8 text-center">{t('no_data')}</p>
-        ) : (
-          <div className="space-y-2">
-            {recentInvoices.map(inv => (
-              <Link key={inv.id} to="/invoices" className="flex items-center justify-between p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{inv.invoice_number || '—'}</p>
-                    <p className="text-xs text-muted-foreground">{inv.client_name} · {formatDate(inv.issue_date)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(inv.total_amount)}</span>
-                  <StatusBadge status={inv.status} />
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
