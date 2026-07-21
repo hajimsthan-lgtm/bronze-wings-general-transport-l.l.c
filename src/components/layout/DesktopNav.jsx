@@ -25,53 +25,60 @@ export default function DesktopNav() {
   };
 
   return (
-    <nav className="hidden md:flex items-center justify-between px-6 lg:px-8 h-16 sticky top-0 z-50">
-      <div className="glass-panel rounded-full flex items-center gap-1.5 pl-2 pr-2 py-1.5">
-        <Link to="/" className="flex items-center gap-2.5 mr-2 pl-1.5 pr-3 py-1">
+    <nav className="hidden md:block sticky top-0 z-50">
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-primary/15" style={{ boxShadow: '0 1px 0 0 rgba(168,85,247,0.10), 0 10px 34px -14px rgba(168,85,247,0.22)' }} />
+      <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Brand */}
+        <Link to="/" className="flex items-center gap-2.5">
           {logoUrl ? (
-            <img src={logoUrl} alt="Bronze Wings" className="w-8 h-8 rounded-full object-contain" />
+            <img src={logoUrl} alt="Bronze Wings" className="w-9 h-9 rounded-full object-contain ring-1 ring-white/10" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)]">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-300 via-primary to-violet-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_0_16px_rgba(168,85,247,0.4)]">
               <span className="text-white font-display font-bold text-[10px]">BW</span>
             </div>
           )}
-          <span className="font-display font-semibold text-foreground text-sm tracking-tight">
-            Bronze Wings
-          </span>
+          <div className="leading-tight">
+            <span className="block font-display font-bold text-foreground text-[15px] tracking-tight">Bronze Wings</span>
+            <span className="block text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Fleet Suite</span>
+          </div>
         </Link>
 
-        {navItems.map(item => {
-          const active = isActive(item.path);
-          return (
-            <Link
-              key={item.key}
-              to={item.path}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
-                active
-                  ? 'bg-primary/15 text-primary border border-primary/25'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05] border border-transparent'
-              }`}
-            >
-              <item.icon className="w-3.5 h-3.5" />
-              <span>{t(item.key)}</span>
-            </Link>
-          );
-        })}
-      </div>
+        {/* Center segmented nav */}
+        <div className="glass-panel rounded-full flex items-center gap-1 p-1">
+          {navItems.map(item => {
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.key}
+                to={item.path}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+                  active
+                    ? 'bg-gradient-to-br from-primary to-violet-600 text-white shadow-[0_0_18px_rgba(168,85,247,0.45)]'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05]'
+                }`}
+              >
+                <item.icon className="w-3.5 h-3.5" />
+                <span>{t(item.key)}</span>
+              </Link>
+            );
+          })}
+        </div>
 
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <Link to="/settings" className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Settings">
-          <Settings className="w-4 h-4" />
-        </Link>
-        <button
-          onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-full glass-panel text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Toggle language"
-        >
-          <Globe className="w-3.5 h-3.5" />
-          {language === 'en' ? 'العربية' : 'English'}
-        </button>
+        {/* Right controls */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full glass-panel text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Toggle language"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {language === 'en' ? 'العربية' : 'English'}
+          </button>
+          <Link to="/settings" className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Settings">
+            <Settings className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </nav>
   );
