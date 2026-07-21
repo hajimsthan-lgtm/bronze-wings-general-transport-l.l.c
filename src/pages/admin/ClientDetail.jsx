@@ -17,6 +17,7 @@ import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
+import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 
@@ -99,49 +100,12 @@ export default function ClientDetail() {
     setEditContactOpen(false);
     if (contactFilter === deletedName) setContactFilter(null);
   };
-  const tripInvoiced = (tripId) => invoices.some(inv => inv.trip_id === tripId);
+  const getTripInvoice = (tripId) => invoices.find(inv => inv.trip_id === tripId);
 
-  const generateInvoiceForTrip = async (trip) => {
-    const allInvs = await base44.entities.Invoice.list('-created_date', 500).catch(() => []);
-    const year = new Date().getFullYear();
-    const yearPrefix = `BW-${year}-`;
-    let maxSeq = 0;
-    (allInvs || []).forEach(inv => {
-      if (inv.invoice_number?.startsWith(yearPrefix)) {
-        const seq = parseInt(inv.invoice_number.slice(yearPrefix.length), 10);
-        if (seq > maxSeq) maxSeq = seq;
-      }
-    });
-    const invoiceNumber = `${yearPrefix}${String(maxSeq + 1).padStart(4, '0')}`;
-    const settings = await getCompanySettings();
-    const vatRate = settings.default_vat_rate || 5;
-    const revenue = Number(trip.revenue) || 0;
-    const vatAmount = Math.round(revenue * vatRate) / 100;
-    await base44.entities.Invoice.create({
-      invoice_number: invoiceNumber,
-      client_name: trip.client_name,
-      contact_person: trip.contact_person || '',
-      issue_date: new Date().toISOString().split('T')[0],
-      due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      line_items: [{ description: `${trip.from_location} → ${trip.to_location} (${trip.trip_number || ''})`, quantity: 1, unit_price: revenue, amount: revenue }],
-      subtotal: revenue,
-      vat_rate: vatRate,
-      vat_amount: vatAmount,
-      total_amount: revenue + vatAmount,
-      status: 'draft',
-      trip_id: trip.id,
-    });
+  const toggleTripInvoiceSent = async (trip, sent) => {
+    await setTripInvoiceSent(trip, sent);
     const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
     setInvoices(refreshed || []);
-  };
-
-  const unlinkTripInvoice = async (trip) => {
-    const linked = invoices.find(inv => inv.trip_id === trip.id);
-    if (linked) {
-      await base44.entities.Invoice.delete(linked.id);
-      const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
-      setInvoices(refreshed || []);
-    }
   };
 
   const invExportCols = [
@@ -211,7 +175,8 @@ export default function ClientDetail() {
           {dataLoading ? <LoadingSpinner /> : displayTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
               {displayTrips.map(trip => {
-                const invoiced = tripInvoiced(trip.id);
+                const inv = getTripInvoice(trip.id);
+                const isSent = inv?.status === 'sent';
                 return (
                   <div key={trip.id} className="glass-card p-3 flex items-center gap-3">
                     <div className="flex-1 min-w-0">
@@ -220,22 +185,24 @@ export default function ClientDetail() {
                     </div>
                     <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
                     <StatusBadge status={trip.status} />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap ${invoiced ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/30'}`}>
-                          {invoiced ? 'Sent' : 'Not Sent'}
-                          <ChevronDown className="w-2.5 h-2.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => !invoiced && generateInvoiceForTrip(trip)} className="text-xs cursor-pointer">
-                          Sent
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => invoiced && unlinkTripInvoice(trip)} className="text-xs cursor-pointer">
-                          Not Sent
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {trip.status === 'completed' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap ${isSent ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`}>
+                            {isSent ? 'Sent' : 'Not Sent'}
+                            <ChevronDown className="w-2.5 h-2.5" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => !isSent && toggleTripInvoiceSent(trip, true)} className="text-xs cursor-pointer">
+                            Mark Sent
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => isSent && toggleTripInvoiceSent(trip, false)} className="text-xs cursor-pointer">
+                            Revert to Not Sent
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 );
               })}

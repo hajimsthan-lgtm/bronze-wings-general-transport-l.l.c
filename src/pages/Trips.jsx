@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
@@ -14,7 +14,7 @@ import { Plus, Search, Truck, LayoutGrid, List } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
 import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
-import { useTrips, useTripDelete } from '@/hooks/useEntityQueries';
+import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import PageInfo from '@/components/common/PageInfo';
 import { formatDate } from '@/lib/formatters';
@@ -25,6 +25,8 @@ export default function Trips() {
   const { t } = useI18n();
   const { data: trips = [], isLoading: loading, refetch } = useTrips();
   const deleteTrip = useTripDelete();
+  const { data: invoices = [], refetch: refetchInvoices } = useInvoices();
+  const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useSheetUrlState('trip');
@@ -169,13 +171,13 @@ export default function Trips() {
         viewMode === 'card' ?
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((trip) =>
-          <TripCard key={trip.id} trip={trip} onClick={setDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} />
+          <TripCard key={trip.id} trip={trip} onClick={setDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
           )}
         </div> :
 
         <div className="space-y-2">
           {filtered.map((trip) =>
-          <TripListRow key={trip.id} trip={trip} onClick={setDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} />
+          <TripListRow key={trip.id} trip={trip} onClick={setDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
           )}
         </div>
         }
