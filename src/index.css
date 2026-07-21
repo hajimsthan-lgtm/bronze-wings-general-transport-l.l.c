@@ -10,39 +10,39 @@
     --font-mono: 'JetBrains Mono', monospace;
     --font-display: 'Sora', 'Inter', sans-serif;
 
-    --background: 224 71% 4%;
+    --background: 222 47% 7%;
     --foreground: 210 40% 96%;
-    --card: 222 40% 9%;
+    --card: 222 40% 11%;
     --card-foreground: 210 40% 96%;
-    --popover: 222 40% 9%;
+    --popover: 222 40% 11%;
     --popover-foreground: 210 40% 96%;
-    --primary: 217 91% 60%;
+    --primary: 38 68% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 222 30% 14%;
     --secondary-foreground: 210 40% 88%;
     --muted: 222 30% 13%;
     --muted-foreground: 220 16% 60%;
-    --accent: 190 95% 50%;
+    --accent: 43 90% 58%;
     --accent-foreground: 222 47% 6%;
     --destructive: 0 84% 62%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 28% 17%;
     --input: 220 28% 15%;
-    --ring: 217 91% 60%;
-    --chart-1: 217 91% 60%;
+    --ring: 38 68% 50%;
+    --chart-1: 38 68% 50%;
     --chart-2: 160 70% 45%;
     --chart-3: 43 96% 56%;
     --chart-4: 280 65% 68%;
     --chart-5: 0 84% 62%;
     --radius: 0.9rem;
-    --sidebar-background: 222 47% 6%;
+    --sidebar-background: 222 47% 7%;
     --sidebar-foreground: 210 40% 88%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 38 68% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 30% 13%;
     --sidebar-accent-foreground: 210 40% 88%;
     --sidebar-border: 220 28% 16%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 38 68% 50%;
 
     --clay-bg: 222 38% 12%;
     --clay-border: 220 26% 20%;
@@ -92,10 +92,10 @@
 }
 .glass-card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(99,179,237,0.28);
+  border-color: rgba(200,150,58,0.28);
   box-shadow:
     0 22px 50px -18px rgba(0,0,0,0.8),
-    0 0 0 1px rgba(99,179,237,0.12),
+    0 0 0 1px rgba(200,150,58,0.12),
     inset 0 1px 0 rgba(255,255,255,0.09);
 }
 
@@ -107,7 +107,7 @@
   box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-.glow-primary { box-shadow: 0 0 0 1px rgba(99,179,237,0.4), 0 0 22px rgba(59,130,246,0.4); }
+.glow-primary { box-shadow: 0 0 0 1px rgba(200,150,58,0.4), 0 0 22px rgba(200,150,58,0.4); }
 
 /* Stat tile: glass with hairline accent */
 .stat-tile {
@@ -126,17 +126,17 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(99,179,237,0.55), rgba(45,212,191,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(200,150,58,0.55), rgba(232,181,71,0.4), transparent);
   opacity: 0.7;
 }
 .stat-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(99,179,237,0.26);
+  border-color: rgba(200,150,58,0.26);
   box-shadow: 0 22px 48px -18px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.09);
 }
 .stat-tile-active {
-  border-color: rgba(99,179,237,0.45) !important;
-  box-shadow: 0 18px 44px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,179,237,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  border-color: rgba(200,150,58,0.45) !important;
+  box-shadow: 0 18px 44px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(200,150,58,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
 }
 
 /* ===== Claymorphism ===== */
@@ -219,8 +219,8 @@
 .professional-page-bg {
   background-color: #070b16;
   background-image:
-    radial-gradient(ellipse 60% 50% at 14% 6%, rgba(59,130,246,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 88% 96%, rgba(45,212,191,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 14% 6%, rgba(200,150,58,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 96%, rgba(232,181,71,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 40% 30% at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%),
     linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(0,0,0,0.18) 100%);
   background-attachment: fixed;
@@ -241,16 +241,16 @@
 
 /* Bolt.new atmospheric shell backdrop */
 .bolt-atmosphere-bg {
-  background-color: #020617;
+  background-color: #0b1121;
   background-image:
-    radial-gradient(ellipse 85% 60% at 50% 6%, rgba(37,99,235,0.34) 0%, rgba(37,99,235,0.10) 34%, transparent 70%),
-    radial-gradient(ellipse 75% 55% at 50% 48%, rgba(30,64,175,0.20) 0%, transparent 66%),
-    radial-gradient(circle at 50% 55%, transparent 0%, rgba(2,6,23,0.62) 82%),
-    radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 22px 22px;
-  background-position: center top, center, center, 0 0;
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(200,150,58,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 50% 100%, rgba(200,150,58,0.05) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, transparent 0%, rgba(7,11,22,0.55) 80%),
+    linear-gradient(180deg, #0b1121 0%, #0a0f1e 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-position: center top, center bottom, center, center;
   background-attachment: fixed;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  background-repeat: no-repeat;
 }
 
 /* Hairline divider */
@@ -297,7 +297,7 @@
 }
 .btn-lightning:hover::before { left: 150%; }
 .btn-lightning:hover {
-  box-shadow: 0 0 20px rgba(59,130,246,0.45), 0 0 40px rgba(59,130,246,0.18);
+  box-shadow: 0 0 20px rgba(200,150,58,0.45), 0 0 40px rgba(200,150,58,0.18);
   transform: translateY(-1px) scale(1.02);
 }
 .btn-lightning:active { transform: translateY(0) scale(0.98); }
