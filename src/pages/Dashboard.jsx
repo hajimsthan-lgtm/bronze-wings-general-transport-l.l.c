@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
-  Truck, FileText, Activity, AlertTriangle, Wrench, FileWarning, ChevronRight
+  Truck, FileText, Activity, AlertTriangle, Wrench, FileWarning, ChevronRight, ArrowRight
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import KpiCard from '@/components/common/KpiCard';
-import DashboardCharts from '@/components/dashboard/DashboardCharts';
-import ProfitAnalytics from '@/components/dashboard/ProfitAnalytics';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
 import PageInfo from '@/components/common/PageInfo';
 
@@ -53,31 +52,95 @@ export default function Dashboard() {
   const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance');
   const expiringDocs = documents.filter(d => d.status === 'expiring_soon' || d.status === 'expired');
 
-  return (
-    <div className="space-y-6 pt-5">
-      <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and profitability. Tap any card to jump to the related section." />
+  const recentTrips = trips.slice(0, 5);
+  const recentInvoices = invoices.slice(0, 5);
 
-      {/* Clickable KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  return (
+    <div className="space-y-5 pt-5">
+      <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and receivables." />
+
+      {/* KPI grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Link to="/trips" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
-            <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length} total`} />
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
+            <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length}`} />
           </div>
         </Link>
         <Link to="/invoices" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
             <KpiCard title={t('pending_invoices')} value={pendingInvoices} icon={FileText} subtitle="tap to review" />
           </div>
         </Link>
         <Link to="/admin/vehicles" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem]">
-            <KpiCard title={t('fleet_health')} value={`${healthPct}%`} icon={Activity} subtitle={`${activeVehicles}/${totalVehicles} active`} />
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
+            <KpiCard title={t('fleet_health')} value={`${healthPct}%`} icon={Activity} subtitle={`${activeVehicles}/${totalVehicles}`} />
           </div>
         </Link>
+        <PendingCustomers />
       </div>
 
-      {/* Pending customers (clickable card) */}
-      <PendingCustomers />
+      {/* Recent lists */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-sm font-semibold text-foreground">Recent Trips</h2>
+            <Link to="/trips" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              View all <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {recentTrips.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">No trips yet</p>
+          ) : (
+            <div className="divide-y divide-border/20">
+              {recentTrips.map(tr => (
+                <Link key={tr.id} to="/trips" className="flex items-center justify-between py-2.5 group">
+                  <div className="min-w-0 pr-3">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {tr.from_location} → {tr.to_location}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {tr.vehicle_plate} · {formatDate(tr.trip_date)}
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
+                    {formatCurrency(tr.revenue)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="glass-card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-sm font-semibold text-foreground">Recent Invoices</h2>
+            <Link to="/invoices" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              View all <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {recentInvoices.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">No invoices yet</p>
+          ) : (
+            <div className="divide-y divide-border/20">
+              {recentInvoices.map(inv => (
+                <Link key={inv.id} to="/invoices" className="flex items-center justify-between py-2.5 group">
+                  <div className="min-w-0 pr-3">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {inv.invoice_number || inv.client_name || 'Invoice'}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {inv.client_name} · {formatDate(inv.issue_date)}
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
+                    {formatCurrency(inv.total_amount)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Alerts */}
       {(overdueInvoices.length > 0 || maintenanceVehicles.length > 0 || expiringDocs.length > 0) && (
@@ -117,12 +180,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Profit analytics */}
-      <ProfitAnalytics />
-
-      {/* Charts */}
-      <DashboardCharts invoices={invoices} trips={trips} />
     </div>
   );
 }

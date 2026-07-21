@@ -16,33 +16,33 @@
     --card-foreground: 210 40% 96%;
     --popover: 222 40% 11%;
     --popover-foreground: 210 40% 96%;
-    --primary: 38 68% 50%;
+    --primary: 271 91% 65%;
     --primary-foreground: 0 0% 100%;
     --secondary: 222 30% 14%;
     --secondary-foreground: 210 40% 88%;
     --muted: 222 30% 13%;
     --muted-foreground: 220 16% 60%;
-    --accent: 43 90% 58%;
+    --accent: 280 85% 72%;
     --accent-foreground: 222 47% 6%;
     --destructive: 0 84% 62%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 28% 17%;
     --input: 220 28% 15%;
-    --ring: 38 68% 50%;
-    --chart-1: 38 68% 50%;
+    --ring: 271 91% 65%;
+    --chart-1: 271 91% 65%;
     --chart-2: 160 70% 45%;
-    --chart-3: 43 96% 56%;
+    --chart-3: 320 80% 65%;
     --chart-4: 280 65% 68%;
     --chart-5: 0 84% 62%;
     --radius: 0.9rem;
     --sidebar-background: 222 47% 7%;
     --sidebar-foreground: 210 40% 88%;
-    --sidebar-primary: 38 68% 50%;
+    --sidebar-primary: 271 91% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 30% 13%;
     --sidebar-accent-foreground: 210 40% 88%;
     --sidebar-border: 220 28% 16%;
-    --sidebar-ring: 38 68% 50%;
+    --sidebar-ring: 271 91% 65%;
 
     --clay-bg: 222 38% 12%;
     --clay-border: 220 26% 20%;
@@ -92,10 +92,10 @@
 }
 .glass-card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(200,150,58,0.28);
+  border-color: rgba(168,85,247,0.28);
   box-shadow:
     0 22px 50px -18px rgba(0,0,0,0.8),
-    0 0 0 1px rgba(200,150,58,0.12),
+    0 0 0 1px rgba(168,85,247,0.12),
     inset 0 1px 0 rgba(255,255,255,0.09);
 }
 
@@ -107,7 +107,7 @@
   box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-.glow-primary { box-shadow: 0 0 0 1px rgba(200,150,58,0.4), 0 0 22px rgba(200,150,58,0.4); }
+.glow-primary { box-shadow: 0 0 0 1px rgba(168,85,247,0.4), 0 0 22px rgba(168,85,247,0.4); }
 
 /* Stat tile: glass with hairline accent */
 .stat-tile {
@@ -126,17 +126,17 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(200,150,58,0.55), rgba(232,181,71,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(168,85,247,0.55), rgba(196,181,253,0.4), transparent);
   opacity: 0.7;
 }
 .stat-tile:hover {
   transform: translateY(-2px);
-  border-color: rgba(200,150,58,0.26);
+  border-color: rgba(168,85,247,0.26);
   box-shadow: 0 22px 48px -18px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.09);
 }
 .stat-tile-active {
-  border-color: rgba(200,150,58,0.45) !important;
-  box-shadow: 0 18px 44px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(200,150,58,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+  border-color: rgba(168,85,247,0.45) !important;
+  box-shadow: 0 18px 44px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
 }
 
 /* ===== Claymorphism ===== */
@@ -219,8 +219,8 @@
 .professional-page-bg {
   background-color: #070b16;
   background-image:
-    radial-gradient(ellipse 60% 50% at 14% 6%, rgba(200,150,58,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 55% 45% at 88% 96%, rgba(232,181,71,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 14% 6%, rgba(168,85,247,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 96%, rgba(196,181,253,0.08) 0%, transparent 60%),
     radial-gradient(ellipse 40% 30% at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%),
     linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(0,0,0,0.18) 100%);
   background-attachment: fixed;
@@ -243,8 +243,8 @@
 .bolt-atmosphere-bg {
   background-color: #0b1121;
   background-image:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(200,150,58,0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 50% 100%, rgba(200,150,58,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(168,85,247,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 50% 100%, rgba(168,85,247,0.05) 0%, transparent 60%),
     radial-gradient(circle at 50% 50%, transparent 0%, rgba(7,11,22,0.55) 80%),
     linear-gradient(180deg, #0b1121 0%, #0a0f1e 100%);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
@@ -297,7 +297,7 @@
 }
 .btn-lightning:hover::before { left: 150%; }
 .btn-lightning:hover {
-  box-shadow: 0 0 20px rgba(200,150,58,0.45), 0 0 40px rgba(200,150,58,0.18);
+  box-shadow: 0 0 20px rgba(168,85,247,0.45), 0 0 40px rgba(168,85,247,0.18);
   transform: translateY(-1px) scale(1.02);
 }
 .btn-lightning:active { transform: translateY(0) scale(0.98); }
