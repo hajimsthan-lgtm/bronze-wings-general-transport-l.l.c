@@ -20,7 +20,7 @@ const DEFAULT_FORM = {
   notes: '',
 };
 
-export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
+export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedClientName, onSaved }) {
   const createPayment = useClientPaymentCreate();
   const updatePayment = useClientPaymentUpdate();
   const [saving, setSaving] = useState(false);
@@ -32,7 +32,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
 
   useEffect(() => {
     if (open) {
-      setForm(editItem ? { ...DEFAULT_FORM, ...editItem } : { ...DEFAULT_FORM });
+      setForm(editItem ? { ...DEFAULT_FORM, ...editItem } : { ...DEFAULT_FORM, client_name: lockedClientName || '' });
       setAllocations(editItem?.allocated_invoices || []);
       setOutstandingInvoices([]);
       base44.entities.Client.list('-created_date', 200).catch(() => []).then(setClients);
@@ -52,7 +52,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
         }).catch(() => {});
       }
     }
-  }, [open, editItem]);
+  }, [open, editItem, lockedClientName]);
 
   // Fetch outstanding invoices when client is selected (new payments only)
   useEffect(() => {
@@ -184,6 +184,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
         });
       }));
 
+      onSaved?.();
       onOpenChange(false);
     } finally {
       setSaving(false);
@@ -212,7 +213,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem }) {
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <div>
             <Label className="text-xs text-muted-foreground">Client</Label>
-            <Select value={form.client_name} onValueChange={v => update('client_name', v)} disabled={!!editItem}>
+            <Select value={form.client_name} onValueChange={v => update('client_name', v)} disabled={!!editItem || !!lockedClientName}>
               <SelectTrigger className="bg-background border-border mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
               <SelectContent>
                 {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}

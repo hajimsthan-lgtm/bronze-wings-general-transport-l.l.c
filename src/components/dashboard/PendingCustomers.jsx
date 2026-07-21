@@ -25,7 +25,7 @@ export default function PendingCustomers() {
   const total = rows.reduce((s, r) => s + (r.balance || 0), 0);
 
   return (
-    <Link to="/payments" className="block group">
+    <Link to="/admin/clients" className="block group">
       <SatinCard className="p-5 transition-all duration-200 group-hover:border-primary/30">
         <div className="flex items-start justify-between mb-3.5">
           <p className="eyebrow pt-1">Pending Customers</p>

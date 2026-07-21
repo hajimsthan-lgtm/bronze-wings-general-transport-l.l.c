@@ -22,7 +22,6 @@ import AppLayout from '@/components/layout/AppLayout';
 // Pages
 import Dashboard from '@/pages/Dashboard';
 import Trips from '@/pages/Trips';
-import Invoices from '@/pages/Invoices';
 import Expenses from '@/pages/Expenses';
 import Fuel from '@/pages/Fuel';
 import DailyReport from '@/pages/DailyReport';
@@ -37,7 +36,6 @@ import VehicleDetail from '@/pages/admin/VehicleDetail';
 import DriverDetail from '@/pages/admin/DriverDetail';
 import ClientDetail from '@/pages/admin/ClientDetail';
 import VendorDetail from '@/pages/admin/VendorDetail';
-import Payments from '@/pages/Payments';
 import Settings from '@/pages/Settings';
 import PromptGenerator from '@/pages/PromptGenerator';
 
@@ -72,7 +70,6 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/trips" element={<Trips />} />
-          <Route path="/invoices" element={<Invoices />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/fuel" element={<Fuel />} />
           <Route path="/reports/daily" element={<DailyReport />} />
@@ -87,7 +84,6 @@ const AuthenticatedApp = () => {
           <Route path="/admin/drivers/:id" element={<DriverDetail />} />
           <Route path="/admin/clients/:id" element={<ClientDetail />} />
           <Route path="/admin/vendors/:id" element={<VendorDetail />} />
-          <Route path="/payments" element={<Payments />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/prompt-generator" element={<PromptGenerator />} />
         </Route>

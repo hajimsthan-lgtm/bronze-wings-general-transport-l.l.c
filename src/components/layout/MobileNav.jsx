@@ -1,11 +1,10 @@
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, DollarSign, BarChart3, Shield, Settings } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Settings } from 'lucide-react';
 
 const navItems = [
   { key: 'dashboard', icon: LayoutDashboard },
   { key: 'operations', icon: Truck },
-  { key: 'financials', icon: DollarSign },
   { key: 'reports', icon: BarChart3 },
   { key: 'admin', icon: Shield },
   { key: 'settings', icon: Settings },

@@ -33,7 +33,7 @@ function StatusPill({ status }) {
   );
 }
 
-export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSaved }) {
+export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSaved, defaultClientName }) {
   const { t } = useI18n();
   const createInvoice = useInvoiceCreate();
   const updateInvoice = useInvoiceUpdate();
@@ -61,7 +61,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       setPayment({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
     } else {
       setForm({
-        client_name: '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
+        client_name: defaultClientName || '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
         invoice_number: '', issue_date: new Date().toISOString().split('T')[0],
         due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
         trip_id: '', line_items: [{ ...emptyItem }],
@@ -71,14 +71,30 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         setForm(prev => ({ ...prev, invoice_number: num, vat_rate: settings.default_vat_rate ?? 5 }));
       });
     }
-  }, [editInvoice, open]);
+  }, [editInvoice, open, defaultClientName]);
 
   useEffect(() => {
     if (open) {
-      base44.entities.Client.list('-created_date', 200).catch(() => []).then(setClients);
+      base44.entities.Client.list('-created_date', 200).catch(() => []).then((cl) => {
+        setClients(cl || []);
+        if (defaultClientName && !editInvoice) {
+          const c = (cl || []).find((x) => x.name === defaultClientName);
+          if (c) {
+            setForm((prev) => ({
+              ...prev,
+              client_name: c.name,
+              client_email: c.email || '',
+              client_phone: c.phone || '',
+              client_address: c.address || '',
+              client_trn: c.trn || '',
+              contact_person: c.contact_person || '',
+            }));
+          }
+        }
+      });
       base44.entities.Trip.list('-created_date', 200).catch(() => []).then(setTrips);
     }
-  }, [open]);
+  }, [open, defaultClientName, editInvoice]);
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const updatePayment = (field, value) => setPayment(prev => ({ ...prev, [field]: value }));

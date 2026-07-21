@@ -1,16 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, DollarSign, BarChart3, Shield, Globe, Settings } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Globe, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
-  { key: 'dashboard', icon: LayoutDashboard, path: '/' },
-  { key: 'operations', icon: Truck, path: '/trips' },
-  { key: 'financials', icon: DollarSign, path: '/invoices' },
-  { key: 'reports', icon: BarChart3, path: '/reports/daily' },
-  { key: 'admin', icon: Shield, path: '/admin/vehicles' },
+  { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
+  { key: 'operations', icon: Truck, path: '/trips', paths: ['/trips'] },
+  { key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
+  { key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] },
 ];
 
 export default function DesktopNav() {
@@ -19,14 +18,13 @@ export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
   useEffect(() => { getCompanySettings().then(s => setLogoUrl(s.logo_url)); }, []);
 
-  const isActive = (path) => {
-    if (path === '/') return location.pathname === '/';
-    return location.pathname.startsWith(path.split('/').slice(0, 2).join('/'));
-  };
+  const isActive = (item) => (item.paths || [item.path]).some((p) =>
+    p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
+  );
 
   return (
     <nav className="hidden md:block sticky top-0 z-50">
-      <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-primary/15" style={{ boxShadow: '0 1px 0 0 rgba(168,85,247,0.10), 0 10px 34px -14px rgba(168,85,247,0.22)' }} />
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-primary/15" style={{ boxShadow: '0 1px 0 0 rgba(59,130,246,0.10), 0 10px 34px -14px rgba(59,130,246,0.22)' }} />
       <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2.5">
@@ -46,7 +44,7 @@ export default function DesktopNav() {
         {/* Center segmented nav */}
         <div className="glass-panel rounded-full flex items-center gap-1 p-1">
           {navItems.map(item => {
-            const active = isActive(item.path);
+            const active = isActive(item);
             return (
               <Link
                 key={item.key}

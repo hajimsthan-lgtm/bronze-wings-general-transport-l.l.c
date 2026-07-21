@@ -11,33 +11,22 @@ const adminSubNav = [
   { key: 'documents', path: '/admin/documents' },
 ];
 
-const financialSubNav = [
-  { key: 'invoices', path: '/invoices' },
-  { key: 'payments', path: '/payments' },
-];
-
 const reportsSubNav = [
   { key: 'daily_report', path: '/reports/daily' },
   { key: 'profit_loss', path: '/reports/pnl' },
   { key: 'soa', path: '/reports/soa' },
+  { key: 'expenses', path: '/expenses' },
+  { key: 'fuel', path: '/fuel' },
 ];
 
 const subNavMap = {
   '/': [],
   '/settings': [],
-  '/trips': [
-    { key: 'trips', path: '/trips' },
-    { key: 'expenses', path: '/expenses' },
-  ],
-  '/expenses': [
-    { key: 'trips', path: '/trips' },
-    { key: 'expenses', path: '/expenses' },
-  ],
-  '/invoices': financialSubNav,
-  '/payments': financialSubNav,
   '/reports/daily': reportsSubNav,
   '/reports/pnl': reportsSubNav,
   '/reports/soa': reportsSubNav,
+  '/expenses': reportsSubNav,
+  '/fuel': reportsSubNav,
   '/admin/vehicles': adminSubNav,
   '/admin/drivers': adminSubNav,
   '/admin/clients': adminSubNav,

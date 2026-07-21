@@ -66,7 +66,7 @@ export default function Dashboard() {
             <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length}`} />
           </div>
         </Link>
-        <Link to="/invoices" className="block group">
+        <Link to="/admin/clients" className="block group">
           <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
             <KpiCard title={t('pending_invoices')} value={pendingInvoices} icon={FileText} subtitle="tap to review" />
           </div>
@@ -114,7 +114,7 @@ export default function Dashboard() {
         <div className="glass-card p-4 md:p-5">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-sm font-semibold text-foreground">Recent Invoices</h2>
-            <Link to="/invoices" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+            <Link to="/admin/clients" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -123,7 +123,7 @@ export default function Dashboard() {
           ) : (
             <div className="divide-y divide-border/20">
               {recentInvoices.map(inv => (
-                <Link key={inv.id} to="/invoices" className="flex items-center justify-between py-2.5 group">
+                <Link key={inv.id} to="/admin/clients" className="flex items-center justify-between py-2.5 group">
                   <div className="min-w-0 pr-3">
                     <p className="text-sm font-medium text-foreground truncate">
                       {inv.invoice_number || inv.client_name || 'Invoice'}
@@ -151,7 +151,7 @@ export default function Dashboard() {
           </h2>
           <div className="space-y-2">
             {overdueInvoices.length > 0 && (
-              <Link to="/invoices" className="flex items-center justify-between p-3 rounded-lg bg-red-500/[0.06] border border-red-500/10 hover:bg-red-500/[0.1] transition-colors group">
+              <Link to="/admin/clients" className="flex items-center justify-between p-3 rounded-lg bg-red-500/[0.06] border border-red-500/10 hover:bg-red-500/[0.1] transition-colors group">
                 <div className="flex items-center gap-3">
                   <FileWarning className="w-4 h-4 text-red-400" />
                   <span className="text-sm text-foreground">{overdueInvoices.length} {t('overdue_invoices')}</span>

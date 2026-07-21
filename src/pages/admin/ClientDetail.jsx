@@ -9,9 +9,11 @@ import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
-import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, X, Filter, ChevronDown } from 'lucide-react';
+import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, X, Filter, ChevronDown, Receipt } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import FixedChargeFormSheet from '@/components/admin/FixedChargeFormSheet';
+import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
+import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -34,6 +36,11 @@ export default function ClientDetail() {
   const [contactFilter, setContactFilter] = useState(null);
   const [editContactIndex, setEditContactIndex] = useState(null);
   const [editContactOpen, setEditContactOpen] = useState(false);
+  const [payments, setPayments] = useState([]);
+  const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
+  const [editInvoice, setEditInvoice] = useState(null);
+  const [paymentFormOpen, setPaymentFormOpen] = useState(false);
+  const [editPayment, setEditPayment] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,15 +51,17 @@ export default function ClientDetail() {
       setLoading(false);
       setDataLoading(true);
       try {
-        const [tR, iR, fR] = await Promise.all([
+        const [tR, iR, fR, pR] = await Promise.all([
           base44.entities.Trip.filter({ client_name: c.name }).catch(() => []),
           base44.entities.Invoice.filter({ client_name: c.name }).catch(() => []),
           base44.entities.FixedCharge.filter({ client_name: c.name }).catch(() => []),
+          base44.entities.ClientPayment.filter({ client_name: c.name }).catch(() => []),
         ]);
         if (cancelled) return;
         setTrips(tR || []);
         setInvoices(iR || []);
         setFixedCharges(fR || []);
+        setPayments(pR || []);
       } finally {
         if (!cancelled) setDataLoading(false);
       }
@@ -64,6 +73,8 @@ export default function ClientDetail() {
   if (!client) return <EmptyState title="Client not found" />;
 
   const reloadCharges = () => base44.entities.FixedCharge.filter({ client_name: client.name }).then(setFixedCharges).catch(() => {});
+  const reloadInvoices = () => base44.entities.Invoice.filter({ client_name: client.name }).then(setInvoices).catch(() => {});
+  const reloadPayments = () => base44.entities.ClientPayment.filter({ client_name: client.name }).then(setPayments).catch(() => {});
   const deleteCharge = async (charge) => { await base44.entities.FixedCharge.delete(charge.id); reloadCharges(); };
   const displayTrips = contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips;
   const displayInvoices = contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices;
@@ -192,6 +203,7 @@ export default function ClientDetail() {
         <TabsList className="bg-card border border-border">
           <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
           <TabsTrigger value="invoices">{t('invoices')} ({displayInvoices.length})</TabsTrigger>
+          <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
           <TabsTrigger value="charges">{t('fixed_charges')} ({fixedCharges.length})</TabsTrigger>
         </TabsList>
 
@@ -243,12 +255,15 @@ export default function ClientDetail() {
                   onToday={() => { const today = new Date().toISOString().split('T')[0]; setInvDateFrom(today); setInvDateTo(today); }}
                 />
                 <div className="flex-1" />
+                <Button onClick={() => { setEditInvoice(null); setInvoiceFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+                  <Plus className="w-3.5 h-3.5 mr-1" /> {t('new_invoice')}
+                </Button>
                 <ExportButtons data={filteredInvoices} filename={`invoices-${client.name}`} title={`Invoices - ${client.name}`} columns={invExportCols} />
               </div>
               {filteredInvoices.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (
                 <div className="space-y-2">
                   {filteredInvoices.map(rec => (
-                    <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
+                    <div key={rec.id} onClick={() => { setEditInvoice(rec); setInvoiceFormOpen(true); }} className="glass-card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">{rec.invoice_number || '—'}</p>
@@ -256,9 +271,36 @@ export default function ClientDetail() {
                       </div>
                       <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.total_amount)}</span>
                       <StatusBadge status={rec.status} />
-                      <button onClick={async () => { const s = await getCompanySettings(); downloadInvoicePDF(rec, client.name, s); }} className="text-muted-foreground hover:text-primary p-1.5">
+                      <button onClick={async (e) => { e.stopPropagation(); const s = await getCompanySettings(); downloadInvoicePDF(rec, client.name, s); }} className="text-muted-foreground hover:text-primary p-1.5">
                         <Download className="w-4 h-4" />
                       </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="payments" className="mt-4">
+          {dataLoading ? <LoadingSpinner /> : (
+            <>
+              <div className="flex justify-end mb-3">
+                <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+                  <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
+                </Button>
+              </div>
+              {payments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
+                <div className="space-y-2">
+                  {payments.map(p => (
+                    <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="glass-card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-primary" /></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
+                      <StatusBadge status={p.status} />
                     </div>
                   ))}
                 </div>
@@ -301,6 +343,8 @@ export default function ClientDetail() {
       </Tabs>
 
       <FixedChargeFormSheet open={chargeFormOpen} onOpenChange={setChargeFormOpen} editItem={editCharge} clientName={client.name} onSaved={reloadCharges} />
+      <InvoiceFormSheet open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} editInvoice={editInvoice} defaultClientName={client.name} onSaved={reloadInvoices} />
+      <PaymentFormSheet open={paymentFormOpen} onOpenChange={setPaymentFormOpen} editItem={editPayment} lockedClientName={client.name} onSaved={() => { reloadPayments(); reloadInvoices(); }} />
       <ContactPersonEditSheet open={editContactOpen} onOpenChange={(open) => { setEditContactOpen(open); if (!open) setEditContactIndex(null); }} contact={editingContact} onSave={saveContact} onDelete={deleteContact} />
     </div>
   );
