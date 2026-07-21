@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Fuel as FuelIcon, Droplets } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Fuel() {
   const { t } = useI18n();
@@ -31,7 +32,7 @@ export default function Fuel() {
   return (
     <div>
       <PageHeader title={t('fuel')} description={`${filtered.length} records`}
-        action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="fuel_records" title="Fuel Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Liters', key: 'liters' }, { label: 'Price/L', key: 'price_per_liter' }, { label: 'Total', key: 'total_cost' }, { label: 'Fuel Type', key: 'fuel_type' }, { label: 'Station', key: 'station_name' }, { label: 'Odometer', key: 'odometer_reading' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter

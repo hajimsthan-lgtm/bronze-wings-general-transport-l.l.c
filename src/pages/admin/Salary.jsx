@@ -14,6 +14,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Salary() {
   const { t } = useI18n();
@@ -35,7 +36,7 @@ export default function Salary() {
   return (
     <div>
       <PageHeader title={t('salary')} description={`${filtered.length} records`}
-        action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={[{ label: 'Driver', key: 'driver_name' }, { label: 'Month', key: 'month' }, { label: 'Year', key: 'year' }, { label: 'Base', key: 'base_salary' }, { label: 'Overtime', key: 'overtime' }, { label: 'Bonus', key: 'bonus' }, { label: 'Deductions', key: 'deductions' }, { label: 'Net', key: 'net_salary' }, { label: 'Status', key: 'status' }, { label: 'Method', key: 'payment_method' }, { label: 'Paid On', key: 'payment_date' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter

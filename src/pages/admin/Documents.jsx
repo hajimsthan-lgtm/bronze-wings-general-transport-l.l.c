@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatDate } from '@/lib/formatters';
 import { Plus, Search, FileText, Pencil, Trash2 } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Documents() {
   const { t } = useI18n();
@@ -32,7 +33,7 @@ export default function Documents() {
   return (
     <div>
       <PageHeader title={t('documents')} description={`${filtered.length} documents`}
-        action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="documents" title="Documents" columns={[{ label: 'Title', key: 'title' }, { label: 'Type', key: 'type' }, { label: 'Related To', key: 'related_entity' }, { label: 'Expiry', key: 'expiry_date' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter
           fromValue={dateFrom}

@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wrench } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Services() {
   const { t } = useI18n();
@@ -31,7 +32,7 @@ export default function Services() {
   return (
     <div>
       <PageHeader title={t('services')} description={`${filtered.length} service records`}
-        action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter
