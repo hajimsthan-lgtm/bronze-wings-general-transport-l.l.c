@@ -227,6 +227,18 @@
   background-repeat: no-repeat;
 }
 
+/* Obsidian Kinetic Blade shell backdrop */
+.kinetic-obsidian-bg {
+  background-color: #0A0A0A;
+  background-image:
+    linear-gradient(rgba(68,68,68,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(68,68,68,0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+  background-position: -1px -1px;
+  background-attachment: fixed;
+  background-repeat: repeat;
+}
+
 /* Hairline divider */
 .hairline { border-color: rgba(255,255,255,0.06) !important; }
 

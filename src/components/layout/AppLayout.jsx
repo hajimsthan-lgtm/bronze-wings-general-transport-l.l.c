@@ -7,7 +7,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen professional-page-bg flex flex-col">
+    <div className="min-h-screen kinetic-obsidian-bg flex flex-col">
       <DesktopNav />
       <TopBar />
       <main className="flex-1 pb-24 md:pb-8 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full pt-3 md:pt-4">
