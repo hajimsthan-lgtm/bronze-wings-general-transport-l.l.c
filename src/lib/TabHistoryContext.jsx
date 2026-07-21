@@ -27,9 +27,7 @@ export function getTabFromPath(pathname) {
     pathname.startsWith('/bank') ||
     pathname.startsWith('/cash') ||
     pathname.startsWith('/fuel') ||
-    pathname.startsWith('/transactions') ||
-    pathname.startsWith('/admin/salary') ||
-    pathname.startsWith('/admin/services')
+    pathname.startsWith('/transactions')
   ) {
     return 'financials';
   }

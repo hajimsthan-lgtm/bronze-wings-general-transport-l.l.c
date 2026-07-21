@@ -14,9 +14,24 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDate } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
+import Services from './Services';
 import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
 
 export default function Vehicles() {
+  const { t } = useI18n();
+  const [tab, setTab] = useState('vehicles');
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-5">
+        <button onClick={() => setTab('vehicles')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'vehicles' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('vehicles')}</button>
+        <button onClick={() => setTab('services')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'services' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('services')}</button>
+      </div>
+      {tab === 'vehicles' ? <VehiclesTab /> : <Services />}
+    </div>
+  );
+}
+
+function VehiclesTab() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);

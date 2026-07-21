@@ -33,8 +33,6 @@ import Drivers from '@/pages/admin/Drivers';
 import Clients from '@/pages/admin/Clients';
 import Vendors from '@/pages/admin/Vendors';
 import Documents from '@/pages/admin/Documents';
-import Salary from '@/pages/admin/Salary';
-import Services from '@/pages/admin/Services';
 import VehicleDetail from '@/pages/admin/VehicleDetail';
 import DriverDetail from '@/pages/admin/DriverDetail';
 import ClientDetail from '@/pages/admin/ClientDetail';
@@ -85,8 +83,6 @@ const AuthenticatedApp = () => {
           <Route path="/admin/clients" element={<Clients />} />
           <Route path="/admin/vendors" element={<Vendors />} />
           <Route path="/admin/documents" element={<Documents />} />
-          <Route path="/admin/salary" element={<Salary />} />
-          <Route path="/admin/services" element={<Services />} />
           <Route path="/admin/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/admin/drivers/:id" element={<DriverDetail />} />
           <Route path="/admin/clients/:id" element={<ClientDetail />} />

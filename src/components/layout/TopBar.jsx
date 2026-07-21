@@ -5,9 +5,7 @@ import ThemeToggle from '@/components/common/ThemeToggle';
 
 const adminSubNav = [
   { key: 'vehicles', path: '/admin/vehicles' },
-  { key: 'services', path: '/admin/services' },
   { key: 'drivers', path: '/admin/drivers' },
-  { key: 'salary', path: '/admin/salary' },
   { key: 'clients', path: '/admin/clients' },
   { key: 'vendors', path: '/admin/vendors' },
   { key: 'documents', path: '/admin/documents' },
@@ -45,8 +43,6 @@ const subNavMap = {
   '/admin/clients': adminSubNav,
   '/admin/vendors': adminSubNav,
   '/admin/documents': adminSubNav,
-  '/admin/services': adminSubNav,
-  '/admin/salary': adminSubNav,
 };
 
 export default function TopBar() {

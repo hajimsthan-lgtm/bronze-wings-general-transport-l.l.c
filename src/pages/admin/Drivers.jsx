@@ -14,9 +14,24 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDate, getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
+import Salary from './Salary';
 import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
 
 export default function Drivers() {
+  const { t } = useI18n();
+  const [tab, setTab] = useState('drivers');
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-5">
+        <button onClick={() => setTab('drivers')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'drivers' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('drivers')}</button>
+        <button onClick={() => setTab('salary')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'salary' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('salary')}</button>
+      </div>
+      {tab === 'drivers' ? <DriversTab /> : <Salary />}
+    </div>
+  );
+}
+
+function DriversTab() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
