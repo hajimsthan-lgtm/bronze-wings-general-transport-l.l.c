@@ -33,7 +33,7 @@ export default function DesktopNav() {
           {logoUrl ? (
             <img src={logoUrl} alt="Bronze Wings" className="w-9 h-9 rounded-full object-contain ring-1 ring-white/10" />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-300 via-primary to-violet-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_0_16px_rgba(168,85,247,0.4)]">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 via-primary to-blue-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_0_16px_rgba(59,130,246,0.4)]">
               <span className="text-white font-display font-bold text-[10px]">BW</span>
             </div>
           )}
@@ -53,7 +53,7 @@ export default function DesktopNav() {
                 to={item.path}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
                   active
-                    ? 'bg-gradient-to-br from-primary to-violet-600 text-white shadow-[0_0_18px_rgba(168,85,247,0.45)]'
+                    ? 'bg-gradient-to-br from-primary to-blue-600 text-white shadow-[0_0_18px_rgba(59,130,246,0.45)]'
                     : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05]'
                 }`}
               >

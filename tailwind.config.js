@@ -6,6 +6,7 @@ module.exports = {
   	extend: {
       fontFamily: {
         sans: ['var(--font-sans)'],
+        body: ['var(--font-body)'],
         mono: ['var(--font-mono)'],
         display: ['var(--font-display)'],
       },
@@ -27,8 +28,16 @@ module.exports = {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+  				light: 'hsl(var(--primary-light))'
   			},
+  			'primary-light': 'hsl(var(--primary-light))',
+  			'background-elevated': 'hsl(var(--background-elevated))',
+  			neon: 'hsl(var(--neon))',
+  			magenta: 'hsl(var(--magenta))',
+  			success: 'hsl(var(--success))',
+  			warning: 'hsl(var(--warning))',
+  			danger: 'hsl(var(--danger))',
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
