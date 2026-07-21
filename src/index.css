@@ -10,7 +10,7 @@
     --font-mono: 'JetBrains Mono', monospace;
     --font-display: 'Sora', 'Inter', sans-serif;
 
-    --background: 222 47% 6%;
+    --background: 224 71% 4%;
     --foreground: 210 40% 96%;
     --card: 222 40% 9%;
     --card-foreground: 210 40% 96%;
@@ -237,6 +237,20 @@
   background-position: -1px -1px;
   background-attachment: fixed;
   background-repeat: repeat;
+}
+
+/* Bolt.new atmospheric shell backdrop */
+.bolt-atmosphere-bg {
+  background-color: #020617;
+  background-image:
+    radial-gradient(ellipse 85% 60% at 50% 6%, rgba(37,99,235,0.34) 0%, rgba(37,99,235,0.10) 34%, transparent 70%),
+    radial-gradient(ellipse 75% 55% at 50% 48%, rgba(30,64,175,0.20) 0%, transparent 66%),
+    radial-gradient(circle at 50% 55%, transparent 0%, rgba(2,6,23,0.62) 82%),
+    radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 22px 22px;
+  background-position: center top, center, center, 0 0;
+  background-attachment: fixed;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
 }
 
 /* Hairline divider */
