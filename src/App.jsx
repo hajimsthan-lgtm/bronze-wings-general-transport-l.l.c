@@ -41,6 +41,7 @@ import ClientDetail from '@/pages/admin/ClientDetail';
 import VendorDetail from '@/pages/admin/VendorDetail';
 import Payments from '@/pages/Payments';
 import Settings from '@/pages/Settings';
+import PromptGenerator from '@/pages/PromptGenerator';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -92,6 +93,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/vendors/:id" element={<VendorDetail />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/prompt-generator" element={<PromptGenerator />} />
         </Route>
       </Route>
 
