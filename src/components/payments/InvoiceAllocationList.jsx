@@ -38,7 +38,7 @@ export default function InvoiceAllocationList({ allocations, outstandingInvoices
     <div className="space-y-3">
       {/* FIFO badge + Search + Mass Actions */}
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold text-violet-300 bg-violet-500/10 border border-violet-500/20 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold text-blue-300 bg-blue-500/10 border border-blue-500/20 whitespace-nowrap">
           <Layers className="w-3 h-3" /> FIFO
         </span>
         <div className="relative flex-1">

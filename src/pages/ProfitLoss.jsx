@@ -121,7 +121,7 @@ export default function ProfitLoss() {
                 <XAxis dataKey="name" tick={{ fill: '#a1a1aa', fontSize: 10 }} />
                 <YAxis tick={{ fill: '#a1a1aa', fontSize: 10 }} />
                 <Tooltip contentStyle={{ backgroundColor: 'hsl(220 20% 8%)', border: '1px solid hsl(215 20% 18%)', borderRadius: 8, color: '#fafafa', fontSize: 12 }} />
-                <Bar dataKey="value" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

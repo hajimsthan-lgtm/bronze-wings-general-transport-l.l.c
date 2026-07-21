@@ -11,8 +11,8 @@ const STATUS_COLORS = {
 };
 
 const TOOLTIP_STYLE = {
-  backgroundColor: 'hsl(222 47% 11%)',
-  border: '1px solid hsl(220 20% 20%)',
+  backgroundColor: '#1a1a1a',
+  border: '1px solid #2a2a2a',
   borderRadius: 8,
   fontSize: 12,
   color: '#e0e0e0',
@@ -55,7 +55,7 @@ export default function DashboardCharts({ invoices, trips }) {
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={TOOLTIP_STYLE} />
-            <Bar dataKey="revenue" fill="#996515" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

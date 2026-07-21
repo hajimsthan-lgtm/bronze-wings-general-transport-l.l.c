@@ -279,7 +279,7 @@ export default function ClientDetail() {
                 <div className="space-y-2">
                   {fixedCharges.map(rec => (
                     <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center flex-shrink-0"><Repeat className="w-4 h-4 text-violet-400" /></div>
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Repeat className="w-4 h-4 text-primary" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{rec.description}</p>
                         <p className="text-xs text-muted-foreground capitalize">{rec.frequency} · {formatCurrency(rec.amount)}</p>

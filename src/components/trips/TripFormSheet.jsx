@@ -268,7 +268,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
                   onCreate={() => createEntity('Client', { name: form.client_name }, 'client')} />
               )}
               {form.client_name && fixedCharges.length > 0 && (
-                <p className="text-[10px] text-violet-400 mt-1.5">{fixedCharges.length} fixed charge(s) loaded — matching routes auto-fill amount</p>
+                <p className="text-[10px] text-blue-400 mt-1.5">{fixedCharges.length} fixed charge(s) loaded — matching routes auto-fill amount</p>
               )}
               {availableContacts.length > 1 && (
                 <div className="mt-2">
@@ -416,7 +416,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, onSaved })
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">Base Fare (AED)</Label>
                 <Input type="number" value={form.base_fare} onChange={e => update('base_fare', e.target.value)} className={inputCls} />
-                {autoFilled && <p className="text-[10px] text-violet-400 mt-1">Auto-filled from fixed charge</p>}
+                {autoFilled && <p className="text-[10px] text-blue-400 mt-1">Auto-filled from fixed charge</p>}
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">Max Allowed ({form.duration_unit === 'days' ? 'Days' : 'Hrs'})</Label>

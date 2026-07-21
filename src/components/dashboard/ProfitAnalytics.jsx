@@ -6,8 +6,8 @@ import { computeVehicleProfit, computeDriverProfit } from '@/lib/accounting';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const TOOLTIP_STYLE = {
-  backgroundColor: 'hsl(222 47% 11%)',
-  border: '1px solid hsl(220 20% 20%)',
+  backgroundColor: '#1a1a1a',
+  border: '1px solid #2a2a2a',
   borderRadius: 8,
   fontSize: 12,
   color: '#e0e0e0',

@@ -9,7 +9,7 @@ import { ChevronDown, Check, Copy } from 'lucide-react';
 const TRIP_TYPE_COLORS = {
   one_way: 'text-sky-400',
   hourly: 'text-amber-400',
-  contract: 'text-violet-400',
+  contract: 'text-blue-400',
   return: 'text-emerald-400',
 };
 

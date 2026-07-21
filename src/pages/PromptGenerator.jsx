@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
 const platforms = [
-  { id: 'Base44', desc: 'Full-stack BaaS app builder', color: 'violet', ring: 'border-violet-500/50 bg-violet-500/10 text-violet-400' },
+  { id: 'Base44', desc: 'Full-stack BaaS app builder', color: 'blue', ring: 'border-blue-500/50 bg-blue-500/10 text-blue-400' },
   { id: 'Lovable', desc: 'AI app builder + Supabase', color: 'rose', ring: 'border-rose-500/50 bg-rose-500/10 text-rose-400' },
   { id: 'Bolt.new', desc: 'AI coding agent', color: 'cyan', ring: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' },
   { id: 'Emergent', desc: 'AI app generator', color: 'emerald', ring: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' },

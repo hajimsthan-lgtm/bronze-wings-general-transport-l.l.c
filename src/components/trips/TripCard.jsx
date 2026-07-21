@@ -9,7 +9,7 @@ import { User, Truck as TruckIcon, Building2, FileText, ChevronDown, Check, Copy
 const TRIP_TYPE_COLORS = {
   one_way: 'text-sky-500 dark:text-sky-400',
   hourly: 'text-amber-500 dark:text-amber-400',
-  contract: 'text-violet-500 dark:text-violet-400',
+  contract: 'text-blue-500 dark:text-blue-400',
   return: 'text-emerald-500 dark:text-emerald-400'
 };
 
