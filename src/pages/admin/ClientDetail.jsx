@@ -101,6 +101,12 @@ export default function ClientDetail() {
     status: p.status || '',
     allocated: (p.allocated_invoices || []).filter(a => a.allocated_amount > 0).map(a => `${a.invoice_number}: ${a.allocated_amount}`).join('; '),
   }));
+  const clientInvoiceSeq = (() => {
+    const sorted = [...invoices].sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || '') || String(a.created_date || '').localeCompare(String(b.created_date || '')));
+    const map = {};
+    sorted.forEach((inv, i) => { map[inv.id] = i + 1; });
+    return map;
+  })();
   const editingContact = editContactIndex != null ? client.contact_persons?.[editContactIndex] : null;
 
   const openEditContact = (index) => { setEditContactIndex(index); setEditContactOpen(true); };
@@ -274,7 +280,7 @@ export default function ClientDetail() {
                       </div>
                       <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.total_amount)}</span>
                       <StatusBadge status={rec.status} />
-                      <button onClick={async (e) => { e.stopPropagation(); const s = await getCompanySettings(); downloadInvoicePDF(rec, client.name, s); }} className="text-muted-foreground hover:text-primary p-1.5">
+                      <button onClick={async (e) => { e.stopPropagation(); const s = await getCompanySettings(); downloadInvoicePDF(rec, client.name, s, clientInvoiceSeq[rec.id]); }} className="text-muted-foreground hover:text-primary p-1.5">
                         <Download className="w-4 h-4" />
                       </button>
                     </div>

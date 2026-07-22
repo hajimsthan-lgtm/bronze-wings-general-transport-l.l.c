@@ -27,7 +27,7 @@ function normalizeRoute(str) {
     .replace(/-{2,}/g, '-');
 }
 
-export function buildInvoiceHTML(invoice, clientName, settings = {}) {
+export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const s = settings;
   const items = invoice.line_items || [];
 
@@ -83,9 +83,10 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}) {
   </div>
 
   <!-- Invoice Title -->
-  <div style="text-align:center;margin:12px 0;padding:6px 0;font-size:14px;font-weight:700;color:#000;border-top:1px solid #333;border-bottom:1px solid #333;">
-    # TAX INVOICE =${esc(invoice.invoice_number || '—')}
+  <div style="text-align:center;margin:12px 0 4px;padding:6px 0;font-size:14px;font-weight:700;color:#000;border-top:1px solid #333;border-bottom:1px solid #333;">
+    # TAX INVOICE = ${esc(seqNo ? `#${String(seqNo).padStart(4, '0')}` : (invoice.invoice_number || '—'))}
   </div>
+  ${invoice.invoice_number ? `<div style="text-align:center;font-size:9px;color:#666;margin-bottom:8px;">Ref: ${esc(invoice.invoice_number)}</div>` : ''}
 
   <!-- Items Table -->
   <table style="width:100%;border-collapse:collapse;margin-top:8px;">
@@ -138,8 +139,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}) {
 </div>`;
 }
 
-export async function downloadInvoicePDF(invoice, clientName, settings = {}) {
-  const html = buildInvoiceHTML(invoice, clientName, settings);
+export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo) {
+  const html = buildInvoiceHTML(invoice, clientName, settings, seqNo);
   const wrapper = document.createElement('div');
   wrapper.style.position = 'fixed';
   wrapper.style.left = '-9999px';
