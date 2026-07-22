@@ -86,6 +86,21 @@ export default function ClientDetail() {
     .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
     .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
   const filteredPayments = payments.filter(p => !p.payment_date || (p.payment_date >= payDateFrom && p.payment_date <= payDateTo));
+  const outstandingExportData = outstandingInvoices.map(inv => ({
+    invoice_number: inv.invoice_number || '',
+    issue_date: inv.issue_date || '',
+    total_amount: Number(inv.total_amount) || 0,
+    paid_amount: Number(inv.paid_amount) || 0,
+    balance: (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0),
+  }));
+  const paidExportData = filteredPayments.map(p => ({
+    reference_number: p.reference_number || '',
+    payment_date: p.payment_date || '',
+    payment_mode: p.payment_mode || '',
+    amount: Number(p.amount) || 0,
+    status: p.status || '',
+    allocated: (p.allocated_invoices || []).filter(a => a.allocated_amount > 0).map(a => `${a.invoice_number}: ${a.allocated_amount}`).join('; '),
+  }));
   const editingContact = editContactIndex != null ? client.contact_persons?.[editContactIndex] : null;
 
   const openEditContact = (index) => { setEditContactIndex(index); setEditContactOpen(true); };
@@ -119,6 +134,21 @@ export default function ClientDetail() {
     { label: 'Due Date', key: 'due_date' }, { label: 'Status', key: 'status' },
     { label: 'Subtotal', key: 'subtotal' }, { label: 'VAT', key: 'vat_amount' },
     { label: 'Total', key: 'total_amount' },
+  ];
+  const outstandingExportCols = [
+    { label: 'Invoice #', key: 'invoice_number' },
+    { label: 'Issue Date', key: 'issue_date' },
+    { label: 'Total', key: 'total_amount', numeric: true },
+    { label: 'Paid', key: 'paid_amount', numeric: true },
+    { label: 'Balance', key: 'balance', numeric: true },
+  ];
+  const paidExportCols = [
+    { label: 'Reference', key: 'reference_number' },
+    { label: 'Date', key: 'payment_date' },
+    { label: 'Mode', key: 'payment_mode' },
+    { label: 'Amount', key: 'amount', numeric: true },
+    { label: 'Status', key: 'status' },
+    { label: 'Allocated Invoices', key: 'allocated' },
   ];
 
   return (
@@ -271,6 +301,17 @@ export default function ClientDetail() {
                 <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
                   <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
                 </Button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding</span>
+                  <ExportButtons data={outstandingExportData} filename={`${client.name}-outstanding`} columns={outstandingExportCols} title={`${client.name} — Outstanding Payments`} options={{ dateRange: `${payDateFrom} to ${payDateTo}` }} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Paid</span>
+                  <ExportButtons data={paidExportData} filename={`${client.name}-payments`} columns={paidExportCols} title={`${client.name} — Paid Payments`} options={{ dateRange: `${payDateFrom} to ${payDateTo}` }} />
+                </div>
               </div>
 
               {outstandingInvoices.length > 0 && (
