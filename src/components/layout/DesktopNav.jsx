@@ -34,13 +34,17 @@ export default function DesktopNav() {
               }
             `}
           >
-            {/* Icon placeholder — replace with actual icon component */}
-            <div className={`w-5 h-5 rounded ${isActive ? 'bg-blue-500/20' : 'bg-white/5'}`} />
-            <span>{item.label}</span>
-            
-            {/* Active indicator glow */}
-            {isActive && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+            {({ isActive }) => (
+              <>
+                {/* Icon placeholder — replace with actual icon component */}
+                <div className={`w-5 h-5 rounded ${isActive ? 'bg-blue-500/20' : 'bg-white/5'}`} />
+                <span>{item.label}</span>
+
+                {/* Active indicator glow */}
+                {isActive && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+                )}
+              </>
             )}
           </NavLink>
         ))}
