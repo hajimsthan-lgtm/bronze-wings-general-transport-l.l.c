@@ -206,7 +206,7 @@ export default function ClientDetail() {
         </div>
       )}
       <Tabs defaultValue="trips">
-        <TabsList className="bg-card border border-border">
+        <TabsList>
           <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
           <TabsTrigger value="invoices">{t('invoices')} ({displayInvoices.length})</TabsTrigger>
           <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
@@ -220,7 +220,7 @@ export default function ClientDetail() {
                 const inv = getTripInvoice(trip.id);
                 const isSent = inv?.status === 'sent';
                 return (
-                  <div key={trip.id} className="glass-card p-3 flex items-center gap-3">
+                  <div key={trip.id} className="row-card flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.vehicle_plate} · {trip.driver_name}{trip.contact_person ? ` · ${trip.contact_person}` : ''}</p>
@@ -272,7 +272,7 @@ export default function ClientDetail() {
               {filteredInvoices.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (
                 <div className="space-y-2">
                   {filteredInvoices.map(rec => (
-                    <div key={rec.id} onClick={() => { setEditInvoice(rec); setInvoiceFormOpen(true); }} className="glass-card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
+                    <div key={rec.id} onClick={() => { setEditInvoice(rec); setInvoiceFormOpen(true); }} className="row-card flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground">{rec.invoice_number || '—'}</p>
@@ -321,7 +321,7 @@ export default function ClientDetail() {
               </div>
 
               {outstandingInvoices.length > 0 && (
-                <div className="glass-card p-3 mb-3">
+                <div className="row-card mb-3">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Invoices</p>
                     <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} unpaid</span>
@@ -349,7 +349,7 @@ export default function ClientDetail() {
                     const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
                     const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
                     return (
-                      <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="glass-card p-3 cursor-pointer hover:border-primary/30 transition-colors">
+                      <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="row-card cursor-pointer hover:border-primary/30 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-primary" /></div>
                           <div className="flex-1 min-w-0">
@@ -389,7 +389,7 @@ export default function ClientDetail() {
               {fixedCharges.length === 0 ? <EmptyState icon={Repeat} title={t('no_data')} /> : (
                 <div className="space-y-2">
                   {fixedCharges.map(rec => (
-                    <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
+                    <div key={rec.id} className="row-card flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Repeat className="w-4 h-4 text-primary" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{rec.description}</p>

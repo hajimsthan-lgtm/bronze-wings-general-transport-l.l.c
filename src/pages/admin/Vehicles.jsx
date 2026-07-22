@@ -23,8 +23,8 @@ export default function Vehicles() {
   return (
     <div>
       <div className="flex items-center gap-2 mb-5">
-        <button onClick={() => setTab('vehicles')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'vehicles' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('vehicles')}</button>
-        <button onClick={() => setTab('services')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'services' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('services')}</button>
+        <button onClick={() => setTab('vehicles')} className={`sub-tab ${tab === 'vehicles' ? 'sub-tab-active' : ''}`}>{t('vehicles')}</button>
+        <button onClick={() => setTab('services')} className={`sub-tab ${tab === 'services' ? 'sub-tab-active' : ''}`}>{t('services')}</button>
       </div>
       {tab === 'vehicles' ? <VehiclesTab /> : <Services />}
     </div>
@@ -52,16 +52,16 @@ function VehiclesTab() {
       
       <div className="relative mb-5">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
       <div>
           {filtered.map((v) =>
-        <div key={v.id} className="glass-card-hover p-4 cursor-pointer glow: 'hover:shadow-violet-400/30 color: 'from-violet-300/28 via-indigo-500/14 to-slate-950/30'," onClick={() => navigate(`/admin/vehicles/${v.id}`)}>
+        <div key={v.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/vehicles/${v.id}`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center"><Truck className="w-4 h-4 text-primary" /></div>
+                  <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center"><Truck className="w-4 h-4 text-white/70" /></div>
                   <div><p className="text-sm font-semibold text-foreground">{v.plate_number}</p><p className="text-xs text-muted-foreground">{v.make} {v.model} {v.year}</p></div>
                 </div>
                 <StatusBadge status={v.status} />

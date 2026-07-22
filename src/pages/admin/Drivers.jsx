@@ -23,8 +23,8 @@ export default function Drivers() {
   return (
     <div>
       <div className="flex items-center gap-2 mb-5">
-        <button onClick={() => setTab('drivers')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'drivers' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('drivers')}</button>
-        <button onClick={() => setTab('salary')} className={`px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 border ${tab === 'salary' ? 'bg-primary/15 text-primary border-primary/25' : 'glass-panel text-muted-foreground hover:text-foreground border-transparent'}`}>{t('salary')}</button>
+        <button onClick={() => setTab('drivers')} className={`sub-tab ${tab === 'drivers' ? 'sub-tab-active' : ''}`}>{t('drivers')}</button>
+        <button onClick={() => setTab('salary')} className={`sub-tab ${tab === 'salary' ? 'sub-tab-active' : ''}`}>{t('salary')}</button>
       </div>
       {tab === 'drivers' ? <DriversTab /> : <Salary />}
     </div>
@@ -50,15 +50,15 @@ function DriversTab() {
       <PageHeader title={t('drivers')} description={`${items.length} drivers`}
       action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       
-      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" /></div>
+      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={User} title={t('no_data')} /> :
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((d) =>
-        <div key={d.id} className="glass-card-hover p-4 cursor-pointer glow: 'hover:shadow-violet-400/30 color: 'from-violet-300/28 via-indigo-500/14 to-slate-950/30'," onClick={() => navigate(`/admin/drivers/${d.id}`)}>
+        <div key={d.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/drivers/${d.id}`)}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-semibold">{getInitials(d.name)}</div>
+                  <div className="w-10 h-10 rounded-full entity-avatar flex items-center justify-center text-sm font-semibold">{getInitials(d.name)}</div>
                   <div><p className="text-sm font-semibold text-foreground">{d.name}</p><p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" />{d.phone}</p></div>
                 </div>
                 <StatusBadge status={d.status} />

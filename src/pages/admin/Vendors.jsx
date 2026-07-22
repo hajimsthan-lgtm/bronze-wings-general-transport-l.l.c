@@ -33,14 +33,14 @@ export default function Vendors() {
     <div>
       <PageHeader title={t('vendors')} description={`${items.length} vendors`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact_person' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" /></div>
+      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Store} title={t('no_data')} /> : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map(v => (
-            <div key={v.id} className="glass-card-hover p-4 cursor-pointer" onClick={() => navigate(`/admin/vendors/${v.id}`)}>
+            <div key={v.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/vendors/${v.id}`)}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-semibold">{getInitials(v.name)}</div>
+                <div className="w-10 h-10 rounded-full entity-avatar flex items-center justify-center text-sm font-semibold">{getInitials(v.name)}</div>
                 <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-foreground truncate">{v.name}</p><p className="text-xs text-muted-foreground capitalize">{v.category}</p></div>
                 <StatusBadge status={v.status} />
               </div>

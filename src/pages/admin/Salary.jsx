@@ -11,10 +11,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, CreditCard } from 'lucide-react';
+import { Plus, CreditCard, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 
 export default function Salary() {
   const { t } = useI18n();
@@ -49,15 +50,15 @@ export default function Salary() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('paid')}</p><p className="text-lg font-display font-bold text-emerald-400">{formatCurrency(totalPaid)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('pending')}</p><p className="text-lg font-display font-bold text-amber-400">{formatCurrency(totalPending)}</p></div>
+        <ReportStatCard index={0} label={t('paid')} value={totalPaid} format={formatCurrency} icon={CheckCircle2} color="#22c55e" />
+        <ReportStatCard index={1} label={t('pending')} value={totalPending} format={formatCurrency} icon={Clock} color="#f59e0b" />
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={CreditCard} title={t('no_data')} /> : (
         <div className="space-y-2">
           {filtered.map(r => (
-            <div key={r.id} className="w-full text-left glass-card-hover p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><CreditCard className="w-4 h-4 text-primary" /></div>
+            <div key={r.id} className="w-full text-left row-card flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0"><CreditCard className="w-4 h-4 text-white/70" /></div>
               <div className="flex-1 min-w-0">
                 {driverMap[r.driver_name]
                   ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}?tab=salary`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>

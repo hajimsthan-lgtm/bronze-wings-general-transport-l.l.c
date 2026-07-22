@@ -119,18 +119,18 @@ export default function Trips() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={`${t('search')}...`}
-              className="w-full clay-input rounded-xl px-3 pl-9 h-11 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40" />
+              className="w-full search-2026 rounded-xl px-3 pl-9 h-11 text-sm" />
             
         </div>
-        <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {STATUSES.map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
                 filter === s
-                  ? 'clay-chip clay-chip-active text-primary border-primary/30'
-                  : 'clay-chip text-muted-foreground hover:text-foreground'
+                  ? 'bg-[rgba(59,130,246,0.20)] border-[rgba(59,130,246,0.30)] text-white shadow-[0_0_12px_rgba(59,130,246,0.15)]'
+                  : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-white/[0.06] hover:text-white/60'
               }`}>
               {s === 'all' ? 'All' : t(s)}
               {s !== 'all' && (
@@ -142,15 +142,17 @@ export default function Trips() {
       </div>
 
       {/* View toggle */}
-      <div className="clay-sm inline-flex items-center gap-1 p-1 mb-4">
+      <div className="inline-flex items-center gap-1 p-1 mb-4 rounded-full" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <button
           onClick={() => setViewMode('card')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'card' ? 'clay-pressed text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${viewMode === 'card' ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
+          style={viewMode === 'card' ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10))', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 0 12px rgba(59,130,246,0.15)' } : { border: '1px solid transparent' }}>
           <LayoutGrid className="w-3.5 h-3.5" /> Cards
         </button>
         <button
           onClick={() => setViewMode('list')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === 'list' ? 'clay-pressed text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${viewMode === 'list' ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
+          style={viewMode === 'list' ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10))', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 0 12px rgba(59,130,246,0.15)' } : { border: '1px solid transparent' }}>
           <List className="w-3.5 h-3.5" /> List
         </button>
       </div>

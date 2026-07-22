@@ -47,7 +47,7 @@ export default function Services() {
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
         <div className="space-y-2">
           {filtered.map(r => (
-            <button key={r.id} onClick={() => { setEditItem(r); setFormOpen(true); }} className="w-full text-left glass-card-hover p-4 flex items-center gap-4">
+            <button key={r.id} onClick={() => { setEditItem(r); setFormOpen(true); }} className="w-full text-left row-card flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-amber-400" /></div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground capitalize">{r.service_type?.replace(/_/g, ' ')}</p>

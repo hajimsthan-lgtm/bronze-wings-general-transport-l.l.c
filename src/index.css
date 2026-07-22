@@ -129,6 +129,112 @@
     box-shadow: 0 10px 28px rgba(0,0,0,0.5), 0 0 16px -8px rgba(59,130,246,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
+  /* ========== 2026 Entity Card (grid) ========== */
+  .entity-card {
+    position: relative;
+    border-radius: 20px;
+    padding: 20px;
+    background: linear-gradient(165deg, rgba(59,130,246,0.08) 0%, rgba(12,16,26,0.60) 100%);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 18px rgba(0,0,0,0.3);
+    transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .entity-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(59,130,246,0.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(59,130,246,0.10), 0 0 24px -8px rgba(59,130,246,0.25);
+  }
+  .entity-avatar {
+    background: linear-gradient(135deg, rgba(59,130,246,0.35), rgba(37,99,235,0.15));
+    border: 1px solid rgba(59,130,246,0.25);
+    box-shadow: 0 0 14px -4px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+    color: #bfdbfe;
+  }
+
+  /* ========== 2026 Row Card (liquid glass list row) ========== */
+  .row-card {
+    position: relative;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    background: linear-gradient(180deg, rgba(20,24,38,0.50) 0%, rgba(14,18,30,0.60) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .row-card::before {
+    content: '';
+    position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    height: 60%; width: 2px; border-radius: 9999px;
+    background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.7);
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+  .row-card:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(28,32,50,0.60) 0%, rgba(18,22,36,0.70) 100%);
+    border-color: rgba(59,130,246,0.18);
+  }
+  .row-card:hover::before { opacity: 1; }
+
+  /* ========== 2026 Detail Header Card ========== */
+  .detail-header-card {
+    border-radius: 20px;
+    padding: 24px;
+    background: linear-gradient(165deg, rgba(59,130,246,0.10) 0%, rgba(12,16,26,0.65) 100%);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid rgba(59,130,246,0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  /* ========== 2026 Sub-Tab Pill ========== */
+  .sub-tab {
+    padding: 0.45rem 1.1rem; border-radius: 9999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.22,1,0.36,1); cursor: pointer; white-space: nowrap;
+  }
+  .sub-tab:hover { color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.03); }
+  .sub-tab-active {
+    background: linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10)) !important;
+    border-color: rgba(59,130,246,0.25) !important; color: #fff !important;
+    box-shadow: 0 0 20px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
+
+  /* ========== 2026 Search Input ========== */
+  .search-2026 {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 0.75rem;
+    color: rgba(255,255,255,0.7);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .search-2026::placeholder { color: rgba(255,255,255,0.3); }
+  .search-2026:focus {
+    border-color: rgba(59,130,246,0.30) !important;
+    background: rgba(255,255,255,0.05) !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+  }
+
+  /* ========== 2026 Empty State Orb ========== */
+  .empty-orb {
+    background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(12,16,26,0.6) 70%) !important;
+    border: 1px solid rgba(59,130,246,0.20) !important;
+    box-shadow: 0 0 28px -6px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
+
+  /* Radix tab trigger active state — 2026 pill */
+  [role="tab"][data-state="active"] {
+    background: linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10)) !important;
+    border: 1px solid rgba(59,130,246,0.25) !important;
+    box-shadow: 0 0 20px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
+
   .glow-primary { box-shadow: 0 0 0 1px rgba(59,130,246,0.35), 0 0 12px rgba(59,130,246,0.22); }
 
   /* ===== Atmospheric blue gradient page background ===== */
