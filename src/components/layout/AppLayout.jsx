@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
 import TopBar from '@/components/layout/TopBar';
+import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
   const location = useLocation();
