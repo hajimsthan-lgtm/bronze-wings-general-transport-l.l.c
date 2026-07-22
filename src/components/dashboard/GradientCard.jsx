@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import CountUp from '@/components/common/CountUp';
 
 const VARIANTS = {
   green:  { gradient: 'linear-gradient(135deg, rgba(74,222,128,0.25) 0%, rgba(34,197,94,0.10) 50%, rgba(10,20,12,0.5) 100%)', rgb: '74,222,128', glow: '#22c55e' },
@@ -50,7 +51,13 @@ export default function GradientCard({ variant = 'blue', icon: Icon, label, titl
 
       {/* number + subtext */}
       <div className="relative z-10">
-        <p className="text-4xl font-bold text-white font-display tracking-tight leading-none">{title}</p>
+        <p className="text-4xl font-bold text-white font-display tracking-tight leading-none">
+          {(() => {
+            const m = typeof title === 'string' ? title.match(/^(\d+(?:\.\d+)?)%?$/) : null;
+            if (!m) return title;
+            return <CountUp value={parseFloat(m[1])} suffix={title.endsWith('%') ? '%' : ''} duration={1500} />;
+          })()}
+        </p>
         {subtitle && <p className="text-sm text-white/40 mt-2">{subtitle}</p>}
       </div>
 
