@@ -6,20 +6,20 @@ import { getCompanySettings } from '@/lib/companySettings';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
-  { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
-  { key: 'operations', icon: Truck, path: '/trips', paths: ['/trips'] },
-  { key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
-  { key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] },
-];
+{ key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
+{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips'] },
+{ key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
+{ key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] }];
+
 
 export default function DesktopNav() {
   const { t, language, toggleLanguage } = useI18n();
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState('');
-  useEffect(() => { getCompanySettings().then(s => setLogoUrl(s.logo_url)); }, []);
+  useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
 
   const isActive = (item) => (item.paths || [item.path]).some((p) =>
-    p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
+  p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
   );
 
   return (
@@ -29,7 +29,7 @@ export default function DesktopNav() {
         background: 'rgba(10,14,23,0.75)',
         backdropFilter: 'blur(24px) saturate(1.5)',
         WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
-        boxShadow: '0 4px 30px rgba(0,0,0,0.5)',
+        boxShadow: '0 4px 30px rgba(0,0,0,0.5)'
       }} />
       {/* gradient bottom hairline */}
       <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.25) 50%, transparent 100%)' }} />
@@ -41,41 +41,41 @@ export default function DesktopNav() {
         <Link to="/" className="flex items-center gap-3 group/brand">
           <div className="relative">
             <div className="absolute inset-0 rounded-xl blur-md opacity-70" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.35) 0%, transparent 70%)' }} />
-            {logoUrl ? (
-              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain ring-1 ring-white/10" />
-            ) : (
-              <div className="relative w-9 h-9 rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+            {logoUrl ?
+            <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain ring-1 ring-white/10" /> :
+
+            <div className="relative w-9 h-9 rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                 <span className="text-sm font-bold text-blue-400">BW</span>
               </div>
-            )}
+            }
           </div>
           <div className="leading-tight">
             <span className="block font-extrabold tracking-tight text-white text-[15px]">Bronze Wings</span>
-            <span className="block text-[9px] uppercase tracking-[0.2em] text-white/40">Fleet Suite</span>
+            <span className="block text-[9px] uppercase tracking-[0.2em] text-white/40">GENERAL </span>
           </div>
         </Link>
 
         {/* Center segmented nav — dark pill channel */}
         <div className="flex items-center gap-1 rounded-full border border-white/5 bg-black/40 p-1.5 backdrop-blur-md">
-          {navItems.map(item => {
+          {navItems.map((item) => {
             const active = isActive(item);
             return (
               <Link
                 key={item.key}
                 to={item.path}
                 className={`relative flex items-center gap-2 rounded-full px-5 py-1.5 text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${
-                  active
-                    ? 'text-white'
-                    : 'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'
-                }`}
-                style={active
-                  ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15))', border: '1px solid rgba(59,130,246,0.40)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 0 12px rgba(59,130,246,0.25)' }
-                  : { border: '1px solid transparent' }}
-              >
+                active ?
+                'text-white' :
+                'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'}`
+                }
+                style={active ?
+                { background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15))', border: '1px solid rgba(59,130,246,0.40)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 0 12px rgba(59,130,246,0.25)' } :
+                { border: '1px solid transparent' }}>
+                
                 <item.icon className="w-3.5 h-3.5" />
                 <span>{t(item.key)}</span>
-              </Link>
-            );
+              </Link>);
+
           })}
         </div>
 
@@ -85,8 +85,8 @@ export default function DesktopNav() {
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-            aria-label="Toggle language"
-          >
+            aria-label="Toggle language">
+            
             <Globe className="w-3.5 h-3.5" />
             {language === 'en' ? 'العربية' : 'English'}
           </button>
@@ -95,6 +95,6 @@ export default function DesktopNav() {
           </Link>
         </div>
       </div>
-    </nav>
-  );
+    </nav>);
+
 }
