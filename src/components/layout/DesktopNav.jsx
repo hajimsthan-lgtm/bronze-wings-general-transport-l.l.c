@@ -51,7 +51,7 @@ export default function DesktopNav() {
           </div>
           <div className="leading-tight">
             <span className="block font-extrabold tracking-tight text-white text-[15px]">Bronze Wings</span>
-            <span className="block text-[9px] uppercase tracking-[0.2em] text-white/40">GENERAL </span>
+            <span className="block text-[9px] uppercase tracking-[0.2em] text-white/40">GENERAL TRANSPORT L.LC</span>
           </div>
         </Link>
 
