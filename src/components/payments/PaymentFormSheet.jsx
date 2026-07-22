@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Check, Loader2 } from 'lucide-react';
+import { X, Check, Loader2, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { useClientPaymentCreate, useClientPaymentUpdate } from '@/hooks/useEntityQueries';
 import InvoiceAllocationList from './InvoiceAllocationList';
@@ -54,23 +54,22 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
     }
   }, [open, editItem, lockedClientName]);
 
-  // Fetch outstanding invoices when client is selected (new payments only)
-  useEffect(() => {
-    if (form.client_name && !editItem) {
-      setLoadingInvoices(true);
-      base44.entities.Invoice.filter({ client_name: form.client_name })
-        .then(all => {
-          const outstanding = (all || [])
-            .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
-            .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
-          setOutstandingInvoices(outstanding);
-        })
-        .catch(() => setOutstandingInvoices([]))
-        .finally(() => setLoadingInvoices(false));
-    } else {
-      setOutstandingInvoices([]);
-    }
+  // Fetch outstanding invoices for the selected client (new payments only)
+  const refreshOutstanding = useCallback(() => {
+    if (!form.client_name || editItem) { setOutstandingInvoices([]); return; }
+    setLoadingInvoices(true);
+    base44.entities.Invoice.filter({ client_name: form.client_name })
+      .then(all => {
+        const outstanding = (all || [])
+          .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
+          .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+        setOutstandingInvoices(outstanding);
+      })
+      .catch(() => setOutstandingInvoices([]))
+      .finally(() => setLoadingInvoices(false));
   }, [form.client_name, editItem]);
+
+  useEffect(() => { refreshOutstanding(); }, [refreshOutstanding]);
 
   // Bulk allocation engine: sequentially deduct from payment amount, oldest invoice first
   const computeAllocations = useCallback((paymentAmount, invoices, selectedIndices = null) => {
@@ -257,9 +256,14 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
             <div className="pt-2">
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-xs text-muted-foreground uppercase tracking-wider">Invoice Allocation — FIFO</Label>
-                {outstandingInvoices.length > 0 && (
-                  <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} outstanding</span>
-                )}
+                <div className="flex items-center gap-2">
+                  {outstandingInvoices.length > 0 && (
+                    <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} outstanding</span>
+                  )}
+                  <button onClick={refreshOutstanding} disabled={loadingInvoices} className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50" title="Refresh outstanding invoices">
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingInvoices ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
               </div>
               <p className="text-[10px] text-muted-foreground -mt-1 mb-2">Oldest invoice paid first. Toggle invoices to include — amounts auto-allocate in order.</p>
               <InvoiceAllocationList
