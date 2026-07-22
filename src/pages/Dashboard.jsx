@@ -9,6 +9,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import KpiCard from '@/components/common/KpiCard';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
+import GradientCard from '@/components/dashboard/GradientCard';
 import PageInfo from '@/components/common/PageInfo';
 
 export default function Dashboard() {
@@ -59,23 +60,11 @@ export default function Dashboard() {
     <div className="space-y-5 pt-5">
       <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and receivables." />
 
-      {/* KPI grid */}
+      {/* KPI grid — Gradient Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Link to="/trips" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
-            <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length}`} />
-          </div>
-        </Link>
-        <Link to="/admin/clients" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
-            <KpiCard title={t('pending_invoices')} value={pendingInvoices} icon={FileText} subtitle="tap to review" />
-          </div>
-        </Link>
-        <Link to="/admin/vehicles" className="block group">
-          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
-            <KpiCard title={t('fleet_health')} value={`${healthPct}%`} icon={Activity} subtitle={`${activeVehicles}/${totalVehicles}`} />
-          </div>
-        </Link>
+        <GradientCard to="/trips" variant="blue" icon={Truck} label={t('active_trips')} title={String(activeTrips)} subtitle={`of ${trips.length}`} index={0} />
+        <GradientCard to="/admin/clients" variant="purple" icon={FileText} label={t('pending_invoices')} title={String(pendingInvoices)} subtitle="tap to review" index={1} />
+        <GradientCard to="/admin/vehicles" variant="green" icon={Activity} label={t('fleet_health')} title={`${healthPct}%`} subtitle={`${activeVehicles}/${totalVehicles}`} index={2} />
         <PendingCustomers />
       </div>
 
