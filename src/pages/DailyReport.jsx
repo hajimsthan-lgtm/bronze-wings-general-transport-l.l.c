@@ -4,10 +4,14 @@ import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ReportStatCard, { hexToRgba } from '@/components/reports/ReportStatCard';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Truck, DollarSign, Fuel, FileText } from 'lucide-react';
+import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
+import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import ReportSectionCard from '@/components/reports/ReportSectionCard';
+import TrendChart from '@/components/reports/TrendChart';
+import BarTrendChart from '@/components/reports/BarTrendChart';
+import RadialGauge from '@/components/reports/RadialGauge';
 
 const contentCardStyle = {
   background: 'linear-gradient(180deg, rgba(20,24,38,0.60) 0%, rgba(14,18,30,0.70) 100%)',
@@ -58,6 +62,28 @@ export default function DailyReport() {
   const expenseTotal = expenses.reduce((s, e) => s + (e.amount || 0), 0);
   const fuelTotal = fuelRecords.reduce((s, f) => s + (f.total_cost || 0), 0);
   const invoiceTotal = invoices.reduce((s, i) => s + (i.total_amount || 0), 0);
+  const net = revenue - expenseTotal - fuelTotal;
+  const margin = revenue > 0 ? (net / revenue) * 100 : 0;
+
+  // Daily analytics
+  const days = [];
+  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  const trendData = days.map((d) => ({
+    label: formatDateShort(d),
+    revenue: trips.filter((t) => t.trip_date === d).reduce((s, t) => s + (t.revenue || 0), 0),
+    expenses: expenses.filter((e) => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) + fuelRecords.filter((f) => f.date === d).reduce((s, f) => s + (f.total_cost || 0), 0),
+  }));
+  const tripCountData = days.map((d) => ({ label: formatDateShort(d), trips: trips.filter((t) => t.trip_date === d).length }));
+
+  // Driver performance
+  const driverPerf = {};
+  trips.forEach((t) => {
+    if (!t.driver_name) return;
+    driverPerf[t.driver_name] = driverPerf[t.driver_name] || { trips: 0, revenue: 0 };
+    driverPerf[t.driver_name].trips += 1;
+    driverPerf[t.driver_name].revenue += (t.revenue || 0);
+  });
+  const driverRanking = Object.entries(driverPerf).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
   return (
     <div className="relative">
@@ -100,6 +126,36 @@ export default function DailyReport() {
             <ReportStatCard index={1} label={t('trips')} value={trips.length} icon={Truck} color="#a855f7" />
             <ReportStatCard index={2} label={t('expenses')} value={expenseTotal} format={formatCurrency} icon={FileText} color="#f97316" />
             <ReportStatCard index={3} label={t('fuel')} value={fuelTotal} format={formatCurrency} icon={Fuel} color="#14b8a6" />
+          </div>
+
+          {/* Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <ReportSectionCard index={4} color="#3b82f6" title="Revenue vs Expenses" className="lg:col-span-2">
+              <TrendChart data={trendData} series={[{ key: 'revenue', name: 'Revenue', color: '#3b82f6' }, { key: 'expenses', name: 'Expenses', color: '#f97316' }]} type="line" height={240} />
+            </ReportSectionCard>
+            <ReportSectionCard index={5} color="#a855f7" title="Profit Margin">
+              <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#a855f7" size={170} /></div>
+            </ReportSectionCard>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ReportSectionCard index={6} color="#a855f7" title="Trips per Day">
+              <BarTrendChart data={tripCountData} dataKey="trips" color="#a855f7" height={220} />
+            </ReportSectionCard>
+            <ReportSectionCard index={7} color="#22c55e" title="Driver Performance">
+              {driverRanking.length === 0 ? <p className="text-sm text-white/40">No data</p> : (
+                <div className="space-y-2">
+                  {driverRanking.map((d, i) => (
+                    <div key={d.name} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.02] transition-colors">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: i === 0 ? 'rgba(234,179,8,0.18)' : 'rgba(255,255,255,0.05)', color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.5)', border: `1px solid ${i === 0 ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.06)'}` }}>{i + 1}</div>
+                      <span className="flex-1 text-sm text-white/80 truncate">{d.name}</span>
+                      <span className="text-xs text-white/40 tabular-nums">{d.trips} trips</span>
+                      <span className="text-sm font-semibold text-white/90 tabular-nums">{formatCurrency(d.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ReportSectionCard>
           </div>
 
           {/* Trips section */}

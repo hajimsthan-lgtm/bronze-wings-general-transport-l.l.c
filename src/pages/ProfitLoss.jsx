@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Wallet, Receipt, PiggyBank, TrendingUp, TrendingDown } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -13,6 +13,8 @@ import CountUpText from '@/components/reports/CountUpText';
 import DonutChart from '@/components/reports/DonutChart';
 import Sparkline from '@/components/reports/Sparkline';
 import ProgressBar from '@/components/reports/ProgressBar';
+import TrendChart from '@/components/reports/TrendChart';
+import RadialGauge from '@/components/reports/RadialGauge';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const addDays = (iso, n) => { const d = new Date(iso); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
@@ -79,6 +81,9 @@ export default function ProfitLoss() {
   };
   const cmp = (shift) => { const prev = computeNet(addDays(dateFrom, -shift), addDays(dateTo, -shift)); if (!prev) return null; return ((netProfit - prev) / Math.abs(prev)) * 100; };
   const cmpWeek = cmp(7), cmpMonth = cmp(30), cmpYear = cmp(365);
+  const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+  const trendData = days.map((d, i) => ({ label: formatDateShort(d), income: incomeSeries[i], expenses: expenseSeries[i] }));
+  const netTrendData = days.map((d, i) => ({ label: formatDateShort(d), net: netSeries[i] }));
 
   const Badge = ({ pct }) => pct == null ? null : (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium" style={{ background: pct >= 0 ? 'rgba(34,197,94,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${pct >= 0 ? 'rgba(34,197,94,0.20)' : 'rgba(239,68,68,0.20)'}`, color: pct >= 0 ? '#4ade80' : '#f87171' }}>
@@ -179,6 +184,20 @@ export default function ProfitLoss() {
             <Badge pct={cmpWeek} />
           </div>
         </div>
+      </ReportSectionCard>
+
+      {/* Income vs Expenses area + Net profit trend + margin gauge */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+        <ReportSectionCard index={7} color="#22c55e" title="Income vs Expenses" className="lg:col-span-2">
+          <TrendChart data={trendData} series={[{ key: 'income', name: 'Income', color: '#22c55e' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={240} />
+        </ReportSectionCard>
+        <ReportSectionCard index={8} color="#3b82f6" title="Profit Margin">
+          <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#3b82f6" size={170} /></div>
+        </ReportSectionCard>
+      </div>
+
+      <ReportSectionCard index={9} color="#3b82f6" title="Net Profit Trend" className="mb-4">
+        <TrendChart data={netTrendData} series={[{ key: 'net', name: 'Net Profit', color: '#3b82f6' }]} type="line" height={220} />
       </ReportSectionCard>
 
       {/* Expense Breakdown donut + progress */}
