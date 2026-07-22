@@ -1,69 +1,81 @@
-import { NavLink } from 'react-router-dom';
-// import your nav icons
+import { Link, useLocation } from 'react-router-dom';
+import { useI18n } from '@/lib/i18n';
+import { LayoutDashboard, Truck, BarChart3, Shield, Globe, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getCompanySettings } from '@/lib/companySettings';
+import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
-  { to: '/operations', label: 'Operations', icon: 'Truck' },
-  { to: '/reports', label: 'Reports', icon: 'BarChart3' },
-  { to: '/admin', label: 'Admin', icon: 'Shield' },
+  { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
+  { key: 'operations', icon: Truck, path: '/trips', paths: ['/trips'] },
+  { key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
+  { key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] },
 ];
 
 export default function DesktopNav() {
+  const { t, language, toggleLanguage } = useI18n();
+  const location = useLocation();
+  const [logoUrl, setLogoUrl] = useState('');
+  useEffect(() => { getCompanySettings().then(s => setLogoUrl(s.logo_url)); }, []);
+
+  const isActive = (item) => (item.paths || [item.path]).some((p) =>
+    p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
+  );
+
   return (
-    <nav 
-      className="hidden md:flex fixed left-0 top-0 h-screen w-64 flex-col z-40 pt-20 pb-6 px-3"
-      style={{
-        background: 'linear-gradient(180deg, rgba(8,11,18,0.92) 0%, rgba(6,8,15,0.88) 100%)',
-        backdropFilter: 'blur(24px) saturate(1.1)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.1)',
-        borderRight: '1px solid rgba(59,130,246,0.08)',
-        boxShadow: '4px 0 24px rgba(0,0,0,0.3), inset -1px 0 0 rgba(255,255,255,0.02)'
-      }}
-    >
-      {/* Nav items */}
-      <div className="flex flex-col gap-1">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => `
-              group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-              ${isActive 
-                ? 'text-blue-400 bg-blue-500/10 border border-blue-500/15' 
-                : 'text-white/40 hover:text-white/70 hover:bg-white/[0.03] border border-transparent'
-              }
-            `}
-          >
-            {({ isActive }) => (
-              <>
-                {/* Icon placeholder — replace with actual icon component */}
-                <div className={`w-5 h-5 rounded ${isActive ? 'bg-blue-500/20' : 'bg-white/5'}`} />
-                <span>{item.label}</span>
-
-                {/* Active indicator glow */}
-                {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </div>
-
-      {/* Bottom section */}
-      <div className="mt-auto">
-        <div 
-          className="p-4 rounded-xl"
-          style={{
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.06), rgba(37,99,235,0.03))',
-            border: '1px solid rgba(59,130,246,0.08)'
-          }}
-        >
-          <p className="text-xs text-white/30 mb-1">Plan</p>
-          <p className="text-sm font-semibold text-white/70">Builder</p>
-          <div className="mt-2 h-1 rounded-full bg-white/5 overflow-hidden">
-            <div className="h-full w-3/4 rounded-full bg-blue-500/40" />
+    <nav className="hidden md:block sticky top-0 z-50">
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-primary/15" style={{ boxShadow: '0 1px 0 0 rgba(59,130,246,0.10), 0 10px 34px -14px rgba(59,130,246,0.22)' }} />
+      <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Brand */}
+        <Link to="/" className="flex items-center gap-2.5">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Bronze Wings" className="w-9 h-9 rounded-full object-contain ring-1 ring-white/10" />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-300 via-primary to-blue-700 flex items-center justify-center shadow-[inset_0_1px_2px_rgba(255,255,255,0.4),0_0_10px_rgba(59,130,246,0.22)]">
+              <span className="text-white font-display font-bold text-[10px]">BW</span>
+            </div>
+          )}
+          <div className="leading-tight">
+            <span className="block font-display font-bold text-foreground text-[15px] tracking-tight">Bronze Wings</span>
+            <span className="block text-[9px] uppercase tracking-[0.2em] text-muted-foreground">Fleet Suite</span>
           </div>
+        </Link>
+
+        {/* Center segmented nav */}
+        <div className="glass-panel rounded-full flex items-center gap-1 p-1">
+          {navItems.map(item => {
+            const active = isActive(item);
+            return (
+              <Link
+                key={item.key}
+                to={item.path}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+                  active
+                    ? 'bg-gradient-to-br from-primary to-blue-600 text-white shadow-[0_0_10px_rgba(59,130,246,0.25)]'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.05]'
+                }`}
+              >
+                <item.icon className="w-3.5 h-3.5" />
+                <span>{t(item.key)}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Right controls */}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full glass-panel text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Toggle language"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            {language === 'en' ? 'العربية' : 'English'}
+          </button>
+          <Link to="/settings" className="w-9 h-9 rounded-full glass-panel flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" aria-label="Settings">
+            <Settings className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     </nav>
