@@ -39,11 +39,11 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   if (settings.logo_url) {
     try {
       const logo = await fetchLogoData(settings.logo_url);
-      const maxW = 30, maxH = 26;
+      const maxW = 24, maxH = 16;
       const aspect = logo.w / logo.h;
       let lw = maxW, lh = maxW / aspect;
       if (lh > maxH) { lh = maxH; lw = maxH * aspect; }
-      doc.addImage(logo.dataUrl, logo.format, margin, headerY, lw, lh);
+      doc.addImage(logo.dataUrl, logo.format, margin, headerY - 1, lw, lh);
     } catch (e) {}
   }
 
