@@ -84,27 +84,35 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
   return (
     <div
       onClick={() => onClick?.(trip)}
-      className="group relative cursor-pointer rounded-[20px] border border-primary/25 p-4 pt-6 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50"
+      className="group relative cursor-pointer rounded-[20px] p-4 pt-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
       style={{
-        background: 'linear-gradient(180deg, rgba(46,134,255,0.10) 0%, #1A1A1E 45%, #141417 100%)',
-        boxShadow: '0 0 0 1px rgba(46,134,255,0.10), 0 0 24px -8px rgba(46,134,255,0.30), 0 0 60px -20px rgba(0,210,255,0.18), inset 0 1px 0 rgba(255,255,255,0.05)'
+        background: 'linear-gradient(165deg, rgba(59,130,246,0.10) 0%, rgba(59,130,246,0.03) 35%, rgba(12,16,26,0.55) 100%)',
+        backdropFilter: 'blur(24px) saturate(1.4)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(59,130,246,0.06)',
       }}
     >
+      {/* Inner top highlight */}
+      <div className="absolute inset-x-0 top-0 h-16 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 60%)' }} />
+      {/* Hover accent ring */}
+      <div className="absolute inset-0 rounded-[20px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: 'inset 0 0 0 1px rgba(59,130,246,0.35), 0 8px 32px rgba(0,0,0,0.5), 0 0 24px -6px rgba(59,130,246,0.25)' }} />
+
       {/* Trip type ribbon */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
         <span
           className="inline-flex items-center px-3 py-0.5 rounded-b-md text-[10px] font-semibold uppercase tracking-wider text-white"
-          style={{ background: 'linear-gradient(180deg, #2E86FF, #1E6FE0)' }}
+          style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.95), rgba(37,99,235,0.95))', boxShadow: '0 4px 12px -2px rgba(59,130,246,0.45)' }}
         >
           {t(trip.trip_type || 'one_way')}
         </span>
       </div>
 
       {/* Header: trip number, status, sent toggle */}
-      <div className="flex items-center justify-between gap-2 mb-3">
+      <div className="relative flex items-center justify-between gap-2 mb-3">
         <button
           onClick={copyTripNumber}
-          className="text-[11px] font-mono text-foreground/90 hover:text-primary transition-colors flex items-center gap-1 min-w-0"
+          className="text-[11px] font-mono text-white/80 hover:text-[#60a5fa] transition-colors flex items-center gap-1 min-w-0"
           title="Click to copy trip number"
         >
           <span className="truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
@@ -169,10 +177,10 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
 
       {/* Revenue pill */}
       {trip.revenue > 0 && (
-        <div className="flex justify-center mb-3">
+        <div className="relative flex justify-center mb-3">
           <div
             className="inline-flex flex-col items-center px-5 py-1.5 rounded-full"
-            style={{ background: 'linear-gradient(135deg, #2E86FF, #00D2FF)', boxShadow: '0 0 20px -4px rgba(46,134,255,0.55)' }}
+            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.95), rgba(14,165,233,0.95))', boxShadow: '0 0 20px -4px rgba(59,130,246,0.55), inset 0 1px 0 rgba(255,255,255,0.25)' }}
           >
             <span className="text-base font-bold text-white tabular-nums leading-tight">{formatCurrency(trip.revenue)}</span>
             {trip.trip_type === 'hourly' && trip.hours > 0 && (
@@ -183,55 +191,55 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
       )}
 
       {/* Route */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="relative flex items-center gap-2 mb-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 mb-0.5">from</p>
-          <p className="text-sm font-medium text-foreground truncate">{trip.from_location}</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">from</p>
+          <p className="text-sm font-medium text-white/85 truncate">{trip.from_location}</p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 pb-1">
-          <span className="w-2 h-2 rounded-full bg-primary" style={{ boxShadow: '0 0 8px rgba(59,130,246,0.7)' }} />
-          <span className="w-8 h-px bg-gradient-to-r from-primary via-cyan-400 to-emerald-400" />
-          <span className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.7)' }} />
+          <span className="w-2 h-2 rounded-full bg-[#3b82f6]" style={{ boxShadow: '0 0 8px rgba(59,130,246,0.7)' }} />
+          <span className="w-8 h-px bg-gradient-to-r from-[#3b82f6] via-[#22d3ee] to-[#4ade80]" />
+          <span className="w-2 h-2 rounded-full bg-[#4ade80]" style={{ boxShadow: '0 0 8px rgba(74,222,128,0.7)' }} />
         </div>
         <div className="flex-1 min-w-0 text-right">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground/60 mb-0.5">to</p>
-          <p className="text-sm font-medium text-foreground truncate">{trip.to_location}</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">to</p>
+          <p className="text-sm font-medium text-white/85 truncate">{trip.to_location}</p>
         </div>
       </div>
 
       {/* Meta chips */}
-      <div className="flex items-center gap-2 flex-wrap pt-3 border-t border-white/5">
+      <div className="relative flex items-center gap-2 flex-wrap pt-3 border-t border-white/[0.05]">
         {trip.driver_name && (
           <button
             onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25252A] text-[11px] text-foreground/90 hover:bg-[#2E2E34] transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/80 hover:bg-white/[0.08] hover:border-[#3b82f6]/40 transition-colors"
           >
-            <User className="w-3 h-3 text-primary" /> {trip.driver_name}
+            <User className="w-3 h-3 text-[#60a5fa]" /> {trip.driver_name}
           </button>
         )}
         {trip.vehicle_plate && (
           <button
             onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25252A] text-[11px] text-foreground/90 hover:bg-[#2E2E34] transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/80 hover:bg-white/[0.08] hover:border-[#3b82f6]/40 transition-colors"
           >
-            <TruckIcon className="w-3 h-3 text-primary" /> {trip.vehicle_plate}
+            <TruckIcon className="w-3 h-3 text-[#60a5fa]" /> {trip.vehicle_plate}
           </button>
         )}
         {trip.client_name && (
           <button
             onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25252A] text-[11px] text-foreground/90 hover:bg-[#2E2E34] transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/80 hover:bg-white/[0.08] hover:border-[#3b82f6]/40 transition-colors"
           >
-            <Building2 className="w-3 h-3 text-primary" /> {trip.client_name}
+            <Building2 className="w-3 h-3 text-[#60a5fa]" /> {trip.client_name}
           </button>
         )}
         {trip.delivery_note_number && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25252A] text-[11px] text-foreground/90">
-            <FileText className="w-3 h-3 text-primary" /> {trip.delivery_note_number}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/80">
+            <FileText className="w-3 h-3 text-[#60a5fa]" /> {trip.delivery_note_number}
           </span>
         )}
-        <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#25252A] text-[11px] text-foreground/90">
-          <Calendar className="w-3 h-3 text-primary" /> {formatDate(trip.trip_date)}
+        <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[11px] text-white/80">
+          <Calendar className="w-3 h-3 text-[#60a5fa]" /> {formatDate(trip.trip_date)}
         </span>
       </div>
     </div>
