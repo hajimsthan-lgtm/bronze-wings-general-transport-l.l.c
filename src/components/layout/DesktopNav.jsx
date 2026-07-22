@@ -49,11 +49,14 @@ export default function DesktopNav() {
               <Link
                 key={item.key}
                 to={item.path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold uppercase tracking-widest transition-all duration-300 ${
                   active
-                    ? 'bg-gradient-to-br from-primary to-blue-600 text-white shadow-[0_0_10px_rgba(59,130,246,0.25)]'
+                    ? 'text-white'
                     : 'text-white/40 hover:text-white/60 hover:bg-white/[0.05]'
                 }`}
+                style={active
+                  ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10))', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 0 20px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08)' }
+                  : { border: '1px solid transparent' }}
               >
                 <item.icon className="w-3.5 h-3.5" />
                 <span>{t(item.key)}</span>
