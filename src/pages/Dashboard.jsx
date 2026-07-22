@@ -9,7 +9,6 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import KpiCard from '@/components/common/KpiCard';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
-import GradientCard from '@/components/dashboard/GradientCard';
 import PageInfo from '@/components/common/PageInfo';
 
 export default function Dashboard() {
@@ -60,38 +59,50 @@ export default function Dashboard() {
     <div className="space-y-5 pt-5">
       <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and receivables." />
 
-      {/* KPI grid — Gradient Cards */}
+      {/* KPI grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <GradientCard to="/trips" variant="green" icon={Truck} label={t('active_trips')} title={String(activeTrips)} subtitle={`of ${trips.length}`} index={0} />
-        <GradientCard to="/admin/clients" variant="purple" icon={FileText} label={t('pending_invoices')} title={String(pendingInvoices)} subtitle="tap to review" index={1} />
-        <GradientCard to="/admin/vehicles" variant="teal" icon={Activity} label={t('fleet_health')} title={`${healthPct}%`} subtitle={`${activeVehicles}/${totalVehicles}`} index={2} />
+        <Link to="/trips" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
+            <KpiCard title={t('active_trips')} value={activeTrips} icon={Truck} subtitle={`of ${trips.length}`} />
+          </div>
+        </Link>
+        <Link to="/admin/clients" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
+            <KpiCard title={t('pending_invoices')} value={pendingInvoices} icon={FileText} subtitle="tap to review" />
+          </div>
+        </Link>
+        <Link to="/admin/vehicles" className="block group">
+          <div className="transition-all duration-200 group-hover:border-primary/30 rounded-[1.1rem] h-full">
+            <KpiCard title={t('fleet_health')} value={`${healthPct}%`} icon={Activity} subtitle={`${activeVehicles}/${totalVehicles}`} />
+          </div>
+        </Link>
         <PendingCustomers />
       </div>
 
       {/* Recent lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-2xl p-4 md:p-5" style={{ background: 'rgba(18,22,34,0.50)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="glass-card p-4 md:p-5">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-semibold text-white/80">Recent Trips</h2>
-            <Link to="/trips" className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+            <h2 className="text-sm font-semibold text-foreground">Recent Trips</h2>
+            <Link to="/trips" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           {recentTrips.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No trips yet</p>
           ) : (
-            <div className="divide-y divide-white/[0.03]">
+            <div className="divide-y divide-border/20">
               {recentTrips.map(tr => (
-                <Link key={tr.id} to="/trips" className="flex items-center justify-between py-2.5 group hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
+                <Link key={tr.id} to="/trips" className="flex items-center justify-between py-2.5 group">
                   <div className="min-w-0 pr-3">
-                    <p className="text-sm font-medium text-white/80 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {tr.from_location} → {tr.to_location}
                     </p>
-                    <p className="text-[11px] text-white/35">
+                    <p className="text-[11px] text-muted-foreground">
                       {tr.vehicle_plate} · {formatDate(tr.trip_date)}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-white/90 tabular-nums whitespace-nowrap">
+                  <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
                     {formatCurrency(tr.revenue)}
                   </span>
                 </Link>
@@ -100,28 +111,28 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="rounded-2xl p-4 md:p-5" style={{ background: 'rgba(18,22,34,0.50)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="glass-card p-4 md:p-5">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-sm font-semibold text-white/80">Recent Invoices</h2>
-            <Link to="/admin/clients" className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
+            <h2 className="text-sm font-semibold text-foreground">Recent Invoices</h2>
+            <Link to="/admin/clients" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           {recentInvoices.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">No invoices yet</p>
           ) : (
-            <div className="divide-y divide-white/[0.03]">
+            <div className="divide-y divide-border/20">
               {recentInvoices.map(inv => (
-                <Link key={inv.id} to="/admin/clients" className="flex items-center justify-between py-2.5 group hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
+                <Link key={inv.id} to="/admin/clients" className="flex items-center justify-between py-2.5 group">
                   <div className="min-w-0 pr-3">
-                    <p className="text-sm font-medium text-white/80 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {inv.invoice_number || inv.client_name || 'Invoice'}
                     </p>
-                    <p className="text-[11px] text-white/35">
+                    <p className="text-[11px] text-muted-foreground">
                       {inv.client_name} · {formatDate(inv.issue_date)}
                     </p>
                   </div>
-                  <span className="text-sm font-semibold text-white/90 tabular-nums whitespace-nowrap">
+                  <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
                     {formatCurrency(inv.total_amount)}
                   </span>
                 </Link>

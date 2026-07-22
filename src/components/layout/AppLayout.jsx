@@ -2,51 +2,41 @@ import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
 import TopBar from '@/components/layout/TopBar';
-import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
   const location = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#06080f]">
-      {/* ═══════════════════════════════════════════════════════
-          AMBIENT BACKGROUND LAYERS
-          ═══════════════════════════════════════════════════════ */}
-      
-      {/* Layer 1: Deep animated ambient gradient orbs */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div 
-          className="absolute top-[10%] left-[15%] w-[500px] h-[500px] rounded-full animate-float opacity-20"
-          style={{
-            background: 'radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            animationDelay: '0s'
-          }}
-        />
-        <div 
-          className="absolute top-[50%] right-[10%] w-[400px] h-[400px] rounded-full animate-float opacity-15"
-          style={{
-            background: 'radial-gradient(circle, rgba(59,130,246,0.20) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            animationDelay: '-3s'
-          }}
-        />
-        <div 
-          className="absolute bottom-[10%] left-[40%] w-[350px] h-[350px] rounded-full animate-float opacity-10"
-          style={{
-            background: 'radial-gradient(circle, rgba(30,64,175,0.18) 0%, transparent 70%)',
-            filter: 'blur(70px)',
-            animationDelay: '-5s'
-          }}
-        />
-      </div>
-
-      {/* Layer 2: Noise texture for depth */}
+      {/* ═══════════════════════════════════════════
+          LAYER 1: Deep animated ambient gradient
+          ═══════════════════════════════════════════ */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0 opacity-[0.025] bg-noise bg-[128px]"
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 20% 40%, rgba(37,99,235,0.12) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59,130,246,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 50% at 50% 0%, rgba(30,64,175,0.06) 0%, transparent 50%)
+          `
+        }}
       />
 
-      {/* Layer 3: Fine tech grid */}
+      {/* ═══════════════════════════════════════════
+          LAYER 2: Subtle noise texture for depth
+          ═══════════════════════════════════════════ */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.025]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '128px 128px'
+        }}
+      />
+
+      {/* ═══════════════════════════════════════════
+          LAYER 3: Fine grid pattern (subtle)
+          ═══════════════════════════════════════════ */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
         style={{
@@ -58,67 +48,83 @@ export default function AppLayout() {
         }}
       />
 
-      {/* Layer 4: Top light leak */}
+      {/* ═══════════════════════════════════════════
+          LAYER 4: Top ambient light leak
+          ═══════════════════════════════════════════ */}
       <div 
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none z-0 opacity-30"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.12) 0%, transparent 70%)',
-          filter: 'blur(80px)'
+          background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.15) 0%, transparent 70%)',
+          filter: 'blur(60px)'
         }}
       />
 
-      {/* ═══════════════════════════════════════════════════════
-          NAVIGATION
-          ═══════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════
+          NAVIGATION & TOP BAR
+          ═══════════════════════════════════════════ */}
       <DesktopNav />
       <TopBar />
 
-      {/* ═══════════════════════════════════════════════════════
-          MAIN CONTENT
-          ═══════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════
+          MAIN CONTENT AREA
+          ═══════════════════════════════════════════ */}
       <main className="flex-1 pb-24 md:pb-8 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full pt-3 md:pt-4 relative z-10">
         <div
           key={location.pathname}
-          className="animate-fade-in-up p-4 md:p-6 rounded-2xl relative overflow-hidden animate-border-pulse"
+          className="animate-fade-in p-4 md:p-6 rounded-2xl relative overflow-hidden"
           style={{
+            /* Multi-layer glassmorphism background */
             background: `
               linear-gradient(
                 180deg,
-                rgba(18, 22, 34, 0.70) 0%,
-                rgba(12, 16, 26, 0.88) 50%,
-                rgba(9, 12, 20, 0.92) 100%
+                rgba(16, 20, 30, 0.65) 0%,
+                rgba(11, 14, 22, 0.85) 50%,
+                rgba(8, 11, 18, 0.90) 100%
               )
             `,
+            /* Enhanced backdrop blur */
             backdropFilter: 'blur(40px) saturate(1.2)',
             WebkitBackdropFilter: 'blur(40px) saturate(1.2)',
-            border: '1px solid rgba(59,130,246,0.10)',
+            /* Multi-layer border for depth */
+            border: '1px solid rgba(59,130,246,0.12)',
+            /* Complex shadow system */
             boxShadow: `
-              inset 0 1px 0 rgba(255,255,255,0.05),
+              /* Inner glow (top edge highlight) */
+              inset 0 1px 0 rgba(255,255,255,0.06),
+              /* Inner ambient */
               inset 0 0 80px rgba(59,130,246,0.03),
-              0 0 0 1px rgba(59,130,246,0.06),
-              0 0 40px rgba(59,130,246,0.05),
-              0 0 80px rgba(37,99,235,0.03),
-              0 20px 60px rgba(0,0,0,0.45)
+              /* Outer soft glow */
+              0 0 0 1px rgba(59,130,246,0.08),
+              0 0 40px rgba(59,130,246,0.06),
+              0 0 80px rgba(37,99,235,0.04),
+              /* Bottom depth shadow */
+              0 20px 60px rgba(0,0,0,0.4)
             `
           }}>
           
-          {/* Inner top highlight */}
+          {/* Inner subtle gradient overlay for card depth */}
           <div 
             className="absolute inset-0 pointer-events-none rounded-2xl"
             style={{
-              background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59,130,246,0.05) 0%, transparent 60%)'
+              background: `
+                radial-gradient(
+                  ellipse 80% 40% at 50% 0%,
+                  rgba(59,130,246,0.04) 0%,
+                  transparent 60%
+                )
+              `
             }}
           />
 
-          {/* Corner accents */}
-          <div className="absolute top-0 left-0 w-20 h-20 pointer-events-none opacity-30" 
+          {/* Corner accent glows */}
+          <div className="absolute top-0 left-0 w-24 h-24 pointer-events-none opacity-40" 
             style={{
-              background: 'radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 70%)'
+              background: 'radial-gradient(circle at top left, rgba(59,130,246,0.15), transparent 70%)'
             }}
           />
-          <div className="absolute bottom-0 right-0 w-28 h-28 pointer-events-none opacity-15" 
+          <div className="absolute bottom-0 right-0 w-32 h-32 pointer-events-none opacity-20" 
             style={{
-              background: 'radial-gradient(circle at bottom right, rgba(37,99,235,0.08), transparent 70%)'
+              background: 'radial-gradient(circle at bottom right, rgba(37,99,235,0.1), transparent 70%)'
             }}
           />
 
