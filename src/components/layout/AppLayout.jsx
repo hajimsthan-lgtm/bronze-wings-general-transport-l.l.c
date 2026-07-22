@@ -13,10 +13,12 @@ export default function AppLayout() {
       <main className="flex-1 pb-24 md:pb-8 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full pt-3 md:pt-4 opacity-100">
         <div
           key={location.pathname}
-          className="animate-fade-in p-4 md:p-6 rounded-[1.25rem] backdrop-blur-2xl border border-primary/15 opacity-100"
+          className="animate-fade-in p-4 md:p-6 rounded-xl backdrop-blur-2xl border border-primary/20 opacity-100 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(180deg, rgba(59,130,246,0.06) 0%, rgba(10,22,40,0.55) 100%)',
-            boxShadow: '0 0 0 1px rgba(59,130,246,0.10), 0 0 30px rgba(59,130,246,0.18), 0 0 70px rgba(37,99,235,0.12), inset 0 1px 0 rgba(255,255,255,0.05)'
+            backgroundImage: "linear-gradient(180deg, rgba(11,14,20,0.72) 0%, rgba(11,14,20,0.86) 100%), url('https://media.base44.com/images/public/6a5e20fffaa71b55806cccc8/a1fbb78bd_generated_image.png')",
+            backgroundSize: 'cover, 56px 56px',
+            backgroundRepeat: 'no-repeat, repeat',
+            boxShadow: '0 0 0 1px rgba(59,130,246,0.16), 0 0 28px rgba(59,130,246,0.16), 0 0 64px rgba(37,99,235,0.10), inset 0 1px 0 rgba(255,255,255,0.04)'
           }}>
           
           <Outlet />
