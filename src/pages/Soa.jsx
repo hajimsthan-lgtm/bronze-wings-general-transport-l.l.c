@@ -10,6 +10,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 
 export default function Soa() {
   const { t } = useI18n();
@@ -38,7 +39,11 @@ export default function Soa() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div>
+    <div className="relative">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div className="absolute -top-24 -left-10 w-[420px] h-[420px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(59,130,246,0.05)' }} />
+        <div className="absolute top-1/3 -right-24 w-[360px] h-[360px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(168,85,247,0.05)', animationDelay: '7s' }} />
+      </div>
       <PageHeader title={t('soa')} description="Client account statements"
         action={
           <div className="flex items-center gap-2">
@@ -76,9 +81,9 @@ export default function Soa() {
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('total')}</p><p className="text-lg font-display font-bold text-foreground">{formatCurrency(totalAmount)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('paid')}</p><p className="text-lg font-display font-bold text-emerald-400">{formatCurrency(paidAmount)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Balance</p><p className="text-lg font-display font-bold text-amber-400">{formatCurrency(balance)}</p></div>
+        <ReportStatCard index={0} label={t('total')} value={totalAmount} format={formatCurrency} icon={FileText} color="#3b82f6" />
+        <ReportStatCard index={1} label={t('paid')} value={paidAmount} format={formatCurrency} icon={FileText} color="#22c55e" />
+        <ReportStatCard index={2} label="Balance" value={balance} format={formatCurrency} icon={FileText} color="#f59e0b" />
       </div>
 
       {filtered.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (

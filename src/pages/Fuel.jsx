@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Fuel as FuelIcon, Droplets } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 
 export default function Fuel() {
   const { t } = useI18n();
@@ -30,7 +31,11 @@ export default function Fuel() {
   const totalLiters = filtered.reduce((s, r) => s + (r.liters || 0), 0);
 
   return (
-    <div>
+    <div className="relative">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div className="absolute -top-24 -left-10 w-[420px] h-[420px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(20,184,166,0.05)' }} />
+        <div className="absolute top-1/3 -right-24 w-[360px] h-[360px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(249,115,22,0.05)', animationDelay: '7s' }} />
+      </div>
       <PageHeader title={t('fuel')} description={`${filtered.length} records`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="fuel_records" title="Fuel Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Liters', key: 'liters' }, { label: 'Price/L', key: 'price_per_liter' }, { label: 'Total', key: 'total_cost' }, { label: 'Fuel Type', key: 'fuel_type' }, { label: 'Station', key: 'station_name' }, { label: 'Odometer', key: 'odometer_reading' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
 
@@ -45,8 +50,8 @@ export default function Fuel() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('total')} Cost</p><p className="text-lg font-display font-bold text-foreground">{formatCurrency(totalCost)}</p></div>
-        <div className="glass-card p-3"><p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('total')} Liters</p><p className="text-lg font-display font-bold text-primary">{totalLiters.toLocaleString()} L</p></div>
+        <ReportStatCard index={0} label={`${t('total')} Cost`} value={totalCost} format={formatCurrency} icon={FuelIcon} color="#14b8a6" />
+        <ReportStatCard index={1} label={`${t('total')} Liters`} value={totalLiters} format={(v) => `${Math.round(v).toLocaleString()} L`} icon={Droplets} color="#f97316" />
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Droplets} title={t('no_data')} /> : (

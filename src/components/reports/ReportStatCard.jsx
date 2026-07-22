@@ -8,7 +8,7 @@ export function hexToRgba(hex, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-function useCountUp(target, duration = 1200) {
+export function useCountUp(target, duration = 1200) {
   const [val, setVal] = useState(0);
   useEffect(() => {
     let raf;
@@ -26,7 +26,7 @@ function useCountUp(target, duration = 1200) {
   return val;
 }
 
-export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0 }) {
+export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra }) {
   const animated = useCountUp(value);
   const display = format ? format(animated) : Math.round(animated).toLocaleString();
   const rgba = (a) => hexToRgba(color, a);
@@ -63,6 +63,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
       <p className="text-3xl font-bold tabular-nums font-display tracking-tight" style={{ color: 'rgba(255,255,255,0.92)' }}>
         {display}
       </p>
+      {extra && <div className="mt-3 flex items-center justify-between gap-2 relative z-10">{extra}</div>}
       <div
         className="mt-4"
         style={{ height: 2, background: `linear-gradient(90deg, transparent, ${rgba(0.5)}, transparent)`, opacity: 0.6 }}

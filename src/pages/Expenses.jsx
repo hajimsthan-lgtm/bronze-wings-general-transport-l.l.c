@@ -46,7 +46,11 @@ export default function Expenses() {
   const totalAmount = filtered.reduce((s, e) => s + (e.amount || 0), 0);
 
   return (
-    <div>
+    <div className="relative">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div className="absolute -top-24 -left-10 w-[420px] h-[420px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(249,115,22,0.05)' }} />
+        <div className="absolute top-1/3 -right-24 w-[360px] h-[360px] rounded-full blur-[130px] md:animate-[float_20s_ease-in-out_infinite]" style={{ background: 'rgba(168,85,247,0.04)', animationDelay: '7s' }} />
+      </div>
       <PullToRefresh onRefresh={() => refetch()}>
       <PageHeader title={t('expenses')} description={`${formatCurrency(totalAmount)} total`}
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
