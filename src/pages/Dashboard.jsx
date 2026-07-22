@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import KpiCard from '@/components/common/KpiCard';
 import PendingCustomers from '@/components/dashboard/PendingCustomers';
 import GradientCard from '@/components/dashboard/GradientCard';
+import RecentActivityRow from '@/components/dashboard/RecentActivityRow';
 import PageInfo from '@/components/common/PageInfo';
 
 export default function Dashboard() {
@@ -56,6 +57,15 @@ export default function Dashboard() {
   const recentTrips = trips.slice(0, 5);
   const recentInvoices = invoices.slice(0, 5);
 
+  const tripTone = (s) => s === 'in_transit' ? { bg: 'bg-blue-500/10', fg: 'text-blue-400' }
+    : s === 'completed' ? { bg: 'bg-emerald-500/10', fg: 'text-emerald-400' }
+    : s === 'cancelled' ? { bg: 'bg-red-500/10', fg: 'text-red-400' }
+    : { bg: 'bg-amber-500/10', fg: 'text-amber-400' };
+  const invTone = (s) => s === 'paid' ? { bg: 'bg-emerald-500/10', fg: 'text-emerald-400' }
+    : s === 'sent' ? { bg: 'bg-blue-500/10', fg: 'text-blue-400' }
+    : s === 'overdue' ? { bg: 'bg-red-500/10', fg: 'text-red-400' }
+    : { bg: 'bg-amber-500/10', fg: 'text-amber-400' };
+
   return (
     <div className="space-y-5 pt-5">
       <PageInfo text="Your business at a glance — active trips, pending invoices, fleet health, and receivables." />
@@ -81,21 +91,20 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground py-8 text-center">No trips yet</p>
           ) : (
             <div className="divide-y divide-white/[0.03]">
-              {recentTrips.map(tr => (
-                <Link key={tr.id} to="/trips" className="flex items-center justify-between py-2.5 group hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
-                  <div className="min-w-0 pr-3">
-                    <p className="text-sm font-medium text-white/80 truncate">
-                      {tr.from_location} → {tr.to_location}
-                    </p>
-                    <p className="text-[11px] text-white/35">
-                      {tr.vehicle_plate} · {formatDate(tr.trip_date)}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-white/90 tabular-nums whitespace-nowrap">
-                    {formatCurrency(tr.revenue)}
-                  </span>
-                </Link>
-              ))}
+              {recentTrips.map(tr => {
+                const tone = tripTone(tr.status);
+                return (
+                  <RecentActivityRow
+                    key={tr.id}
+                    to="/trips"
+                    icon={Truck}
+                    iconBg={tone.bg}
+                    iconClass={tone.fg}
+                    title={`Trip ${tr.trip_number || '—'} · ${tr.from_location} → ${tr.to_location}`}
+                    subtitle={`${tr.driver_name || '—'} · ${(tr.status || '').replace(/_/g, ' ')}`}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
@@ -111,21 +120,20 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground py-8 text-center">No invoices yet</p>
           ) : (
             <div className="divide-y divide-white/[0.03]">
-              {recentInvoices.map(inv => (
-                <Link key={inv.id} to="/admin/clients" className="flex items-center justify-between py-2.5 group hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
-                  <div className="min-w-0 pr-3">
-                    <p className="text-sm font-medium text-white/80 truncate">
-                      {inv.invoice_number || inv.client_name || 'Invoice'}
-                    </p>
-                    <p className="text-[11px] text-white/35">
-                      {inv.client_name} · {formatDate(inv.issue_date)}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-white/90 tabular-nums whitespace-nowrap">
-                    {formatCurrency(inv.total_amount)}
-                  </span>
-                </Link>
-              ))}
+              {recentInvoices.map(inv => {
+                const tone = invTone(inv.status);
+                return (
+                  <RecentActivityRow
+                    key={inv.id}
+                    to="/admin/clients"
+                    icon={FileText}
+                    iconBg={tone.bg}
+                    iconClass={tone.fg}
+                    title={`Invoice ${inv.invoice_number || '—'} · ${inv.client_name || '—'}`}
+                    subtitle={`${(inv.status || '').replace(/_/g, ' ')} · ${formatCurrency(inv.total_amount)}`}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
