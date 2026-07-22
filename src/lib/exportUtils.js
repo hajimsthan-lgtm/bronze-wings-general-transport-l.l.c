@@ -39,7 +39,7 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   if (settings.logo_url) {
     try {
       const logo = await fetchLogoData(settings.logo_url);
-      const maxW = 24, maxH = 16;
+      const maxW = 30, maxH = 20;
       const aspect = logo.w / logo.h;
       let lw = maxW, lh = maxW / aspect;
       if (lh > maxH) { lh = maxH; lw = maxH * aspect; }
@@ -98,7 +98,7 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
 
   // ── Totals row (gold fill, clean borders) ────────────────────────────────
   const hasNumeric = columns.some(c => c.numeric);
-  if (hasNumeric && data.length > 0) {
+  if (!options.skipTotal && hasNumeric && data.length > 0) {
     y += 2;
     doc.setDrawColor(101, 67, 33); doc.setLineWidth(0.5);
     doc.line(margin, y - 2, pageW - margin, y - 2);

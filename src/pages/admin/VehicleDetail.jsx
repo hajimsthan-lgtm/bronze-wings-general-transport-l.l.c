@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Fuel as FuelIcon, Receipt, Wrench } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ProfitSummary from '@/components/admin/ProfitSummary';
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -60,6 +61,11 @@ export default function VehicleDetail() {
   const fExpenses = expenses.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
   const fServices = services.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
 
+  const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
+  const totalFuel = fFuel.reduce((s, x) => s + (Number(x.total_cost) || 0), 0);
+  const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  const netProfit = totalTrips - totalExpenses - totalFuel;
+
   return (
     <div>
       <EntityDetailHeader
@@ -87,6 +93,18 @@ export default function VehicleDetail() {
           onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
         />
       </div>
+
+      <ProfitSummary
+        title={`Vehicle Profit — ${vehicle.plate_number}`}
+        items={[
+          { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
+          { label: 'Expenses', value: totalExpenses, tone: 'text-amber-400' },
+          { label: 'Fuel', value: totalFuel, tone: 'text-sky-400' },
+        ]}
+        netProfit={netProfit}
+        filenameBase={`vehicle-${vehicle.plate_number}-profit`}
+        dateRange={`${dateFrom} to ${dateTo}`}
+      />
 
       <Tabs defaultValue="trips">
         <TabsList className="bg-card border border-border">

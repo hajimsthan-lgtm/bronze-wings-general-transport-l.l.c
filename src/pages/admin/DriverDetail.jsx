@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Wallet, Receipt } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import ProfitSummary from '@/components/admin/ProfitSummary';
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -57,6 +58,11 @@ export default function DriverDetail() {
   const fSalaries = salaries.filter(r => !r.payment_date || (r.payment_date >= dateFrom && r.payment_date <= dateTo));
   const fExpenses = expenses.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
 
+  const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
+  const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
+  const totalSalary = fSalaries.reduce((s, x) => s + (Number(x.net_salary) || 0), 0);
+  const netProfit = totalTrips - totalExpenses - totalSalary;
+
   return (
     <div>
       <EntityDetailHeader
@@ -84,6 +90,18 @@ export default function DriverDetail() {
           onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
         />
       </div>
+
+      <ProfitSummary
+        title={`Driver Profit — ${driver.name}`}
+        items={[
+          { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
+          { label: 'Expenses', value: totalExpenses, tone: 'text-amber-400' },
+          { label: 'Salary', value: totalSalary, tone: 'text-sky-400' },
+        ]}
+        netProfit={netProfit}
+        filenameBase={`driver-${driver.name}-profit`}
+        dateRange={`${dateFrom} to ${dateTo}`}
+      />
 
       <Tabs defaultValue={initialTab}>
         <TabsList className="bg-card border border-border">
