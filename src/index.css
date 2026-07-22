@@ -82,6 +82,18 @@
     font-family: var(--font-heading);
     letter-spacing: -0.02em;
   }
+
+  /* WebView / mobile: disable text selection on interactive chrome,
+     while keeping general content panels selectable. */
+  button,
+  nav button,
+  .sub-tab,
+  a[role="button"],
+  [role="button"],
+  svg.lucide {
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 @layer components {

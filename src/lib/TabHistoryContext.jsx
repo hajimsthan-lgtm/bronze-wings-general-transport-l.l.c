@@ -42,10 +42,16 @@ export function TabHistoryProvider({ children }) {
     setActiveTab(tab);
   }, [location.pathname]);
 
-  // Switch to a tab — navigates to the cached route for that tab (or its root)
+  // Switch to a tab — navigates to the cached route for that tab (or its root).
+  // Double-tapping the active tab resets it back to its root.
   const switchTab = (tabKey) => {
     const root = TAB_ROOTS[tabKey];
     if (!root) return;
+    if (tabKey === activeTab) {
+      tabRoutes.current[tabKey] = root;
+      if (location.pathname !== root) navigate(root);
+      return;
+    }
     const cachedRoute = tabRoutes.current[tabKey] || root;
     setActiveTab(tabKey);
     if (cachedRoute !== location.pathname) {

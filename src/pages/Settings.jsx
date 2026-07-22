@@ -32,6 +32,9 @@ export default function Settings() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
+      if (typeof base44.auth.deleteMe === 'function') {
+        await base44.auth.deleteMe();
+      }
       await base44.auth.logout('/login');
     } catch {
       toast({ title: 'Could not complete the action', variant: 'destructive' });

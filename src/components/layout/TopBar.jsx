@@ -34,6 +34,11 @@ const subNavMap = {
   '/admin/documents': adminSubNav,
 };
 
+export function hasSubNavForPath(pathname) {
+  const matchedKey = Object.keys(subNavMap).find(k => pathname === k || pathname.startsWith(k + '/'));
+  return matchedKey ? subNavMap[matchedKey].length > 0 : false;
+}
+
 export default function TopBar() {
   const location = useLocation();
   const { t, toggleLanguage, language } = useI18n();
