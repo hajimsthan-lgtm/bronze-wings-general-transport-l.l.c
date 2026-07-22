@@ -18,7 +18,7 @@ export default function AppLayout() {
         <div 
           className="absolute top-[10%] left-[15%] w-[500px] h-[500px] rounded-full animate-float opacity-20"
           style={{
-            background: 'radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(var(--panel-accent2-rgb),0.25) 0%, transparent 70%)',
             filter: 'blur(80px)',
             animationDelay: '0s'
           }}
@@ -26,7 +26,7 @@ export default function AppLayout() {
         <div 
           className="absolute top-[50%] right-[10%] w-[400px] h-[400px] rounded-full animate-float opacity-15"
           style={{
-            background: 'radial-gradient(circle, rgba(59,130,246,0.20) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.20) 0%, transparent 70%)',
             filter: 'blur(60px)',
             animationDelay: '-3s'
           }}
@@ -34,7 +34,7 @@ export default function AppLayout() {
         <div 
           className="absolute bottom-[10%] left-[40%] w-[350px] h-[350px] rounded-full animate-float opacity-10"
           style={{
-            background: 'radial-gradient(circle, rgba(30,64,175,0.18) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(var(--panel-accent2-rgb),0.18) 0%, transparent 70%)',
             filter: 'blur(70px)',
             animationDelay: '-5s'
           }}
@@ -51,8 +51,8 @@ export default function AppLayout() {
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(59,130,246,0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59,130,246,0.3) 1px, transparent 1px)
+            linear-gradient(rgba(var(--panel-accent-rgb),0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(var(--panel-accent-rgb),0.3) 1px, transparent 1px)
           `,
           backgroundSize: '48px 48px'
         }}
@@ -62,7 +62,7 @@ export default function AppLayout() {
       <div 
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none z-0 opacity-30"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(59,130,246,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(var(--panel-accent-rgb),0.12) 0%, transparent 70%)',
           filter: 'blur(80px)'
         }}
       />
@@ -91,13 +91,13 @@ export default function AppLayout() {
             `,
             backdropFilter: 'blur(40px) saturate(1.2)',
             WebkitBackdropFilter: 'blur(40px) saturate(1.2)',
-            border: '1px solid rgba(59,130,246,0.10)',
+            border: '1px solid rgba(var(--panel-accent-rgb),0.10)',
             boxShadow: `
               inset 0 1px 0 rgba(255,255,255,0.05),
-              inset 0 0 80px rgba(59,130,246,0.03),
-              0 0 0 1px rgba(59,130,246,0.06),
-              0 0 40px rgba(59,130,246,0.05),
-              0 0 80px rgba(37,99,235,0.03),
+              inset 0 0 80px rgba(var(--panel-accent-rgb),0.03),
+              0 0 0 1px rgba(var(--panel-accent-rgb),0.06),
+              0 0 40px rgba(var(--panel-accent-rgb),0.05),
+              0 0 80px rgba(var(--panel-accent2-rgb),0.03),
               0 20px 60px rgba(0,0,0,0.45)
             `
           }}>
@@ -106,19 +106,19 @@ export default function AppLayout() {
           <div 
             className="absolute inset-0 pointer-events-none rounded-2xl"
             style={{
-              background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59,130,246,0.05) 0%, transparent 60%)'
+              background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(var(--panel-accent-rgb),0.05) 0%, transparent 60%)'
             }}
           />
 
           {/* Corner accents */}
           <div className="absolute top-0 left-0 w-20 h-20 pointer-events-none opacity-30" 
             style={{
-              background: 'radial-gradient(circle at top left, rgba(59,130,246,0.12), transparent 70%)'
+              background: 'radial-gradient(circle at top left, rgba(var(--panel-accent-rgb),0.12), transparent 70%)'
             }}
           />
           <div className="absolute bottom-0 right-0 w-28 h-28 pointer-events-none opacity-15" 
             style={{
-              background: 'radial-gradient(circle at bottom right, rgba(37,99,235,0.08), transparent 70%)'
+              background: 'radial-gradient(circle at bottom right, rgba(var(--panel-accent2-rgb),0.08), transparent 70%)'
             }}
           />
 

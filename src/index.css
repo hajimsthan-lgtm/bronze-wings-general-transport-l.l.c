@@ -39,6 +39,8 @@
     --border: 0 0% 16%;                  /* #2a2a2a */
     --input: 0 0% 13%;                   /* #212121 */
     --ring: 217 91% 60%;
+    --panel-accent-rgb: 59, 130, 246;
+    --panel-accent2-rgb: 37, 99, 235;
     --radius: 0.75rem;
     --chart-1: 217 91% 60%;
     --chart-2: 199 89% 48%;
