@@ -61,7 +61,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
       base44.entities.Invoice.filter({ client_name: form.client_name })
         .then(all => {
           const outstanding = (all || [])
-            .filter(inv => ['sent', 'partially_paid', 'overdue'].includes(inv.status))
+            .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
             .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
           setOutstandingInvoices(outstanding);
         })
@@ -173,15 +173,17 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
         await createPayment.mutateAsync(paymentData);
       }
 
-      // Update each affected invoice: set paid_amount + status (paid / partially_paid)
+      // Update each affected invoice (non-blocking — payment is already saved)
       await Promise.all(selectedAllocations.map(async (alloc) => {
-        const inv = outstandingInvoices.find(i => i.id === alloc.invoice_id);
-        const newPaidAmount = (Number(inv?.paid_amount) || 0) + alloc.allocated_amount;
-        const newStatus = newPaidAmount >= alloc.invoice_total ? 'paid' : 'partially_paid';
-        await base44.entities.Invoice.update(alloc.invoice_id, {
-          paid_amount: newPaidAmount,
-          status: newStatus,
-        });
+        try {
+          const inv = outstandingInvoices.find(i => i.id === alloc.invoice_id);
+          const newPaidAmount = (Number(inv?.paid_amount) || 0) + alloc.allocated_amount;
+          const newStatus = newPaidAmount >= (Number(alloc.invoice_total) || 0) - 0.01 ? 'paid' : 'partially_paid';
+          await base44.entities.Invoice.update(alloc.invoice_id, {
+            paid_amount: newPaidAmount,
+            status: newStatus,
+          });
+        } catch {}
       }));
 
       onSaved?.();

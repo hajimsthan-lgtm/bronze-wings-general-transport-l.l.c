@@ -34,6 +34,8 @@ export default function ClientDetail() {
   const [editCharge, setEditCharge] = useState(null);
   const [invDateFrom, setInvDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [invDateTo, setInvDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const [payDateFrom, setPayDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
+  const [payDateTo, setPayDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [contactFilter, setContactFilter] = useState(null);
   const [editContactIndex, setEditContactIndex] = useState(null);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -80,6 +82,10 @@ export default function ClientDetail() {
   const displayTrips = contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips;
   const displayInvoices = contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices;
   const filteredInvoices = displayInvoices.filter(inv => !inv.issue_date || (inv.issue_date >= invDateFrom && inv.issue_date <= invDateTo));
+  const outstandingInvoices = displayInvoices
+    .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
+    .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+  const filteredPayments = payments.filter(p => !p.payment_date || (p.payment_date >= payDateFrom && p.payment_date <= payDateTo));
   const editingContact = editContactIndex != null ? client.contact_persons?.[editContactIndex] : null;
 
   const openEditContact = (index) => { setEditContactIndex(index); setEditContactOpen(true); };
@@ -252,24 +258,73 @@ export default function ClientDetail() {
         <TabsContent value="payments" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : (
             <>
-              <div className="flex justify-end mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                <div className="flex-1 max-w-md">
+                  <DateRangeFilter
+                    fromValue={payDateFrom}
+                    onFromChange={setPayDateFrom}
+                    toValue={payDateTo}
+                    onToChange={setPayDateTo}
+                    onToday={() => { setPayDateFrom(new Date().toISOString().split('T')[0]); setPayDateTo(new Date().toISOString().split('T')[0]); }}
+                  />
+                </div>
                 <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
                   <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
                 </Button>
               </div>
-              {payments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
+
+              {outstandingInvoices.length > 0 && (
+                <div className="glass-card p-3 mb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Invoices</p>
+                    <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} unpaid</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {outstandingInvoices.map(inv => {
+                      const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
+                      const isPartial = (Number(inv.paid_amount) || 0) > 0;
+                      return (
+                        <div key={inv.id} className="flex items-center gap-3">
+                          <span className="text-xs font-medium text-foreground flex-1 min-w-0 truncate">{inv.invoice_number}</span>
+                          {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
+                          <span className="text-[10px] text-muted-foreground">{formatDate(inv.issue_date)}</span>
+                          <span className="text-xs font-semibold text-foreground tabular-nums">{formatCurrency(balance)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {filteredPayments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
                 <div className="space-y-2">
-                  {payments.map(p => (
-                    <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="glass-card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-primary" /></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
+                  {filteredPayments.map(p => {
+                    const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
+                    const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
+                    return (
+                      <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="glass-card p-3 cursor-pointer hover:border-primary/30 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-primary" /></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
+                            <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
+                          </div>
+                          {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
+                          <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
+                          <StatusBadge status={p.status} />
+                        </div>
+                        {allocs.length > 0 && (
+                          <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1.5">
+                            {allocs.map(a => (
+                              <span key={a.invoice_id} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 whitespace-nowrap">
+                                {a.invoice_number}: {formatCurrency(a.allocated_amount)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
-                      <StatusBadge status={p.status} />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </>
