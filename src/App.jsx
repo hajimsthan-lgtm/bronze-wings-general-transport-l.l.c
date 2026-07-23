@@ -37,7 +37,6 @@ import ClientDetail from '@/pages/admin/ClientDetail';
 import VendorDetail from '@/pages/admin/VendorDetail';
 import Settings from '@/pages/Settings';
 import PromptGenerator from '@/pages/PromptGenerator';
-import ProjectDashboard from '@/pages/ProjectDashboard';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -87,7 +86,6 @@ const AuthenticatedApp = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/prompt-generator" element={<PromptGenerator />} />
         </Route>
-        <Route path="/projects" element={<ProjectDashboard />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
