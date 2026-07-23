@@ -12,6 +12,9 @@ import { Inbox, Wallet, Receipt } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
 
+const RAIL_COLORS = { active:'#22c55e', completed:'#22c55e', paid:'#22c55e', done:'#22c55e', pending:'#f59e0b', partial:'#f59e0b', maintenance:'#f59e0b', on_leave:'#f59e0b', scheduled:'#3b82f6', in_transit:'#3b82f6', in_progress:'#3b82f6', sent:'#3b82f6', draft:'#3b82f6', expired:'#ef4444', terminated:'#ef4444', cancelled:'#ef4444', rejected:'#ef4444', inactive:'#64748b' };
+const railColor = (s) => RAIL_COLORS[s] || '#3b82f6';
+
 export default function DriverDetail() {
   const { id } = useParams();
   const { t } = useI18n();
@@ -104,7 +107,7 @@ export default function DriverDetail() {
       />
 
       <Tabs defaultValue={initialTab}>
-        <TabsList className="bg-card border border-border">
+        <TabsList className="bg-transparent border-0 p-0 h-auto">
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
           <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
@@ -113,16 +116,21 @@ export default function DriverDetail() {
         <TabsContent value="trips" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fTrips.map(trip => (
-                <div key={trip.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
+              {fTrips.map(trip => {
+                const accent = railColor(trip.status);
+                return (
+                <div key={trip.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
+                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
+                  <div className="flex-1 min-w-0 pl-2">
                     <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
                     <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</span>
                   <StatusBadge status={trip.status} />
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
@@ -130,17 +138,22 @@ export default function DriverDetail() {
         <TabsContent value="salary" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fSalaries.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fSalaries.map(rec => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wallet className="w-4 h-4 text-emerald-400" /></div>
+              {fSalaries.map(rec => {
+                const accent = railColor(rec.status);
+                return (
+                <div key={rec.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
+                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 ml-1.5"><Wallet className="w-4 h-4 text-emerald-400" /></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
                     <p className="text-xs text-muted-foreground">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.net_salary)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
@@ -148,16 +161,21 @@ export default function DriverDetail() {
         <TabsContent value="expenses" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fExpenses.map(rec => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
+              {fExpenses.map(rec => {
+                const accent = railColor(rec.status);
+                return (
+                <div key={rec.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
+                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
+                  <div className="flex-1 min-w-0 pl-2">
                     <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
                     <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.amount)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </TabsContent>
