@@ -19,24 +19,26 @@ import ResetPassword from '@/pages/ResetPassword';
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
 
-// Pages
-import Dashboard from '@/pages/Dashboard';
-import Operations from '@/pages/Operations';
-import Expenses from '@/pages/Expenses';
-import DailyReport from '@/pages/DailyReport';
-import ProfitLoss from '@/pages/ProfitLoss';
-import Soa from '@/pages/Soa';
-import Vehicles from '@/pages/admin/Vehicles';
-import Drivers from '@/pages/admin/Drivers';
-import Clients from '@/pages/admin/Clients';
-import Vendors from '@/pages/admin/Vendors';
-import Documents from '@/pages/admin/Documents';
-import VehicleDetail from '@/pages/admin/VehicleDetail';
-import DriverDetail from '@/pages/admin/DriverDetail';
-import ClientDetail from '@/pages/admin/ClientDetail';
-import VendorDetail from '@/pages/admin/VendorDetail';
-import Settings from '@/pages/Settings';
-import PromptGenerator from '@/pages/PromptGenerator';
+// Pages — code-split for smaller initial bundle on mobile WebView
+import { lazy, Suspense } from 'react';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Operations = lazy(() => import('@/pages/Operations'));
+const Expenses = lazy(() => import('@/pages/Expenses'));
+const DailyReport = lazy(() => import('@/pages/DailyReport'));
+const ProfitLoss = lazy(() => import('@/pages/ProfitLoss'));
+const Soa = lazy(() => import('@/pages/Soa'));
+const Vehicles = lazy(() => import('@/pages/admin/Vehicles'));
+const Drivers = lazy(() => import('@/pages/admin/Drivers'));
+const Clients = lazy(() => import('@/pages/admin/Clients'));
+const Vendors = lazy(() => import('@/pages/admin/Vendors'));
+const Documents = lazy(() => import('@/pages/admin/Documents'));
+const VehicleDetail = lazy(() => import('@/pages/admin/VehicleDetail'));
+const DriverDetail = lazy(() => import('@/pages/admin/DriverDetail'));
+const ClientDetail = lazy(() => import('@/pages/admin/ClientDetail'));
+const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -59,6 +61,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
+    <Suspense fallback={<LoadingSpinner />}>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -90,6 +93,7 @@ const AuthenticatedApp = () => {
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
@@ -8,6 +8,7 @@ import {
 import { useI18n } from '@/lib/i18n';
 import { formatCurrency } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import QuickActions from '@/components/dashboard/QuickActions';
 import { motion } from 'framer-motion';
 import {
@@ -100,23 +101,22 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [expenses, setExpenses] = useState([]);
 
+  const loadData = useCallback(async () => {
+    const tr = await base44.entities.Trip.list('-created_date', 50).catch(() => []);
+    const inv = await base44.entities.Invoice.list('-created_date', 50).catch(() => []);
+    const v = await base44.entities.Vehicle.list().catch(() => []);
+    const d = await base44.entities.Document.list().catch(() => []);
+    const e = await base44.entities.Expense.list('-created_date', 50).catch(() => []);
+    setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const tr = await base44.entities.Trip.list('-created_date', 50).catch(() => []);
-        const inv = await base44.entities.Invoice.list('-created_date', 50).catch(() => []);
-        const v = await base44.entities.Vehicle.list().catch(() => []);
-        const d = await base44.entities.Document.list().catch(() => []);
-        const e = await base44.entities.Expense.list('-created_date', 50).catch(() => []);
-        if (cancelled) return;
-        setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      try { await loadData(); } finally { if (!cancelled) setLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadData]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -184,6 +184,7 @@ export default function Dashboard() {
   const invStatusColor = (s) => s === 'paid' ? '#10b981' : s === 'sent' ? '#3b82f6' : s === 'overdue' ? '#ef4444' : '#f59e0b';
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <div className="space-y-6">
       {/* Subtitle */}
       <motion.div
@@ -372,5 +373,6 @@ export default function Dashboard() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

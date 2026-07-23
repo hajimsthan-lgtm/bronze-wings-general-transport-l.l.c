@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Wallet, Receipt, PiggyBank, TrendingUp, TrendingDown } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
@@ -28,13 +29,16 @@ export default function ProfitLoss() {
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
 
-  useEffect(() => {
-    Promise.all([
+  const loadData = useCallback(async () => {
+    const [t, e, f] = await Promise.all([
       base44.entities.Trip.list('-trip_date', 500),
       base44.entities.Expense.list('-date', 500),
       base44.entities.FuelRecord.list('-date', 500),
-    ]).then(([t, e, f]) => { setTrips(t); setExpenses(e); setFuelRecords(f); }).finally(() => setLoading(false));
+    ]);
+    setTrips(t); setExpenses(e); setFuelRecords(f);
   }, []);
+
+  useEffect(() => { loadData().finally(() => setLoading(false)); }, [loadData]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -107,6 +111,7 @@ export default function ProfitLoss() {
   );
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <div className="relative">
       {/* Ambient background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
@@ -228,7 +233,7 @@ export default function ProfitLoss() {
       {/* Comparison mini-cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         {[{ label: 'vs Last Week', pct: cmpWeek }, { label: 'vs Last Month', pct: cmpMonth }, { label: 'vs Last Year', pct: cmpYear }].map((c, i) => (
-          <div key={c.label} className="rounded-2xl p-4 animate-fade-in-up" style={{ animationDelay: `${0.4 + i * 0.08}s`, background: 'linear-gradient(165deg, rgba(59,130,246,0.10) 0%, rgba(12,16,26,0.55) 100%)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div key={c.label} className="rounded-2xl p-4 animate-fade-in-up" style={{ animationDelay: `${0.4 + i * 0.08}s`, background: '#232636', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '-6px -6px 12px rgba(255,255,255,0.04), 6px 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
             <p className="text-[10px] uppercase tracking-wider text-white/40">{c.label}</p>
             <p className="text-lg font-bold mt-1 tabular-nums" style={{ color: c.pct == null ? 'rgba(255,255,255,0.3)' : c.pct >= 0 ? '#4ade80' : '#f87171' }}>
               {c.pct == null ? '—' : `${c.pct >= 0 ? '↑' : '↓'} ${Math.abs(c.pct).toFixed(1)}%`}
@@ -237,5 +242,6 @@ export default function ProfitLoss() {
         ))}
       </div>
     </div>
+    </PullToRefresh>
   );
 }

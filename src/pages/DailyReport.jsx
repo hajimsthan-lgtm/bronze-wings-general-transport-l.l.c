@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import ReportStatCard, { hexToRgba } from '@/components/reports/ReportStatCard';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
@@ -14,12 +15,10 @@ import BarTrendChart from '@/components/reports/BarTrendChart';
 import RadialGauge from '@/components/reports/RadialGauge';
 
 const contentCardStyle = {
-  background: 'linear-gradient(180deg, rgba(20,24,38,0.60) 0%, rgba(14,18,30,0.70) 100%)',
-  backdropFilter: 'blur(32px)',
-  WebkitBackdropFilter: 'blur(32px)',
-  border: '1px solid rgba(255,255,255,0.04)',
-  borderRadius: '20px',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.35)',
+  background: '#232636',
+  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: '24px',
+  boxShadow: '-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)',
 };
 
 const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)';
@@ -43,20 +42,25 @@ export default function DailyReport() {
   const [fuelRecords, setFuelRecords] = useState([]);
   const [invoices, setInvoices] = useState([]);
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
+  const loadData = useCallback(async () => {
+    const [t, e, f, i] = await Promise.all([
       base44.entities.Trip.list('-trip_date', 500),
       base44.entities.Expense.list('-date', 500),
       base44.entities.FuelRecord.list('-date', 500),
       base44.entities.Invoice.list('-issue_date', 500),
-    ]).then(([t, e, f, i]) => {
-      setTrips((t || []).filter(x => !x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo)));
-      setExpenses((e || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
-      setFuelRecords((f || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
-      setInvoices((i || []).filter(x => !x.issue_date || (x.issue_date >= dateFrom && x.issue_date <= dateTo)));
-    }).finally(() => setLoading(false));
+    ]);
+    setTrips((t || []).filter(x => !x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo)));
+    setExpenses((e || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
+    setFuelRecords((f || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
+    setInvoices((i || []).filter(x => !x.issue_date || (x.issue_date >= dateFrom && x.issue_date <= dateTo)));
   }, [dateFrom, dateTo]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    loadData().finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [loadData]);
 
   const revenue = trips.reduce((s, t) => s + (t.revenue || 0), 0);
   const expenseTotal = expenses.reduce((s, e) => s + (e.amount || 0), 0);
@@ -86,6 +90,7 @@ export default function DailyReport() {
   const driverRanking = Object.entries(driverPerf).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
   return (
+    <PullToRefresh onRefresh={loadData}>
     <div className="relative">
       {/* Ambient background orbs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
@@ -213,5 +218,6 @@ export default function DailyReport() {
         </div>
       )}
     </div>
+    </PullToRefresh>
   );
 }

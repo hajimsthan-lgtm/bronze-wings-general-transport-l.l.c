@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -85,11 +85,28 @@ export default function Operations() {
   const [clientMap, setClientMap] = useState({});
   const [clientsList, setClientsList] = useState([]);
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState('trip');
   const [editTrip, setEditTrip] = useState(null);
   const [editContract, setEditContract] = useState(null);
-  const [detailTrip, setDetailTrip] = useState(null);
+
+  // Trip detail sheet is URL-backed so Android hardware back closes it.
+  const detailTripId = searchParams.get('tripId');
+  const detailTripOpen = searchParams.get('open') === 'trip-detail';
+  const detailTrip = detailTripOpen && detailTripId ? (trips.find((t) => t.id === detailTripId) || null) : null;
+  const openDetailTrip = (trip) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('open', 'trip-detail');
+    next.set('tripId', trip.id);
+    setSearchParams(next);
+  };
+  const closeDetailTrip = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('open');
+    next.delete('tripId');
+    setSearchParams(next, { replace: true });
+  };
 
   const loadContracts = useCallback(async () => {
     setContractsLoading(true);
@@ -188,7 +205,7 @@ export default function Operations() {
 
   const handleDeleteTrip = async (trip) => {
     await deleteTrip.mutateAsync(trip.id);
-    setDetailTrip(null);
+    closeDetailTrip();
   };
   const handleDeleteContract = async (c) => {
     if (!confirm(`${t('delete')} "${c.company_name}"?`)) return;
@@ -242,7 +259,7 @@ export default function Operations() {
   const tripGrid = (list) => (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {list.map((trip) => (
-        <TripCard key={trip.id} trip={trip} onClick={setDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
+        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
       ))}
     </div>
   );
@@ -321,7 +338,7 @@ export default function Operations() {
                 {mode === 'all' && <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>}
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
-                  : <TripsTable trips={filteredTrips} onOpenDetail={setDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
+                  : <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
               </div>
             )}
             {showContracts && filteredContracts.length > 0 && (
@@ -348,8 +365,8 @@ export default function Operations() {
       <TripDetailSheet
         trip={detailTrip}
         contactPersons={clientsList.find((c) => c.name === detailTrip?.client_name)?.contact_persons}
-        onClose={() => setDetailTrip(null)}
-        onEdit={(trip) => { setDetailTrip(null); openEditTrip(trip); }}
+        onClose={closeDetailTrip}
+        onEdit={(trip) => { closeDetailTrip(); openEditTrip(trip); }}
         onDelete={handleDeleteTrip}
       />
     </div>

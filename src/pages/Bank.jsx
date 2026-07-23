@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ export default function Bank() {
   const totalDebits = dateFiltered.filter(t => t.type === 'debit').reduce((s, t) => s + (t.amount || 0), 0);
 
   return (
+    <PullToRefresh onRefresh={load}>
     <div>
       <PageHeader title={t('bank')} description="Bank transactions & reconciliation"
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
@@ -100,6 +102,7 @@ export default function Bank() {
         </SheetContent>
       </Sheet>
     </div>
+    </PullToRefresh>
   );
 }
 

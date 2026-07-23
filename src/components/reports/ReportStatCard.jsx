@@ -33,41 +33,31 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
 
   return (
     <div
-      className="relative overflow-hidden p-5 animate-fade-in-up hover:-translate-y-[3px] hover:scale-[1.01] transition-transform duration-300 group"
+      className="relative overflow-hidden p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group"
       style={{
         animationDelay: `${index * 0.08}s`,
-        transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        background: `linear-gradient(165deg, ${rgba(0.18)} 0%, ${rgba(0.06)} 40%, rgba(12,16,26,0.55) 100%)`,
-        backdropFilter: 'blur(24px) saturate(1.4)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+        background: '#232636',
         border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '20px',
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px ${rgba(0.08)}`,
+        borderRadius: '24px',
+        boxShadow: `-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)`,
       }}
     >
       <div className="flex items-start justify-between mb-4">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50 pt-1.5">{label}</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] pt-1.5">{label}</p>
         {Icon && (
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          <span
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
             style={{
-              background: `radial-gradient(circle, ${rgba(0.25)} 0%, transparent 70%)`,
-              border: `1.5px solid ${rgba(0.30)}`,
-              boxShadow: `0 0 16px ${rgba(0.20)}, inset 0 1px 0 rgba(255,255,255,0.10)`,
+              background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+              boxShadow: `0 4px 12px ${rgba(0.3)}`,
             }}
           >
-            <Icon className="w-[18px] h-[18px] text-white/70" />
-          </div>
+            <Icon className="w-5 h-5" />
+          </span>
         )}
       </div>
-      <p className="text-3xl font-bold tabular-nums font-display tracking-tight" style={{ color: 'rgba(255,255,255,0.92)' }}>
-        {display}
-      </p>
+      <p className="text-4xl font-light text-white tabular-nums tracking-tight">{display}</p>
       {extra && <div className="mt-3 flex items-center justify-between gap-2 relative z-10">{extra}</div>}
-      <div
-        className="mt-4"
-        style={{ height: 2, background: `linear-gradient(90deg, transparent, ${rgba(0.5)}, transparent)`, opacity: 0.6 }}
-      />
     </div>
   );
 }
