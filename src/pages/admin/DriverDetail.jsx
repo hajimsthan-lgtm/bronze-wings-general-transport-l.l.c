@@ -107,7 +107,7 @@ export default function DriverDetail() {
       />
 
       <Tabs defaultValue={initialTab}>
-        <TabsList className="bg-transparent border-0 p-0 h-auto">
+        <TabsList className="rounded-xl p-1.5 gap-1.5" style={{ background:'#1a1a2e', border:'1px solid rgba(255,255,255,0.06)' }}>
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
           <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
@@ -119,14 +119,13 @@ export default function DriverDetail() {
               {fTrips.map(trip => {
                 const accent = railColor(trip.status);
                 return (
-                <div key={trip.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
-                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
+                <div key={trip.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
                   <div className="flex-1 min-w-0 pl-2">
-                    <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
+                    <p className="text-[15px] font-semibold text-white truncate">{trip.from_location} → {trip.to_location}</p>
+                    <p className="text-xs text-white/40 mt-0.5">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</span>
+                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(trip.revenue)}</span>
                   <StatusBadge status={trip.status} />
                 </div>
                 );
@@ -141,15 +140,14 @@ export default function DriverDetail() {
               {fSalaries.map(rec => {
                 const accent = railColor(rec.status);
                 return (
-                <div key={rec.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
-                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 ml-1.5"><Wallet className="w-4 h-4 text-emerald-400" /></div>
+                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ml-1.5" style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
-                    <p className="text-xs text-muted-foreground">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
+                    <p className="text-[15px] font-semibold text-white">{rec.month} {rec.year}</p>
+                    <p className="text-xs text-white/40 mt-0.5">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</span>
+                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.net_salary)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
                 );
@@ -164,14 +162,13 @@ export default function DriverDetail() {
               {fExpenses.map(rec => {
                 const accent = railColor(rec.status);
                 return (
-                <div key={rec.id} className="group relative rounded-2xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-300 hover:-translate-y-0.5" style={{ background:'linear-gradient(180deg,#1c1c20,#161618)', border:'1px solid rgba(255,255,255,0.07)', boxShadow:'0 4px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-r-full" style={{ background: accent, boxShadow:`0 0 8px ${accent}80` }} />
-                  <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ boxShadow:'0 0 0 1px rgba(59,130,246,0.25), 0 0 22px -6px rgba(59,130,246,0.35)' }} />
+                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
                   <div className="flex-1 min-w-0 pl-2">
-                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                    <p className="text-[15px] font-semibold text-white truncate">{rec.description || rec.category}</p>
+                    <p className="text-xs text-white/40 mt-0.5 capitalize">{rec.category} · {formatDate(rec.date)}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</span>
+                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.amount)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
                 );
