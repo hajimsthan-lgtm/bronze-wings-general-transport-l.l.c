@@ -33,7 +33,7 @@ export default function ContractModeFields({ p }) {
       {/* Contract Details */}
       <Section title={t('contract_period')}>
         <div>
-          <Label className="text-xs text-muted-foreground mb-1.5">{t('contract_company')}</Label>
+          <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
           <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} className={inputCls} />
           <datalist id="contract-company-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
           {isNewClient && (
@@ -43,11 +43,11 @@ export default function ContractModeFields({ p }) {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('start_date')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('start_date')}</Label>
             <Input type="date" value={contract.start_date} onChange={(e) => updateContract('start_date', e.target.value)} className={`${inputCls} date-input-clean`} />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('end_date')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('end_date')}</Label>
             <Input type="date" value={contract.end_date} onChange={(e) => updateContract('end_date', e.target.value)} className={`${inputCls} date-input-clean`} />
           </div>
         </div>
@@ -60,11 +60,11 @@ export default function ContractModeFields({ p }) {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('monthly_rate')} (AED)</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('monthly_rate')} (AED)</Label>
             <Input type="number" value={contract.monthly_rate} onChange={(e) => updateContract('monthly_rate', e.target.value)} className={inputCls} />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('contract_status')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('contract_status')}</Label>
             <Select value={contract.status} onValueChange={(v) => updateContract('status', v)}>
               <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -81,7 +81,7 @@ export default function ContractModeFields({ p }) {
       <Section title="Assignment">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('chiller_van')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('chiller_van')}</Label>
             <Input list="contract-vehicle-suggestions" value={contract.vehicle_plate} onChange={(e) => updateContract('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
             <datalist id="contract-vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
             {isNewVehicle && (
@@ -90,7 +90,7 @@ export default function ContractModeFields({ p }) {
             )}
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('assigned_driver')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('assigned_driver')}</Label>
             <Input list="contract-driver-suggestions" value={contract.driver_name} onChange={(e) => updateContract('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
             <datalist id="contract-driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
             {isNewDriver && (
@@ -128,28 +128,28 @@ export default function ContractModeFields({ p }) {
         <div className="glass-card p-3 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label>
+              <Label className="text-xs text-white/60 mb-1.5">{t('date')}</Label>
               <Input type="date" value={expenseForm.date} onChange={(e) => setExpenseForm((f) => ({ ...f, date: e.target.value }))} className={`${inputCls} date-input-clean`} />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground mb-1.5">{t('amount')} (AED)</Label>
+              <Label className="text-xs text-white/60 mb-1.5">{t('amount')} (AED)</Label>
               <Input type="number" value={expenseForm.amount} onChange={(e) => setExpenseForm((f) => ({ ...f, amount: e.target.value }))} className={inputCls} />
             </div>
           </div>
           {activeCat === 'fuel' && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">{t('liters')}</Label>
+                <Label className="text-xs text-white/60 mb-1.5">{t('liters')}</Label>
                 <Input type="number" value={expenseForm.liters} onChange={(e) => setExpenseForm((f) => ({ ...f, liters: e.target.value }))} className={inputCls} />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">{t('price_per_liter')}</Label>
+                <Label className="text-xs text-white/60 mb-1.5">{t('price_per_liter')}</Label>
                 <Input type="number" value={expenseForm.price_per_liter} onChange={(e) => setExpenseForm((f) => ({ ...f, price_per_liter: e.target.value }))} className={inputCls} />
               </div>
             </div>
           )}
           <div>
-            <Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('description')}</Label>
             <Input value={expenseForm.description} onChange={(e) => setExpenseForm((f) => ({ ...f, description: e.target.value }))} className={inputCls} />
           </div>
           <Button type="button" variant="outline" onClick={addExpense} className="w-full border-border border-dashed">

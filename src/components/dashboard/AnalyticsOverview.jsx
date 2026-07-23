@@ -51,7 +51,7 @@ export default function AnalyticsOverview() {
       <div className="rounded-2xl p-5 relative overflow-hidden" style={GLASS}>
         <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent)' }} />
         <div className="absolute inset-x-0 top-0 h-16 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 60%)' }} />
-        <h2 className="relative text-sm font-semibold text-white/80 mb-4">Revenue Trend</h2>
+        <h2 className="relative text-sm font-semibold text-white/90 mb-4">Revenue Trend</h2>
         <ResponsiveContainer width="100%" height={210}>
           <AreaChart data={REVENUE_DATA} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
             <defs>
@@ -83,7 +83,7 @@ export default function AnalyticsOverview() {
       {/* Expense breakdown donut */}
       <div className="rounded-2xl p-5 relative overflow-hidden" style={GLASS}>
         <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent)' }} />
-        <h2 className="relative text-sm font-semibold text-white/80 mb-4">Expense Breakdown</h2>
+        <h2 className="relative text-sm font-semibold text-white/90 mb-4">Expense Breakdown</h2>
         <div className="flex items-center gap-4">
           <div className="relative flex-shrink-0">
             <ResponsiveContainer width={160} height={160}>
@@ -109,7 +109,7 @@ export default function AnalyticsOverview() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[10px] uppercase tracking-wider text-white/40">Total</span>
+              <span className="text-[10px] uppercase tracking-wider text-white/60">Total</span>
               <span className="text-lg font-bold text-white">
                 <CountUp value={expenseTotal} decimals={2} prefix="AED " />
               </span>
@@ -121,9 +121,9 @@ export default function AnalyticsOverview() {
               return (
                 <div key={d.name} className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.color, boxShadow: `0 0 6px ${d.color}80` }} />
-                  <span className="text-xs text-white/70 flex-1 truncate">{d.name}</span>
-                  <span className="text-xs text-white/40 tabular-nums">{formatCurrency(d.value)}</span>
-                  <span className="text-xs text-white/30 w-9 text-right tabular-nums">{pct}%</span>
+                  <span className="text-xs text-white/85 flex-1 truncate">{d.name}</span>
+                  <span className="text-xs text-white/60 tabular-nums">{formatCurrency(d.value)}</span>
+                  <span className="text-xs text-white/55 w-9 text-right tabular-nums">{pct}%</span>
                 </div>
               );
             })}

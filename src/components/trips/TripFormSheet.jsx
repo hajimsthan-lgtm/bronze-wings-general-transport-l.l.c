@@ -346,7 +346,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const overtimeMetric = Math.max(0, calculatedDurationNum - maxAllowedNum);
   const extraCharges = overtimeMetric * (Number(form.overtime_rate) || 0);
   const isOvertime = overtimeMetric > 0 && form.load_datetime && form.offload_datetime;
-  const inputCls = 'bg-background/50 border-border backdrop-blur-sm';
+  const inputCls = 'bg-white/[0.04] border-white/15 backdrop-blur-sm';
 
   const tripNumberOverridden = !!form.trip_number && form.trip_number !== autoTripNumber;
   const revenueOverridden = revenueOverride && Number(form.revenue) !== autoRevenue;
@@ -379,7 +379,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] max-w-4xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
+      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-4xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
         <DialogHeader className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <DialogTitle className="font-display text-foreground text-lg">{title}</DialogTitle>

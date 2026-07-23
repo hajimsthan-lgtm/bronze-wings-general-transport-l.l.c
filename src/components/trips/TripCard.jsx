@@ -106,7 +106,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
           </span>
           <button
             onClick={copyTripNumber}
-            className="text-xs font-mono font-semibold text-white/70 tracking-wider hover:text-[#60a5fa] transition-colors flex items-center gap-1 min-w-0"
+            className="text-xs font-mono font-semibold text-white/85 tracking-wider hover:text-[#60a5fa] transition-colors flex items-center gap-1 min-w-0"
             title="Click to copy trip number"
           >
             <span className="truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
@@ -179,7 +179,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
           >
             <span className="text-lg font-bold text-white tabular-nums leading-tight">{formatCurrency(trip.revenue)}</span>
             {trip.trip_type === 'hourly' && trip.hours > 0 && (
-              <span className="text-[10px] text-white/70 leading-tight">({trip.hours} Hours)</span>
+              <span className="text-[10px] text-white/85 leading-tight">({trip.hours} Hours)</span>
             )}
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
       {/* Route visualizer */}
       <div className="relative flex items-center gap-2 mb-4">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">from</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">from</p>
           <p className="text-sm font-semibold text-white truncate">{trip.from_location}</p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 pb-1">
@@ -197,7 +197,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
           <span className="w-2 h-2 rounded-full bg-[#f59e0b]" style={{ boxShadow: '0 0 8px rgba(245,158,11,0.7)' }} />
         </div>
         <div className="flex-1 min-w-0 text-right">
-          <p className="text-[9px] uppercase tracking-wider text-white/30 mb-0.5">to</p>
+          <p className="text-[9px] uppercase tracking-wider text-white/60 mb-0.5">to</p>
           <p className="text-sm font-semibold text-white truncate">{trip.to_location}</p>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
         {trip.driver_name && (
           <button
             onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/90 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
           >
             <User className="w-3 h-3 text-[#60a5fa]" /> {trip.driver_name}
           </button>
@@ -215,7 +215,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
         {trip.vehicle_plate && (
           <button
             onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/90 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
           >
             <TruckIcon className="w-3 h-3 text-[#60a5fa]" /> {trip.vehicle_plate}
           </button>
@@ -223,17 +223,17 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
         {trip.client_name && (
           <button
             onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/90 hover:bg-white/10 hover:border-blue-500/30 transition-colors"
           >
             <Building2 className="w-3 h-3 text-[#60a5fa]" /> {trip.client_name}
           </button>
         )}
         {trip.delivery_note_number && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/90">
             <FileText className="w-3 h-3 text-[#60a5fa]" /> {trip.delivery_note_number}
           </span>
         )}
-        <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/80">
+        <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-white/90">
           <Calendar className="w-3 h-3 text-[#60a5fa]" /> {formatDate(trip.trip_date)}
         </span>
       </div>

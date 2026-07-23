@@ -18,7 +18,7 @@ export default function QuickActions() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
-      <h2 className="text-[11px] uppercase tracking-wider font-semibold text-white/40 mb-2.5">Quick Actions</h2>
+      <h2 className="text-[11px] uppercase tracking-wider font-semibold text-white/60 mb-2.5">Quick Actions</h2>
       <div className="flex md:grid md:grid-cols-5 gap-2.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
         {ACTIONS.map((a, i) => (
           <motion.button
@@ -49,7 +49,7 @@ export default function QuickActions() {
             >
               <a.icon className="w-5 h-5" style={{ color: a.color }} />
             </span>
-            <span className="relative text-sm font-medium text-white/70 whitespace-nowrap">{a.label}</span>
+            <span className="relative text-sm font-medium text-white/85 whitespace-nowrap">{a.label}</span>
           </motion.button>
         ))}
       </div>

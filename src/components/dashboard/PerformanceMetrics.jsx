@@ -45,10 +45,10 @@ export default function PerformanceMetrics() {
               <p className="text-xl font-bold text-white leading-none">
                 <CountUp value={m.value} decimals={m.decimals} prefix={m.prefix || ''} suffix={m.suffix || ''} duration={1500} />
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-white/40 mt-1.5">{m.label}</p>
+              <p className="text-[10px] uppercase tracking-wider text-white/60 mt-1.5">{m.label}</p>
             </div>
           </div>
-          <p className="relative text-xs text-white/30 mt-2.5">{m.sub}</p>
+          <p className="relative text-xs text-white/55 mt-2.5">{m.sub}</p>
         </motion.div>
       ))}
     </motion.div>

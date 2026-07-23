@@ -61,7 +61,7 @@ export default function TopBar() {
                   key={item.path}
                   to={item.path}
                   className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-300 ${
-                    isActive ? 'text-blue-400' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+                    isActive ? 'text-blue-400' : 'text-white/65 hover:text-white/90 hover:bg-white/5'
                   }`}
                   style={isActive ? {
                     background: 'linear-gradient(135deg, rgba(59,130,246,0.20) 0%, rgba(15,23,42,0.80) 100%)',
