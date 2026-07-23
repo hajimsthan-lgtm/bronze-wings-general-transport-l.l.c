@@ -23,7 +23,7 @@ import { formatDate } from '@/lib/formatters';
 
 const STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 
-export default function Trips() {
+export default function TripsView() {
   const { t } = useI18n();
   const { data: trips = [], isLoading: loading, refetch } = useTrips();
   const deleteTrip = useTripDelete();
@@ -152,7 +152,7 @@ export default function Trips() {
           description="Create your first trip to get started"
           action={
           <Button onClick={() => {setEditTrip(null);setFormOpen(true);}} variant="outline" className="border-border">
-              <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
+            <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
             </Button>
           } /> :
 

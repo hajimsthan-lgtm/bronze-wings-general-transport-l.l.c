@@ -15,7 +15,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 const STATUSES = ['all', 'active', 'expired', 'terminated'];
 
-export default function Contracts() {
+export default function ContractsView() {
   const { t } = useI18n();
   const { toast } = useToast();
   const [contracts, setContracts] = useState([]);
