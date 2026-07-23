@@ -43,6 +43,13 @@ function DriversTab() {
   const load = () => {setLoading(true);base44.entities.Driver.list('-created_date', 100).then(setItems).finally(() => setLoading(false));};
   useEffect(() => {load();}, []);
 
+  // Auto-open the new-driver form when arriving via ?new=1 (Dashboard quick action)
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filtered = items.filter((d) => !search || d.name?.toLowerCase().includes(search.toLowerCase()) || d.phone?.includes(search));
 
   return (

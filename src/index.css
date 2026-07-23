@@ -107,8 +107,9 @@
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      0 6px 20px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.015);
   }
   .glass-card::before {
     content: '';
@@ -120,11 +121,12 @@
   .glass-card:hover,
   .clay-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(59, 130, 246, 0.5);
+    border-color: rgba(59, 130, 246, 0.45);
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.5),
-      0 0 16px -8px rgba(59, 130, 246, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      0 10px 30px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(59, 130, 246, 0.18),
+      0 0 28px -8px rgba(59, 130, 246, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* hover variant used across the app */
@@ -137,8 +139,8 @@
   }
   .glass-card-hover:hover {
     transform: translateY(-2px);
-    border-color: rgba(59,130,246,0.5);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.5), 0 0 16px -8px rgba(59,130,246,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+    border-color: rgba(59,130,246,0.45);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.18), 0 0 26px -8px rgba(59,130,246,0.38), inset 0 1px 0 rgba(255,255,255,0.08);
   }
 
   /* ========== 2026 Entity Card (grid) ========== */
@@ -334,9 +336,10 @@
     transform: translateY(-2px);
     border-color: rgba(59, 130, 246, 0.45);
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.5),
-      0 0 16px -8px rgba(59, 130, 246, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      0 10px 30px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(59, 130, 246, 0.18),
+      0 0 28px -8px rgba(59, 130, 246, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   .stat-tile:hover::after {
     opacity: 1;

@@ -72,6 +72,13 @@ export default function ClientDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Auto-open the new-invoice form when arriving via ?new_invoice=1 (Dashboard quick action)
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('new_invoice') === '1') { setEditInvoice(null); setInvoiceFormOpen(true); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (loading) return <LoadingSpinner />;
   if (!client) return <EmptyState title="Client not found" />;
 

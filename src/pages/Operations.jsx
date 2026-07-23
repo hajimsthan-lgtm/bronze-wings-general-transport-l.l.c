@@ -174,6 +174,18 @@ export default function Operations() {
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
+  // Auto-open the new-trip form when arriving via ?new=1 (Dashboard quick action)
+  useEffect(() => {
+    const p = new URLSearchParams(location.search);
+    if (p.get('new') === '1') {
+      setFormMode('trip');
+      setEditTrip(null);
+      setEditContract(null);
+      setFormOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleDeleteTrip = async (trip) => {
     await deleteTrip.mutateAsync(trip.id);
     setDetailTrip(null);
