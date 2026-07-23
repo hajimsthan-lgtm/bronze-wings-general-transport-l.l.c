@@ -22,6 +22,7 @@ import AppLayout from '@/components/layout/AppLayout';
 // Pages
 import Dashboard from '@/pages/Dashboard';
 import Trips from '@/pages/Trips';
+import Contracts from '@/pages/Contracts';
 import Expenses from '@/pages/Expenses';
 import Fuel from '@/pages/Fuel';
 import DailyReport from '@/pages/DailyReport';
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/trips" element={<Trips />} />
+          <Route path="/contracts" element={<Contracts />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/fuel" element={<Fuel />} />
           <Route path="/reports/daily" element={<DailyReport />} />

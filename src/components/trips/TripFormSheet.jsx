@@ -29,7 +29,7 @@ const DEFAULT_CONTRACT = {
 
 const todayStr = () => new Date().toISOString().split('T')[0];
 
-export default function TripFormSheet({ open, onOpenChange, editTrip, editContract, onSaved }) {
+export default function TripFormSheet({ open, onOpenChange, editTrip, editContract, onSaved, initialMode }) {
   const { t } = useI18n();
   const createTrip = useTripCreate();
   const updateTrip = useTripUpdate();
@@ -110,7 +110,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           calculated_duration: editTrip.calculated_duration || '',
         });
       } else {
-        setMode('trip');
+        setMode(initialMode || 'trip');
         setForm({ ...DEFAULT_FORM, trip_date: todayStr() });
         setContract({ ...DEFAULT_CONTRACT });
         setExpenses([]);
@@ -318,6 +318,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         }
       }
       onOpenChange(false);
+      onSaved?.();
     } finally { setSaving(false); }
   };
 

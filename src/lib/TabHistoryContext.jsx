@@ -16,7 +16,7 @@ const TAB_ROOTS = {
  */
 export function getTabFromPath(pathname) {
   if (pathname === '/') return 'dashboard';
-  if (pathname.startsWith('/trips')) return 'operations';
+  if (pathname.startsWith('/trips') || pathname.startsWith('/contracts')) return 'operations';
   if (
     pathname.startsWith('/reports') ||
     pathname.startsWith('/expenses') ||

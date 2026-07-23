@@ -3,6 +3,11 @@ import { useI18n } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
 import ThemeToggle from '@/components/common/ThemeToggle';
 
+const operationsSubNav = [
+  { key: 'trips', path: '/trips' },
+  { key: 'contracts', path: '/contracts' },
+];
+
 const adminSubNav = [
   { key: 'vehicles', path: '/admin/vehicles' },
   { key: 'drivers', path: '/admin/drivers' },
@@ -27,6 +32,8 @@ const subNavMap = {
   '/reports/soa': reportsSubNav,
   '/expenses': reportsSubNav,
   '/fuel': reportsSubNav,
+  '/trips': operationsSubNav,
+  '/contracts': operationsSubNav,
   '/admin/vehicles': adminSubNav,
   '/admin/drivers': adminSubNav,
   '/admin/clients': adminSubNav,

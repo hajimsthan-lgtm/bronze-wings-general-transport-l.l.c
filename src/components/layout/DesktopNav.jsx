@@ -7,7 +7,7 @@ import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
 { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
-{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips'] },
+{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips', '/contracts'] },
 { key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
 { key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] }];
 
