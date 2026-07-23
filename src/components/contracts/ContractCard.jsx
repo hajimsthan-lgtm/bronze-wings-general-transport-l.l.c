@@ -56,7 +56,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
   return (
     <div
       className="group relative flex flex-col rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5"
-      style={{ background: '#1b1c22', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)' }}
+      style={{ background: '#232636', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
@@ -125,7 +125,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
       </div>
 
       {/* Footer stat pill */}
-      <div className="rounded-xl p-1.5 flex gap-1" style={{ background: '#0d0d11', border: '1px solid rgba(255,255,255,0.04)' }}>
+      <div className="rounded-xl p-1.5 flex gap-1" style={{ background: '#1e2130', border: '1px solid rgba(255,255,255,0.04)', boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.35)' }}>
         <Stat label={t('monthly_rental')} value={formatCurrency(monthlyRate)} />
         <Stat label={t('total_expenses')} value={formatCurrency(totalExpenses)} />
         <Stat label={t('net_profit')} value={formatCurrency(netProfit)} highlight tone={netProfit >= 0 ? 'eco' : 'heat'} icon={netProfit >= 0 ? TrendingUp : TrendingDown} />

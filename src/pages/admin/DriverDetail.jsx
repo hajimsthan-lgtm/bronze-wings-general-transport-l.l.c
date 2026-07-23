@@ -104,7 +104,7 @@ export default function DriverDetail() {
       />
 
       <Tabs defaultValue={initialTab}>
-        <TabsList className="rounded-xl p-1.5 gap-1.5" style={{ background:'#1a1a2e', border:'1px solid rgba(255,255,255,0.06)' }}>
+        <TabsList className="rounded-xl p-1.5 gap-1.5" style={{ background:'#232636', border:'1px solid rgba(255,255,255,0.06)', boxShadow:'-4px -4px 8px rgba(255,255,255,0.04), 4px 4px 12px rgba(0,0,0,0.3)' }}>
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
           <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
@@ -114,7 +114,7 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fTrips.map(trip => (
-                <div key={trip.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                <div key={trip.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
                   <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="flex-1 min-w-0 pl-2">
                     <p className="text-[15px] font-semibold text-white truncate">{trip.from_location} → {trip.to_location}</p>
@@ -132,7 +132,7 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fSalaries.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fSalaries.map(rec => (
-                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
                   <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ml-1.5" style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
                   <div className="flex-1 min-w-0">
@@ -151,7 +151,7 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fExpenses.map(rec => (
-                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
+                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
                   <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="flex-1 min-w-0 pl-2">
                     <p className="text-[15px] font-semibold text-white truncate">{rec.description || rec.category}</p>
