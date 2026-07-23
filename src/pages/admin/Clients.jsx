@@ -16,6 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { getInitials } from '@/lib/formatters';
 import { Plus, Search, Users, Pencil, Trash2, Phone, Mail } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
+import EntityHeroCard from '@/components/common/EntityHeroCard';
 import ClientForm from '@/components/admin/ClientForm';
 
 export default function Clients() {
@@ -43,6 +44,13 @@ export default function Clients() {
     <div>
       <PageHeader title={t('clients')} description={`${items.length} clients`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="clients" columns={exportColumns} title="Clients" /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
+      <EntityHeroCard icon={Users} title={t('clients')} total={items.length} accent="139,92,246"
+        stats={[
+          { label: 'Active', value: items.filter(c => c.status === 'active').length, color: '#34d399' },
+          { label: 'Inactive', value: items.filter(c => c.status === 'inactive').length, color: '#94a3b8' },
+        ]}
+      />
+
       <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> : (

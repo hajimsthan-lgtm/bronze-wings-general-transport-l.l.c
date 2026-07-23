@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDate, getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
+import EntityHeroCard from '@/components/common/EntityHeroCard';
 import Salary from './Salary';
 import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
 
@@ -57,6 +58,14 @@ function DriversTab() {
       <PageHeader title={t('drivers')} description={`${items.length} drivers`}
       action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       
+      <EntityHeroCard icon={User} title={t('drivers')} total={items.length} accent="59,130,246"
+        stats={[
+          { label: 'Active', value: items.filter(d => d.status === 'active').length, color: '#34d399' },
+          { label: 'On Leave', value: items.filter(d => d.status === 'on_leave').length, color: '#f59e0b' },
+          { label: 'Inactive', value: items.filter(d => d.status === 'inactive').length, color: '#94a3b8' },
+        ]}
+      />
+
       <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={User} title={t('no_data')} /> :

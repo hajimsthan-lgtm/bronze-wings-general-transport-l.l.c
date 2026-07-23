@@ -10,7 +10,7 @@ export default function AppLayout() {
   const hasSubNav = hasSubNavForPath(location.pathname);
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-[#06080f]">
+    <div className="h-[100dvh] flex flex-col relative overflow-hidden bg-[#06080f]">
       {/* ═══════════════════════════════════════════════════════
           AMBIENT BACKGROUND LAYERS
           ═══════════════════════════════════════════════════════ */}
@@ -76,12 +76,13 @@ export default function AppLayout() {
       <TopBar />
 
       {/* ═══════════════════════════════════════════════════════
-          MAIN CONTENT
+          MAIN CONTENT — fixed-height panel; body scrolls internally
+          so the page header stays pinned (unbreakable structure)
           ═══════════════════════════════════════════════════════ */}
-      <main className={`flex-1 pb-28 md:pb-20 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 ${hasSubNav ? 'pt-3 md:pt-4' : 'pt-[calc(12px+env(safe-area-inset-top))]'}`}>
+      <main className={`flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 ${hasSubNav ? 'pt-3 md:pt-4' : 'pt-[calc(12px+env(safe-area-inset-top))]'}`}>
         <div
           key={location.pathname}
-          className="animate-fade-in-up p-4 md:p-6 rounded-2xl relative overflow-hidden animate-border-pulse"
+          className="animate-fade-in-up flex-1 min-h-0 flex flex-col rounded-2xl relative overflow-hidden animate-border-pulse"
           style={{
             background: `
               linear-gradient(
@@ -124,8 +125,8 @@ export default function AppLayout() {
             }}
           />
 
-          {/* Content */}
-          <div className="relative z-10">
+          {/* Scrollable body — page header is sticky within this region */}
+          <div className="relative z-10 flex-1 min-h-0 overflow-y-auto thin-scroll p-4 md:p-6 pb-28 md:pb-24">
             <Outlet />
           </div>
         </div>

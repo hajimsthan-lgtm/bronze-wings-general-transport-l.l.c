@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDate } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
+import EntityHeroCard from '@/components/common/EntityHeroCard';
 import Services from './Services';
 import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
 
@@ -50,6 +51,14 @@ function VehiclesTab() {
       <PageHeader title={t('vehicles')} description={`${items.length} vehicles`}
       action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       
+      <EntityHeroCard icon={Truck} title={t('vehicles')} total={items.length} accent="249,115,22"
+        stats={[
+          { label: 'Active', value: items.filter(v => v.status === 'active').length, color: '#34d399' },
+          { label: 'Maintenance', value: items.filter(v => v.status === 'maintenance').length, color: '#f59e0b' },
+          { label: 'Inactive', value: items.filter(v => v.status === 'inactive').length, color: '#94a3b8' },
+        ]}
+      />
+
       <div className="relative mb-5">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />

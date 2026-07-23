@@ -6,9 +6,21 @@ export default function PullToRefresh({ onRefresh, children }) {
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
+  const wrapRef = useRef(null);
+
+  // Detect the nearest scroll container so pull-to-refresh only fires at its top
+  const scrollTop = () => {
+    let el = wrapRef.current?.parentElement;
+    while (el) {
+      const ov = window.getComputedStyle(el).overflowY;
+      if (ov === 'auto' || ov === 'scroll') return el.scrollTop;
+      el = el.parentElement;
+    }
+    return window.scrollY;
+  };
 
   const onTouchStart = (e) => {
-    if (window.scrollY <= 0 && !refreshing) {
+    if (scrollTop() <= 0 && !refreshing) {
       startY.current = e.touches[0].clientY;
       pulling.current = true;
     }
@@ -33,7 +45,7 @@ export default function PullToRefresh({ onRefresh, children }) {
   };
 
   return (
-    <div onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+    <div ref={wrapRef} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
       <div
         style={{
           transform: `translateY(${pull}px)`,
