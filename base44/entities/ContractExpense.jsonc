@@ -1,0 +1,66 @@
+{
+  "name": "ContractExpense",
+  "type": "object",
+  "properties": {
+    "contract_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "fuel",
+        "maintenance",
+        "salik_tolls",
+        "insurance",
+        "registration",
+        "other"
+      ],
+      "default": "other"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "description": {
+      "type": "string"
+    },
+    "liters": {
+      "type": "number"
+    },
+    "price_per_liter": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "contract_id",
+    "category",
+    "amount",
+    "date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

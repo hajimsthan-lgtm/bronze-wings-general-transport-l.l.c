@@ -1,0 +1,69 @@
+{
+  "name": "MonthlyContract",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "auto_renewal": {
+      "type": "boolean",
+      "default": false
+    },
+    "monthly_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "terminated"
+      ],
+      "default": "active"
+    },
+    "vehicle_plate": {
+      "type": "string"
+    },
+    "driver_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "company_name",
+    "monthly_rate"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
