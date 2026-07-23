@@ -23,7 +23,6 @@ import AppLayout from '@/components/layout/AppLayout';
 import Dashboard from '@/pages/Dashboard';
 import Operations from '@/pages/Operations';
 import Expenses from '@/pages/Expenses';
-import Fuel from '@/pages/Fuel';
 import DailyReport from '@/pages/DailyReport';
 import ProfitLoss from '@/pages/ProfitLoss';
 import Soa from '@/pages/Soa';
@@ -72,7 +71,6 @@ const AuthenticatedApp = () => {
           <Route path="/trips" element={<Operations />} />
           <Route path="/contracts" element={<Operations />} />
           <Route path="/expenses" element={<Expenses />} />
-          <Route path="/fuel" element={<Fuel />} />
           <Route path="/reports/daily" element={<DailyReport />} />
           <Route path="/reports/pnl" element={<ProfitLoss />} />
           <Route path="/reports/soa" element={<Soa />} />

@@ -106,10 +106,32 @@ export default function VehicleDetail() {
         dateRange={`${dateFrom} to ${dateTo}`}
       />
 
+      {/* Inline fuel history — always visible */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
+          <h3 className="text-sm font-semibold text-foreground">{t('fuel')}</h3>
+          <span className="text-xs text-muted-foreground">({fFuel.length})</span>
+        </div>
+        {dataLoading ? <LoadingSpinner /> : fFuel.length === 0 ? <EmptyState icon={FuelIcon} title={t('no_data')} /> : (
+          <div className="space-y-2">
+            {fFuel.map(rec => (
+              <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name}</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.total_cost)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <Tabs defaultValue="trips">
         <TabsList className="bg-card border border-border">
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
-          <TabsTrigger value="fuel">{t('fuel')} ({fFuel.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
           <TabsTrigger value="services">{t('services')} ({fServices.length})</TabsTrigger>
         </TabsList>
@@ -131,22 +153,6 @@ export default function VehicleDetail() {
           )}
         </TabsContent>
 
-        <TabsContent value="fuel" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : fFuel.length === 0 ? <EmptyState icon={FuelIcon} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {fFuel.map(rec => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.total_cost)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (

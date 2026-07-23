@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
 import TopBar, { hasSubNavForPath } from '@/components/layout/TopBar';
+import AppFooter from '@/components/layout/AppFooter';
 import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
@@ -77,7 +78,7 @@ export default function AppLayout() {
       {/* ═══════════════════════════════════════════════════════
           MAIN CONTENT
           ═══════════════════════════════════════════════════════ */}
-      <main className={`flex-1 pb-24 md:pb-8 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 ${hasSubNav ? 'pt-3 md:pt-4' : 'pt-[calc(12px+env(safe-area-inset-top))]'}`}>
+      <main className={`flex-1 pb-28 md:pb-20 px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 ${hasSubNav ? 'pt-3 md:pt-4' : 'pt-[calc(12px+env(safe-area-inset-top))]'}`}>
         <div
           key={location.pathname}
           className="animate-fade-in-up p-4 md:p-6 rounded-2xl relative overflow-hidden animate-border-pulse"
@@ -130,6 +131,7 @@ export default function AppLayout() {
         </div>
       </main>
 
+      <AppFooter />
       <MobileNav />
     </div>
   );

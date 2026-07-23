@@ -5,6 +5,7 @@ import ThemeToggle from '@/components/common/ThemeToggle';
 
 const operationsSubNav = [
   { key: 'trips', path: '/trips' },
+  { key: 'expenses', path: '/expenses' },
 ];
 
 const adminSubNav = [
@@ -19,8 +20,6 @@ const reportsSubNav = [
   { key: 'daily_report', path: '/reports/daily' },
   { key: 'profit_loss', path: '/reports/pnl' },
   { key: 'soa', path: '/reports/soa' },
-  { key: 'expenses', path: '/expenses' },
-  { key: 'fuel', path: '/fuel' },
 ];
 
 const subNavMap = {
@@ -29,8 +28,7 @@ const subNavMap = {
   '/reports/daily': reportsSubNav,
   '/reports/pnl': reportsSubNav,
   '/reports/soa': reportsSubNav,
-  '/expenses': reportsSubNav,
-  '/fuel': reportsSubNav,
+  '/expenses': operationsSubNav,
   '/trips': operationsSubNav,
   '/admin/vehicles': adminSubNav,
   '/admin/drivers': adminSubNav,
@@ -54,7 +52,7 @@ export default function TopBar() {
   if (subNav.length === 0) return null;
 
   return (
-    <div className="sticky top-0 md:top-14 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="sticky top-0 md:top-20 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12 py-2">
           {/* frosted sub-tab pill track */}

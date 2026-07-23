@@ -16,14 +16,8 @@ const TAB_ROOTS = {
  */
 export function getTabFromPath(pathname) {
   if (pathname === '/') return 'dashboard';
-  if (pathname.startsWith('/trips') || pathname.startsWith('/contracts')) return 'operations';
-  if (
-    pathname.startsWith('/reports') ||
-    pathname.startsWith('/expenses') ||
-    pathname.startsWith('/fuel')
-  ) {
-    return 'reports';
-  }
+  if (pathname.startsWith('/trips') || pathname.startsWith('/contracts') || pathname.startsWith('/expenses')) return 'operations';
+  if (pathname.startsWith('/reports')) return 'reports';
   if (pathname.startsWith('/settings')) return 'settings';
   if (pathname.startsWith('/admin')) return 'admin';
   return 'dashboard';

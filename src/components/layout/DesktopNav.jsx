@@ -7,8 +7,8 @@ import ThemeToggle from '@/components/common/ThemeToggle';
 
 const navItems = [
 { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
-{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips', '/contracts'] },
-{ key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports', '/expenses', '/fuel'] },
+{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips', '/contracts', '/expenses'] },
+{ key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports'] },
 { key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] }];
 
 
@@ -36,7 +36,7 @@ export default function DesktopNav() {
       {/* centered ambient blue light-leak */}
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
 
-      <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3 group/brand">
           <div className="relative">
