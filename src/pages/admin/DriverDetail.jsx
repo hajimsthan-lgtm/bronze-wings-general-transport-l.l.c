@@ -12,9 +12,6 @@ import { Inbox, Wallet, Receipt } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
 
-const RAIL_COLORS = { active:'#22c55e', completed:'#22c55e', paid:'#22c55e', done:'#22c55e', pending:'#f59e0b', partial:'#f59e0b', maintenance:'#f59e0b', on_leave:'#f59e0b', scheduled:'#3b82f6', in_transit:'#3b82f6', in_progress:'#3b82f6', sent:'#3b82f6', draft:'#3b82f6', expired:'#ef4444', terminated:'#ef4444', cancelled:'#ef4444', rejected:'#ef4444', inactive:'#64748b' };
-const railColor = (s) => RAIL_COLORS[s] || '#3b82f6';
-
 export default function DriverDetail() {
   const { id } = useParams();
   const { t } = useI18n();
@@ -116,11 +113,9 @@ export default function DriverDetail() {
         <TabsContent value="trips" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fTrips.map(trip => {
-                const accent = railColor(trip.status);
-                return (
+              {fTrips.map(trip => (
                 <div key={trip.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="flex-1 min-w-0 pl-2">
                     <p className="text-[15px] font-semibold text-white truncate">{trip.from_location} → {trip.to_location}</p>
                     <p className="text-xs text-white/40 mt-0.5">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
@@ -128,8 +123,7 @@ export default function DriverDetail() {
                   <span className="text-base font-bold text-white tabular-nums">{formatCurrency(trip.revenue)}</span>
                   <StatusBadge status={trip.status} />
                 </div>
-                );
-              })}
+              ))}
             </div>
           )}
         </TabsContent>
@@ -137,11 +131,9 @@ export default function DriverDetail() {
         <TabsContent value="salary" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fSalaries.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fSalaries.map(rec => {
-                const accent = railColor(rec.status);
-                return (
+              {fSalaries.map(rec => (
                 <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ml-1.5" style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[15px] font-semibold text-white">{rec.month} {rec.year}</p>
@@ -150,8 +142,7 @@ export default function DriverDetail() {
                   <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.net_salary)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
-                );
-              })}
+              ))}
             </div>
           )}
         </TabsContent>
@@ -159,11 +150,9 @@ export default function DriverDetail() {
         <TabsContent value="expenses" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
             <div className="space-y-2">
-              {fExpenses.map(rec => {
-                const accent = railColor(rec.status);
-                return (
+              {fExpenses.map(rec => (
                 <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#1a1a2e] hover:bg-[#252542] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: accent }} />
+                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
                   <div className="flex-1 min-w-0 pl-2">
                     <p className="text-[15px] font-semibold text-white truncate">{rec.description || rec.category}</p>
                     <p className="text-xs text-white/40 mt-0.5 capitalize">{rec.category} · {formatDate(rec.date)}</p>
@@ -171,8 +160,7 @@ export default function DriverDetail() {
                   <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.amount)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
-                );
-              })}
+              ))}
             </div>
           )}
         </TabsContent>
