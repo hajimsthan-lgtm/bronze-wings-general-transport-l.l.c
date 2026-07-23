@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, FileText } from 'lucide-react';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import FilterPill from '@/components/operations/FilterPill';
 import { useToast } from '@/components/ui/use-toast';
 
 const STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -89,31 +90,25 @@ export default function Contracts() {
           }
         />
 
-        <div className="space-y-3 mb-5">
+        <div className="space-y-3 mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={`${t('search')}...`}
-              className="w-full search-2026 rounded-xl px-3 pl-9 h-11 text-sm"
+              className="w-full h-11 rounded-xl pl-9 pr-3 text-sm bg-muted/50 border border-border focus-visible:border-primary/40"
             />
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
             {STATUSES.map((s) => (
-              <button
+              <FilterPill
                 key={s}
+                active={filter === s}
+                label={s === 'all' ? 'All' : t(s)}
+                count={s === 'all' ? undefined : contracts.filter((c) => c.status === s).length}
                 onClick={() => setFilter(s)}
-                className={`flex items-center gap-2 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
-                  filter === s
-                    ? 'bg-[rgba(59,130,246,0.20)] border-[rgba(59,130,246,0.30)] text-white shadow-[0_0_12px_rgba(59,130,246,0.15)]'
-                    : 'bg-white/[0.03] border-white/[0.06] text-white/60 hover:bg-white/[0.06] hover:text-white/80'
-                }`}>
-                {s === 'all' ? 'All' : t(s)}
-                {s !== 'all' && (
-                  <span className="ml-1 opacity-60">{contracts.filter((c) => c.status === s).length}</span>
-                )}
-              </button>
+              />
             ))}
           </div>
         </div>

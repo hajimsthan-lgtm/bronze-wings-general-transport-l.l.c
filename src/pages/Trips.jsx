@@ -16,6 +16,8 @@ import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import FilterPill from '@/components/operations/FilterPill';
+import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import PageInfo from '@/components/common/PageInfo';
 import { formatDate } from '@/lib/formatters';
 
@@ -83,9 +85,18 @@ export default function Trips() {
           } />
         <PageInfo text="Record every transport job here. Enter client, route and times — revenue and overtime calculate automatically. Tap a driver, vehicle or client name to jump to their profile." />
 
-      {/* Date filter + Export */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
+      <div className="space-y-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={`${t('search')}...`}
+              className="w-full h-11 rounded-xl pl-9 pr-3 text-sm bg-muted/50 border border-border focus-visible:border-primary/40"
+            />
+          </div>
+          <DateRangeFilter
             fromValue={dateFrom}
             onFromChange={setDateFrom}
             toValue={dateTo}
@@ -94,67 +105,42 @@ export default function Trips() {
               const today = new Date().toISOString().split('T')[0];
               setDateFrom(today);
               setDateTo(today);
-            }} />
-          
-        <div className="flex-1" />
-        <ExportButtons data={filtered.map((t) => ({ ...t, trip_date: t.trip_date ? formatDate(t.trip_date) : '' }))} filename="trips" title="Trips" columns={[
-          { label: 'Trip #', key: 'trip_number' },
-          { label: 'Date', key: 'trip_date' },
-          { label: 'Driver', key: 'driver_name' },
-          { label: 'Vehicle', key: 'vehicle_plate' },
-          { label: 'Client', key: 'client_name' },
-          { label: 'From', key: 'from_location' },
-          { label: 'To', key: 'to_location' },
-          { label: 'Revenue', key: 'revenue' },
-          { label: 'Status', key: 'status' },
-          { label: 'Payment', key: 'payment_status' }]
+            }}
+          />
+          <div className="flex-1" />
+          <SegmentedToggle
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: 'card', label: 'Cards', icon: LayoutGrid },
+              { value: 'list', label: 'List', icon: List },
+            ]}
+          />
+          <ExportButtons data={filtered.map((t) => ({ ...t, trip_date: t.trip_date ? formatDate(t.trip_date) : '' }))} filename="trips" title="Trips" columns={[
+            { label: 'Trip #', key: 'trip_number' },
+            { label: 'Date', key: 'trip_date' },
+            { label: 'Driver', key: 'driver_name' },
+            { label: 'Vehicle', key: 'vehicle_plate' },
+            { label: 'Client', key: 'client_name' },
+            { label: 'From', key: 'from_location' },
+            { label: 'To', key: 'to_location' },
+            { label: 'Revenue', key: 'revenue' },
+            { label: 'Status', key: 'status' },
+            { label: 'Payment', key: 'payment_status' }]
           } />
-      </div>
-
-      {/* Search + Filters */}
-      <div className="space-y-3 mb-5">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={`${t('search')}...`}
-              className="w-full search-2026 rounded-xl px-3 pl-9 h-11 text-sm" />
-            
         </div>
+
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
           {STATUSES.map((s) => (
-            <button
+            <FilterPill
               key={s}
+              active={filter === s}
+              label={s === 'all' ? 'All' : t(s)}
+              count={s === 'all' ? undefined : trips.filter((tr) => tr.status === s).length}
               onClick={() => setFilter(s)}
-              className={`flex items-center gap-2 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
-                filter === s
-                  ? 'bg-[rgba(59,130,246,0.20)] border-[rgba(59,130,246,0.30)] text-white shadow-[0_0_12px_rgba(59,130,246,0.15)]'
-                  : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:bg-white/[0.06] hover:text-white/60'
-              }`}>
-              {s === 'all' ? 'All' : t(s)}
-              {s !== 'all' && (
-                <span className="ml-1 opacity-60">{trips.filter((tr) => tr.status === s).length}</span>
-              )}
-            </button>
+            />
           ))}
         </div>
-      </div>
-
-      {/* View toggle */}
-      <div className="inline-flex items-center gap-1 p-1 mb-4 rounded-full" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <button
-          onClick={() => setViewMode('card')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${viewMode === 'card' ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
-          style={viewMode === 'card' ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10))', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 0 12px rgba(59,130,246,0.15)' } : { border: '1px solid transparent' }}>
-          <LayoutGrid className="w-3.5 h-3.5" /> Cards
-        </button>
-        <button
-          onClick={() => setViewMode('list')}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${viewMode === 'list' ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
-          style={viewMode === 'list' ? { background: 'linear-gradient(135deg, rgba(59,130,246,0.20), rgba(37,99,235,0.10))', border: '1px solid rgba(59,130,246,0.25)', boxShadow: '0 0 12px rgba(59,130,246,0.15)' } : { border: '1px solid transparent' }}>
-          <List className="w-3.5 h-3.5" /> List
-        </button>
       </div>
 
       {loading ?

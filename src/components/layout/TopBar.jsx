@@ -60,21 +60,16 @@ export default function TopBar() {
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12 py-2">
           {/* frosted sub-tab pill track */}
-          <div className="flex items-center gap-2 rounded-2xl border border-white/5 bg-slate-950/40 p-1.5 backdrop-blur-lg overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1 backdrop-blur-lg overflow-x-auto no-scrollbar">
             {subNav.map(item => {
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all duration-300 ${
-                    isActive ? 'text-blue-400' : 'text-white/65 hover:text-white/90 hover:bg-white/5'
+                  className={`inline-flex items-center h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+                    isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
-                  style={isActive ? {
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.20) 0%, rgba(15,23,42,0.80) 100%)',
-                    border: '1px solid rgba(96,165,250,0.35)',
-                    boxShadow: '0 4px 16px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.12)',
-                  } : { border: '1px solid transparent' }}
                 >
                   {t(item.key)}
                 </Link>
