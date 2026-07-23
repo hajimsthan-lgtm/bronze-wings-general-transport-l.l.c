@@ -5,7 +5,7 @@ import MetaChip from '@/components/operations/MetaChip';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import MiniStat from '@/components/operations/MiniStat';
 
-export default function ContractCard({ contract, expenses = [], onEdit, onDelete }) {
+export default function ContractCard({ contract, expenses = [], onEdit, onDelete, onDetails }) {
   const { t } = useI18n();
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
   const monthlyRate = Number(contract.monthly_rate) || 0;
@@ -16,13 +16,12 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
   const daysLeft = contract.end_date ? Math.ceil((new Date(contract.end_date) - today) / 86400000) : null;
   const expiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
 
-  const barColor = margin >= 60 ? 'linear-gradient(90deg, #22c55e, #3b82f6)' : margin >= 0 ? 'linear-gradient(90deg, #f59e0b, #22c55e)' : 'linear-gradient(90deg, #ef4444, #f59e0b)';
+  const barColor = margin >= 30 ? 'linear-gradient(90deg, #22c55e, #3b82f6)' : margin >= 15 ? 'linear-gradient(90deg, #f59e0b, #22c55e)' : 'linear-gradient(90deg, #ef4444, #f59e0b)';
+  const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';
 
   return (
-    <div
-      className="group relative flex flex-col rounded-2xl p-5 bg-card/60 backdrop-blur-xl border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 transition-all duration-300"
-    >
-      {/* Header: company + avatar, status pill */}
+    <div className="group relative flex flex-col rounded-2xl p-5 bg-card/60 backdrop-blur-xl border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 transition-all duration-300">
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 border border-primary/20">
@@ -30,7 +29,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
           </span>
           <div className="min-w-0">
             <p className="text-[15px] font-semibold text-foreground truncate">{contract.company_name || '—'}</p>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('monthly_contract')}</p>
+            <p className="font-mono text-[11px] text-muted-foreground">#{contract.id?.slice(-6).toUpperCase()}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -58,7 +57,6 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
         )}
       </div>
 
-      {/* Expiry warning */}
       {expiringSoon && (
         <div className="flex items-center gap-1.5 mt-3 px-2.5 py-1.5 rounded-lg bg-amber-500/10 text-[11px] text-amber-400">
           <AlertTriangle className="w-3 h-3 flex-shrink-0" />
@@ -66,7 +64,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
         </div>
       )}
 
-      {/* Mini stats */}
+      {/* Metrics grid */}
       <div className="grid grid-cols-3 gap-2 mt-4">
         <MiniStat label={t('monthly_rental')} value={formatCurrency(monthlyRate)} />
         <MiniStat label={t('total_expenses')} value={formatCurrency(totalExpenses)} />
@@ -77,7 +75,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
       <div className="mt-4">
         <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
           <span className="uppercase tracking-wider">{t('profit_margin')}</span>
-          <span className={`font-semibold tabular-nums ${margin >= 60 ? 'text-emerald-400' : margin >= 0 ? 'text-amber-400' : 'text-red-400'}`}>{margin}%</span>
+          <span className={`font-semibold tabular-nums ${marginTone}`}>{margin}%</span>
         </div>
         <div className="h-1.5 rounded-full bg-muted overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(0, Math.min(100, margin))}%`, background: barColor }} />
@@ -89,6 +87,9 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
         {contract.vehicle_plate && <MetaChip icon={Truck} label={contract.vehicle_plate} />}
         {contract.driver_name && <MetaChip icon={User} label={contract.driver_name} />}
         <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={onDetails} className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted/50 border border-border text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors" title={t('details')}>
+            <Building2 className="w-3.5 h-3.5" />
+          </button>
           <button onClick={onEdit} className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted/50 border border-border text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors" title={t('edit')}>
             <Pencil className="w-3.5 h-3.5" />
           </button>

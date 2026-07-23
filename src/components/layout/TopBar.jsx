@@ -5,7 +5,6 @@ import ThemeToggle from '@/components/common/ThemeToggle';
 
 const operationsSubNav = [
   { key: 'trips', path: '/trips' },
-  { key: 'contracts', path: '/contracts' },
 ];
 
 const adminSubNav = [
@@ -33,7 +32,6 @@ const subNavMap = {
   '/expenses': reportsSubNav,
   '/fuel': reportsSubNav,
   '/trips': operationsSubNav,
-  '/contracts': operationsSubNav,
   '/admin/vehicles': adminSubNav,
   '/admin/drivers': adminSubNav,
   '/admin/clients': adminSubNav,
