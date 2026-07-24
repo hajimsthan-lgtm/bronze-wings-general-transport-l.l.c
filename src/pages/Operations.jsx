@@ -11,7 +11,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import TripCard from '@/components/trips/TripCard';
 import ContractCard from '@/components/contracts/ContractCard';
 import TripsList from '@/components/operations/TripsList';
-import ContractsTable from '@/components/operations/ContractsTable';
+import ContractsList from '@/components/operations/ContractsList';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import SegmentedBar from '@/components/operations/SegmentedBar';
@@ -402,7 +402,7 @@ export default function Operations() {
                 {mode === 'all' && <SectionLabel count={filteredContracts.length}>{t('contracts_section')}</SectionLabel>}
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
-                  : <ContractsTable contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={openEditContract} />}
+                  : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={openEditContract} driverMap={driverMap} vehicleMap={vehicleMap} />}
               </div>
             )}
           </div>

@@ -122,7 +122,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               </div>
 
               <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
