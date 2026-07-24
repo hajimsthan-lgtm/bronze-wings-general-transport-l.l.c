@@ -83,8 +83,8 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
+            <div className="flex items-start gap-3 p-4">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
                 <ArrowRight className="w-4 h-4" style={{ color }} />
               </div>
 
@@ -123,7 +123,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               </div>
 
               <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
+                <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-xl bg-muted/40 border border-border/50">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
