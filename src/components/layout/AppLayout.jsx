@@ -89,8 +89,8 @@ export default function AppLayout() {
           className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0 animate-border-pulse"
           style={{
             background: 'var(--panel-bg)',
-            backdropFilter: 'blur(40px) saturate(1.2)',
-            WebkitBackdropFilter: 'blur(40px) saturate(1.2)',
+            backdropFilter: 'var(--panel-blur)',
+            WebkitBackdropFilter: 'var(--panel-blur)',
             border: '1px solid var(--panel-border-color)',
             boxShadow: 'var(--panel-inner-highlight), inset 0 0 80px rgba(var(--panel-accent-rgb),0.03), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06), 0 0 40px rgba(var(--panel-accent-rgb),0.05), 0 0 80px rgba(var(--panel-accent2-rgb),0.03), var(--panel-drop-shadow)'
           }}>

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
+import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
@@ -109,6 +110,7 @@ export default function DriverDetail() {
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
           <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
+          <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
@@ -164,6 +166,10 @@ export default function DriverDetail() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <EntityDocumentsTab entityType="driver" entityId={driver.id} />
         </TabsContent>
       </Tabs>
     </div>

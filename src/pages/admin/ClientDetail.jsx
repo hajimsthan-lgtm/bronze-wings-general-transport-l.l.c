@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
+import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
@@ -219,6 +220,7 @@ export default function ClientDetail() {
           <TabsTrigger value="invoices">{t('invoices')} ({displayInvoices.length})</TabsTrigger>
           <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
           <TabsTrigger value="charges">{t('fixed_charges')} ({fixedCharges.length})</TabsTrigger>
+          <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
@@ -416,6 +418,10 @@ export default function ClientDetail() {
               )}
             </>
           )}
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <EntityDocumentsTab entityType="client" entityId={client.id} />
         </TabsContent>
       </Tabs>
 
