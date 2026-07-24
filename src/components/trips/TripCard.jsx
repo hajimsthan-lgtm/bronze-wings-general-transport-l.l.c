@@ -73,7 +73,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
   return (
     <div
       onClick={() => onClick?.(trip)}
-      className="group relative flex flex-col cursor-pointer rounded-2xl pl-6 p-5 bg-[#1a1a1a]/80 backdrop-blur-xl border border-[#2a2a2a] shadow-[0_4px_20px_rgba(0,0,0,0.45)] hover:shadow-[0_10px_34px_-6px_rgba(59,130,246,0.30)] hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-300"
+      className="group relative flex flex-col cursor-pointer rounded-2xl pl-6 p-5 bg-[#1a1a1a]/80 border border-[#2a2a2a] shadow-[0_4px_20px_rgba(0,0,0,0.45)] hover:shadow-[0_10px_34px_-6px_rgba(59,130,246,0.30)] hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-300"
     >
       {/* Left accent rail */}
       <span className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.6)]" />

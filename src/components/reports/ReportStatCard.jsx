@@ -33,12 +33,9 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
 
   return (
     <div
-      className="relative overflow-hidden p-4 sm:p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group"
+      className="relative overflow-hidden p-4 sm:p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group bg-card border border-white/[0.06] rounded-3xl"
       style={{
         animationDelay: `${index * 0.08}s`,
-        background: '#232636',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '24px',
         boxShadow: `-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)`,
       }}
     >

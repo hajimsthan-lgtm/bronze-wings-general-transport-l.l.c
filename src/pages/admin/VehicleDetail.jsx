@@ -13,6 +13,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Fuel as FuelIcon, Receipt, Wrench } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
+import Vehicle3DModel from '@/components/admin/Vehicle3DModel';
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -86,6 +87,9 @@ export default function VehicleDetail() {
           { label: t('next_service'), value: formatDate(vehicle.next_service_date) },
         ]}
       />
+
+      <Vehicle3DModel />
+
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter
           fromValue={dateFrom}

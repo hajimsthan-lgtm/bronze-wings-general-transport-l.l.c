@@ -70,6 +70,8 @@
     --header-tint-1: rgba(10,14,23,0.12);
     --header-tint-2: rgba(10,14,23,0.05);
     --nav-inactive: rgba(255,255,255,0.45);
+    --surf-1: rgba(18,22,34,0.6);
+    --surf-2: rgba(12,16,26,0.85);
   }
 
   .light {
@@ -105,6 +107,8 @@
     --header-tint-1: rgba(255,255,255,0.88);
     --header-tint-2: rgba(255,255,255,0.78);
     --nav-inactive: rgba(30,41,59,0.55);
+    --surf-1: #ffffff;
+    --surf-2: #f4f7fb;
   }
 }
 
@@ -1377,3 +1381,11 @@
 .light .detail-header-card { background: linear-gradient(165deg, rgba(59,130,246,0.06) 0%, #ffffff 100%) !important; border: 1px solid rgba(0,0,0,0.07) !important; }
 .light .glass-card-hover { background: #ffffff !important; border: 1px solid #e2e8f0 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.06) !important; }
 .light .clay, .light .clay-sm { background: #f4f6fb !important; border: 1px solid rgba(0,0,0,0.07) !important; box-shadow: 4px 4px 10px rgba(0,0,0,0.05), -4px -4px 10px rgba(255,255,255,0.8) !important; }
+.light .bg-\[\#1a1a1a\]\/80 { background: hsl(var(--card)) !important; }
+.light .border-\[\#2a2a2a\], .light .border-\[\#3a3a3a\] { border-color: hsl(var(--border)) !important; }
+.light .bg-\[\#1e3a5f\] { background: rgba(59,130,246,0.10) !important; }
+
+/* 3D truck model bob animation */
+@keyframes truck-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.truck-3d-bob { animation: truck-bob 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .truck-3d-bob { animation: none !important; } }

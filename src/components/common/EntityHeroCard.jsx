@@ -5,10 +5,9 @@
 export default function EntityHeroCard({ icon: Icon, title, total, stats = [], accent = '59,130,246' }) {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl p-5 mb-5"
+      className="relative overflow-hidden rounded-2xl p-5 mb-5 border border-white/[0.06]"
       style={{
-        background: `linear-gradient(135deg, rgba(${accent},0.16) 0%, rgba(18,22,34,0.6) 55%, rgba(12,16,26,0.85) 100%)`,
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: `linear-gradient(135deg, rgba(${accent},0.16) 0%, var(--surf-1) 55%, var(--surf-2) 100%)`,
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 36px rgba(0,0,0,0.35)',
       }}
     >
@@ -45,8 +44,7 @@ export default function EntityHeroCard({ icon: Icon, title, total, stats = [], a
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-xl px-3 py-2.5"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}
+              className="rounded-xl px-3 py-2.5 bg-muted/40 border border-border/50"
             >
               <p className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: s.color || '#a0a5b8' }}>{s.label}</p>
               <p className="text-xl font-semibold text-foreground mt-0.5 tabular-nums">{s.value}</p>

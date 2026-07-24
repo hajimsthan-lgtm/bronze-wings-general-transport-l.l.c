@@ -359,7 +359,7 @@ export default function Operations() {
                 style={{
                   ['--row-accent']: a.accent,
                   animationDelay: `${i * 0.05}s`,
-                  background: `linear-gradient(165deg, ${hexToRgba(a.accent, 0.10)} 0%, rgba(12,16,26,0.55) 100%)`,
+                  background: `linear-gradient(165deg, ${hexToRgba(a.accent, 0.10)} 0%, var(--surf-1) 100%)`,
                   border: `1px solid ${hexToRgba(a.accent, 0.18)}`,
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
                 }}

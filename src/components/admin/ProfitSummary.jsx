@@ -25,8 +25,8 @@ export default function ProfitSummary({ title, items, netProfit, filenameBase, d
 
   return (
     <div
-      className="rounded-2xl p-6 mb-4 backdrop-blur-xl transition-all duration-400 hover:-translate-y-0.5"
-      style={{ background:'#232636', border:'1px solid rgba(255,255,255,0.06)', boxShadow:'-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
+      className="rounded-2xl p-6 mb-4 bg-card border border-white/[0.06] transition-all duration-400 hover:-translate-y-0.5"
+      style={{ boxShadow:'-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
     >
       <div className="flex items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-3 min-w-0">
@@ -44,14 +44,13 @@ export default function ProfitSummary({ title, items, netProfit, filenameBase, d
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {items.map((it, i) => (
-          <div key={i} className="rounded-xl p-3" style={{ background:'#1e2130', border:'1px solid rgba(255,255,255,0.06)', boxShadow:'inset 2px 2px 4px rgba(0,0,0,0.35), inset -2px -2px 4px rgba(255,255,255,0.02)' }}>
+          <div key={i} className="rounded-xl p-3 bg-input border border-white/[0.06]" style={{ boxShadow:'inset 2px 2px 4px rgba(0,0,0,0.35), inset -2px -2px 4px rgba(255,255,255,0.02)' }}>
             <p className="text-[10px] uppercase tracking-wider text-[#6b7280] mb-1.5">{it.label}</p>
             <p className={`text-base font-bold ${it.tone || 'text-white'}`}>{formatCurrency(it.value)}</p>
           </div>
         ))}
         <div
-          className="rounded-xl p-3 relative overflow-hidden"
-          style={{ background:'#1e3a5f', border:'1px solid rgba(59,130,246,0.3)' }}
+          className="rounded-xl p-3 relative overflow-hidden bg-[#1e3a5f] border border-primary/30"
         >
           <span className="absolute left-0 top-0 bottom-0 w-1" style={{ background:'#3b82f6' }} />
           <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color:'rgba(59,130,246,0.85)' }}>Net Profit</p>
