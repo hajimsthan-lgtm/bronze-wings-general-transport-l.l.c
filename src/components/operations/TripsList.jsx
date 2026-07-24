@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Eye, Pencil, Trash2, MoreVertical, Check, Send, Undo2, ArrowRight } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
@@ -57,7 +58,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
   };
 
   return (
-    <div className="space-y-1.5">
+    <div>
       {trips.map((trip, i) => {
         const invoice = invoiceMap?.[trip.id];
         const isSent = invoice?.status === 'sent';
@@ -67,21 +68,35 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
           <div
             key={trip.id}
             onClick={() => onOpenDetail?.(trip)}
-            className="row-card group cursor-pointer animate-fade-in-up"
-            style={{ animationDelay: `${Math.min(i * 0.03, 0.4)}s` }}
+            className="group relative rounded-2xl mb-2 cursor-pointer transition-all duration-200 hover:-translate-y-px animate-fade-in-up"
+            style={{
+              animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
+              background: 'linear-gradient(180deg, rgba(20,24,38,0.50) 0%, rgba(14,18,30,0.60) 100%)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+            }}
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 8px ${color}` }} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 min-w-0">
-                  <p className="text-sm text-foreground font-medium truncate">
+            <span
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+            />
+            <div className="flex items-center gap-3 p-4">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
+                <ArrowRight className="w-4 h-4" style={{ color }} />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {trip.from_location || '—'} <ArrowRight className="inline w-3 h-3 text-muted-foreground/60 mx-0.5 -mt-px" /> {trip.to_location || '—'}
                   </p>
-                  <span className="hidden sm:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                  <span className="hidden md:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
                     {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
                   <span className="font-mono text-muted-foreground/80 whitespace-nowrap">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
                   <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(trip.trip_date)}</span>
@@ -93,66 +108,70 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   )}
                   {trip.driver_name && (
                     <>
-                      <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[100px]">{trip.driver_name}</button>
+                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
+                      <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[100px] hidden sm:inline-block">{trip.driver_name}</button>
                     </>
                   )}
                   {trip.vehicle_plate && (
                     <>
-                      <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap">{trip.vehicle_plate}</button>
+                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
+                      <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap hidden sm:inline-block">{trip.vehicle_plate}</button>
                     </>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2.5 flex-shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                    <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}</StatusPill>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                  {STATUS_OPTIONS.map((opt) => (
-                    <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                      {opt.label}
-                      {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                        <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}</StatusPill>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                      {STATUS_OPTIONS.map((opt) => (
+                        <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                          {opt.label}
+                          {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-              {trip.status === 'completed' && (
+                  {trip.status === 'completed' && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
+                          <StatusPill as="span" variant={isSent ? 'green' : 'neutral'}>{isSent ? t('sent') : 'Not Sent'}</StatusPill>
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, true)} className="text-xs cursor-pointer flex items-center gap-2"><Send className="w-3 h-3" /> Mark Sent</DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+
+                <div className="h-6 w-px bg-border/50 hidden sm:block" />
+
+                <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
-                      <StatusPill as="span" variant={isSent ? 'green' : 'neutral'}>{isSent ? t('sent') : 'Not Sent'}</StatusPill>
+                    <button onClick={(e) => e.stopPropagation()} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                      <MoreVertical className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, true)} className="text-xs cursor-pointer flex items-center gap-2"><Send className="w-3 h-3" /> Mark Sent</DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
+                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); }} className="cursor-pointer flex items-center gap-2"><Eye className="w-3.5 h-3.5" /> {t('details')}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit?.(trip); }} className="cursor-pointer flex items-center gap-2"><Pencil className="w-3.5 h-3.5" /> {t('edit')}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete?.(trip); }} className="cursor-pointer flex items-center gap-2 text-red-400"><Trash2 className="w-3.5 h-3.5" /> {t('delete')}</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
-
-              <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button onClick={(e) => e.stopPropagation()} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); }} className="cursor-pointer flex items-center gap-2"><Eye className="w-3.5 h-3.5" /> {t('details')}</DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit?.(trip); }} className="cursor-pointer flex items-center gap-2"><Pencil className="w-3.5 h-3.5" /> {t('edit')}</DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete?.(trip); }} className="cursor-pointer flex items-center gap-2 text-red-400"><Trash2 className="w-3.5 h-3.5" /> {t('delete')}</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              </div>
             </div>
           </div>
         );
