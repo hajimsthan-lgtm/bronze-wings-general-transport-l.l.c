@@ -10,6 +10,7 @@ import TripModeFields from './TripModeFields';
 import TripCalcPanel from './TripCalcPanel';
 import ContractModeFields from './contract/ContractModeFields';
 import ContractProfitPanel from './contract/ContractProfitPanel';
+import TripMapPanel from './TripMapPanel';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
@@ -393,6 +394,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             {mode === 'trip'
               ? <TripModeFields p={tripCtx} />
               : <ContractModeFields p={contractCtx} />}
+            {mode === 'trip' && <TripMapPanel from={form.from_location} to={form.to_location} />}
           </div>
 
           {mode === 'trip'
