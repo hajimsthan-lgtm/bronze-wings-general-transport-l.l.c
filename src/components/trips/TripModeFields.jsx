@@ -1,15 +1,15 @@
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
 import Section from './Section';
+import IconInput from './IconInput';
+import TripTypeSelector from './TripTypeSelector';
 
-const TRIP_TYPES = ['one_way', 'hourly', 'contract', 'return'];
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
 export default function TripModeFields({ p }) {
@@ -29,10 +29,10 @@ export default function TripModeFields({ p }) {
   return (
     <>
       {/* Client */}
-      <Section title={t('client')}>
+      <Section title={t('client')} icon={Building2} accent="59,130,246" delay={0}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('client')}</Label>
-          <Input list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={inputCls} />
+          <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={inputCls} />
           <datalist id="client-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
           {isNewClient && (
             <CreateNewCard label="client" value={form.client_name} created={createdFlags.client} loading={creating === 'client'}
@@ -58,33 +58,34 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Route */}
-      <Section title="Route">
+      <Section title="Route" icon={RouteIcon} accent="16,185,129" delay={60}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('from')}</Label>
-            <Input list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={inputCls} />
+            <IconInput icon={MapPin} list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={inputCls} />
             <datalist id="from-suggestions">{fromSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('to')}</Label>
-            <Input list="to-suggestions" value={form.to_location} onChange={(e) => update('to_location', e.target.value)} placeholder="Abu Dhabi" className={inputCls} />
+            <IconInput icon={Flag} list="to-suggestions" value={form.to_location} onChange={(e) => update('to_location', e.target.value)} placeholder="Abu Dhabi" className={inputCls} />
             <datalist id="to-suggestions">{toSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
           </div>
         </div>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('trip_type')}</Label>
-          <Select value={form.trip_type} onValueChange={(v) => update('trip_type', v)}>
-            <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-            <SelectContent>{TRIP_TYPES.map((tp) => <SelectItem key={tp} value={tp}>{t(tp)}</SelectItem>)}</SelectContent>
-          </Select>
+          <TripTypeSelector value={form.trip_type} onChange={(v) => update('trip_type', v)} t={t} />
         </div>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">Trip #</Label>
-          <Input value={form.trip_number || autoTripNumber} onChange={(e) => update('trip_number', e.target.value)} className={`${inputCls} font-mono text-xs`} />
+          <IconInput icon={Hash} value={form.trip_number || autoTripNumber} onChange={(e) => update('trip_number', e.target.value)} className={`${inputCls} font-mono text-xs`} />
           {tripNumberOverridden && (
             <p className="text-[10px] text-red-400 font-semibold mt-1">⚠ Overwritten — auto value was {autoTripNumber}</p>
           )}
         </div>
+      </Section>
+
+      {/* Schedule */}
+      <Section title="Schedule" icon={CalendarClock} accent="245,158,11" delay={120}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Load Date &amp; Time</Label>
@@ -108,17 +109,17 @@ export default function TripModeFields({ p }) {
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Calculated Duration</Label>
-            <Input value={form.calculated_duration ? `${form.calculated_duration} ${form.duration_unit === 'days' ? 'Days' : 'Hours'}` : ''} readOnly className={`${inputCls} opacity-60 font-mono text-xs`} />
+            <IconInput icon={Gauge} value={form.calculated_duration ? `${form.calculated_duration} ${form.duration_unit === 'days' ? 'Days' : 'Hours'}` : ''} readOnly className={`${inputCls} opacity-60 font-mono text-xs`} />
           </div>
         </div>
       </Section>
 
       {/* Assignment */}
-      <Section title="Assignment">
+      <Section title="Assignment" icon={Truck} accent="139,92,246" delay={180}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
-            <Input list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
+            <IconInput icon={Truck} list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
             <datalist id="vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
             {isNewVehicle && (
               <CreateNewCard label="vehicle" value={form.vehicle_plate} created={createdFlags.vehicle} loading={creating === 'vehicle'}
@@ -127,7 +128,7 @@ export default function TripModeFields({ p }) {
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('driver')}</Label>
-            <Input list="driver-suggestions" value={form.driver_name} onChange={(e) => update('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
+            <IconInput icon={User} list="driver-suggestions" value={form.driver_name} onChange={(e) => update('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
             <datalist id="driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
             {isNewDriver && (
               <CreateNewCard label="driver" value={form.driver_name} created={createdFlags.driver} loading={creating === 'driver'}
@@ -145,21 +146,21 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Delivery */}
-      <Section title="Delivery">
+      <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
-            <Input value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', e.target.value)} className={inputCls} />
+            <IconInput icon={FileText} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', e.target.value)} className={inputCls} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('distance')}</Label>
-            <Input type="number" value={form.distance_km} onChange={(e) => update('distance_km', e.target.value)} className={inputCls} />
+            <IconInput icon={Ruler} type="number" value={form.distance_km} onChange={(e) => update('distance_km', e.target.value)} className={inputCls} />
           </div>
         </div>
         {form.trip_type === 'return' && (
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Return Of (Trip #)</Label>
-            <Input value={form.return_trip_number} onChange={(e) => update('return_trip_number', e.target.value)} placeholder="TR-0607-0001" className={inputCls} />
+            <IconInput icon={RotateCcw} value={form.return_trip_number} onChange={(e) => update('return_trip_number', e.target.value)} placeholder="TR-0607-0001" className={inputCls} />
           </div>
         )}
         <div>
@@ -182,20 +183,20 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Financial */}
-      <Section title="Financial">
+      <Section title="Financial" icon={Wallet} accent="249,115,22" delay={300}>
         <div className="grid grid-cols-3 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Base Fare (AED)</Label>
-            <Input type="number" value={form.base_fare} onChange={(e) => update('base_fare', e.target.value)} className={inputCls} />
+            <IconInput icon={DollarSign} type="number" value={form.base_fare} onChange={(e) => update('base_fare', e.target.value)} className={inputCls} />
             {autoFilled && <p className="text-[10px] text-blue-400 mt-1">Auto-filled from fixed charge</p>}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Max Allowed ({form.duration_unit === 'days' ? 'Days' : 'Hrs'})</Label>
-            <Input type="number" value={form.max_allowed_duration} onChange={(e) => update('max_allowed_duration', e.target.value)} className={inputCls} />
+            <IconInput icon={Gauge} type="number" value={form.max_allowed_duration} onChange={(e) => update('max_allowed_duration', e.target.value)} className={inputCls} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Overtime Rate (AED)</Label>
-            <Input type="number" value={form.overtime_rate} onChange={(e) => update('overtime_rate', e.target.value)} className={inputCls} />
+            <IconInput icon={Timer} type="number" value={form.overtime_rate} onChange={(e) => update('overtime_rate', e.target.value)} className={inputCls} />
           </div>
         </div>
         {isOvertime && (
@@ -212,7 +213,7 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('amount')} (Revenue)</Label>
-            <Input type="number" value={form.revenue} onChange={(e) => { update('revenue', e.target.value); p.setRevenueOverride(true); }} className={inputCls} />
+            <IconInput icon={Wallet} type="number" value={form.revenue} onChange={(e) => { update('revenue', e.target.value); p.setRevenueOverride(true); }} className={inputCls} />
             {revenueOverridden ? (
               <p className="text-[10px] text-red-400 font-semibold mt-1">⚠ Overwritten — calculated value was {formatCurrency(autoRevenue)}</p>
             ) : (
@@ -222,7 +223,7 @@ export default function TripModeFields({ p }) {
           {form.trip_type === 'hourly' && (
             <div>
               <Label className="text-xs text-white/60 mb-1.5">{t('hours')}</Label>
-              <Input type="number" value={form.hours} onChange={(e) => update('hours', e.target.value)} className={inputCls} />
+              <IconInput icon={Clock} type="number" value={form.hours} onChange={(e) => update('hours', e.target.value)} className={inputCls} />
             </div>
           )}
         </div>
@@ -241,7 +242,7 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Notes */}
-      <Section title={t('notes')}>
+      <Section title={t('notes')} icon={StickyNote} accent="148,163,184" delay={360}>
         <Textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} rows={2} className={inputCls} />
       </Section>
     </>

@@ -939,6 +939,79 @@
   }
 }
 
+@layer components {
+  /* ===== Trip form: color-coded sections ===== */
+  .trip-section {
+    position: relative;
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 3px solid rgb(var(--section-accent));
+    background: linear-gradient(180deg, rgba(18,22,34,0.5) 0%, rgba(12,16,26,0.62) 100%);
+    padding: 0.95rem 1.05rem 1.1rem;
+    transition: box-shadow .25s ease, border-color .25s ease, transform .25s ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .trip-section:hover {
+    border-color: rgba(var(--section-accent), 0.35);
+    box-shadow: 0 0 0 1px rgba(var(--section-accent),0.22), 0 0 28px -8px rgba(var(--section-accent),0.45), 0 12px 28px rgba(0,0,0,0.35);
+    transform: translateY(-1px);
+  }
+  .trip-section-icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--section-accent), 0.16);
+    border: 1px solid rgba(var(--section-accent), 0.35);
+    color: rgb(var(--section-accent));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* ===== Trip type selector cards ===== */
+  .trip-type-card {
+    position: relative; border-radius: 0.8rem; padding: 0.6rem 0.4rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.6);
+    transition: all .25s ease; cursor: pointer;
+  }
+  .trip-type-card:hover {
+    border-color: rgba(59,130,246,0.4);
+    color: #fff;
+    background: rgba(59,130,246,0.08);
+  }
+  .trip-type-card-active {
+    background: linear-gradient(135deg, rgba(59,130,246,0.22), rgba(37,99,235,0.12));
+    border-color: rgba(59,130,246,0.55);
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.3), 0 0 18px -4px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  /* ===== Live calc: pulsing dot + total glow ===== */
+  .live-pulse-dot {
+    width: 8px; height: 8px; border-radius: 9999px;
+    background: #34d399;
+    box-shadow: 0 0 0 0 rgba(52,211,153,0.7);
+    animation: live-pulse 1.6s ease-in-out infinite;
+  }
+  .calc-total-glow {
+    position: relative;
+    border-radius: 0.9rem;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(16,185,129,0.10));
+    border: 1px solid rgba(59,130,246,0.25);
+    box-shadow: 0 0 24px -6px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .calc-total-glow::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer-sweep 3.5s linear infinite;
+    pointer-events: none;
+  }
+}
+
 @layer utilities {
   .animate-stagger-in {
     animation: stagger-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
