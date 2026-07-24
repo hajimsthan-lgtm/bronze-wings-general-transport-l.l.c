@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Navigation, MapPin, Search, Loader2, X } from 'lucide-react';
+import { Navigation, MapPin, Search, Loader2, X, LocateFixed } from 'lucide-react';
 
 const DEFAULT_CENTER = [25.2048, 55.2708]; // Dubai
 
@@ -97,6 +97,23 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo }) {
     setSearch('');
   };
 
+  const locate = () => {
+    if (!navigator.geolocation) return;
+    setPicking(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const name = await reverseGeocode(latitude, longitude);
+          applyPick(latitude, longitude, name);
+          map?.panTo([latitude, longitude]);
+        } finally { setPicking(false); }
+      },
+      () => setPicking(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const refCb = (m) => setMap(m);
 
   return (
@@ -127,6 +144,13 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo }) {
               }`}
             >
               To
+            </button>
+            <button
+              onClick={locate}
+              title="Use current location"
+              className="w-6 h-6 rounded-full bg-white/5 border border-white/10 text-primary hover:text-primary flex items-center justify-center"
+            >
+              <LocateFixed className="w-3 h-3" />
             </button>
             <button
               onClick={reset}

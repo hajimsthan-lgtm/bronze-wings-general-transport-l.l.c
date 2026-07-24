@@ -17,8 +17,8 @@ export default function EntityDetailHeader({ title, subtitle, badge, info = [], 
         <ArrowLeft className="back-arrow w-4 h-4" /> {t('back')}
       </Button>
       <div
-        className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-400 hover:-translate-y-0.5"
-        style={{ background: '#232636', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
+        className="rounded-2xl p-6 backdrop-blur-xl transition-all duration-400 hover:-translate-y-0.5 bg-card border border-white/[0.06]"
+        style={{ boxShadow: '-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)' }}
       >
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="min-w-0">

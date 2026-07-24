@@ -35,12 +35,8 @@ export default function DateRangeFilter({ fromValue, onFromChange, toValue, onTo
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
-            className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl flex-1 md:flex-initial md:w-auto justify-between md:justify-start transition-all min-w-0"
-            style={{
-              background: '#1e2130',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.03)',
-            }}
+            className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl flex-1 md:flex-initial md:w-auto justify-between md:justify-start transition-all min-w-0 bg-input border border-white/10"
+            style={{ boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.03)' }}
           >
             <CalendarIcon className="w-4 h-4 text-blue-400 shrink-0" />
             <span className="text-sm text-foreground font-mono tabular-nums truncate">{label}</span>

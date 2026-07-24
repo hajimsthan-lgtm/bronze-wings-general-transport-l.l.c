@@ -381,7 +381,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-4xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
+      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-5xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
         <DialogHeader className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <DialogTitle className="font-display text-foreground text-lg">{title}</DialogTitle>
@@ -389,7 +389,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
         </DialogHeader>
 
-        <div className="grid lg:grid-cols-[1fr_290px] gap-6 items-start">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
           <div className="space-y-5">
             {mode === 'trip'
               ? <TripModeFields p={tripCtx} />
@@ -397,9 +397,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
 
           <div className="space-y-5">
-            {mode === 'trip'
-              ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
-              : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
             {mode === 'trip' && (
               <TripMapPanel
                 from={form.from_location}
@@ -408,6 +405,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
                 onSelectTo={(v) => update('to_location', v)}
               />
             )}
+            {mode === 'trip'
+              ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+              : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
           </div>
         </div>
 

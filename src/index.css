@@ -1351,3 +1351,13 @@
   .detail-page > *, .detail-page [role="tabpanel"], .meta-stagger, .badge-breathe { animation: none !important; opacity: 1 !important; transform: none !important; }
   .detail-name:hover, .back-btn:hover .back-arrow { animation: none !important; transform: none !important; }
 }
+
+/* Light-mode: remap hardcoded dark surfaces + text (dark theme stays identical) */
+.light .bg-\[\#1a1a1a\], .light .bg-\[\#141414\], .light .bg-\[\#1e2130\], .light .bg-\[\#232636\], .light .bg-\[\#242424\], .light .bg-\[\#262626\], .light .bg-\[\#2a2a2a\], .light .bg-\[\#2a2e42\], .light .bg-\[\#1a1d29\], .light .bg-\[\#06080f\] { background: hsl(var(--card)) !important; }
+.light .hover\:bg-\[\#2a2e42\]:hover, .light .hover\:bg-\[\#2a2a2a\]:hover, .light .hover\:bg-\[\#242424\]:hover { background: hsl(var(--muted)) !important; }
+.light .bg-white\/\[0\.03\], .light .bg-white\/\[0\.04\], .light .bg-white\/\[0\.06\], .light .bg-white\/\[0\.08\] { background: rgba(0,0,0,0.03) !important; }
+.light .border-white\/\[0\.08\], .light .border-white\/\[0\.12\], .light .border-white\/\[0\.15\], .light .border-white\/15, .light .border-white\/20 { border-color: rgba(0,0,0,0.10) !important; }
+.light main .text-white { color: hsl(var(--foreground)) !important; }
+.light main button[class*="linear-gradient"] { color: #fff !important; }
+.light .detail-page .text-white { color: hsl(var(--foreground)) !important; }
+.light .text-\[\#a0a5b8\], .light .text-\[\#6b7280\] { color: hsl(var(--muted-foreground)) !important; }
