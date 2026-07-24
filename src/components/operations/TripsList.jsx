@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Eye, Pencil, Trash2, MoreVertical, Check, Send, Undo2, ArrowRight } from 'lucide-react';
+import { Check, Send, Undo2, ArrowRight } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
@@ -99,8 +99,6 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
-                  <span className="font-mono text-muted-foreground/80 whitespace-nowrap">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
-                  <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(trip.trip_date)}</span>
                   {trip.client_name && (
                     <>
@@ -166,18 +164,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   <p className={`text-[10px] tabular-nums leading-tight ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)}</p>
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="w-7 h-7 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                      <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); }} className="cursor-pointer flex items-center gap-2"><Eye className="w-3.5 h-3.5" /> {t('details')}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit?.(trip); }} className="cursor-pointer flex items-center gap-2"><Pencil className="w-3.5 h-3.5" /> {t('edit')}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete?.(trip); }} className="cursor-pointer flex items-center gap-2 text-red-400"><Trash2 className="w-3.5 h-3.5" /> {t('delete')}</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+
               </div>
             </div>
           </div>

@@ -33,7 +33,7 @@ export default function GradientCard({ variant = 'blue', icon: Icon, label, titl
       />
 
       {/* top-left label */}
-      <span className="relative z-10 text-[11px] uppercase tracking-wider font-semibold text-white/50">{label}</span>
+      <span className="relative z-10 text-[11px] uppercase tracking-wider font-semibold text-white/50 pr-12 leading-tight">{label}</span>
 
       {/* top-right icon in soft glow circle */}
       <div className="absolute top-4 right-4 z-10">

@@ -348,13 +348,13 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div className="flex md:grid md:grid-cols-4 gap-3 mb-4 overflow-x-auto no-scrollbar pb-1">
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
               <div
                 key={a.label}
-                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-default"
+                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-default min-w-[150px] flex-shrink-0 md:min-w-0"
                 style={{
                   ['--row-accent']: a.accent,
                   animationDelay: `${i * 0.05}s`,

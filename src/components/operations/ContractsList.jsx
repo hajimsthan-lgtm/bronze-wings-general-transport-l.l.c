@@ -46,9 +46,9 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: CONTRACT_ACCENT, boxShadow: `0 0 8px ${CONTRACT_ACCENT}` }}
             />
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(CONTRACT_ACCENT, 0.14), border: `1px solid ${hexToRgba(CONTRACT_ACCENT, 0.3)}` }}>
-                <Building2 className="w-4 h-4" style={{ color: CONTRACT_ACCENT }} />
+            <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(CONTRACT_ACCENT, 0.14), border: `1px solid ${hexToRgba(CONTRACT_ACCENT, 0.3)}` }}>
+                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: CONTRACT_ACCENT }} />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -78,7 +78,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <StatusPill as="span" variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
                   <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}%</span>
@@ -93,8 +93,8 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                      <MoreVertical className="w-4 h-4" />
+                    <button onClick={(e) => e.stopPropagation()} className="w-7 h-7 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                      <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
