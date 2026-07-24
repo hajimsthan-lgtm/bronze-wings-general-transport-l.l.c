@@ -14,11 +14,10 @@ import TripsList from '@/components/operations/TripsList';
 import ContractsList from '@/components/operations/ContractsList';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
-import SegmentedBar from '@/components/operations/SegmentedBar';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency } from '@/lib/formatters';
-import { Truck, FileText, LayoutGrid, Wallet, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { Truck, FileText, Wallet, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -312,18 +311,9 @@ export default function Operations() {
   useEffect(() => { setSubBarTarget(document.getElementById('ops-subbar')); }, []);
   const subBar = subBarTarget && createPortal(
     <div className="border-t border-border/50 pt-2 mt-1 space-y-2">
-      <div className="flex justify-center">
-        <SegmentedBar
-          value={mode}
-          onChange={setMode}
-          options={[
-            { value: 'all', label: t('all_operations'), icon: LayoutGrid },
-            { value: 'trip', label: t('per_trip'), icon: Truck },
-            { value: 'contract', label: t('contracts'), icon: FileText },
-          ]}
-        />
-      </div>
       <OperationsToolbar
+        mode={mode}
+        onModeChange={setMode}
         search={search}
         setSearch={setSearch}
         dateFrom={dateFrom}

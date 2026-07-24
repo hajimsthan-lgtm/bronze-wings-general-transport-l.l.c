@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useI18n } from '@/lib/i18n';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
-import FilterPill from '@/components/operations/FilterPill';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
 
@@ -12,11 +11,22 @@ export default function OperationsToolbar({
   search, setSearch,
   dateFrom, setDateFrom, dateTo, setDateTo,
   statusOptions, statusValue, onStatusChange, statusCounts,
+  mode, onModeChange,
   viewMode, setViewMode,
   onNewTrip, onNewContract,
   exportData, exportFilename, exportTitle, exportColumns,
 }) {
   const { t } = useI18n();
+
+  const MODE_OPTIONS = [
+    { value: 'all', label: t('all_operations') },
+    { value: 'trip', label: t('per_trip') },
+    { value: 'contract', label: t('contracts') },
+  ];
+  const STATUS_DOT = {
+    scheduled: '#60a5fa', in_transit: '#fbbf24', completed: '#34d399', cancelled: '#f87171',
+    active: '#34d399', expired: '#f87171', terminated: '#f87171',
+  };
 
   return (
     <div>
@@ -83,19 +93,19 @@ export default function OperationsToolbar({
         </DropdownMenu>
       </div>
 
-      {statusOptions && statusOptions.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {statusOptions.map((s) => (
-            <FilterPill
-              key={s}
-              active={statusValue === s}
-              label={s === 'all' ? t('all') : t(s)}
-              count={s === 'all' ? undefined : (statusCounts?.[s] ?? 0)}
-              onClick={() => onStatusChange(s)}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 items-center">
+        {MODE_OPTIONS.map((m) => (
+          <button key={m.value} onClick={() => onModeChange(m.value)} className={`filter-chip ${mode === m.value ? 'filter-chip-active' : ''}`}>{m.label}</button>
+        ))}
+        <span className="h-4 w-px bg-border/60 mx-1 flex-shrink-0" />
+        {statusOptions.map((s) => (
+          <button key={s} onClick={() => onStatusChange(s)} className={`filter-chip ${statusValue === s ? 'filter-chip-active' : ''}`}>
+            {s !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_DOT[s] || '#94a3b8' }} />}
+            {s === 'all' ? t('all') : t(s)}
+            {s !== 'all' && statusCounts?.[s] != null && <span className="ml-1 text-[10px] opacity-60 tabular-nums">{statusCounts[s]}</span>}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
