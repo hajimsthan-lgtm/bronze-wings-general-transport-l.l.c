@@ -26,10 +26,10 @@ export default function DesktopNav() {
     <nav className="hidden md:block sticky top-0 z-50">
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, rgba(10,14,23,0.50) 0%, rgba(10,14,23,0.35) 100%)',
-        backdropFilter: 'blur(30px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)'
+        background: 'linear-gradient(180deg, rgba(10,14,23,0.20) 0%, rgba(10,14,23,0.12) 100%)',
+        backdropFilter: 'blur(28px) saturate(1.5)',
+        WebkitBackdropFilter: 'blur(28px) saturate(1.5)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.25)'
       }} />
       {/* top specular highlight */}
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)' }} />
