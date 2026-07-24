@@ -13,7 +13,7 @@ export default function MobileHeader() {
   }, []);
 
   return (
-    <header className="md:hidden sticky top-0 z-50">
+    <header className="md:hidden sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div
         className="absolute inset-0"
         style={{
@@ -29,7 +29,6 @@ export default function MobileHeader() {
       />
       <div
         className="relative h-14 px-4 flex items-center justify-between"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <Link to="/" className="flex items-center gap-2.5">
           <div className="relative">

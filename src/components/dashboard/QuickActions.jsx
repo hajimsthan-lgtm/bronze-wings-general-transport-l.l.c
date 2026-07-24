@@ -22,10 +22,10 @@ const INVOICE = { label: '+ New Invoice', icon: FileText, grad: ['#8b5cf6', '#a7
 function IconBox({ a }) {
   return (
     <span
-      className="relative w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white transition-transform duration-300 group-hover:scale-110"
+      className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white transition-transform duration-300 group-hover:scale-110"
       style={{ background: `linear-gradient(135deg, ${a.grad[0]}, ${a.grad[1]})`, boxShadow: `0 4px 10px ${a.glow}` }}
     >
-      <a.icon className="w-5 h-5 text-white" />
+      <a.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
     </span>
   );
 }
@@ -48,11 +48,11 @@ export default function QuickActions() {
             transition={{ duration: 0.4, delay: 0.55 + i * 0.05 }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="group relative flex items-center gap-3 px-4 py-3.5 md:px-5 md:py-4 rounded-2xl w-full transition-all duration-300 hover:-translate-y-0.5"
+            className="group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
             style={CARD}
           >
             <IconBox a={a} />
-            <span className="relative text-sm font-semibold text-white whitespace-nowrap">{a.label}</span>
+            <span className="relative flex-1 min-w-0 truncate text-[13px] sm:text-sm font-semibold text-white">{a.label}</span>
           </motion.button>
         ))}
 
@@ -66,12 +66,13 @@ export default function QuickActions() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="group relative flex items-center gap-3 px-5 py-4 rounded-2xl w-full transition-all duration-300 hover:-translate-y-0.5"
+                className="group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 sm:py-4 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
                 style={CARD}
               >
                 <IconBox a={INVOICE} />
-                <span className="relative text-sm font-semibold text-white whitespace-nowrap flex items-center gap-1">
-                  {INVOICE.label}<ChevronDown className="w-3.5 h-3.5 text-white/50" />
+                <span className="relative flex-1 min-w-0 flex items-center gap-1 text-[13px] sm:text-sm font-semibold text-white">
+                  <span className="truncate">{INVOICE.label}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-white/50 flex-shrink-0" />
                 </span>
               </button>
             </DropdownMenuTrigger>

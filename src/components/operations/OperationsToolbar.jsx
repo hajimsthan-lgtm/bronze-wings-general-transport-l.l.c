@@ -31,7 +31,7 @@ export default function OperationsToolbar({
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3 mb-3">
-        <div className="relative flex-1 min-w-[220px]">
+        <div className="relative w-full md:flex-1 md:min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
             value={search}
@@ -62,7 +62,7 @@ export default function OperationsToolbar({
           }}
         />
 
-        <div className="flex-1" />
+        <div className="hidden md:block md:flex-1" />
 
         <SegmentedToggle
           value={viewMode}
@@ -77,7 +77,7 @@ export default function OperationsToolbar({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 h-11 px-4">
+            <Button className="bg-primary hover:bg-primary/90 h-11 px-4 w-full md:w-auto">
               <Plus className="w-4 h-4 mr-1.5" /> {t('new_record')}
               <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
             </Button>

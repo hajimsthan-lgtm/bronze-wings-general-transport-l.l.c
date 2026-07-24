@@ -52,11 +52,11 @@ export default function TopBar() {
   if (subNav.length === 0) return null;
 
   return (
-    <div className="sticky top-14 md:top-20 z-40">
+    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12 py-2">
           {/* frosted sub-tab pill track */}
-          <div className="flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1 backdrop-blur-lg overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1 backdrop-blur-lg overflow-x-auto no-scrollbar flex-1 min-w-0">
             {subNav.map(item => {
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
               return (

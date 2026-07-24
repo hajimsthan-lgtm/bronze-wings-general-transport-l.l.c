@@ -33,7 +33,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
 
   return (
     <div
-      className="relative overflow-hidden p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group"
+      className="relative overflow-hidden p-4 sm:p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group"
       style={{
         animationDelay: `${index * 0.08}s`,
         background: '#232636',
@@ -46,17 +46,17 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] pt-1.5">{label}</p>
         {Icon && (
           <span
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
             style={{
               background: `linear-gradient(135deg, ${color}, ${color}cc)`,
               boxShadow: `0 4px 12px ${rgba(0.3)}`,
             }}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </span>
         )}
       </div>
-      <p className="text-4xl font-light text-white tabular-nums tracking-tight">{display}</p>
+      <p className="text-2xl sm:text-4xl font-light text-white tabular-nums tracking-tight">{display}</p>
       {extra && <div className="mt-3 flex items-center justify-between gap-2 relative z-10">{extra}</div>}
     </div>
   );

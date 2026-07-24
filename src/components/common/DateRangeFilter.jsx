@@ -31,11 +31,11 @@ export default function DateRangeFilter({ fromValue, onFromChange, toValue, onTo
     : (fromValue || toValue || 'Select dates');
 
   return (
-    <div className="flex items-center gap-2 w-full">
+    <div className="flex items-center gap-2 w-full md:w-auto">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
-            className="flex items-center gap-2 h-10 px-4 rounded-xl w-full md:w-auto justify-between md:justify-start transition-all"
+            className="flex items-center gap-2 h-10 px-3 sm:px-4 rounded-xl flex-1 md:flex-initial md:w-auto justify-between md:justify-start transition-all min-w-0"
             style={{
               background: '#1e2130',
               border: '1px solid rgba(255,255,255,0.08)',

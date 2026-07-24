@@ -31,14 +31,16 @@ function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
   return (
     <Link to={to} className="group relative block rounded-3xl p-4 sm:p-6 overflow-hidden transition-all duration-400 hover:-translate-y-1" style={CARD}>
       <span
-        className="absolute top-5 right-5 w-11 h-11 rounded-2xl flex items-center justify-center text-white"
+        className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white"
         style={{ background: `linear-gradient(135deg, ${grad[0]}, ${grad[1]})`, boxShadow: `0 4px 12px ${glow}` }}
       >
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </span>
-      <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">{label}</p>
-      <p className="text-4xl sm:text-5xl font-light text-white mt-2 leading-none tabular-nums">{value}</p>
-      <p className="text-[13px] text-[#a0a5b8] mt-2">{subtitle}</p>
+      <div className="pr-10 sm:pr-14">
+        <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">{label}</p>
+        <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mt-2 leading-none tabular-nums">{value}</p>
+        <p className="text-[13px] text-[#a0a5b8] mt-2">{subtitle}</p>
+      </div>
     </Link>
   );
 }
