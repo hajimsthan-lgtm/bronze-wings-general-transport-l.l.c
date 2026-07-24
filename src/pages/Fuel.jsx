@@ -103,16 +103,19 @@ export default function Fuel() {
 function FuelForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' });
   useEffect(() => { if (editItem) setForm({ ...form, ...editItem, liters: editItem.liters || '', price_per_liter: editItem.price_per_liter || '', total_cost: editItem.total_cost || '', odometer_reading: editItem.odometer_reading || '' }); else setForm({ date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' }); }, [editItem]);
+  useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).catch(() => []).then(setVehicles); base44.entities.Driver.list('-created_date', 200).catch(() => []).then(setDrivers); }, []);
   const update = (f, v) => { const next = { ...form, [f]: v }; if (f === 'liters' || f === 'price_per_liter') next.total_cost = (Number(next.liters) || 0) * (Number(next.price_per_liter) || 0); setForm(next); };
   const handle = async () => { setSaving(true); await onSave({ ...form, liters: Number(form.liters) || 0, price_per_liter: Number(form.price_per_liter) || 0, total_cost: Number(form.total_cost) || 0, odometer_reading: Number(form.odometer_reading) || 0 }); setSaving(false); };
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input list="fuel-vehicles" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" placeholder="Select or type plate" /><datalist id="fuel-vehicles">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input list="fuel-drivers" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" placeholder="Select or type driver" /><datalist id="fuel-drivers">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Liters</Label><Input type="number" value={form.liters} onChange={e => update('liters', e.target.value)} className="bg-background border-border" /></div>

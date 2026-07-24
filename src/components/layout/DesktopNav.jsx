@@ -26,13 +26,15 @@ export default function DesktopNav() {
     <nav className="hidden md:block sticky top-0 z-50">
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
-        background: 'rgba(10,14,23,0.75)',
-        backdropFilter: 'blur(24px) saturate(1.5)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
-        boxShadow: '0 4px 30px rgba(0,0,0,0.5)'
+        background: 'linear-gradient(180deg, rgba(10,14,23,0.50) 0%, rgba(10,14,23,0.35) 100%)',
+        backdropFilter: 'blur(30px) saturate(1.8)',
+        WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)'
       }} />
+      {/* top specular highlight */}
+      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)' }} />
       {/* gradient bottom hairline */}
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.25) 50%, transparent 100%)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.30) 50%, transparent 100%)' }} />
       {/* centered ambient blue light-leak */}
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
 

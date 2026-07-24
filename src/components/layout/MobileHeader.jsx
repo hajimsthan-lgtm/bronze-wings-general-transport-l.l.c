@@ -17,16 +17,14 @@ export default function MobileHeader() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'rgba(10,14,23,0.82)',
-          backdropFilter: 'blur(20px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(20px) saturate(1.4)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+          background: 'linear-gradient(180deg, rgba(10,14,23,0.55) 0%, rgba(10,14,23,0.40) 100%)',
+          backdropFilter: 'blur(28px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)',
         }}
       />
-      <div
-        className="absolute inset-x-0 bottom-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.25) 50%, transparent)' }}
-      />
+      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.30) 50%, transparent)' }} />
       <div
         className="relative h-14 px-4 flex items-center justify-between"
       >
