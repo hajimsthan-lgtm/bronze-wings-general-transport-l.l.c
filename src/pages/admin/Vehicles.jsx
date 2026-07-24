@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatDate } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
+import VehicleCard from '@/components/admin/VehicleCard';
 import Services from './Services';
 import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
 
@@ -65,34 +66,11 @@ function VehiclesTab() {
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
-      <div>
-          {filtered.map((v) =>
-        <div key={v.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/vehicles/${v.id}`)}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center"><Truck className="w-4 h-4 text-white/70" /></div>
-                  <div><p className="text-sm font-semibold text-foreground">{v.plate_number}</p><p className="text-xs text-muted-foreground">{v.make} {v.model} {v.year}</p></div>
-                </div>
-                <StatusBadge status={v.status} />
-              </div>
-              <div className="space-y-1.5 text-xs text-muted-foreground">
-                {v.assigned_driver && <p>Driver: <span className="text-foreground">{v.assigned_driver}</span></p>}
-                {v.registration_expiry && <p>{t('registration')}: <span className="text-foreground">{formatDate(v.registration_expiry)}</span></p>}
-                {v.insurance_expiry && <p>{t('insurance')}: <span className="text-foreground">{formatDate(v.insurance_expiry)}</span></p>}
-              </div>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" onClick={() => {setEditItem(v);setFormOpen(true);}} className="text-muted-foreground hover:text-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger>
-                  <AlertDialogContent className="bg-card border-border"><AlertDialogHeader><AlertDialogTitle className="text-foreground">{t('delete')} Vehicle?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-                    <AlertDialogFooter><AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={async () => {await base44.entities.Vehicle.delete(v.id);load();}} className="bg-destructive">{t('delete')}</AlertDialogAction></AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-        )}
-        </div>
-      }
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.map((v) => (
+          <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
+        ))}
+      </div>}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">

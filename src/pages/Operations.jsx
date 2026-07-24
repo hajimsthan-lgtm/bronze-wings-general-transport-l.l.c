@@ -10,15 +10,15 @@ import EmptyState from '@/components/common/EmptyState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import TripCard from '@/components/trips/TripCard';
 import ContractCard from '@/components/contracts/ContractCard';
-import TripsTable from '@/components/operations/TripsTable';
+import TripsList from '@/components/operations/TripsList';
 import ContractsTable from '@/components/operations/ContractsTable';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import SegmentedBar from '@/components/operations/SegmentedBar';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
-import { formatDate } from '@/lib/formatters';
-import { Truck, FileText, LayoutGrid } from 'lucide-react';
+import { formatDate, formatCurrency } from '@/lib/formatters';
+import { Truck, FileText, LayoutGrid, Wallet, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -70,7 +70,7 @@ export default function Operations() {
   const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
 
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('list');
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
@@ -183,6 +183,37 @@ export default function Operations() {
     contracts.forEach((cn) => { if (c[cn.status] != null) c[cn.status]++; });
     return c;
   }, [contracts]);
+
+  // Light analytics strip — adapts to the active mode
+  const analytics = useMemo(() => {
+    if (mode === 'contract') {
+      const list = filteredContracts;
+      const monthlyTotal = list.reduce((s, c) => s + (Number(c.monthly_rate) || 0), 0);
+      const active = list.filter((c) => c.status === 'active').length;
+      const margins = list.map((c) => {
+        const exp = (expensesByContract[c.id] || []).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+        const mr = Number(c.monthly_rate) || 0;
+        return mr > 0 ? Math.round(((mr - exp) / mr) * 100) : 0;
+      });
+      const avgMargin = margins.length ? Math.round(margins.reduce((a, b) => a + b, 0) / margins.length) : 0;
+      return [
+        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet },
+        { label: 'Contracts', value: list.length, icon: FileText },
+        { label: 'Active', value: active, icon: CheckCircle2 },
+        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp },
+      ];
+    }
+    const list = filteredTrips;
+    const revenue = list.reduce((s, tr) => s + (Number(tr.revenue) || 0), 0);
+    const completed = list.filter((tr) => tr.status === 'completed').length;
+    const inTransit = list.filter((tr) => tr.status === 'in_transit').length;
+    return [
+      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet },
+      { label: 'Trips', value: list.length, icon: Truck },
+      { label: 'Completed', value: completed, icon: CheckCircle2 },
+      { label: 'In Transit', value: inTransit, icon: Clock },
+    ];
+  }, [mode, filteredTrips, filteredContracts, expensesByContract]);
 
   // Form handlers
   const openNewTrip = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
@@ -328,6 +359,21 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          {analytics.map((a, i) => {
+            const Icon = a.icon;
+            return (
+              <div key={a.label} className="stat-tile p-3.5 animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</p>
+                  <Icon className="w-3.5 h-3.5 text-primary/60" />
+                </div>
+                <p className="text-base md:text-lg font-semibold text-foreground mt-1.5 tabular-nums truncate">{a.value}</p>
+              </div>
+            );
+          })}
+        </div>
+
         {/* All operations controls moved to the sticky sub-head bar (TopBar slot) */}
 
         {loading ? (
@@ -348,7 +394,7 @@ export default function Operations() {
                 {mode === 'all' && <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>}
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
-                  : <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
+                  : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
               </div>
             )}
             {showContracts && filteredContracts.length > 0 && (
