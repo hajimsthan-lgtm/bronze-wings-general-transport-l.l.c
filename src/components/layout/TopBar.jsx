@@ -1,7 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { Globe } from 'lucide-react';
-import ThemeToggle from '@/components/common/ThemeToggle';
 
 const operationsSubNav = [
   { key: 'trips', path: '/trips' },
@@ -74,7 +73,6 @@ export default function TopBar() {
             })}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <ThemeToggle className="md:hidden" />
             <button
               onClick={toggleLanguage}
               className="md:hidden flex items-center gap-1 px-2 py-1 rounded text-[10px] text-muted-foreground"

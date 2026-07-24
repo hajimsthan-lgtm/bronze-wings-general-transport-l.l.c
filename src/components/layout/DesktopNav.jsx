@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { LayoutDashboard, Truck, BarChart3, Shield, Globe, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
-import ThemeToggle from '@/components/common/ThemeToggle';
+import LiveClock from '@/components/common/LiveClock';
 
 const navItems = [
 { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
@@ -81,7 +81,7 @@ export default function DesktopNav() {
 
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
-          <ThemeToggle />
+          <LiveClock />
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"

@@ -11,7 +11,7 @@ export default function ExpenseCard({ exp, onEdit, onDelete }) {
   const color = categoryColors[exp.category] || '#94a3b8';
 
   return (
-    <div className="entity-card cursor-pointer group animate-fade-in-up" onClick={() => onEdit(exp)} style={{ borderLeft: `3px solid ${color}` }}>
+    <div className="entity-card cursor-pointer group animate-fade-in-up row-edge-glow" onClick={() => onEdit(exp)} style={{ ['--row-accent']: color, borderLeft: `3px solid ${color}` }}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.14), border: `1px solid ${hexToRgba(color, 0.3)}` }}>

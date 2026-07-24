@@ -18,6 +18,7 @@ import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency } from '@/lib/formatters';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { Truck, FileText, Wallet, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
@@ -198,21 +199,22 @@ export default function Operations() {
       });
       const avgMargin = margins.length ? Math.round(margins.reduce((a, b) => a + b, 0) / margins.length) : 0;
       return [
-        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet },
-        { label: 'Contracts', value: list.length, icon: FileText },
-        { label: 'Active', value: active, icon: CheckCircle2 },
-        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp },
+        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts` },
+        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active` },
+        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others` },
+        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin' },
       ];
     }
     const list = filteredTrips;
     const revenue = list.reduce((s, tr) => s + (Number(tr.revenue) || 0), 0);
     const completed = list.filter((tr) => tr.status === 'completed').length;
     const inTransit = list.filter((tr) => tr.status === 'in_transit').length;
+    const scheduled = list.filter((tr) => tr.status === 'scheduled').length;
     return [
-      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet },
-      { label: 'Trips', value: list.length, icon: Truck },
-      { label: 'Completed', value: completed, icon: CheckCircle2 },
-      { label: 'In Transit', value: inTransit, icon: Clock },
+      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips` },
+      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed` },
+      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit` },
+      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled` },
     ];
   }, [mode, filteredTrips, filteredContracts, expensesByContract]);
 
@@ -358,12 +360,26 @@ export default function Operations() {
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
-              <div key={a.label} className="stat-tile p-3.5 animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</p>
-                  <Icon className="w-3.5 h-3.5 text-primary/60" />
+              <div
+                key={a.label}
+                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-default"
+                style={{
+                  ['--row-accent']: a.accent,
+                  animationDelay: `${i * 0.05}s`,
+                  background: `linear-gradient(165deg, ${hexToRgba(a.accent, 0.10)} 0%, rgba(12,16,26,0.55) 100%)`,
+                  border: `1px solid ${hexToRgba(a.accent, 0.18)}`,
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
+                }}
+              >
+                <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
+                <div className="flex items-center justify-between mb-2.5 relative">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(a.accent, 0.14), border: `1px solid ${hexToRgba(a.accent, 0.3)}` }}>
+                    <Icon className="w-4 h-4" style={{ color: a.accent }} />
+                  </div>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</span>
                 </div>
-                <p className="text-base md:text-lg font-semibold text-foreground mt-1.5 tabular-nums truncate">{a.value}</p>
+                <p className="text-lg md:text-xl font-bold text-foreground tabular-nums truncate relative">{a.value}</p>
+                {a.sub && <p className="text-[11px] text-muted-foreground mt-0.5 relative">{a.sub}</p>}
               </div>
             );
           })}

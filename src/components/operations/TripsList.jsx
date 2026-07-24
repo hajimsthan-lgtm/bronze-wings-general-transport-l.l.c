@@ -64,6 +64,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
         const isSent = invoice?.status === 'sent';
         const statusOpt = STATUS_OPTIONS.find((s) => s.value === trip.status) || STATUS_OPTIONS[0];
         const color = STATUS_HEX[trip.status] || '#94a3b8';
+        const profit = (Number(trip.revenue) || 0) - (Number(trip.fuel_cost) || 0) - (Number(trip.toll_cost) || 0) - (Number(trip.other_cost) || 0);
         return (
           <div
             key={trip.id}
@@ -83,8 +84,8 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
-            <div className="flex items-start gap-3 p-4">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
+            <div className="flex items-center gap-3 p-4">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
                 <ArrowRight className="w-4 h-4" style={{ color }} />
               </div>
 
@@ -123,7 +124,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               </div>
 
               <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-xl bg-muted/40 border border-border/50">
+                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
@@ -158,7 +159,10 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-                <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(trip.revenue)}</p>
+                  <p className={`text-[10px] tabular-nums leading-tight ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)}</p>
+                </div>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
