@@ -71,13 +71,7 @@ export default function DateRangeFilter({ fromValue, onFromChange, toValue, onTo
         </PopoverContent>
       </Popover>
 
-      <button
-        onClick={onToday}
-        className="rounded-xl px-4 h-10 text-xs font-semibold whitespace-nowrap text-white transition-all hover:brightness-110"
-        style={{ background: 'linear-gradient(135deg,#3b82f6,#60a5fa)', boxShadow: '0 4px 16px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.2)' }}
-      >
-        {t('today')}
-      </button>
+
     </div>
   );
 }

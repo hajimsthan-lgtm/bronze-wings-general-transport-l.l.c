@@ -99,6 +99,8 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
+                  <span className="font-mono text-muted-foreground/80 whitespace-nowrap">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
+                  <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(trip.trip_date)}</span>
                   {trip.client_name && (
                     <>

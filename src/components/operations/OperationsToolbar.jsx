@@ -1,7 +1,7 @@
-import { Search, X, Plus, ChevronDown, Truck, FileText, LayoutGrid, List } from 'lucide-react';
+import { Search, X, Plus, LayoutGrid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
@@ -13,20 +13,16 @@ export default function OperationsToolbar({
   statusOptions, statusValue, onStatusChange, statusCounts,
   mode, onModeChange,
   viewMode, setViewMode,
-  onNewTrip, onNewContract,
+  onNewTrip,
   exportData, exportFilename, exportTitle, exportColumns,
 }) {
   const { t } = useI18n();
-
   const MODE_OPTIONS = [
     { value: 'all', label: t('all_operations') },
     { value: 'trip', label: t('per_trip') },
     { value: 'contract', label: t('contracts') },
   ];
-  const STATUS_DOT = {
-    scheduled: '#60a5fa', in_transit: '#fbbf24', completed: '#34d399', cancelled: '#f87171',
-    active: '#34d399', expired: '#f87171', terminated: '#f87171',
-  };
+  const selectCls = 'h-9 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
 
   return (
     <div>
@@ -55,11 +51,6 @@ export default function OperationsToolbar({
           onFromChange={setDateFrom}
           toValue={dateTo}
           onToChange={setDateTo}
-          onToday={() => {
-            const today = new Date().toISOString().split('T')[0];
-            setDateFrom(today);
-            setDateTo(today);
-          }}
         />
 
         <div className="hidden md:block md:flex-1" />
@@ -75,36 +66,35 @@ export default function OperationsToolbar({
 
         <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 h-11 px-4 w-full md:w-auto">
-              <Plus className="w-4 h-4 mr-1.5" /> {t('new_record')}
-              <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onNewTrip} className="cursor-pointer flex items-center gap-2">
-              <Truck className="w-4 h-4 text-primary" /> {t('new_trip')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onNewContract} className="cursor-pointer flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" /> {t('new_contract')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button onClick={onNewTrip} className="bg-primary hover:bg-primary/90 h-11 px-4 w-full md:w-auto">
+          <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
+        </Button>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 items-center">
-        {MODE_OPTIONS.map((m) => (
-          <button key={m.value} onClick={() => onModeChange(m.value)} className={`filter-chip ${mode === m.value ? 'filter-chip-active' : ''}`}>{m.label}</button>
-        ))}
-        <span className="h-4 w-px bg-border/60 mx-1 flex-shrink-0" />
-        {statusOptions.map((s) => (
-          <button key={s} onClick={() => onStatusChange(s)} className={`filter-chip ${statusValue === s ? 'filter-chip-active' : ''}`}>
-            {s !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_DOT[s] || '#94a3b8' }} />}
-            {s === 'all' ? t('all') : t(s)}
-            {s !== 'all' && statusCounts?.[s] != null && <span className="ml-1 text-[10px] opacity-60 tabular-nums">{statusCounts[s]}</span>}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <Select value={mode} onValueChange={onModeChange}>
+          <SelectTrigger className={selectCls}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MODE_OPTIONS.map((m) => (
+              <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={statusValue} onValueChange={onStatusChange}>
+          <SelectTrigger className={selectCls}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s === 'all' ? t('all') : t(s)}{s !== 'all' && statusCounts?.[s] != null ? ` · ${statusCounts[s]}` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

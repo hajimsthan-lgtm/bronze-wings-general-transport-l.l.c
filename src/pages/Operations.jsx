@@ -198,10 +198,10 @@ export default function Operations() {
       });
       const avgMargin = margins.length ? Math.round(margins.reduce((a, b) => a + b, 0) / margins.length) : 0;
       return [
-        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts` },
-        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active` },
-        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others` },
-        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin' },
+        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts`, action: () => setMode('contract') },
+        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active`, action: () => setMode('contract') },
+        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others`, action: () => setContractFilter('active') },
+        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin', action: () => setMode('contract') },
       ];
     }
     const list = filteredTrips;
@@ -210,10 +210,10 @@ export default function Operations() {
     const inTransit = list.filter((tr) => tr.status === 'in_transit').length;
     const scheduled = list.filter((tr) => tr.status === 'scheduled').length;
     return [
-      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips` },
-      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed` },
-      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit` },
-      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled` },
+      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips`, action: () => setMode('all') },
+      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed`, action: () => setMode('trip') },
+      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit`, action: () => setTripFilter('completed') },
+      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled`, action: () => setTripFilter('in_transit') },
     ];
   }, [mode, filteredTrips, filteredContracts, expensesByContract]);
 
@@ -354,7 +354,8 @@ export default function Operations() {
             return (
               <div
                 key={a.label}
-                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-default min-w-[150px] flex-shrink-0 md:min-w-0"
+                onClick={() => a.action?.()}
+                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-pointer min-w-[150px] flex-shrink-0 md:min-w-0"
                 style={{
                   ['--row-accent']: a.accent,
                   animationDelay: `${i * 0.05}s`,

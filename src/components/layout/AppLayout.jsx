@@ -10,7 +10,7 @@ export default function AppLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative bg-[#06080f] md:overflow-hidden">
+    <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
       {/* ═══════════════════════════════════════════════════════
           AMBIENT BACKGROUND LAYERS
           ═══════════════════════════════════════════════════════ */}
@@ -88,25 +88,11 @@ export default function AppLayout() {
           key={location.pathname}
           className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0 animate-border-pulse"
           style={{
-            background: `
-              linear-gradient(
-                180deg,
-                rgba(18, 22, 34, 0.70) 0%,
-                rgba(12, 16, 26, 0.88) 50%,
-                rgba(9, 12, 20, 0.92) 100%
-              )
-            `,
+            background: 'var(--panel-bg)',
             backdropFilter: 'blur(40px) saturate(1.2)',
             WebkitBackdropFilter: 'blur(40px) saturate(1.2)',
-            border: '1px solid rgba(var(--panel-accent-rgb),0.10)',
-            boxShadow: `
-              inset 0 1px 0 rgba(255,255,255,0.05),
-              inset 0 0 80px rgba(var(--panel-accent-rgb),0.03),
-              0 0 0 1px rgba(var(--panel-accent-rgb),0.06),
-              0 0 40px rgba(var(--panel-accent-rgb),0.05),
-              0 0 80px rgba(var(--panel-accent2-rgb),0.03),
-              0 20px 60px rgba(0,0,0,0.45)
-            `
+            border: '1px solid var(--panel-border-color)',
+            boxShadow: 'var(--panel-inner-highlight), inset 0 0 80px rgba(var(--panel-accent-rgb),0.03), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06), 0 0 40px rgba(var(--panel-accent-rgb),0.05), 0 0 80px rgba(var(--panel-accent2-rgb),0.03), var(--panel-drop-shadow)'
           }}>
           
           {/* Inner top highlight */}

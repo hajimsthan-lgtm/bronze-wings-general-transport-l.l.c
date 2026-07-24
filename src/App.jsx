@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { I18nProvider } from '@/lib/i18n';
+import { ThemeProvider } from '@/lib/theme';
 import { TabHistoryProvider } from '@/lib/TabHistoryContext';
 
 // Auth pages
@@ -100,17 +101,19 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <I18nProvider>
-          <Router>
-            <ScrollToTop />
-            <TabHistoryProvider>
-              <AuthenticatedApp />
-            </TabHistoryProvider>
-          </Router>
-          <Toaster />
-        </I18nProvider>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <I18nProvider>
+            <Router>
+              <ScrollToTop />
+              <TabHistoryProvider>
+                <AuthenticatedApp />
+              </TabHistoryProvider>
+            </Router>
+            <Toaster />
+          </I18nProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </AuthProvider>
   )
 }

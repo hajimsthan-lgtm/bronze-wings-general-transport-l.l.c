@@ -26,7 +26,7 @@ export default function DesktopNav() {
     <nav className="hidden md:block sticky top-0 z-50">
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, rgba(10,14,23,0.12) 0%, rgba(10,14,23,0.05) 100%)',
+        background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
         backdropFilter: 'blur(14px) saturate(1.3)',
         WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
       }} />

@@ -18,7 +18,7 @@ export default function MobileNav() {
       <div
         className="relative rounded-full flex items-center justify-between gap-1 px-2 py-1.5 max-w-md mx-auto"
         style={{
-          background: 'linear-gradient(180deg, rgba(10,14,23,0.14) 0%, rgba(10,14,23,0.06) 100%)',
+          background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
           backdropFilter: 'blur(16px) saturate(1.4)',
           WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
           border: '1px solid rgba(255,255,255,0.10)',
@@ -44,7 +44,7 @@ export default function MobileNav() {
               )}
               <Icon
                 className="relative w-5 h-5 transition-colors duration-200"
-                style={{ color: active ? item.color : 'rgba(255,255,255,0.45)' }}
+                style={{ color: active ? item.color : 'var(--nav-inactive)' }}
               />
             </button>
           );
