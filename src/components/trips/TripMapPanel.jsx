@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMapEvents } from 'react-leaflet';
+import { useState, useCallback, useEffect } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Navigation, MapPin, Search, Loader2, X } from 'lucide-react';
 
@@ -26,6 +26,21 @@ function ClickHandler({ onPick, busy }) {
       if (!busy) onPick(e.latlng);
     },
   });
+  return null;
+}
+
+// Re-measures the map once it's laid out (handles Dialog open animation)
+function MapResizeFix() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    const ro = new ResizeObserver(() => {
+      try { map.invalidateSize(); } catch {}
+    });
+    ro.observe(container);
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => { try { map.invalidateSize(); } catch {} }));
+    return () => { ro.disconnect(); cancelAnimationFrame(id); };
+  }, [map]);
   return null;
 }
 
@@ -82,10 +97,7 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo }) {
     setSearch('');
   };
 
-  const refCb = (m) => {
-    setMap(m);
-    if (m) setTimeout(() => m.invalidateSize(), 250);
-  };
+  const refCb = (m) => setMap(m);
 
   return (
     <div className="glass-card overflow-hidden">
@@ -177,6 +189,7 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo }) {
             attribution=""
             maxZoom={19}
           />
+          <MapResizeFix />
           <ClickHandler onPick={handlePick} busy={picking} />
           {fromCoord && (
             <CircleMarker center={fromCoord} radius={9} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.7, weight: 2 }}>
