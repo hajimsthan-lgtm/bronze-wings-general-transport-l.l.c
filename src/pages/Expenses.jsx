@@ -126,6 +126,11 @@ export default function Expenses() {
 
       <PullToRefresh onRefresh={() => refetch()}>
         <PageHeader title={t('expenses')} description={`${formatCurrency(totalAmount)} total`} />
+        <div className="flex justify-end md:hidden mb-4">
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-11 px-4">
+            <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
+          </Button>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {analytics.map((a, i) => {

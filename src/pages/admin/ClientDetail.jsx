@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -79,7 +80,7 @@ export default function ClientDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <DetailSkeleton />;
   if (!client) return <EmptyState title="Client not found" />;
 
   const reloadCharges = () => base44.entities.FixedCharge.filter({ client_name: client.name }).then(setFixedCharges).catch(() => {});
@@ -165,7 +166,7 @@ export default function ClientDetail() {
   ];
 
   return (
-    <div>
+    <div className="detail-page">
       <EntityDetailHeader
         title={client.name}
         subtitle={client.contact_person}

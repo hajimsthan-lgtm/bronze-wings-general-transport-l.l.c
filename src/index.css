@@ -1310,3 +1310,44 @@
 .light .bg-muted\/40, .light .bg-muted\/50, .light .bg-muted\/30 { background: rgba(0,0,0,0.04); }
 .light ::-webkit-scrollbar-track { background: #eef1f7; }
 .light ::-webkit-scrollbar-thumb { background: #93c5fd; }
+
+/* Light-mode: remap faded-white utilities so content never disappears */
+.light .text-white\/20, .light .text-white\/30, .light .text-white\/40, .light .text-white\/50, .light .text-white\/60, .light .text-white\/70, .light .text-white\/80, .light .text-white\/90 { color: hsl(var(--muted-foreground)) !important; }
+.light .border-white\/5, .light .border-white\/10, .light .border-white\/20 { border-color: rgba(0,0,0,0.08) !important; }
+.light .bg-white\/5, .light .bg-white\/10, .light .bg-white\/20 { background: rgba(0,0,0,0.03) !important; }
+.light .bg-white\/\[0\.04\], .light .bg-white\/\[0\.06\] { background: rgba(0,0,0,0.03) !important; }
+.light .border-white\/\[0\.06\], .light .border-white\/\[0\.04\] { border-color: rgba(0,0,0,0.08) !important; }
+.light .text-\[\#a0a5b8\] { color: hsl(var(--muted-foreground)) !important; }
+.light .bg-\[\#232636\], .light .hover\:bg-\[\#2a2e42\] { background: hsl(var(--card)) !important; }
+
+/* ===== Entity detail-page motion ===== */
+@keyframes detail-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes meta-stagger { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes name-glow { 0%,100% { text-shadow: 0 0 0 rgba(255,255,255,0); } 50% { text-shadow: 0 0 20px rgba(255,255,255,0.12); } }
+@keyframes badge-breathe { 0%,100% { opacity: 0.85; } 50% { opacity: 1; } }
+@keyframes tab-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skel-sweep { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+.detail-page > * { opacity: 0; animation: detail-in 500ms cubic-bezier(0.22,1,0.36,1) forwards; will-change: transform, opacity; }
+.detail-page > *:nth-child(1) { animation-delay: 0ms; }
+.detail-page > *:nth-child(2) { animation-delay: 100ms; }
+.detail-page > *:nth-child(3) { animation-delay: 150ms; }
+.detail-page > *:nth-child(4) { animation-delay: 200ms; }
+.detail-page > *:nth-child(5) { animation-delay: 250ms; }
+.detail-page > *:nth-child(n+6) { animation-delay: 300ms; }
+.detail-page [role="tabpanel"] { animation: tab-in 250ms cubic-bezier(0.22,1,0.36,1) both; }
+
+.meta-stagger { opacity: 0; animation: meta-stagger 400ms cubic-bezier(0.22,1,0.36,1) forwards; will-change: transform, opacity; }
+.detail-name { transition: text-shadow 300ms ease; }
+.detail-name:hover { animation: name-glow 300ms ease-in-out; }
+.badge-breathe { animation: badge-breathe 2s ease-in-out infinite; }
+.back-arrow { transition: transform 200ms ease; }
+.back-btn:hover .back-arrow { transform: translateX(-4px); }
+
+.skel-block { background: linear-gradient(90deg, #1E2330 25%, #2a3040 37%, #1E2330 63%); background-size: 200% 100%; animation: skel-sweep 1.5s ease-in-out infinite; border-radius: 8px; }
+.light .skel-block { background: linear-gradient(90deg, #e5e9f0 25%, #f4f6fb 37%, #e5e9f0 63%); background-size: 200% 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-page > *, .detail-page [role="tabpanel"], .meta-stagger, .badge-breathe { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .detail-name:hover, .back-btn:hover .back-arrow { animation: none !important; transform: none !important; }
+}

@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -53,7 +54,7 @@ export default function VehicleDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <DetailSkeleton />;
   if (!vehicle) return <EmptyState title="Vehicle not found" />;
 
   const fTrips = trips.filter(t => !t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo));
@@ -67,7 +68,7 @@ export default function VehicleDetail() {
   const netProfit = totalTrips - totalExpenses - totalFuel;
 
   return (
-    <div>
+    <div className="detail-page">
       <EntityDetailHeader
         title={`${vehicle.make} ${vehicle.model} ${vehicle.year || ''}`}
         subtitle={vehicle.plate_number}

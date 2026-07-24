@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -45,14 +46,14 @@ export default function VendorDetail() {
     return () => { cancelled = true; };
   }, [id]);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <DetailSkeleton />;
   if (!vendor) return <EmptyState title="Vendor not found" />;
 
   const fExpenses = expenses.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
   const fServices = services.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
 
   return (
-    <div>
+    <div className="detail-page">
       <EntityDetailHeader
         title={vendor.name}
         subtitle={vendor.contact_person}
