@@ -394,12 +394,21 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             {mode === 'trip'
               ? <TripModeFields p={tripCtx} />
               : <ContractModeFields p={contractCtx} />}
-            {mode === 'trip' && <TripMapPanel from={form.from_location} to={form.to_location} />}
           </div>
 
-          {mode === 'trip'
-            ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
-            : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
+          <div className="space-y-5">
+            {mode === 'trip'
+              ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+              : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
+            {mode === 'trip' && (
+              <TripMapPanel
+                from={form.from_location}
+                to={form.to_location}
+                onSelectFrom={(v) => update('from_location', v)}
+                onSelectTo={(v) => update('to_location', v)}
+              />
+            )}
+          </div>
         </div>
 
         {/* Mobile condensed bar */}
