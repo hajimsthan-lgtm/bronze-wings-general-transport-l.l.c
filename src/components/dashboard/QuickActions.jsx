@@ -38,7 +38,7 @@ export default function QuickActions() {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}>
       <h2 className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280] mb-3">Quick Actions</h2>
-      <div className="flex md:grid md:grid-cols-5 gap-4 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         {ACTIONS.map((a, i) => (
           <motion.button
             key={a.label}
@@ -48,7 +48,7 @@ export default function QuickActions() {
             transition={{ duration: 0.4, delay: 0.55 + i * 0.05 }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="group relative flex items-center gap-3 px-5 py-4 rounded-2xl flex-shrink-0 transition-all duration-300 hover:-translate-y-0.5"
+            className="group relative flex items-center gap-3 px-4 py-3.5 md:px-5 md:py-4 rounded-2xl w-full transition-all duration-300 hover:-translate-y-0.5"
             style={CARD}
           >
             <IconBox a={a} />
@@ -60,7 +60,7 @@ export default function QuickActions() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.55 + ACTIONS.length * 0.05 }}
-          className="flex-shrink-0"
+          className="w-full"
         >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

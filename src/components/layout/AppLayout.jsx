@@ -1,16 +1,16 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
-import TopBar, { hasSubNavForPath } from '@/components/layout/TopBar';
+import TopBar from '@/components/layout/TopBar';
 import AppFooter from '@/components/layout/AppFooter';
+import MobileHeader from '@/components/layout/MobileHeader';
 import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
   const location = useLocation();
-  const hasSubNav = hasSubNavForPath(location.pathname);
 
   return (
-    <div className="h-[100dvh] flex flex-col relative overflow-hidden bg-[#06080f]">
+    <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative bg-[#06080f] md:overflow-hidden">
       {/* ═══════════════════════════════════════════════════════
           AMBIENT BACKGROUND LAYERS
           ═══════════════════════════════════════════════════════ */}
@@ -72,6 +72,7 @@ export default function AppLayout() {
       {/* ═══════════════════════════════════════════════════════
           NAVIGATION
           ═══════════════════════════════════════════════════════ */}
+      <MobileHeader />
       <DesktopNav />
       <TopBar />
 
@@ -79,10 +80,10 @@ export default function AppLayout() {
           MAIN CONTENT — fixed-height panel; body scrolls internally
           so the page header stays pinned (unbreakable structure)
           ═══════════════════════════════════════════════════════ */}
-      <main className={`flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 ${hasSubNav ? 'pt-3 md:pt-4' : 'pt-[calc(12px+env(safe-area-inset-top))]'}`}>
+      <main className="flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 pt-3 md:pt-4">
         <div
           key={location.pathname}
-          className="animate-fade-in-up flex-1 min-h-0 flex flex-col rounded-2xl relative overflow-hidden animate-border-pulse"
+          className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0 animate-border-pulse"
           style={{
             background: `
               linear-gradient(
@@ -126,7 +127,7 @@ export default function AppLayout() {
           />
 
           {/* Scrollable body — page header is sticky within this region */}
-          <div className="relative z-10 flex-1 min-h-0 overflow-y-auto thin-scroll p-4 md:p-6 pb-28 md:pb-24">
+          <div className="relative z-10 p-4 md:p-6 pb-28 md:pb-24 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
             <Outlet />
           </div>
         </div>

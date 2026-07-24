@@ -29,7 +29,7 @@ const CARD_SM = {
 
 function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
   return (
-    <Link to={to} className="group relative block rounded-3xl p-6 overflow-hidden transition-all duration-400 hover:-translate-y-1" style={CARD}>
+    <Link to={to} className="group relative block rounded-3xl p-4 sm:p-6 overflow-hidden transition-all duration-400 hover:-translate-y-1" style={CARD}>
       <span
         className="absolute top-5 right-5 w-11 h-11 rounded-2xl flex items-center justify-center text-white"
         style={{ background: `linear-gradient(135deg, ${grad[0]}, ${grad[1]})`, boxShadow: `0 4px 12px ${glow}` }}
@@ -37,7 +37,7 @@ function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
         <Icon className="w-5 h-5" />
       </span>
       <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">{label}</p>
-      <p className="text-5xl font-light text-white mt-2 leading-none tabular-nums">{value}</p>
+      <p className="text-4xl sm:text-5xl font-light text-white mt-2 leading-none tabular-nums">{value}</p>
       <p className="text-[13px] text-[#a0a5b8] mt-2">{subtitle}</p>
     </Link>
   );
@@ -198,7 +198,7 @@ export default function Dashboard() {
 
       {/* Stat cards */}
       <motion.div
-        className="grid grid-cols-2 lg:grid-cols-4 gap-5"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5"
         initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
       >

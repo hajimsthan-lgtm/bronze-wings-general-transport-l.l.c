@@ -52,7 +52,7 @@ export default function TopBar() {
   if (subNav.length === 0) return null;
 
   return (
-    <div className="sticky top-0 md:top-20 z-40" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <div className="sticky top-14 md:top-20 z-40">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12 py-2">
           {/* frosted sub-tab pill track */}
