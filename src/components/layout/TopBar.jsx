@@ -30,6 +30,7 @@ const subNavMap = {
   '/reports/soa': reportsSubNav,
   '/expenses': operationsSubNav,
   '/trips': operationsSubNav,
+  '/contracts': operationsSubNav,
   '/admin/vehicles': adminSubNav,
   '/admin/drivers': adminSubNav,
   '/admin/clients': adminSubNav,
@@ -84,6 +85,9 @@ export default function TopBar() {
             </button>
           </div>
         </div>
+
+        {/* Operations controls slot — populated via portal by the Operations page */}
+        <div id="ops-subbar" />
       </div>
     </div>
   );

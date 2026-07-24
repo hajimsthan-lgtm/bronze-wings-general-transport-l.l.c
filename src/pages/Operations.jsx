@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -275,6 +276,46 @@ export default function Operations() {
   const noContracts = showContracts && filteredContracts.length === 0;
   const allEmpty = noTrips && (mode === 'trip' || noContracts) && (mode !== 'trip' ? noContracts : true);
 
+  // Portal the operations controls into the sticky sub-head bar slot in TopBar
+  const [subBarTarget, setSubBarTarget] = useState(null);
+  useEffect(() => { setSubBarTarget(document.getElementById('ops-subbar')); }, []);
+  const subBar = subBarTarget && createPortal(
+    <div className="border-t border-border/50 pt-2 mt-1 space-y-2">
+      <div className="flex justify-center">
+        <SegmentedBar
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'all', label: t('all_operations'), icon: LayoutGrid },
+            { value: 'trip', label: t('per_trip'), icon: Truck },
+            { value: 'contract', label: t('contracts'), icon: FileText },
+          ]}
+        />
+      </div>
+      <OperationsToolbar
+        search={search}
+        setSearch={setSearch}
+        dateFrom={dateFrom}
+        setDateFrom={setDateFrom}
+        dateTo={dateTo}
+        setDateTo={setDateTo}
+        statusOptions={statusOptions}
+        statusValue={statusValue}
+        onStatusChange={onStatusChange}
+        statusCounts={statusCounts}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onNewTrip={openNewTrip}
+        onNewContract={openNewContract}
+        exportData={exportData}
+        exportFilename={isContractExport ? 'monthly-contracts' : 'trips'}
+        exportTitle={isContractExport ? 'Monthly Contracts' : 'Trips'}
+        exportColumns={isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS}
+      />
+    </div>,
+    subBarTarget
+  );
+
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
@@ -287,38 +328,7 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="flex justify-center mb-5">
-          <SegmentedBar
-            value={mode}
-            onChange={setMode}
-            options={[
-              { value: 'all', label: t('all_operations'), icon: LayoutGrid },
-              { value: 'trip', label: t('per_trip'), icon: Truck },
-              { value: 'contract', label: t('contracts'), icon: FileText },
-            ]}
-          />
-        </div>
-
-        <OperationsToolbar
-          search={search}
-          setSearch={setSearch}
-          dateFrom={dateFrom}
-          setDateFrom={setDateFrom}
-          dateTo={dateTo}
-          setDateTo={setDateTo}
-          statusOptions={statusOptions}
-          statusValue={statusValue}
-          onStatusChange={onStatusChange}
-          statusCounts={statusCounts}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          onNewTrip={openNewTrip}
-          onNewContract={openNewContract}
-          exportData={exportData}
-          exportFilename={isContractExport ? 'monthly-contracts' : 'trips'}
-          exportTitle={isContractExport ? 'Monthly Contracts' : 'Trips'}
-          exportColumns={isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS}
-        />
+        {/* All operations controls moved to the sticky sub-head bar (TopBar slot) */}
 
         {loading ? (
           <LoadingSpinner />
@@ -352,6 +362,8 @@ export default function Operations() {
           </div>
         )}
       </PullToRefresh>
+
+      {subBar}
 
       <TripFormSheet
         open={formOpen}
