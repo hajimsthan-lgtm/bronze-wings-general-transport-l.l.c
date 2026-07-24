@@ -84,9 +84,9 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
-                <ArrowRight className="w-4 h-4" style={{ color }} />
+            <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color }} />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -123,7 +123,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -143,6 +143,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   </DropdownMenu>
 
                   {trip.status === 'completed' && (
+                    <div className="hidden sm:block">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
@@ -154,6 +155,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                         <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    </div>
                   )}
                 </div>
 
@@ -166,8 +168,8 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                      <MoreVertical className="w-4 h-4" />
+                    <button onClick={(e) => e.stopPropagation()} className="w-7 h-7 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                      <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
