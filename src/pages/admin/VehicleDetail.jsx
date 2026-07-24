@@ -114,11 +114,11 @@ export default function VehicleDetail() {
 
       {/* Inline fuel history — always visible */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3 hidden">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
-          <h3 className="text-sm font-semibold text-foreground">{t('fuel')}</h3>
-          <span className="text-xs text-muted-foreground">({fFuel.length})</span>
-        </div>
+        
+
+
+
+        
         {dataLoading ? <LoadingSpinner /> : fFuel.length === 0 ? <EmptyState icon={FuelIcon} title={t('no_data')} /> :
         <div className="space-y-2">
             {fFuel.map((rec) =>
