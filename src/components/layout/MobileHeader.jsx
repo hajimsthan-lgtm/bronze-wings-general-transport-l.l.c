@@ -17,10 +17,9 @@ export default function MobileHeader() {
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(10,14,23,0.18) 0%, rgba(10,14,23,0.10) 100%)',
-          backdropFilter: 'blur(24px) saturate(1.5)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.25)',
+          background: 'linear-gradient(180deg, rgba(10,14,23,0.06) 0%, rgba(10,14,23,0.02) 100%)',
+          backdropFilter: 'blur(16px) saturate(1.3)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
         }}
       />
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)' }} />
