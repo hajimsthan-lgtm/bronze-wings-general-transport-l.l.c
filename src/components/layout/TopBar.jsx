@@ -83,9 +83,6 @@ export default function TopBar() {
             </button>
           </div>
         </div>
-
-        {/* Operations controls slot — populated via portal by the Operations page */}
-        <div id="ops-subbar" />
       </div>
     </div>
   );
