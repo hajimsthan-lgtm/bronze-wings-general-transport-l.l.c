@@ -14,6 +14,7 @@ import TripsList from '@/components/operations/TripsList';
 import ContractsList from '@/components/operations/ContractsList';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
+import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency } from '@/lib/formatters';
@@ -90,6 +91,7 @@ export default function Operations() {
   const [formMode, setFormMode] = useState('trip');
   const [editTrip, setEditTrip] = useState(null);
   const [editContract, setEditContract] = useState(null);
+  const [detailContract, setDetailContract] = useState(null);
 
   // Trip detail sheet is URL-backed so Android hardware back closes it.
   const detailTripId = searchParams.get('tripId');
@@ -238,8 +240,7 @@ export default function Operations() {
     await deleteTrip.mutateAsync(trip.id);
     closeDetailTrip();
   };
-  const handleDeleteContract = async (c) => {
-    if (!confirm(`${t('delete')} "${c.company_name}"?`)) return;
+  const deleteContractById = async (c) => {
     try {
       await base44.entities.ContractExpense.deleteMany({ contract_id: c.id }).catch(() => {});
       await base44.entities.MonthlyContract.delete(c.id);
@@ -248,6 +249,10 @@ export default function Operations() {
     } catch {
       toast({ title: 'Could not delete contract', variant: 'destructive' });
     }
+  };
+  const handleDeleteContract = async (c) => {
+    if (!confirm(`${t('delete')} "${c.company_name}"?`)) return;
+    await deleteContractById(c);
   };
 
   // Export
@@ -297,7 +302,7 @@ export default function Operations() {
   const contractGrid = (list) => (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {list.map((c) => (
-        <ContractCard key={c.id} contract={c} expenses={expensesByContract[c.id] || []} onEdit={() => openEditContract(c)} onDelete={() => handleDeleteContract(c)} onDetails={() => openEditContract(c)} />
+        <ContractCard key={c.id} contract={c} expenses={expensesByContract[c.id] || []} onEdit={() => openEditContract(c)} onDelete={() => handleDeleteContract(c)} onDetails={() => setDetailContract(c)} />
       ))}
     </div>
   );
@@ -392,7 +397,7 @@ export default function Operations() {
                 {mode === 'all' && <SectionLabel count={filteredContracts.length}>{t('contracts_section')}</SectionLabel>}
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
-                  : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={openEditContract} driverMap={driverMap} vehicleMap={vehicleMap} />}
+                  : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} driverMap={driverMap} vehicleMap={vehicleMap} />}
               </div>
             )}
           </div>
@@ -416,6 +421,14 @@ export default function Operations() {
         onClose={closeDetailTrip}
         onEdit={(trip) => { closeDetailTrip(); openEditTrip(trip); }}
         onDelete={handleDeleteTrip}
+      />
+
+      <ContractDetailSheet
+        contract={detailContract}
+        expenses={detailContract ? (expensesByContract[detailContract.id] || []) : []}
+        onClose={() => setDetailContract(null)}
+        onEdit={(c) => { setDetailContract(null); openEditContract(c); }}
+        onDelete={async (c) => { await deleteContractById(c); setDetailContract(null); }}
       />
     </div>
   );

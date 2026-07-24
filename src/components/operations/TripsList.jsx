@@ -68,9 +68,10 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
           <div
             key={trip.id}
             onClick={() => onOpenDetail?.(trip)}
-            className="group relative rounded-2xl mb-2 cursor-pointer transition-all duration-200 hover:-translate-y-px animate-fade-in-up"
+            className="group relative rounded-2xl mb-2 cursor-pointer row-edge-glow hover:-translate-y-px animate-fade-in-up"
             style={{
               animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
+              ['--row-accent']: color,
               background: 'linear-gradient(180deg, rgba(20,24,38,0.50) 0%, rgba(14,18,30,0.60) 100%)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
@@ -88,11 +89,11 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {trip.from_location || '—'} <ArrowRight className="inline w-3 h-3 text-muted-foreground/60 mx-0.5 -mt-px" /> {trip.to_location || '—'}
-                  </p>
-                  <span className="hidden md:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{trip.from_location || '—'}</p>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
+                  <p className="text-sm font-medium text-foreground truncate">{trip.to_location || '—'}</p>
+                  <span className="hidden md:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap ml-1">
                     {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
                   </span>
                 </div>

@@ -31,9 +31,10 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
           <div
             key={c.id}
             onClick={() => onDetails?.(c)}
-            className="group relative rounded-2xl mb-2 cursor-pointer transition-all duration-200 hover:-translate-y-px animate-fade-in-up"
+            className="group relative rounded-2xl mb-2 cursor-pointer row-edge-glow hover:-translate-y-px animate-fade-in-up"
             style={{
               animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
+              ['--row-accent']: CONTRACT_ACCENT,
               background: 'linear-gradient(180deg, rgba(28,22,40,0.50) 0%, rgba(20,16,30,0.62) 100%)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
