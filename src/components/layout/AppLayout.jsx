@@ -73,7 +73,7 @@ export default function AppLayout() {
           NAVIGATION — overlays content on desktop so scrolling data
           shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
-      <div className="md:absolute md:inset-x-0 md:top-0 md:z-50">
+      <div className="sticky top-0 z-50 md:absolute md:inset-x-0 md:top-0">
         <MobileHeader />
         <DesktopNav />
         <TopBar />
