@@ -70,17 +70,20 @@ export default function AppLayout() {
       />
 
       {/* ═══════════════════════════════════════════════════════
-          NAVIGATION
+          NAVIGATION — overlays content on desktop so scrolling data
+          shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
-      <MobileHeader />
-      <DesktopNav />
-      <TopBar />
+      <div className="md:absolute md:inset-x-0 md:top-0 md:z-50">
+        <MobileHeader />
+        <DesktopNav />
+        <TopBar />
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           MAIN CONTENT — fixed-height panel; body scrolls internally
-          so the page header stays pinned (unbreakable structure)
+          beneath the transparent header
           ═══════════════════════════════════════════════════════ */}
-      <main className="flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 pt-3 md:pt-4">
+      <main className="flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 pt-3 md:pt-0">
         <div
           key={location.pathname}
           className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0 animate-border-pulse"
@@ -126,9 +129,11 @@ export default function AppLayout() {
             }}
           />
 
-          {/* Scrollable body — page header is sticky within this region */}
-          <div className="relative z-10 p-4 md:p-6 pb-28 md:pb-24 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
-            <Outlet />
+          {/* Scrollable body — content scrolls behind the transparent header */}
+          <div className="relative z-10 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
+            <div className="p-4 md:p-6 md:pt-32 pb-28 md:pb-24">
+              <Outlet />
+            </div>
           </div>
         </div>
       </main>

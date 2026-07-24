@@ -26,9 +26,9 @@ export default function DesktopNav() {
     <nav className="hidden md:block sticky top-0 z-50">
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, rgba(10,14,23,0.04) 0%, rgba(10,14,23,0.01) 100%)',
-        backdropFilter: 'blur(10px) saturate(1.2)',
-        WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
+        background: 'linear-gradient(180deg, rgba(10,14,23,0.12) 0%, rgba(10,14,23,0.05) 100%)',
+        backdropFilter: 'blur(14px) saturate(1.3)',
+        WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
       }} />
       {/* top specular highlight */}
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)' }} />
