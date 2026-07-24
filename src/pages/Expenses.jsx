@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
-import { Plus, Search, Receipt, Fuel, Wrench, Car, CreditCard, ShieldCheck, Building, Package, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Receipt, MoreVertical, Pencil, Trash2, Wallet, Clock, CheckCircle2, LayoutGrid, List, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -24,15 +24,24 @@ import ReportRowCard from '@/components/reports/ReportRowCard';
 import ReportStatusBadge from '@/components/reports/ReportStatusBadge';
 import DonutChart from '@/components/reports/DonutChart';
 import TrendChart from '@/components/reports/TrendChart';
+import { createPortal } from 'react-dom';
+import SegmentedToggle from '@/components/operations/SegmentedToggle';
+import ExpenseCard from '@/components/expenses/ExpenseCard';
+import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToRgba } from '@/components/expenses/expenseMeta';
 
-const CATEGORIES = ['all', 'fuel', 'maintenance', 'toll', 'salary', 'insurance', 'registration', 'office', 'other'];
-const categoryIcons = { fuel: Fuel, maintenance: Wrench, toll: Car, salary: CreditCard, insurance: ShieldCheck, registration: Building, office: Building, other: Package };
-const categoryColors = { fuel: '#f97316', maintenance: '#3b82f6', toll: '#a855f7', salary: '#22c55e', insurance: '#ec4899', registration: '#14b8a6', office: '#f59e0b', other: '#94a3b8' };
+// Category metadata imported from @/components/expenses/expenseMeta
+const EXPENSE_EXPORT_COLUMNS = [
+  { label: 'Date', key: 'date' }, { label: 'Category', key: 'category' },
+  { label: 'Description', key: 'description' }, { label: 'Amount', key: 'amount' },
+  { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' },
+  { label: 'Vendor', key: 'vendor_name' }, { label: 'Status', key: 'status' },
+];
 
 export default function Expenses() {
   const { t } = useI18n();
   const { data: expenses = [], isLoading: loading, refetch } = useExpenses();
   const [filter, setFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('list');
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useSheetUrlState('expense');
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
@@ -49,6 +58,14 @@ export default function Expenses() {
   });
 
   const totalAmount = filtered.reduce((s, e) => s + (e.amount || 0), 0);
+  const pendingCount = filtered.filter((e) => e.status === 'pending').length;
+  const approvedCount = filtered.filter((e) => e.status === 'approved').length;
+  const analytics = [
+    { label: 'Total', value: formatCurrency(totalAmount), icon: Wallet, color: '#f97316' },
+    { label: 'Expenses', value: filtered.length, icon: Receipt, color: '#3b82f6' },
+    { label: 'Pending', value: pendingCount, icon: Clock, color: '#f59e0b' },
+    { label: 'Approved', value: approvedCount, icon: CheckCircle2, color: '#22c55e' },
+  ];
 
   // Category donut
   const catMap = {};
@@ -61,6 +78,45 @@ export default function Expenses() {
   { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const trendData = days.map((d) => ({ label: formatDateShort(d), amount: filtered.filter((e) => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) }));
 
+  // Portal the expense controls into the sticky sub-head bar slot in TopBar
+  const [subBarTarget, setSubBarTarget] = useState(null);
+  useEffect(() => { setSubBarTarget(document.getElementById('ops-subbar')); }, []);
+  const subBar = subBarTarget && createPortal(
+    <div className="border-t border-border/50 pt-2 mt-1 space-y-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="w-full h-11 rounded-xl pl-9 pr-9 text-sm bg-muted/50 border border-border focus-visible:border-primary/40" />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <DateRangeFilter
+          fromValue={dateFrom}
+          onFromChange={setDateFrom}
+          toValue={dateTo}
+          onToChange={setDateTo}
+          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
+        />
+        <div className="flex-1" />
+        <SegmentedToggle value={viewMode} onChange={setViewMode} options={[{ value: 'card', label: t('cards_view'), icon: LayoutGrid }, { value: 'list', label: t('list_view'), icon: List }]} />
+        <ExportButtons data={filtered} filename="expenses" title="Expenses" columns={EXPENSE_EXPORT_COLUMNS} />
+        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-11 px-4"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+      </div>
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+        {CATEGORIES.map((c) => (
+          <button key={c} onClick={() => setFilter(c)} className={`filter-chip ${filter === c ? 'filter-chip-active' : ''}`}>
+            {c !== 'all' && <span className="w-1.5 h-1.5 rounded-full" style={{ background: categoryColors[c] }} />}
+            {c === 'all' ? t('all') : c.replace(/_/g, ' ')}
+          </button>
+        ))}
+      </div>
+    </div>,
+    subBarTarget
+  );
+
   return (
     <div className="relative">
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
@@ -69,41 +125,23 @@ export default function Expenses() {
       </div>
 
       <PullToRefresh onRefresh={() => refetch()}>
-        <PageHeader title={t('expenses')} description={`${formatCurrency(totalAmount)} total`}
-          action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
+        <PageHeader title={t('expenses')} description={`${formatCurrency(totalAmount)} total`} />
 
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <DateRangeFilter
-            fromValue={dateFrom}
-            onFromChange={setDateFrom}
-            toValue={dateTo}
-            onToChange={setDateTo}
-            onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-          />
-          <div className="flex-1" />
-          <ExportButtons data={filtered} filename="expenses" title="Expenses" columns={[
-            { label: 'Date', key: 'date' }, { label: 'Category', key: 'category' },
-            { label: 'Description', key: 'description' }, { label: 'Amount', key: 'amount' },
-            { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' },
-            { label: 'Vendor', key: 'vendor_name' }, { label: 'Status', key: 'status' },
-          ]} />
-        </div>
-
-        <div className="space-y-3 mb-5">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 bg-card border-border h-10" />
-          </div>
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-            {CATEGORIES.map(c => (
-              <button key={c} onClick={() => setFilter(c)} className="px-4 py-1.5 rounded-full text-sm whitespace-nowrap transition-all duration-200"
-                style={filter === c
-                  ? { background: 'rgba(59,130,246,0.20)', border: '1px solid rgba(59,130,246,0.30)', color: '#fff', boxShadow: '0 0 12px rgba(59,130,246,0.15)' }
-                  : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.40)' }}>
-                {c === 'all' ? 'All' : c.replace(/_/g, ' ')}
-              </button>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          {analytics.map((a, i) => {
+            const Icon = a.icon;
+            return (
+              <div key={a.label} className="stat-tile p-3.5 animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</p>
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: hexToRgba(a.color, 0.14), border: `1px solid ${hexToRgba(a.color, 0.3)}` }}>
+                    <Icon className="w-3.5 h-3.5" style={{ color: a.color }} />
+                  </span>
+                </div>
+                <p className="text-base md:text-lg font-semibold text-foreground mt-1.5 tabular-nums truncate">{a.value}</p>
+              </div>
+            );
+          })}
         </div>
 
         {donutData.length > 0 && (
@@ -119,10 +157,16 @@ export default function Expenses() {
 
         {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
           <EmptyState icon={Receipt} title={t('no_data')} description="Add your first expense" />
+        ) : viewMode === 'card' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            {filtered.map(exp => (
+              <ExpenseCard key={exp.id} exp={exp} onEdit={(e) => { setEditItem(e); setFormOpen(true); }} onDelete={setDeleteTarget} />
+            ))}
+          </div>
         ) : (
           <div>
             {filtered.map(exp => {
-              const Icon = categoryIcons[exp.category] || Package;
+              const Icon = categoryIcons[exp.category] || categoryIcons.other;
               const color = categoryColors[exp.category] || '#94a3b8';
               return (
                 <ReportRowCard
@@ -162,6 +206,8 @@ export default function Expenses() {
           </div>
         )}
       </PullToRefresh>
+
+      {subBar}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>
