@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
@@ -8,6 +9,22 @@ import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
   const location = useLocation();
+  const spotlightRef = useRef(null);
+
+  useEffect(() => {
+    let raf = 0;
+    const onMove = (e) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = spotlightRef.current;
+        if (!el) return;
+        el.style.setProperty('--mx', e.clientX + 'px');
+        el.style.setProperty('--my', e.clientY + 'px');
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf); };
+  }, []);
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
@@ -48,15 +65,24 @@ export default function AppLayout() {
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.025] bg-noise bg-[128px]"
       />
 
-      {/* Layer 3: Fine tech grid */}
-      <div 
-        className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]"
+      {/* Layer 3: Dotted ambient grid */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.06]"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(var(--panel-accent-rgb),0.3) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(var(--panel-accent-rgb),0.3) 1px, transparent 1px)
-          `,
-          backgroundSize: '48px 48px'
+          backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.5) 1px, transparent 1.5px)',
+          backgroundSize: '26px 26px'
+        }}
+      />
+
+      {/* Layer 3b: Cursor-following light */}
+      <div
+        ref={spotlightRef}
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 15,
+          '--mx': '50vw',
+          '--my': '30vh',
+          background: 'radial-gradient(440px circle at var(--mx) var(--my), rgba(var(--panel-accent-rgb),0.08), transparent 65%)'
         }}
       />
 
@@ -100,6 +126,15 @@ export default function AppLayout() {
             className="absolute inset-0 pointer-events-none rounded-2xl"
             style={{
               background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(var(--panel-accent-rgb),0.05) 0%, transparent 60%)'
+            }}
+          />
+
+          {/* Dotted ambient texture across panel */}
+          <div
+            className="absolute inset-0 pointer-events-none rounded-2xl opacity-[0.05]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.45) 1px, transparent 1.5px)',
+              backgroundSize: '24px 24px'
             }}
           />
 
