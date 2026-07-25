@@ -14,6 +14,7 @@ import { Plus, Search, Users, Pencil, Trash2, Phone, Mail } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import ClientForm from '@/components/admin/ClientForm';
+import ClientCard from '@/components/admin/ClientCard';
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -54,24 +55,7 @@ export default function ClientsPanel() {
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map(c => (
-            <div key={c.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/clients/${c.id}`)}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full entity-avatar flex items-center justify-center text-sm font-semibold">{getInitials(c.name)}</div>
-                <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-foreground truncate">{c.name}</p><p className="text-xs text-muted-foreground">{c.contact_person}</p></div>
-                <StatusBadge status={c.status} />
-              </div>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                {c.email && <p className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</p>}
-                {c.phone && <p className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</p>}
-                {c.trn && <p>TRN: {c.trn}</p>}
-              </div>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" onClick={() => { setEditItem(c); setFormOpen(true); }} className="text-muted-foreground hover:text-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
-                <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger>
-                  <AlertDialogContent className="bg-card border-border"><AlertDialogHeader><AlertDialogTitle className="text-foreground">{t('delete')}?</AlertDialogTitle><AlertDialogDescription>This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={async () => { await base44.entities.Client.delete(c.id); load(); }} className="bg-destructive">{t('delete')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
+            <ClientCard key={c.id} c={c} onOpen={() => navigate(`/admin/clients/${c.id}`)} onEdit={() => { setEditItem(c); setFormOpen(true); }} onDelete={async () => { await base44.entities.Client.delete(c.id); load(); }} />
           ))}
         </div>
       )}

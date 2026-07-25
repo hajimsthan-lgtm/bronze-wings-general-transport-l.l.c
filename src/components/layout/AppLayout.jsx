@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
@@ -9,22 +8,6 @@ import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
   const location = useLocation();
-  const spotlightRef = useRef(null);
-
-  useEffect(() => {
-    let raf = 0;
-    const onMove = (e) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const el = spotlightRef.current;
-        if (!el) return;
-        el.style.setProperty('--mx', e.clientX + 'px');
-        el.style.setProperty('--my', e.clientY + 'px');
-      });
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf); };
-  }, []);
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
@@ -74,16 +57,12 @@ export default function AppLayout() {
         }}
       />
 
-      {/* Layer 3b: Cursor-following light (background only — behind all content) */}
-      <div
-        ref={spotlightRef}
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          '--mx': '50vw',
-          '--my': '30vh',
-          background: 'radial-gradient(480px circle at var(--mx) var(--my), rgba(var(--panel-accent-rgb),0.16), transparent 65%)'
-        }}
-      />
+      {/* Layer 3b: Animated cool wave light (background only — behind all content) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-[18%] -left-[10%] w-[55vw] h-[55vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.10), transparent 70%)', filter: 'blur(60px)' }} />
+        <div className="absolute top-[18%] -right-[10%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.10), transparent 70%)', filter: 'blur(70px)', animationDelay: '-3s' }} />
+        <div className="absolute -bottom-[15%] left-[25%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.10), transparent 70%)', filter: 'blur(60px)', animationDelay: '-5.5s' }} />
+      </div>
 
       {/* Layer 4: Top light leak */}
       <div 

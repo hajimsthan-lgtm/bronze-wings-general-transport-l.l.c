@@ -539,6 +539,18 @@
     transform: scale(0.97);
   }
 
+  /* Distinct New Entry buttons (trips vs expenses) */
+  .btn-new-trip {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.35), 0 6px 18px -6px rgba(59,130,246,0.6);
+  }
+  .btn-new-trip:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-new-expense {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    box-shadow: 0 0 0 1px rgba(249,115,22,0.35), 0 6px 18px -6px rgba(249,115,22,0.6);
+  }
+  .btn-new-expense:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
   /* Lightning button effect (legacy alias) */
   .btn-lightning {
     position: relative;
@@ -1169,6 +1181,18 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+
+  /* Animated brand text sheen + twinkling stars */
+  .brand-shine {
+    background: linear-gradient(90deg, #ffffff 0%, #bfdbfe 20%, #ffffff 40%, #93c5fd 60%, #ffffff 80%, #bfdbfe 100%);
+    background-size: 220% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: brand-sheen 4s linear infinite;
+  }
+  .animate-twinkle { animation: twinkle 2.2s ease-in-out infinite; }
+  .animate-wave-glow { animation: wave-glow 8s ease-in-out infinite; }
   /* Pulsing blue border glow for the main glass panel */
   .animate-border-pulse {
     animation: border-pulse 4.5s ease-in-out infinite;
@@ -1309,6 +1333,18 @@
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  @keyframes brand-sheen { to { background-position: 220% center; } }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.15); }
+  }
+  @keyframes wave-glow {
+    0%   { transform: translate(0,0) scale(1);    opacity: .5; }
+    25%  { transform: translate(6%, 8%) scale(1.15); opacity: .8; }
+    50%  { transform: translate(-5%, 10%) scale(1.05); opacity: .6; }
+    75%  { transform: translate(7%, -6%) scale(1.2);  opacity: .85; }
+    100% { transform: translate(0,0) scale(1);    opacity: .5; }
+  }
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
@@ -1360,6 +1396,13 @@
 .light .hud-icon-tile > svg { color: #2563eb; }
 .light .clay-btn-ghost { background: #eef1f7; color: #475569; border: 1px solid rgba(0,0,0,0.08); box-shadow: 4px 4px 10px rgba(0,0,0,0.05), -4px -4px 10px rgba(255,255,255,0.8); }
 .light .clay-btn-ghost:hover { color: #0f172a; border-color: rgba(59,130,246,0.4); }
+.light .brand-shine {
+  background: linear-gradient(90deg, #1e293b 0%, #2563eb 25%, #1e293b 50%, #3b82f6 75%, #1e293b 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .light .black-card { background: #ffffff !important; border: 1px solid #e2e8f0 !important; }
 .light header, .light nav { color: hsl(var(--foreground)); }
 .light header .text-white, .light nav .text-white { color: hsl(var(--foreground)) !important; }

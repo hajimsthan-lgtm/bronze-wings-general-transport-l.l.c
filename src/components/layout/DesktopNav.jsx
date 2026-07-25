@@ -4,6 +4,7 @@ import { LayoutDashboard, Truck, BarChart3, Shield, Globe, Settings } from 'luci
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
+import BrandName from '@/components/layout/BrandName';
 
 const navItems = [
 { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
@@ -50,10 +51,7 @@ export default function DesktopNav() {
               </div>
             }
           </div>
-          <div className="leading-tight">
-            <span className="block font-extrabold tracking-tight text-white text-[15px]">Bronze Wings</span>
-            <span className="block text-[9px] uppercase tracking-[0.2em] text-white/40">GENERAL TRANSPORT L.L.C</span>
-          </div>
+          <BrandName variant="desktop" />
         </Link>
 
         {/* Center segmented nav — dark pill channel */}

@@ -3,6 +3,7 @@ import { Settings, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useI18n } from '@/lib/i18n';
+import BrandName from '@/components/layout/BrandName';
 
 export default function MobileHeader() {
   const { language, toggleLanguage } = useI18n();
@@ -45,10 +46,7 @@ export default function MobileHeader() {
               </div>
             )}
           </div>
-          <div className="leading-tight">
-            <span className="block font-extrabold tracking-tight text-white text-sm">Bronze Wings</span>
-            <span className="block text-[8px] uppercase tracking-[0.18em] text-white/40">General Transport</span>
-          </div>
+          <BrandName variant="mobile" />
         </Link>
         <div className="flex items-center gap-1.5">
           <button

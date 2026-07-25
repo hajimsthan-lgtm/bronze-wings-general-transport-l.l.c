@@ -1,57 +1,46 @@
-import { formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Truck, Tag, User, CalendarClock, ShieldCheck } from 'lucide-react';
+import { Pencil, Trash2, Phone, Truck, CalendarClock } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
+import { getInitials, formatDate } from '@/lib/formatters';
 
-const STATUS_ACCENT = { active: '#34d399', maintenance: '#f59e0b', inactive: '#94a3b8' };
+const STATUS_ACCENT = { active: '#34d399', on_leave: '#f59e0b', inactive: '#94a3b8' };
 
-function expiryTone(dateStr) {
-  if (!dateStr) return 'text-foreground';
-  const d = new Date(dateStr);
-  const days = Math.ceil((d - new Date()) / 86400000);
-  if (days < 0) return 'text-red-400';
-  if (days <= 30) return 'text-amber-400';
-  return 'text-foreground';
-}
-
-function MetaItem({ icon: Icon, label, value, tone }) {
+function MetaChip({ icon: Icon, label, value }) {
   return (
     <div className="flex items-center gap-1.5 min-w-0 rounded-lg bg-white/[0.03] border border-white/[0.05] px-2 py-1.5">
       <Icon className="w-3 h-3 text-muted-foreground/70 flex-shrink-0" />
       <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">{label}</span>
-      <span className={`text-[11px] truncate ${tone || 'text-foreground'}`}>{value || '—'}</span>
+      <span className="text-[11px] truncate text-foreground">{value || '—'}</span>
     </div>
   );
 }
 
-export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
+export default function DriverCard({ d, onOpen, onEdit, onDelete }) {
   const { t } = useI18n();
-  const accent = STATUS_ACCENT[v.status] || '#94a3b8';
+  const accent = STATUS_ACCENT[d.status] || '#94a3b8';
 
   return (
     <div className="entity-card cursor-pointer group relative" onClick={onOpen}>
       <div className="absolute inset-x-0 top-0 h-1 rounded-t-[20px]" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
-      <div className="flex items-start justify-between mb-3.5">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-12 h-12 rounded-2xl entity-avatar flex items-center justify-center relative">
-            <Truck className="w-6 h-6 text-white/80" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full ring-2 ring-[#1a1d29]" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
+          <div className="w-12 h-12 rounded-full entity-avatar flex items-center justify-center text-sm font-semibold relative">
+            {getInitials(d.name)}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-[#1a1d29]" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
-            <p className="text-xs text-muted-foreground truncate">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
+            <p className="text-sm font-semibold text-foreground truncate">{d.name}</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 truncate"><Phone className="w-3 h-3" />{d.phone || '—'}</p>
           </div>
         </div>
-        <StatusBadge status={v.status} />
+        <StatusBadge status={d.status} />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-2 gap-y-2 mb-3">
-        <MetaItem icon={Tag} label="Type" value={v.type} />
-        <MetaItem icon={User} label="Driver" value={v.assigned_driver} />
-        <MetaItem icon={CalendarClock} label="Reg" value={v.registration_expiry ? formatDate(v.registration_expiry) : null} tone={expiryTone(v.registration_expiry)} />
-        <MetaItem icon={ShieldCheck} label="Ins" value={v.insurance_expiry ? formatDate(v.insurance_expiry) : null} tone={expiryTone(v.insurance_expiry)} />
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <MetaChip icon={Truck} label={t('vehicle')} value={d.assigned_vehicle} />
+        <MetaChip icon={CalendarClock} label="License" value={d.license_expiry ? formatDate(d.license_expiry) : null} />
       </div>
 
       <div className="flex items-center gap-2 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
@@ -62,8 +51,8 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-card border-border">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-foreground">{t('delete')} Vehicle?</AlertDialogTitle>
-              <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+              <AlertDialogTitle className="text-foreground">{t('delete')} Driver?</AlertDialogTitle>
+              <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel>

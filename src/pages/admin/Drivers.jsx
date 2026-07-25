@@ -15,6 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatDate, getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
+import DriverCard from '@/components/admin/DriverCard';
 import Salary from './Salary';
 import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
 
@@ -70,27 +71,9 @@ function DriversTab() {
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={User} title={t('no_data')} /> :
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((d) =>
-        <div key={d.id} className="entity-card cursor-pointer" onClick={() => navigate(`/admin/drivers/${d.id}`)}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full entity-avatar flex items-center justify-center text-sm font-semibold">{getInitials(d.name)}</div>
-                  <div><p className="text-sm font-semibold text-foreground">{d.name}</p><p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" />{d.phone}</p></div>
-                </div>
-                <StatusBadge status={d.status} />
-              </div>
-              <div className="space-y-1 text-xs text-muted-foreground">
-                {d.assigned_vehicle && <p>{t('vehicle')}: <span className="text-foreground">{d.assigned_vehicle}</span></p>}
-                {d.license_expiry && <p>License: <span className="text-foreground">{formatDate(d.license_expiry)}</span></p>}
-              </div>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" onClick={() => {setEditItem(d);setFormOpen(true);}} className="text-muted-foreground hover:text-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
-                <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button></AlertDialogTrigger>
-                  <AlertDialogContent className="bg-card border-border"><AlertDialogHeader><AlertDialogTitle className="text-foreground">{t('delete')} Driver?</AlertDialogTitle><AlertDialogDescription>This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={async () => {await base44.entities.Driver.delete(d.id);load();}} className="bg-destructive">{t('delete')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-        )}
+          {filtered.map((d) => (
+            <DriverCard key={d.id} d={d} onOpen={() => navigate(`/admin/drivers/${d.id}`)} onEdit={() => { setEditItem(d); setFormOpen(true); }} onDelete={async () => { await base44.entities.Driver.delete(d.id); load(); }} />
+          ))}
         </div>
       }
 

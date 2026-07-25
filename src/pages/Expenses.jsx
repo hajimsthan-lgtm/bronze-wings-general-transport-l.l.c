@@ -50,6 +50,12 @@ export default function Expenses() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const deleteExpense = useExpenseDelete();
 
+  useEffect(() => {
+    const handler = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('expenses:new', handler);
+    return () => window.removeEventListener('expenses:new', handler);
+  }, [setFormOpen]);
+
   const filtered = expenses.filter(e => {
     if (filter !== 'all' && e.category !== filter) return false;
     if (e.date < dateFrom || e.date > dateTo) return false;
