@@ -15,9 +15,9 @@ const adminSubNav = [
 
 
 const reportsSubNav = [
-{ key: 'daily_report', path: '/reports/daily' },
-{ key: 'profit_loss', path: '/reports/pnl' },
-{ key: 'soa', path: '/reports/soa' }];
+{ key: 'daily_report', path: '/reports/daily', label: 'Daily' },
+{ key: 'profit_loss', path: '/reports/pnl', label: 'P&L' },
+{ key: 'soa', path: '/reports/soa', label: 'SOA' }];
 
 
 const subNavMap = {
@@ -66,7 +66,7 @@ export default function TopBar() {
                   isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`
                   }>
                   
-                  {t(item.key)}
+                  {item.label || t(item.key)}
                 </Link>);
 
             })}

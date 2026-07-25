@@ -52,29 +52,31 @@ export default function OperationsToolbar({
           onToChange={setDateTo}
         />
 
-        <Select value={mode} onValueChange={onModeChange}>
-          <SelectTrigger className={selectCls}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MODE_OPTIONS.map((m) => (
-              <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-nowrap">
+          <Select value={mode} onValueChange={onModeChange}>
+            <SelectTrigger className={selectCls}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MODE_OPTIONS.map((m) => (
+                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={statusValue} onValueChange={onStatusChange}>
+          <Select value={statusValue} onValueChange={onStatusChange}>
           <SelectTrigger className={selectCls}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {statusOptions.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s === 'all' ? t('all') : t(s)}{s !== 'all' && statusCounts?.[s] != null ? ` · ${statusCounts[s]}` : ''}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {statusOptions.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s === 'all' ? t('all') : t(s)}{s !== 'all' && statusCounts?.[s] != null ? ` · ${statusCounts[s]}` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Row 2 — view toggle (small) · exports */}
