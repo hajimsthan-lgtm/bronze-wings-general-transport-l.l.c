@@ -20,7 +20,8 @@ export default function OperationsToolbar({
     { value: 'trip', label: t('per_trip') },
     { value: 'contract', label: t('contracts') },
   ];
-  const selectCls = 'h-10 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
+  const modeSelectCls = 'h-10 w-[160px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
+  const statusSelectCls = 'h-10 w-[120px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
 
   return (
     <div className="space-y-3">
@@ -54,7 +55,7 @@ export default function OperationsToolbar({
 
         <div className="flex items-center gap-2 flex-nowrap">
           <Select value={mode} onValueChange={onModeChange}>
-            <SelectTrigger className={selectCls}>
+            <SelectTrigger className={modeSelectCls}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -65,7 +66,7 @@ export default function OperationsToolbar({
           </Select>
 
           <Select value={statusValue} onValueChange={onStatusChange}>
-          <SelectTrigger className={selectCls}>
+          <SelectTrigger className={statusSelectCls}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
