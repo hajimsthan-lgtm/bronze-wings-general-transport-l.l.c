@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
@@ -11,16 +10,21 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Wallet, Receipt, Truck, Route as RouteIcon, TrendingUp, Percent, ChevronRight } from 'lucide-react';
+import { Inbox, Wallet, Receipt } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
-import DriverTripMap from '@/components/drivers/DriverTripMap';
-import DriverTripsPanel from '@/components/drivers/DriverTripsPanel';
+import FleetDashboard from '@/components/fleet/FleetDashboard';
 
 const fmtDT = (v) =>
   v
     ? new Date(v).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
     : '—';
+
+const initialsOf = (name = '') =>
+  name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
+
+const yearsSince = (d) =>
+  d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -82,7 +86,54 @@ export default function DriverDetail() {
 
   const completedTrips = fTrips.filter((x) => x.status === 'completed').length;
   const avgPerTrip = fTrips.length ? totalTrips / fTrips.length : 0;
-  const completionRate = fTrips.length ? Math.round((completedTrips / fTrips.length) * 100) : 0;
+  const completionRate = fTrips.length ? (completedTrips / fTrips.length) * 100 : 0;
+  const rate = completionRate / 20; // 0-5
+  const expYears = yearsSince(driver.join_date);
+
+  const hero = {
+    title: driver.name,
+    subtitle: driver.phone,
+    vehicleLabel: vehicle ? `${vehicle.make} ${vehicle.model}` : (driver.assigned_vehicle || 'No vehicle'),
+    rating: rate,
+    stats: [
+      { label: 'Mileage', value: vehicle ? `${Number(vehicle.odometer_km || 0).toLocaleString()} km` : '—' },
+      { label: 'Trips', value: fTrips.length },
+      { label: 'Revenue', value: formatCurrency(totalTrips) },
+      { label: 'Avg / Trip', value: formatCurrency(avgPerTrip) },
+    ],
+  };
+
+  const info = {
+    rows: [
+      { label: 'Trip Revenue', value: formatCurrency(totalTrips), tone: 'text-emerald-400' },
+      { label: 'Expenses', value: formatCurrency(totalExpenses), tone: 'text-amber-400' },
+      { label: 'Net Profit', value: formatCurrency(netProfit), tone: 'text-sky-400' },
+    ],
+    card: {
+      bank: 'Driver Account',
+      last4: (driver.license_number || '').replace(/\s/g, '').slice(-4) || '••••',
+      type: 'License',
+      holder: driver.name,
+    },
+  };
+
+  const profile = {
+    name: driver.name,
+    email: driver.email,
+    phone: driver.phone,
+    initials: initialsOf(driver.name),
+    rating: rate,
+    expLabel: 'Experience',
+    experience: `${expYears} year${expYears === 1 ? '' : 's'}`,
+    chatHref: driver.email ? `mailto:${driver.email}` : (driver.phone ? `tel:${driver.phone}` : null),
+  };
+
+  const route = {
+    from: recentTrip?.from_location,
+    to: recentTrip?.to_location,
+    fromTime: fmtDT(recentTrip?.load_datetime || recentTrip?.trip_date),
+    toTime: fmtDT(recentTrip?.offload_datetime),
+  };
 
   return (
     <div className="detail-page">
@@ -103,116 +154,8 @@ export default function DriverDetail() {
         ]}
       />
 
-      {/* Dashboard grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-        {/* Main column */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Vehicle card */}
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Truck className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Assigned Vehicle</h3>
-            </div>
-            {vehicle ? (
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="w-full sm:w-40 h-28 rounded-xl bg-muted/40 border border-white/[0.06] flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-10 h-10 text-primary/40" />
-                </div>
-                <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</p>
-                    <p className="text-sm font-semibold text-foreground">{vehicle.make} {vehicle.model} {vehicle.year || ''}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Plate</p>
-                    <p className="text-sm font-semibold text-foreground">{vehicle.plate_number}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Type</p>
-                    <p className="text-sm font-semibold text-foreground capitalize">{vehicle.type}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Odometer</p>
-                    <p className="text-sm font-semibold text-foreground tabular-nums">{Number(vehicle.odometer_km || 0).toLocaleString()} km</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Fuel</p>
-                    <p className="text-sm font-semibold text-foreground capitalize">{vehicle.fuel_type}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Status</p>
-                    <div className="mt-0.5"><StatusBadge status={vehicle.status} /></div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <EmptyState icon={Truck} title="No vehicle assigned" />
-            )}
-          </div>
-
-          {/* Metrics bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="stat-tile p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                <RouteIcon className="w-3.5 h-3.5" />
-                <span className="text-[10px] uppercase tracking-wider font-semibold">Trips</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground tabular-nums">{fTrips.length}</p>
-            </div>
-            <div className="stat-tile p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span className="text-[10px] uppercase tracking-wider font-semibold">Revenue</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground tabular-nums">{formatCurrency(totalTrips)}</p>
-            </div>
-            <div className="stat-tile p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                <Wallet className="w-3.5 h-3.5" />
-                <span className="text-[10px] uppercase tracking-wider font-semibold">Avg / Trip</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground tabular-nums">{formatCurrency(avgPerTrip)}</p>
-            </div>
-            <div className="stat-tile p-4">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                <Percent className="w-3.5 h-3.5" />
-                <span className="text-[10px] uppercase tracking-wider font-semibold">Completion</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground tabular-nums">{completionRate}%</p>
-            </div>
-          </div>
-
-          {/* Trip map */}
-          <DriverTripMap from={recentTrip?.from_location} to={recentTrip?.to_location} />
-
-          {/* Trip timeline */}
-          {recentTrip && (
-            <div className="glass-card p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <RouteIcon className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Latest Trip Timeline</h3>
-              </div>
-              <div className="relative pl-6">
-                <div className="absolute left-[7px] top-2 bottom-2 w-px bg-white/10" />
-                <div className="relative mb-5">
-                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-primary ring-2 ring-primary/20" />
-                  <p className="text-xs text-muted-foreground">{fmtDT(recentTrip.load_datetime || recentTrip.trip_date)}</p>
-                  <p className="text-sm font-medium text-foreground">Start · {recentTrip.from_location || '—'}</p>
-                </div>
-                <div className="relative">
-                  <span className="absolute -left-6 top-1 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
-                  <p className="text-xs text-muted-foreground">{fmtDT(recentTrip.offload_datetime)}</p>
-                  <p className="text-sm font-medium text-foreground">Finish · {recentTrip.to_location || '—'}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right: trips panel */}
-        <div>
-          <DriverTripsPanel trips={recentTrips} loading={dataLoading} />
-        </div>
+      <div className="mt-4">
+        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} />
       </div>
 
       {/* Records */}
@@ -239,7 +182,7 @@ export default function DriverDetail() {
       />
 
       <Tabs defaultValue={initialTab} className="mt-4">
-        <TabsList className="rounded-xl p-1.5 gap-1.5" style={{ background:'#232636', border:'1px solid rgba(255,255,255,0.06)', boxShadow:'-4px -4px 8px rgba(255,255,255,0.04), 4px 4px 12px rgba(0,0,0,0.3)' }}>
+        <TabsList className="rounded-xl p-1.5 gap-1.5 bg-card border border-border">
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
           <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
@@ -250,13 +193,12 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fTrips.map((trip) => (
-                <div key={trip.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
-                  <div className="flex-1 min-w-0 pl-2">
-                    <p className="text-[15px] font-semibold text-white truncate">{trip.from_location} → {trip.to_location}</p>
-                    <p className="text-xs text-white/40 mt-0.5">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
+                <div key={trip.id} className="glass-card p-3 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.vehicle_plate}</p>
                   </div>
-                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(trip.revenue)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</span>
                   <StatusBadge status={trip.status} />
                 </div>
               ))}
@@ -268,14 +210,13 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fSalaries.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fSalaries.map((rec) => (
-                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ml-1.5" style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
+                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[15px] font-semibold text-white">{rec.month} {rec.year}</p>
-                    <p className="text-xs text-white/40 mt-0.5">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
+                    <p className="text-sm font-semibold text-foreground">{rec.month} {rec.year}</p>
+                    <p className="text-xs text-muted-foreground">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
                   </div>
-                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.net_salary)}</span>
+                  <span className="text-base font-bold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
               ))}
@@ -287,13 +228,12 @@ export default function DriverDetail() {
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fExpenses.map((rec) => (
-                <div key={rec.id} className="group relative rounded-xl p-3.5 flex items-center gap-3 overflow-hidden transition-all duration-200 hover:-translate-y-0.5 bg-[#232636] hover:bg-[#2a2e42] border border-white/[0.06]">
-                  <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl" style={{ background: '#3b82f6' }} />
-                  <div className="flex-1 min-w-0 pl-2">
-                    <p className="text-[15px] font-semibold text-white truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-white/40 mt-0.5 capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
                   </div>
-                  <span className="text-base font-bold text-white tabular-nums">{formatCurrency(rec.amount)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</span>
                   <StatusBadge status={rec.status} />
                 </div>
               ))}
