@@ -348,14 +348,14 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="flex md:grid md:grid-cols-4 gap-3 mb-4 overflow-x-auto no-scrollbar pb-1">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
               <div
                 key={a.label}
                 onClick={() => a.action?.()}
-                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-pointer min-w-[150px] flex-shrink-0 md:min-w-0"
+                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-pointer"
                 style={{
                   ['--row-accent']: a.accent,
                   animationDelay: `${i * 0.05}s`,
@@ -395,7 +395,7 @@ export default function Operations() {
           <div className="space-y-8">
             {showTrips && filteredTrips.length > 0 && (
               <div>
-                {mode === 'all' && <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>}
+                <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
                   : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
@@ -403,7 +403,7 @@ export default function Operations() {
             )}
             {showContracts && filteredContracts.length > 0 && (
               <div>
-                {mode === 'all' && <SectionLabel count={filteredContracts.length}>{t('contracts_section')}</SectionLabel>}
+                <SectionLabel count={filteredContracts.length}>{t('contracts_section')}</SectionLabel>
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
                   : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} driverMap={driverMap} vehicleMap={vehicleMap} />}

@@ -25,9 +25,10 @@ export default function OperationsToolbar({
   const selectCls = 'h-9 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center gap-3 mb-3">
-        <div className="relative w-full md:flex-1 md:min-w-[220px]">
+    <div className="space-y-3">
+      {/* Row 1 — search · date · primary action */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
             value={search}
@@ -53,24 +54,12 @@ export default function OperationsToolbar({
           onToChange={setDateTo}
         />
 
-        <div className="hidden md:block md:flex-1" />
-
-        <SegmentedToggle
-          value={viewMode}
-          onChange={setViewMode}
-          options={[
-            { value: 'card', label: t('cards_view'), icon: LayoutGrid },
-            { value: 'list', label: t('list_view'), icon: List },
-          ]}
-        />
-
-        <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
-
-        <Button onClick={onNewTrip} className="bg-primary hover:bg-primary/90 h-11 px-4 w-full md:w-auto">
+        <Button onClick={onNewTrip} className="bg-primary hover:bg-primary/90 h-11 px-5 ml-auto">
           <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
         </Button>
       </div>
 
+      {/* Row 2 — filters · view · export */}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={mode} onValueChange={onModeChange}>
           <SelectTrigger className={selectCls}>
@@ -95,6 +84,19 @@ export default function OperationsToolbar({
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex-1" />
+
+        <SegmentedToggle
+          value={viewMode}
+          onChange={setViewMode}
+          options={[
+            { value: 'card', label: t('cards_view'), icon: LayoutGrid },
+            { value: 'list', label: t('list_view'), icon: List },
+          ]}
+        />
+
+        <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
       </div>
     </div>
   );
