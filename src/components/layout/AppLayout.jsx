@@ -67,22 +67,21 @@ export default function AppLayout() {
 
       {/* Layer 3: Dotted ambient grid */}
       <div
-        className="fixed inset-0 pointer-events-none z-0 opacity-[0.06]"
+        className="fixed inset-0 pointer-events-none z-0 opacity-[0.14]"
         style={{
-          backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.5) 1px, transparent 1.5px)',
+          backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.7) 1px, transparent 1.5px)',
           backgroundSize: '26px 26px'
         }}
       />
 
-      {/* Layer 3b: Cursor-following light */}
+      {/* Layer 3b: Cursor-following light (background only — behind all content) */}
       <div
         ref={spotlightRef}
-        className="fixed inset-0 pointer-events-none"
+        className="fixed inset-0 pointer-events-none z-0"
         style={{
-          zIndex: 15,
           '--mx': '50vw',
           '--my': '30vh',
-          background: 'radial-gradient(440px circle at var(--mx) var(--my), rgba(var(--panel-accent-rgb),0.08), transparent 65%)'
+          background: 'radial-gradient(480px circle at var(--mx) var(--my), rgba(var(--panel-accent-rgb),0.16), transparent 65%)'
         }}
       />
 
@@ -131,9 +130,9 @@ export default function AppLayout() {
 
           {/* Dotted ambient texture across panel */}
           <div
-            className="absolute inset-0 pointer-events-none rounded-2xl opacity-[0.05]"
+            className="absolute inset-0 pointer-events-none rounded-2xl opacity-[0.11]"
             style={{
-              backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.45) 1px, transparent 1.5px)',
+              backgroundImage: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.6) 1px, transparent 1.5px)',
               backgroundSize: '24px 24px'
             }}
           />
