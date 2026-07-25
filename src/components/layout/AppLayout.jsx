@@ -57,11 +57,11 @@ export default function AppLayout() {
         }}
       />
 
-      {/* Layer 3b: Animated cool wave light (background only — behind all content) */}
+      {/* Layer 3b: Animated cool wave light (background only — subtle, behind all content) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-[18%] -left-[10%] w-[55vw] h-[55vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.10), transparent 70%)', filter: 'blur(60px)' }} />
-        <div className="absolute top-[18%] -right-[10%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.10), transparent 70%)', filter: 'blur(70px)', animationDelay: '-3s' }} />
-        <div className="absolute -bottom-[15%] left-[25%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.10), transparent 70%)', filter: 'blur(60px)', animationDelay: '-5.5s' }} />
+        <div className="absolute -top-[18%] -left-[10%] w-[55vw] h-[55vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.05), transparent 70%)', filter: 'blur(90px)' }} />
+        <div className="absolute top-[18%] -right-[10%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.05), transparent 70%)', filter: 'blur(90px)', animationDelay: '-3s' }} />
+        <div className="absolute -bottom-[15%] left-[25%] w-[50vw] h-[50vh] rounded-full animate-wave-glow" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%)', filter: 'blur(90px)', animationDelay: '-5.5s' }} />
       </div>
 
       {/* Layer 4: Top light leak */}
@@ -90,7 +90,7 @@ export default function AppLayout() {
       <main className="flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 pt-3 md:pt-0">
         <div
           key={location.pathname}
-          className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0 animate-border-pulse"
+          className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0"
           style={{
             background: 'var(--panel-bg)',
             backdropFilter: 'var(--panel-blur)',

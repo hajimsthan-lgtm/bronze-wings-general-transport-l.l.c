@@ -20,7 +20,7 @@ export default function OperationsToolbar({
     { value: 'trip', label: t('per_trip') },
     { value: 'contract', label: t('contracts') },
   ];
-  const selectCls = 'h-11 w-[160px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
+  const selectCls = 'h-9 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
 
   return (
     <div className="space-y-3">
