@@ -237,6 +237,13 @@ export default function Operations() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Open the new-trip form from the TopBar subnav "New Trip" button
+  useEffect(() => {
+    const handler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
+    window.addEventListener('ops:new-trip', handler);
+    return () => window.removeEventListener('ops:new-trip', handler);
+  }, []);
+
   const handleDeleteTrip = async (trip) => {
     await deleteTrip.mutateAsync(trip.id);
     closeDetailTrip();

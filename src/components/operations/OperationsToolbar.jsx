@@ -1,6 +1,5 @@
-import { Search, X, Plus, LayoutGrid, List } from 'lucide-react';
+import { Search, X, LayoutGrid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
@@ -13,7 +12,6 @@ export default function OperationsToolbar({
   statusOptions, statusValue, onStatusChange, statusCounts,
   mode, onModeChange,
   viewMode, setViewMode,
-  onNewTrip,
   exportData, exportFilename, exportTitle, exportColumns,
 }) {
   const { t } = useI18n();
@@ -26,7 +24,7 @@ export default function OperationsToolbar({
 
   return (
     <div className="space-y-3">
-      {/* Row 1 — search · date · primary action */}
+      {/* Row 1 — filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -54,13 +52,6 @@ export default function OperationsToolbar({
           onToChange={setDateTo}
         />
 
-        <Button onClick={onNewTrip} className="bg-primary hover:bg-primary/90 h-11 px-5 ml-auto">
-          <Plus className="w-4 h-4 mr-1.5" /> {t('new_trip')}
-        </Button>
-      </div>
-
-      {/* Row 2 — filters · view · export */}
-      <div className="flex flex-wrap items-center gap-2">
         <Select value={mode} onValueChange={onModeChange}>
           <SelectTrigger className={selectCls}>
             <SelectValue />
@@ -84,10 +75,12 @@ export default function OperationsToolbar({
             ))}
           </SelectContent>
         </Select>
+      </div>
 
-        <div className="flex-1" />
-
+      {/* Row 2 — view toggle (small) · exports */}
+      <div className="flex flex-wrap items-center gap-2">
         <SegmentedToggle
+          compact
           value={viewMode}
           onChange={setViewMode}
           options={[
@@ -95,7 +88,7 @@ export default function OperationsToolbar({
             { value: 'list', label: t('list_view'), icon: List },
           ]}
         />
-
+        <div className="flex-1" />
         <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
       </div>
     </div>

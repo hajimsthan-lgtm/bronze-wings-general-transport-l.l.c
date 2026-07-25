@@ -1,6 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { Globe } from 'lucide-react';
+import { Globe, Plus } from 'lucide-react';
 
 const operationsSubNav = [
 { key: 'trips', path: '/trips' },
@@ -72,16 +72,16 @@ export default function TopBar() {
             })}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            
-
-
-
-
-
-
-            
-          </div>
-        </div>
+            {(location.pathname === '/trips' || location.pathname === '/contracts') && (
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
+                className="inline-flex items-center gap-1.5 h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" /> {t('new_trip')}
+              </button>
+            )}
+            </div>
+            </div>
       </div>
     </div>);
 
