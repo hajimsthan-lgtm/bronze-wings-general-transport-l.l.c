@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -16,7 +15,7 @@ import { getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import { Plus, Search, Store, Pencil, Trash2 } from 'lucide-react';
 
-export default function Vendors() {
+export default function VendorsPanel() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,9 +30,11 @@ export default function Vendors() {
 
   return (
     <div>
-      <PageHeader title={t('vendors')} description={`${items.length} vendors`}
-        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact_person' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
+      <div className="flex items-center gap-2 mb-5 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
+        <ExportButtons data={filtered} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact_person' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }]} />
+        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+      </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Store} title={t('no_data')} /> : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

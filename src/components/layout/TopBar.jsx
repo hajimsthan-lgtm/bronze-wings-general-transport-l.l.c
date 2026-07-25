@@ -10,8 +10,7 @@ const operationsSubNav = [
 const adminSubNav = [
 { key: 'vehicles', path: '/admin/vehicles' },
 { key: 'drivers', path: '/admin/drivers' },
-{ key: 'clients', path: '/admin/clients' },
-{ key: 'vendors', path: '/admin/vendors' }];
+{ key: 'clients', path: '/admin/clients' }];
 
 
 const reportsSubNav = [

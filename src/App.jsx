@@ -32,7 +32,7 @@ const Soa = lazy(() => import('@/pages/Soa'));
 const Vehicles = lazy(() => import('@/pages/admin/Vehicles'));
 const Drivers = lazy(() => import('@/pages/admin/Drivers'));
 const Clients = lazy(() => import('@/pages/admin/Clients'));
-const Vendors = lazy(() => import('@/pages/admin/Vendors'));
+
 const Documents = lazy(() => import('@/pages/admin/Documents'));
 const VehicleDetail = lazy(() => import('@/pages/admin/VehicleDetail'));
 const DriverDetail = lazy(() => import('@/pages/admin/DriverDetail'));
@@ -81,7 +81,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/vehicles" element={<Vehicles />} />
           <Route path="/admin/drivers" element={<Drivers />} />
           <Route path="/admin/clients" element={<Clients />} />
-          <Route path="/admin/vendors" element={<Vendors />} />
+          <Route path="/admin/vendors" element={<Navigate to="/admin/clients?tab=vendors" replace />} />
           <Route path="/admin/documents" element={<Documents />} />
           <Route path="/admin/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/admin/drivers/:id" element={<DriverDetail />} />
