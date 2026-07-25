@@ -37,9 +37,9 @@ function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
         <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </span>
       <div className="pr-10 sm:pr-14">
-        <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">{label}</p>
-        <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-white mt-2 leading-none tabular-nums">{value}</p>
-        <p className="text-[13px] text-[#a0a5b8] mt-2">{subtitle}</p>
+        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">{label}</p>
+        <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-white mt-2 leading-none tabular-nums truncate">{value}</p>
+        <p className="text-[11px] sm:text-[13px] text-[#a0a5b8] mt-2 truncate">{subtitle}</p>
       </div>
     </Link>
   );
@@ -55,9 +55,9 @@ function MetricCard({ icon: Icon, grad, glow, value, label, subtitle }) {
         <Icon className="w-6 h-6" />
       </span>
       <div className="min-w-0">
-        <p className="text-3xl font-light text-white leading-none tabular-nums">{value}</p>
+        <p className="text-2xl sm:text-3xl font-light text-white leading-none tabular-nums truncate">{value}</p>
         <p className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280] mt-1.5">{label}</p>
-        <p className="text-[13px] text-[#a0a5b8] mt-0.5">{subtitle}</p>
+        <p className="text-[11px] sm:text-[13px] text-[#a0a5b8] mt-0.5 truncate">{subtitle}</p>
       </div>
     </div>
   );

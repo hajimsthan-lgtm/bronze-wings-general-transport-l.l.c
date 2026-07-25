@@ -5,7 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Check, Send, Undo2, ArrowRight } from 'lucide-react';
+import { Check, Send, Undo2, ArrowRight, ChevronDown } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
@@ -84,66 +84,73 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
-            <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
-                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color }} />
+            <div className="flex items-center gap-3 p-3 sm:p-3.5">
+              {/* Route badge */}
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.22)}` }}>
+                <ArrowRight className="w-4 h-4" style={{ color }} />
               </div>
 
+              {/* Main */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{trip.from_location || '—'}</p>
-                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
-                  <p className="text-sm font-medium text-foreground truncate">{trip.to_location || '—'}</p>
-                  <span className="hidden md:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap ml-1">
-                    {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
-                  <span className="font-mono text-muted-foreground/80 whitespace-nowrap">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
+                {/* Line 1 — trip number + date */}
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
+                  <span className="font-mono text-muted-foreground/80 truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
                   <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(trip.trip_date)}</span>
+                </div>
+                {/* Line 2 — from → to */}
+                <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{trip.from_location || '—'}</p>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
+                  <p className="text-sm font-semibold text-foreground truncate">{trip.to_location || '—'}</p>
+                </div>
+                {/* Line 3 — meta (desktop only, keeps mobile tap target clean) */}
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-1 min-w-0">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                    {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
+                  </span>
                   {trip.client_name && (
                     <>
                       <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="hover:text-primary transition-colors truncate max-w-[120px]">{trip.client_name}</button>
+                      <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="hover:text-primary transition-colors truncate max-w-[140px]">{trip.client_name}</button>
                     </>
                   )}
                   {trip.driver_name && (
                     <>
-                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
-                      <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[100px] hidden sm:inline-block">{trip.driver_name}</button>
+                      <span className="text-muted-foreground/40">·</span>
+                      <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[120px]">{trip.driver_name}</button>
                     </>
                   )}
                   {trip.vehicle_plate && (
                     <>
-                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
-                      <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap hidden sm:inline-block">{trip.vehicle_plate}</button>
+                      <span className="text-muted-foreground/40">·</span>
+                      <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap">{trip.vehicle_plate}</button>
                     </>
                   )}
                 </div>
               </div>
 
+              {/* Right — status + amount */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                        <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}</StatusPill>
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                      {STATUS_OPTIONS.map((opt) => (
-                        <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                          {opt.label}
-                          {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                      <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}<ChevronDown className="w-2.5 h-2.5 ml-0.5" /></StatusPill>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                    {STATUS_OPTIONS.map((opt) => (
+                      <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                        {opt.label}
+                        {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                  {trip.status === 'completed' && (
-                    <div className="hidden sm:block">
+                {trip.status === 'completed' && (
+                  <div className="hidden sm:block">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
@@ -155,18 +162,15 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                         <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(trip.revenue)}</p>
+                  <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(trip.revenue)}</p>
                   <p className={`text-[10px] tabular-nums leading-tight ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)}</p>
                 </div>
-
-
               </div>
             </div>
           </div>

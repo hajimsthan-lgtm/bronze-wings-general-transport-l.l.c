@@ -46,38 +46,44 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
               className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: CONTRACT_ACCENT, boxShadow: `0 0 8px ${CONTRACT_ACCENT}` }}
             />
-            <div className="flex items-center gap-2.5 sm:gap-3 p-3 sm:p-4">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(CONTRACT_ACCENT, 0.14), border: `1px solid ${hexToRgba(CONTRACT_ACCENT, 0.3)}` }}>
-                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: CONTRACT_ACCENT }} />
+            <div className="flex items-center gap-3 p-3 sm:p-3.5">
+              {/* Icon badge */}
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(CONTRACT_ACCENT, 0.14), border: `1px solid ${hexToRgba(CONTRACT_ACCENT, 0.3)}` }}>
+                <Building2 className="w-4 h-4" style={{ color: CONTRACT_ACCENT }} />
               </div>
 
+              {/* Main */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-foreground truncate">{c.company_name || '—'}</p>
+                {/* Line 1 — company name */}
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{c.company_name || '—'}</p>
                   {c.auto_renewal && <Repeat className="w-3 h-3 text-primary flex-shrink-0" />}
-                  <span className="hidden md:inline text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">{t('monthly_contract')}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0 overflow-hidden">
+                {/* Line 2 — id + date range */}
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1 min-w-0">
                   <span className="font-mono text-muted-foreground/80 whitespace-nowrap">#{c.id?.slice(-6).toUpperCase()}</span>
                   <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(c.start_date)}</span>
                   <ArrowRight className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
                   <span className="tabular-nums whitespace-nowrap">{formatDate(c.end_date)}</span>
+                </div>
+                {/* Line 3 — meta (desktop only) */}
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-1 min-w-0">
                   {c.driver_name && (
                     <>
-                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
-                      <button onClick={(e) => handleLink(e, driverMap, c.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[100px] hidden sm:inline-block">{c.driver_name}</button>
+                      <button onClick={(e) => handleLink(e, driverMap, c.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[120px]">{c.driver_name}</button>
                     </>
                   )}
                   {c.vehicle_plate && (
                     <>
-                      <span className="text-muted-foreground/40 hidden sm:inline">·</span>
-                      <button onClick={(e) => handleLink(e, vehicleMap, c.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap hidden sm:inline-block">{c.vehicle_plate}</button>
+                      <span className="text-muted-foreground/40">·</span>
+                      <button onClick={(e) => handleLink(e, vehicleMap, c.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap">{c.vehicle_plate}</button>
                     </>
                   )}
                 </div>
               </div>
 
+              {/* Right — status + margin + rate + menu */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <StatusPill as="span" variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
@@ -87,7 +93,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(monthlyRate)}</p>
+                  <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(monthlyRate)}</p>
                   <p className={`text-[10px] tabular-nums leading-tight ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
                 </div>
 
