@@ -20,7 +20,7 @@ export default function OperationsToolbar({
     { value: 'trip', label: t('per_trip') },
     { value: 'contract', label: t('contracts') },
   ];
-  const selectCls = 'h-9 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
+  const selectCls = 'h-10 w-[150px] bg-muted/50 border-border text-sm rounded-xl data-[placeholder]:text-muted-foreground';
 
   return (
     <div className="space-y-3">
@@ -32,7 +32,7 @@ export default function OperationsToolbar({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`${t('search')}...`}
-            className="w-full h-11 rounded-xl pl-9 pr-9 text-sm bg-muted/50 border border-border focus-visible:border-primary/40"
+            className="w-full h-10 rounded-xl pl-9 pr-9 text-sm bg-muted/50 border border-border focus-visible:border-primary/40"
           />
           {search && (
             <button

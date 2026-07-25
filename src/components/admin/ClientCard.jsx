@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Mail, Phone, Hash, Building2 } from 'lucide-react';
+import { Pencil, Trash2, Mail, Phone, Hash, Building2, ExternalLink } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
 import { getInitials } from '@/lib/formatters';
 
-const STATUS_ACCENT = { active: '#34d399', inactive: '#94a3b8' };
+const ACCENT = '#10b981';
+const STATUS_DOT = { active: '#34d399', inactive: '#94a3b8' };
 
 function MetaItem({ icon: Icon, label, value, className = '' }) {
   return (
@@ -21,15 +23,19 @@ function MetaItem({ icon: Icon, label, value, className = '' }) {
 
 export default function ClientCard({ c, onOpen, onEdit, onDelete }) {
   const { t } = useI18n();
-  const accent = STATUS_ACCENT[c.status] || '#94a3b8';
+  const [selected, setSelected] = useState(false);
+  const dot = STATUS_DOT[c.status] || '#94a3b8';
 
   return (
-    <div className="entity-card cursor-pointer group" onClick={onOpen}>
+    <div
+      className={`entity-card cursor-pointer animate-fade-in-up ${selected ? 'ring-2 ring-primary/50 border-primary/40' : ''}`}
+      onClick={() => setSelected((s) => !s)}
+    >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-12 h-12 rounded-2xl entity-avatar flex items-center justify-center text-sm font-semibold relative shrink-0">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-semibold relative shrink-0" style={{ background: `linear-gradient(135deg, ${ACCENT}40, ${ACCENT}10)`, border: `1px solid ${ACCENT}40`, boxShadow: `0 0 14px -4px ${ACCENT}66, inset 0 1px 0 rgba(255,255,255,0.12)` }}>
             {getInitials(c.name)}
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-[#1a1d29]" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-[#1a1d29]" style={{ background: dot, boxShadow: `0 0 8px ${dot}` }} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-foreground truncate">{c.name}</p>
@@ -39,29 +45,34 @@ export default function ClientCard({ c, onOpen, onEdit, onDelete }) {
         <StatusBadge status={c.status} />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         <MetaItem icon={Mail} label="Email" value={c.email} />
         <MetaItem icon={Phone} label="Phone" value={c.phone} />
         <MetaItem icon={Hash} label="TRN" value={c.trn} className="col-span-2" />
       </div>
 
-      <div className="flex items-center gap-1 pt-3 border-t border-border/50" onClick={(e) => e.stopPropagation()}>
-        <Button variant="ghost" size="sm" onClick={onEdit} className="text-muted-foreground hover:text-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="bg-card border-border">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="text-foreground">{t('delete')}?</AlertDialogTitle>
-              <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={onDelete} className="bg-destructive">{t('delete')}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      <div className={`grid transition-all duration-300 ease-out ${selected ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-border/50' : 'grid-rows-[0fr] opacity-0'}`}>
+        <div className="overflow-hidden">
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" onClick={onOpen} className="text-muted-foreground hover:text-foreground h-8 px-2 gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Open</Button>
+            <Button variant="ghost" size="sm" onClick={onEdit} className="text-muted-foreground hover:text-foreground h-8 px-2 gap-1.5"><Pencil className="w-3.5 h-3.5" />Edit</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2 gap-1.5"><Trash2 className="w-3.5 h-3.5" />Delete</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-card border-border">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-foreground">{t('delete')}?</AlertDialogTitle>
+                  <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-border">{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete} className="bg-destructive">{t('delete')}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
       </div>
     </div>
   );
