@@ -85,14 +85,14 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
 
               {/* Right — status + margin + rate + menu */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
+                <div className="w-[112px] sm:w-[132px] flex items-center justify-end gap-1.5 px-1.5 py-1 rounded-xl bg-muted/40 border border-border/50">
                   <StatusPill as="span" variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
                   <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}%</span>
                 </div>
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-                <div className="text-right">
+                <div className="w-[84px] sm:w-[96px] text-right">
                   <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(monthlyRate)}</p>
                   <p className={`text-[10px] tabular-nums leading-tight ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
                 </div>

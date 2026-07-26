@@ -130,44 +130,46 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                 </div>
               </div>
 
-              {/* Right — status + amount */}
+              {/* Right — status + amount (fixed columns for perfect alignment) */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                      <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}<ChevronDown className="w-2.5 h-2.5 ml-0.5" /></StatusPill>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                        {opt.label}
-                        {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="w-[104px] sm:w-[168px] flex items-center justify-end gap-1.5">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                        <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}<ChevronDown className="w-2.5 h-2.5 ml-0.5" /></StatusPill>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                      {STATUS_OPTIONS.map((opt) => (
+                        <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                          {opt.label}
+                          {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                {trip.status === 'completed' && (
-                  <div className="hidden sm:block">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
-                          <StatusPill as="span" variant={isSent ? 'green' : 'neutral'}>{isSent ? t('sent') : 'Not Sent'}</StatusPill>
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, true)} className="text-xs cursor-pointer flex items-center gap-2"><Send className="w-3 h-3" /> Mark Sent</DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
+                  {trip.status === 'completed' && (
+                    <div className="hidden sm:block">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
+                            <StatusPill as="span" variant={isSent ? 'green' : 'neutral'}>{isSent ? t('sent') : 'Not Sent'}</StatusPill>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, true)} className="text-xs cursor-pointer flex items-center gap-2"><Send className="w-3 h-3" /> Mark Sent</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </div>
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-                <div className="text-right">
+                <div className="w-[82px] sm:w-[96px] text-right">
                   <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(trip.revenue)}</p>
                   <p className={`text-[10px] tabular-nums leading-tight ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)}</p>
                 </div>
