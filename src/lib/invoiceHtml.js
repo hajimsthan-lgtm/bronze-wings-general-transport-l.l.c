@@ -84,7 +84,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <div style="display:flex;align-items:center;gap:10px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:55px;width:55px;border-radius:50%;object-fit:cover;" />` : ''}
       <div>
-        <div style="font-size:16pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+        <div style="font-size:18pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
         ${compH2 ? `<div style="font-size:9pt;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
       </div>
     </div>
