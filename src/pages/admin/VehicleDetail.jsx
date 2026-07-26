@@ -15,6 +15,8 @@ import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
 import Vehicle3DModel from '@/components/admin/Vehicle3DModel';
 import FleetDashboard from '@/components/fleet/FleetDashboard';
+import ExportButtons from '@/components/common/ExportButtons';
+import BreakdownDialog from '@/components/common/BreakdownDialog';
 
 const fmtDT = (v) =>
   v
@@ -40,6 +42,7 @@ export default function VehicleDetail() {
   const [dataLoading, setDataLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const [breakdown, setBreakdown] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,9 +110,9 @@ export default function VehicleDetail() {
 
   const info = {
     rows: [
-      { label: 'Trip Revenue', value: formatCurrency(totalTrips), tone: 'text-emerald-400' },
-      { label: 'Expenses', value: formatCurrency(totalExpenses), tone: 'text-amber-400' },
-      { label: 'Net Profit', value: formatCurrency(netProfit), tone: 'text-sky-400' },
+      { label: 'Trip Revenue', value: formatCurrency(totalTrips), tone: 'text-emerald-400', onClick: () => setBreakdown({ title: 'Trip Revenue Breakdown', rows: fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `${formatDate(tt.trip_date)} · ${tt.driver_name || ''}`, amount: tt.revenue, tone: 'text-emerald-400' })) }) },
+      { label: 'Expenses', value: formatCurrency(totalExpenses), tone: 'text-amber-400', onClick: () => setBreakdown({ title: 'Expenses Breakdown', rows: fExpenses.map((r) => ({ label: r.description || r.category, sub: `${r.category} · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' })) }) },
+      { label: 'Net Profit', value: formatCurrency(netProfit), tone: 'text-sky-400', onClick: () => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] }) },
     ],
     card: {
       bank: 'Fleet',
@@ -137,6 +140,13 @@ export default function VehicleDetail() {
     toTime: fmtDT(recentTrip?.offload_datetime),
   };
 
+  const exportRows = [
+    ...fTrips.map((tt) => ({ date: tt.trip_date, type: 'Trip', description: `${tt.from_location || ''} → ${tt.to_location || ''}`, amount: tt.revenue })),
+    ...fFuel.map((r) => ({ date: r.date, type: 'Fuel', description: `${r.liters}L · ${r.station_name || ''}`, amount: r.total_cost })),
+    ...fExpenses.map((r) => ({ date: r.date, type: 'Expense', description: r.description || r.category, amount: r.amount })),
+    ...fServices.map((r) => ({ date: r.date, type: 'Service', description: r.service_type, amount: r.cost })),
+  ];
+
   return (
     <div className="detail-page">
       <EntityDetailHeader
@@ -158,12 +168,7 @@ export default function VehicleDetail() {
 
       <Vehicle3DModel />
 
-      <div className="mt-4">
-        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} />
-      </div>
-
-      {/* Records */}
-      <div className="flex flex-wrap items-center gap-3 mt-6 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mt-4 mb-4">
         <DateRangeFilter
           fromValue={dateFrom}
           onFromChange={setDateFrom}
@@ -171,6 +176,23 @@ export default function VehicleDetail() {
           onToChange={setDateTo}
           onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
         />
+        <div className="ml-auto">
+          <ExportButtons
+            data={exportRows}
+            filename={`vehicle-${vehicle.plate_number}-transactions`}
+            title={`${vehicle.make} ${vehicle.model} Transactions`}
+            columns={[
+              { label: 'Date', key: 'date' },
+              { label: 'Type', key: 'type' },
+              { label: 'Description', key: 'description' },
+              { label: 'Amount', key: 'amount' },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div>
+        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} />
       </div>
 
       <ProfitSummary
@@ -272,6 +294,13 @@ export default function VehicleDetail() {
           <EntityDocumentsTab entityType="vehicle" entityId={vehicle.id} />
         </TabsContent>
       </Tabs>
+
+      <BreakdownDialog
+        open={!!breakdown}
+        onOpenChange={(o) => !o && setBreakdown(null)}
+        title={breakdown?.title}
+        rows={breakdown?.rows}
+      />
     </div>
   );
 }

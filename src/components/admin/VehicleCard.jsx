@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock } from 'lucide-react';
 import CardChip from '@/components/admin/CardChip';
+import PlateBadge from '@/components/common/PlateBadge';
 
 const TRUCK_IMG = 'https://media.base44.com/images/public/6a5e20fffaa71b55806cccc8/ee669be11_generated_image.png';
 const ACCENT = '#3b82f6';
@@ -32,7 +33,7 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
       <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-20" style={{ background: ACCENT }} />
 
       <div className="relative flex items-start justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">Plate</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">{v.type || 'Vehicle'}</span>
         <div className="flex items-center gap-1.5">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium flex-shrink-0" style={{ background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
@@ -53,8 +54,8 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
         </div>
       </div>
 
-      <p className="relative mt-1 text-2xl font-bold tracking-tight text-foreground font-display truncate">{v.plate_number}</p>
-      <p className="relative text-xs text-muted-foreground truncate mt-0.5">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
+      <PlateBadge plate={v.plate_number} compact className="relative mt-1" />
+      <p className="relative text-xs text-muted-foreground truncate mt-2">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
 
       <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-white/10">
         <img src={v.image_url || TRUCK_IMG} alt="vehicle" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />

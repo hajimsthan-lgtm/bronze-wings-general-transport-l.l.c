@@ -1,5 +1,6 @@
 import { Info, Truck, MessageCircle } from 'lucide-react';
 import FleetStars from './FleetStars';
+import PlateBadge from '@/components/common/PlateBadge';
 import FleetRouteMap from './FleetRouteMap';
 import DriverTripsPanel from '@/components/drivers/DriverTripsPanel';
 
@@ -48,21 +49,19 @@ export default function FleetDashboard({ hero, info, profile, route, trips, trip
               {info.rows.map((r, i) => (
                 <div key={i} className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{r.label}</span>
-                  <span className={`text-sm font-semibold ${r.tone || 'text-foreground'}`}>{r.value}</span>
+                  {r.onClick ? (
+                    <button type="button" onClick={r.onClick} title="View breakdown" className={`text-sm font-semibold underline decoration-dotted underline-offset-2 hover:opacity-80 transition-opacity ${r.tone || 'text-foreground'}`}>
+                      {r.value}
+                    </button>
+                  ) : (
+                    <span className={`text-sm font-semibold ${r.tone || 'text-foreground'}`}>{r.value}</span>
+                  )}
                 </div>
               ))}
             </div>
             {info.card && (
-              <div
-                className="mt-auto rounded-xl p-4 relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg,#1e3a8a,#0f172a)', border: '1px solid rgba(59,130,246,0.3)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-white/80">{info.card.bank || 'Fleet Card'}</span>
-                  <span className="text-[10px] uppercase tracking-wider text-white/50">{info.card.type || ''}</span>
-                </div>
-                <p className="text-lg font-mono font-semibold text-white tracking-widest mt-3">{info.card.last4 || '••••'}</p>
-                {info.card.holder && <p className="text-[10px] text-white/50 mt-1 truncate">{info.card.holder}</p>}
+              <div className="mt-auto">
+                <PlateBadge plate={info.card.last4} holder={info.card.holder} />
               </div>
             )}
           </div>
