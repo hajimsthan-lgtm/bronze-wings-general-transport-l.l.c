@@ -10,13 +10,16 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Fuel as FuelIcon, Receipt, Wrench } from 'lucide-react';
+import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, Eye } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
 import Vehicle3DModel from '@/components/admin/Vehicle3DModel';
 import FleetDashboard from '@/components/fleet/FleetDashboard';
 import ExportButtons from '@/components/common/ExportButtons';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
+import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
+import { exportToPDF } from '@/lib/exportUtils';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const fmtDT = (v) =>
   v
@@ -43,6 +46,7 @@ export default function VehicleDetail() {
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [breakdown, setBreakdown] = useState(null);
+  const [viewer, setViewer] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +118,18 @@ export default function VehicleDetail() {
       { label: 'Expenses', value: formatCurrency(totalExpenses), tone: 'text-amber-400', onClick: () => setBreakdown({ title: 'Expenses Breakdown', rows: fExpenses.map((r) => ({ label: r.description || r.category, sub: `${r.category} · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' })) }) },
       { label: 'Net Profit', value: formatCurrency(netProfit), tone: 'text-sky-400', onClick: () => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] }) },
     ],
+    onDownload: () => exportToPDF(
+      [
+        { label: 'Trip Revenue', amount: Number(totalTrips) || 0 },
+        { label: 'Expenses', amount: Number(totalExpenses) || 0 },
+        { label: 'Fuel', amount: Number(totalFuel) || 0 },
+        { label: 'Net Profit', amount: Number(netProfit) || 0 },
+      ],
+      `vehicle-${vehicle.plate_number}-profit`,
+      [{ label: 'Category', key: 'label' }, { label: 'Amount', key: 'amount', numeric: true }],
+      `Vehicle Profit — ${vehicle.plate_number}`,
+      { dateRange: `${dateFrom} to ${dateTo}`, skipTotal: true }
+    ),
     card: {
       bank: 'Fleet',
       last4: vehicle.plate_number || '••••',
@@ -146,6 +162,99 @@ export default function VehicleDetail() {
     ...fExpenses.map((r) => ({ date: r.date, type: 'Expense', description: r.description || r.category, amount: r.amount })),
     ...fServices.map((r) => ({ date: r.date, type: 'Service', description: r.service_type, amount: r.cost })),
   ];
+
+  const viewerConfig = {
+    trips: {
+      title: 'Trips Timeline', icon: Truck, accent: '#3b82f6', records: trips, dateField: 'trip_date',
+      filename: `vehicle-${vehicle.plate_number}-trips`,
+      columns: [
+        { label: 'Date', key: 'trip_date' },
+        { label: 'From', key: 'from_location' },
+        { label: 'To', key: 'to_location' },
+        { label: 'Driver', key: 'driver_name' },
+        { label: 'Revenue', key: 'revenue', numeric: true },
+        { label: 'Status', key: 'status' },
+      ],
+      renderRow: (tt) => (
+        <div className="flex gap-3">
+          <div className="flex flex-col items-center flex-shrink-0">
+            <div className="w-2.5 h-2.5 rounded-full mt-3" style={{ background: '#3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.18)' }} />
+            <div className="w-0.5 flex-1 bg-blue-500/15 mt-1" />
+          </div>
+          <div className="flex-1 rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#3b82f6', 0.06), border: `1px solid ${hexToRgba('#3b82f6', 0.18)}` }}>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{tt.from_location || ''} → {tt.to_location || ''}</p>
+              <p className="text-xs text-muted-foreground">{formatDate(tt.trip_date)} · {tt.driver_name || ''}</p>
+            </div>
+            <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(tt.revenue)}</span>
+            <StatusBadge status={tt.status} />
+          </div>
+        </div>
+      ),
+    },
+    fuel: {
+      title: 'Fuel Records', icon: FuelIcon, accent: '#f59e0b', records: fuelRecords, dateField: 'date',
+      filename: `vehicle-${vehicle.plate_number}-fuel`,
+      columns: [
+        { label: 'Date', key: 'date' },
+        { label: 'Liters', key: 'liters', numeric: true },
+        { label: 'Station', key: 'station_name' },
+        { label: 'Cost', key: 'total_cost', numeric: true },
+      ],
+      renderRow: (r) => (
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.18)}` }}>
+          <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">{r.liters}L · {r.station_name || '—'}</p>
+            <p className="text-xs text-muted-foreground">{formatDate(r.date)} · {r.driver_name || ''}</p>
+          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.total_cost)}</span>
+        </div>
+      ),
+    },
+    expenses: {
+      title: 'Expenses', icon: Receipt, accent: '#f43f5e', records: expenses, dateField: 'date',
+      filename: `vehicle-${vehicle.plate_number}-expenses`,
+      columns: [
+        { label: 'Date', key: 'date' },
+        { label: 'Category', key: 'category' },
+        { label: 'Description', key: 'description' },
+        { label: 'Amount', key: 'amount', numeric: true },
+      ],
+      renderRow: (r) => (
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.18)}` }}>
+          <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-rose-400" /></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">{r.description || r.category}</p>
+            <p className="text-xs text-muted-foreground capitalize">{r.category} · {formatDate(r.date)}</p>
+          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.amount)}</span>
+          <StatusBadge status={r.status} />
+        </div>
+      ),
+    },
+    services: {
+      title: 'Service Records', icon: Wrench, accent: '#10b981', records: services, dateField: 'date',
+      filename: `vehicle-${vehicle.plate_number}-services`,
+      columns: [
+        { label: 'Date', key: 'date' },
+        { label: 'Type', key: 'service_type' },
+        { label: 'Vendor', key: 'vendor_name' },
+        { label: 'Cost', key: 'cost', numeric: true },
+      ],
+      renderRow: (r) => (
+        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.18)}` }}>
+          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground capitalize">{r.service_type}</p>
+            <p className="text-xs text-muted-foreground">{formatDate(r.date)} · {r.vendor_name || '—'}</p>
+          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.cost)}</span>
+          <StatusBadge status={r.status} />
+        </div>
+      ),
+    },
+  };
 
   return (
     <div className="detail-page">
@@ -192,7 +301,7 @@ export default function VehicleDetail() {
       </div>
 
       <div>
-        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} />
+        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} newTripHref={`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`} />
       </div>
 
       <ProfitSummary
@@ -213,6 +322,7 @@ export default function VehicleDetail() {
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
           <h3 className="text-sm font-semibold text-foreground">{t('fuel')}</h3>
           <span className="text-xs text-muted-foreground">({fFuel.length})</span>
+          <button onClick={() => setViewer('fuel')} className="ml-auto inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#f59e0b', boxShadow: '0 4px 14px -4px #f59e0b' }}><Eye className="w-3 h-3" /> View</button>
         </div>
         {dataLoading ? <LoadingSpinner /> : fFuel.length === 0 ? <EmptyState icon={FuelIcon} title={t('no_data')} /> : (
           <div className="space-y-2">
@@ -239,6 +349,10 @@ export default function VehicleDetail() {
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-muted-foreground">{fTrips.length} trips</span>
+            <button onClick={() => setViewer('trips')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#3b82f6', boxShadow: '0 4px 14px -4px #3b82f6' }}><Eye className="w-3 h-3" /> View</button>
+          </div>
           {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fTrips.map((trip) => (
@@ -256,6 +370,10 @@ export default function VehicleDetail() {
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-muted-foreground">{fExpenses.length} expenses</span>
+            <button onClick={() => setViewer('expenses')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#f43f5e', boxShadow: '0 4px 14px -4px #f43f5e' }}><Eye className="w-3 h-3" /> View</button>
+          </div>
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fExpenses.map((rec) => (
@@ -273,6 +391,10 @@ export default function VehicleDetail() {
         </TabsContent>
 
         <TabsContent value="services" className="mt-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs text-muted-foreground">{fServices.length} services</span>
+            <button onClick={() => setViewer('services')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#10b981', boxShadow: '0 4px 14px -4px #10b981' }}><Eye className="w-3 h-3" /> View</button>
+          </div>
           {dataLoading ? <LoadingSpinner /> : fServices.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
             <div className="space-y-2">
               {fServices.map((rec) => (
@@ -300,6 +422,12 @@ export default function VehicleDetail() {
         onOpenChange={(o) => !o && setBreakdown(null)}
         title={breakdown?.title}
         rows={breakdown?.rows}
+      />
+
+      <RecordsViewerSheet
+        open={!!viewer}
+        onOpenChange={(o) => !o && setViewer(null)}
+        {...(viewer ? viewerConfig[viewer] : {})}
       />
     </div>
   );

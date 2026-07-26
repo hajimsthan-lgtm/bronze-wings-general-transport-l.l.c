@@ -92,6 +92,7 @@ export default function Operations() {
   const [editTrip, setEditTrip] = useState(null);
   const [editContract, setEditContract] = useState(null);
   const [detailContract, setDetailContract] = useState(null);
+  const [prefill, setPrefill] = useState(null);
 
   // Trip detail sheet is URL-backed so Android hardware back closes it.
   const detailTripId = searchParams.get('tripId');
@@ -218,20 +219,22 @@ export default function Operations() {
   }, [mode, filteredTrips, filteredContracts, expensesByContract]);
 
   // Form handlers
-  const openNewTrip = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
+  const openNewTrip = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
   const openNewContract = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
   const openEditTrip = (trip) => { setFormMode('trip'); setEditTrip(trip); setEditContract(null); setFormOpen(true); };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
-  // Auto-open the new-trip form when arriving via ?new=1 (Dashboard quick action)
+  // Auto-open the new-trip form when arriving via ?new=1 (Dashboard quick action / vehicle "New Trip")
   useEffect(() => {
     const p = new URLSearchParams(location.search);
     if (p.get('new') === '1') {
       setFormMode('trip');
       setEditTrip(null);
       setEditContract(null);
+      const vp = p.get('vehicle_plate');
+      setPrefill(vp ? { vehicle_plate: vp } : null);
       setFormOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,7 +242,7 @@ export default function Operations() {
 
   // Open the new-trip form from the TopBar subnav "New Trip" button
   useEffect(() => {
-    const handler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
+    const handler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
     window.addEventListener('ops:new-trip', handler);
     return () => window.removeEventListener('ops:new-trip', handler);
   }, []);
@@ -427,6 +430,7 @@ export default function Operations() {
         editContract={editContract}
         initialMode={formMode}
         onSaved={handleFormSaved}
+        prefill={prefill}
       />
 
       <TripDetailSheet

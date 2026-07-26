@@ -1,10 +1,10 @@
-import { Info, Truck, MessageCircle } from 'lucide-react';
+import { Info, Truck, MessageCircle, FileText } from 'lucide-react';
 import FleetStars from './FleetStars';
 import PlateBadge from '@/components/common/PlateBadge';
 import FleetRouteMap from './FleetRouteMap';
 import DriverTripsPanel from '@/components/drivers/DriverTripsPanel';
 
-export default function FleetDashboard({ hero, info, profile, route, trips, tripsLoading }) {
+export default function FleetDashboard({ hero, info, profile, route, trips, tripsLoading, newTripHref }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-2 space-y-4">
@@ -43,7 +43,12 @@ export default function FleetDashboard({ hero, info, profile, route, trips, trip
           <div className="glass-card p-4 flex flex-col">
             <div className="flex items-center gap-2 mb-3">
               <Info className="w-4 h-4 text-primary" />
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Information</h3>
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Vehicle Profit</h3>
+              {info.onDownload && (
+                <button type="button" onClick={info.onDownload} title="Download PDF" className="ml-auto inline-flex items-center gap-1 h-7 px-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-medium text-foreground hover:bg-white/10 transition-colors">
+                  <FileText className="w-3 h-3" /> PDF
+                </button>
+              )}
             </div>
             <div className="space-y-3 mb-4">
               {info.rows.map((r, i) => (
@@ -103,7 +108,7 @@ export default function FleetDashboard({ hero, info, profile, route, trips, trip
 
       {/* Right: trips panel */}
       <div>
-        <DriverTripsPanel trips={trips} loading={tripsLoading} />
+        <DriverTripsPanel trips={trips} loading={tripsLoading} newTripHref={newTripHref} />
       </div>
     </div>
   );

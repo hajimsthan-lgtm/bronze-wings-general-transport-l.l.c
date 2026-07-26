@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, BarChart3, Shield, Globe, Settings } from 'lucide-react';
+import { useTheme } from '@/lib/theme';
+import { LayoutDashboard, Truck, BarChart3, Shield, Sun, Moon, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
@@ -14,7 +15,8 @@ const navItems = [
 
 
 export default function DesktopNav() {
-  const { t, language, toggleLanguage } = useI18n();
+  const { t } = useI18n();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState('');
   useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
@@ -82,12 +84,11 @@ export default function DesktopNav() {
         <div className="flex items-center gap-2">
           <LiveClock />
           <button
-            onClick={toggleLanguage}
+            onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-            aria-label="Toggle language">
-            
-            <Globe className="w-3.5 h-3.5" />
-            {language === 'en' ? 'العربية' : 'English'}
+            aria-label="Toggle theme">
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
           <Link to="/settings" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white" aria-label="Settings">
             <Settings className="w-4 h-4" />

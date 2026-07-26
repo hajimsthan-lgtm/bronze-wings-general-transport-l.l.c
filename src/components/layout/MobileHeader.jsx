@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Settings, Globe } from 'lucide-react';
+import { Settings, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useI18n } from '@/lib/i18n';
+import { useTheme } from '@/lib/theme';
 import BrandName from '@/components/layout/BrandName';
 
 export default function MobileHeader() {
-  const { language, toggleLanguage } = useI18n();
+  const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
 
   useEffect(() => {
@@ -50,12 +51,12 @@ export default function MobileHeader() {
         </Link>
         <div className="flex items-center gap-1.5">
           <button
-            onClick={toggleLanguage}
+            onClick={toggleTheme}
             className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
-            aria-label="Toggle language"
+            aria-label="Toggle theme"
           >
-            <Globe className="w-3.5 h-3.5" />
-            {language === 'en' ? 'ع' : 'EN'}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
           <Link
             to="/settings"

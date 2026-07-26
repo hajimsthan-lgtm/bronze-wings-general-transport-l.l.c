@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Search, History, ChevronRight } from 'lucide-react';
+import { Search, History, ChevronRight, Plus } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -8,7 +8,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 const initials = (name = '') =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
 
-export default function DriverTripsPanel({ trips = [], loading = false }) {
+export default function DriverTripsPanel({ trips = [], loading = false, newTripHref }) {
   return (
     <div className="glass-card p-4 flex flex-col" style={{ maxHeight: 580 }}>
       <div className="flex items-center justify-between mb-3">
@@ -57,10 +57,11 @@ export default function DriverTripsPanel({ trips = [], loading = false }) {
       </div>
 
       <Link
-        to="/trips"
+        to={newTripHref || '/trips'}
         className="w-full mt-3 flex items-center justify-center gap-2 rounded-xl bg-primary text-white text-sm font-semibold py-2.5 hover:brightness-110 transition-all"
       >
-        <History className="w-4 h-4" /> View history
+        {newTripHref ? <Plus className="w-4 h-4" /> : <History className="w-4 h-4" />}
+        {newTripHref ? 'New Trip' : 'View history'}
       </Link>
     </div>
   );
