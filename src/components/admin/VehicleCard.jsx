@@ -5,6 +5,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock } from 'lucide-react';
 import CardChip from '@/components/admin/CardChip';
 import PlateBadge from '@/components/common/PlateBadge';
+import OwnershipCard from '@/components/common/OwnershipCard';
 
 const TRUCK_IMG = 'https://media.base44.com/images/public/6a5e20fffaa71b55806cccc8/ee669be11_generated_image.png';
 const ACCENT = '#3b82f6';
@@ -20,7 +21,7 @@ function yearsLeft(dateStr) {
   return m <= 0 ? '<1m' : `${m}m`;
 }
 
-export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
+export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipChange }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
   const dot = STATUS_DOT[v.status] || '#94a3b8';
@@ -57,10 +58,7 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
       <PlateBadge plate={v.plate_number} compact className="relative mt-1" />
       <p className="relative text-xs text-muted-foreground truncate mt-2">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
 
-      <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-white/10">
-        <img src={v.image_url || TRUCK_IMG} alt="vehicle" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,10,10,0.10) 0%, rgba(10,10,10,0.55) 100%)' }} />
-      </div>
+      <OwnershipCard front={v.ownership_front_url} back={v.ownership_back_url} onChange={onOwnershipChange} />
 
       <div className="relative mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         <CardChip icon={Tag} label="Type" value={v.type} accent={ACCENT} />

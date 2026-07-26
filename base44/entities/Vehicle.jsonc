@@ -8,6 +8,12 @@
     "image_url": {
       "type": "string"
     },
+    "ownership_front_url": {
+      "type": "string"
+    },
+    "ownership_back_url": {
+      "type": "string"
+    },
     "make": {
       "type": "string"
     },
