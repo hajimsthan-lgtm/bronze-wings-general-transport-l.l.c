@@ -8,9 +8,9 @@ import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import RecordSectionCard from '@/components/common/RecordSectionCard';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, Eye } from 'lucide-react';
+import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, Eye, FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitSummary from '@/components/admin/ProfitSummary';
 import Vehicle3DModel from '@/components/admin/Vehicle3DModel';
@@ -256,6 +256,14 @@ export default function VehicleDetail() {
     },
   };
 
+  const pdfExport = (key, records) => exportToPDF(
+    records.map((r) => { const o = {}; viewerConfig[key].columns.forEach((c) => { o[c.key] = r[c.key]; }); return o; }),
+    viewerConfig[key].filename,
+    viewerConfig[key].columns,
+    viewerConfig[key].title,
+    { dateRange: `${dateFrom} to ${dateTo}` }
+  );
+
   return (
     <div className="detail-page">
       <EntityDetailHeader
@@ -340,82 +348,64 @@ export default function VehicleDetail() {
         )}
       </div>
 
-      <Tabs defaultValue="trips">
-        <TabsList className="bg-card border border-border">
-          <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
-          <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
-          <TabsTrigger value="services">{t('services')} ({fServices.length})</TabsTrigger>
-          <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="trips" className="mt-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground">{fTrips.length} trips</span>
-            <button onClick={() => setViewer('trips')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#3b82f6', boxShadow: '0 4px 14px -4px #3b82f6' }}><Eye className="w-3 h-3" /> View</button>
-          </div>
-          {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {fTrips.map((trip) => (
-                <div key={trip.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.driver_name}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
-                  <StatusBadge status={trip.status} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')}>
+          <div className="space-y-2">
+            {fTrips.slice(0, 5).map((trip) => (
+              <div key={trip.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#3b82f6', 0.06), border: `1px solid ${hexToRgba('#3b82f6', 0.16)}` }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.driver_name}</p>
                 </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="expenses" className="mt-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground">{fExpenses.length} expenses</span>
-            <button onClick={() => setViewer('expenses')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#f43f5e', boxShadow: '0 4px 14px -4px #f43f5e' }}><Eye className="w-3 h-3" /> View</button>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
+                <StatusBadge status={trip.status} />
+              </div>
+            ))}
           </div>
-          {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {fExpenses.map((rec) => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.amount)}</span>
-                  <StatusBadge status={rec.status} />
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+        </RecordSectionCard>
 
-        <TabsContent value="services" className="mt-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-muted-foreground">{fServices.length} services</span>
-            <button onClick={() => setViewer('services')} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: '#10b981', boxShadow: '0 4px 14px -4px #10b981' }}><Eye className="w-3 h-3" /> View</button>
+        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')}>
+          <div className="space-y-2">
+            {fExpenses.slice(0, 5).map((rec) => (
+              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                <StatusBadge status={rec.status} />
+              </div>
+            ))}
           </div>
-          {dataLoading ? <LoadingSpinner /> : fServices.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {fServices.map((rec) => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-primary" /></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.cost)}</span>
-                  <StatusBadge status={rec.status} />
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
+        </RecordSectionCard>
 
-        <TabsContent value="documents" className="mt-4">
+        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')}>
+          <div className="space-y-2">
+            {fServices.slice(0, 5).map((rec) => (
+              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.cost)}</span>
+                <StatusBadge status={rec.status} />
+              </div>
+            ))}
+          </div>
+        </RecordSectionCard>
+
+        <div className="glass-card p-4 relative overflow-hidden" style={{ borderTop: '3px solid #a855f7' }}>
+          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: 'radial-gradient(circle, ' + hexToRgba('#a855f7', 0.5) + ' 0%, transparent 70%)' }} />
+          <div className="flex items-center gap-2 mb-3 relative">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba('#a855f7', 0.14), border: '1px solid ' + hexToRgba('#a855f7', 0.3) }}>
+              <FileText className="w-4 h-4" style={{ color: '#a855f7' }} />
+            </div>
+            <h3 className="text-sm font-semibold text-foreground">{t('documents')}</h3>
+          </div>
           <EntityDocumentsTab entityType="vehicle" entityId={vehicle.id} />
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       <BreakdownDialog
         open={!!breakdown}
