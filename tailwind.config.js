@@ -9,6 +9,7 @@ module.exports = {
                 body: ['var(--font-body)'],
                 mono: ['var(--font-mono)'],
                 display: ['var(--font-display)'],
+                heading: ['var(--font-heading)'],
             },
             borderRadius: {
                 lg: 'var(--radius)',
@@ -112,8 +113,8 @@ module.exports = {
                 },
                 /* ── NEW: Subtle border glow pulse ── */
                 'border-pulse': {
-                    '0%, 100%': { borderColor: 'rgba(0,117,255,0.08)' },
-                    '50%': { borderColor: 'rgba(0,117,255,0.18)' }
+                    '0%, 100%': { borderColor: 'rgba(45,106,79,0.08)' },
+                    '50%': { borderColor: 'rgba(45,106,79,0.18)' }
                 }
             },
             animation: {
