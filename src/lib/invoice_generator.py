@@ -10,9 +10,6 @@ Public API
 ----------
     generate_invoice_pdf(invoice_data: dict) -> bytes
 
-The returned bytes can be streamed to a browser (Flask/FastAPI `Response`) or
-written straight to disk:
-
     pdf = generate_invoice_pdf(data)
     open("invoice.pdf", "wb").write(pdf)
 
@@ -73,55 +70,54 @@ def number_to_words(num) -> str:
     return (words + " Only").upper()
 
 
+def _split_brand(name: str):
+    """'Bronze Wings General Transport L.L.C' -> ('Bronze Wings', 'General Transport L.L.C')."""
+    gidx = name.lower().find("general")
+    if gidx >= 0:
+        return name[:gidx].strip(), name[gidx:].strip()
+    return name, ""
+
+
 # ── Stylesheet ───────────────────────────────────────────────────────────────
 CSS = """
 @page { size: A4; margin: 15mm; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-    font-size: 10pt;
-    color: #1F2937;
-    line-height: 1.4;
-}
+body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #1F2937; line-height: 1.4; }
 .invoice-wrapper { width: 100%; }
 
 /* Header */
-.header-main {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    border-bottom: 2.5px solid #8C745E; padding-bottom: 12px; margin-bottom: 18px;
-}
-.col-left { width: 32%; text-align: left; padding-top: 2px; }
-.col-left .logo { max-height: 75px; width: auto; object-fit: contain; margin-bottom: 8px; display: block; }
-.col-left .comp-name { font-size: 12.5pt; font-weight: 700; color: #5C4A32; margin-bottom: 4px; line-height: 1.3; }
-.col-left .comp-detail { font-size: 8.5pt; color: #555; line-height: 1.6; }
+.header-main { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #8C745E; padding-bottom: 12px; margin-bottom: 18px; }
+.col-left { width: 30%; text-align: left; padding-top: 6px; }
+.col-left .from-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 6px; }
+.col-left .from-detail { font-size: 9pt; color: #1F2937; line-height: 1.7; }
 
-.col-center { width: 36%; text-align: center; padding-top: 18px; }
+.col-center { width: 40%; text-align: center; }
+.col-center .logo { height: 95px; width: auto; object-fit: contain; margin: 0 auto 6px; display: block; }
+.col-center .brand-h1 { font-size: 18pt; font-weight: 800; color: #5C4A32; letter-spacing: 2px; text-transform: uppercase; line-height: 1.1; }
+.col-center .brand-h2 { font-size: 9pt; font-weight: 600; color: #8C745E; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; margin-bottom: 10px; }
 .col-center .tax-title { font-size: 20pt; font-weight: 700; color: #5C4A32; letter-spacing: 4px; text-transform: uppercase; line-height: 1.1; }
 .col-center .ref-num { font-size: 11pt; color: #8C745E; margin-top: 8px; font-weight: 600; letter-spacing: 1px; }
-.col-center .inv-date { font-size: 9.5pt; color: #6B7280; margin-top: 4px; }
+.col-center .inv-date { font-size: 9.5pt; color: #777; margin-top: 4px; }
 
-.col-right { width: 32%; text-align: right; padding-top: 8px; }
+.col-right { width: 30%; text-align: right; padding-top: 6px; }
 .col-right .bill-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 6px; }
-.col-right .bill-company { font-size: 14pt; font-weight: 700; color: #1F2937; margin-bottom: 6px; }
-.col-right .bill-trn { font-size: 9pt; color: #6B7280; }
-.col-right .due-date { font-size: 9pt; color: #6B7280; margin-top: 4px; }
+.col-right .bill-company { font-size: 12pt; font-weight: 700; color: #1F2937; margin-bottom: 4px; }
+.col-right .bill-detail { font-size: 9pt; color: #1F2937; line-height: 1.7; }
 
 /* Items table */
 .items-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 9pt; }
-.items-table thead th {
-    background-color: #8C745E; color: #fff; padding: 9px 8px; text-align: left;
-    font-weight: 600; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.5px;
-}
-.items-table thead th:nth-child(1) { width: 5%;  text-align: center; }
-.items-table thead th:nth-child(2) { width: 11%; }
-.items-table thead th:nth-child(3) { width: 47%; }
-.items-table thead th:nth-child(4) { width: 9%;  text-align: center; }
-.items-table thead th:nth-child(5) { width: 13%; text-align: right; }
-.items-table thead th:nth-child(6) { width: 15%; text-align: right; }
+.items-table thead th { background-color: #8C745E; color: #fff; padding: 9px 8px; text-align: left; font-weight: 600; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+.items-table thead th:nth-child(1) { width: 4%;  text-align: center; }
+.items-table thead th:nth-child(2) { width: 9%; }
+.items-table thead th:nth-child(3) { width: 44%; }
+.items-table thead th:nth-child(4) { width: 7%;  text-align: center; }
+.items-table thead th:nth-child(5) { width: 11%; text-align: right; }
+.items-table thead th:nth-child(6) { width: 12%; text-align: right; }
+.items-table thead th:nth-child(7) { width: 13%; text-align: right; }
 .items-table tbody td { padding: 10px 8px; border-bottom: 1px solid #E5E7EB; vertical-align: top; font-size: 9pt; color: #1F2937; }
 .items-table tbody td:nth-child(1) { text-align: center; }
 .items-table tbody td:nth-child(4) { text-align: center; }
-.items-table tbody td:nth-child(5), .items-table tbody td:nth-child(6) { text-align: right; }
+.items-table tbody td:nth-child(5), .items-table tbody td:nth-child(6), .items-table tbody td:nth-child(7) { text-align: right; }
 .items-table tbody tr:last-child td { border-bottom: 2px solid #1F2937; }
 
 /* Totals */
@@ -155,16 +151,18 @@ TEMPLATE = """<!DOCTYPE html>
 
   <div class="header-main">
     <div class="col-left">
-      {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
-      <div class="comp-name">{{ data.company.name }}</div>
-      <div class="comp-detail">
+      <div class="from-label">From</div>
+      <div class="from-detail">
         {{ data.company.address }}<br>
         TRN: {{ data.company.trn }}<br>
-        {{ data.company.phone }} | {{ data.company.email }}
+        {{ data.company.phone }}{% if data.company.email %} | {{ data.company.email }}{% endif %}
       </div>
     </div>
 
     <div class="col-center">
+      {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
+      <div class="brand-h1">{{ data.company.h1 }}</div>
+      {% if data.company.h2 %}<div class="brand-h2">{{ data.company.h2 }}</div>{% endif %}
       <div class="tax-title">Tax Invoice</div>
       <div class="ref-num">{{ data.invoice_no }}</div>
       <div class="inv-date">{{ data.invoice_date }}</div>
@@ -173,15 +171,19 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="col-right">
       <div class="bill-label">Bill To</div>
       <div class="bill-company">{{ data.bill_to.name }}</div>
-      {% if data.bill_to.trn %}<div class="bill-trn">Customer TRN: {{ data.bill_to.trn }}</div>{% endif %}
-      <div class="due-date">Due Date: {{ data.due_date }}</div>
+      <div class="bill-detail">
+        {% if data.bill_to.trn %}Customer TRN: {{ data.bill_to.trn }}<br>{% endif %}
+        {% if data.bill_to.address %}{{ data.bill_to.address }}<br>{% endif %}
+        {% if data.bill_to.phone %}{{ data.bill_to.phone }}<br>{% endif %}
+        Due Date: {{ data.due_date }}
+      </div>
     </div>
   </div>
 
   <table class="items-table">
     <thead>
       <tr>
-        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th>
+        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th><th>VAT 5%</th>
       </tr>
     </thead>
     <tbody>
@@ -193,6 +195,7 @@ TEMPLATE = """<!DOCTYPE html>
         <td>{{ item.qty }}</td>
         <td>{{ "%.2f"|format(item.per_trip) }}</td>
         <td>{{ "%.2f"|format(item.amount) }}</td>
+        <td>{{ "%.2f"|format(item.amount * data.vat_rate / 100) }}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -229,14 +232,14 @@ TEMPLATE = """<!DOCTYPE html>
 
 # ── Public API ───────────────────────────────────────────────────────────────
 def generate_invoice_pdf(invoice_data: dict) -> bytes:
-    """Render `invoice_data` into a branded tax-invoice PDF and return the bytes.
-
-    Streams cleanly to a browser from any web framework, e.g. (FastAPI):
-        return Response(generate_invoice_pdf(data), media_type="application/pdf",
-                        headers={"Content-Disposition": "attachment; filename=invoice.pdf"})
-    """
+    """Render `invoice_data` into a branded tax-invoice PDF and return the bytes."""
     data = dict(invoice_data)
     data.setdefault("amount_in_words", number_to_words(data.get("total", 0)))
+    comp = dict(data.get("company", {}))
+    h1, h2 = _split_brand(comp.get("name", "Bronze Wings General Transport L.L.C"))
+    comp.setdefault("h1", h1)
+    comp.setdefault("h2", h2)
+    data["company"] = comp
     html = Template(TEMPLATE).render(data=data, css=CSS)
     return HTML(string=html).write_pdf()
 
@@ -250,7 +253,7 @@ SAMPLE_INVOICE = {
         "phone": "050-8655601",
         "email": "hire@bronzewings.ae",
     },
-    "logo_url": None,  # path or URL to logo; None omits it
+    "logo_url": None,
 
     "invoice_no": "BW-2026-0012",
     "invoice_date": "26/07/2026",

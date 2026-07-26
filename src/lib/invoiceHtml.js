@@ -53,6 +53,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     const itemDate = item.date ? fmtDate(item.date) : fmtDate(invoice.issue_date);
     const isLast = idx === items.length - 1;
     const rowBorder = isLast ? '2px solid #1F2937' : '1px solid #E5E7EB';
+    const lineVat = amt * (vatRate / 100);
 
     return `<tr>
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:center;font-size:9pt;color:#1F2937;vertical-align:top;">${idx + 1}</td>
@@ -61,36 +62,50 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:center;font-size:9pt;color:#1F2937;vertical-align:top;">${qty}</td>
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;vertical-align:top;">${fmtMoney(unitPrice)}</td>
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;font-weight:600;vertical-align:top;">${fmtMoney(amt)}</td>
+      <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;vertical-align:top;">${fmtMoney(lineVat)}</td>
     </tr>`;
   }).join('');
 
   const refNumber = invoice.invoice_number || (seqNo ? `#${String(seqNo).padStart(4, '0')}` : '#0001');
   const billName = clientName || invoice.client_name || '—';
 
+  // Split company name into brand (H1) + suffix (H2), e.g.
+  // "Bronze Wings General Transport L.L.C" -> "Bronze Wings" / "General Transport L.L.C"
+  const fullName = s.company_name || 'Bronze Wings General Transport L.L.C';
+  const gIdx = fullName.toLowerCase().indexOf('general');
+  const compH1 = gIdx >= 0 ? fullName.slice(0, gIdx).trim() : fullName;
+  const compH2 = gIdx >= 0 ? fullName.slice(gIdx).trim() : '';
+
   return `
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <!-- Header Row: Company (left) | TAX INVOICE (center) | Bill To (right) -->
+  <!-- Header Row: From/Address (left) | Logo + Company + Tax Invoice (center) | Bill To (right) -->
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;border-bottom:2.5px solid #8C745E;padding-bottom:12px;">
-    <div style="flex:1;text-align:left;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:75px;width:auto;margin-bottom:8px;object-fit:contain;" />` : ''}
-      <div style="font-size:12.5pt;font-weight:700;color:#5C4A32;margin-bottom:4px;line-height:1.3;">${esc(s.company_name || '')}</div>
-      <div style="font-size:8.5pt;color:#555;line-height:1.6;">
+    <div style="flex:1;text-align:left;padding-top:6px;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:600;letter-spacing:1.5px;margin-bottom:6px;">From</div>
+      <div style="font-size:9pt;color:#1F2937;line-height:1.7;">
         ${esc(s.address || '')}<br>
         TRN: ${esc(s.trn || '')}<br>
-        ${esc(s.phone1 || '')} | ${esc(s.email || '')}
+        ${esc(s.phone1 || '')}${s.email ? ' | ' + esc(s.email) : ''}
       </div>
     </div>
-    <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;padding-top:18px;">
-      <div style="font-size:20pt;font-weight:700;color:#5C4A32;letter-spacing:4px;text-transform:uppercase;margin:0;line-height:1.1;">TAX INVOICE</div>
+    <div style="flex:1.3;text-align:center;display:flex;flex-direction:column;align-items:center;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:95px;width:auto;margin-bottom:6px;object-fit:contain;" />` : ''}
+      <div style="font-size:18pt;font-weight:800;color:#5C4A32;letter-spacing:2px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+      ${compH2 ? `<div style="font-size:9pt;font-weight:600;color:#8C745E;letter-spacing:3px;text-transform:uppercase;margin-top:2px;margin-bottom:10px;">${esc(compH2)}</div>` : '<div style="height:10px;"></div>'}
+      <div style="font-size:20pt;font-weight:700;color:#5C4A32;letter-spacing:4px;text-transform:uppercase;line-height:1.1;">TAX INVOICE</div>
       <div style="font-size:11pt;color:#8C745E;margin-top:8px;font-weight:600;letter-spacing:1px;">${esc(refNumber)}</div>
       <div style="font-size:9.5pt;color:#777;margin-top:4px;">${fmtDate(invoice.issue_date)}</div>
     </div>
-    <div style="flex:1;text-align:right;padding-top:8px;">
+    <div style="flex:1;text-align:right;padding-top:6px;">
       <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:600;letter-spacing:1.5px;margin-bottom:6px;">Bill To</div>
-      <div style="font-size:14pt;font-weight:700;color:#1F2937;margin-bottom:6px;">${esc(billName)}</div>
-      ${invoice.client_trn ? `<div style="font-size:9pt;color:#666;">Customer TRN: ${esc(invoice.client_trn)}</div>` : ''}
-      ${invoice.due_date ? `<div style="font-size:9pt;color:#666;margin-top:4px;">Due Date: ${fmtDate(invoice.due_date)}</div>` : ''}
+      <div style="font-size:12pt;font-weight:700;color:#1F2937;margin-bottom:4px;">${esc(billName)}</div>
+      <div style="font-size:9pt;color:#1F2937;line-height:1.7;">
+        ${invoice.client_trn ? `Customer TRN: ${esc(invoice.client_trn)}<br>` : ''}
+        ${invoice.client_address ? `${esc(invoice.client_address)}<br>` : ''}
+        ${invoice.client_phone ? `${esc(invoice.client_phone)}<br>` : ''}
+        ${invoice.due_date ? `Due Date: ${fmtDate(invoice.due_date)}` : ''}
+      </div>
     </div>
   </div>
 
@@ -98,16 +113,17 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:9pt;">
     <thead>
       <tr>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:5%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.No</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:11%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Date</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:47%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:9%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:15%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:4%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.No</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:9%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Date</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:44%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:7%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:11%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:12%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">VAT 5%</th>
       </tr>
     </thead>
     <tbody>
-      ${rowsHtml || `<tr><td colspan="6" style="padding:10px 6px;text-align:center;font-size:9pt;color:#999;">No items</td></tr>`}
+      ${rowsHtml || `<tr><td colspan="7" style="padding:10px 6px;text-align:center;font-size:9pt;color:#999;">No items</td></tr>`}
     </tbody>
   </table>
 
