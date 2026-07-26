@@ -54,7 +54,7 @@ export default function ClientProfileCard({ client, stats }) {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
             {statsList.map((s) => { const I = s.icon; return (
-              <div key={s.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
+              <div key={s.label} className="rounded-xl p-2.5 border border-black/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
                 <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: s.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</p></div>
                 <p className="text-sm font-semibold text-foreground tabular-nums truncate">{s.value}</p>
               </div>
