@@ -37,10 +37,9 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
   ];
 
   return (
-    <div className="glass-card p-5 relative overflow-hidden animate-border-pulse" style={LUMINATE}>
-      <div className="absolute -top-24 -left-12 w-64 h-64 rounded-full pointer-events-none opacity-40" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.50)} 0%, transparent 70%)` }} />
-      <div className="absolute -bottom-28 -right-12 w-64 h-64 rounded-full pointer-events-none opacity-30" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.45)} 0%, transparent 70%)` }} />
-      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(96,165,250,0.7), rgba(168,85,247,0.5), transparent)' }} />
+    <div className="glass-card p-5 relative overflow-hidden row-edge-glow animate-fade-in-up" style={{ ['--row-accent']: '#3b82f6', borderTop: '3px solid #3b82f6', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)' }}>
+      <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
+      <div className="absolute -bottom-12 -left-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.5)} 0%, transparent 70%)` }} />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Left — identity & stats */}
