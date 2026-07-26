@@ -22,6 +22,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
+import ClientProfileCard from '@/components/admin/ClientProfileCard';
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -181,6 +182,8 @@ export default function ClientDetail() {
           { label: 'Address', value: client.address },
         ]}
       />
+
+      <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
       {client.contact_persons?.length > 0 && (
         <div className="glass-card p-4 mb-4">
           <div className="flex items-center justify-between mb-3">

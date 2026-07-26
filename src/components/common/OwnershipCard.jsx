@@ -34,15 +34,24 @@ export default function OwnershipCard({ front, back, onChange }) {
       <div className="relative w-full h-full rounded-xl overflow-hidden border border-white/10 bg-muted/30 flex items-center justify-center">
         {current ? (
           <img src={current} alt={`ownership ${side}`} className="absolute inset-0 w-full h-full object-cover" />
+        ) : !hasAny ? (
+          <div className="flex flex-col items-center justify-center text-center px-3 gap-2">
+            <ImagePlus className="w-7 h-7 text-muted-foreground/50" />
+            <p className="text-[11px] text-muted-foreground">No ownership card attached</p>
+            <div className="flex gap-2">
+              <button type="button" onClick={(e) => { e.stopPropagation(); frontRef.current?.click(); }} className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-primary hover:bg-white/10 transition-colors">
+                <Upload className="w-3 h-3" /> Front
+              </button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); backRef.current?.click(); }} className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-primary hover:bg-white/10 transition-colors">
+                <Upload className="w-3 h-3" /> Back
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center px-3">
             <ImagePlus className="w-6 h-6 text-muted-foreground/50 mb-1" />
             <p className="text-[10px] text-muted-foreground">No {side} attached</p>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); (side === 'front' ? frontRef : backRef).current?.click(); }}
-              className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-primary hover:underline"
-            >
+            <button type="button" onClick={(e) => { e.stopPropagation(); (side === 'front' ? frontRef : backRef).current?.click(); }} className="mt-2 inline-flex items-center gap-1 text-[10px] font-medium text-primary hover:underline">
               <Upload className="w-3 h-3" /> Attach {side} (JPG/PNG)
             </button>
           </div>

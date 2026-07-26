@@ -4,8 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
+import VehicleProfileCard from '@/components/admin/VehicleProfileCard';
 import StatusBadge from '@/components/common/StatusBadge';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import RecordSectionCard from '@/components/common/RecordSectionCard';
@@ -13,24 +13,11 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ProfitCard from '@/components/common/ProfitCard';
-import Vehicle3DModel from '@/components/admin/Vehicle3DModel';
-import FleetDashboard from '@/components/fleet/FleetDashboard';
 import ExportButtons from '@/components/common/ExportButtons';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
 import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
 import { exportToPDF } from '@/lib/exportUtils';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
-
-const fmtDT = (v) =>
-  v
-    ? new Date(v).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
-    : '—';
-
-const initialsOf = (name = '') =>
-  name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
-
-const yearsSince = (d) =>
-  d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -82,10 +69,6 @@ export default function VehicleDetail() {
   if (loading) return <DetailSkeleton />;
   if (!vehicle) return <EmptyState title="Vehicle not found" />;
 
-  const sortedTrips = [...trips].sort((a, b) => (b.trip_date || '').localeCompare(a.trip_date || ''));
-  const recentTrip = sortedTrips[0] || null;
-  const recentTrips = sortedTrips.slice(0, 5);
-
   const fTrips = trips.filter((tt) => !tt.trip_date || (tt.trip_date >= dateFrom && tt.trip_date <= dateTo));
   const fFuel = fuelRecords.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
   const fExpenses = expenses.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
@@ -96,65 +79,11 @@ export default function VehicleDetail() {
   const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
   const netProfit = totalTrips - totalExpenses - totalFuel;
 
-  const completedTrips = fTrips.filter((x) => x.status === 'completed').length;
-  const completionRate = fTrips.length ? (completedTrips / fTrips.length) * 100 : 0;
-  const rate = completionRate / 20;
-
-  const hero = {
-    title: `${vehicle.make} ${vehicle.model} ${vehicle.year || ''}`,
-    subtitle: vehicle.plate_number,
-    vehicleLabel: vehicle.type,
-    rating: rate,
-    stats: [
-      { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km` },
-      { label: 'Fuel', value: vehicle.fuel_type },
-      { label: 'Trips', value: fTrips.length },
-      { label: 'Revenue', value: formatCurrency(totalTrips) },
-    ],
-  };
-
-  const info = {
-    rows: [
-      { label: 'Trip Revenue', value: formatCurrency(totalTrips), tone: 'text-emerald-400', onClick: () => setBreakdown({ title: 'Trip Revenue Breakdown', rows: fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `${formatDate(tt.trip_date)} · ${tt.driver_name || ''}`, amount: tt.revenue, tone: 'text-emerald-400' })) }) },
-      { label: 'Expenses', value: formatCurrency(totalExpenses), tone: 'text-amber-400', onClick: () => setBreakdown({ title: 'Expenses Breakdown', rows: fExpenses.map((r) => ({ label: r.description || r.category, sub: `${r.category} · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' })) }) },
-      { label: 'Net Profit', value: formatCurrency(netProfit), tone: 'text-sky-400', onClick: () => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] }) },
-    ],
-    onDownload: () => exportToPDF(
-      [
-        { label: 'Trip Revenue', amount: Number(totalTrips) || 0 },
-        { label: 'Expenses', amount: Number(totalExpenses) || 0 },
-        { label: 'Fuel', amount: Number(totalFuel) || 0 },
-        { label: 'Net Profit', amount: Number(netProfit) || 0 },
-      ],
-      `vehicle-${vehicle.plate_number}-profit`,
-      [{ label: 'Category', key: 'label' }, { label: 'Amount', key: 'amount', numeric: true }],
-      `Vehicle Profit — ${vehicle.plate_number}`,
-      { dateRange: `${dateFrom} to ${dateTo}`, skipTotal: true }
-    ),
-    card: {
-      bank: 'Fleet',
-      last4: vehicle.plate_number || '••••',
-      type: 'Plate',
-      holder: vehicle.assigned_driver || '',
-    },
-  };
-
-  const profile = driver ? {
-    name: driver.name,
-    email: driver.email,
-    phone: driver.phone,
-    initials: initialsOf(driver.name),
-    rating: rate,
-    expLabel: 'Experience',
-    experience: `${yearsSince(driver.join_date)} yrs`,
-    chatHref: driver.email ? `mailto:${driver.email}` : (driver.phone ? `tel:${driver.phone}` : null),
-  } : null;
-
-  const route = {
-    from: recentTrip?.from_location,
-    to: recentTrip?.to_location,
-    fromTime: fmtDT(recentTrip?.load_datetime || recentTrip?.trip_date),
-    toTime: fmtDT(recentTrip?.offload_datetime),
+  const saveOwnership = async (front, back) => {
+    try {
+      await base44.entities.Vehicle.update(vehicle.id, { ownership_front_url: front, ownership_back_url: back });
+      setVehicle((prev) => ({ ...prev, ownership_front_url: front, ownership_back_url: back }));
+    } catch {}
   };
 
   const exportRows = [
@@ -176,22 +105,6 @@ export default function VehicleDetail() {
         { label: 'Revenue', key: 'revenue', numeric: true },
         { label: 'Status', key: 'status' },
       ],
-      renderRow: (tt) => (
-        <div className="flex gap-3">
-          <div className="flex flex-col items-center flex-shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full mt-3" style={{ background: '#3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.18)' }} />
-            <div className="w-0.5 flex-1 bg-blue-500/15 mt-1" />
-          </div>
-          <div className="flex-1 rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#3b82f6', 0.06), border: `1px solid ${hexToRgba('#3b82f6', 0.18)}` }}>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{tt.from_location || ''} → {tt.to_location || ''}</p>
-              <p className="text-xs text-muted-foreground">{formatDate(tt.trip_date)} · {tt.driver_name || ''}</p>
-            </div>
-            <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(tt.revenue)}</span>
-            <StatusBadge status={tt.status} />
-          </div>
-        </div>
-      ),
     },
     fuel: {
       title: 'Fuel Records', icon: FuelIcon, accent: '#f59e0b', records: fuelRecords, dateField: 'date',
@@ -202,16 +115,6 @@ export default function VehicleDetail() {
         { label: 'Station', key: 'station_name' },
         { label: 'Cost', key: 'total_cost', numeric: true },
       ],
-      renderRow: (r) => (
-        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.18)}` }}>
-          <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground">{r.liters}L · {r.station_name || '—'}</p>
-            <p className="text-xs text-muted-foreground">{formatDate(r.date)} · {r.driver_name || ''}</p>
-          </div>
-          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.total_cost)}</span>
-        </div>
-      ),
     },
     expenses: {
       title: 'Expenses', icon: Receipt, accent: '#f43f5e', records: expenses, dateField: 'date',
@@ -222,17 +125,6 @@ export default function VehicleDetail() {
         { label: 'Description', key: 'description' },
         { label: 'Amount', key: 'amount', numeric: true },
       ],
-      renderRow: (r) => (
-        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.18)}` }}>
-          <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-rose-400" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{r.description || r.category}</p>
-            <p className="text-xs text-muted-foreground capitalize">{r.category} · {formatDate(r.date)}</p>
-          </div>
-          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.amount)}</span>
-          <StatusBadge status={r.status} />
-        </div>
-      ),
     },
     services: {
       title: 'Service Records', icon: Wrench, accent: '#10b981', records: services, dateField: 'date',
@@ -243,17 +135,6 @@ export default function VehicleDetail() {
         { label: 'Vendor', key: 'vendor_name' },
         { label: 'Cost', key: 'cost', numeric: true },
       ],
-      renderRow: (r) => (
-        <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.18)}` }}>
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground capitalize">{r.service_type}</p>
-            <p className="text-xs text-muted-foreground">{formatDate(r.date)} · {r.vendor_name || '—'}</p>
-          </div>
-          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(r.cost)}</span>
-          <StatusBadge status={r.status} />
-        </div>
-      ),
     },
   };
 
@@ -267,24 +148,9 @@ export default function VehicleDetail() {
 
   return (
     <div className="detail-page">
-      <EntityDetailHeader
-        title={`${vehicle.make} ${vehicle.model} ${vehicle.year || ''}`}
-        subtitle={vehicle.plate_number}
-        badge={<StatusBadge status={vehicle.status} />}
-        backTo="/admin/vehicles"
-        info={[
-          { label: 'Type', value: vehicle.type },
-          { label: t('driver'), value: vehicle.assigned_driver },
-          { label: 'Fuel Type', value: vehicle.fuel_type },
-          { label: 'Odometer', value: vehicle.odometer_km ? `${vehicle.odometer_km} km` : null },
-          { label: t('registration'), value: formatDate(vehicle.registration_expiry) },
-          { label: t('insurance'), value: formatDate(vehicle.insurance_expiry) },
-          { label: t('last_service'), value: formatDate(vehicle.last_service_date) },
-          { label: t('next_service'), value: formatDate(vehicle.next_service_date) },
-        ]}
-      />
+      <EntityDetailHeader backTo="/admin/vehicles" />
 
-      <Vehicle3DModel />
+      <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} />
 
       <div className="flex flex-wrap items-center gap-3 mt-4 mb-4">
         <DateRangeFilter
@@ -309,11 +175,7 @@ export default function VehicleDetail() {
         </div>
       </div>
 
-      <div>
-        <FleetDashboard hero={hero} info={info} profile={profile} route={route} trips={recentTrips} tripsLoading={dataLoading} newTripHref={`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')}>
           <div className="space-y-2">
             {fTrips.slice(0, 5).map((trip, i, arr) => (
