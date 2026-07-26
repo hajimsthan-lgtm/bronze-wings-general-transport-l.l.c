@@ -62,7 +62,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:center;font-size:9pt;color:#1F2937;vertical-align:top;">${qty}</td>
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;vertical-align:top;">${fmtMoney(unitPrice)}</td>
       <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;font-weight:600;vertical-align:top;">${fmtMoney(amt)}</td>
-      <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;vertical-align:top;">${fmtMoney(lineVat)}</td>
+      <td style="padding:10px 8px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#1F2937;vertical-align:top;">${vatRate}%</td>
     </tr>`;
   }).join('');
 
@@ -82,9 +82,9 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <!-- Header band: logo + brand (left) | contact info (right) -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <div style="display:flex;align-items:center;gap:10px;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:55px;width:55px;border-radius:50%;object-fit:cover;" />` : ''}
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:62px;width:62px;border-radius:50%;object-fit:cover;" />` : ''}
       <div>
-        <div style="font-size:18pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+        <div style="font-size:20pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
         ${compH2 ? `<div style="font-size:9pt;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
       </div>
     </div>
@@ -133,7 +133,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
         <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:center;width:7%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
         <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:11%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
         <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:12%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">VAT 5%</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">VAT %</th>
       </tr>
     </thead>
     <tbody>

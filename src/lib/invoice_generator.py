@@ -88,8 +88,8 @@ body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 10pt; col
 /* Header band */
 .header-band { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .brand-block { display: flex; align-items: center; gap: 10px; }
-.brand-block .logo { height: 55px; width: 55px; border-radius: 50%; object-fit: cover; }
-.brand-block .brand-h1 { font-size: 18pt; font-weight: 800; color: #333; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1.1; }
+.brand-block .logo { height: 62px; width: 62px; border-radius: 50%; object-fit: cover; }
+.brand-block .brand-h1 { font-size: 20pt; font-weight: 800; color: #333; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1.1; }
 .brand-block .brand-h2 { font-size: 9pt; font-weight: 500; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
 .contact-col { text-align: right; font-size: 9pt; color: #333; line-height: 1.6; }
 .header-rule { border-bottom: 1.5px solid #8C745E; margin-bottom: 14px; }
@@ -203,7 +203,7 @@ TEMPLATE = """<!DOCTYPE html>
   <table class="items-table">
     <thead>
       <tr>
-        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th><th>VAT 5%</th>
+        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th><th>VAT %</th>
       </tr>
     </thead>
     <tbody>
@@ -215,7 +215,7 @@ TEMPLATE = """<!DOCTYPE html>
         <td>{{ item.qty }}</td>
         <td>{{ "%.2f"|format(item.per_trip) }}</td>
         <td>{{ "%.2f"|format(item.amount) }}</td>
-        <td>{{ "%.2f"|format(item.amount * data.vat_rate / 100) }}</td>
+        <td>{{ data.vat_rate }}%</td>
       </tr>
       {% endfor %}
     </tbody>
