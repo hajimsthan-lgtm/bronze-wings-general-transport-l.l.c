@@ -1,8 +1,8 @@
-import { Truck, Gauge, Fuel as FuelIcon, Wallet, MessageCircle, CreditCard } from 'lucide-react';
+import { Truck, Gauge, Fuel as FuelIcon, Wallet, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const initialsOf = (name = '') =>
@@ -10,7 +10,15 @@ const initialsOf = (name = '') =>
 
 const LUMINATE = {
   borderTop: '3px solid #3b82f6',
-  boxShadow: '0 0 0 1px rgba(59,130,246,0.18), 0 0 44px -10px rgba(59,130,246,0.45), 0 20px 50px rgba(0,0,0,0.45)',
+  boxShadow: '0 0 0 1px rgba(59,130,246,0.25), 0 0 60px -8px rgba(59,130,246,0.55), 0 0 90px -20px rgba(168,85,247,0.35), 0 24px 60px rgba(0,0,0,0.5)',
+};
+
+const expiryTone = (d) => {
+  if (!d) return 'text-muted-foreground';
+  const today = new Date().toISOString().split('T')[0];
+  if (d < today) return 'text-rose-400';
+  const soon = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+  return d <= soon ? 'text-amber-400' : 'text-foreground';
 };
 
 export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership }) {
@@ -21,17 +29,28 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
     { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), icon: Wallet, accent: '#34d399' },
   ];
 
+  const detailTiles = [
+    { label: 'Registration', value: formatDate(vehicle.registration_expiry), icon: CalendarClock, accent: '#60a5fa', tone: expiryTone(vehicle.registration_expiry) },
+    { label: 'Insurance', value: formatDate(vehicle.insurance_expiry), icon: ShieldCheck, accent: '#34d399', tone: expiryTone(vehicle.insurance_expiry) },
+    { label: 'Last Service', value: formatDate(vehicle.last_service_date), icon: Wrench, accent: '#f59e0b', tone: 'text-foreground' },
+    { label: 'Next Service', value: formatDate(vehicle.next_service_date), icon: CalendarDays, accent: '#a855f7', tone: expiryTone(vehicle.next_service_date) },
+  ];
+
   return (
     <div className="glass-card p-5 relative overflow-hidden animate-border-pulse" style={LUMINATE}>
-      <div className="absolute -top-20 -left-10 w-56 h-56 rounded-full pointer-events-none opacity-30" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.45)} 0%, transparent 70%)` }} />
-      <div className="absolute -bottom-24 -right-10 w-56 h-56 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.40)} 0%, transparent 70%)` }} />
+      <div className="absolute -top-24 -left-12 w-64 h-64 rounded-full pointer-events-none opacity-40" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.50)} 0%, transparent 70%)` }} />
+      <div className="absolute -bottom-28 -right-12 w-64 h-64 rounded-full pointer-events-none opacity-30" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.45)} 0%, transparent 70%)` }} />
+      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(96,165,250,0.7), rgba(168,85,247,0.5), transparent)' }} />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Left — identity & stats */}
         <div>
           <div className="flex items-start gap-4">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center flex-shrink-0">
-              {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-9 h-9 text-primary/60" />}
+            <div className="relative flex-shrink-0">
+              <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)' }} />
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
+                {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-9 h-9 text-primary/60" />}
+              </div>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -83,6 +102,24 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
           </div>
           <p className="text-[10px] text-muted-foreground mt-3">Attach front &amp; back (JPG/PNG). Use the flip icon on the card to switch sides.</p>
         </div>
+      </div>
+
+      {/* Vehicle details strip */}
+      <div className="relative mt-5 pt-4 border-t border-white/[0.06]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {detailTiles.map((d) => { const I = d.icon; return (
+            <div key={d.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(d.accent, 0.05) }}>
+              <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: d.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.label}</p></div>
+              <p className={`text-sm font-semibold tabular-nums truncate ${d.tone}`}>{d.value || '—'}</p>
+            </div>
+          ); })}
+        </div>
+        {vehicle.notes && (
+          <div className="mt-2.5 flex items-start gap-2 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#ffffff', 0.03) }}>
+            <StickyNote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">{vehicle.notes}</p>
+          </div>
+        )}
       </div>
     </div>
   );
