@@ -50,100 +50,94 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       .map(esc)
       .join('<br>');
     const itemDate = item.date ? fmtDate(item.date) : fmtDate(invoice.issue_date);
+    const isLast = idx === items.length - 1;
+    const rowBorder = isLast ? '2px solid #333' : '1px solid #ddd';
 
-    return `<tr style="background:${idx % 2 === 0 ? '#f3eee6' : '#ffffff'};">
-      <td style="padding:7px 5px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:9px;color:#333;">${idx + 1}</td>
-      <td style="padding:7px 5px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:9px;color:#333;">${itemDate}</td>
-      <td style="padding:7px 9px;border-bottom:1px solid #e5e5e5;text-align:left;font-size:9px;color:#333;line-height:1.5;">${desc}</td>
-      <td style="padding:7px 5px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:9px;color:#333;">${qty}</td>
-      <td style="padding:7px 7px;border-bottom:1px solid #e5e5e5;text-align:right;font-size:9px;color:#333;">${fmtMoney(unitPrice)}</td>
-      <td style="padding:7px 7px;border-bottom:1px solid #e5e5e5;text-align:right;font-size:9px;color:#333;font-weight:600;">${fmtMoney(amt)}</td>
+    return `<tr>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};text-align:center;font-size:9pt;color:#333;vertical-align:top;">${idx + 1}</td>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};font-size:9pt;color:#333;vertical-align:top;">${itemDate}</td>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};font-size:9pt;color:#333;line-height:1.5;vertical-align:top;">${desc}</td>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};text-align:center;font-size:9pt;color:#333;vertical-align:top;">${qty}</td>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#333;vertical-align:top;">${fmtMoney(unitPrice)}</td>
+      <td style="padding:10px 6px;border-bottom:${rowBorder};text-align:right;font-size:9pt;color:#333;font-weight:600;vertical-align:top;">${fmtMoney(amt)}</td>
     </tr>`;
   }).join('');
 
-  const clientAddr = (invoice.client_address ?? '').split('\n').map(esc).join('<br>');
-  const companyAddr = (s.company_address ?? '').split('\n').map(esc).join('<br>');
+  const refNumber = invoice.invoice_number || (seqNo ? `#${String(seqNo).padStart(4, '0')}` : '#0001');
+  const billName = clientName || invoice.client_name || '—';
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#333;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <!-- Header: Logo (left) | Company info (center) | Title/meta (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:10px;">
-    <div style="text-align:center;width:100px;flex-shrink:0;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #755f3f;" />` : ''}
-      <div style="font-size:11px;font-weight:700;color:#755f3f;letter-spacing:0.04em;margin-top:5px;">BRONZE WINGS</div>
-      <div style="font-size:7px;color:#755f3f;letter-spacing:0.03em;">GENERAL TRANSPORT L.L.C</div>
+  <!-- Header Row: Company (left) | TAX INVOICE (center) | Bill To (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;border-bottom:2px solid #8B7355;padding-bottom:10px;">
+    <div style="flex:1;text-align:left;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:55px;height:55px;margin-bottom:4px;border-radius:50%;object-fit:cover;" />` : ''}
+      <div style="font-size:13pt;font-weight:700;color:#5C4A32;margin-bottom:2px;">${esc(s.company_name || '')}</div>
+      <div style="font-size:8.5pt;color:#666;line-height:1.5;">
+        ${esc(s.address || '')}<br>
+        TRN: ${esc(s.trn || '')}<br>
+        ${esc(s.phone1 || '')} | ${esc(s.email || '')}
+      </div>
     </div>
-    <div style="flex:1;padding-top:8px;">
-      <div style="font-size:13px;font-weight:700;color:#654321;">${esc(s.company_name || '')}</div>
-      <div style="font-size:9px;color:#444;margin-top:3px;">${esc(s.address || '')}</div>
-      <div style="font-size:9px;color:#444;margin-top:2px;">TRN: ${esc(s.trn || '')} &nbsp;·&nbsp; ${esc(s.phone1 || '')} &nbsp;·&nbsp; ${esc(s.email || '')}</div>
+    <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;padding-top:10px;">
+      <div style="font-size:18pt;font-weight:700;color:#5C4A32;letter-spacing:3px;text-transform:uppercase;margin:0;">TAX INVOICE</div>
+      <div style="font-size:10pt;color:#8B7355;margin-top:4px;font-weight:600;">${esc(refNumber)}</div>
+      <div style="font-size:9pt;color:#888;margin-top:2px;">${fmtDate(invoice.issue_date)}</div>
     </div>
-    <div style="text-align:right;flex-shrink:0;">
-      <div style="font-size:16px;font-weight:700;color:#654321;">TAX INVOICE</div>
-      <div style="font-size:11px;font-weight:700;color:#333;margin-top:3px;">${esc(invoice.invoice_number || (seqNo ? `#${String(seqNo).padStart(4, '0')}` : '—'))}</div>
-      <div style="font-size:9px;color:#888;margin-top:2px;">${fmtDate(invoice.issue_date)}</div>
-    </div>
-  </div>
-
-  <!-- Bill To -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:6px 0 10px;padding:8px 10px;background:#f7f3ec;border-left:3px solid #755f3f;border-radius:3px;">
-    <div>
-      <div style="font-size:8px;font-weight:700;color:#755f3f;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:3px;">Bill To</div>
-      <div style="font-size:10px;font-weight:700;color:#000;">${esc(clientName || invoice.client_name || '—')}</div>
-      ${invoice.client_trn ? `<div style="font-size:9px;color:#333;margin-top:2px;">TRN: ${esc(invoice.client_trn)}</div>` : ''}
-      ${clientAddr ? `<div style="font-size:9px;color:#333;line-height:1.4;margin-top:2px;">${clientAddr}</div>` : ''}
-    </div>
-    <div style="text-align:right;font-size:9px;color:#444;">
-      ${invoice.due_date ? `<div>Due Date: <strong>${fmtDate(invoice.due_date)}</strong></div>` : ''}
+    <div style="flex:1;text-align:right;padding-top:5px;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8B7355;font-weight:600;letter-spacing:1px;margin-bottom:3px;">Bill To</div>
+      <div style="font-size:12pt;font-weight:700;color:#333;margin-bottom:2px;">${esc(billName)}</div>
+      ${invoice.client_trn ? `<div style="font-size:9pt;color:#666;">TRN: ${esc(invoice.client_trn)}</div>` : ''}
+      ${invoice.due_date ? `<div style="font-size:9pt;color:#666;margin-top:4px;">Due Date: ${fmtDate(invoice.due_date)}</div>` : ''}
     </div>
   </div>
 
   <!-- Items Table -->
-  <table style="width:100%;border-collapse:collapse;margin-top:8px;">
+  <table style="width:100%;border-collapse:collapse;margin-top:15px;margin-bottom:15px;font-size:9pt;">
     <thead>
-      <tr style="background:#755f3f;">
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:36px;color:#fff;">S.NO</th>
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:62px;color:#fff;">DATE</th>
-        <th style="padding:7px 9px;font-size:9px;text-transform:uppercase;text-align:left;color:#fff;">DESCRIPTION</th>
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:52px;color:#fff;">TRIP - QTY</th>
-        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:62px;color:#fff;">PER TRIP</th>
-        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:72px;color:#fff;">AMOUNT</th>
+      <tr>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:center;width:5%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.No</th>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:left;width:12%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Date</th>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:left;width:46%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:center;width:10%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
+        <th style="background:#8B7355;color:#fff;padding:8px 6px;text-align:right;width:14%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
       </tr>
     </thead>
     <tbody>
-      ${rowsHtml || `<tr><td colspan="6" style="padding:10px;text-align:center;font-size:9px;color:#999;">No items</td></tr>`}
+      ${rowsHtml || `<tr><td colspan="6" style="padding:10px 6px;text-align:center;font-size:9pt;color:#999;">No items</td></tr>`}
     </tbody>
   </table>
 
-  <!-- Amount in Words + Totals -->
-  <div style="display:flex;justify-content:space-between;margin-top:16px;border-top:2px solid #000;padding-top:10px;">
-    <div style="flex:1;">
-      <div style="font-size:9px;font-weight:700;color:#000;text-transform:uppercase;margin-bottom:4px;">Amount in Words</div>
-      <div style="font-size:10px;color:#333;font-weight:500;line-height:1.4;">${numberToWords(total).toUpperCase()}</div>
+  <!-- Totals Section: Amount in Words (left) | Totals (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:15px;margin-bottom:20px;">
+    <div style="flex:1;padding-right:20px;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8B7355;font-weight:600;letter-spacing:1px;margin-bottom:4px;">Amount in Words</div>
+      <div style="font-size:9pt;color:#333;font-weight:600;line-height:1.5;">${numberToWords(total).toUpperCase()}</div>
     </div>
     <div style="width:220px;">
-      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:9px;color:#333;">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:9.5pt;border-bottom:1px solid #ddd;">
         <span>Sub Total</span><span>${fmtMoney(subtotal)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:9px;color:#333;">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:9.5pt;border-bottom:1px solid #ddd;">
         <span>Vat ${vatRate}%</span><span>${fmtMoney(vatAmount)}</span>
       </div>
-      <div style="border-top:1px solid #999;margin:4px 0;"></div>
-      <div style="display:flex;justify-content:space-between;padding:5px 0;font-weight:700;font-size:10px;color:#000;">
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:11pt;border-top:2px solid #333;padding-top:6px;margin-top:2px;">
         <span>Total</span><span>${fmtMoney(total)}</span>
       </div>
     </div>
   </div>
 
-  <!-- Footer / Signature -->
-  <div style="margin-top:auto;padding-top:50px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:9px;color:#333;border-top:1px solid #ccc;padding-top:10px;">
-      <div style="font-weight:700;">${esc(s.company_name || 'BRONZE WINGS GENERAL TRANSPORT LLC')}</div>
-      <div>CUSTOMER: ${esc(clientName || invoice.client_name || '—')}</div>
-      <div style="text-align:center;">
-        <div style="border-top:1px solid #333;padding-top:2px;margin-top:20px;width:120px;">SIGNATURE</div>
-      </div>
+  <!-- Signatures -->
+  <div style="display:flex;justify-content:space-between;margin-top:50px;padding-top:20px;border-top:1px solid #ddd;">
+    <div style="width:45%;text-align:center;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8B7355;font-weight:600;letter-spacing:1px;margin-bottom:35px;">For ${esc(s.company_name || 'Bronze Wings General Transport L.L.C')}</div>
+      <div style="border-top:1px solid #333;width:80%;margin:0 auto;padding-top:6px;font-size:9pt;color:#666;">Authorized Signature &amp; Stamp</div>
+    </div>
+    <div style="width:45%;text-align:center;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8B7355;font-weight:600;letter-spacing:1px;margin-bottom:35px;">For ${esc(billName)}</div>
+      <div style="border-top:1px solid #333;width:80%;margin:0 auto;padding-top:6px;font-size:9pt;color:#666;">Authorized Signature &amp; Stamp</div>
     </div>
   </div>
 
