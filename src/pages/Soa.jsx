@@ -4,7 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useReportClient } from '@/lib/reportClientFilter';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
@@ -24,7 +24,7 @@ export default function Soa() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState('all');
+  const reportClient = useReportClient();
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
 
@@ -36,12 +36,12 @@ export default function Soa() {
   }, []);
 
   const dateFiltered = invoices.filter(i => !i.issue_date || (i.issue_date >= dateFrom && i.issue_date <= dateTo));
-  const filtered = selectedClient === 'all' ? dateFiltered : dateFiltered.filter(i => i.client_name === selectedClient);
+  const filtered = reportClient === 'all' ? dateFiltered : dateFiltered.filter(i => i.client_name === reportClient);
   const totalAmount = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
 
-  const clientNames = [...new Set(invoices.map(i => i.client_name).filter(Boolean))];
+
 
   // Payment status pie
   const statusMap = {};
@@ -98,13 +98,7 @@ export default function Soa() {
               title="Statement of Account"
               options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
             />
-            <Select value={selectedClient} onValueChange={setSelectedClient}>
-              <SelectTrigger className="bg-card border-border w-48 h-10"><SelectValue placeholder="Select client" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Clients</SelectItem>
-                {clientNames.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-              </SelectContent>
-            </Select>
+
           </div>
         } />
 

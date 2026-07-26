@@ -17,6 +17,7 @@ import ProgressBar from '@/components/reports/ProgressBar';
 import TrendChart from '@/components/reports/TrendChart';
 import RadialGauge from '@/components/reports/RadialGauge';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { useReportClient } from '@/lib/reportClientFilter';
 
 const addDays = (iso, n) => { const d = new Date(iso); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
 
@@ -28,6 +29,7 @@ export default function ProfitLoss() {
   const [trips, setTrips] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
+  const reportClient = useReportClient();
 
   const loadData = useCallback(async () => {
     const [t, e, f] = await Promise.all([
@@ -42,7 +44,7 @@ export default function ProfitLoss() {
 
   if (loading) return <LoadingSpinner />;
 
-  const fTrips = trips.filter(t => !t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo));
+  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo)));
   const fExpenses = expenses.filter(e => !e.date || (e.date >= dateFrom && e.date <= dateTo));
   const fFuel = fuelRecords.filter(f => !f.date || (f.date >= dateFrom && f.date <= dateTo));
 

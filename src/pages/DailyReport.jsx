@@ -13,6 +13,7 @@ import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import TrendChart from '@/components/reports/TrendChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
 import RadialGauge from '@/components/reports/RadialGauge';
+import { useReportClient } from '@/lib/reportClientFilter';
 
 const contentCardStyle = {
   background: '#232636',
@@ -41,6 +42,7 @@ export default function DailyReport() {
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const reportClient = useReportClient();
 
   const loadData = useCallback(async () => {
     const [t, e, f, i] = await Promise.all([
@@ -49,11 +51,12 @@ export default function DailyReport() {
       base44.entities.FuelRecord.list('-date', 500),
       base44.entities.Invoice.list('-issue_date', 500),
     ]);
-    setTrips((t || []).filter(x => !x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo)));
+    const byClient = (x) => reportClient === 'all' || x.client_name === reportClient;
+    setTrips((t || []).filter(x => byClient(x) && (!x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo))));
     setExpenses((e || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
     setFuelRecords((f || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
-    setInvoices((i || []).filter(x => !x.issue_date || (x.issue_date >= dateFrom && x.issue_date <= dateTo)));
-  }, [dateFrom, dateTo]);
+    setInvoices((i || []).filter(x => byClient(x) && (!x.issue_date || (x.issue_date >= dateFrom && x.issue_date <= dateTo))));
+  }, [dateFrom, dateTo, reportClient]);
 
   useEffect(() => {
     let cancelled = false;

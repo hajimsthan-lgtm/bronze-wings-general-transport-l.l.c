@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { getCompanySettings } from './companySettings';
+import { downloadInvoicePDF } from './invoiceHtml';
 
 export function exportToCSV(data, filename, columns) {
   const escape = (val, isNumeric) => {
@@ -144,107 +145,7 @@ async function fetchLogoData(url) {
 }
 
 export async function exportInvoicePDF(invoice, clientName, logoUrl) {
-  // Programmatic canvas engine — replicates ReportLab layout in jsPDF
-  // Letter size (612 × 792 pt), 140pt top bypass for pre-printed letterhead, 85pt bottom margin
-  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-  const width = doc.internal.pageSize.width;    // 612
-  const height = doc.internal.pageSize.height; // 792
-
-  const topMargin = 140;
-  const leftMargin = 54;
-  const rightMargin = 54;
-  const bottomMargin = 85;
-
-  const fmtDate = (dateStr) => {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr + 'T00:00');
-    if (isNaN(d.getTime())) return dateStr;
-    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
-  };
-
-  let y = topMargin;
-
-  const drawText = (text, x, yPos, { bold = false, fontSize = 10, color = [0, 0, 0], align = 'left' } = {}) => {
-    doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.setFontSize(fontSize);
-    doc.setTextColor(color[0], color[1], color[2]);
-    doc.text(String(text), x, yPos, { align });
-  };
-
-  // ── 1. DOCUMENT IDENTIFIER META ───────────────────────────────────────────
-  drawText('INVOICE', leftMargin, y, { bold: true, fontSize: 16 });
-  drawText(`Invoice Ref: ${invoice.invoice_number || '—'}`, width - rightMargin, y, { fontSize: 11, align: 'right' });
-
-  y += 18;
-  drawText(`Date: ${fmtDate(invoice.issue_date)}`, width - rightMargin, y, { fontSize: 9, color: [71, 85, 105], align: 'right' });
-
-  y += 30;
-
-  // ── 2. CLIENT / BILL TO BLOCK ──────────────────────────────────────────────
-  drawText('BILL TO:', leftMargin, y, { bold: true, fontSize: 9, color: [100, 116, 139] });
-  y += 14;
-  drawText(clientName || invoice.client_name || '—', leftMargin, y, { bold: true, fontSize: 11 });
-
-  if (invoice.client_trn) {
-    y += 13;
-    drawText(`TRN: ${invoice.client_trn}`, leftMargin, y, { fontSize: 9.5 });
-  }
-
-  y += 35;
-
-  // ── 3. LINE ITEMS TABULAR GRID (monochrome, no fills) ─────────────────────
-  doc.setDrawColor(148, 163, 184);
-  doc.setLineWidth(1);
-  doc.line(leftMargin, y, width - rightMargin, y);
-
-  y += 14;
-  const colDescX = leftMargin;
-  const colQtyX = width - 240;
-  const colPriceX = width - 140;
-  const colTotalX = width - rightMargin;
-
-  drawText('Description', colDescX, y, { bold: true, fontSize: 9 });
-  drawText('Qty', colQtyX, y, { bold: true, fontSize: 9, align: 'right' });
-  drawText('Unit Price (AED)', colPriceX, y, { bold: true, fontSize: 9, align: 'right' });
-  drawText('Amount (AED)', colTotalX, y, { bold: true, fontSize: 9, align: 'right' });
-
-  y += 8;
-  doc.line(leftMargin, y, width - rightMargin, y);
-
-  const items = invoice.line_items || [];
-  items.forEach(item => {
-    y += 18;
-    drawText(String(item.description || '').substring(0, 58), colDescX, y, { fontSize: 9.5 });
-    drawText(String(item.quantity || ''), colQtyX, y, { fontSize: 9.5, align: 'right' });
-    drawText(Number(item.unit_price || 0).toFixed(2), colPriceX, y, { fontSize: 9.5, align: 'right' });
-    drawText(Number(item.amount || 0).toFixed(2), colTotalX, y, { fontSize: 9.5, align: 'right' });
-  });
-
-  y += 10;
-  doc.setDrawColor(203, 213, 225);
-  doc.setLineWidth(1);
-  doc.line(leftMargin, y, width - rightMargin, y);
-
-  // ── 4. TOTALS SUMMATION MATRIX (double-line accent) ────────────────────────
-  y += 20;
-  drawText('Subtotal:', colPriceX, y, { fontSize: 9.5, align: 'right' });
-  drawText(Number(invoice.subtotal || 0).toFixed(2), colTotalX, y, { fontSize: 9.5, align: 'right' });
-
-  y += 14;
-  drawText(`VAT (${invoice.vat_rate || 0}%):`, colPriceX, y, { fontSize: 9.5, align: 'right' });
-  drawText(Number(invoice.vat_amount || 0).toFixed(2), colTotalX, y, { fontSize: 9.5, align: 'right' });
-
-  y += 18;
-  // Double-line rule above total
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.5);
-  doc.line(width - 180, y - 12, width - rightMargin, y - 12);
-
-  drawText('Total (AED):', colPriceX, y, { bold: true, fontSize: 11, align: 'right' });
-  drawText(Number(invoice.total_amount || 0).toFixed(2), colTotalX, y, { bold: true, fontSize: 11, align: 'right' });
-
-  // Double-line rule below total
-  doc.line(width - 180, y + 4, width - rightMargin, y + 4);
-
-  doc.save(`invoice-${invoice.invoice_number || invoice.id}.pdf`);
+  // Unified with the branded bulk "TAX INVOICE" format (see invoiceHtml.js).
+  const settings = await getCompanySettings();
+  return downloadInvoicePDF(invoice, clientName, settings);
 }

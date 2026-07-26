@@ -4,6 +4,7 @@ import { Globe, Plus } from 'lucide-react';
 import ClientNavDropdown from './ClientNavDropdown';
 import DriverNavDropdown from './DriverNavDropdown';
 import VehicleNavDropdown from './VehicleNavDropdown';
+import ReportClientDropdown from './ReportClientDropdown';
 
 const operationsSubNav = [
 { key: 'trips', path: '/trips' },
@@ -77,6 +78,7 @@ export default function TopBar() {
             {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
             {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
             {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
+            {location.pathname.startsWith('/reports/') && <ReportClientDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
