@@ -85,28 +85,31 @@ CSS = """
 body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #1F2937; line-height: 1.4; }
 .invoice-wrapper { width: 100%; }
 
-/* Brand band */
-.brand-band { text-align: center; margin-bottom: 10px; }
-.brand-band .logo { height: 80px; width: auto; object-fit: contain; margin: 0 auto 4px; display: block; }
-.brand-band .brand-h1 { font-size: 19pt; font-weight: 800; color: #5C4A32; letter-spacing: 2px; text-transform: uppercase; line-height: 1.1; }
-.brand-band .brand-h2 { font-size: 9.5pt; font-weight: 600; color: #8C745E; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
-.brand-rule { border-bottom: 2px solid #8C745E; margin-bottom: 14px; }
+/* Header band */
+.header-band { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.brand-block { display: flex; align-items: center; gap: 10px; }
+.brand-block .logo { height: 55px; width: 55px; border-radius: 50%; object-fit: cover; }
+.brand-block .brand-h1 { font-size: 16pt; font-weight: 800; color: #333; letter-spacing: 1.5px; text-transform: uppercase; line-height: 1.1; }
+.brand-block .brand-h2 { font-size: 9pt; font-weight: 500; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.contact-col { text-align: right; font-size: 9pt; color: #333; line-height: 1.6; }
+.header-rule { border-bottom: 1.5px solid #8C745E; margin-bottom: 14px; }
+
+/* Title */
+.title-block { text-align: center; margin-bottom: 14px; }
+.title-block .tax-title { font-size: 18pt; font-weight: 700; color: #333; letter-spacing: 3px; text-transform: uppercase; line-height: 1.1; }
+.title-block .ref-num { font-size: 11pt; color: #8C745E; font-weight: 700; margin-top: 4px; }
 
 /* Meta row */
 .meta-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-.from-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
-.from-name { font-size: 9.5pt; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
-.from-detail { font-size: 9pt; color: #1F2937; line-height: 1.6; }
-.meta-row .col-center { flex: 1; text-align: center; padding-top: 4px; }
-.tax-title { font-size: 18pt; font-weight: 700; color: #374151; letter-spacing: 3px; text-transform: uppercase; line-height: 1.1; }
-.ref-num { font-size: 11pt; color: #8C745E; font-weight: 700; margin-top: 6px; }
-.ref-line { border-bottom: 1px solid #C9C9C9; width: 60%; margin: 8px auto 0; }
+.from-label { font-size: 8pt; text-transform: uppercase; color: #777; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
+.from-name { font-size: 9.5pt; font-weight: 700; color: #333; margin-bottom: 2px; }
+.from-detail { font-size: 9pt; color: #333; line-height: 1.6; }
 .meta-row .col-left { flex: 1; text-align: left; }
 .meta-row .col-right { flex: 1; text-align: right; }
-.inv-date { font-size: 9pt; color: #1F2937; margin-bottom: 6px; }
-.bill-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
-.bill-company { font-size: 9.5pt; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
-.bill-detail { font-size: 9pt; color: #1F2937; line-height: 1.6; }
+.inv-date { font-size: 9pt; color: #333; margin-bottom: 5px; }
+.bill-label { font-size: 8pt; text-transform: uppercase; color: #777; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
+.bill-company { font-size: 9.5pt; font-weight: 700; color: #333; margin-bottom: 2px; }
+.bill-detail { font-size: 9pt; color: #333; line-height: 1.6; }
 
 /* Items table */
 .items-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 9pt; }
@@ -153,12 +156,27 @@ TEMPLATE = """<!DOCTYPE html>
 <body>
 <div class="invoice-wrapper">
 
-  <div class="brand-band">
-    {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
-    <div class="brand-h1">{{ data.company.h1 }}</div>
-    {% if data.company.h2 %}<div class="brand-h2">{{ data.company.h2 }}</div>{% endif %}
+  <div class="header-band">
+    <div class="brand-block">
+      {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
+      <div>
+        <div class="brand-h1">{{ data.company.h1 }}</div>
+        {% if data.company.h2 %}<div class="brand-h2">{{ data.company.h2 }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="contact-col">
+      {{ data.company.phone }}<br>
+      {% if data.company.phone2 %}{{ data.company.phone2 }}<br>{% endif %}
+      {% if data.company.email %}{{ data.company.email }}<br>{% endif %}
+      {{ data.company.address }}
+    </div>
   </div>
-  <div class="brand-rule"></div>
+  <div class="header-rule"></div>
+
+  <div class="title-block">
+    <div class="tax-title">Tax Invoice</div>
+    <div class="ref-num">{{ data.invoice_no }}</div>
+  </div>
 
   <div class="meta-row">
     <div class="col-left">
@@ -166,15 +184,8 @@ TEMPLATE = """<!DOCTYPE html>
       <div class="from-name">{{ data.company.name }}</div>
       <div class="from-detail">
         {{ data.company.address }}<br>
-        TRN: {{ data.company.trn }}<br>
-        {{ data.company.phone }}{% if data.company.email %} | {{ data.company.email }}{% endif %}
+        TRN: {{ data.company.trn }}
       </div>
-    </div>
-
-    <div class="col-center">
-      <div class="tax-title">Tax Invoice</div>
-      <div class="ref-num">{{ data.invoice_no }}</div>
-      <div class="ref-line"></div>
     </div>
 
     <div class="col-right">
@@ -182,8 +193,8 @@ TEMPLATE = """<!DOCTYPE html>
       <div class="bill-label">Bill To</div>
       <div class="bill-company">{{ data.bill_to.name }}</div>
       <div class="bill-detail">
+        {% if data.bill_to.address %}{{ data.bill_to.address }}<br>{% endif %}
         {% if data.bill_to.trn %}TRN: {{ data.bill_to.trn }}<br>{% endif %}
-        {% if data.bill_to.contact %}{{ data.bill_to.contact }}<br>{% endif %}
         Due Date: {{ data.due_date }}
       </div>
     </div>

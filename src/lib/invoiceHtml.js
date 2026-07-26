@@ -79,37 +79,45 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   return `
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <!-- Brand band: centered logo + company name -->
-  <div style="text-align:center;margin-bottom:10px;">
-    ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:80px;width:auto;object-fit:contain;margin-bottom:4px;" />` : '<div style="height:8px;"></div>'}
-    <div style="font-size:19pt;font-weight:800;color:#5C4A32;letter-spacing:2px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
-    ${compH2 ? `<div style="font-size:9.5pt;font-weight:600;color:#8C745E;letter-spacing:3px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
-  </div>
-  <div style="border-bottom:2px solid #8C745E;margin-bottom:14px;"></div>
-
-  <!-- Meta row: FROM (left) | TAX INVOICE (center) | BILL TO (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-    <div style="flex:1;text-align:left;">
-      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">From</div>
-      <div style="font-size:9.5pt;font-weight:700;color:#1F2937;margin-bottom:2px;">${esc(s.company_name || '')}</div>
-      <div style="font-size:9pt;color:#1F2937;line-height:1.6;">
-        ${esc(s.address || '')}<br>
-        TRN: ${esc(s.trn || '')}<br>
-        ${esc(s.phone1 || '')}${s.email ? ' | ' + esc(s.email) : ''}
+  <!-- Header band: logo + brand (left) | contact info (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:55px;width:55px;border-radius:50%;object-fit:cover;" />` : ''}
+      <div>
+        <div style="font-size:16pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+        ${compH2 ? `<div style="font-size:9pt;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
       </div>
     </div>
-    <div style="flex:1;text-align:center;padding-top:4px;">
-      <div style="font-size:18pt;font-weight:700;color:#374151;letter-spacing:3px;text-transform:uppercase;line-height:1.1;">TAX INVOICE</div>
-      <div style="font-size:11pt;color:#8C745E;font-weight:700;margin-top:6px;">${esc(refNumber)}</div>
-      <div style="border-bottom:1px solid #C9C9C9;width:60%;margin:8px auto 0;"></div>
+    <div style="text-align:right;font-size:9pt;color:#333;line-height:1.6;">
+      ${esc(s.phone1 || '')}${s.phone2 ? `<br>${esc(s.phone2)}` : ''}<br>
+      ${s.email ? `${esc(s.email)}<br>` : ''}${esc(s.address || '')}
+    </div>
+  </div>
+  <div style="border-bottom:1.5px solid #8C745E;margin-bottom:14px;"></div>
+
+  <!-- Title: TAX INVOICE + invoice number (centered) -->
+  <div style="text-align:center;margin-bottom:14px;">
+    <div style="font-size:18pt;font-weight:700;color:#333;letter-spacing:3px;text-transform:uppercase;line-height:1.1;">TAX INVOICE</div>
+    <div style="font-size:11pt;color:#8C745E;font-weight:700;margin-top:4px;">${esc(refNumber)}</div>
+  </div>
+
+  <!-- Meta row: FROM (left) | BILL TO (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+    <div style="flex:1;text-align:left;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#777;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">From</div>
+      <div style="font-size:9.5pt;font-weight:700;color:#333;margin-bottom:2px;">${esc(s.company_name || '')}</div>
+      <div style="font-size:9pt;color:#333;line-height:1.6;">
+        ${esc(s.address || '')}<br>
+        TRN: ${esc(s.trn || '')}
+      </div>
     </div>
     <div style="flex:1;text-align:right;">
-      <div style="font-size:9pt;color:#1F2937;margin-bottom:6px;">Date: ${fmtDate(invoice.issue_date)}</div>
-      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">Bill To</div>
-      <div style="font-size:9.5pt;font-weight:700;color:#1F2937;margin-bottom:2px;">${esc(billName)}</div>
-      <div style="font-size:9pt;color:#1F2937;line-height:1.6;">
+      <div style="font-size:9pt;color:#333;margin-bottom:5px;">Date: ${fmtDate(invoice.issue_date)}</div>
+      <div style="font-size:8pt;text-transform:uppercase;color:#777;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">Bill To</div>
+      <div style="font-size:9.5pt;font-weight:700;color:#333;margin-bottom:2px;">${esc(billName)}</div>
+      <div style="font-size:9pt;color:#333;line-height:1.6;">
+        ${invoice.client_address ? `${esc(invoice.client_address)}<br>` : ''}
         ${invoice.client_trn ? `TRN: ${esc(invoice.client_trn)}<br>` : ''}
-        ${(invoice.client_phone || invoice.client_email) ? `${[invoice.client_phone, invoice.client_email].filter(Boolean).map(esc).join(' | ')}<br>` : ''}
         ${invoice.due_date ? `Due Date: ${fmtDate(invoice.due_date)}` : ''}
       </div>
     </div>
@@ -119,13 +127,13 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:9pt;">
     <thead>
       <tr>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:4%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.No</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:9%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Date</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:left;width:44%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:center;width:7%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:11%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:12%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
-        <th style="background:#8C745E;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">VAT 5%</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:center;width:4%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.No</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:left;width:9%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Date</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:left;width:44%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:center;width:7%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Trip Qty</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:11%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Per Trip</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:12%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+        <th style="background:#9A8471;color:#fff;padding:9px 8px;text-align:right;width:13%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">VAT 5%</th>
       </tr>
     </thead>
     <tbody>
