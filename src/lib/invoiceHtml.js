@@ -79,31 +79,37 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   return `
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <!-- Header Row: From/Address (left) | Logo + Company + Tax Invoice (center) | Bill To (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;border-bottom:2.5px solid #8C745E;padding-bottom:12px;">
-    <div style="flex:1;text-align:left;padding-top:6px;">
-      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:600;letter-spacing:1.5px;margin-bottom:6px;">From</div>
-      <div style="font-size:9pt;color:#1F2937;line-height:1.7;">
+  <!-- Brand band: centered logo + company name -->
+  <div style="text-align:center;margin-bottom:10px;">
+    ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:80px;width:auto;object-fit:contain;margin-bottom:4px;" />` : '<div style="height:8px;"></div>'}
+    <div style="font-size:19pt;font-weight:800;color:#5C4A32;letter-spacing:2px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+    ${compH2 ? `<div style="font-size:9.5pt;font-weight:600;color:#8C745E;letter-spacing:3px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
+  </div>
+  <div style="border-bottom:2px solid #8C745E;margin-bottom:14px;"></div>
+
+  <!-- Meta row: FROM (left) | TAX INVOICE (center) | BILL TO (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+    <div style="flex:1;text-align:left;">
+      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">From</div>
+      <div style="font-size:9.5pt;font-weight:700;color:#1F2937;margin-bottom:2px;">${esc(s.company_name || '')}</div>
+      <div style="font-size:9pt;color:#1F2937;line-height:1.6;">
         ${esc(s.address || '')}<br>
         TRN: ${esc(s.trn || '')}<br>
         ${esc(s.phone1 || '')}${s.email ? ' | ' + esc(s.email) : ''}
       </div>
     </div>
-    <div style="flex:1.3;text-align:center;display:flex;flex-direction:column;align-items:center;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:95px;width:auto;margin-bottom:6px;object-fit:contain;" />` : ''}
-      <div style="font-size:18pt;font-weight:800;color:#5C4A32;letter-spacing:2px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
-      ${compH2 ? `<div style="font-size:9pt;font-weight:600;color:#8C745E;letter-spacing:3px;text-transform:uppercase;margin-top:2px;margin-bottom:10px;">${esc(compH2)}</div>` : '<div style="height:10px;"></div>'}
-      <div style="font-size:20pt;font-weight:700;color:#5C4A32;letter-spacing:4px;text-transform:uppercase;line-height:1.1;">TAX INVOICE</div>
-      <div style="font-size:11pt;color:#8C745E;margin-top:8px;font-weight:600;letter-spacing:1px;">${esc(refNumber)}</div>
-      <div style="font-size:9.5pt;color:#777;margin-top:4px;">${fmtDate(invoice.issue_date)}</div>
+    <div style="flex:1;text-align:center;padding-top:4px;">
+      <div style="font-size:18pt;font-weight:700;color:#374151;letter-spacing:3px;text-transform:uppercase;line-height:1.1;">TAX INVOICE</div>
+      <div style="font-size:11pt;color:#8C745E;font-weight:700;margin-top:6px;">${esc(refNumber)}</div>
+      <div style="border-bottom:1px solid #C9C9C9;width:60%;margin:8px auto 0;"></div>
     </div>
-    <div style="flex:1;text-align:right;padding-top:6px;">
-      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:600;letter-spacing:1.5px;margin-bottom:6px;">Bill To</div>
-      <div style="font-size:12pt;font-weight:700;color:#1F2937;margin-bottom:4px;">${esc(billName)}</div>
-      <div style="font-size:9pt;color:#1F2937;line-height:1.7;">
-        ${invoice.client_trn ? `Customer TRN: ${esc(invoice.client_trn)}<br>` : ''}
-        ${invoice.client_address ? `${esc(invoice.client_address)}<br>` : ''}
-        ${invoice.client_phone ? `${esc(invoice.client_phone)}<br>` : ''}
+    <div style="flex:1;text-align:right;">
+      <div style="font-size:9pt;color:#1F2937;margin-bottom:6px;">Date: ${fmtDate(invoice.issue_date)}</div>
+      <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">Bill To</div>
+      <div style="font-size:9.5pt;font-weight:700;color:#1F2937;margin-bottom:2px;">${esc(billName)}</div>
+      <div style="font-size:9pt;color:#1F2937;line-height:1.6;">
+        ${invoice.client_trn ? `TRN: ${esc(invoice.client_trn)}<br>` : ''}
+        ${(invoice.client_phone || invoice.client_email) ? `${[invoice.client_phone, invoice.client_email].filter(Boolean).map(esc).join(' | ')}<br>` : ''}
         ${invoice.due_date ? `Due Date: ${fmtDate(invoice.due_date)}` : ''}
       </div>
     </div>

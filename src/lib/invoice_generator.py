@@ -85,24 +85,28 @@ CSS = """
 body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 10pt; color: #1F2937; line-height: 1.4; }
 .invoice-wrapper { width: 100%; }
 
-/* Header */
-.header-main { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5px solid #8C745E; padding-bottom: 12px; margin-bottom: 18px; }
-.col-left { width: 30%; text-align: left; padding-top: 6px; }
-.col-left .from-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 6px; }
-.col-left .from-detail { font-size: 9pt; color: #1F2937; line-height: 1.7; }
+/* Brand band */
+.brand-band { text-align: center; margin-bottom: 10px; }
+.brand-band .logo { height: 80px; width: auto; object-fit: contain; margin: 0 auto 4px; display: block; }
+.brand-band .brand-h1 { font-size: 19pt; font-weight: 800; color: #5C4A32; letter-spacing: 2px; text-transform: uppercase; line-height: 1.1; }
+.brand-band .brand-h2 { font-size: 9.5pt; font-weight: 600; color: #8C745E; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+.brand-rule { border-bottom: 2px solid #8C745E; margin-bottom: 14px; }
 
-.col-center { width: 40%; text-align: center; }
-.col-center .logo { height: 95px; width: auto; object-fit: contain; margin: 0 auto 6px; display: block; }
-.col-center .brand-h1 { font-size: 18pt; font-weight: 800; color: #5C4A32; letter-spacing: 2px; text-transform: uppercase; line-height: 1.1; }
-.col-center .brand-h2 { font-size: 9pt; font-weight: 600; color: #8C745E; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; margin-bottom: 10px; }
-.col-center .tax-title { font-size: 20pt; font-weight: 700; color: #5C4A32; letter-spacing: 4px; text-transform: uppercase; line-height: 1.1; }
-.col-center .ref-num { font-size: 11pt; color: #8C745E; margin-top: 8px; font-weight: 600; letter-spacing: 1px; }
-.col-center .inv-date { font-size: 9.5pt; color: #777; margin-top: 4px; }
-
-.col-right { width: 30%; text-align: right; padding-top: 6px; }
-.col-right .bill-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 6px; }
-.col-right .bill-company { font-size: 12pt; font-weight: 700; color: #1F2937; margin-bottom: 4px; }
-.col-right .bill-detail { font-size: 9pt; color: #1F2937; line-height: 1.7; }
+/* Meta row */
+.meta-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.from-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
+.from-name { font-size: 9.5pt; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
+.from-detail { font-size: 9pt; color: #1F2937; line-height: 1.6; }
+.meta-row .col-center { flex: 1; text-align: center; padding-top: 4px; }
+.tax-title { font-size: 18pt; font-weight: 700; color: #374151; letter-spacing: 3px; text-transform: uppercase; line-height: 1.1; }
+.ref-num { font-size: 11pt; color: #8C745E; font-weight: 700; margin-top: 6px; }
+.ref-line { border-bottom: 1px solid #C9C9C9; width: 60%; margin: 8px auto 0; }
+.meta-row .col-left { flex: 1; text-align: left; }
+.meta-row .col-right { flex: 1; text-align: right; }
+.inv-date { font-size: 9pt; color: #1F2937; margin-bottom: 6px; }
+.bill-label { font-size: 8pt; text-transform: uppercase; color: #8C745E; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 5px; }
+.bill-company { font-size: 9.5pt; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
+.bill-detail { font-size: 9pt; color: #1F2937; line-height: 1.6; }
 
 /* Items table */
 .items-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 9pt; }
@@ -149,9 +153,17 @@ TEMPLATE = """<!DOCTYPE html>
 <body>
 <div class="invoice-wrapper">
 
-  <div class="header-main">
+  <div class="brand-band">
+    {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
+    <div class="brand-h1">{{ data.company.h1 }}</div>
+    {% if data.company.h2 %}<div class="brand-h2">{{ data.company.h2 }}</div>{% endif %}
+  </div>
+  <div class="brand-rule"></div>
+
+  <div class="meta-row">
     <div class="col-left">
       <div class="from-label">From</div>
+      <div class="from-name">{{ data.company.name }}</div>
       <div class="from-detail">
         {{ data.company.address }}<br>
         TRN: {{ data.company.trn }}<br>
@@ -160,21 +172,18 @@ TEMPLATE = """<!DOCTYPE html>
     </div>
 
     <div class="col-center">
-      {% if data.logo_url %}<img src="{{ data.logo_url }}" alt="Logo" class="logo">{% endif %}
-      <div class="brand-h1">{{ data.company.h1 }}</div>
-      {% if data.company.h2 %}<div class="brand-h2">{{ data.company.h2 }}</div>{% endif %}
       <div class="tax-title">Tax Invoice</div>
       <div class="ref-num">{{ data.invoice_no }}</div>
-      <div class="inv-date">{{ data.invoice_date }}</div>
+      <div class="ref-line"></div>
     </div>
 
     <div class="col-right">
+      <div class="inv-date">Date: {{ data.invoice_date }}</div>
       <div class="bill-label">Bill To</div>
       <div class="bill-company">{{ data.bill_to.name }}</div>
       <div class="bill-detail">
-        {% if data.bill_to.trn %}Customer TRN: {{ data.bill_to.trn }}<br>{% endif %}
-        {% if data.bill_to.address %}{{ data.bill_to.address }}<br>{% endif %}
-        {% if data.bill_to.phone %}{{ data.bill_to.phone }}<br>{% endif %}
+        {% if data.bill_to.trn %}TRN: {{ data.bill_to.trn }}<br>{% endif %}
+        {% if data.bill_to.contact %}{{ data.bill_to.contact }}<br>{% endif %}
         Due Date: {{ data.due_date }}
       </div>
     </div>
@@ -240,6 +249,9 @@ def generate_invoice_pdf(invoice_data: dict) -> bytes:
     comp.setdefault("h1", h1)
     comp.setdefault("h2", h2)
     data["company"] = comp
+    bill = dict(data.get("bill_to", {}))
+    bill.setdefault("contact", " | ".join(p for p in (bill.get("phone"), bill.get("email")) if p))
+    data["bill_to"] = bill
     html = Template(TEMPLATE).render(data=data, css=CSS)
     return HTML(string=html).write_pdf()
 
