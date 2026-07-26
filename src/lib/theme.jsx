@@ -5,24 +5,24 @@ const ThemeContext = createContext(null);
 const ACCENTS = {
   blue:   { primary: '217 91% 60%', light: '213 94% 68%', accent: '217 91% 60%', ring: '217 91% 60%', rgb: '59,130,246', rgb2: '37,99,235', sidebar: '217 91% 60%', chart1: '217 91% 60%' },
   green:  { primary: '153 40% 30%', light: '165 13% 80%', accent: '153 40% 30%', ring: '153 40% 30%', rgb: '45,106,79', rgb2: '82,121,111', sidebar: '153 40% 30%', chart1: '153 40% 30%' },
-  purple: { primary: '265 89% 66%', light: '270 90% 72%', accent: '265 89% 66%', ring: '265 89% 66%', rgb: '168,85,247', rgb2: '147,51,234', sidebar: '265 89% 66%', chart1: '265 89% 66%' },
+  purple: { primary: '276 91% 38%', light: '273 70% 58%', accent: '309 78% 40%', ring: '276 91% 38%', rgb: '114,9,183', rgb2: '181,23,158', sidebar: '276 91% 38%', chart1: '276 91% 38%' },
   amber:  { primary: '32 95% 50%', light: '35 92% 58%', accent: '32 95% 50%', ring: '32 95% 50%', rgb: '245,158,11', rgb2: '217,119,6', sidebar: '32 95% 50%', chart1: '32 95% 50%' },
   rose:   { primary: '347 77% 60%', light: '350 80% 70%', accent: '347 77% 60%', ring: '347 77% 60%', rgb: '244,63,94', rgb2: '219,39,119', sidebar: '347 77% 60%', chart1: '347 77% 60%' },
 };
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'light';
-    return localStorage.getItem('bw-theme-v2') || 'light';
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem('bw-theme-v3') || 'dark';
   });
   const [accent, setAccentState] = useState(() => {
-    if (typeof window === 'undefined') return 'green';
-    return ACCENTS[localStorage.getItem('bw-accent-v2')] ? localStorage.getItem('bw-accent-v2') : 'green';
+    if (typeof window === 'undefined') return 'purple';
+    return ACCENTS[localStorage.getItem('bw-accent-v3')] ? localStorage.getItem('bw-accent-v3') : 'purple';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
   const applyAccent = useCallback((acc) => {
-    const a = ACCENTS[acc] || ACCENTS.green;
+    const a = ACCENTS[acc] || ACCENTS.purple;
     const root = document.documentElement;
     root.style.setProperty('--primary', a.primary);
     root.style.setProperty('--primary-light', a.light);
@@ -39,12 +39,12 @@ export function ThemeProvider({ children }) {
     const root = document.documentElement;
     if (theme === 'light') root.classList.add('light');
     else root.classList.remove('light');
-    localStorage.setItem('bw-theme-v2', theme);
+    localStorage.setItem('bw-theme-v3', theme);
   }, [theme]);
 
   useEffect(() => {
     applyAccent(accent);
-    localStorage.setItem('bw-accent-v2', accent);
+    localStorage.setItem('bw-accent-v3', accent);
   }, [accent, applyAccent]);
 
   useEffect(() => {
@@ -70,6 +70,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) return { theme: 'light', accent: 'green', isFullscreen: false, setTheme: () => {}, setAccent: () => {}, toggleTheme: () => {}, toggleFullscreen: () => {} };
+  if (!ctx) return { theme: 'dark', accent: 'purple', isFullscreen: false, setTheme: () => {}, setAccent: () => {}, toggleTheme: () => {}, toggleFullscreen: () => {} };
   return ctx;
 }
