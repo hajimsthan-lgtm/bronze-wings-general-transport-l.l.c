@@ -4,8 +4,8 @@ const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'crimson';
-    return localStorage.getItem('bw-theme-v5') || 'crimson';
+    if (typeof window === 'undefined') return 'navy';
+    return localStorage.getItem('bw-theme-v6') || 'navy';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
@@ -13,7 +13,7 @@ export function ThemeProvider({ children }) {
     const root = document.documentElement;
     if (theme === 'navy') root.classList.add('theme-navy');
     else root.classList.remove('theme-navy');
-    localStorage.setItem('bw-theme-v5', theme);
+    localStorage.setItem('bw-theme-v6', theme);
   }, [theme]);
 
   useEffect(() => {
@@ -39,6 +39,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) return { theme: 'crimson', setTheme: () => {}, toggleTheme: () => {}, isFullscreen: false, toggleFullscreen: () => {} };
+  if (!ctx) return { theme: 'navy', setTheme: () => {}, toggleTheme: () => {}, isFullscreen: false, toggleFullscreen: () => {} };
   return ctx;
 }

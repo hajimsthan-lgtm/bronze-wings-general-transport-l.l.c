@@ -3,9 +3,9 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 
-export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, children }) {
+export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', children }) {
   return (
-    <div className="glass-card p-4 relative overflow-hidden" style={{ borderTop: `3px solid ${accent}` }}>
+    <div className={`glass-card p-4 relative overflow-hidden flex flex-col h-full ${className}`} style={{ borderTop: `3px solid ${accent}` }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.5)} 0%, transparent 70%)` }} />
       <div className="flex items-center gap-2 mb-3 relative">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>

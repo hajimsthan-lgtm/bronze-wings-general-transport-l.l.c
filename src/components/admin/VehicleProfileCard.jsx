@@ -1,4 +1,5 @@
-import { Truck, Gauge, Fuel as FuelIcon, Wallet, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote } from 'lucide-react';
+import { useState } from 'react';
+import { Truck, Gauge, Fuel as FuelIcon, Wallet, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -7,11 +8,6 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const initialsOf = (name = '') =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
-
-const LUMINATE = {
-  borderTop: '3px solid #3b82f6',
-  boxShadow: '0 0 0 1px rgba(59,130,246,0.25), 0 0 60px -8px rgba(59,130,246,0.55), 0 0 90px -20px rgba(168,85,247,0.35), 0 24px 60px rgba(0,0,0,0.5)',
-};
 
 const expiryTone = (d) => {
   if (!d) return 'text-muted-foreground';
@@ -22,6 +18,8 @@ const expiryTone = (d) => {
 };
 
 export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership }) {
+  const [expanded, setExpanded] = useState(false);
+
   const statsList = [
     { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, icon: Gauge, accent: '#60a5fa' },
     { label: 'Fuel', value: vehicle.fuel_type, icon: FuelIcon, accent: '#f59e0b' },
@@ -41,82 +39,93 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
       <div className="absolute -bottom-12 -left-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.5)} 0%, transparent 70%)` }} />
 
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Left — identity & stats */}
-        <div>
-          <div className="flex items-start gap-4">
-            <div className="relative flex-shrink-0">
-              <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)' }} />
-              <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
-                {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-9 h-9 text-primary/60" />}
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-lg font-bold text-foreground leading-tight">{vehicle.make} {vehicle.model} {vehicle.year || ''}</h2>
-                <StatusBadge status={vehicle.status} />
-              </div>
-              <p className="text-xs text-muted-foreground capitalize mt-0.5">{vehicle.type} · {vehicle.fuel_type}</p>
-              <div className="mt-2.5"><PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} /></div>
+      <div className="relative">
+        <div className="flex items-start gap-4">
+          <div className="relative flex-shrink-0">
+            <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)' }} />
+            <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
+              {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-9 h-9 text-primary/60" />}
             </div>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
-            {statsList.map((s) => { const I = s.icon; return (
-              <div key={s.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
-                <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: s.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</p></div>
-                <p className="text-sm font-semibold text-foreground tabular-nums truncate">{s.value}</p>
-              </div>
-            ); })}
-          </div>
-
-          {driver && (
-            <div className="mt-4 flex items-center gap-3 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.06) }}>
-              <div className="w-11 h-11 rounded-full entity-avatar flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden">
-                {driver.image_url ? <img src={driver.image_url} alt="" className="w-full h-full object-cover" /> : initialsOf(driver.name)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{driver.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{driver.phone || driver.email || ''}</p>
-              </div>
-              {(driver.email || driver.phone) && (
-                <a href={driver.email ? `mailto:${driver.email}` : `tel:${driver.phone}`} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground hover:bg-white/10 transition-colors">
-                  <MessageCircle className="w-3.5 h-3.5" /> Chat
-                </a>
-              )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg font-bold text-foreground leading-tight">{vehicle.make} {vehicle.model} {vehicle.year || ''}</h2>
+              <StatusBadge status={vehicle.status} />
             </div>
-          )}
+            <p className="text-xs text-muted-foreground capitalize mt-0.5">{vehicle.type} · {vehicle.fuel_type}</p>
+            <div className="mt-2.5"><PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} /></div>
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="mt-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+              {expanded ? 'Hide Details' : 'View Details & Ownership Card'}
+            </button>
+          </div>
         </div>
 
-        {/* Right — ownership card */}
-        <div className="lg:border-l lg:border-white/10 lg:pl-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
-              <CreditCard className="w-4 h-4" style={{ color: '#a855f7' }} />
-            </div>
-            <h3 className="text-sm font-semibold text-foreground">Ownership Card</h3>
-          </div>
-          <div className="max-w-[420px] w-full">
-            <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-3">Attach front &amp; back (JPG/PNG). Use the flip icon on the card to switch sides.</p>
-        </div>
-      </div>
-
-      {/* Vehicle details strip */}
-      <div className="relative mt-5 pt-4 border-t border-white/[0.06]">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {detailTiles.map((d) => { const I = d.icon; return (
-            <div key={d.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(d.accent, 0.05) }}>
-              <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: d.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.label}</p></div>
-              <p className={`text-sm font-semibold tabular-nums truncate ${d.tone}`}>{d.value || '—'}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+          {statsList.map((s) => { const I = s.icon; return (
+            <div key={s.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
+              <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: s.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</p></div>
+              <p className="text-sm font-semibold text-foreground tabular-nums truncate">{s.value}</p>
             </div>
           ); })}
         </div>
-        {vehicle.notes && (
-          <div className="mt-2.5 flex items-start gap-2 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#ffffff', 0.03) }}>
-            <StickyNote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">{vehicle.notes}</p>
+
+        {expanded && (
+          <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
+            <div>
+              {driver && (
+                <div className="flex items-center gap-3 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.06) }}>
+                  <div className="w-11 h-11 rounded-full entity-avatar flex items-center justify-center text-sm font-bold text-white flex-shrink-0 overflow-hidden">
+                    {driver.image_url ? <img src={driver.image_url} alt="" className="w-full h-full object-cover" /> : initialsOf(driver.name)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{driver.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{driver.phone || driver.email || ''}</p>
+                  </div>
+                  {(driver.email || driver.phone) && (
+                    <a href={driver.email ? `mailto:${driver.email}` : `tel:${driver.phone}`} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground hover:bg-white/10 transition-colors">
+                      <MessageCircle className="w-3.5 h-3.5" /> Chat
+                    </a>
+                  )}
+                </div>
+              )}
+              {!driver && <p className="text-xs text-muted-foreground">No driver assigned.</p>}
+            </div>
+
+            <div className="lg:border-l lg:border-white/10 lg:pl-5 flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
+                  <CreditCard className="w-4 h-4" style={{ color: '#a855f7' }} />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">Ownership Card</h3>
+              </div>
+              <div className="max-w-[420px] w-full">
+                <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-3">Attach front &amp; back (JPG/PNG). Use the flip icon on the card to switch sides.</p>
+            </div>
+          </div>
+        )}
+
+        {expanded && (
+          <div className="relative mt-5 pt-4 border-t border-white/[0.06]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {detailTiles.map((d) => { const I = d.icon; return (
+                <div key={d.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(d.accent, 0.05) }}>
+                  <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: d.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.label}</p></div>
+                  <p className={`text-sm font-semibold tabular-nums truncate ${d.tone}`}>{d.value || '—'}</p>
+                </div>
+              ); })}
+            </div>
+            {vehicle.notes && (
+              <div className="mt-2.5 flex items-start gap-2 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#ffffff', 0.03) }}>
+                <StickyNote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">{vehicle.notes}</p>
+              </div>
+            )}
           </div>
         )}
       </div>

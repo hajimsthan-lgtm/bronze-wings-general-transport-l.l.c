@@ -176,7 +176,7 @@ export default function VehicleDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')}>
+        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fTrips.slice(0, 5).map((trip, i, arr) => (
               <div key={trip.id} className="flex gap-3">
@@ -197,7 +197,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')}>
+        <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fFuel.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.16)}` }}>
@@ -212,22 +212,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')}>
-          <div className="space-y-2">
-            {fExpenses.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
-                </div>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
-                <StatusBadge status={rec.status} />
-              </div>
-            ))}
-          </div>
-        </RecordSectionCard>
-
-        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Service" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')}>
+        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Service" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fServices.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
@@ -243,7 +228,23 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
+        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
+          <div className="space-y-2">
+            {fExpenses.slice(0, 5).map((rec) => (
+              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                </div>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                <StatusBadge status={rec.status} />
+              </div>
+            ))}
+          </div>
+        </RecordSectionCard>
+
         <ProfitCard
+          className="h-full"
           title={`Vehicle Profit — ${vehicle.plate_number}`}
           items={[
             { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
@@ -256,7 +257,7 @@ export default function VehicleDetail() {
           onView={() => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] })}
         />
 
-        <div className="glass-card p-4 relative overflow-hidden" style={{ borderTop: '3px solid #a855f7' }}>
+        <div className="glass-card p-4 relative overflow-hidden flex flex-col h-full" style={{ borderTop: '3px solid #a855f7' }}>
           <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: 'radial-gradient(circle, ' + hexToRgba('#a855f7', 0.5) + ' 0%, transparent 70%)' }} />
           <div className="flex items-center gap-2 mb-3 relative">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba('#a855f7', 0.14), border: '1px solid ' + hexToRgba('#a855f7', 0.3) }}>

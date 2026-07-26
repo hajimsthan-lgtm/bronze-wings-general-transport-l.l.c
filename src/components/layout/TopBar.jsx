@@ -3,6 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { Globe, Plus } from 'lucide-react';
 import ClientNavDropdown from './ClientNavDropdown';
 import DriverNavDropdown from './DriverNavDropdown';
+import VehicleNavDropdown from './VehicleNavDropdown';
 
 const operationsSubNav = [
 { key: 'trips', path: '/trips' },
@@ -74,6 +75,7 @@ export default function TopBar() {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
+            {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
             {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
               <button

@@ -3,7 +3,7 @@ import { formatCurrency } from '@/lib/formatters';
 import { exportToPDF } from '@/lib/exportUtils';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-export default function ProfitCard({ title, items, netProfit, filenameBase, dateRange, onView }) {
+export default function ProfitCard({ title, items, netProfit, filenameBase, dateRange, onView, className = '' }) {
   const accent = netProfit >= 0 ? '#22c55e' : '#ef4444';
 
   const handleDownload = () => {
@@ -21,7 +21,7 @@ export default function ProfitCard({ title, items, netProfit, filenameBase, date
   };
 
   return (
-    <div className="glass-card p-4 relative overflow-hidden" style={{ borderTop: `3px solid ${accent}` }}>
+    <div className={`glass-card p-4 relative overflow-hidden flex flex-col h-full ${className}`} style={{ borderTop: `3px solid ${accent}` }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.5)} 0%, transparent 70%)` }} />
       <div className="flex items-center gap-2 mb-3 relative">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
