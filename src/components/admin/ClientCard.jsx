@@ -48,8 +48,8 @@ export default function ClientCard({ c, onOpen, onEdit, onDelete }) {
       <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${ACCENT}33 0%, rgba(12,16,26,0.6) 70%)` }}>
         <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1.5px)', backgroundSize: '18px 18px' }} />
         <Building2 className="absolute right-3 bottom-3 w-10 h-10 opacity-25" style={{ color: ACCENT }} />
-        <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, boxShadow: `0 0 24px -6px ${ACCENT}, inset 0 1px 0 rgba(255,255,255,0.15)`, color: '#fff' }}>
-          {getInitials(c.name)}
+        <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center text-xl font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, boxShadow: `0 0 24px -6px ${ACCENT}, inset 0 1px 0 rgba(255,255,255,0.15)`, color: '#fff' }}>
+          {c.image_url ? <img src={c.image_url} alt={c.name} className="w-full h-full object-cover" /> : getInitials(c.name)}
         </div>
       </div>
 

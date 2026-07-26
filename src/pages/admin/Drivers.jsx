@@ -16,6 +16,7 @@ import { formatDate, getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import DriverCard from '@/components/admin/DriverCard';
+import ImageUpload from '@/components/common/ImageUpload';
 import Salary from './Salary';
 import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
 
@@ -90,13 +91,14 @@ function DriversTab() {
 function DriverForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
-  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' });else setForm({ name: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });}, [editItem]);
+  const [form, setForm] = useState({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' });else setForm({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });}, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
   const handle = async () => {setSaving(true);await onSave({ ...form, base_salary: Number(form.base_salary) || 0 });setSaving(false);};
 
   return (
     <div className="space-y-4">
+      <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Driver Photo" shape="circle" />
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Name</Label><Input value={form.name} onChange={(e) => update('name', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={(e) => update('phone', e.target.value)} className="bg-background border-border" /></div>

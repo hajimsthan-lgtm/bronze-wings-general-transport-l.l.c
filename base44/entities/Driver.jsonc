@@ -5,6 +5,9 @@
     "name": {
       "type": "string"
     },
+    "image_url": {
+      "type": "string"
+    },
     "phone": {
       "type": "string"
     },

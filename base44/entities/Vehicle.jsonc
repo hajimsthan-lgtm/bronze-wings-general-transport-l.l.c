@@ -5,6 +5,9 @@
     "plate_number": {
       "type": "string"
     },
+    "image_url": {
+      "type": "string"
+    },
     "make": {
       "type": "string"
     },

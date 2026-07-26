@@ -11,6 +11,7 @@ import TripCalcPanel from './TripCalcPanel';
 import ContractModeFields from './contract/ContractModeFields';
 import ContractProfitPanel from './contract/ContractProfitPanel';
 import TripMapPanel from './TripMapPanel';
+import TripFinancialFields from './TripFinancialFields';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
@@ -405,6 +406,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
                 onSelectTo={(v) => update('to_location', v)}
               />
             )}
+            {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
             {mode === 'trip'
               ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
               : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}

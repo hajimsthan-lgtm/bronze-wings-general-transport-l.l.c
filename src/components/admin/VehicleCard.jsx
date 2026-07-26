@@ -57,7 +57,7 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete }) {
       <p className="relative text-xs text-muted-foreground truncate mt-0.5">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
 
       <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-white/10">
-        <img src={TRUCK_IMG} alt="vehicle" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        <img src={v.image_url || TRUCK_IMG} alt="vehicle" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,10,10,0.10) 0%, rgba(10,10,10,0.55) 100%)' }} />
       </div>
 

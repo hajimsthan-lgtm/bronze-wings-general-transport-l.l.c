@@ -7,13 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Building2, UserPlus, Users } from 'lucide-react';
+import ImageUpload from '@/components/common/ImageUpload';
 
 export default function ClientForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
   const [existingClients, setExistingClients] = useState([]);
   const [selectedExistingId, setSelectedExistingId] = useState('');
-  const [form, setForm] = useState({ name: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
+  const [form, setForm] = useState({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', department: '' });
 
   useEffect(() => { base44.entities.Client.list('-created_date', 200).then(setExistingClients).catch(() => {}); }, []);
@@ -21,7 +22,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
   useEffect(() => {
     if (editItem) { setForm({ ...editItem }); setSelectedExistingId(''); }
     else {
-      setForm({ name: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
+      setForm({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
       setSelectedExistingId('');
       setNewContact({ name: '', email: '', phone: '', department: '' });
     }
@@ -112,6 +113,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
 
   return (
     <div className="space-y-4">
+      <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Company Logo / Photo" />
       {!editItem && (
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5">Select existing company (optional — to add another contact person)</Label>

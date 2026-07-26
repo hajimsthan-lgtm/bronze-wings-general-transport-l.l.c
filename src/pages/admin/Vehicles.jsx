@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import VehicleCard from '@/components/admin/VehicleCard';
+import ImageUpload from '@/components/common/ImageUpload';
 import Services from './Services';
 import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
 
@@ -85,13 +86,14 @@ function VehiclesTab() {
 function VehicleForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ plate_number: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
-  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, year: editItem.year || '' });else setForm({ plate_number: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });}, [editItem]);
+  const [form, setForm] = useState({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, year: editItem.year || '' });else setForm({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });}, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
   const handle = async () => {setSaving(true);await onSave({ ...form, year: form.year ? Number(form.year) : undefined });setSaving(false);};
 
   return (
     <div className="space-y-4">
+      <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Vehicle Photo" />
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('plate_number')}</Label><Input value={form.plate_number} onChange={(e) => update('plate_number', e.target.value)} className="bg-background border-border" /></div>
       <div className="grid grid-cols-3 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Make</Label><Input value={form.make} onChange={(e) => update('make', e.target.value)} className="bg-background border-border" /></div>
