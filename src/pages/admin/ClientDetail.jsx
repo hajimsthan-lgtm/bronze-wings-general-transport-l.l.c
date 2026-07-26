@@ -11,7 +11,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
-import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, X, Filter, ChevronDown, Receipt } from 'lucide-react';
+import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, X, Filter, ChevronDown, Receipt, Building2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import FixedChargeFormSheet from '@/components/admin/FixedChargeFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
@@ -24,8 +24,9 @@ import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 
-export default function ClientDetail() {
-  const { id } = useParams();
+export default function ClientDetail({ id: propId, inline = false }) {
+  const params = useParams();
+  const id = propId || params.id;
   const { t } = useI18n();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -169,6 +170,16 @@ export default function ClientDetail() {
 
   return (
     <div className="detail-page">
+      {inline ? (
+        <div className="detail-header-card p-4 mb-4 flex items-center gap-3 animate-fade-in-up">
+          <div className="w-11 h-11 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5" /></div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold text-foreground truncate">{client.name}</h2>
+            <p className="text-xs text-muted-foreground truncate">{client.contact_person || client.email || ''}</p>
+          </div>
+          <StatusBadge status={client.status} />
+        </div>
+      ) : (
       <EntityDetailHeader
         title={client.name}
         subtitle={client.contact_person}
@@ -182,6 +193,7 @@ export default function ClientDetail() {
           { label: 'Address', value: client.address },
         ]}
       />
+      )}
 
       <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
       {client.contact_persons?.length > 0 && (

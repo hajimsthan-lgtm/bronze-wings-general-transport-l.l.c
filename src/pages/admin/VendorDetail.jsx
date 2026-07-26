@@ -10,11 +10,12 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Receipt, Wrench } from 'lucide-react';
+import { Receipt, Wrench, Store } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 
-export default function VendorDetail() {
-  const { id } = useParams();
+export default function VendorDetail({ id: propId, inline = false }) {
+  const params = useParams();
+  const id = propId || params.id;
   const { t } = useI18n();
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,16 @@ export default function VendorDetail() {
 
   return (
     <div className="detail-page">
+      {inline ? (
+        <div className="detail-header-card p-4 mb-4 flex items-center gap-3 animate-fade-in-up">
+          <div className="w-11 h-11 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0"><Store className="w-5 h-5" /></div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold text-foreground truncate">{vendor.name}</h2>
+            <p className="text-xs text-muted-foreground truncate">{vendor.contact_person || vendor.email || ''}</p>
+          </div>
+          <StatusBadge status={vendor.status} />
+        </div>
+      ) : (
       <EntityDetailHeader
         title={vendor.name}
         subtitle={vendor.contact_person}
@@ -68,6 +79,7 @@ export default function VendorDetail() {
           { label: 'Address', value: vendor.address },
         ]}
       />
+      )}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <DateRangeFilter
           fromValue={dateFrom}
