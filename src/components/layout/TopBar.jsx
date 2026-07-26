@@ -1,6 +1,7 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { Globe, Plus } from 'lucide-react';
+import ClientNavDropdown from './ClientNavDropdown';
 
 const operationsSubNav = [
 { key: 'trips', path: '/trips' },
@@ -71,6 +72,7 @@ export default function TopBar() {
             })}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
