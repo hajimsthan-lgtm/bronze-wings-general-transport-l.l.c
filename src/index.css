@@ -1485,3 +1485,39 @@
 @keyframes truck-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .truck-3d-bob { animation: truck-bob 4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .truck-3d-bob { animation: none !important; } }
+
+/* ═══════════════════════════════════════════════════════
+    PREMIUM POLISH — global micro-interactions & native feel
+    Theme-neutral: enhances both dark & light without touching tokens
+    ═══════════════════════════════════════════════════════ */
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  ::selection { background: rgba(59, 130, 246, 0.32); color: #ffffff; }
+}
+
+@layer components {
+  /* Snappier, unified motion on every glass surface */
+  .glass-card, .clay-card, .entity-card, .row-card, .glass-card-hover,
+  .kpi-card, .stat-tile, .glass, .glass-sm, .glass-panel, .detail-header-card {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  /* Native-style press feedback */
+  .entity-card:active, .row-card:active, .glass-card:active,
+  .glass-card-hover:active, .kpi-card:active, .stat-tile:active {
+    transform: scale(0.99);
+  }
+  /* Sheen sweep on primary CTA buttons */
+  .lightning-btn, .clay-btn { position: relative; overflow: hidden; }
+  .lightning-btn::after, .clay-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .lightning-btn:hover::after, .clay-btn:hover::after { left: 160%; }
+}
