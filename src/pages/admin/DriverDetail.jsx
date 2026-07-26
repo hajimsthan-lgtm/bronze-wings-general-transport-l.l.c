@@ -15,6 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Wallet, Receipt } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
+import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
+import HoursGauge from '@/components/drivers/HoursGauge';
+import TripChecklist from '@/components/drivers/TripChecklist';
 
 const yearsSince = (d) =>
   d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
@@ -75,12 +78,20 @@ export default function DriverDetail() {
   const netProfit = totalTrips - totalExpenses - totalSalary;
   const avgPerTrip = fTrips.length ? totalTrips / fTrips.length : 0;
   const expYears = yearsSince(driver.join_date);
+  const totalHours = fTrips.reduce((s, x) => s + (Number(x.hours) || Number(x.calculated_duration) || 0), 0);
 
   return (
     <div className="detail-page">
       <EntityDetailHeader backTo="/admin/drivers" />
 
-      <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}` }} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4 items-start">
+        <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} />
+        <div className="space-y-4">
+          <WeeklyActivityChart trips={trips} />
+          <HoursGauge hours={totalHours} />
+        </div>
+        <TripChecklist trips={fTrips} />
+      </div>
 
       <div className="flex flex-wrap items-center gap-3 mt-4 mb-4">
         <DateRangeFilter
