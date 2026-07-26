@@ -16,6 +16,8 @@ import { formatDate } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import VehicleCard from '@/components/admin/VehicleCard';
+import VehicleListRow from '@/components/admin/VehicleListRow';
+import ViewToggle from '@/components/common/ViewToggle';
 import ImageUpload from '@/components/common/ImageUpload';
 import Services from './Services';
 import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
@@ -45,6 +47,7 @@ function VehiclesTab() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [view, setView] = useState('grid');
 
   const load = () => {setLoading(true);base44.entities.Vehicle.list('-created_date', 100).then(setItems).finally(() => setLoading(false));};
   useEffect(() => {load();}, []);
@@ -54,7 +57,7 @@ function VehiclesTab() {
   return (
     <div>
       <PageHeader title={t('vehicles')} description={`${items.length} vehicles`}
-      action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
+      action={<div className="flex items-center gap-2"><ViewToggle view={view} onChange={setView} /><ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       
       <EntityHeroCard icon={Truck} title={t('vehicles')} total={items.length} accent="249,115,22"
         stats={[
@@ -70,11 +73,19 @@ function VehiclesTab() {
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
+      view === 'grid' ? (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filtered.map((v) => (
           <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
         ))}
-      </div>}
+      </div>
+      ) : (
+      <div className="space-y-2">
+        {filtered.map((v) => (
+          <VehicleListRow key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
+        ))}
+      </div>
+      )}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">

@@ -16,6 +16,8 @@ import { formatDate, getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import DriverCard from '@/components/admin/DriverCard';
+import DriverListRow from '@/components/admin/DriverListRow';
+import ViewToggle from '@/components/common/ViewToggle';
 import ImageUpload from '@/components/common/ImageUpload';
 import Salary from './Salary';
 import { Plus, Search, User, Pencil, Trash2, Phone } from 'lucide-react';
@@ -42,6 +44,7 @@ function DriversTab() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [view, setView] = useState('grid');
 
   const load = () => {setLoading(true);base44.entities.Driver.list('-created_date', 100).then(setItems).finally(() => setLoading(false));};
   useEffect(() => {load();}, []);
@@ -58,7 +61,7 @@ function DriversTab() {
   return (
     <div>
       <PageHeader title={t('drivers')} description={`${items.length} drivers`}
-      action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
+      action={<div className="flex items-center gap-2"><ViewToggle view={view} onChange={setView} /><ExportButtons data={filtered} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} /><Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
       
       <EntityHeroCard icon={User} title={t('drivers')} total={items.length} accent="59,130,246"
         stats={[
@@ -71,12 +74,19 @@ function DriversTab() {
       <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={User} title={t('no_data')} /> :
+      view === 'grid' ? (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((d) => (
             <DriverCard key={d.id} d={d} onOpen={() => navigate(`/admin/drivers/${d.id}`)} onEdit={() => { setEditItem(d); setFormOpen(true); }} onDelete={async () => { await base44.entities.Driver.delete(d.id); load(); }} />
           ))}
         </div>
-      }
+      ) : (
+      <div className="space-y-2">
+        {filtered.map((d) => (
+          <DriverListRow key={d.id} d={d} onOpen={() => navigate(`/admin/drivers/${d.id}`)} onEdit={() => { setEditItem(d); setFormOpen(true); }} onDelete={async () => { await base44.entities.Driver.delete(d.id); load(); }} />
+        ))}
+      </div>
+      )}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">

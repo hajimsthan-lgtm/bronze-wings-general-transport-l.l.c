@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { getInitials } from '@/lib/formatters';
 import ExportButtons from '@/components/common/ExportButtons';
+import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
 import { Plus, Search, Store, Pencil, Trash2 } from 'lucide-react';
 
 export default function VendorsPanel() {
@@ -23,13 +24,21 @@ export default function VendorsPanel() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [expenses, setExpenses] = useState([]);
 
-  const load = () => { setLoading(true); base44.entities.Vendor.list('-created_date', 100).then(setItems).finally(() => setLoading(false)); };
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      base44.entities.Vendor.list('-created_date', 100).catch(() => []),
+      base44.entities.VendorExpense.list('-created_date', 300).catch(() => []),
+    ]).then(([v, e]) => { setItems(v || []); setExpenses(e || []); }).finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, []);
   const filtered = items.filter(v => !search || v.name?.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div>
+      <VendorsAnalytics vendors={items} expenses={expenses} onSelect={(id) => navigate(`/admin/vendors/${id}`)} />
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
         <ExportButtons data={filtered} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact_person' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }]} />

@@ -15,6 +15,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import EntityHeroCard from '@/components/common/EntityHeroCard';
 import ClientForm from '@/components/admin/ClientForm';
 import ClientCard from '@/components/admin/ClientCard';
+import ClientsAnalytics from '@/components/admin/ClientsAnalytics';
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -24,8 +25,17 @@ export default function ClientsPanel() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [trips, setTrips] = useState([]);
+  const [invoices, setInvoices] = useState([]);
 
-  const load = () => { setLoading(true); base44.entities.Client.list('-created_date', 100).then(setItems).finally(() => setLoading(false)); };
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      base44.entities.Client.list('-created_date', 100).catch(() => []),
+      base44.entities.Trip.list('-trip_date', 500).catch(() => []),
+      base44.entities.Invoice.list('-created_date', 200).catch(() => []),
+    ]).then(([c, t, i]) => { setItems(c || []); setTrips(t || []); setInvoices(i || []); }).finally(() => setLoading(false));
+  };
   useEffect(() => { load(); }, []);
   const filtered = items.filter(c => !search || c.name?.toLowerCase().includes(search.toLowerCase()));
   const exportColumns = [
@@ -39,12 +49,7 @@ export default function ClientsPanel() {
 
   return (
     <div>
-      <EntityHeroCard icon={Users} title={t('clients')} total={items.length} accent="139,92,246"
-        stats={[
-          { label: 'Active', value: items.filter(c => c.status === 'active').length, color: '#34d399' },
-          { label: 'Inactive', value: items.filter(c => c.status === 'inactive').length, color: '#94a3b8' },
-        ]}
-      />
+      <ClientsAnalytics clients={items} trips={trips} invoices={invoices} onSelect={(id) => navigate(`/admin/clients/${id}`)} />
 
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         <div className="relative flex-1 min-w-[200px]"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
