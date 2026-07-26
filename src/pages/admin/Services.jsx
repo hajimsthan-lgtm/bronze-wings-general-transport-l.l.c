@@ -27,6 +27,10 @@ export default function Services() {
 
   const load = () => { setLoading(true); base44.entities.ServiceRecord.list('-created_date', 100).then(setRecords).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+  }, []);
   const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
 
   return (

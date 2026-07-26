@@ -28,6 +28,10 @@ export default function Fuel() {
 
   const load = () => { setLoading(true); base44.entities.FuelRecord.list('-date', 100).then(setRecords).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+  }, []);
 
   const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
   const totalCost = filtered.reduce((s, r) => s + (r.total_cost || 0), 0);

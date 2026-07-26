@@ -22,7 +22,10 @@ import { Plus, Search, Truck, Pencil, Trash2 } from 'lucide-react';
 
 export default function Vehicles() {
   const { t } = useI18n();
-  const [tab, setTab] = useState('vehicles');
+  const [tab, setTab] = useState(() => {
+    const p = new URLSearchParams(window.location.search);
+    return p.get('tab') === 'services' ? 'services' : 'vehicles';
+  });
   return (
     <div>
       <div className="flex items-center gap-2 mb-5">

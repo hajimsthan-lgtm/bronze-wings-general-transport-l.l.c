@@ -1,9 +1,9 @@
-import { FileText, Eye } from 'lucide-react';
+import { FileText, Eye, Plus } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 
-export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6', count, onView, onPdf, loading, emptyIcon, emptyLabel, children }) {
+export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, children }) {
   return (
     <div className="glass-card p-4 relative overflow-hidden" style={{ borderTop: `3px solid ${accent}` }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.5)} 0%, transparent 70%)` }} />
@@ -14,6 +14,11 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
         <span className="text-xs text-muted-foreground">({count})</span>
         <div className="ml-auto flex gap-1.5">
+          {onNew && (
+            <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
+              <Plus className="w-3 h-3" /> {newLabel || 'New'}
+            </button>
+          )}
           <button onClick={onPdf} title="Download PDF" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: accent, boxShadow: `0 4px 14px -4px ${accent}` }}>
             <FileText className="w-3 h-3" /> PDF
           </button>
