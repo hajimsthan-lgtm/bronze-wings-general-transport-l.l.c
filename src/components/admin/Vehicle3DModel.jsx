@@ -2,7 +2,7 @@ const TRUCK_GLB = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Mo
 
 export default function Vehicle3DModel() {
   return (
-    <div className="glass-card mb-4 overflow-hidden flex items-center justify-center">
+    <div className="glass-card mb-4 overflow-hidden flex items-center justify-center hidden">
       <div className="truck-3d-bob w-full" style={{ maxWidth: 460, height: 300 }}>
         <model-viewer
           src={TRUCK_GLB}
@@ -16,9 +16,9 @@ export default function Vehicle3DModel() {
           min-camera-orbit="auto 0deg auto"
           max-camera-orbit="auto 90deg auto"
           interaction-prompt="auto"
-          style={{ width: '100%', height: '100%', backgroundColor: 'transparent', background: 'transparent' }}
-        />
+          style={{ width: '100%', height: '100%', backgroundColor: 'transparent', background: 'transparent' }} />
+        
       </div>
-    </div>
-  );
+    </div>);
+
 }
