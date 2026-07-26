@@ -113,8 +113,8 @@ module.exports = {
                 },
                 /* ── NEW: Subtle border glow pulse ── */
                 'border-pulse': {
-                    '0%, 100%': { borderColor: 'rgba(114,9,183,0.08)' },
-                    '50%': { borderColor: 'rgba(114,9,183,0.18)' }
+                    '0%, 100%': { borderColor: 'rgba(214,40,40,0.08)' },
+                    '50%': { borderColor: 'rgba(214,40,40,0.18)' }
                 }
             },
             animation: {

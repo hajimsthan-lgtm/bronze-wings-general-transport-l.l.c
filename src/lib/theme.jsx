@@ -8,21 +8,22 @@ const ACCENTS = {
   purple: { primary: '276 91% 38%', light: '273 70% 58%', accent: '309 78% 40%', ring: '276 91% 38%', rgb: '114,9,183', rgb2: '181,23,158', sidebar: '276 91% 38%', chart1: '276 91% 38%' },
   amber:  { primary: '32 95% 50%', light: '35 92% 58%', accent: '32 95% 50%', ring: '32 95% 50%', rgb: '245,158,11', rgb2: '217,119,6', sidebar: '32 95% 50%', chart1: '32 95% 50%' },
   rose:   { primary: '347 77% 60%', light: '350 80% 70%', accent: '347 77% 60%', ring: '347 77% 60%', rgb: '244,63,94', rgb2: '219,39,119', sidebar: '347 77% 60%', chart1: '347 77% 60%' },
+  red:    { primary: '0 69% 50%', light: '0 75% 62%', accent: '31 100% 48%', ring: '0 69% 50%', rgb: '214,40,40', rgb2: '247,127,0', sidebar: '0 69% 50%', chart1: '0 69% 50%' },
 };
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
     if (typeof window === 'undefined') return 'dark';
-    return localStorage.getItem('bw-theme-v3') || 'dark';
+    return localStorage.getItem('bw-theme-v4') || 'dark';
   });
   const [accent, setAccentState] = useState(() => {
-    if (typeof window === 'undefined') return 'purple';
-    return ACCENTS[localStorage.getItem('bw-accent-v3')] ? localStorage.getItem('bw-accent-v3') : 'purple';
+    if (typeof window === 'undefined') return 'red';
+    return ACCENTS[localStorage.getItem('bw-accent-v4')] ? localStorage.getItem('bw-accent-v4') : 'red';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
   const applyAccent = useCallback((acc) => {
-    const a = ACCENTS[acc] || ACCENTS.purple;
+    const a = ACCENTS[acc] || ACCENTS.red;
     const root = document.documentElement;
     root.style.setProperty('--primary', a.primary);
     root.style.setProperty('--primary-light', a.light);
@@ -39,12 +40,12 @@ export function ThemeProvider({ children }) {
     const root = document.documentElement;
     if (theme === 'light') root.classList.add('light');
     else root.classList.remove('light');
-    localStorage.setItem('bw-theme-v3', theme);
+    localStorage.setItem('bw-theme-v4', theme);
   }, [theme]);
 
   useEffect(() => {
     applyAccent(accent);
-    localStorage.setItem('bw-accent-v3', accent);
+    localStorage.setItem('bw-accent-v4', accent);
   }, [accent, applyAccent]);
 
   useEffect(() => {
@@ -70,6 +71,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) return { theme: 'dark', accent: 'purple', isFullscreen: false, setTheme: () => {}, setAccent: () => {}, toggleTheme: () => {}, toggleFullscreen: () => {} };
+  if (!ctx) return { theme: 'dark', accent: 'red', isFullscreen: false, setTheme: () => {}, setAccent: () => {}, toggleTheme: () => {}, toggleFullscreen: () => {} };
   return ctx;
 }
