@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
-import { LayoutDashboard, Truck, BarChart3, Shield, Sun, Moon, Settings } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
@@ -86,9 +86,9 @@ export default function DesktopNav() {
           <button
             onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-            aria-label="Toggle theme">
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            {theme === 'dark' ? 'Light' : 'Dark'}
+            aria-label="Switch theme">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 8px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
+            {theme === 'crimson' ? 'Crimson' : 'Navy'}
           </button>
           <Link to="/settings" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white" aria-label="Settings">
             <Settings className="w-4 h-4" />

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Settings, Sun, Moon } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useI18n } from '@/lib/i18n';
@@ -53,10 +53,10 @@ export default function MobileHeader() {
           <button
             onClick={toggleTheme}
             className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
-            aria-label="Toggle theme"
+            aria-label="Switch theme"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            {theme === 'dark' ? 'Light' : 'Dark'}
+            <span className="w-2 h-2 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 6px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
+            {theme === 'crimson' ? 'Crimson' : 'Navy'}
           </button>
           <Link
             to="/settings"
