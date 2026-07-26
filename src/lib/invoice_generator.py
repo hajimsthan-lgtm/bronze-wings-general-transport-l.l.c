@@ -116,15 +116,17 @@ body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; font-size: 10pt; col
 .items-table thead th { background-color: #8C745E; color: #fff; padding: 9px 8px; text-align: left; font-weight: 600; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
 .items-table thead th:nth-child(1) { width: 4%;  text-align: center; }
 .items-table thead th:nth-child(2) { width: 9%; }
-.items-table thead th:nth-child(3) { width: 44%; }
+.items-table thead th:nth-child(3) { width: 35%; }
 .items-table thead th:nth-child(4) { width: 7%;  text-align: center; }
 .items-table thead th:nth-child(5) { width: 11%; text-align: right; }
 .items-table thead th:nth-child(6) { width: 12%; text-align: right; }
-.items-table thead th:nth-child(7) { width: 13%; text-align: right; }
+.items-table thead th:nth-child(7) { width: 9%; text-align: center; }
+.items-table thead th:nth-child(8) { width: 13%; text-align: right; }
 .items-table tbody td { padding: 10px 8px; border-bottom: 1px solid #E5E7EB; vertical-align: top; font-size: 9pt; color: #1F2937; }
 .items-table tbody td:nth-child(1) { text-align: center; }
 .items-table tbody td:nth-child(4) { text-align: center; }
-.items-table tbody td:nth-child(5), .items-table tbody td:nth-child(6), .items-table tbody td:nth-child(7) { text-align: right; }
+.items-table tbody td:nth-child(7) { text-align: center; }
+.items-table tbody td:nth-child(5), .items-table tbody td:nth-child(6), .items-table tbody td:nth-child(8) { text-align: right; }
 .items-table tbody tr:last-child td { border-bottom: 2px solid #1F2937; }
 
 /* Totals */
@@ -203,7 +205,7 @@ TEMPLATE = """<!DOCTYPE html>
   <table class="items-table">
     <thead>
       <tr>
-        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th><th>VAT %</th>
+        <th>S.No</th><th>Date</th><th>Description</th><th>Trip Qty</th><th>Per Trip</th><th>Amount</th><th>VAT %</th><th>VAT 5%</th>
       </tr>
     </thead>
     <tbody>
@@ -216,6 +218,7 @@ TEMPLATE = """<!DOCTYPE html>
         <td>{{ "%.2f"|format(item.per_trip) }}</td>
         <td>{{ "%.2f"|format(item.amount) }}</td>
         <td>{{ data.vat_rate }}%</td>
+        <td>{{ "%.2f"|format(item.amount * data.vat_rate / 100) }}</td>
       </tr>
       {% endfor %}
     </tbody>
