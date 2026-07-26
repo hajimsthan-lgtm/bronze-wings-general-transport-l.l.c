@@ -51,7 +51,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       .join('<br>');
     const itemDate = item.date ? fmtDate(item.date) : fmtDate(invoice.issue_date);
 
-    return `<tr style="background:#ffffff;">
+    return `<tr style="background:${idx % 2 === 0 ? '#f3eee6' : '#ffffff'};">
       <td style="padding:7px 5px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:9px;color:#333;">${idx + 1}</td>
       <td style="padding:7px 5px;border-bottom:1px solid #e5e5e5;text-align:center;font-size:9px;color:#333;">${itemDate}</td>
       <td style="padding:7px 9px;border-bottom:1px solid #e5e5e5;text-align:left;font-size:9px;color:#333;line-height:1.5;">${desc}</td>
@@ -67,37 +67,48 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   return `
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <!-- Header: Customer (left) | Company (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-    <div style="flex:1;">
-      <div style="font-size:10px;color:#333;margin-bottom:2px;">Date: <strong>${fmtDate(invoice.issue_date)}</strong></div>
-      <div style="font-size:10px;font-weight:700;color:#000;margin-top:8px;">CUSTOMER: ${esc(clientName || invoice.client_name || '—')}</div>
-      ${invoice.client_trn ? `<div style="font-size:9px;color:#333;">TRN: ${esc(invoice.client_trn)}</div>` : ''}
-      ${clientAddr ? `<div style="font-size:9px;color:#333;line-height:1.4;margin-top:3px;">${clientAddr}</div>` : ''}
+  <!-- Header: Logo (left) | Company info (center) | Title/meta (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:10px;">
+    <div style="text-align:center;width:100px;flex-shrink:0;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #755f3f;" />` : ''}
+      <div style="font-size:11px;font-weight:700;color:#755f3f;letter-spacing:0.04em;margin-top:5px;">BRONZE WINGS</div>
+      <div style="font-size:7px;color:#755f3f;letter-spacing:0.03em;">GENERAL TRANSPORT L.L.C</div>
     </div>
-    <div style="flex:1;text-align:right;">
-      <div style="font-size:10px;font-weight:700;color:#000;">${esc(s.company_name || '—')}</div>
-      ${s.company_trn ? `<div style="font-size:9px;color:#333;">TRN: ${esc(s.company_trn)}</div>` : ''}
-      ${companyAddr ? `<div style="font-size:9px;color:#333;line-height:1.4;margin-top:3px;">${companyAddr}</div>` : ''}
+    <div style="flex:1;padding-top:8px;">
+      <div style="font-size:13px;font-weight:700;color:#654321;">${esc(s.company_name || '')}</div>
+      <div style="font-size:9px;color:#444;margin-top:3px;">${esc(s.address || '')}</div>
+      <div style="font-size:9px;color:#444;margin-top:2px;">TRN: ${esc(s.trn || '')} &nbsp;·&nbsp; ${esc(s.phone1 || '')} &nbsp;·&nbsp; ${esc(s.email || '')}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:16px;font-weight:700;color:#654321;">TAX INVOICE</div>
+      <div style="font-size:11px;font-weight:700;color:#333;margin-top:3px;">${esc(invoice.invoice_number || (seqNo ? `#${String(seqNo).padStart(4, '0')}` : '—'))}</div>
+      <div style="font-size:9px;color:#888;margin-top:2px;">${fmtDate(invoice.issue_date)}</div>
     </div>
   </div>
 
-  <!-- Invoice Title -->
-  <div style="text-align:center;margin:12px 0 4px;padding:6px 0;font-size:14px;font-weight:700;color:#000;border-top:1px solid #333;border-bottom:1px solid #333;">
-    # TAX INVOICE = ${esc(seqNo ? `#${String(seqNo).padStart(4, '0')}` : (invoice.invoice_number || '—'))}
+  <!-- Bill To -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:6px 0 10px;padding:8px 10px;background:#f7f3ec;border-left:3px solid #755f3f;border-radius:3px;">
+    <div>
+      <div style="font-size:8px;font-weight:700;color:#755f3f;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:3px;">Bill To</div>
+      <div style="font-size:10px;font-weight:700;color:#000;">${esc(clientName || invoice.client_name || '—')}</div>
+      ${invoice.client_trn ? `<div style="font-size:9px;color:#333;margin-top:2px;">TRN: ${esc(invoice.client_trn)}</div>` : ''}
+      ${clientAddr ? `<div style="font-size:9px;color:#333;line-height:1.4;margin-top:2px;">${clientAddr}</div>` : ''}
+    </div>
+    <div style="text-align:right;font-size:9px;color:#444;">
+      ${invoice.due_date ? `<div>Due Date: <strong>${fmtDate(invoice.due_date)}</strong></div>` : ''}
+    </div>
   </div>
-  ${invoice.invoice_number ? `<div style="text-align:center;font-size:9px;color:#666;margin-bottom:8px;">Ref: ${esc(invoice.invoice_number)}</div>` : ''}
 
   <!-- Items Table -->
   <table style="width:100%;border-collapse:collapse;margin-top:8px;">
     <thead>
-      <tr style="border-top:2px solid #000;border-bottom:2px solid #000;">
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:36px;">S.NO</th>
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:62px;">DATE</th>
-        <th style="padding:7px 9px;font-size:9px;text-transform:uppercase;text-align:left;">DESCRIPTION</th>
-        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:52px;">TRIP - QTY</th>
-        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:62px;">PER TRIP</th>
-        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:72px;">AMOUNT</th>
+      <tr style="background:#755f3f;">
+        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:36px;color:#fff;">S.NO</th>
+        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:62px;color:#fff;">DATE</th>
+        <th style="padding:7px 9px;font-size:9px;text-transform:uppercase;text-align:left;color:#fff;">DESCRIPTION</th>
+        <th style="padding:7px 5px;font-size:9px;text-transform:uppercase;text-align:center;width:52px;color:#fff;">TRIP - QTY</th>
+        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:62px;color:#fff;">PER TRIP</th>
+        <th style="padding:7px 7px;font-size:9px;text-transform:uppercase;text-align:right;width:72px;color:#fff;">AMOUNT</th>
       </tr>
     </thead>
     <tbody>
@@ -139,8 +150,23 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 </div>`;
 }
 
+async function fetchLogoDataUrl(url) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  const html = buildInvoiceHTML(invoice, clientName, settings, seqNo);
+  let logoDataUrl = null;
+  if (settings.logo_url) {
+    try { logoDataUrl = await fetchLogoDataUrl(settings.logo_url); } catch (e) {}
+  }
+  const html = buildInvoiceHTML(invoice, clientName, { ...settings, logo_url: logoDataUrl || settings.logo_url }, seqNo);
   const wrapper = document.createElement('div');
   wrapper.style.position = 'fixed';
   wrapper.style.left = '-9999px';
