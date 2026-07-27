@@ -97,8 +97,8 @@ module.exports = {
                 'fade-in-up': {
                     '0%': { 
                         opacity: '0', 
-                        transform: 'translateY(10px) scale(0.995)',
-                        filter: 'blur(4px)'
+                        transform: 'translateY(5px) scale(0.998)',
+                        filter: 'blur(1px)'
                     },
                     '100%': { 
                         opacity: '1', 
@@ -123,7 +123,7 @@ module.exports = {
                 'shimmer': 'shimmer 1.8s ease-in-out infinite',
                 'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
                 /* ── NEW ── */
-                'fade-in-up': 'fade-in-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                'fade-in-up': 'fade-in-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards',
                 'float': 'float 8s ease-in-out infinite',
                 'border-pulse': 'border-pulse 4s ease-in-out infinite',
             },

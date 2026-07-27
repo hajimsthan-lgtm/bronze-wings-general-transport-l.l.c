@@ -368,7 +368,7 @@ export default function Operations() {
                 onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}
                 className="group relative overflow-hidden animate-fade-in-up cursor-pointer p-4 sm:p-5"
                 style={{
-                  animationDelay: `${i * 0.06}s`,
+                  animationDelay: `${i * 0.03}s`,
                   borderRadius: '1.25rem',
                   background: 'linear-gradient(145deg, #20242f, #14171f)',
                   border: `1px solid ${hexToRgba(a.accent, 0.32)}`,
