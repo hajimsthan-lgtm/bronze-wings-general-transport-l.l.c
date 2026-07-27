@@ -46,7 +46,7 @@ export function playBell() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     // Cool bell — three decaying sine partials
-    [[4000, 1, 0.5], [6000, 0.35, 0.35]].forEach(([f, g, d]) => {
+    [[5000, 1, 0.45], [10000, 0.3, 0.25]].forEach(([f, g, d]) => {
       const o = audioCtx.createOscillator();
       const gn = audioCtx.createGain();
       o.type = 'sine';
@@ -63,6 +63,7 @@ export function playBell() {
 export default function EdgeQuickRail() {
   const [hovered, setHovered] = useState(null);
   const [calcOpen, setCalcOpen] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   const apps = [
     ...APPS,
@@ -73,7 +74,7 @@ export default function EdgeQuickRail() {
   const onEnter = (a) => { setHovered(a.key); playBell(); };
   const onLeave = () => setHovered(null);
 
-  const renderItem = (a) => {
+  const renderItem = (a, i) => {
     const tile = (
       <span
         className="relative w-11 h-11 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-active:scale-95"
@@ -93,18 +94,28 @@ export default function EdgeQuickRail() {
         {a.label}
       </span>
     );
-    const cls = "group relative flex items-center justify-center";
+    const cls = "group relative flex items-center justify-center animate-rail-rise";
+    const aStyle = { animationDelay: `${i * 0.045}s` };
     return a.to ? (
-      <Link key={a.key} to={a.to} className={cls} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</Link>
+      <Link key={a.key} to={a.to} className={cls} style={aStyle} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</Link>
     ) : (
-      <button key={a.key} type="button" onClick={() => a.action?.()} className={cls} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</button>
+      <button key={a.key} type="button" onClick={() => a.action?.()} className={cls} style={aStyle} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</button>
     );
   };
 
   return (
     <>
-      <div className="fixed left-1.5 md:left-2 top-[70px] md:top-[92px] z-[55] flex flex-col gap-2.5">
-        {apps.map(renderItem)}
+      <div
+        className="fixed left-0 top-[70px] md:top-[92px] z-[55]"
+        style={{ width: revealed ? 56 : 8, height: '72vh' }}
+        onMouseEnter={() => setRevealed(true)}
+        onMouseLeave={() => setRevealed(false)}
+      >
+        {revealed && (
+          <div className="absolute top-0 left-1.5 flex flex-col gap-2.5">
+            {apps.map((a, i) => renderItem(a, i))}
+          </div>
+        )}
       </div>
       <CalculatorModal open={calcOpen} onClose={() => setCalcOpen(false)} />
     </>

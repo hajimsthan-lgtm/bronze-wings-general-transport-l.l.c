@@ -1218,6 +1218,9 @@
   .animate-fade-in-up {
     animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+  .animate-rail-rise {
+    animation: rail-rise 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
   /* Animated brand text sheen + twinkling stars */
   .brand-shine {
@@ -1273,6 +1276,10 @@
   @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(14px) scale(0.99); filter: blur(6px); }
     to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+  @keyframes rail-rise {
+    from { opacity: 0; transform: translateY(48px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   @keyframes slide-in-right {
     from { opacity: 0; transform: translateX(20px); }
