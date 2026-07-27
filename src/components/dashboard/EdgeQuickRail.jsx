@@ -10,11 +10,11 @@ const WhatsAppIcon = (props) => (
   </svg>
 );
 const GmailIcon = (props) => (
-  <svg viewBox="0 0 24 24" {...props}>
-    <path fill="#EAEAEA" d="M22 6.2v11.6c0 .82-.66 1.48-1.48 1.48H17V9.36L12 13.1 7 9.36v9.92H3.48C2.66 19.28 2 18.62 2 17.8V6.2c0-1.83 2.08-2.95 3.58-1.94l1.1.74L12 8.9l5.32-3.9 1.1-.74C19.92 3.25 22 4.37 22 6.2z" />
-    <path fill="#34A853" d="M7 9.36L17 19.28h3.52c.82 0 1.48-.66 1.48-1.48V6.2L7 9.36z" opacity="0.85" />
-    <path fill="#EA4335" d="M22 6.2L7 9.36v0L2 6.2c0-1.83 2.08-2.95 3.58-1.94l1.1.74L12 8.9l5.32-3.9 1.1-.74C19.92 3.25 22 4.37 22 6.2z" opacity="0.9" />
-    <path fill="#FBBC04" d="M2 6.2L7 9.36v9.92H3.48C2.66 19.28 2 18.62 2 17.8V6.2z" opacity="0.9" />
+  <svg viewBox="0 0 48 48" {...props}>
+    <path fill="#4caf50" d="M45 16v20c0 1.7-1.3 3-3 3h-5V21.5L24 30 11 21.5V39H6c-1.7 0-3-1.3-3-3V16c0-3.5 4-5.5 7-3.5l14 10.5L38 12.5c3-2 7 .5 7 3.5z" />
+    <path fill="#fbc02d" d="M11 21.5V39H6c-1.7 0-3-1.3-3-3V16c0-3.5 4-5.5 7-3.5l1 .75z" />
+    <path fill="#4285f4" d="M37 21.5V39h5c1.7 0 3-1.3 3-3V16c0-3.5-4-5.5-7-3.5l-1 .75z" />
+    <path fill="#ea4335" d="M11 39V21.5L24 30l13-8.5V39H11z" />
   </svg>
 );
 
@@ -46,7 +46,7 @@ export function playBell() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     // Cool bell — three decaying sine partials
-    [[880, 1, 0.55], [1320, 0.5, 0.4], [1976, 0.25, 0.3]].forEach(([f, g, d]) => {
+    [[4000, 1, 0.5], [6000, 0.35, 0.35]].forEach(([f, g, d]) => {
       const o = audioCtx.createOscillator();
       const gn = audioCtx.createGain();
       o.type = 'sine';
@@ -76,17 +76,16 @@ export default function EdgeQuickRail() {
   const renderItem = (a) => {
     const tile = (
       <span
-        className="relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-active:scale-95"
+        className="relative w-11 h-11 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-active:scale-95"
         style={{
-          background: `linear-gradient(135deg, ${a.hex}33, ${a.hex}14)`,
-          backdropFilter: 'blur(14px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
-          border: `1px solid ${a.hex}66`,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 14px ${a.hex}40`,
+          background: `linear-gradient(145deg, ${a.hex}, ${a.hex}cc)`,
+          borderRadius: '0.85rem',
+          border: `1px solid ${a.hex}99`,
+          boxShadow: `inset 0 2px 3px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.22), 0 6px 14px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.06)`,
           color: '#fff',
         }}
       >
-        <a.icon className="w-5 h-5" style={{ filter: `drop-shadow(0 0 5px ${a.hex})` }} />
+        <a.icon className="w-5 h-5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }} />
       </span>
     );
     const label = hovered === a.key && (
