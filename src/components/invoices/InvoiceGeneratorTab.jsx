@@ -9,7 +9,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
-import { FileText, Download, Send, Trash2, Zap, Truck, AlertCircle, CheckCheck, Layers } from 'lucide-react';
+import { FileText, Download, Send, Trash2, Zap, Truck, AlertCircle, CheckCheck, Layers, AlertTriangle, Clock, Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const pad = (n) => String(n).padStart(4, '0');
@@ -20,6 +20,18 @@ const dueFromTerms = (terms) => {
   const d = new Date();
   d.setDate(d.getDate() + (days || 30));
   return d.toISOString().split('T')[0];
+};
+
+const dueInfo = (inv) => {
+  const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
+  if (inv.status === 'paid' || balance <= 0.001) return { rank: 3, key: 'paid', label: 'Paid', color: '#34d399', bg: 'rgba(52,211,153,0.14)', border: 'rgba(52,211,153,0.4)', Icon: CheckCircle2 };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const due = inv.due_date ? new Date(inv.due_date) : null;
+  if (!due) return { rank: 2, key: 'open', label: 'Open', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Clock };
+  const days = Math.ceil((due - today) / 86400000);
+  if (days < 0) return { rank: 0, key: 'overdue', label: `Overdue · ${Math.abs(days)}d`, color: '#f87171', bg: 'rgba(248,113,113,0.16)', border: 'rgba(248,113,113,0.45)', Icon: AlertTriangle, pulse: true };
+  if (days <= 3) return { rank: 1, key: 'soon', label: days === 0 ? 'Due today' : `Due in ${days}d`, color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Clock };
+  return { rank: 2, key: 'open', label: `Due ${formatDate(inv.due_date)}`, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Calendar };
 };
 
 export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoicesChanged }) {
@@ -62,8 +74,14 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
   }, [allInvoices]);
 
   const followUpInvoices = (invoices || [])
-    .filter((inv) => inv.trip_id && !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
-    .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+    .filter((inv) => inv.trip_id && inv.status !== 'cancelled')
+    .sort((a, b) => {
+      const r = dueInfo(a).rank - dueInfo(b).rank;
+      if (r !== 0) return r;
+      return String(b.created_date || '').localeCompare(String(a.created_date || ''));
+    });
+
+  const fuCounts = followUpInvoices.reduce((acc, inv) => { const k = dueInfo(inv).key; acc[k] = (acc[k] || 0) + 1; return acc; }, { overdue: 0, soon: 0, open: 0, paid: 0 });
 
   const buildInvoice = (trip, number) => {
     const revenue = Number(trip.revenue) || 0;
@@ -261,7 +279,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center"><AlertCircle className="w-4 h-4 text-amber-400" /></div>
             <div>
               <p className="text-sm font-semibold text-foreground">Follow-up</p>
-              <p className="text-[11px] text-muted-foreground">{followUpInvoices.length} generated invoice{followUpInvoices.length === 1 ? '' : 's'} awaiting payment</p>
+              <p className="text-[11px] text-muted-foreground">{followUpInvoices.length} generated invoice{followUpInvoices.length === 1 ? '' : 's'} · paid & unpaid tracking</p>
             </div>
           </div>
           {selectedFollow.size > 0 && (
@@ -273,8 +291,20 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
           )}
         </div>
 
+        {/* Due-alert summary strip */}
+        {followUpInvoices.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {[{ key: 'overdue', label: 'Overdue', color: '#f87171' },{ key: 'soon', label: 'Due Soon', color: '#fbbf24' },{ key: 'open', label: 'Unpaid', color: '#60a5fa' },{ key: 'paid', label: 'Paid', color: '#34d399' }].map((s) => fuCounts[s.key] > 0 && (
+              <div key={s.key} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${s.color}1f`, border: `1px solid ${s.color}55`, color: s.color }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }} />
+                {s.label} {fuCounts[s.key]}
+              </div>
+            ))}
+          </div>
+        )}
+
         {followUpInvoices.length === 0 ? (
-          <EmptyState icon={CheckCheck} title="Nothing to follow up" description="Generated invoices with an outstanding balance will appear here for tracking." />
+          <EmptyState icon={CheckCheck} title="Nothing to follow up" description="Generated invoices will appear here — paid & unpaid, with due-date alerts." />
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-3 px-2 pb-1 border-b border-border/50">
@@ -284,16 +314,25 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
             {followUpInvoices.map((inv) => {
               const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
               const checked = selectedFollow.has(inv.id);
+              const di = dueInfo(inv);
+              const DIcon = di.Icon;
+              const isNew = inv.created_date && new Date(inv.created_date).toDateString() === new Date().toDateString();
               return (
                 <div key={inv.id} onClick={() => toggleFollow(inv.id)} className={`row-card flex items-center gap-3 cursor-pointer transition-colors ${checked ? 'border-primary/40' : ''}`}>
                   <Checkbox checked={checked} onCheckedChange={() => toggleFollow(inv.id)} onClick={(e) => e.stopPropagation()} />
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{inv.invoice_number || '—'}</p>
-                    <p className="text-xs text-muted-foreground">Issued {formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground">{inv.invoice_number || '—'}</p>
+                      {isNew && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">New</span>}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Issued {formatDate(inv.issue_date)}{inv.status === 'sent' ? ' · Sent' : ''}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground">{formatCurrency(balance)}</span>
-                  <StatusBadge status={inv.status} />
+                  <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: di.bg, border: `1px solid ${di.border}`, color: di.color }}>
+                    <DIcon className={cn('w-3 h-3', di.pulse && 'animate-pulse')} style={{ color: di.color }} />
+                    {di.label}
+                  </span>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(balance)}</span>
                 </div>
               );
             })}
