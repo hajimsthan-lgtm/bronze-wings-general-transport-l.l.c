@@ -11,7 +11,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
-import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, X, Filter, ChevronDown, Receipt, Building2 } from 'lucide-react';
+import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, ChevronDown, Receipt, Building2, Calendar as CalendarIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import FixedChargeFormSheet from '@/components/admin/FixedChargeFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
@@ -22,6 +22,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
+import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
 
@@ -37,10 +38,8 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const [dataLoading, setDataLoading] = useState(true);
   const [chargeFormOpen, setChargeFormOpen] = useState(false);
   const [editCharge, setEditCharge] = useState(null);
-  const [invDateFrom, setInvDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [invDateTo, setInvDateTo] = useState(new Date().toISOString().split('T')[0]);
-  const [payDateFrom, setPayDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [payDateTo, setPayDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
+  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [contactFilter, setContactFilter] = useState(null);
   const [editContactIndex, setEditContactIndex] = useState(null);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -91,13 +90,14 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const reloadInvoices = () => base44.entities.Invoice.filter({ client_name: client.name }).then(setInvoices).catch(() => {});
   const reloadPayments = () => base44.entities.ClientPayment.filter({ client_name: client.name }).then(setPayments).catch(() => {});
   const deleteCharge = async (charge) => { await base44.entities.FixedCharge.delete(charge.id); reloadCharges(); };
-  const displayTrips = contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips;
-  const displayInvoices = contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices;
-  const filteredInvoices = displayInvoices.filter(inv => !inv.issue_date || (inv.issue_date >= invDateFrom && inv.issue_date <= invDateTo));
+  const inDateRange = (d) => !d || (d >= dateFrom && d <= dateTo);
+  const displayTrips = (contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips).filter(tr => inDateRange(tr.trip_date));
+  const displayInvoices = (contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices).filter(inv => inDateRange(inv.issue_date));
+  const filteredInvoices = displayInvoices;
   const outstandingInvoices = displayInvoices
     .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
     .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
-  const filteredPayments = payments.filter(p => !p.payment_date || (p.payment_date >= payDateFrom && p.payment_date <= payDateTo));
+  const filteredPayments = payments.filter(p => inDateRange(p.payment_date));
   const outstandingExportData = outstandingInvoices.map(inv => ({
     invoice_number: inv.invoice_number || '',
     issue_date: inv.issue_date || '',
@@ -199,39 +199,28 @@ export default function ClientDetail({ id: propId, inline = false }) {
       <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">
         <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
       </div>
-      {client.contact_persons?.length > 0 && (
-        <div className="glass-card p-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Contact Persons</p>
-            {contactFilter && (
-              <button onClick={() => setContactFilter(null)} className="text-[10px] text-primary hover:text-primary/80 flex items-center gap-1">
-                <X className="w-3 h-3" /> Clear filter
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {client.contact_persons.map((cp, i) => {
-              const isActive = contactFilter === cp.name;
-              return (
-                <div key={i} onClick={() => openEditContact(i)} className={`rounded-lg p-2.5 cursor-pointer transition-all ${isActive ? 'bg-primary/10 border border-primary/30' : 'bg-background/30 border border-transparent hover:border-border/50'}`}>
-                  <div className="flex items-start justify-between gap-1 mb-1">
-                    <p className="text-xs font-medium text-foreground truncate">{cp.name}</p>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setContactFilter(isActive ? null : cp.name); }}
-                      className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium transition-colors flex items-center gap-0.5 whitespace-nowrap ${isActive ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground hover:text-foreground'}`}
-                    >
-                      <Filter className="w-2.5 h-2.5" /> {isActive ? 'On' : 'Filter'}
-                    </button>
-                  </div>
-                  {cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}
-                  {cp.email && <p className="text-[10px] text-muted-foreground truncate">{cp.email}</p>}
-                  {cp.phone && <p className="text-[10px] text-muted-foreground">{cp.phone}</p>}
-                </div>
-              );
-            })}
-          </div>
+      <ContactPersonSmartSelector
+        contactPersons={client.contact_persons || []}
+        activeFilter={contactFilter}
+        onFilter={setContactFilter}
+        onAdd={() => { setEditContactIndex(null); setEditContactOpen(true); }}
+        onEdit={openEditContact}
+      />
+      <div className="glass-card p-3 mb-4 flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="w-4 h-4 text-primary" />
+          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Page date filter</span>
         </div>
-      )}
+        <DateRangeFilter
+          fromValue={dateFrom}
+          onFromChange={setDateFrom}
+          toValue={dateTo}
+          onToChange={setDateTo}
+          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
+        />
+        <div className="flex-1" />
+        <span className="text-[10px] text-muted-foreground hidden sm:inline">Filters trips · invoices · payments</span>
+      </div>
       <Tabs defaultValue="trips">
         <TabsList>
           <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
@@ -284,15 +273,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
         <TabsContent value="invoices" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : (
             <>
-              <div className="flex items-center gap-3 mb-3">
-                <DateRangeFilter
-                  fromValue={invDateFrom}
-                  onFromChange={setInvDateFrom}
-                  toValue={invDateTo}
-                  onToChange={setInvDateTo}
-                  onToday={() => { const today = new Date().toISOString().split('T')[0]; setInvDateFrom(today); setInvDateTo(today); }}
-                />
-                <div className="flex-1" />
+              <div className="flex items-center justify-end gap-3 mb-3">
                 <Button onClick={() => { setEditInvoice(null); setInvoiceFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
                   <Plus className="w-3.5 h-3.5 mr-1" /> {t('new_invoice')}
                 </Button>
@@ -329,16 +310,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
         <TabsContent value="payments" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : (
             <>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                <div className="flex-1 max-w-md">
-                  <DateRangeFilter
-                    fromValue={payDateFrom}
-                    onFromChange={setPayDateFrom}
-                    toValue={payDateTo}
-                    onToChange={setPayDateTo}
-                    onToday={() => { setPayDateFrom(new Date().toISOString().split('T')[0]); setPayDateTo(new Date().toISOString().split('T')[0]); }}
-                  />
-                </div>
+              <div className="flex items-center justify-end gap-3 mb-3">
                 <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
                   <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
                 </Button>
@@ -347,11 +319,11 @@ export default function ClientDetail({ id: propId, inline = false }) {
               <div className="flex flex-wrap items-center gap-4 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding</span>
-                  <ExportButtons data={outstandingExportData} filename={`${client.name}-outstanding`} columns={outstandingExportCols} title={`${client.name} — Outstanding Payments`} options={{ dateRange: `${payDateFrom} to ${payDateTo}` }} />
+                  <ExportButtons data={outstandingExportData} filename={`${client.name}-outstanding`} columns={outstandingExportCols} title={`${client.name} — Outstanding Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Paid</span>
-                  <ExportButtons data={paidExportData} filename={`${client.name}-payments`} columns={paidExportCols} title={`${client.name} — Paid Payments`} options={{ dateRange: `${payDateFrom} to ${payDateTo}` }} />
+                  <ExportButtons data={paidExportData} filename={`${client.name}-payments`} columns={paidExportCols} title={`${client.name} — Paid Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
                 </div>
               </div>
 

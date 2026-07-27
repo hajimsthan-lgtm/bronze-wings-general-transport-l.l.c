@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 
 const PRESETS = [
   { label: 'Today', get: () => { const d = new Date(); return { from: d, to: d }; } },
@@ -17,17 +18,25 @@ const toISO = (d) => (d ? format(d, 'yyyy-MM-dd') : '');
 export default function DateRangeFilter({ fromValue, onFromChange, toValue, onToChange, onToday }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const range = { from: fromValue ? new Date(fromValue) : undefined, to: toValue ? new Date(toValue) : undefined };
+  const [mode, setMode] = useState('range'); // 'range' | 'single'
 
-  const apply = (r) => {
+  const range = { from: fromValue ? new Date(fromValue) : undefined, to: toValue ? new Date(toValue) : undefined };
+  const singleSelected = fromValue ? new Date(fromValue) : undefined;
+
+  const applyRange = (r) => {
     onFromChange(r?.from ? toISO(r.from) : '');
     onToChange(r?.to ? toISO(r.to) : '');
   };
+  const applySingle = (d) => {
+    const iso = d ? toISO(d) : '';
+    onFromChange(iso);
+    onToChange(iso);
+  };
+  const handlePreset = (get) => { applyRange(get()); setOpen(false); };
 
-  const handlePreset = (get) => { apply(get()); setOpen(false); };
-
+  const isSingle = mode === 'single' && fromValue && fromValue === toValue;
   const label = fromValue && toValue
-    ? `${fromValue} → ${toValue}`
+    ? (isSingle ? fromValue : `${fromValue} → ${toValue}`)
     : (fromValue || toValue || 'Select dates');
 
   return (
@@ -46,28 +55,55 @@ export default function DateRangeFilter({ fromValue, onFromChange, toValue, onTo
         <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
           <div className="flex flex-col sm:flex-row">
             <div className="p-3 sm:border-r border-border bg-muted/30 flex flex-col gap-1">
-              {PRESETS.map((p) => (
-                <button
-                  key={p.label}
-                  onClick={() => handlePreset(p.get)}
-                  className="text-left text-xs px-3 py-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-colors whitespace-nowrap"
-                >
-                  {p.label}
-                </button>
-              ))}
+              <div className="inline-flex p-0.5 rounded-lg bg-background/40 border border-white/10 mb-2 self-start">
+                <button type="button" onClick={() => setMode('range')} className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors', mode === 'range' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}>Range</button>
+                <button type="button" onClick={() => setMode('single')} className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors', mode === 'single' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}>Single</button>
+              </div>
+              {mode === 'range' ? (
+                <>
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      onClick={() => handlePreset(p.get)}
+                      className="text-left text-xs px-3 py-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-colors whitespace-nowrap"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <button onClick={() => { applySingle(new Date()); setOpen(false); }} className="text-left text-xs px-3 py-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-colors whitespace-nowrap">
+                    Today
+                  </button>
+                  {onToday && (
+                    <button onClick={() => { onToday(); setOpen(false); }} className="text-left text-xs px-3 py-2 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-colors whitespace-nowrap">
+                      Apply custom
+                    </button>
+                  )}
+                </>
+              )}
             </div>
-            <Calendar
-              mode="range"
-              selected={range}
-              onSelect={apply}
-              numberOfMonths={1}
-              initialFocus
-            />
+            {mode === 'range' ? (
+              <Calendar
+                mode="range"
+                selected={range}
+                onSelect={applyRange}
+                numberOfMonths={1}
+                initialFocus
+              />
+            ) : (
+              <Calendar
+                mode="single"
+                selected={singleSelected}
+                onSelect={(d) => { applySingle(d); setOpen(false); }}
+                numberOfMonths={1}
+                initialFocus
+              />
+            )}
           </div>
         </PopoverContent>
       </Popover>
-
-
     </div>
   );
 }

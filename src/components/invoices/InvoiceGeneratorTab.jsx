@@ -263,12 +263,10 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
           <EmptyState icon={Truck} title="No trips" description="This client has no trips yet. Add a trip to start billing." />
         ) : (
           <div className="space-y-2">
-            {billableTrips.length > 0 && (
-              <div className="flex items-center gap-3 px-2 pb-1 border-b border-border/50">
-                <Checkbox checked={allBillableSelected} onCheckedChange={toggleAllBillable} id="gen-all" />
-                <label htmlFor="gen-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">Select all billable</label>
-              </div>
-            )}
+            <div className="flex items-center gap-3 px-2 pb-1 border-b border-border/50">
+              <Checkbox checked={allBillableSelected && billableTrips.length > 0} onCheckedChange={toggleAllBillable} id="gen-all" disabled={billableTrips.length === 0} />
+              <label htmlFor="gen-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">Select all billable{billableTrips.length > 0 ? ` (${billableTrips.length})` : ''}</label>
+            </div>
             {allClientTrips.map((tr) => {
               const info = tripInvoiceInfo[tr.id];
               const isBilled = !!info;
