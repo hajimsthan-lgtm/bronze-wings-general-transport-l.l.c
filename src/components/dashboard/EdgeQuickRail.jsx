@@ -46,22 +46,19 @@ export default function EdgeQuickRail() {
   ];
 
   const renderRow = (a) => {
-    const inner = (
-      <>
-        <span
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-          style={{ background: a.bg, boxShadow: `0 6px 16px ${a.glow}, inset 0 1px 0 rgba(255,255,255,0.15)` }}
-        >
-          <a.icon className="w-5 h-5" />
-        </span>
-        <span className="flex-1 min-w-0 truncate text-[13px] font-semibold text-white">{a.label}</span>
-      </>
+    const cls = "group relative flex items-center justify-center w-12 h-12 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-110";
+    const iconSpan = (
+      <span
+        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
+        style={{ background: a.bg, boxShadow: `0 6px 16px ${a.glow}, inset 0 1px 0 rgba(255,255,255,0.15)` }}
+      >
+        <a.icon className="w-5 h-5" />
+      </span>
     );
-    const cls = "group relative flex items-center gap-3 px-3 py-2.5 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:bg-white/[0.04]";
     return a.to ? (
-      <Link key={a.key} to={a.to} className={cls} onClick={() => setOpen(false)}>{inner}</Link>
+      <Link key={a.key} to={a.to} className={cls} onClick={() => setOpen(false)} title={a.label}>{iconSpan}</Link>
     ) : (
-      <button key={a.key} type="button" onClick={() => { a.action?.(); }} className={cls}>{inner}</button>
+      <button key={a.key} type="button" onClick={() => { a.action?.(); }} className={cls} title={a.label}>{iconSpan}</button>
     );
   };
 
@@ -85,19 +82,16 @@ export default function EdgeQuickRail() {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onMouseEnter={handleEnter}
             onMouseLeave={handleLeave}
-            className="fixed left-0 top-14 md:top-20 bottom-0 w-64 z-[65] glass-panel rounded-none rounded-r-2xl p-3 flex flex-col gap-1.5 overflow-y-auto no-scrollbar"
+            className="fixed left-0 top-14 md:top-20 bottom-0 w-16 z-[65] glass-panel rounded-none rounded-r-2xl p-2 flex flex-col items-center gap-2 overflow-y-auto no-scrollbar"
             style={{ borderLeft: 'none' }}
           >
-            <div className="flex items-center justify-between px-1 pt-1 pb-2">
-              <span className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280]">Quick Apps</span>
-              <button
-                onClick={() => setOpen(false)}
-                className="w-6 h-6 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-                aria-label="Close"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors mb-1"
+              aria-label="Close"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
             {apps.map(renderRow)}
           </motion.aside>
         )}

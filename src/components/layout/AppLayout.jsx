@@ -4,6 +4,7 @@ import MobileNav from '@/components/layout/MobileNav';
 import TopBar from '@/components/layout/TopBar';
 import AppFooter from '@/components/layout/AppFooter';
 import MobileHeader from '@/components/layout/MobileHeader';
+import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import { Bell, Settings, Search } from 'lucide-react';
 
 export default function AppLayout() {
@@ -137,6 +138,7 @@ export default function AppLayout() {
         </div>
       </main>
 
+      <EdgeQuickRail />
       <AppFooter />
       <MobileNav />
     </div>
