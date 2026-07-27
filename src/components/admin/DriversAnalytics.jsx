@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
-export default function DriversAnalytics({ drivers = [], trips = [], loading, onAdd }) {
+export default function DriversAnalytics({ drivers = [], trips = [], loading }) {
   if (loading && drivers.length === 0) return <LoadingSpinner />;
 
   const active = drivers.filter((d) => d.status === 'active').length;
@@ -29,17 +29,6 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Drivers Portal</h1>
-          <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ExportButtons data={drivers.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
-          {onAdd && <Button onClick={onAdd} className="h-10"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>}
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <ReportStatCard index={0} label="Total Drivers" value={drivers.length} icon={Users} color="#3b82f6" />
         <ReportStatCard index={1} label="Active" value={active} icon={UserCheck} color="#34d399" />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import DriversAnalytics from '@/components/admin/DriversAnalytics';
+import DriverCard from '@/components/admin/DriverCard';
+import DriverListRow from '@/components/admin/DriverListRow';
+import ViewToggle from '@/components/common/ViewToggle';
+import ExportButtons from '@/components/common/ExportButtons';
+import EmptyState from '@/components/common/EmptyState';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ImageUpload from '@/components/common/ImageUpload';
 import Salary from './Salary';
+import { Plus, Search, Users, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Drivers() {
   const { t } = useI18n();
@@ -26,11 +34,15 @@ export default function Drivers() {
 
 function DriversTab() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [drivers, setDrivers] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [view, setView] = useState('list');
+  const [mode, setMode] = useState('analytics');
 
   const load = () => {
     setLoading(true);
@@ -47,9 +59,51 @@ function DriversTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const filtered = drivers.filter((d) => !search || d.name?.toLowerCase().includes(search.toLowerCase()) || d.phone?.includes(search) || d.license_number?.toLowerCase().includes(search.toLowerCase()));
+
   return (
     <div>
-      <DriversAnalytics drivers={drivers} trips={trips} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} />
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-display">Drivers Portal</h1>
+          <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+          </div>
+          {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
+          <ExportButtons data={filtered.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+        </div>
+      </div>
+
+      {mode === 'analytics' ? (
+        <DriversAnalytics drivers={filtered} trips={trips} loading={loading} />
+      ) : (
+        <>
+          <div className="relative mb-5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          </div>
+
+          {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> :
+            view === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filtered.map((d) => (
+                  <DriverCard key={d.id} d={d} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filtered.map((d) => (
+                  <DriverListRow key={d.id} d={d} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
+                ))}
+              </div>
+            )}
+        </>
+      )}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">

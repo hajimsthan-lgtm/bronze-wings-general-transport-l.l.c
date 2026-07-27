@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
-export default function ClientsAnalytics({ clients = [], trips = [], invoices = [], loading, onAdd }) {
+export default function ClientsAnalytics({ clients = [], trips = [], invoices = [], loading }) {
   if (loading && clients.length === 0) return <LoadingSpinner />;
 
   const revenueMap = {};
@@ -33,17 +33,6 @@ export default function ClientsAnalytics({ clients = [], trips = [], invoices = 
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Clients Portal</h1>
-          <p className="text-sm text-muted-foreground">Analytics overview & client insights</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ExportButtons data={clients.map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status, revenue: revenueMap[c.name] || 0 }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Revenue', key: 'revenue', numeric: true }]} />
-          {onAdd && <Button onClick={onAdd} className="h-10"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>}
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <ReportStatCard index={0} label="Total Clients" value={clients.length} icon={Users} color="#8b5cf6" />
         <ReportStatCard index={1} label="Active Clients" value={active} icon={Building2} color="#34d399" />
