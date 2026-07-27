@@ -64,6 +64,20 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
 
   const billableTrips = (trips || []).filter((tr) => tr.status === 'completed' && !tripInvoiceMap[tr.id]);
 
+  // All non-cancelled trips for display — already-invoiced ones are shown but locked
+  const allClientTrips = useMemo(
+    () => (trips || []).filter((tr) => tr.status !== 'cancelled').sort((a, b) => String(b.trip_date || '').localeCompare(String(a.trip_date || ''))),
+    [trips]
+  );
+
+  const tripInvoiceInfo = useMemo(() => {
+    const m = {};
+    (invoices || []).forEach((inv) => {
+      if (inv.trip_id) String(inv.trip_id).split(',').forEach((tid) => { const id = tid.trim(); if (id) m[id] = { number: inv.invoice_number, status: inv.status }; });
+    });
+    return m;
+  }, [invoices]);
+
   const nextStart = useMemo(() => {
     let max = 0;
     allInvoices.forEach((inv) => {
@@ -245,22 +259,35 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, onInvoice
         </div>
         <p className="text-[11px] text-muted-foreground mb-4">{genMode === 'bulk' ? 'Bulk mode — all selected trips are combined into a single invoice.' : 'Single mode — one invoice is created per selected trip.'}</p>
 
-        {billableTrips.length === 0 ? (
-          <EmptyState icon={Truck} title="No billable trips" description="Completed trips without an invoice will appear here for quick billing." />
+        {allClientTrips.length === 0 ? (
+          <EmptyState icon={Truck} title="No trips" description="This client has no trips yet. Add a trip to start billing." />
         ) : (
           <div className="space-y-2">
-            <div className="flex items-center gap-3 px-2 pb-1 border-b border-border/50">
-              <Checkbox checked={allBillableSelected} onCheckedChange={toggleAllBillable} id="gen-all" />
-              <label htmlFor="gen-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">Select all</label>
-            </div>
-            {billableTrips.map((tr) => {
+            {billableTrips.length > 0 && (
+              <div className="flex items-center gap-3 px-2 pb-1 border-b border-border/50">
+                <Checkbox checked={allBillableSelected} onCheckedChange={toggleAllBillable} id="gen-all" />
+                <label htmlFor="gen-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">Select all billable</label>
+              </div>
+            )}
+            {allClientTrips.map((tr) => {
+              const info = tripInvoiceInfo[tr.id];
+              const isBilled = !!info;
               const checked = selectedTrips.has(tr.id);
               return (
-                <div key={tr.id} onClick={() => toggleTrip(tr.id)} className={`row-card flex items-center gap-3 cursor-pointer transition-colors ${checked ? 'border-primary/40' : ''}`}>
-                  <Checkbox checked={checked} onCheckedChange={() => toggleTrip(tr.id)} onClick={(e) => e.stopPropagation()} />
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Truck className="w-4 h-4 text-primary" /></div>
+                <div key={tr.id} onClick={() => !isBilled && tr.status === 'completed' && toggleTrip(tr.id)} className={`row-card flex items-center gap-3 transition-colors ${isBilled ? 'opacity-60 cursor-not-allowed' : tr.status === 'completed' ? 'cursor-pointer' : 'opacity-70'} ${checked ? 'border-primary/40' : ''}`}>
+                  <Checkbox checked={checked} disabled={isBilled || tr.status !== 'completed'} onCheckedChange={() => toggleTrip(tr.id)} onClick={(e) => e.stopPropagation()} />
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isBilled ? 'bg-emerald-500/10' : 'bg-primary/10'}`}>
+                    {isBilled ? <FileText className="w-4 h-4 text-emerald-400" /> : <Truck className="w-4 h-4 text-primary" />}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{tr.from_location} → {tr.to_location}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-foreground truncate">{tr.from_location} → {tr.to_location}</p>
+                      {isBilled ? (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">Invoiced · {info.number}</span>
+                      ) : tr.status !== 'completed' ? (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 whitespace-nowrap">Not completed</span>
+                      ) : null}
+                    </div>
                     <p className="text-xs text-muted-foreground">{formatDate(tr.trip_date)} · {tr.vehicle_plate} · {tr.driver_name}</p>
                   </div>
                   <span className="text-sm font-semibold text-foreground">{formatCurrency(tr.revenue)}</span>
