@@ -10,6 +10,7 @@ import { FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
+import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
@@ -25,6 +26,9 @@ export default function Soa() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [clients, setClients] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [fuelRecords, setFuelRecords] = useState([]);
   const reportClient = useReportClient();
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
@@ -33,7 +37,12 @@ export default function Soa() {
     Promise.all([
       base44.entities.Invoice.list('-issue_date', 500),
       base44.entities.Client.list(),
-    ]).then(([inv, cl]) => { setInvoices(inv); setClients(cl); }).finally(() => setLoading(false));
+      base44.entities.Trip.list('-trip_date', 500),
+      base44.entities.Expense.list('-date', 500),
+      base44.entities.FuelRecord.list('-date', 500),
+    ]).then(([inv, cl, tr, ex, fu]) => {
+      setInvoices(inv); setClients(cl); setTrips(tr); setExpenses(ex); setFuelRecords(fu);
+    }).finally(() => setLoading(false));
   }, []);
 
   const dateFiltered = invoices.filter(i => !i.issue_date || (i.issue_date >= dateFrom && i.issue_date <= dateTo));
@@ -42,6 +51,9 @@ export default function Soa() {
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
   const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
+  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo)));
+  const fExpenses = expenses.filter(e => !e.date || (e.date >= dateFrom && e.date <= dateTo));
+  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= dateFrom && f.date <= dateTo));
 
 
 
@@ -87,6 +99,7 @@ export default function Soa() {
       <PageHeader title={t('soa')} description="Client account statements"
         action={
           <div className="flex items-center gap-2">
+            <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
             <ExportButtons
               data={filtered.map(inv => ({ invoice_number: inv.invoice_number, client_name: inv.client_name, issue_date: inv.issue_date, status: inv.status, total_amount: inv.total_amount }))}
               filename="soa"
@@ -105,6 +118,7 @@ export default function Soa() {
         } />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
+        <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
         <DateRangeFilter
           fromValue={dateFrom}
           onFromChange={setDateFrom}

@@ -10,6 +10,7 @@ import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
+import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import TrendChart from '@/components/reports/TrendChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
@@ -101,6 +102,7 @@ export default function DailyReport() {
 
       <PageHeader title={t('daily_report')} description={`${formatDate(dateFrom)} — ${formatDate(dateTo)}`}
         action={<div className="flex items-center gap-2">
+          <AllTransactionsExport trips={trips} expenses={expenses} fuelRecords={fuelRecords} dateRange={dateRange} />
           <ExportButtons
             data={trips.map(tr => ({ trip_date: tr.trip_date, route: `${tr.from_location} → ${tr.to_location}`, driver_name: tr.driver_name, vehicle_plate: tr.vehicle_plate, revenue: tr.revenue }))}
             filename="daily_report"
@@ -122,6 +124,10 @@ export default function DailyReport() {
             onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
           />
         </div>} />
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <AllTransactionsExport trips={trips} expenses={expenses} fuelRecords={fuelRecords} dateRange={dateRange} />
+      </div>
 
       {loading ? <LoadingSpinner /> : (
         <div className="space-y-6">

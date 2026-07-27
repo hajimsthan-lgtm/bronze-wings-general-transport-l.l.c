@@ -9,6 +9,7 @@ import { Wallet, Receipt, PiggyBank, TrendingUp, TrendingDown } from 'lucide-rea
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
+import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import CountUpText from '@/components/reports/CountUpText';
@@ -120,24 +121,28 @@ export default function ProfitLoss() {
       {/* Ambient handled by app layout */}
 
       <PageHeader title={t('profit_loss')} description="Financial overview"
-        action={<ExportButtons
-          data={[
-            { category: 'Trip Revenue', amount: totalRevenue },
-            ...chartData.map(c => ({ category: `Expense: ${c.name}`, amount: -c.value })),
-            { category: 'Fuel (trip-linked)', amount: -totalFuel },
-            { category: 'Trip Costs (tolls, other)', amount: -tripCosts },
-            { category: 'Net Profit', amount: netProfit },
-          ]}
-          filename="profit_loss"
-          columns={[
-            { label: 'Category', key: 'category' },
-            { label: 'Amount (AED)', key: 'amount', numeric: true },
-          ]}
-          title="Profit & Loss"
-          options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
-        />} />
+        action={<div className="flex items-center gap-2">
+          <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
+          <ExportButtons
+            data={[
+              { category: 'Trip Revenue', amount: totalRevenue },
+              ...chartData.map(c => ({ category: `Expense: ${c.name}`, amount: -c.value })),
+              { category: 'Fuel (trip-linked)', amount: -totalFuel },
+              { category: 'Trip Costs (tolls, other)', amount: -tripCosts },
+              { category: 'Net Profit', amount: netProfit },
+            ]}
+            filename="profit_loss"
+            columns={[
+              { label: 'Category', key: 'category' },
+              { label: 'Amount (AED)', key: 'amount', numeric: true },
+            ]}
+            title="Profit & Loss"
+            options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
+          />
+        </div>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
+        <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
         <DateRangeFilter
           fromValue={dateFrom}
           onFromChange={setDateFrom}
