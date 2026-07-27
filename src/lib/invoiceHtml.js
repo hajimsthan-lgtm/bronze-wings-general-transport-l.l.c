@@ -78,7 +78,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const compH2 = gIdx >= 0 ? fullName.slice(gIdx).trim() : '';
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
+<div id="invoice-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
   <!-- Header band: logo + brand (left) | contact info (right) -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -204,29 +204,44 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
   try {
     const element = wrapper.querySelector('#invoice-container');
     const canvas = await html2canvas(element, {
-      scale: 2,
+      scale: 1.5,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
     });
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.98);
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     const pdfW = pdf.internal.pageSize.getWidth();
     const pdfH = pdf.internal.pageSize.getHeight();
+    const footerH = 10; // mm reserved at the bottom for the page number
+    const usableH = pdfH - footerH;
     const imgW = pdfW;
-    const imgH = (canvas.height * imgW) / canvas.width;
+    const pxPerMm = canvas.width / imgW;
+    const usablePx = Math.floor(usableH * pxPerMm);
+    const totalPages = Math.max(1, Math.ceil(canvas.height / usablePx));
 
-    let heightLeft = imgH;
-    let position = 0;
-    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
-    heightLeft -= pdfH;
+    for (let p = 0; p < totalPages; p++) {
+      const y0 = p * usablePx;
+      const sliceHpx = Math.min(usablePx, canvas.height - y0);
+      if (sliceHpx <= 0) break;
 
-    while (heightLeft > 0) {
-      position -= pdfH;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
-      heightLeft -= pdfH;
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = sliceHpx;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      ctx.drawImage(canvas, 0, y0, canvas.width, sliceHpx, 0, 0, canvas.width, sliceHpx);
+
+      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+      const sliceHmm = sliceHpx / pxPerMm;
+      if (p > 0) pdf.addPage();
+      pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, sliceHmm);
+
+      // Page number footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(130, 130, 130);
+      pdf.text(`Page ${p + 1} of ${totalPages}`, pdfW / 2, pdfH - 4, { align: 'center' });
     }
 
     pdf.save(`invoice-${invoice.invoice_number || invoice.id}.pdf`);
