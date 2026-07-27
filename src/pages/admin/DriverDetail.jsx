@@ -103,6 +103,7 @@ export default function DriverDetail() {
         />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
       <ProfitCard
         title={`Driver Profit — ${driver.name}`}
         items={[
@@ -116,6 +117,7 @@ export default function DriverDetail() {
         onView={() => setBreakdown({ title: 'Driver Transactions', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' })), ...fSalaries.map((r) => ({ label: `${r.month} ${r.year} Salary`, sub: `Salary · ${formatDate(r.payment_date)}`, amount: r.net_salary, tone: 'text-sky-400' }))] })}
       />
 
+      <div className="lg:col-span-2">
       <Tabs defaultValue={initialTab} className="mt-4">
         <TabsList className="rounded-xl p-1.5 gap-1.5 bg-card border border-border">
           <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
@@ -180,6 +182,8 @@ export default function DriverDetail() {
           <EntityDocumentsTab entityType="driver" entityId={driver.id} />
         </TabsContent>
       </Tabs>
+      </div>
+      </div>
 
       <BreakdownDialog
         open={!!breakdown}
