@@ -23,6 +23,7 @@ import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
+import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
 
 export default function ClientDetail({ id: propId, inline = false }) {
   const params = useParams();
@@ -195,7 +196,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
       />
       )}
 
-      <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
+      <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">
+        <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
+      </div>
       {client.contact_persons?.length > 0 && (
         <div className="glass-card p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
@@ -233,6 +236,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
         <TabsList>
           <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
           <TabsTrigger value="invoices">{t('invoices')} ({displayInvoices.length})</TabsTrigger>
+          <TabsTrigger value="generator">Invoice Generator</TabsTrigger>
           <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
           <TabsTrigger value="charges">{t('fixed_charges')} ({fixedCharges.length})</TabsTrigger>
           <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
@@ -313,6 +317,12 @@ export default function ClientDetail({ id: propId, inline = false }) {
                 </div>
               )}
             </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="generator" className="mt-4">
+          {dataLoading ? <LoadingSpinner /> : (
+            <InvoiceGeneratorTab client={client} trips={displayTrips} invoices={displayInvoices} onInvoicesChanged={reloadInvoices} />
           )}
         </TabsContent>
 
