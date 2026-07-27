@@ -36,8 +36,8 @@ const DropdownMenuSubContent = React.forwardRef(({ className, ...props }, ref) =
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "z-50 min-w-[8rem] overflow-hidden rounded-xl border border-white/10 bg-popover/95 backdrop-blur-xl p-1.5 text-popover-foreground shadow-2xl shadow-black/50",
-      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-200 ease-out",
+      "z-50 min-w-[8rem] overflow-hidden rounded-xl border border-white/10 bg-popover/95 backdrop-blur-xl p-1.5 text-popover-foreground shadow-2xl shadow-black/50 data-[side=top]:origin-bottom data-[side=bottom]:origin-top",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1.5 data-[side=left]:slide-in-from-right-1.5 data-[side=right]:slide-in-from-left-1.5 data-[side=top]:slide-in-from-bottom-1.5 duration-200 ease-out",
       className
     )}
     {...props} />
@@ -51,8 +51,8 @@ const DropdownMenuContent = React.forwardRef(({ className, sideOffset = 6, ...pr
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[10rem] overflow-hidden rounded-xl border border-white/10 bg-popover/95 backdrop-blur-xl p-1.5 text-popover-foreground shadow-2xl shadow-black/50 ring-1 ring-white/5",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 duration-200 ease-out",
+        "z-50 min-w-[10rem] overflow-hidden rounded-xl border border-white/10 bg-popover/95 backdrop-blur-xl p-1.5 text-popover-foreground shadow-2xl shadow-black/50 ring-1 ring-white/5 data-[side=top]:origin-bottom data-[side=bottom]:origin-top",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-1.5 data-[side=left]:slide-in-from-right-1.5 data-[side=right]:slide-in-from-left-1.5 data-[side=top]:slide-in-from-bottom-1.5 duration-200 ease-out",
         className
       )}
       {...props} />
