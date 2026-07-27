@@ -10,6 +10,7 @@ import { formatCurrency } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import QuickActions from '@/components/dashboard/QuickActions';
+import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import HeroGreetingCard from '@/components/dashboard/HeroGreetingCard';
 import { motion } from 'framer-motion';
 import {
@@ -187,6 +188,8 @@ export default function Dashboard() {
   const invStatusColor = (s) => s === 'paid' ? '#10b981' : s === 'sent' ? '#3b82f6' : s === 'overdue' ? '#ef4444' : '#f59e0b';
 
   return (
+    <>
+    <EdgeQuickRail />
     <PullToRefresh onRefresh={loadData}>
     <div className="space-y-6">
       {/* Hero greeting card */}
@@ -370,5 +373,6 @@ export default function Dashboard() {
       )}
     </div>
     </PullToRefresh>
+    </>
   );
 }
