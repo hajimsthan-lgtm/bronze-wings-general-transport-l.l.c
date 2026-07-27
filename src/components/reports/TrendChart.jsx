@@ -1,37 +1,63 @@
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { hexToRgba } from './ReportStatCard';
-
-const tooltipStyle = {
-  background: 'rgba(12,16,26,0.92)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 10,
-  color: '#fff',
-  fontSize: 12,
-};
+import { axisTick, gridStroke, chartTooltipStyle, cursorStyle } from './chartTheme';
 
 export default function TrendChart({ data, series, height = 220, type = 'area', xKey = 'label' }) {
   const Comp = type === 'line' ? LineChart : AreaChart;
+  const gid = (s) => `trend-${s.key}`;
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <Comp data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+      <Comp data={data} margin={{ top: 10, right: 14, bottom: 4, left: -12 }}>
         <defs>
           {series.map((s) => (
-            <linearGradient key={s.key} id={`grad-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={s.color} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={s.color} stopOpacity={0.02} />
+            <linearGradient key={`f-${s.key}`} id={`${gid(s)}-fill`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={s.color} stopOpacity={0.45} />
+              <stop offset="55%" stopColor={s.color} stopOpacity={0.14} />
+              <stop offset="100%" stopColor={s.color} stopOpacity={0.01} />
+            </linearGradient>
+          ))}
+          {series.map((s) => (
+            <linearGradient key={`s-${s.key}`} id={`${gid(s)}-stroke`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={s.color} stopOpacity={0.65} />
+              <stop offset="50%" stopColor={s.color} stopOpacity={1} />
+              <stop offset="100%" stopColor={s.color} stopOpacity={0.65} />
             </linearGradient>
           ))}
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
-        <XAxis dataKey={xKey} tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} axisLine={false} tickLine={false} width={44} />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: 'rgba(255,255,255,0.1)' }} />
+        <CartesianGrid strokeDasharray="4 6" stroke={gridStroke} vertical={false} />
+        <XAxis dataKey={xKey} tick={axisTick} axisLine={false} tickLine={false} dy={6} />
+        <YAxis tick={axisTick} axisLine={false} tickLine={false} width={44} />
+        <Tooltip contentStyle={chartTooltipStyle} cursor={cursorStyle} />
         {type === 'area'
           ? series.map((s) => (
-              <Area key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} fill={`url(#grad-${s.key})`} strokeWidth={2} dot={false} isAnimationActive animationDuration={1000} />
+              <Area
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.name}
+                stroke={`url(#${gid(s)}-stroke)`}
+                fill={`url(#${gid(s)}-fill)`}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 4.5, fill: s.color, stroke: '#fff', strokeWidth: 2 }}
+                isAnimationActive
+                animationDuration={1100}
+                animationEasing="ease-out"
+              />
             ))
           : series.map((s) => (
-              <Line key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={2} dot={false} isAnimationActive animationDuration={1000} />
+              <Line
+                key={s.key}
+                type="monotone"
+                dataKey={s.key}
+                name={s.name}
+                stroke={`url(#${gid(s)}-stroke)`}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 4.5, fill: s.color, stroke: '#fff', strokeWidth: 2 }}
+                isAnimationActive
+                animationDuration={1100}
+                animationEasing="ease-out"
+              />
             ))}
       </Comp>
     </ResponsiveContainer>

@@ -8,6 +8,7 @@ import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Wallet, Receipt, PiggyBank, TrendingUp, TrendingDown } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import CountUpText from '@/components/reports/CountUpText';
@@ -90,6 +91,7 @@ export default function ProfitLoss() {
   const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
   const trendData = days.map((d, i) => ({ label: formatDateShort(d), income: incomeSeries[i], expenses: expenseSeries[i] }));
   const netTrendData = days.map((d, i) => ({ label: formatDateShort(d), net: netSeries[i] }));
+  const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
 
   const Badge = ({ pct }) => pct == null ? null : (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium" style={{ background: pct >= 0 ? 'rgba(34,197,94,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${pct >= 0 ? 'rgba(34,197,94,0.20)' : 'rgba(239,68,68,0.20)'}`, color: pct >= 0 ? '#4ade80' : '#f87171' }}>
@@ -157,12 +159,12 @@ export default function ProfitLoss() {
 
       {/* Income & Expenses sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ReportSectionCard index={3} color="#22c55e" title="Income">
+        <ReportSectionCard index={3} color="#22c55e" title="Income" action={<SectionExportButtons data={[{ label: 'Trip Revenue', amount: totalRevenue }]} filename="pnl_income" columns={[{ label: 'Item', key: 'label' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Income" options={{ dateRange }} />}>
           <Row label="Trip Revenue" amount={totalRevenue} positive />
           <TotalRow label="Total Income" amount={totalRevenue} color="#22c55e" positive />
         </ReportSectionCard>
 
-        <ReportSectionCard index={4} color="#ef4444" title={t('expenses')}>
+        <ReportSectionCard index={4} color="#ef4444" title={t('expenses')} action={<SectionExportButtons data={[...chartData.map((c) => ({ item: c.name, amount: c.value })), { item: 'Fuel (trip-linked)', amount: totalFuel }, { item: 'Trip Costs (tolls, other)', amount: tripCosts }]} filename="pnl_expenses" columns={[{ label: 'Item', key: 'item' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Expenses" options={{ dateRange }} />}>
           {chartData.map(item => (
             <Row key={item.name} label={item.name.replace(/_/g, ' ')} amount={item.value} positive={false} />
           ))}
@@ -173,7 +175,7 @@ export default function ProfitLoss() {
       </div>
 
       {/* Net Profit section */}
-      <ReportSectionCard index={5} color="#3b82f6" title="Net Profit / Loss" className="mb-4">
+      <ReportSectionCard index={5} color="#3b82f6" title="Net Profit / Loss" className="mb-4" action={<SectionExportButtons data={[{ label: 'Net Profit', amount: netProfit }]} filename="pnl_net_profit" columns={[{ label: 'Item', key: 'label' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Net Profit / Loss" options={{ dateRange }} />}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-sm text-white/60">Net Profit</p>
@@ -190,21 +192,21 @@ export default function ProfitLoss() {
 
       {/* Income vs Expenses area + Net profit trend + margin gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-        <ReportSectionCard index={7} color="#22c55e" title="Income vs Expenses" className="lg:col-span-2">
+        <ReportSectionCard index={7} color="#22c55e" title="Income vs Expenses" className="lg:col-span-2" action={<SectionExportButtons data={trendData} filename="pnl_income_vs_expenses" columns={[{ label: 'Date', key: 'label' }, { label: 'Income', key: 'income', numeric: true }, { label: 'Expenses', key: 'expenses', numeric: true }]} title="Income vs Expenses" options={{ dateRange }} />}>
           <TrendChart data={trendData} series={[{ key: 'income', name: 'Income', color: '#22c55e' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={240} />
         </ReportSectionCard>
-        <ReportSectionCard index={8} color="#3b82f6" title="Profit Margin">
+        <ReportSectionCard index={8} color="#3b82f6" title="Profit Margin" action={<SectionExportButtons data={[{ metric: 'Profit Margin %', value: margin.toFixed(2) }]} filename="pnl_profit_margin" columns={[{ label: 'Metric', key: 'metric' }, { label: 'Value', key: 'value', numeric: true }]} title="Profit Margin" options={{ dateRange }} />}>
           <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#3b82f6" size={170} /></div>
         </ReportSectionCard>
       </div>
 
-      <ReportSectionCard index={9} color="#3b82f6" title="Net Profit Trend" className="mb-4">
+      <ReportSectionCard index={9} color="#3b82f6" title="Net Profit Trend" className="mb-4" action={<SectionExportButtons data={netTrendData} filename="pnl_net_profit_trend" columns={[{ label: 'Date', key: 'label' }, { label: 'Net Profit', key: 'net', numeric: true }]} title="Net Profit Trend" options={{ dateRange }} />}>
         <TrendChart data={netTrendData} series={[{ key: 'net', name: 'Net Profit', color: '#3b82f6' }]} type="line" height={220} />
       </ReportSectionCard>
 
       {/* Expense Breakdown donut + progress */}
       {donutData.length > 0 && (
-        <ReportSectionCard index={6} color="#a855f7" title="Expense Breakdown">
+        <ReportSectionCard index={6} color="#a855f7" title="Expense Breakdown" action={<SectionExportButtons data={donutData.map((d) => ({ category: d.name, amount: d.value }))} filename="pnl_expense_breakdown" columns={[{ label: 'Category', key: 'category' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Expense Breakdown" options={{ dateRange }} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <div className="flex justify-center">
               <DonutChart data={donutData} total={formatCurrency(donutTotal)} height={200} />

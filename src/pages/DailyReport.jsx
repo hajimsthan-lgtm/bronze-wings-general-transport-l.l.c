@@ -9,6 +9,7 @@ import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import TrendChart from '@/components/reports/TrendChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
@@ -91,6 +92,7 @@ export default function DailyReport() {
     driverPerf[t.driver_name].revenue += (t.revenue || 0);
   });
   const driverRanking = Object.entries(driverPerf).map(([name, v]) => ({ name, ...v })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+  const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
 
   return (
     <PullToRefresh onRefresh={loadData}>
@@ -133,19 +135,19 @@ export default function DailyReport() {
 
           {/* Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <ReportSectionCard index={4} color="#3b82f6" title="Revenue vs Expenses" className="lg:col-span-2">
+            <ReportSectionCard index={4} color="#3b82f6" title="Revenue vs Expenses" className="lg:col-span-2" action={<SectionExportButtons data={trendData} filename="daily_revenue_vs_expenses" columns={[{ label: 'Date', key: 'label' }, { label: 'Revenue', key: 'revenue', numeric: true }, { label: 'Expenses', key: 'expenses', numeric: true }]} title="Revenue vs Expenses" options={{ dateRange }} />}>
               <TrendChart data={trendData} series={[{ key: 'revenue', name: 'Revenue', color: '#3b82f6' }, { key: 'expenses', name: 'Expenses', color: '#f97316' }]} type="line" height={240} />
             </ReportSectionCard>
-            <ReportSectionCard index={5} color="#a855f7" title="Profit Margin">
+            <ReportSectionCard index={5} color="#a855f7" title="Profit Margin" action={<SectionExportButtons data={[{ metric: 'Profit Margin %', value: margin.toFixed(2) }]} filename="daily_profit_margin" columns={[{ label: 'Metric', key: 'metric' }, { label: 'Value', key: 'value', numeric: true }]} title="Profit Margin" options={{ dateRange }} />}>
               <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#a855f7" size={170} /></div>
             </ReportSectionCard>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ReportSectionCard index={6} color="#a855f7" title="Trips per Day">
+            <ReportSectionCard index={6} color="#a855f7" title="Trips per Day" action={<SectionExportButtons data={tripCountData} filename="daily_trips_per_day" columns={[{ label: 'Date', key: 'label' }, { label: 'Trips', key: 'trips', numeric: true }]} title="Trips per Day" options={{ dateRange }} />}>
               <BarTrendChart data={tripCountData} dataKey="trips" color="#a855f7" height={220} />
             </ReportSectionCard>
-            <ReportSectionCard index={7} color="#22c55e" title="Driver Performance">
+            <ReportSectionCard index={7} color="#22c55e" title="Driver Performance" action={<SectionExportButtons data={driverRanking.map((d) => ({ driver: d.name, trips: d.trips, revenue: d.revenue }))} filename="daily_driver_performance" columns={[{ label: 'Driver', key: 'driver' }, { label: 'Trips', key: 'trips', numeric: true }, { label: 'Revenue', key: 'revenue', numeric: true }]} title="Driver Performance" options={{ dateRange }} />}>
               {driverRanking.length === 0 ? <p className="text-sm text-white/40">No data</p> : (
                 <div className="space-y-2">
                   {driverRanking.map((d, i) => (

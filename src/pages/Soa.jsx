@@ -9,6 +9,7 @@ import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
+import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
@@ -40,6 +41,7 @@ export default function Soa() {
   const totalAmount = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
+  const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
 
 
 
@@ -121,13 +123,13 @@ export default function Soa() {
 
       {pieData.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          <ReportSectionCard index={3} color="#22c55e" title="Payment Status">
+          <ReportSectionCard index={3} color="#22c55e" title="Payment Status" action={<SectionExportButtons data={pieData.map((d) => ({ status: d.name, amount: d.value }))} filename="soa_payment_status" columns={[{ label: 'Status', key: 'status' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Payment Status" options={{ dateRange }} />}>
             <div className="flex justify-center"><DonutChart data={pieData} total={formatCurrency(pieTotal)} height={180} /></div>
           </ReportSectionCard>
-          <ReportSectionCard index={4} color="#a855f7" title="Aging Buckets">
+          <ReportSectionCard index={4} color="#a855f7" title="Aging Buckets" action={<SectionExportButtons data={agingData} filename="soa_aging_buckets" columns={[{ label: 'Bucket', key: 'label' }, { label: 'Amount (AED)', key: 'value', numeric: true }]} title="Aging Buckets" options={{ dateRange }} />}>
             <BarTrendChart data={agingData} dataKey="value" color="#a855f7" height={200} />
           </ReportSectionCard>
-          <ReportSectionCard index={5} color="#f97316" title="Client Balances">
+          <ReportSectionCard index={5} color="#f97316" title="Client Balances" action={<SectionExportButtons data={clientBalData} filename="soa_client_balances" columns={[{ label: 'Client', key: 'label' }, { label: 'Balance (AED)', key: 'value', numeric: true }]} title="Client Balances" options={{ dateRange }} />}>
             <BarTrendChart data={clientBalData} dataKey="value" color="#f97316" height={200} horizontal />
           </ReportSectionCard>
         </div>
