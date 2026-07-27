@@ -358,20 +358,17 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-4">
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
               <div
                 key={a.label}
                 onClick={() => a.action?.()}
-                className="row-edge-glow relative rounded-2xl p-4 overflow-hidden animate-fade-in-up cursor-pointer"
+                className="entity-card row-edge-glow relative overflow-hidden animate-fade-in-up cursor-pointer p-4"
                 style={{
                   ['--row-accent']: a.accent,
                   animationDelay: `${i * 0.05}s`,
-                  background: `linear-gradient(165deg, ${hexToRgba(a.accent, 0.10)} 0%, var(--surf-1) 100%)`,
-                  border: `1px solid ${hexToRgba(a.accent, 0.18)}`,
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
                 }}
               >
                 <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />

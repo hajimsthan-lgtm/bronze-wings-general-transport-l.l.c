@@ -43,7 +43,7 @@ function VehiclesTab() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [view, setView] = useState('grid');
+  const [view, setView] = useState('list');
   const [mode, setMode] = useState('analytics');
   const [trips, setTrips] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
