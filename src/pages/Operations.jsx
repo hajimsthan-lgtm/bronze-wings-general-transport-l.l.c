@@ -365,21 +365,20 @@ export default function Operations() {
               <div
                 key={a.label}
                 onClick={() => a.action?.()}
-                className="entity-card row-edge-glow relative overflow-hidden animate-fade-in-up cursor-pointer p-4"
-                style={{
-                  ['--row-accent']: a.accent,
-                  animationDelay: `${i * 0.05}s`,
-                }}
+                className="kpi-card group relative overflow-hidden animate-fade-in-up cursor-pointer p-4 sm:p-5"
+                style={{ animationDelay: `${i * 0.06}s` }}
               >
-                <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
-                <div className="flex items-center justify-between mb-2.5 relative">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(a.accent, 0.14), border: `1px solid ${hexToRgba(a.accent, 0.3)}` }}>
-                    <Icon className="w-4 h-4" style={{ color: a.accent }} />
+                {/* dotted spotlight backdrop */}
+                <div className="absolute inset-0 pointer-events-none kpi-dots opacity-30" style={{ backgroundImage: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 1px, transparent 1.5px)`, backgroundSize: '14px 14px' }} />
+                <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none opacity-40 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.55)} 0%, transparent 70%)` }} />
+                <div className="relative flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.22)}, ${hexToRgba(a.accent, 0.08)})`, border: `1px solid ${hexToRgba(a.accent, 0.35)}`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 0 16px -4px ${hexToRgba(a.accent, 0.6)}` }}>
+                    <Icon className="w-5 h-5" style={{ color: a.accent }} />
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</span>
+                  <span className="text-[10px] uppercase tracking-[0.1em] text-white/45 font-semibold">{a.label}</span>
                 </div>
-                <p className="text-lg md:text-xl font-bold text-foreground tabular-nums truncate relative">{a.value}</p>
-                {a.sub && <p className="text-[11px] text-muted-foreground mt-0.5 relative">{a.sub}</p>}
+                <p className="relative text-xl md:text-2xl font-bold text-white tabular-nums truncate tracking-tight">{a.value}</p>
+                {a.sub && <p className="relative text-[11px] text-white/40 mt-1 truncate">{a.sub}</p>}
               </div>
             );
           })}

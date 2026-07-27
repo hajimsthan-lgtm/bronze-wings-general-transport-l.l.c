@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette } from 'lucide-react';
+import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import ProfileHeader from '@/components/settings/ProfileHeader';
 import LocalizationCard from '@/components/settings/LocalizationCard';
@@ -11,6 +11,7 @@ import SecurityCard from '@/components/settings/SecurityCard';
 import DangerZone from '@/components/settings/DangerZone';
 import UserManualCard from '@/components/settings/UserManualCard';
 import DisplaySettingsCard from '@/components/settings/DisplaySettingsCard';
+import SoundSettingsCard from '@/components/settings/SoundSettingsCard';
 
 export default function Settings() {
   const { language, toggleLanguage } = useI18n();
@@ -58,6 +59,7 @@ export default function Settings() {
     { key: 'profile', label: 'Profile', icon: User, render: () => <ProfileHeader user={user} loading={loading} onUpdated={handleProfileUpdated} /> },
     { key: 'localization', label: 'Localization', icon: Globe, render: () => <LocalizationCard language={language} onLanguageChange={handleLanguageChange} /> },
     { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
+    { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
     { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
     { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
     { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => <DangerZone deleting={deleting} onDelete={handleDelete} /> },

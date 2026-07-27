@@ -69,15 +69,10 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
           <div
             key={trip.id}
             onClick={() => onOpenDetail?.(trip)}
-            className="group relative rounded-2xl mb-2 cursor-pointer row-edge-glow hover:-translate-y-px animate-fade-in-up"
+            className="group row-card row-edge-glow cursor-pointer animate-fade-in-up mb-2"
             style={{
               animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
               ['--row-accent']: color,
-              background: 'linear-gradient(180deg, rgba(20,24,38,0.50) 0%, rgba(14,18,30,0.60) 100%)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255,255,255,0.04)',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
             }}
           >
             <span

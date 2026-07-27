@@ -2,7 +2,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
 import TopBar from '@/components/layout/TopBar';
-import AppFooter from '@/components/layout/AppFooter';
 import MobileHeader from '@/components/layout/MobileHeader';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import { Bell, Settings, Search } from 'lucide-react';
@@ -139,7 +138,6 @@ export default function AppLayout() {
       </main>
 
       <EdgeQuickRail />
-      <AppFooter />
       <MobileNav />
     </div>
   );

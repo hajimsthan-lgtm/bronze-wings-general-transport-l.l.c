@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, MapPin, Truck, Receipt, FileBarChart, Calculator as CalcIcon, ChevronLeft } from 'lucide-react';
+import { Phone, MapPin, Truck, Receipt, FileBarChart, Calculator as CalcIcon, Settings as SettingsIcon } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
 /* Real brand glyphs (inline SVG, brand colors) */
@@ -20,83 +19,94 @@ const GmailIcon = (props) => (
 );
 
 const APPS = [
-  { key: 'whatsapp', label: 'WhatsApp', bg: 'linear-gradient(135deg,#25D366,#128C7E)', glow: 'rgba(37,211,102,0.35)', icon: WhatsAppIcon, action: () => window.open('https://wa.me/', '_blank') },
-  { key: 'gmail', label: 'Gmail', bg: 'linear-gradient(135deg,#EA4335,#C5221F)', glow: 'rgba(234,67,53,0.35)', icon: GmailIcon, action: () => { window.location.href = 'mailto:?subject=Transport%20Update'; } },
-  { key: 'call', label: 'Call', bg: 'linear-gradient(135deg,#10b981,#059669)', glow: 'rgba(16,185,129,0.35)', icon: Phone, action: () => { window.location.href = 'tel:'; } },
-  { key: 'maps', label: 'Maps', bg: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', glow: 'rgba(59,130,246,0.35)', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
-  { key: 'trip', label: 'New Trip', bg: 'linear-gradient(135deg,#0ea5e9,#0369a1)', glow: 'rgba(14,165,233,0.35)', icon: Truck, to: '/trips' },
-  { key: 'expense', label: 'Expense', bg: 'linear-gradient(135deg,#f97316,#ea580c)', glow: 'rgba(249,115,22,0.35)', icon: Receipt, to: '/expenses' },
-  { key: 'reports', label: 'Reports', bg: 'linear-gradient(135deg,#8b5cf6,#7c3aed)', glow: 'rgba(139,92,246,0.35)', icon: FileBarChart, to: '/reports/daily' },
+  { key: 'whatsapp', label: 'WhatsApp', hex: '#25D366', icon: WhatsAppIcon, action: () => window.open('https://wa.me/', '_blank') },
+  { key: 'gmail', label: 'Gmail', hex: '#EA4335', icon: GmailIcon, action: () => { window.location.href = 'mailto:?subject=Transport%20Update'; } },
+  { key: 'call', label: 'Call', hex: '#10b981', icon: Phone, action: () => { window.location.href = 'tel:'; } },
+  { key: 'maps', label: 'Maps', hex: '#3b82f6', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
+  { key: 'trip', label: 'New Trip', hex: '#0ea5e9', icon: Truck, to: '/trips' },
+  { key: 'expense', label: 'Expense', hex: '#f97316', icon: Receipt, to: '/expenses' },
+  { key: 'reports', label: 'Reports', hex: '#8b5cf6', icon: FileBarChart, to: '/reports/daily' },
 ];
 
+/* ── Sound ── */
+function readSound() {
+  try {
+    const en = localStorage.getItem('qa_sound_enabled');
+    const vol = localStorage.getItem('qa_sound_volume');
+    return { enabled: en === null ? true : en === '1', volume: vol === null ? 0.5 : Number(vol) };
+  } catch { return { enabled: true, volume: 0.5 }; }
+}
+
+let audioCtx;
+export function playBell() {
+  const { enabled, volume } = readSound();
+  if (!enabled || !volume) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    // Cool bell — three decaying sine partials
+    [[880, 1, 0.55], [1320, 0.5, 0.4], [1976, 0.25, 0.3]].forEach(([f, g, d]) => {
+      const o = audioCtx.createOscillator();
+      const gn = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      gn.gain.setValueAtTime(0, now);
+      gn.gain.linearRampToValueAtTime(g * volume * 0.28, now + 0.004);
+      gn.gain.exponentialRampToValueAtTime(0.0001, now + d);
+      o.connect(gn); gn.connect(audioCtx.destination);
+      o.start(now); o.stop(now + d + 0.05);
+    });
+  } catch {}
+}
+
 export default function EdgeQuickRail() {
-  const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(null);
   const [calcOpen, setCalcOpen] = useState(false);
-  const closeTimer = useRef(null);
-
-  const cancelClose = () => { if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; } };
-  const handleEnter = () => { cancelClose(); setOpen(true); };
-  const handleLeave = () => { cancelClose(); closeTimer.current = setTimeout(() => setOpen(false), 3000); };
-
-  useEffect(() => () => cancelClose(), []);
 
   const apps = [
     ...APPS,
-    { key: 'calc', label: 'Calculator', bg: 'linear-gradient(135deg,#374151,#111827)', glow: 'rgba(55,65,81,0.4)', icon: CalcIcon, action: () => setCalcOpen(true) },
+    { key: 'calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: () => setCalcOpen(true) },
+    { key: 'settings', label: 'Settings', hex: '#94a3b8', icon: SettingsIcon, to: '/settings' },
   ];
 
-  const renderRow = (a) => {
-    const cls = "group relative flex items-center justify-center w-12 h-12 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-110";
-    const iconSpan = (
+  const onEnter = (a) => { setHovered(a.key); playBell(); };
+  const onLeave = () => setHovered(null);
+
+  const renderItem = (a) => {
+    const tile = (
       <span
-        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
-        style={{ background: a.bg, boxShadow: `0 6px 16px ${a.glow}, inset 0 1px 0 rgba(255,255,255,0.15)` }}
+        className="relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-active:scale-95"
+        style={{
+          background: `linear-gradient(135deg, ${a.hex}33, ${a.hex}14)`,
+          backdropFilter: 'blur(14px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
+          border: `1px solid ${a.hex}66`,
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.16), 0 4px 14px ${a.hex}40`,
+          color: '#fff',
+        }}
       >
-        <a.icon className="w-5 h-5" />
+        <a.icon className="w-5 h-5" style={{ filter: `drop-shadow(0 0 5px ${a.hex})` }} />
       </span>
     );
+    const label = hovered === a.key && (
+      <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white z-10 glass-sm border border-white/10 animate-slide-in-right">
+        {a.label}
+      </span>
+    );
+    const cls = "group relative flex items-center justify-center";
     return a.to ? (
-      <Link key={a.key} to={a.to} className={cls} onClick={() => setOpen(false)} title={a.label}>{iconSpan}</Link>
+      <Link key={a.key} to={a.to} className={cls} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</Link>
     ) : (
-      <button key={a.key} type="button" onClick={() => { a.action?.(); }} className={cls} title={a.label}>{iconSpan}</button>
+      <button key={a.key} type="button" onClick={() => a.action?.()} className={cls} onMouseEnter={() => onEnter(a)} onMouseLeave={onLeave} title={a.label}>{tile}{label}</button>
     );
   };
 
   return (
     <>
-      {/* Invisible left-edge hover trigger — opens the rail on cursor reach */}
-      <div
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
-        onClick={handleEnter}
-        className="fixed left-0 top-14 md:top-20 bottom-0 w-3 z-[55] cursor-pointer"
-        aria-hidden
-      />
-
-      <AnimatePresence>
-        {open && (
-          <motion.aside
-            initial={{ x: -280, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -280, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            onMouseEnter={handleEnter}
-            onMouseLeave={handleLeave}
-            className="fixed left-0 top-14 md:top-20 bottom-0 w-16 z-[65] glass-panel rounded-none rounded-r-2xl p-2 flex flex-col items-center gap-2 overflow-y-auto no-scrollbar"
-            style={{ borderLeft: 'none' }}
-          >
-            <button
-              onClick={() => setOpen(false)}
-              className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors mb-1"
-              aria-label="Close"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {apps.map(renderRow)}
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
+      <div className="fixed left-1.5 md:left-2 top-[70px] md:top-[92px] z-[55] flex flex-col gap-2.5">
+        {apps.map(renderItem)}
+      </div>
       <CalculatorModal open={calcOpen} onClose={() => setCalcOpen(false)} />
     </>
   );
