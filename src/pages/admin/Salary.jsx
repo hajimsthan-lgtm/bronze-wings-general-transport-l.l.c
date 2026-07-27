@@ -1,129 +1,267 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import StatusBadge from '@/components/common/StatusBadge';
+import ExportButtons from '@/components/common/ExportButtons';
+import ReportStatCard from '@/components/reports/ReportStatCard';
+import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, CreditCard, CheckCircle2, Clock } from 'lucide-react';
+import { getCompanySettings } from '@/lib/companySettings';
+import { downloadPayslipPDF } from '@/lib/payslipHtml';
+import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
-import ExportButtons from '@/components/common/ExportButtons';
-import ReportStatCard from '@/components/reports/ReportStatCard';
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function Salary() {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const [driverMap, setDriverMap] = useState({});
+  const [settings, setSettings] = useState({});
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
-  const [driverMap, setDriverMap] = useState({});
+  const [prefillDriver, setPrefillDriver] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [busyId, setBusyId] = useState(null);
 
-  const load = () => { setLoading(true); base44.entities.SalaryRecord.list('-created_date', 100).then(setRecords).finally(() => setLoading(false)); };
-  useEffect(() => { load(); base44.entities.Driver.list('-created_date', 200).then(d => setDriverMap(Object.fromEntries((d || []).map(x => [x.name, x.id])))).catch(() => {}); }, []);
+  // Filters
+  const now = new Date();
+  const [search, setSearch] = useState('');
+  const [monthFilter, setMonthFilter] = useState(MONTHS[now.getMonth()]);
+  const [yearFilter, setYearFilter] = useState(String(now.getFullYear()));
+  const [statusFilter, setStatusFilter] = useState('');
 
-  const filtered = records.filter(r => !r.payment_date || (r.payment_date >= dateFrom && r.payment_date <= dateTo));
-  const totalPaid = filtered.filter(r => r.status === 'paid').reduce((s, r) => s + (r.net_salary || 0), 0);
-  const totalPending = filtered.filter(r => r.status === 'pending').reduce((s, r) => s + (r.net_salary || 0), 0);
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      base44.entities.SalaryRecord.list('-created_date', 200).catch(() => []),
+      base44.entities.Driver.list('-created_date', 200).catch(() => []),
+      getCompanySettings(),
+    ]).then(([r, d, s]) => {
+      setRecords(r || []);
+      setDrivers(d || []);
+      setDriverMap(Object.fromEntries((d || []).map((x) => [x.name, x.id])));
+      setSettings(s || {});
+    }).finally(() => setLoading(false));
+  };
+  useEffect(() => { load(); }, []);
+
+  const years = useMemo(() => {
+    const set = new Set(records.map((r) => String(r.year)));
+    set.add(String(now.getFullYear()));
+    return [...set].sort((a, b) => Number(b) - Number(a));
+  }, [records]);
+
+  const filtered = useMemo(() => records.filter((r) => {
+    if (search && !r.driver_name?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (monthFilter && r.month !== monthFilter) return false;
+    if (yearFilter && String(r.year) !== yearFilter) return false;
+    if (statusFilter && r.status !== statusFilter) return false;
+    return true;
+  }), [records, search, monthFilter, yearFilter, statusFilter]);
+
+  const totalPayroll = filtered.reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
+  const totalPaid = filtered.filter((r) => r.status === 'paid').reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
+  const totalPending = filtered.filter((r) => r.status !== 'paid').reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
+
+  const generatePayroll = async () => {
+    const month = monthFilter || MONTHS[now.getMonth()];
+    const year = Number(yearFilter || now.getFullYear());
+    const existing = new Set(records.filter((r) => r.month === month && Number(r.year) === year).map((r) => r.driver_name));
+    const toCreate = drivers
+      .filter((d) => (d.status || 'active') !== 'inactive' && !existing.has(d.name))
+      .map((d) => ({
+        driver_name: d.name,
+        month,
+        year,
+        base_salary: Number(d.base_salary) || 0,
+        overtime: 0,
+        bonus: 0,
+        deductions: 0,
+        net_salary: Number(d.base_salary) || 0,
+        status: 'pending',
+        payment_method: 'bank_transfer',
+        notes: '',
+      }));
+    if (toCreate.length === 0) { alert(`All active drivers already have a salary record for ${month} ${year}.`); return; }
+    setGenerating(true);
+    try {
+      await base44.entities.SalaryRecord.bulkCreate(toCreate);
+      load();
+    } finally { setGenerating(false); }
+  };
+
+  const markPaid = async (rec) => {
+    setBusyId(rec.id);
+    try {
+      await base44.entities.SalaryRecord.update(rec.id, {
+        status: 'paid',
+        payment_date: rec.payment_date || new Date().toISOString().split('T')[0],
+      });
+      load();
+    } finally { setBusyId(null); }
+  };
+
+  const remove = async (rec) => {
+    if (!window.confirm(`Delete salary record for ${rec.driver_name} (${rec.month} ${rec.year})?`)) return;
+    setBusyId(rec.id);
+    try { await base44.entities.SalaryRecord.delete(rec.id); load(); } finally { setBusyId(null); }
+  };
+
+  const payslip = async (rec) => {
+    const drv = drivers.find((d) => d.name === rec.driver_name) || {};
+    await downloadPayslipPDF(rec, drv, settings);
+  };
+
+  const exportColumns = [
+    { label: 'Driver', key: 'driver_name' },
+    { label: 'Month', key: 'month' },
+    { label: 'Year', key: 'year' },
+    { label: 'Base', key: 'base_salary' },
+    { label: 'Overtime', key: 'overtime' },
+    { label: 'Bonus', key: 'bonus' },
+    { label: 'Deductions', key: 'deductions' },
+    { label: 'Net', key: 'net_salary' },
+    { label: 'Status', key: 'status' },
+    { label: 'Method', key: 'payment_method' },
+    { label: 'Paid On', key: 'payment_date' },
+  ];
 
   return (
     <div>
-      <PageHeader title={t('salary')} description={`${filtered.length} records`}
-        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={[{ label: 'Driver', key: 'driver_name' }, { label: 'Month', key: 'month' }, { label: 'Year', key: 'year' }, { label: 'Base', key: 'base_salary' }, { label: 'Overtime', key: 'overtime' }, { label: 'Bonus', key: 'bonus' }, { label: 'Deductions', key: 'deductions' }, { label: 'Net', key: 'net_salary' }, { label: 'Status', key: 'status' }, { label: 'Method', key: 'payment_method' }, { label: 'Paid On', key: 'payment_date' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Salary & Payroll</h1>
+          <p className="text-sm text-muted-foreground">{filtered.length} records · {monthFilter || 'All months'} {yearFilter}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={exportColumns} />
+          <Button onClick={generatePayroll} disabled={generating} variant="outline" className="h-10 border-border">
+            <Sparkles className="w-4 h-4 mr-1.5 text-amber-400" />{generating ? 'Generating…' : 'Generate Payroll'}
+          </Button>
+          <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10">
+            <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <ReportStatCard index={0} label={t('paid')} value={totalPaid} format={formatCurrency} icon={CheckCircle2} color="#22c55e" />
-        <ReportStatCard index={1} label={t('pending')} value={totalPending} format={formatCurrency} icon={Clock} color="#f59e0b" />
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search driver…" className="bg-input border-border pl-9" />
+        </div>
+        <Select value={monthFilter} onValueChange={setMonthFilter}>
+          <SelectTrigger className="bg-input border-border w-[150px]"><SelectValue placeholder="Month" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>All Months</SelectItem>
+            {MONTHS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={yearFilter} onValueChange={setYearFilter}>
+          <SelectTrigger className="bg-input border-border w-[110px]"><SelectValue placeholder="Year" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>All Years</SelectItem>
+            {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="bg-input border-border w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>All Status</SelectItem>
+            {['pending', 'paid', 'partial'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {(search || monthFilter || yearFilter || statusFilter) && (
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setMonthFilter(''); setYearFilter(''); setStatusFilter(''); }} className="text-muted-foreground">Clear</Button>
+        )}
       </div>
 
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={CreditCard} title={t('no_data')} /> : (
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <ReportStatCard index={0} label="Total Payroll" value={totalPayroll} format={formatCurrency} icon={Wallet} color="#38BDF8" />
+        <ReportStatCard index={1} label={t('paid')} value={totalPaid} format={formatCurrency} icon={CheckCircle2} color="#22c55e" />
+        <ReportStatCard index={2} label={t('pending')} value={totalPending} format={formatCurrency} icon={Clock} color="#f59e0b" />
+        <ReportStatCard index={3} label="Records" value={filtered.length} format={(v) => String(v)} icon={CreditCard} color="#a855f7" />
+      </div>
+
+      {/* List */}
+      {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
+        <EmptyState icon={Wallet} title={t('no_data')} description="Generate payroll for the selected month or add a salary record manually." />
+      ) : (
         <div className="space-y-2">
-          {filtered.map(r => (
-            <div key={r.id} className="w-full text-left row-card flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0"><CreditCard className="w-4 h-4 text-white/70" /></div>
+          {filtered.map((r) => (
+            <div key={r.id} className="row-card flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
+                <Wallet className="w-4 h-4 text-white/70" />
+              </div>
               <div className="flex-1 min-w-0">
                 {driverMap[r.driver_name]
                   ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}?tab=salary`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>
                   : <p className="text-sm font-medium text-foreground">{r.driver_name}</p>}
-                <p className="text-xs text-muted-foreground">{r.month} {r.year} · {r.payment_method}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {r.month} {r.year} · {(r.payment_method || '').replace(/_/g, ' ')}
+                  {r.payment_date ? ` · paid ${formatDate(r.payment_date)}` : ''}
+                </p>
               </div>
-              <button onClick={() => { setEditItem(r); setFormOpen(true); }} className="text-right flex-shrink-0">
-                <p className="text-sm font-semibold text-foreground">{formatCurrency(r.net_salary)}</p>
+              <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground mr-2">
+                <span title="Base">{formatCurrency(r.base_salary)}</span>
+                <span title="Overtime" className="text-emerald-400/80">+{formatCurrency(r.overtime)}</span>
+                <span title="Deductions" className="text-red-400/80">-{formatCurrency(r.deductions)}</span>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(r.net_salary)}</p>
                 <StatusBadge status={r.status} />
-              </button>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {r.status !== 'paid' && (
+                  <button title="Mark Paid" onClick={() => markPaid(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-emerald-500/15 text-emerald-400 transition-colors disabled:opacity-50">
+                    <CheckCircle className="w-4 h-4" />
+                  </button>
+                )}
+                <button title="Download Payslip" onClick={() => payslip(r)} className="p-2 rounded-lg hover:bg-primary/15 text-[#38BDF8] transition-colors">
+                  <Download className="w-4 h-4" />
+                </button>
+                <button title="Edit" onClick={() => { setEditItem(r); setPrefillDriver(''); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button title="Delete" onClick={() => remove(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-red-500/15 text-red-400 transition-colors disabled:opacity-50">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Form Sheet */}
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Salary</SheetTitle></SheetHeader>
-          <SalaryForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.SalaryRecord.update(editItem.id, data); else await base44.entities.SalaryRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Salary</SheetTitle>
+          </SheetHeader>
+          <SalaryFormSheet
+            editItem={editItem}
+            prefillDriver={prefillDriver}
+            onSave={async (data) => {
+              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, data);
+              else await base44.entities.SalaryRecord.create(data);
+              load();
+              setFormOpen(false);
+            }}
+            onCancel={() => setFormOpen(false)}
+          />
         </SheetContent>
       </Sheet>
-    </div>
-  );
-}
-
-function SalaryForm({ editItem, onSave, onCancel }) {
-  const { t } = useI18n();
-  const [saving, setSaving] = useState(false);
-  const [drivers, setDrivers] = useState([]);
-  useEffect(() => { base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {}); }, []);
-  const [form, setForm] = useState({ driver_name: '', month: '', year: new Date().getFullYear(), base_salary: '', overtime: '', bonus: '', deductions: '', net_salary: '', status: 'pending', payment_method: 'bank_transfer', payment_date: '', notes: '' });
-  useEffect(() => {
-    if (editItem) setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '', overtime: editItem.overtime || '', bonus: editItem.bonus || '', deductions: editItem.deductions || '', net_salary: editItem.net_salary || '' });
-    else setForm({ driver_name: '', month: '', year: new Date().getFullYear(), base_salary: '', overtime: '', bonus: '', deductions: '', net_salary: '', status: 'pending', payment_method: 'bank_transfer', payment_date: '', notes: '' });
-  }, [editItem]);
-  const update = (f, v) => {
-    const next = { ...form, [f]: v };
-    if (['base_salary', 'overtime', 'bonus', 'deductions'].includes(f)) {
-      next.net_salary = (Number(next.base_salary) || 0) + (Number(next.overtime) || 0) + (Number(next.bonus) || 0) - (Number(next.deductions) || 0);
-    }
-    setForm(next);
-  };
-  const handle = async () => { setSaving(true); await onSave({ ...form, year: Number(form.year), base_salary: Number(form.base_salary) || 0, overtime: Number(form.overtime) || 0, bonus: Number(form.bonus) || 0, deductions: Number(form.deductions) || 0, net_salary: Number(form.net_salary) || 0 }); setSaving(false); };
-
-  return (
-    <div className="space-y-4">
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input list="salary-drivers" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" /><datalist id="salary-drivers">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Month</Label><Input value={form.month} onChange={e => update('month', e.target.value)} placeholder="January" className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Year</Label><Input type="number" value={form.year} onChange={e => update('year', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Base Salary</Label><Input type="number" value={form.base_salary} onChange={e => update('base_salary', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Overtime</Label><Input type="number" value={form.overtime} onChange={e => update('overtime', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Bonus</Label><Input type="number" value={form.bonus} onChange={e => update('bonus', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Deductions</Label><Input type="number" value={form.deductions} onChange={e => update('deductions', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="glass-card p-3 flex justify-between items-center"><span className="text-sm text-muted-foreground">Net Salary</span><span className="text-lg font-display font-bold text-primary">{formatCurrency(Number(form.net_salary) || 0)}</span></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['pending','paid','partial'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Method</Label><Select value={form.payment_method} onValueChange={v => update('payment_method', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['cash','bank_transfer','wps'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent></Select></div>
-      </div>
-      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
   );
 }
