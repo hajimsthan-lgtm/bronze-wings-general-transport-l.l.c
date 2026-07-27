@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
-import { LayoutDashboard, Truck, BarChart3, Shield, Settings } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Settings, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
+import { useTour, gatherTourSteps } from '@/lib/tour';
+import { useToast } from '@/components/ui/use-toast';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 
@@ -24,6 +26,14 @@ export default function DesktopNav() {
   const isActive = (item) => (item.paths || [item.path]).some((p) =>
   p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
   );
+
+  const tour = useTour();
+  const { toast } = useToast();
+  const startTour = () => {
+    const steps = gatherTourSteps();
+    if (!steps.length) { toast({ title: 'No guided sections on this page' }); return; }
+    tour.start(steps);
+  };
 
   return (
     <nav className="hidden md:block sticky top-0 z-50">
@@ -83,6 +93,15 @@ export default function DesktopNav() {
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
+          <button
+            onClick={startTour}
+            className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-blue-500/15 border border-blue-500/40 text-xs font-semibold text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
+            aria-label="Info Journey"
+            title="Info Journey — guide me through this page"
+          >
+            <GraduationCap className="w-4 h-4" />
+            <span className="hidden lg:inline">Tour</span>
+          </button>
           <button
             onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"

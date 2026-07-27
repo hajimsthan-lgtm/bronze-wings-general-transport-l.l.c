@@ -365,11 +365,20 @@ export default function Operations() {
               <div
                 key={a.label}
                 onClick={() => a.action?.()}
-                className="kpi-card group relative overflow-hidden animate-fade-in-up cursor-pointer p-4 sm:p-5"
-                style={{ animationDelay: `${i * 0.06}s` }}
+                onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}
+                className="group relative overflow-hidden animate-fade-in-up cursor-pointer p-4 sm:p-5"
+                style={{
+                  animationDelay: `${i * 0.06}s`,
+                  borderRadius: '1.25rem',
+                  background: 'linear-gradient(145deg, #20242f, #14171f)',
+                  border: `1px solid ${hexToRgba(a.accent, 0.32)}`,
+                  boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.10), inset 0 -3px 6px rgba(0,0,0,0.42), 0 8px 20px rgba(0,0,0,0.4)',
+                }}
               >
-                {/* dotted spotlight backdrop */}
-                <div className="absolute inset-0 pointer-events-none kpi-dots opacity-30" style={{ backgroundImage: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 1px, transparent 1.5px)`, backgroundSize: '14px 14px' }} />
+                {/* cursor-follow lightning blob */}
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 140px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.35)}, transparent 60%)` }} />
+                {/* edge lightning ring */}
+                <div className="absolute inset-0 pointer-events-none rounded-[1.25rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${hexToRgba(a.accent, 0.5)}, 0 0 22px -4px ${hexToRgba(a.accent, 0.55)}` }} />
                 <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none opacity-40 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.55)} 0%, transparent 70%)` }} />
                 <div className="relative flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.22)}, ${hexToRgba(a.accent, 0.08)})`, border: `1px solid ${hexToRgba(a.accent, 0.35)}`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 0 16px -4px ${hexToRgba(a.accent, 0.6)}` }}>

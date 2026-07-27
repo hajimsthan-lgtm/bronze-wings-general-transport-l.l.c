@@ -10,6 +10,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { I18nProvider } from '@/lib/i18n';
 import { ThemeProvider } from '@/lib/theme';
 import { TabHistoryProvider } from '@/lib/TabHistoryContext';
+import { TourProvider } from '@/lib/tour';
+import GuidedTour from '@/components/tour/GuidedTour';
 
 // Auth pages
 import Login from '@/pages/Login';
@@ -107,7 +109,10 @@ function App() {
             <Router>
               <ScrollToTop />
               <TabHistoryProvider>
-                <AuthenticatedApp />
+                <TourProvider>
+                  <AuthenticatedApp />
+                  <GuidedTour />
+                </TourProvider>
               </TabHistoryProvider>
             </Router>
             <Toaster />

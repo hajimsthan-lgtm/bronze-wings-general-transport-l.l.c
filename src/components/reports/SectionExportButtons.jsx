@@ -1,4 +1,4 @@
-import { Table, FileText } from 'lucide-react';
+import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 
 export default function SectionExportButtons({ data, filename, columns, title, options, className = '' }) {
@@ -6,10 +6,10 @@ export default function SectionExportButtons({ data, filename, columns, title, o
   return (
     <div className={`flex items-center gap-1 ${className}`}>
       <button title="Export CSV" onClick={() => exportToCSV(data, filename, columns)} className={btn}>
-        <Table className="w-3.5 h-3.5" />
+        <ExcelIcon className="w-3.5 h-3.5" />
       </button>
       <button title="Export PDF" onClick={() => exportToPDF(data, filename, columns, title || filename, options)} className={btn}>
-        <FileText className="w-3.5 h-3.5" />
+        <PdfIcon className="w-3.5 h-3.5" />
       </button>
     </div>
   );

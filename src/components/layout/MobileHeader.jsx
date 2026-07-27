@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Settings } from 'lucide-react';
+import { Settings, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
+import { useTour, gatherTourSteps } from '@/lib/tour';
+import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import BrandName from '@/components/layout/BrandName';
@@ -9,6 +11,13 @@ import BrandName from '@/components/layout/BrandName';
 export default function MobileHeader() {
   const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
+  const tour = useTour();
+  const { toast } = useToast();
+  const startTour = () => {
+    const steps = gatherTourSteps();
+    if (!steps.length) { toast({ title: 'No guided sections on this page' }); return; }
+    tour.start(steps);
+  };
 
   useEffect(() => {
     getCompanySettings().then((s) => setLogoUrl(s.logo_url));
@@ -50,6 +59,14 @@ export default function MobileHeader() {
           <BrandName variant="mobile" />
         </Link>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={startTour}
+            className="w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/40 flex items-center justify-center text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
+            aria-label="Info Journey"
+            title="Info Journey"
+          >
+            <GraduationCap className="w-4 h-4" />
+          </button>
           <button
             onClick={toggleTheme}
             className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 transition-all hover:border-blue-500/30 hover:text-white"

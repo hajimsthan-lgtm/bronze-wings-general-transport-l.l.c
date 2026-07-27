@@ -1,4 +1,5 @@
-import { Table, FileText, Layers } from 'lucide-react';
+import { Layers } from 'lucide-react';
+import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { buildAllTransactions, ALL_TX_COLUMNS } from '@/lib/allTransactions';
 
@@ -11,10 +12,10 @@ export default function AllTransactionsExport({ trips, expenses, fuelRecords, da
       <Layers className="w-3.5 h-3.5 text-white/50 mr-1" />
       <span className="text-xs font-medium text-white/70 mr-1.5 hidden sm:inline">All Tx</span>
       <button title="Export All Transactions CSV" onClick={() => exportToCSV(data, 'all_transactions', ALL_TX_COLUMNS)} className={btn}>
-        <Table className="w-3.5 h-3.5" />
+        <ExcelIcon className="w-3.5 h-3.5" />
       </button>
       <button title="Export All Transactions PDF" onClick={() => exportToPDF(data, 'all_transactions', ALL_TX_COLUMNS, 'All Transactions', opts)} className={btn}>
-        <FileText className="w-3.5 h-3.5" />
+        <PdfIcon className="w-3.5 h-3.5" />
       </button>
     </div>
   );

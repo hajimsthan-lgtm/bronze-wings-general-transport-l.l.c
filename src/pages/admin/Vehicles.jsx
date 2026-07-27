@@ -62,7 +62,7 @@ function VehiclesTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+      <div data-tour data-tour-title="Header & Controls" data-tour-en="Welcome to the Vehicles portal. Use Analytics for a fleet overview or Browse to manage individual vehicles. Export your fleet to Excel or PDF, and tap Add New to register a vehicle." data-tour-ur="ویہکل پورٹل میں خوش آمدید۔ فلیٹ کے جائزے کے لیے اینالیٹکس استعمال کریں یا انفرادی گاڑیوں کو منتظم کرنے کے لیے براؤز کریں۔ فلیٹ کو ایکسل یا پی ڈی ایف پر برآمد کریں، اور نئی گاڑی داخل کرنے کے لیے نیا اضافہ کریں۔" data-tour-ml="വാഹന പോർട്ടലിലേക്ക് സ്വാഗതം. ഫ്ലീറ്റ് അവലോകനത്തിന് അനലിറ്റിക്സ് ഉപയോഗിക്കുക അല്ലെങ്കിൽ വാഹനങ്ങൾ കൈകാര്യം ചെയ്യാൻ ബ്രൗസ് ചെയ്യുക. എക്സൽ അല്ലെങ്കിൽ PDF ലേക്ക് എക്സ്പോർട്ട് ചെയ്യുക." className="flex items-center justify-between gap-3 mb-5 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-foreground font-display">Vehicles Portal</h1>
           <p className="text-sm text-muted-foreground">Analytics overview & fleet insights</p>
@@ -79,23 +79,25 @@ function VehiclesTab() {
       </div>
 
       {mode === 'analytics' ? (
-        <VehiclesAnalytics vehicles={filtered} trips={trips} fuelRecords={fuelRecords} expenses={expenses} loading={loading} />
+        <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
+          <VehiclesAnalytics vehicles={filtered} trips={trips} fuelRecords={fuelRecords} expenses={expenses} loading={loading} />
+        </div>
       ) : (
         <>
-          <div className="relative mb-5">
+          <div data-tour data-tour-title="Search Fleet" data-tour-en="Type a plate number or make here to instantly filter your vehicles. The list below updates as you type." data-tour-ur="اپنی گاڑیوں کو فوری طور پر فلٹر کرنے کے لیے یہاں پلیٹ نمبر یا برانڈ درج کریں۔ نیچے دی گئی فہرست آپ کی ٹائپ کے مطابق اپڈیٹ ہوتی ہے۔" data-tour-ml="നിങ്ങളുടെ വാഹനങ്ങൾ ഉടൻ ഫിൽട്ടർ ചെയ്യാൻ ഇവിടെ പ്ലേറ്റ് നമ്പർ അല്ലെങ്കിൽ മേക്ക് ടൈപ്പ് ചെയ്യുക. താഴെയുള്ള പട്ടിക ടൈപ്പ് ചെയ്യുമ്പോൾ അപ്ഡേറ്റ് ചെയ്യും." className="relative mb-5">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
           </div>
 
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
           view === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filtered.map((v) => (
                 <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
               ))}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div data-tour data-tour-title="Vehicle List" data-tour-en="Each row is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر قطار ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ വരിയും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="space-y-2">
               {filtered.map((v) => (
                 <VehicleListRow key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
               ))}
