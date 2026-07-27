@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
-  Truck, FileText, Activity, AlertTriangle, Wrench, FileWarning, ChevronRight,
+  Truck, FileText, AlertTriangle, Wrench, FileWarning, ChevronRight,
   Car, Heart, Users, CheckCircle, TrendingUp, ArrowRight,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
@@ -10,6 +10,7 @@ import { formatCurrency } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import QuickActions from '@/components/dashboard/QuickActions';
+import HeroGreetingCard from '@/components/dashboard/HeroGreetingCard';
 import { motion } from 'framer-motion';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -188,15 +189,8 @@ export default function Dashboard() {
   return (
     <PullToRefresh onRefresh={loadData}>
     <div className="space-y-6">
-      {/* Subtitle */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="flex items-center gap-2 text-[13px] text-[#6b7280]"
-      >
-        <Activity className="w-4 h-4 text-[#3b82f6]" />
-        <span>Your business at a glance — active trips, pending invoices, fleet health, and receivables.</span>
-      </motion.div>
+      {/* Hero greeting card */}
+      <HeroGreetingCard activeTrips={activeTrips} totalRevenue={totalRevenue} pendingInvoices={pendingInvoices} />
 
       {/* Stat cards */}
       <motion.div
