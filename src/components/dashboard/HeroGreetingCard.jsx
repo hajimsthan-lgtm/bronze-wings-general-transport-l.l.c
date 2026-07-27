@@ -28,7 +28,7 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
   const { text: greet, Icon: GreetIcon, tone } = getGreeting(hour);
   const dateStr = now.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
-  const firstName = userName ? userName.split(' ')[0] : '';
+  const displayName = userName || '';
 
   const stats = [
     { label: 'Active Trips', value: activeTrips, hex: '#34d399' },
@@ -57,7 +57,7 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
               </span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-heading text-white mt-3 leading-tight">
-              {greet}{firstName ? <>, <span className="text-gradient">{firstName}</span></> : null}
+              {greet}{displayName ? <>, <span className="text-gradient">{displayName}</span></> : null}
             </h1>
             <p className="text-[13px] sm:text-sm text-[#a0a5b8] mt-2 max-w-md">
               Here's your business snapshot for today — tap any metric to dive in.
