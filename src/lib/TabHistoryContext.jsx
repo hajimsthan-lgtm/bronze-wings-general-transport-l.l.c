@@ -43,13 +43,13 @@ export function TabHistoryProvider({ children }) {
     if (!root) return;
     if (tabKey === activeTab) {
       tabRoutes.current[tabKey] = root;
-      if (location.pathname !== root) navigate(root);
+      if (location.pathname !== root) navigate(root, { replace: true });
       return;
     }
     const cachedRoute = tabRoutes.current[tabKey] || root;
     setActiveTab(tabKey);
     if (cachedRoute !== location.pathname) {
-      navigate(cachedRoute);
+      navigate(cachedRoute, { replace: true });
     }
   };
 

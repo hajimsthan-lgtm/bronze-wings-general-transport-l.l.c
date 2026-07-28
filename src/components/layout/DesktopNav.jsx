@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import { LayoutDashboard, Truck, BarChart3, Shield, Settings, GraduationCap } from 'lucide-react';
@@ -27,6 +28,7 @@ export default function DesktopNav() {
   p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
   );
 
+  const { switchTab } = useTabHistory();
   const tour = useTour();
   const { toast } = useToast();
   const startTour = () => {
@@ -71,9 +73,9 @@ export default function DesktopNav() {
           {navItems.map((item) => {
             const active = isActive(item);
             return (
-              <Link
+              <button
                 key={item.key}
-                to={item.path}
+                onClick={() => switchTab(item.key)}
                 className={`relative flex items-center gap-2 rounded-full px-5 py-1.5 text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${
                 active ?
                 'text-white' :
@@ -82,10 +84,10 @@ export default function DesktopNav() {
                 style={active ?
                 { background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15))', border: '1px solid rgba(59,130,246,0.40)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 0 12px rgba(59,130,246,0.25)' } :
                 { border: '1px solid transparent' }}>
-                
+
                 <item.icon className="w-3.5 h-3.5" />
                 <span>{t(item.key)}</span>
-              </Link>);
+              </button>);
 
           })}
         </div>
