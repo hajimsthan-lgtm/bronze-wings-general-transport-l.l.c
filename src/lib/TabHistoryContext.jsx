@@ -9,6 +9,7 @@ const TAB_ROOTS = {
   reports: '/reports/daily',
   admin: '/admin/vehicles',
   settings: '/settings',
+  agents: '/agents',
 };
 
 /**
@@ -19,6 +20,7 @@ export function getTabFromPath(pathname) {
   if (pathname.startsWith('/trips') || pathname.startsWith('/contracts') || pathname.startsWith('/expenses')) return 'operations';
   if (pathname.startsWith('/reports')) return 'reports';
   if (pathname.startsWith('/settings')) return 'settings';
+  if (pathname.startsWith('/agents')) return 'agents';
   if (pathname.startsWith('/admin')) return 'admin';
   return 'dashboard';
 }

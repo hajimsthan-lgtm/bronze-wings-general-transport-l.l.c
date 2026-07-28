@@ -2,6 +2,13 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext(null);
 
+const THEME_CLASSES = {
+  navy: 'theme-navy',
+  emerald: 'theme-emerald',
+  // crimson is the :root default — no class needed
+};
+const CYCLE = ['crimson', 'navy', 'emerald'];
+
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
     if (typeof window === 'undefined') return 'navy';
@@ -11,8 +18,9 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'navy') root.classList.add('theme-navy');
-    else root.classList.remove('theme-navy');
+    // remove all theme classes, then add the active one (if any)
+    Object.values(THEME_CLASSES).forEach((c) => root.classList.remove(c));
+    if (THEME_CLASSES[theme]) root.classList.add(THEME_CLASSES[theme]);
     localStorage.setItem('bw-theme-v6', theme);
   }, [theme]);
 
@@ -22,16 +30,18 @@ export function ThemeProvider({ children }) {
     return () => document.removeEventListener('fullscreenchange', onFs);
   }, []);
 
-  const toggleTheme = () => setThemeState((p) => (p === 'crimson' ? 'navy' : 'crimson'));
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-      else await document.exitFullscreen();
-    } catch {}
-  };
+  const toggleTheme = () => setThemeState((p) => {
+    const i = CYCLE.indexOf(p);
+    return CYCLE[(i + 1) % CYCLE.length];
+  });
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: setThemeState, toggleTheme, isFullscreen, toggleFullscreen }}>
+    <ThemeContext.Provider value={{ theme, setTheme: setThemeState, toggleTheme, isFullscreen, toggleFullscreen: async () => {
+      try {
+        if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch {}
+    } }}>
       {children}
     </ThemeContext.Provider>
   );

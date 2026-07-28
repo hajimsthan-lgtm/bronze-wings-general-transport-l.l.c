@@ -1,12 +1,13 @@
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, BarChart3, Shield } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Bot } from 'lucide-react';
 
 const navItems = [
   { key: 'dashboard', icon: LayoutDashboard, color: '#60a5fa' },
   { key: 'operations', icon: Truck, color: '#fb923c' },
   { key: 'reports', icon: BarChart3, color: '#34d399' },
   { key: 'admin', icon: Shield, color: '#c084fc' },
+  { key: 'agents', icon: Bot, color: '#22d3ee' },
 ];
 
 export default function MobileNav() {

@@ -4,6 +4,7 @@ import { useTheme } from '@/lib/theme';
 const THEMES = [
   { key: 'crimson', label: 'Crimson', swatch: '#D62828' },
   { key: 'navy', label: 'Navy', swatch: '#3E92CC' },
+  { key: 'emerald', label: 'Emerald', swatch: '#10b981' },
 ];
 
 export default function DisplaySettingsCard() {
@@ -22,7 +23,7 @@ export default function DisplaySettingsCard() {
       </div>
 
       <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Theme</p>
-      <div className="grid grid-cols-2 gap-2 mb-5">
+      <div className="grid grid-cols-3 gap-2 mb-5">
         {THEMES.map((th) => (
           <button
             key={th.key}

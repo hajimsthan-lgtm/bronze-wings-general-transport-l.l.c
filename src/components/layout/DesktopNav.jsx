@@ -2,7 +2,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
-import { LayoutDashboard, Truck, BarChart3, Shield, Settings, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Settings, GraduationCap, Bot } from 'lucide-react';
+
+const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
+const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useTour, gatherTourSteps } from '@/lib/tour';
@@ -14,7 +17,8 @@ const navItems = [
 { key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
 { key: 'operations', icon: Truck, path: '/trips', paths: ['/trips', '/contracts', '/expenses'] },
 { key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports'] },
-{ key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] }];
+{ key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] },
+{ key: 'agents', icon: Bot, path: '/agents', paths: ['/agents'] }];
 
 
 export default function DesktopNav() {
@@ -108,8 +112,8 @@ export default function DesktopNav() {
             onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
             aria-label="Switch theme">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 8px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
-            {theme === 'crimson' ? 'Crimson' : 'Navy'}
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: THEME_SWATCH[theme] || '#3E92CC', boxShadow: `0 0 8px ${THEME_SWATCH[theme] || '#3E92CC'}` }} />
+            {THEME_LABEL[theme] || 'Navy'}
           </button>
           <Link to="/settings" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white" aria-label="Settings">
             <Settings className="w-4 h-4" />
