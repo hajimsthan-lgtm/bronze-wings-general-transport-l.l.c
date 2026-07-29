@@ -12,9 +12,9 @@ export default function DriverNavDropdown() {
 
   return (
     <Select value="all" onValueChange={onSelect}>
-      <SelectTrigger className="w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs hidden">
-        <SelectValue placeholder="Select a driver…" />
-      </SelectTrigger>
+      
+
+      
       <SelectContent>
         <SelectItem value="all">All drivers</SelectItem>
         {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
