@@ -65,9 +65,7 @@ export default function TopBar() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`inline-flex items-center h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
-                  isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`
-                  }>
+                  className={`sub-tab ${isActive ? 'sub-tab-active' : ''}`}>
                   
                   {item.label || t(item.key)}
                 </Link>);

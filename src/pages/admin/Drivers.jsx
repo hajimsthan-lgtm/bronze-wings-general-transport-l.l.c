@@ -11,6 +11,7 @@ import DriversAnalytics from '@/components/admin/DriversAnalytics';
 import DriverCard from '@/components/admin/DriverCard';
 import DriverListRow from '@/components/admin/DriverListRow';
 import ViewToggle from '@/components/common/ViewToggle';
+import SubTabBar from '@/components/common/SubTabBar';
 import ExportButtons from '@/components/common/ExportButtons';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -23,9 +24,8 @@ export default function Drivers() {
   const [tab, setTab] = useState('drivers');
   return (
     <div>
-      <div className="flex items-center gap-2 mb-5">
-        <button onClick={() => setTab('drivers')} className={`sub-tab ${tab === 'drivers' ? 'sub-tab-active' : ''}`}>{t('drivers')}</button>
-        <button onClick={() => setTab('salary')} className={`sub-tab ${tab === 'salary' ? 'sub-tab-active' : ''}`}>{t('salary')}</button>
+      <div className="mb-5">
+        <SubTabBar value={tab} onChange={setTab} options={[{ value: 'drivers', label: t('drivers') }, { value: 'salary', label: t('salary') }]} />
       </div>
       {tab === 'drivers' ? <DriversTab /> : <Salary />}
     </div>
@@ -69,10 +69,7 @@ function DriversTab() {
           <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
+          <SubTabBar value={mode} onChange={setMode} options={[{ value: 'analytics', label: 'Analytics', icon: BarChart3 }, { value: 'browse', label: 'Browse', icon: LayoutGrid }]} />
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
           <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>

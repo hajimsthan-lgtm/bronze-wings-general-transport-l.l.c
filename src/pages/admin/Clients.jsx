@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import ClientsPanel from '@/components/admin/ClientsPanel';
 import VendorsPanel from '@/components/admin/VendorsPanel';
+import SubTabBar from '@/components/common/SubTabBar';
 
 export default function Clients() {
   const { t } = useI18n();
@@ -15,10 +16,7 @@ export default function Clients() {
 
   return (
     <div>
-      <div className="flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1 backdrop-blur-lg w-fit mb-5">
-        <button onClick={() => setView('clients')} className={`sub-tab ${view === 'clients' ? 'sub-tab-active' : ''}`}>{t('clients')}</button>
-        <button onClick={() => setView('vendors')} className={`sub-tab ${view === 'vendors' ? 'sub-tab-active' : ''}`}>{t('vendors')}</button>
-      </div>
+      <SubTabBar value={view} onChange={setView} options={[{ value: 'clients', label: t('clients') }, { value: 'vendors', label: t('vendors') }]} className="mb-5" />
       {view === 'clients' ? <ClientsPanel /> : <VendorsPanel />}
     </div>
   );
