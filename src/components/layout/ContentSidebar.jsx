@@ -3,6 +3,7 @@ import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import { LayoutDashboard, Truck, BarChart3, Shield, Bot, Settings, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import QuickFanMenu from '@/components/layout/QuickFanMenu';
 
 /* Each nav item carries its own modern color model — a duotone gradient,
    a glow color, and a soft tint for the active halo. */
@@ -235,6 +236,11 @@ export default function ContentSidebar() {
         </button>
 
         {navItems.map(renderItem)}
+
+        {/* Quick-tools fan launcher — separated from the nav icons */}
+        <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <QuickFanMenu />
+        </div>
 
         <div className="mt-auto pt-3">
           <Link
