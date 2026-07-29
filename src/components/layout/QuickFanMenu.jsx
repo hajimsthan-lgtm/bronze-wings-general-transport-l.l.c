@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Phone, MapPin, Calculator as CalcIcon, Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
@@ -25,24 +25,23 @@ const APPS = [
   { key: 'calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
 ];
 
-const RADIUS = 82;
+const RADIUS = 84;
+const SHOW_MS = 4000;
 
 export default function QuickFanMenu() {
   const [open, setOpen] = useState(false);
   const [calcOpen, setCalcOpen] = useState(false);
-  const wrapRef = useRef(null);
+  const timer = useRef(null);
 
-  // close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
-  }, [open]);
+  // hover reveals the fan; it auto-hides SHOW_MS after the last interaction
+  const poke = () => {
+    clearTimeout(timer.current);
+    setOpen(true);
+    timer.current = setTimeout(() => setOpen(false), SHOW_MS);
+  };
 
   const handleAction = (a) => {
+    clearTimeout(timer.current);
     setOpen(false);
     if (a.action === 'calc') setCalcOpen(true);
     else a.action();
@@ -50,7 +49,24 @@ export default function QuickFanMenu() {
 
   return (
     <>
-      <div ref={wrapRef} className="relative flex justify-center">
+      <div
+        className="relative flex justify-center"
+        onMouseEnter={poke}
+        onMouseLeave={poke}
+      >
+        {/* expanding light halo when open */}
+        {open && (
+          <span
+            className="pointer-events-none absolute left-1/2 top-1/2 rounded-full"
+            style={{
+              width: 48,
+              height: 48,
+              background: 'radial-gradient(circle, rgba(244,63,94,0.5) 0%, rgba(244,63,94,0.14) 45%, transparent 70%)',
+              animation: 'fan-halo 1.8s ease-out infinite',
+            }}
+          />
+        )}
+
         {/* faint dotted semicircle guide */}
         {open && (
           <svg
@@ -69,6 +85,23 @@ export default function QuickFanMenu() {
           </svg>
         )}
 
+        {/* rotating conic light ring */}
+        {open && (
+          <span
+            className="pointer-events-none absolute left-1/2 top-1/2"
+            style={{
+              width: (RADIUS + 22) * 2,
+              height: (RADIUS + 22) * 2,
+              borderRadius: '9999px',
+              background:
+                'conic-gradient(from 0deg, transparent 0deg, rgba(244,63,94,0.55) 40deg, transparent 95deg, transparent 180deg, rgba(244,63,94,0.45) 220deg, transparent 275deg)',
+              WebkitMask: 'radial-gradient(circle, transparent 47%, #000 48%, #000 49.5%, transparent 50.5%)',
+              mask: 'radial-gradient(circle, transparent 47%, #000 48%, #000 49.5%, transparent 50.5%)',
+              animation: 'fan-ring-spin 3s linear infinite',
+            }}
+          />
+        )}
+
         {/* fan icons — right-facing semicircle */}
         {open && APPS.map((a, i) => {
           const angle = (-90 + (180 / (APPS.length - 1)) * i) * (Math.PI / 180);
@@ -80,34 +113,44 @@ export default function QuickFanMenu() {
               key={a.key}
               type="button"
               onClick={() => handleAction(a)}
+              onMouseEnter={poke}
               title={a.label}
               className="absolute left-1/2 top-1/2 z-40"
-              style={{
-                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-              }}
+              style={{ transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` }}
             >
               <span
-                className="relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 hover:brightness-125 active:scale-95"
+                className="group relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
                 style={{
-                  animation: `fan-pop 0.4s cubic-bezier(0.16,1,0.3,1) ${i * 0.05}s both`,
+                  animation: `fan-pop 0.45s cubic-bezier(0.16,1,0.3,1) ${i * 0.06}s both`,
                   background: `linear-gradient(145deg, ${a.hex}, ${a.hex}cc)`,
                   border: `1px solid ${a.hex}99`,
-                  boxShadow: `inset 0 2px 3px rgba(255,255,255,0.4), inset 0 -3px 5px rgba(0,0,0,0.22), 0 6px 16px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.06)`,
+                  boxShadow: `0 0 18px -4px ${a.hex}cc, inset 0 2px 3px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.22), 0 6px 16px rgba(0,0,0,0.42)`,
                   color: '#fff',
                 }}
               >
-                <Icon className="w-5 h-5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
+                {/* sheen sweep */}
+                <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+                  <span
+                    className="absolute top-0 h-full w-1/2 skew-x-[-20deg]"
+                    style={{
+                      left: '-120%',
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+                      animation: `fan-sheen 1.9s ease-in-out ${i * 0.1 + 0.25}s infinite`,
+                    }}
+                  />
+                </span>
+                <Icon className="relative w-5 h-5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
               </span>
             </button>
           );
         })}
 
-        {/* launcher — separated menu icon */}
+        {/* launcher — hover to reveal fan */}
         <button
           type="button"
-          onClick={() => setOpen((s) => !s)}
+          onClick={poke}
           title="Quick tools"
-          className="group relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300"
+          className="group relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 z-50"
         >
           <span
             className="relative flex items-center justify-center w-[42px] h-[42px] rounded-[13px] transition-transform duration-300 group-hover:scale-110 group-active:scale-95"
@@ -115,10 +158,10 @@ export default function QuickFanMenu() {
               background: 'linear-gradient(150deg, #f43f5e 0%, #be123c 100%)',
               border: '1px solid rgba(244,63,94,0.55)',
               boxShadow: open
-                ? 'inset 0 1.5px 1px rgba(255,255,255,0.5), 0 8px 20px rgba(244,63,94,0.5), 0 0 0 1px rgba(244,63,94,0.4), 0 0 22px -4px rgba(244,63,94,0.65)'
+                ? 'inset 0 1.5px 1px rgba(255,255,255,0.5), 0 8px 24px rgba(244,63,94,0.6), 0 0 0 1px rgba(244,63,94,0.45), 0 0 34px -4px rgba(244,63,94,0.85)'
                 : 'inset 0 1.5px 1px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)',
               color: '#fff',
-              transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
+              transform: open ? 'rotate(135deg)' : 'rotate(0deg)',
             }}
           >
             <span className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.42), transparent)' }} />
