@@ -90,7 +90,7 @@ export default function EdgeQuickRail() {
       </span>
     );
     const label = hovered === a.key && (
-      <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white z-10 glass-sm border border-white/10 animate-slide-in-right">
+      <span className="pointer-events-none absolute right-full mr-3 top-1/2 -translate-y-1/2 whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white z-10 glass-sm border border-white/10 animate-fade-in">
         {a.label}
       </span>
     );
@@ -106,13 +106,13 @@ export default function EdgeQuickRail() {
   return (
     <>
       <div
-        className="fixed left-0 top-[70px] md:top-[92px] z-[55]"
+        className="fixed right-0 top-[70px] md:top-[92px] z-[55]"
         style={{ width: revealed ? 56 : 8, height: '72vh' }}
         onMouseEnter={() => setRevealed(true)}
         onMouseLeave={() => setRevealed(false)}
       >
         {revealed && (
-          <div className="absolute top-0 left-1.5 flex flex-col gap-2.5">
+          <div className="absolute top-0 right-1.5 flex flex-col gap-2.5">
             {apps.map((a, i) => renderItem(a, i))}
           </div>
         )}

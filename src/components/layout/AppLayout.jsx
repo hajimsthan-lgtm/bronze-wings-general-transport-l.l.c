@@ -131,16 +131,14 @@ export default function AppLayout() {
 
           {/* Scrollable body — content scrolls behind the transparent header */}
           <div className="relative z-10 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
-            <div className="flex flex-col md:flex-row md:gap-5 p-4 md:p-5 md:pt-32 pb-28 md:pb-10">
-              <ContentSidebar />
-              <div className="flex-1 min-w-0">
-                <Outlet />
-              </div>
+            <div className="p-4 pb-28 md:pt-32 md:pb-24 md:pr-6 md:pl-[60px]">
+              <Outlet />
             </div>
           </div>
         </div>
       </main>
 
+      <ContentSidebar />
       <EdgeQuickRail />
       <MobileNav />
     </div>
