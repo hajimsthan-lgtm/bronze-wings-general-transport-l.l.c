@@ -116,14 +116,14 @@ export default function ContentSidebar() {
           gap: expanded ? 4 : 12,
           ...(expanded
             ? {
-                background: 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.86) 0%, rgba(var(--surf-2-rgb),0.95) 100%)',
-                backdropFilter: 'blur(26px) saturate(1.45)',
-                WebkitBackdropFilter: 'blur(26px) saturate(1.45)',
-                border: '1px solid rgba(var(--panel-accent-rgb),0.18)',
+                background: 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.10) 0%, rgba(var(--surf-2-rgb),0.14) 100%)',
+                backdropFilter: 'blur(16px) saturate(1.25)',
+                WebkitBackdropFilter: 'blur(16px) saturate(1.25)',
+                border: '1px solid rgba(255,255,255,0.10)',
                 borderLeft: 'none',
                 borderRadius: '0 1.5rem 1.5rem 0',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 48px rgba(var(--panel-accent-rgb),0.04), 16px 0 44px rgba(0,0,0,0.55), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06)',
+                  'inset 0 1px 0 rgba(255,255,255,0.10), 16px 0 44px rgba(0,0,0,0.35)',
               }
             : {
                 background: 'transparent',

@@ -9,6 +9,7 @@ import ContentSidebar from '@/components/layout/ContentSidebar';
 
 export default function AppLayout() {
   const location = useLocation();
+  const showHeader = location.pathname === '/' || location.pathname.startsWith('/settings');
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
@@ -78,11 +79,13 @@ export default function AppLayout() {
           NAVIGATION — overlays content on desktop so scrolling data
           shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
-      <div className="sticky top-0 z-50 md:absolute md:inset-x-0 md:top-0">
-        <MobileHeader />
-        <DesktopNav />
-        <TopBar />
-      </div>
+      {showHeader && (
+        <div className="sticky top-0 z-50 md:absolute md:inset-x-0 md:top-0">
+          <MobileHeader />
+          <DesktopNav />
+          <TopBar />
+        </div>
+      )}
 
       {/* ═══════════════════════════════════════════════════════
           MAIN CONTENT — fixed-height panel; body scrolls internally
@@ -131,7 +134,7 @@ export default function AppLayout() {
 
           {/* Scrollable body — content scrolls behind the transparent header */}
           <div className="relative z-10 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
-            <div className="p-4 pb-28 md:pt-32 md:pb-24 md:pr-6 md:pl-[60px]">
+            <div className={`p-4 pb-28 md:pb-24 md:pr-6 md:pl-[60px] ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}>
               <Outlet />
             </div>
           </div>
