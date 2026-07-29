@@ -5,6 +5,7 @@ import TopBar from '@/components/layout/TopBar';
 import MobileHeader from '@/components/layout/MobileHeader';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import { Bell, Settings, Search } from 'lucide-react';
+import ContentSidebar from '@/components/layout/ContentSidebar';
 
 export default function AppLayout() {
   const location = useLocation();
@@ -130,8 +131,11 @@ export default function AppLayout() {
 
           {/* Scrollable body — content scrolls behind the transparent header */}
           <div className="relative z-10 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
-            <div className="p-4 md:p-6 md:pt-32 pb-28 md:pb-24">
-              <Outlet />
+            <div className="flex flex-col md:flex-row md:gap-5 p-4 md:p-5 md:pt-32 pb-28 md:pb-10">
+              <ContentSidebar />
+              <div className="flex-1 min-w-0">
+                <Outlet />
+              </div>
             </div>
           </div>
         </div>

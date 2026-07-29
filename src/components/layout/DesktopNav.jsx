@@ -1,11 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useTabHistory } from '@/lib/TabHistoryContext';
-import { useI18n } from '@/lib/i18n';
+import { Link } from 'react-router-dom';
 import { useTheme } from '@/lib/theme';
-import { LayoutDashboard, Truck, BarChart3, Shield, Settings, GraduationCap, Bot } from 'lucide-react';
-
-const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
-const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
+import { Settings, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useTour, gatherTourSteps } from '@/lib/tour';
@@ -13,26 +8,14 @@ import { useToast } from '@/components/ui/use-toast';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 
-const navItems = [
-{ key: 'dashboard', icon: LayoutDashboard, path: '/', paths: ['/'] },
-{ key: 'operations', icon: Truck, path: '/trips', paths: ['/trips', '/contracts', '/expenses'] },
-{ key: 'reports', icon: BarChart3, path: '/reports/daily', paths: ['/reports'] },
-{ key: 'admin', icon: Shield, path: '/admin/vehicles', paths: ['/admin'] },
-{ key: 'agents', icon: Bot, path: '/agents', paths: ['/agents'] }];
-
+const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
+const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
 
 export default function DesktopNav() {
-  const { t } = useI18n();
   const { theme, toggleTheme } = useTheme();
-  const location = useLocation();
   const [logoUrl, setLogoUrl] = useState('');
-  useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
+  useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
 
-  const isActive = (item) => (item.paths || [item.path]).some((p) =>
-  p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)
-  );
-
-  const { switchTab } = useTabHistory();
   const tour = useTour();
   const { toast } = useToast();
   const startTour = () => {
@@ -72,30 +55,6 @@ export default function DesktopNav() {
           <BrandName variant="desktop" />
         </Link>
 
-        {/* Center segmented nav — dark pill channel */}
-        <div className="flex items-center gap-1 rounded-full border border-white/5 bg-black/40 p-1.5 backdrop-blur-md">
-          {navItems.map((item) => {
-            const active = isActive(item);
-            return (
-              <button
-                key={item.key}
-                onClick={() => switchTab(item.key)}
-                className={`relative flex items-center gap-2 rounded-full px-5 py-1.5 text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${
-                active ?
-                'text-white' :
-                'text-white/40 hover:text-white/80 hover:bg-white/[0.04]'}`
-                }
-                style={active ?
-                { background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.15))', border: '1px solid rgba(59,130,246,0.40)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 0 12px rgba(59,130,246,0.25)' } :
-                { border: '1px solid transparent' }}>
-
-                <item.icon className="w-3.5 h-3.5" />
-                <span>{t(item.key)}</span>
-              </button>);
-
-          })}
-        </div>
-
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
@@ -120,6 +79,6 @@ export default function DesktopNav() {
           </Link>
         </div>
       </div>
-    </nav>);
-
+    </nav>
+  );
 }
