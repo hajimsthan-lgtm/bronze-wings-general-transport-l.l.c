@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { LayoutDashboard, Truck, BarChart3, Shield, Bot, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
+import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own modern color model — a duotone gradient,
    a glow color, and a soft tint for the active halo. */
@@ -94,11 +95,11 @@ export default function ContentSidebar() {
   const [showAllLabels, setShowAllLabels] = useState(false);
   const [shownKey, setShownKey] = useState(null);
   const [fading, setFading] = useState(false);
-  const [panelVisible, setPanelVisible] = useState(true);
-  const panelVisibleRef = useRef(true);
+  const panelVisible = useRailVisible();
+  const panelVisibleRef = useRef(panelVisible);
   const setPanelVisibleSync = (v) => {
     panelVisibleRef.current = v;
-    setPanelVisible(v);
+    railVisibility.set(v);
   };
 
   const labelTimer = useRef(null);

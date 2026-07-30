@@ -1,11 +1,10 @@
 export default function LoadingSpinner({ size = 'md', className = '' }) {
   const scale = { sm: 0.7, md: 1, lg: 1.3 }[size] || 1;
   const Wheel = ({ cx }) => (
-    <g className="animate-wheel-spin" style={{ transformBox: 'fill-box', transformOrigin: 'center' }}>
+    <g className="animate-wheel-spin" style={{ transformOrigin: `${cx}px 49px` }}>
       <circle cx={cx} cy="49" r="6.5" fill="#141414" stroke="rgba(255,255,255,0.20)" strokeWidth="1" />
       <circle cx={cx} cy="49" r="2.6" fill="#3a3a3a" />
       <line x1={cx} y1="44" x2={cx} y2="54" stroke="rgba(255,255,255,0.55)" strokeWidth="1.3" />
-      <line x1={cx - 5} y1="49" x2={cx + 5} y2="49" stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
     </g>
   );
   return (

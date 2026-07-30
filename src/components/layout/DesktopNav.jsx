@@ -6,6 +6,7 @@ import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 import TopQuickIcons from '@/components/layout/TopQuickIcons';
 import HeaderSubNav from '@/components/layout/headerSubNav';
+import { useRailVisible } from '@/lib/railVisibility';
 
 const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
 const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
@@ -15,6 +16,7 @@ export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
   const isDashboard = location.pathname === '/';
+  const railVisible = useRailVisible();
   useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
 
   return (
@@ -48,8 +50,10 @@ export default function DesktopNav() {
           <BrandName variant="desktop" />
         </Link>
 
-        {/* Page sub-nav tiles — live in the main header */}
-        <HeaderSubNav className="hidden md:flex" />
+        {/* Page sub-nav tiles — synced with the left rail visibility */}
+        <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <HeaderSubNav />
+        </div>
 
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">

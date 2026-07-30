@@ -1570,7 +1570,7 @@
 
 /* Spinning loader wheels */
 @keyframes wheel-spin { to { transform: rotate(360deg); } }
-.animate-wheel-spin { transform-box: fill-box; transform-origin: center; animation: wheel-spin 0.7s linear infinite; }
+.animate-wheel-spin { animation: wheel-spin 0.7s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-wheel-spin { animation: none !important; } }
 
 /* ═══════════════════════════════════════════════════════
