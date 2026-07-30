@@ -1,7 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, BarChart3, Shield, Bot, Settings, ChevronsRight, ChevronsLeft } from 'lucide-react';
+import { LayoutDashboard, Truck, BarChart3, Shield, Bot, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
 
@@ -237,30 +237,9 @@ export default function ContentSidebar() {
 
         {navItems.map(renderItem)}
 
-        {/* Quick-tools fan launcher — separated from the nav icons */}
-        <div className="mt-5 pt-16" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <QuickFanMenu />
-        </div>
-
+        {/* Quick-tools fan launcher — pinned to the bottom of the rail */}
         <div className="mt-auto pt-3">
-          <Link
-            to="/settings"
-            onMouseEnter={() => onLabelEnter('settings')}
-            onMouseLeave={onLabelLeave}
-            className="group relative flex items-center justify-center w-12 h-12 mx-auto rounded-2xl transition-all duration-300"
-          >
-            <IconTile
-              item={{ icon: Settings, from: '#64748b', to: '#334155', glow: '100,116,139' }}
-              active={location.pathname.startsWith('/settings')}
-            />
-            {(showAllLabels || shownKey === 'settings') && (
-              <ShimmerLabel
-                label="Settings"
-                glow="100,116,139"
-                fading={!showAllLabels && fading && shownKey === 'settings'}
-              />
-            )}
-          </Link>
+          <QuickFanMenu />
         </div>
       </aside>
     </div>
