@@ -7,6 +7,7 @@ import { useTour, gatherTourSteps } from '@/lib/tour';
 import { useToast } from '@/components/ui/use-toast';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
+import TopQuickIcons from '@/components/layout/TopQuickIcons';
 
 const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
 const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
@@ -58,6 +59,7 @@ export default function DesktopNav() {
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
+          <TopQuickIcons />
           <button
             onClick={startTour}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-blue-500/15 border border-blue-500/40 text-xs font-semibold text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
