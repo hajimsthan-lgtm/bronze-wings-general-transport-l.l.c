@@ -56,17 +56,17 @@ export default function TopBar() {
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-12 py-2">
-          {/* frosted sub-tab pill track */}
-          <div className="flex items-center gap-1 rounded-full border border-border bg-muted/40 p-1 backdrop-blur-lg overflow-x-auto no-scrollbar flex-1 min-w-0">
+        <div className="flex items-center justify-between h-10 py-1.5">
+          {/* compact inset sub-tab channel — distinct from main nav */}
+          <div className="flex items-center gap-0.5 rounded-full border border-white/[0.06] bg-background/50 p-1 backdrop-blur-md overflow-x-auto no-scrollbar flex-1 min-w-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)]">
             {subNav.map((item) => {
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`sub-tab ${isActive ? 'sub-tab-active' : ''}`}>
-                  
+                  className={`sub-tab !py-1 !px-2.5 !text-[10px] !tracking-[0.04em] ${isActive ? 'sub-tab-active' : ''}`}>
+
                   {item.label || t(item.key)}
                 </Link>);
 
