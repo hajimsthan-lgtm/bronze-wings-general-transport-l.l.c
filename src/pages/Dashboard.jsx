@@ -30,7 +30,7 @@ const CARD_SM = {
 
 function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
   return (
-    <Link to={to} className="group relative block rounded-3xl p-4 sm:p-6 overflow-hidden transition-all duration-400 hover:-translate-y-1" style={CARD}>
+    <Link to={to} className="group relative block rounded-3xl p-5 sm:p-6 overflow-hidden transition-all duration-400 hover:-translate-y-1" style={CARD}>
       <span
         className="absolute top-4 right-4 sm:top-5 sm:right-5 w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white"
         style={{ background: `linear-gradient(135deg, ${grad[0]}, ${grad[1]})`, boxShadow: `0 4px 12px ${glow}` }}
@@ -48,7 +48,7 @@ function StatCard({ icon: Icon, grad, glow, value, subtitle, label, to }) {
 
 function MetricCard({ icon: Icon, grad, glow, value, label, subtitle }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-0.5" style={CARD_SM}>
+    <div className="flex items-center gap-4 rounded-2xl p-5 sm:p-6 min-w-0 transition-all duration-300 hover:-translate-y-0.5" style={CARD_SM}>
       <span
         className="w-12 h-12 rounded-2xl flex items-center justify-center text-white flex-shrink-0"
         style={{ background: `linear-gradient(135deg, ${grad[0]}, ${grad[1]})`, boxShadow: `0 4px 12px ${glow}` }}
@@ -211,7 +211,7 @@ export default function Dashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5">
         {/* Revenue trend */}
-        <div className="rounded-3xl p-6" style={CARD}>
+        <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <h2 className="text-base font-semibold text-white mb-5">Revenue Trend</h2>
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={revData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -236,7 +236,7 @@ export default function Dashboard() {
         </div>
 
         {/* Expense breakdown donut */}
-        <div className="rounded-3xl p-6" style={CARD}>
+        <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <h2 className="text-base font-semibold text-white mb-5">Expense Breakdown</h2>
           <div className="flex items-center gap-4">
             <div className="relative" style={{ width: 150, height: 150, flexShrink: 0 }}>
@@ -270,7 +270,7 @@ export default function Dashboard() {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
         <MetricCard icon={CheckCircle} grad={['#10b981', '#34d399']} glow="rgba(16,185,129,0.3)" value={`${onTimePct}%`} label="ON-TIME DELIVERY" subtitle="All trips on schedule" />
         <MetricCard icon={TrendingUp} grad={['#3b82f6', '#60a5fa']} glow="rgba(59,130,246,0.3)" value={formatCurrency(avgTripValue)} label="AVG. TRIP VALUE" subtitle="Per trip average" />
         <MetricCard icon={Truck} grad={['#f97316', '#fb923c']} glow="rgba(249,115,22,0.3)" value={`${fleetUtil}%`} label="FLEET UTILIZATION" subtitle="Vehicle usage rate" />
@@ -279,7 +279,7 @@ export default function Dashboard() {
       {/* Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Recent Trips */}
-        <div className="rounded-3xl p-6" style={CARD}>
+        <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-semibold text-white">Recent Trips</h2>
             <Link to="/trips" className="inline-flex items-center gap-1 text-[13px] text-[#3b82f6] font-medium hover:text-[#60a5fa]">
@@ -305,7 +305,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Invoices */}
-        <div className="rounded-3xl p-6" style={CARD}>
+        <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-semibold text-white">Recent Invoices</h2>
             <Link to="/admin/clients" className="inline-flex items-center gap-1 text-[13px] text-[#3b82f6] font-medium hover:text-[#60a5fa]">

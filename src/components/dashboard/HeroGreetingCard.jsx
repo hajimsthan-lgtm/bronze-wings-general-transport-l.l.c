@@ -57,7 +57,7 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
               </span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-heading text-white mt-3 leading-tight">
-              {greet}{displayName ? <>, <span className="text-gradient">{displayName}</span></> : null}
+              {greet}{displayName ? <>, <span className="text-[#a0a5b8] font-normal text-base sm:text-lg align-middle">{displayName}</span></> : null}
             </h1>
             <p className="text-[13px] sm:text-sm text-[#a0a5b8] mt-2 max-w-md">
               Here's your business snapshot for today — tap any metric to dive in.
