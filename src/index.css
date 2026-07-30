@@ -1639,6 +1639,16 @@
 .animate-marquee-freeze-roll { animation: marquee-freeze-roll 28s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-marquee-freeze-roll { animation: none !important; } }
 
+/* Single company name — glides across, re-enters from the right as it exits left (infinity) */
+@keyframes marquee-single {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.animate-marquee-single {
+  animation: marquee-single 16s linear infinite, footer-color-shift 8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .animate-marquee-single { animation: none !important; } }
+
 /* Multi-color shimmer for footer text */
 @keyframes footer-color-shift {
   0% { background-position: 0% center; }

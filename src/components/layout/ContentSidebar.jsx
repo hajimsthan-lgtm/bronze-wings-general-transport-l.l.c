@@ -18,7 +18,7 @@ const navItems = [
 
 const LABEL_LINGER_MS = 3000;   // name stays visible this long after cursor leaves the icon
 const LABEL_FADE_MS = 450;      // graceful fade-out duration
-const PANEL_VANISH_MS = 5000;   // whole rail vanishes after this long with no cursor on it
+const PANEL_VANISH_MS = 15000;   // whole rail vanishes after this long with no cursor on it
 
 function IconTile({ item, active }) {
   return (
