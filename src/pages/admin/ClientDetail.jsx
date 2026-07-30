@@ -291,7 +291,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
 
         <TabsContent value="generator" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : (
-            <InvoiceGeneratorTab client={client} trips={displayTrips} invoices={displayInvoices} onInvoicesChanged={reloadInvoices} />
+            <InvoiceGeneratorTab client={client} trips={trips} invoices={invoices} onInvoicesChanged={reloadInvoices} />
           )}
         </TabsContent>
 
