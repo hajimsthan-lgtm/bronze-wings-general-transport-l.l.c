@@ -5,9 +5,10 @@ const ThemeContext = createContext(null);
 const THEME_CLASSES = {
   navy: 'theme-navy',
   emerald: 'theme-emerald',
+  amethyst: 'theme-amethyst',
   // crimson is the :root default — no class needed
 };
-const CYCLE = ['crimson', 'navy', 'emerald'];
+const CYCLE = ['crimson', 'navy', 'emerald', 'amethyst'];
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {

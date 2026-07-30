@@ -6,7 +6,7 @@ export default function AppFooter() {
   useEffect(() => { getCompanySettings().then(setS); }, []);
   const company = s?.company_name || 'General Transport L.L.C';
 
-  // company name only, repeated for a seamless horizontal loop
+  // company name only, repeated for a seamless loop
   const items = Array(6).fill(company);
 
   return (
@@ -22,15 +22,18 @@ export default function AppFooter() {
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
-        <div className="flex items-center h-full w-max animate-marquee-left" style={{ willChange: 'transform' }}>
+        {/* Freeze 8s, then roll 5s, repeating */}
+        <div className="flex items-center h-full w-max animate-marquee-freeze-roll" style={{ willChange: 'transform' }}>
           {items.map((it, i) => (
             <span key={i} className="flex items-center shrink-0">
               <span
                 className="px-6 text-[14px] font-bold uppercase tracking-[0.16em]"
                 style={{
-                  backgroundImage: 'linear-gradient(100deg, #ffffff 0%, rgb(var(--panel-accent2-rgb)) 50%, #ffffff 100%)',
+                  backgroundImage: 'linear-gradient(90deg, #ff6b6b 0%, #f59e0b 16%, #facc15 28%, #34d399 40%, #22d3ee 52%, #60a5fa 64%, #a78bfa 76%, #f472b6 88%, #ff6b6b 100%)',
+                  backgroundSize: '200% auto',
                   WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 0 8px rgba(var(--panel-accent2-rgb),0.45))',
+                  filter: 'drop-shadow(0 0 8px rgba(168,85,247,0.40))',
+                  animation: 'footer-color-shift 8s linear infinite',
                 }}
               >
                 {it}

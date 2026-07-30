@@ -8,8 +8,8 @@ import TopQuickIcons from '@/components/layout/TopQuickIcons';
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible } from '@/lib/railVisibility';
 
-const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
-const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
+const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981', amethyst: '#a855f7' };
+const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald', amethyst: 'Amethyst' };
 
 export default function DesktopNav() {
   const { theme, toggleTheme } = useTheme();
@@ -41,9 +41,17 @@ export default function DesktopNav() {
             <div className="relative">
               <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
               {logoUrl ?
-              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain ring-1 ring-white/10" /> :
-              <div className="relative w-9 h-9 rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center">
-                <span className="text-sm font-bold text-blue-400">BW</span>
+              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
+                border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+              }} /> :
+              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+                  border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                  boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+                }}>
+                <span className="text-sm font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
               </div>}
             </div>
           )}

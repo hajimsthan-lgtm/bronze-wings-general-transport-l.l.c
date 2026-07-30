@@ -218,6 +218,77 @@
     --surf-1: rgba(25,39,31,0.6);
     --surf-2: rgba(14,23,20,0.85);
   }
+
+  .theme-amethyst {
+    /* ===== Deep Amethyst — dark violet + gold ===== */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --background: 270 60% 9%;              /* #0F0917 deep amethyst */
+    --background-elevated: 268 44% 14%;
+    --card: 268 38% 16%;                   /* #1C1430 */
+    --card-foreground: 0 0% 97%;
+    --foreground: 0 0% 97%;
+    --muted: 268 28% 20%;
+    --muted-foreground: 268 14% 66%;
+    --popover: 268 38% 16%;
+    --popover-foreground: 0 0% 97%;
+    --primary: 271 76% 63%;               /* #a855f7 violet */
+    --primary-light: 271 80% 70%;
+    --primary-foreground: 270 60% 8%;
+    --secondary: 268 30% 18%;
+    --secondary-foreground: 0 0% 97%;
+    --accent: 43 88% 56%;                  /* #f5c542 gold */
+    --accent-foreground: 270 60% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --neon: 271 76% 63%;
+    --magenta: 43 88% 56%;
+    --success: 142 60% 48%;
+    --success-light: 142 68% 56%;
+    --warning: 43 88% 56%;
+    --danger: 0 72% 51%;
+    --border: 268 24% 24%;
+    --input: 268 38% 16%;
+    --ring: 271 76% 63%;
+    --panel-accent-rgb: 168, 85, 247;     /* #a855f7 */
+    --panel-accent2-rgb: 245, 197, 66;    /* #f5c542 */
+    --surf-1-rgb: 28, 20, 48;             /* #1C1430 */
+    --surf-2-rgb: 15, 9, 23;              /* #0F0917 */
+    --radius: 1rem;
+    --chart-1: 271 76% 63%;
+    --chart-2: 43 88% 56%;
+    --chart-3: 268 14% 66%;
+    --chart-4: 271 80% 70%;
+    --chart-5: 268 28% 60%;
+    --sidebar-background: 272 64% 7%;
+    --sidebar-foreground: 0 0% 97%;
+    --sidebar-primary: 271 76% 63%;
+    --sidebar-primary-foreground: 270 60% 8%;
+    --sidebar-accent: 268 22% 14%;
+    --sidebar-accent-foreground: 0 0% 97%;
+    --sidebar-border: 268 18% 20%;
+    --sidebar-ring: 271 76% 63%;
+    --clay-bg: 268 38% 16%;
+    --clay-border: 268 24% 26%;
+    --clay-shadow-dark: 272 64% 4%;
+    --clay-shadow-light: 268 40% 22%;
+
+    --app-bg: #0F0917;
+    --panel-bg: linear-gradient(180deg, rgba(28,20,48,0.75) 0%, rgba(15,9,23,0.88) 50%, rgba(15,9,23,0.92) 100%);
+    --panel-border-color: rgba(168,85,247,0.18);
+    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
+    --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    --panel-blur: blur(12px) saturate(1.2);
+    --header-tint-1: rgba(15,9,23,0.12);
+    --header-tint-2: rgba(15,9,23,0.05);
+    --nav-inactive: rgba(180,160,200,0.55);
+    --surf-1: rgba(28,20,48,0.6);
+    --surf-2: rgba(15,9,23,0.85);
+  }
 }
 
 @layer base {
@@ -1559,6 +1630,20 @@
 @keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 .animate-marquee-left { animation: marquee-left 32s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-marquee-left { animation: none !important; } }
+
+/* Freeze 8s then roll 5s — repeating footer animation */
+@keyframes marquee-freeze-roll {
+  0%, 61.538% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee-freeze-roll { animation: marquee-freeze-roll 13s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-marquee-freeze-roll { animation: none !important; } }
+
+/* Multi-color shimmer for footer text */
+@keyframes footer-color-shift {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
 
 /* Sub-nav tiles light up on page entry */
 @keyframes subnav-light {
