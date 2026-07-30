@@ -1,6 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText } from 'lucide-react';
+import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText, Landmark } from 'lucide-react';
 
 const operationsSubNav = [
   { key: 'trips', path: '/trips' },
@@ -15,6 +15,7 @@ const reportsSubNav = [
   { key: 'daily_report', path: '/reports/daily', label: 'Daily' },
   { key: 'profit_loss', path: '/reports/pnl', label: 'P&L' },
   { key: 'soa', path: '/reports/soa', label: 'SOA' },
+  { key: 'bank_reconciliation', path: '/reports/bank-reconciliation', label: 'Bank Rec' },
 ];
 
 export const subNavMap = {
@@ -23,6 +24,7 @@ export const subNavMap = {
   '/reports/daily': reportsSubNav,
   '/reports/pnl': reportsSubNav,
   '/reports/soa': reportsSubNav,
+  '/reports/bank-reconciliation': reportsSubNav,
   '/expenses': operationsSubNav,
   '/trips': operationsSubNav,
   '/contracts': operationsSubNav,
@@ -36,7 +38,7 @@ export const subNavMap = {
 export const SUBNAV_ICON = {
   trips: Route, expenses: Receipt,
   vehicles: Truck, drivers: Users, clients: Building2,
-  daily_report: ClipboardList, profit_loss: TrendingUp, soa: FileText,
+  daily_report: ClipboardList, profit_loss: TrendingUp, soa: FileText, bank_reconciliation: Landmark,
 };
 
 export const SUBNAV_STYLE = {
@@ -48,6 +50,7 @@ export const SUBNAV_STYLE = {
   daily_report: { from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
   profit_loss: { from: '#8b5cf6', to: '#5b21b6', glow: '139,92,246' },
   soa: { from: '#f97316', to: '#9a3412', glow: '249,115,22' },
+  bank_reconciliation: { from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' },
 };
 
 export function hasSubNavForPath(pathname) {

@@ -1633,10 +1633,10 @@
 
 /* Freeze 8s then roll 5s — repeating footer animation */
 @keyframes marquee-freeze-roll {
-  0%, 61.538% { transform: translateX(0); }
+  0%, 40% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.animate-marquee-freeze-roll { animation: marquee-freeze-roll 13s linear infinite; }
+.animate-marquee-freeze-roll { animation: marquee-freeze-roll 20s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-marquee-freeze-roll { animation: none !important; } }
 
 /* Multi-color shimmer for footer text */

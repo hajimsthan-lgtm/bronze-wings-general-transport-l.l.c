@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { QUICK_APPS } from '@/components/layout/quickApps.jsx';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
-/* Top header — all quick app icons auto-reveal with an equal staggered
-   duration on mount. Calm claymorphic tiles with brand-colored icons. */
+/* Top header — only WhatsApp, Gmail, Maps and Calculator.
+   Icons auto-reveal with an equal staggered duration on mount. */
+const TOP_KEYS = ['whatsapp', 'gmail', 'maps', 'calc'];
+
 export default function TopQuickIcons() {
   const [calcOpen, setCalcOpen] = useState(false);
-  const apps = QUICK_APPS;
+  const apps = QUICK_APPS.filter((a) => TOP_KEYS.includes(a.key));
 
   const handleAction = (a) => {
     if (a.action === 'calc') setCalcOpen(true);
@@ -15,7 +17,7 @@ export default function TopQuickIcons() {
 
   return (
     <>
-      <div className="hidden xl:flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-[52vw]">
+      <div className="hidden xl:flex items-center gap-2">
         {apps.map((a, i) => {
           const Icon = a.icon;
           return (
@@ -25,7 +27,7 @@ export default function TopQuickIcons() {
               onClick={() => handleAction(a)}
               title={a.label}
               aria-label={a.label}
-              className="group relative flex items-center gap-2 h-10 pl-2.5 pr-3 rounded-xl flex-shrink-0 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+              className="group relative flex items-center gap-2 h-10 pl-2.5 pr-3 rounded-xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
               style={{
                 background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
                 border: '1px solid rgba(255,255,255,0.06)',

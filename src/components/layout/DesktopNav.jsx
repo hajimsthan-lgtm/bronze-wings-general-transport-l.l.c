@@ -6,7 +6,7 @@ import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 import TopQuickIcons from '@/components/layout/TopQuickIcons';
 import HeaderSubNav from '@/components/layout/headerSubNav';
-import { useRailVisible } from '@/lib/railVisibility';
+import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 
 const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981', amethyst: '#a855f7' };
 const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald', amethyst: 'Amethyst' };
@@ -20,7 +20,10 @@ export default function DesktopNav() {
   useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
 
   return (
-    <nav className="hidden md:block sticky top-0 z-50">
+    <nav
+      className="hidden md:block sticky top-0 z-50"
+      onMouseEnter={() => railVisibility.set(true)}
+    >
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
         background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
