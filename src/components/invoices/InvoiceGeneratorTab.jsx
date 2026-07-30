@@ -9,8 +9,9 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import ExportButtons from '@/components/common/ExportButtons';
-import { FileText, Download, Send, Trash2, Zap, Truck, AlertCircle, CheckCheck, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, DollarSign } from 'lucide-react';
+import { FileText, Download, Send, Trash2, Zap, Truck, AlertCircle, CheckCheck, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, DollarSign, MailCheck, Split } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
 const pad = (n) => String(n).padStart(4, '0');
 const SCROLL_H = 'max-h-[440px] overflow-y-auto thin-scroll pr-1';
@@ -26,16 +27,17 @@ const dueFromTerms = (terms) => {
 const flagInfo = (inv, clientAdvance) => {
   const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
   const paid = Number(inv.paid_amount) || 0;
-  if (inv.status === 'paid' || balance <= 0.001) return { rank: 4, key: 'paid', label: 'Paid', color: '#34d399', bg: 'rgba(52,211,153,0.14)', border: 'rgba(52,211,153,0.4)', Icon: CheckCircle2 };
-  if (paid > 0) return { rank: 1, key: 'partial', label: 'Partial', color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: DollarSign };
-  if (clientAdvance > 0) return { rank: 2, key: 'advance', label: 'Advance', color: '#22d3ee', bg: 'rgba(34,211,238,0.14)', border: 'rgba(34,211,238,0.4)', Icon: Wallet };
+  const isSent = inv.status === 'sent' || inv.status === 'partially_paid';
+  if (inv.status === 'paid' || balance <= 0.001) return { rank: 4, key: 'paid', label: 'Paid', color: '#34d399', bg: 'rgba(52,211,153,0.14)', border: 'rgba(52,211,153,0.4)', Icon: CheckCircle2, sent: isSent };
+  if (paid > 0) return { rank: 1, key: 'partial', label: 'Split', color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Split, sent: isSent };
+  if (clientAdvance > 0) return { rank: 2, key: 'advance', label: 'Advance', color: '#22d3ee', bg: 'rgba(34,211,238,0.14)', border: 'rgba(34,211,238,0.4)', Icon: Wallet, sent: isSent };
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const due = inv.due_date ? new Date(inv.due_date) : null;
-  if (!due) return { rank: 3, key: 'open', label: 'Unpaid', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Clock };
+  if (!due) return { rank: 3, key: 'open', label: 'Unpaid', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Clock, sent: isSent };
   const days = Math.ceil((due - today) / 86400000);
-  if (days < 0) return { rank: 0, key: 'overdue', label: `Overdue · ${Math.abs(days)}d`, color: '#f87171', bg: 'rgba(248,113,113,0.16)', border: 'rgba(248,113,113,0.45)', Icon: AlertTriangle, pulse: true };
-  if (days <= 3) return { rank: 1, key: 'soon', label: days === 0 ? 'Due today' : `Due in ${days}d`, color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Clock };
-  return { rank: 3, key: 'open', label: `Due ${formatDate(inv.due_date)}`, color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Calendar };
+  if (days < 0) return { rank: 0, key: 'overdue', label: `Overdue · ${Math.abs(days)}d`, color: '#f87171', bg: 'rgba(248,113,113,0.16)', border: 'rgba(248,113,113,0.45)', Icon: AlertTriangle, pulse: true, sent: isSent };
+  if (days <= 3) return { rank: 1, key: 'soon', label: days === 0 ? 'Due today' : `Due in ${days}d`, color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Clock, sent: isSent };
+  return { rank: 3, key: 'open', label: isSent ? 'Sent' : 'Unpaid', color: isSent ? '#818cf8' : '#60a5fa', bg: isSent ? 'rgba(129,140,248,0.14)' : 'rgba(96,165,250,0.12)', border: isSent ? 'rgba(129,140,248,0.4)' : 'rgba(96,165,250,0.35)', Icon: isSent ? MailCheck : Calendar, sent: isSent };
 };
 
 export default function InvoiceGeneratorTab({ client, trips, invoices, payments, onInvoicesChanged, onNewInvoice, onEditInvoice, clientInvoiceSeq }) {
@@ -104,7 +106,8 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     [invoices, clientAdvance]
   );
 
-  const flagCounts = allInvoicesSorted.reduce((acc, inv) => { const k = flagInfo(inv, clientAdvance).key; acc[k] = (acc[k] || 0) + 1; return acc; }, { overdue: 0, soon: 0, partial: 0, advance: 0, open: 0, paid: 0 });
+  const flagCounts = allInvoicesSorted.reduce((acc, inv) => { const fi = flagInfo(inv, clientAdvance); acc[fi.key] = (acc[fi.key] || 0) + 1; if (fi.sent) acc.sent = (acc.sent || 0) + 1; return acc; }, { overdue: 0, soon: 0, partial: 0, advance: 0, open: 0, paid: 0, sent: 0 });
+  const agingBuckets = useMemo(() => getAgingBuckets(allInvoicesSorted), [allInvoicesSorted]);
 
   const buildInvoice = (trip, number) => {
     const revenue = Number(trip.revenue) || 0;
@@ -279,29 +282,29 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           <EmptyState icon={Truck} title="No billable trips" description="Completed trips without invoices will appear here." />
         ) : (
           <div className="space-y-1.5">
-            {/* select-all header row */}
-            <div className="row-card flex items-center gap-3 !mb-1 !py-2">
+            {/* select-all header row — blue accent */}
+            <div className="flex items-center gap-3 !mb-1 !py-2 px-4 rounded-xl border border-sky-500/30 bg-sky-500/10">
               <Checkbox checked={allBillableSelected ? true : someBillableSelected ? 'indeterminate' : false} onCheckedChange={toggleAllBillable} id="gen-all" />
-              <label htmlFor="gen-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">
+              <label htmlFor="gen-all" className="text-[11px] text-sky-300 uppercase tracking-wider font-semibold cursor-pointer">
                 {allBillableSelected ? `All ${billableTrips.length} selected` : `Select all billable (${billableTrips.length})`}
               </label>
               {selectedTrips.size > 0 && (
-                <span className="ml-auto text-[11px] text-primary font-semibold">{selectedTrips.size} selected</span>
+                <span className="ml-auto text-[11px] text-sky-300 font-bold">{selectedTrips.size} selected</span>
               )}
             </div>
-            {/* scrollable billable trips list */}
+            {/* scrollable billable trips list — non-shakable */}
             <div ref={scrollRef} className={SCROLL_H}>
               {billableTrips.map((tr) => {
                 const checked = selectedTrips.has(tr.id);
                 return (
-                  <div key={tr.id} onClick={() => toggleTrip(tr.id)} className={`row-card flex items-center gap-3 cursor-pointer transition-colors ${checked ? 'border-primary/40' : ''}`}>
+                  <div key={tr.id} onClick={() => toggleTrip(tr.id)} className={`row-card flex items-center gap-3 cursor-pointer hover:!translate-y-0 transition-colors ${checked ? 'border-sky-500/40' : ''}`}>
                     <Checkbox checked={checked} onCheckedChange={() => toggleTrip(tr.id)} onClick={(e) => e.stopPropagation()} />
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Truck className="w-4 h-4 text-primary" /></div>
+                    <div className="w-9 h-9 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center flex-shrink-0"><Truck className="w-4 h-4 text-sky-400" /></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{tr.from_location} → {tr.to_location}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(tr.trip_date)} · {tr.vehicle_plate} · {tr.driver_name}</p>
                     </div>
-                    <span className="text-sm font-semibold text-foreground">{formatCurrency(tr.revenue)}</span>
+                    <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(tr.revenue)}</span>
                   </div>
                 );
               })}
@@ -325,10 +328,20 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           </div>
         </div>
 
-        {/* flag summary strip */}
+        {/* aging analysis */}
+        {allInvoicesSorted.length > 0 && <InvoiceAgingStrip invoices={allInvoicesSorted} />}
+
+        {/* flag summary strip — Sent, Paid, Split, Advance, Unpaid, Overdue, Due Soon */}
         {allInvoicesSorted.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            {[{ key: 'overdue', label: 'Overdue', color: '#f87171' },{ key: 'soon', label: 'Due Soon', color: '#fbbf24' },{ key: 'partial', label: 'Partial', color: '#fbbf24' },{ key: 'advance', label: 'Advance', color: '#22d3ee' },{ key: 'open', label: 'Unpaid', color: '#60a5fa' },{ key: 'paid', label: 'Paid', color: '#34d399' }].map((s) => flagCounts[s.key] > 0 && (
+            {[
+              { key: 'sent', label: 'Sent', color: '#818cf8', Icon: MailCheck },
+              { key: 'paid', label: 'Paid', color: '#34d399', Icon: CheckCircle2 },
+              { key: 'partial', label: 'Split', color: '#fbbf24', Icon: Split },
+              { key: 'advance', label: 'Advance', color: '#22d3ee', Icon: Wallet },
+              { key: 'open', label: 'Unpaid', color: '#60a5fa', Icon: Clock },
+              { key: 'overdue', label: 'Overdue', color: '#f87171', Icon: AlertTriangle },
+            ].map((s) => flagCounts[s.key] > 0 && (
               <div key={s.key} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${s.color}1f`, border: `1px solid ${s.color}55`, color: s.color }}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }} />
                 {s.label} {flagCounts[s.key]}
@@ -360,33 +373,48 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           <EmptyState icon={FileText} title="No invoices yet" description="Generate from billable trips above or create one manually." />
         ) : (
           <div className="space-y-1.5">
-            {/* select-all header */}
-            <div className="row-card flex items-center gap-3 !mb-1 !py-2">
+            {/* select-all header — amber accent */}
+            <div className="flex items-center gap-3 !mb-1 !py-2 px-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
               <Checkbox checked={allInvSelected ? true : someInvSelected ? 'indeterminate' : false} onCheckedChange={toggleAllInv} id="inv-all" />
-              <label htmlFor="inv-all" className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium cursor-pointer">
+              <label htmlFor="inv-all" className="text-[11px] text-amber-300 uppercase tracking-wider font-semibold cursor-pointer">
                 {allInvSelected ? `All ${allInvoicesSorted.length} selected` : `Select all (${allInvoicesSorted.length})`}
               </label>
+              <div className="ml-auto flex items-center gap-3 text-[10px] text-muted-foreground">
+                <span><span className="text-emerald-400 font-semibold tabular-nums">{formatCurrency(flagCounts.paid > 0 ? allInvoicesSorted.filter(i => flagInfo(i, clientAdvance).key === 'paid').reduce((s, i) => s + (Number(i.total_amount) || 0), 0) : 0)}</span> paid</span>
+                <span><span className="text-red-400 font-semibold tabular-nums">{formatCurrency(allInvoicesSorted.filter(i => { const fi = flagInfo(i, clientAdvance); return fi.key === 'overdue'; }).reduce((s, i) => s + ((Number(i.total_amount) || 0) - (Number(i.paid_amount) || 0)), 0))}</span> overdue</span>
+              </div>
             </div>
-            {/* scrollable invoice list */}
+            {/* scrollable invoice list — non-shakable */}
             <div className={SCROLL_H}>
               {allInvoicesSorted.map((inv) => {
                 const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
                 const checked = selectedInv.has(inv.id);
                 const fi = flagInfo(inv, clientAdvance);
                 const FIcon = fi.Icon;
+                const ageDays = inv.due_date ? Math.max(0, Math.ceil((new Date() - new Date(inv.due_date)) / 86400000)) : 0;
                 return (
-                  <div key={inv.id} onClick={() => onEditInvoice?.(inv)} className={`row-card flex items-center gap-3 cursor-pointer transition-colors ${checked ? 'border-primary/40' : ''}`}>
+                  <div key={inv.id} onClick={() => onEditInvoice?.(inv)} className={`row-card flex items-center gap-3 cursor-pointer hover:!translate-y-0 transition-colors ${checked ? 'border-amber-500/40' : ''}`}>
                     <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
+                    <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{inv.invoice_number || '—'}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{inv.status === 'sent' ? ' · Sent' : ''}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}</p>
                     </div>
+                    {fi.sent && (
+                      <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 whitespace-nowrap">
+                        <MailCheck className="w-2.5 h-2.5" /> Sent
+                      </span>
+                    )}
+                    {ageDays > 0 && fi.key !== 'paid' && (
+                      <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap" style={{ background: ageDays > 90 ? 'rgba(248,113,113,0.15)' : ageDays > 30 ? 'rgba(251,191,36,0.15)' : 'rgba(96,165,250,0.12)', color: ageDays > 90 ? '#f87171' : ageDays > 30 ? '#fbbf24' : '#60a5fa', border: `1px solid ${ageDays > 90 ? 'rgba(248,113,113,0.35)' : ageDays > 30 ? 'rgba(251,191,36,0.4)' : 'rgba(96,165,250,0.35)'}` }}>
+                        {ageDays}d
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
                       <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
                       {fi.label}
                     </span>
-                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(balance || inv.total_amount)}</span>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap tabular-nums">{formatCurrency(balance || inv.total_amount)}</span>
                   </div>
                 );
               })}
