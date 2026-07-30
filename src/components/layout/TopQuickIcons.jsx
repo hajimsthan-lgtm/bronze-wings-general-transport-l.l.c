@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { QUICK_APPS } from '@/components/layout/quickApps.jsx';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
-/* Top header — four core comms tools as premium frosted-glass tiles
-   with glowing icon chips and flashing sheen-text labels. */
+/* Top header — four core comms tools as calm claymorphic tiles with
+   clear brand-colored icons and readable static labels. */
 const TOP_KEYS = ['whatsapp', 'gmail', 'call', 'message'];
 
 export default function TopQuickIcons() {
@@ -25,37 +25,23 @@ export default function TopQuickIcons() {
               key={a.key}
               type="button"
               onClick={() => handleAction(a)}
-              onMouseMove={(e) => {
-                const r = e.currentTarget.getBoundingClientRect();
-                e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
-                e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
-              }}
               title={a.label}
               aria-label={a.label}
-              className="group relative flex items-center gap-2 h-10 pl-2 pr-3 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
+              className="group relative flex items-center gap-2 h-10 pl-2.5 pr-3 rounded-xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
               style={{
-                background: 'linear-gradient(160deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%)',
-                backdropFilter: 'blur(16px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
-                border: '1px solid rgba(255,255,255,0.16)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.30), 0 6px 18px rgba(0,0,0,0.38)',
+                background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+                border: '1px solid rgba(255,255,255,0.06)',
+                boxShadow: '-3px -3px 7px rgba(255,255,255,0.04), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
-              {/* cursor-follow glow */}
-              <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 50px at var(--mx,50%) var(--my,50%), ${a.hex}44, transparent 70%)` }} />
-              {/* accent edge glow on hover */}
-              <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${a.hex}66, 0 0 22px -6px ${a.hex}aa` }} />
-              {/* top specular highlight */}
-              <span className="pointer-events-none absolute inset-x-1 top-0 h-1/2 rounded-t-2xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.20), transparent)' }} />
-              {/* icon chip */}
-              <span className="relative flex items-center justify-center w-7 h-7 rounded-xl" style={{ background: `linear-gradient(145deg, ${a.hex}33, ${a.hex}14)`, border: `1px solid ${a.hex}55`, boxShadow: `inset 0 1px 0 ${a.hex}66, 0 0 12px -4px ${a.hex}99` }}>
-                <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ color: a.hex, filter: `drop-shadow(0 0 5px ${a.hex}cc)` }} />
+              {/* pressed-in accent ring on hover */}
+              <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${a.hex}40` }} />
+              {/* recognizable brand-colored icon chip */}
+              <span className="relative flex items-center justify-center w-7 h-7 rounded-lg" style={{ background: `${a.hex}1a`, border: `1px solid ${a.hex}33` }}>
+                <Icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ color: a.hex }} />
               </span>
-              {/* flashing sheen text label */}
-              <span
-                className="brand-shine relative text-[11px] font-bold tracking-wide whitespace-nowrap"
-                style={{ backgroundImage: `linear-gradient(90deg, #ffffff 0%, ${a.hex} 50%, #ffffff 100%)` }}
-              >
+              {/* clear static label */}
+              <span className="relative text-[12px] font-semibold tracking-wide text-white/75 whitespace-nowrap group-hover:text-white transition-colors">
                 {a.label}
               </span>
             </button>

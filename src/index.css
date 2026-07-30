@@ -1560,6 +1560,19 @@
 .animate-marquee-left { animation: marquee-left 32s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-marquee-left { animation: none !important; } }
 
+/* Sub-nav tiles light up on page entry */
+@keyframes subnav-light {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.95); filter: brightness(1.5); }
+  60%  { opacity: 1; filter: brightness(1.25); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) { @keyframes subnav-light { 0%,100% { opacity:1; transform:none; filter:none; } } }
+
+/* Spinning loader wheels */
+@keyframes wheel-spin { to { transform: rotate(360deg); } }
+.animate-wheel-spin { transform-box: fill-box; transform-origin: center; animation: wheel-spin 0.7s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-wheel-spin { animation: none !important; } }
+
 /* ═══════════════════════════════════════════════════════
     PREMIUM POLISH — global micro-interactions & native feel
     Theme-neutral: enhances both dark & light without touching tokens

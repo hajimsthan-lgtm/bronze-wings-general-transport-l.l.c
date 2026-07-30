@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@/lib/theme';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -13,6 +13,8 @@ const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
 export default function DesktopNav() {
   const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
+  const location = useLocation();
+  const isDashboard = location.pathname === '/';
   useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
 
   return (
@@ -33,16 +35,16 @@ export default function DesktopNav() {
       <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3 group/brand">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl blur-md opacity-70" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.35) 0%, transparent 70%)' }} />
-            {logoUrl ?
-            <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain ring-1 ring-white/10" /> :
-
-            <div className="relative w-9 h-9 rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+          {isDashboard && (
+            <div className="relative">
+              <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
+              {logoUrl ?
+              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain ring-1 ring-white/10" /> :
+              <div className="relative w-9 h-9 rounded-xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-center">
                 <span className="text-sm font-bold text-blue-400">BW</span>
-              </div>
-            }
-          </div>
+              </div>}
+            </div>
+          )}
           <BrandName variant="desktop" />
         </Link>
 

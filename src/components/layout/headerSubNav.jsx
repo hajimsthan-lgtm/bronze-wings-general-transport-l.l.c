@@ -63,8 +63,8 @@ export default function HeaderSubNav({ className = '' }) {
   if (!subNav.length) return null;
 
   return (
-    <nav className={`flex items-center gap-1.5 ${className}`}>
-      {subNav.map((item) => {
+    <nav key={location.pathname} className={`flex items-center gap-1.5 ${className}`}>
+      {subNav.map((item, i) => {
         const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
         const Icon = SUBNAV_ICON[item.key] || FileText;
         const st = SUBNAV_STYLE[item.key] || SUBNAV_STYLE.trips;
@@ -73,6 +73,7 @@ export default function HeaderSubNav({ className = '' }) {
           <Link
             key={item.path}
             to={item.path}
+            style={{ animation: `subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.07}s both` }}
             onMouseMove={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
@@ -87,8 +88,8 @@ export default function HeaderSubNav({ className = '' }) {
                 background: `linear-gradient(150deg, ${st.from} 0%, ${st.to} 100%)`,
                 border: `1px solid rgba(${st.glow},0.55)`,
                 boxShadow: isActive
-                  ? `inset 0 1.5px 1px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.34), 0 8px 20px rgba(${st.glow},0.5), 0 0 0 1px rgba(${st.glow},0.45), 0 0 22px -4px rgba(${st.glow},0.7)`
-                  : `inset 0 1.5px 1px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)`,
+                  ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 5px 12px rgba(${st.glow},0.26), 0 0 0 1px rgba(${st.glow},0.32)`
+                  : `inset 0 1.5px 1px rgba(255,255,255,0.40), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.36)`,
                 color: '#fff',
               }}
             >
