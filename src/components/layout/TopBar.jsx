@@ -56,18 +56,24 @@ export default function TopBar() {
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-10 py-1.5">
-          {/* compact inset sub-tab channel — distinct from main nav */}
-          <div className="flex items-center gap-0.5 rounded-full border border-white/[0.06] bg-background/50 p-1 backdrop-blur-md overflow-x-auto no-scrollbar flex-1 min-w-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)]">
-            {subNav.map((item) => {
+        <div className="flex items-center justify-between h-11 py-1.5">
+          {/* liquid-glass segmented sub-nav — distinct from main nav */}
+          <div className="relative flex items-center gap-1 rounded-2xl border border-white/[0.07] bg-background/60 p-1 backdrop-blur-xl overflow-x-auto no-scrollbar flex-1 min-w-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_2px_5px_rgba(0,0,0,0.5)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-2xl" style={{ background: 'linear-gradient(90deg,transparent,rgba(255,255,255,0.16) 50%,transparent)' }} />
+            {subNav.map((item, i) => {
               const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`sub-tab !py-1 !px-2.5 !text-[10px] !tracking-[0.04em] ${isActive ? 'sub-tab-active' : ''}`}>
-
+                  className={`group/sub relative flex items-center gap-1.5 h-8 px-3 rounded-xl text-[10px] font-semibold uppercase tracking-[0.06em] whitespace-nowrap transition-all duration-300 border ${
+                    isActive
+                      ? 'bg-gradient-to-br from-primary/25 to-primary/[0.04] border-primary/40 text-white shadow-[0_0_18px_-4px_rgba(var(--panel-accent-rgb),0.55),inset_0_1px_0_rgba(255,255,255,0.08)]'
+                      : 'border-transparent text-white/45 hover:text-white/80 hover:bg-white/[0.04]'
+                  }`}>
+                  <span className={`font-mono text-[8px] leading-none ${isActive ? 'text-primary' : 'text-white/25 group-hover/sub:text-white/40'}`}>{String(i + 1).padStart(2, '0')}</span>
                   {item.label || t(item.key)}
+                  {isActive && <span className="absolute left-1.5 top-1/2 -translate-y-1/2 w-[2px] h-3 rounded-full bg-primary shadow-[0_0_6px_rgba(var(--panel-accent-rgb),0.9)]" />}
                 </Link>);
 
             })}
