@@ -1,4 +1,4 @@
-import { Phone, MapPin, Calculator as CalcIcon } from 'lucide-react';
+import { Phone, MapPin, Calculator as CalcIcon, Calendar, HardDrive, StickyNote, Languages, MessageCircle } from 'lucide-react';
 
 /* Real brand glyphs (inline SVG, brand colors) */
 export const WhatsAppIcon = (props) => (
@@ -24,4 +24,9 @@ export const QUICK_APPS = [
   { key: 'call', label: 'Call', hex: '#10b981', icon: Phone, action: () => { window.location.href = 'tel:'; } },
   { key: 'maps', label: 'Maps', hex: '#3b82f6', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
   { key: 'calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
+  { key: 'telegram', label: 'Telegram', hex: '#0088cc', icon: MessageCircle, action: () => window.open('https://web.telegram.org', '_blank') },
+  { key: 'calendar', label: 'Calendar', hex: '#4285f4', icon: Calendar, action: () => window.open('https://calendar.google.com', '_blank') },
+  { key: 'drive', label: 'Drive', hex: '#0f9d58', icon: HardDrive, action: () => window.open('https://drive.google.com', '_blank') },
+  { key: 'notes', label: 'Notes', hex: '#f59e0b', icon: StickyNote, action: () => window.open('https://keep.google.com', '_blank') },
+  { key: 'translate', label: 'Translate', hex: '#8b5cf6', icon: Languages, action: () => window.open('https://translate.google.com', '_blank') },
 ];

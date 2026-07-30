@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 import { QUICK_APPS as APPS } from '@/components/layout/quickApps.jsx';
 
-const RADIUS = 84;
+const RADIUS = 130;
 const SHOW_MS = 4000;
 
 export default function QuickFanMenu() {
