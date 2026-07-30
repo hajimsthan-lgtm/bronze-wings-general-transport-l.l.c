@@ -1,4 +1,4 @@
-import { Phone, MapPin, Calculator as CalcIcon, Calendar, HardDrive, StickyNote, Languages, MessageCircle, LayoutDashboard, Route, Receipt, TrendingUp, FileText, Truck, Users, Building2, FolderOpen, Bot } from 'lucide-react';
+import { Phone, MapPin, Calculator as CalcIcon, Calendar, HardDrive, StickyNote, Languages, MessageCircle, LayoutDashboard, Route, Receipt, TrendingUp, FileText, Truck, Users, Building2, FolderOpen, Bot, Settings, Sparkles, ClipboardList } from 'lucide-react';
 
 /* Real brand glyphs (inline SVG, brand colors) */
 export const WhatsAppIcon = (props) => (
@@ -29,6 +29,15 @@ export const QUICK_APPS = [
   { key: 'drive', label: 'Drive', hex: '#0f9d58', icon: HardDrive, action: () => window.open('https://drive.google.com', '_blank') },
   { key: 'notes', label: 'Notes', hex: '#f59e0b', icon: StickyNote, action: () => window.open('https://keep.google.com', '_blank') },
   { key: 'translate', label: 'Translate', hex: '#8b5cf6', icon: Languages, action: () => window.open('https://translate.google.com', '_blank') },
+];
+
+/* In-app tools — rendered as the horizontal fan row. Every entry stays inside the app. */
+export const QUICK_APPS_TOOLS = [
+  { key: 'tool-calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
+  { key: 'tool-contracts', label: 'Contracts', hex: '#3b82f6', icon: FileText, to: '/contracts' },
+  { key: 'tool-daily', label: 'Daily Report', hex: '#06b6d4', icon: ClipboardList, to: '/reports/daily' },
+  { key: 'tool-settings', label: 'Settings', hex: '#8b5cf6', icon: Settings, to: '/settings' },
+  { key: 'tool-prompts', label: 'Prompts', hex: '#f59e0b', icon: Sparkles, to: '/prompt-generator' },
 ];
 
 /* In-app module shortcuts — rendered as the vertical fan column. */

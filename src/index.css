@@ -1555,6 +1555,11 @@
 .animate-marquee-up { animation: marquee-up 16s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .animate-marquee-up { animation: none !important; } }
 
+/* Horizontal marquee — full-width footer text flow */
+@keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.animate-marquee-left { animation: marquee-left 32s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .animate-marquee-left { animation: none !important; } }
+
 /* ═══════════════════════════════════════════════════════
     PREMIUM POLISH — global micro-interactions & native feel
     Theme-neutral: enhances both dark & light without touching tokens

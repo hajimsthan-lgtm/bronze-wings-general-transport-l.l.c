@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
-import { QUICK_APPS as APPS, QUICK_APPS_NAV as NAV } from '@/components/layout/quickApps.jsx';
+import { QUICK_APPS_TOOLS as APPS, QUICK_APPS_NAV as NAV } from '@/components/layout/quickApps.jsx';
 
 const SHOW_MS = 3000;
 
@@ -23,7 +23,8 @@ export default function QuickFanMenu() {
     clearTimeout(timer.current);
     setOpen(false);
     if (a.action === 'calc') setCalcOpen(true);
-    else a.action();
+    else if (a.to) navigate(a.to);
+    else if (typeof a.action === 'function') a.action();
   };
 
   const handleNav = (item) => {

@@ -15,50 +15,48 @@ export default function AppFooter() {
   useEffect(() => { getCompanySettings().then(setS); }, []);
   const company = s?.company_name || 'General Transport L.L.C';
 
-  // build a seamless loop: company name + quotes, duplicated
+  // one cycle = company name + all quotes; duplicated for a seamless loop
   const cycle = [{ kind: 'name', text: company }, ...QUOTES];
-  const lines = [...cycle, ...cycle];
+  const items = [...cycle, ...cycle];
 
   return (
     <footer className="hidden md:block fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-8 pb-3">
-        <div
-          className="pointer-events-auto mx-auto flex items-center overflow-hidden rounded-2xl"
-          style={{
-            height: 44,
-            background: 'rgba(10,14,23,0.78)',
-            backdropFilter: 'blur(22px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(22px) saturate(1.4)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 -10px 30px rgba(0,0,0,0.5)',
-          }}
-        >
-          {/* vertical marquee — company name (shining) + colored quotes */}
-          <div className="relative w-full h-full overflow-hidden">
-            <div className="absolute inset-x-0 top-0 flex flex-col items-center animate-marquee-up" style={{ willChange: 'transform' }}>
-              {lines.map((l, i) => l.kind === 'name' ? (
+      <div
+        className="w-full overflow-hidden"
+        style={{
+          height: 42,
+          background: 'rgba(10,14,23,0.38)',
+          backdropFilter: 'blur(18px) saturate(1.3)',
+          WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
+      >
+        <div className="flex items-center h-full w-max animate-marquee-left" style={{ willChange: 'transform' }}>
+          {items.map((it, i) => (
+            <span key={i} className="flex items-center shrink-0">
+              {it.kind === 'name' ? (
                 <span
-                  key={i}
-                  className="flex items-center justify-center h-[44px] text-[13px] font-bold tracking-[0.12em] uppercase"
+                  className="px-5 text-[13px] font-bold uppercase tracking-[0.14em]"
                   style={{
                     backgroundImage: 'linear-gradient(100deg, #ffffff 0%, rgb(var(--panel-accent2-rgb)) 50%, #ffffff 100%)',
                     WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    filter: 'drop-shadow(0 0 8px rgba(var(--panel-accent2-rgb),0.4))',
+                    filter: 'drop-shadow(0 0 7px rgba(var(--panel-accent2-rgb),0.4))',
                   }}
                 >
-                  {l.text}
+                  {it.text}
                 </span>
               ) : (
                 <span
-                  key={i}
-                  className="flex items-center justify-center h-[44px] text-[11px] font-medium italic"
-                  style={{ color: l.color, textShadow: `0 0 8px ${l.color}66` }}
+                  className="px-5 text-[11px] font-medium italic"
+                  style={{ color: it.color, textShadow: `0 0 8px ${it.color}66` }}
                 >
-                  “{l.text}”
+                  “{it.text}”
                 </span>
-              ))}
-            </div>
-          </div>
+              )}
+              <span className="text-white/15 text-[7px]">◆</span>
+            </span>
+          ))}
         </div>
       </div>
     </footer>
