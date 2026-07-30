@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { QUICK_APPS } from '@/components/layout/quickApps.jsx';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
-/* Top header keeps only the four core communication tools:
-   WhatsApp, Mail, Call, Message. */
+/* Top header — four core comms tools as frosted-glass pills with
+   flashing sheen-text labels. */
 const TOP_KEYS = ['whatsapp', 'gmail', 'call', 'message'];
 
 export default function TopQuickIcons() {
@@ -12,12 +12,12 @@ export default function TopQuickIcons() {
 
   const handleAction = (a) => {
     if (a.action === 'calc') setCalcOpen(true);
-    else a.action();
+    else if (typeof a.action === 'function') a.action();
   };
 
   return (
     <>
-      <div className="hidden xl:flex items-center gap-2">
+      <div className="hidden xl:flex items-center gap-1.5">
         {apps.map((a) => {
           const Icon = a.icon;
           return (
@@ -32,16 +32,30 @@ export default function TopQuickIcons() {
               }}
               title={a.label}
               aria-label={a.label}
-              className="group relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 hover:-translate-y-0.5"
+              className="group relative flex items-center gap-1.5 h-9 pl-2 pr-3 rounded-xl transition-all duration-300 hover:-translate-y-0.5"
               style={{
-                background: `linear-gradient(160deg, ${a.hex}33 0%, ${a.hex}12 55%, rgba(0,0,0,0.30) 100%)`,
-                border: `1px solid ${a.hex}44`,
-                boxShadow: `inset 0 1px 0 ${a.hex}66, inset 0 -2px 4px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.35), 0 0 0 1px ${a.hex}1a`,
+                background: 'linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.07) 100%)',
+                backdropFilter: 'blur(14px) saturate(1.5)',
+                WebkitBackdropFilter: 'blur(14px) saturate(1.5)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.28), 0 5px 16px rgba(0,0,0,0.35)',
               }}
             >
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl opacity-70" style={{ background: `linear-gradient(180deg, ${a.hex}40, transparent)` }} />
-              <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 50px at var(--mx,50%) var(--my,50%), ${a.hex}66, transparent 70%)` }} />
-              <Icon className="relative w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
+              {/* cursor-follow glow */}
+              <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 42px at var(--mx,50%) var(--my,50%), ${a.hex}55, transparent 70%)` }} />
+              {/* top specular highlight */}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.16), transparent)' }} />
+              {/* icon in a frosted chip */}
+              <span className="relative flex items-center justify-center w-6 h-6 rounded-lg" style={{ background: `${a.hex}1f`, border: `1px solid ${a.hex}44` }}>
+                <Icon className="w-3.5 h-3.5" style={{ color: a.hex, filter: `drop-shadow(0 0 4px ${a.hex}aa)` }} />
+              </span>
+              {/* flashing sheen text label */}
+              <span
+                className="brand-shine relative text-[11px] font-semibold tracking-wide whitespace-nowrap"
+                style={{ backgroundImage: `linear-gradient(90deg, #ffffff 0%, ${a.hex} 50%, #ffffff 100%)` }}
+              >
+                {a.label}
+              </span>
             </button>
           );
         })}

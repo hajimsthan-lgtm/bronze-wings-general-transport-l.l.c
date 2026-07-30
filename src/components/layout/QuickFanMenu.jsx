@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 import { QUICK_APPS_TOOLS as APPS, QUICK_APPS_NAV as NAV } from '@/components/layout/quickApps.jsx';
 
-const SHOW_MS = 3000;
+const SHOW_MS = 8000;
 
 export default function QuickFanMenu() {
   const [open, setOpen] = useState(false);
