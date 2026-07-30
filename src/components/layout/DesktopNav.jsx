@@ -5,6 +5,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 import TopQuickIcons from '@/components/layout/TopQuickIcons';
+import HeaderSubNav from '@/components/layout/headerSubNav';
 
 const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981' };
 const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald' };
@@ -44,6 +45,9 @@ export default function DesktopNav() {
           </div>
           <BrandName variant="desktop" />
         </Link>
+
+        {/* Page sub-nav tiles — live in the main header */}
+        <HeaderSubNav className="hidden md:flex" />
 
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
