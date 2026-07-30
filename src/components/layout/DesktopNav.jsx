@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '@/lib/theme';
-import { Settings, GraduationCap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
-import { useTour, gatherTourSteps } from '@/lib/tour';
-import { useToast } from '@/components/ui/use-toast';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
 import TopQuickIcons from '@/components/layout/TopQuickIcons';
@@ -16,14 +13,6 @@ export default function DesktopNav() {
   const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
   useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
-
-  const tour = useTour();
-  const { toast } = useToast();
-  const startTour = () => {
-    const steps = gatherTourSteps();
-    if (!steps.length) { toast({ title: 'No guided sections on this page' }); return; }
-    tour.start(steps);
-  };
 
   return (
     <nav className="hidden md:block sticky top-0 z-50">
@@ -61,24 +50,12 @@ export default function DesktopNav() {
           <LiveClock />
           <TopQuickIcons />
           <button
-            onClick={startTour}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-blue-500/15 border border-blue-500/40 text-xs font-semibold text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
-            aria-label="Info Journey"
-            title="Info Journey — guide me through this page"
-          >
-            <GraduationCap className="w-4 h-4" />
-            <span className="hidden lg:inline">Tour</span>
-          </button>
-          <button
             onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
             aria-label="Switch theme">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: THEME_SWATCH[theme] || '#3E92CC', boxShadow: `0 0 8px ${THEME_SWATCH[theme] || '#3E92CC'}` }} />
             {THEME_LABEL[theme] || 'Navy'}
           </button>
-          <Link to="/settings" className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white" aria-label="Settings">
-            <Settings className="w-4 h-4" />
-          </Link>
         </div>
       </div>
     </nav>

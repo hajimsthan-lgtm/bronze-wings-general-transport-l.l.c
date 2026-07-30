@@ -14,7 +14,7 @@ export default function TopQuickIcons() {
 
   return (
     <>
-      <div className="hidden xl:flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5 border border-white/10">
+      <div className="hidden xl:flex items-center gap-2">
         {QUICK_APPS.map((a) => {
           const Icon = a.icon;
           return (
@@ -22,19 +22,25 @@ export default function TopQuickIcons() {
               key={a.key}
               type="button"
               onClick={() => handleAction(a)}
+              onMouseMove={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+                e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+              }}
               title={a.label}
               aria-label={a.label}
-              className="group relative flex items-center justify-center w-8 h-8 rounded-lg text-white/55 hover:text-white transition-all duration-200 hover:scale-110 active:scale-95"
+              className="group relative flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 hover:-translate-y-0.5"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: `linear-gradient(160deg, ${a.hex}33 0%, ${a.hex}12 55%, rgba(0,0,0,0.30) 100%)`,
+                border: `1px solid ${a.hex}44`,
+                boxShadow: `inset 0 1px 0 ${a.hex}66, inset 0 -2px 4px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.35), 0 0 0 1px ${a.hex}1a`,
               }}
             >
-              <span
-                className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ boxShadow: `0 0 14px -2px ${a.hex}aa, inset 0 0 8px -2px ${a.hex}66`, borderColor: `${a.hex}66` }}
-              />
-              <Icon className="relative w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }} />
+              {/* top specular gloss */}
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl opacity-70" style={{ background: `linear-gradient(180deg, ${a.hex}40, transparent)` }} />
+              {/* cursor-follow glow */}
+              <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 50px at var(--mx,50%) var(--my,50%), ${a.hex}66, transparent 70%)` }} />
+              <Icon className="relative w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
             </button>
           );
         })}
