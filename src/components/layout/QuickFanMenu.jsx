@@ -3,8 +3,7 @@ import { Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 import { QUICK_APPS as APPS } from '@/components/layout/quickApps.jsx';
 
-const RADIUS = 130;
-const SHOW_MS = 4000;
+const SHOW_MS = 3000;
 
 export default function QuickFanMenu() {
   const [open, setOpen] = useState(false);
@@ -45,47 +44,10 @@ export default function QuickFanMenu() {
           />
         )}
 
-        {/* faint dotted semicircle guide */}
-        {open && (
-          <svg
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            width={(RADIUS + 30) * 2}
-            height={(RADIUS + 30) * 2}
-            style={{ overflow: 'visible' }}
-          >
-            <path
-              d={`M ${RADIUS + 30} 30 A ${RADIUS + 30} ${RADIUS + 30} 0 0 1 ${RADIUS + 30} ${2 * (RADIUS + 30) - 30}`}
-              fill="none"
-              stroke="rgba(255,255,255,0.10)"
-              strokeWidth="1"
-              strokeDasharray="2 5"
-            />
-          </svg>
-        )}
-
-        {/* rotating conic light ring */}
-        {open && (
-          <span
-            className="pointer-events-none absolute left-1/2 top-1/2"
-            style={{
-              width: (RADIUS + 22) * 2,
-              height: (RADIUS + 22) * 2,
-              borderRadius: '9999px',
-              background:
-                'conic-gradient(from 0deg, transparent 0deg, rgba(244,63,94,0.55) 40deg, transparent 95deg, transparent 180deg, rgba(244,63,94,0.45) 220deg, transparent 275deg)',
-              WebkitMask: 'radial-gradient(circle, transparent 47%, #000 48%, #000 49.5%, transparent 50.5%)',
-              mask: 'radial-gradient(circle, transparent 47%, #000 48%, #000 49.5%, transparent 50.5%)',
-              animation: 'fan-ring-spin 3s linear infinite',
-            }}
-          />
-        )}
-
-        {/* fan icons — right-facing semicircle */}
+        {/* quick-app icons — straight horizontal row */}
         {open && APPS.map((a, i) => {
-          const len = APPS.length;
-          const angle = (-90 + (180 / (len - 1)) * i) * (Math.PI / 180);
-          const x = RADIUS * Math.cos(angle);
-          const y = RADIUS * Math.sin(angle);
+          const GAP = 54;
+          const x = 34 + i * GAP;
           const Icon = a.icon;
           return (
             <button
@@ -95,7 +57,7 @@ export default function QuickFanMenu() {
               onMouseEnter={poke}
               title={a.label}
               className="absolute left-1/2 top-1/2 z-40"
-              style={{ transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` }}
+              style={{ transform: `translate(calc(-50% + ${x}px), -50%)` }}
             >
               <span
                 className="group relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
