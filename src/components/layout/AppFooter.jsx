@@ -1,57 +1,64 @@
 import { useEffect, useState } from 'react';
-import { Mail, MessageCircle, Phone, MapPin, Printer } from 'lucide-react';
 import { getCompanySettings } from '@/lib/companySettings';
-import { useI18n } from '@/lib/i18n';
 
-const digits = (s = '') => (s || '').replace(/[^0-9]/g, '');
+const QUOTES = [
+  { text: 'Moving the nation, one kilometer at a time', color: '#60a5fa' },
+  { text: 'Heavy hauls, heavier trust', color: '#f59e0b' },
+  { text: 'On time, every time', color: '#34d399' },
+  { text: 'Driven by precision', color: '#a78bfa' },
+  { text: 'From desert to depot, we deliver', color: '#f43f5e' },
+  { text: 'Fleet first, freight forward', color: '#22d3ee' },
+];
 
 export default function AppFooter() {
-  const { t } = useI18n();
   const [s, setS] = useState(null);
   useEffect(() => { getCompanySettings().then(setS); }, []);
-  if (!s) return null;
+  const company = s?.company_name || 'General Transport L.L.C';
 
-  const phone = s.phone1 || s.phone2 || '';
-  const email = s.email || '';
-  const address = s.address || '';
-
-  const actions = [
-    { icon: Mail, label: t('gmail'), href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`, external: true },
-    { icon: MessageCircle, label: t('whatsapp'), href: `https://wa.me/${digits(phone)}`, external: true },
-    { icon: Phone, label: t('call'), href: `tel:${(phone || '').replace(/\s/g, '')}` },
-    { icon: MapPin, label: t('location'), href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, external: true },
-    { icon: Printer, label: t('print_export'), onClick: () => window.print() },
-  ];
+  // build a seamless loop: company name + quotes, duplicated
+  const cycle = [{ kind: 'name', text: company }, ...QUOTES];
+  const lines = [...cycle, ...cycle];
 
   return (
     <footer className="hidden md:block fixed bottom-0 left-0 right-0 z-40 pointer-events-none">
       <div className="max-w-[1440px] mx-auto px-6 lg:px-8 pb-3">
         <div
-          className="pointer-events-auto mx-auto flex items-center justify-center gap-1 rounded-full px-2 py-1.5"
+          className="pointer-events-auto mx-auto flex items-center overflow-hidden rounded-2xl"
           style={{
-            background: 'rgba(10,14,23,0.82)',
-            backdropFilter: 'blur(24px) saturate(1.5)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
+            height: 44,
+            background: 'rgba(10,14,23,0.78)',
+            backdropFilter: 'blur(22px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(22px) saturate(1.4)',
             border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 -10px 30px rgba(0,0,0,0.5)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 -10px 30px rgba(0,0,0,0.5)',
           }}
         >
-          <span className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">{t('quick_actions')}</span>
-          <span className="w-px h-5 bg-white/10 mx-1" />
-          {actions.map((a, i) => {
-            const Icon = a.icon;
-            const inner = (
-              <span className="flex items-center gap-1.5 h-8 px-3 rounded-full text-[11px] font-medium text-white/65 transition-all hover:text-white hover:bg-white/[0.07]">
-                <Icon className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">{a.label}</span>
-              </span>
-            );
-            return a.onClick ? (
-              <button key={i} type="button" onClick={a.onClick} aria-label={a.label} className="cursor-pointer">{inner}</button>
-            ) : (
-              <a key={i} href={a.href} target={a.external ? '_blank' : undefined} rel={a.external ? 'noopener noreferrer' : undefined} aria-label={a.label}>{inner}</a>
-            );
-          })}
+          {/* vertical marquee — company name (shining) + colored quotes */}
+          <div className="relative w-full h-full overflow-hidden">
+            <div className="absolute inset-x-0 top-0 flex flex-col items-center animate-marquee-up" style={{ willChange: 'transform' }}>
+              {lines.map((l, i) => l.kind === 'name' ? (
+                <span
+                  key={i}
+                  className="flex items-center justify-center h-[44px] text-[13px] font-bold tracking-[0.12em] uppercase"
+                  style={{
+                    backgroundImage: 'linear-gradient(100deg, #ffffff 0%, rgb(var(--panel-accent2-rgb)) 50%, #ffffff 100%)',
+                    WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 0 8px rgba(var(--panel-accent2-rgb),0.4))',
+                  }}
+                >
+                  {l.text}
+                </span>
+              ) : (
+                <span
+                  key={i}
+                  className="flex items-center justify-center h-[44px] text-[11px] font-medium italic"
+                  style={{ color: l.color, textShadow: `0 0 8px ${l.color}66` }}
+                >
+                  “{l.text}”
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </footer>

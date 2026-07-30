@@ -63,11 +63,12 @@ export default function HeaderSubNav({ className = '' }) {
   if (!subNav.length) return null;
 
   return (
-    <nav className={`flex items-center gap-2 ${className}`}>
+    <nav className={`flex items-center gap-1.5 ${className}`}>
       {subNav.map((item) => {
         const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
         const Icon = SUBNAV_ICON[item.key] || FileText;
         const st = SUBNAV_STYLE[item.key] || SUBNAV_STYLE.trips;
+        const label = item.label || t(item.key);
         return (
           <Link
             key={item.path}
@@ -77,46 +78,57 @@ export default function HeaderSubNav({ className = '' }) {
               e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
               e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
             }}
-            className="group/sub relative flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0"
+            className={`group/sub relative flex items-center gap-2 h-11 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 ${isActive ? 'pl-1.5 pr-3' : 'px-1.5'}`}
           >
             {/* duotone gradient tile */}
             <span
-              className="relative flex items-center justify-center w-11 h-11 rounded-[14px]"
+              className="relative flex items-center justify-center w-9 h-9 rounded-[12px] transition-all duration-300"
               style={{
                 background: `linear-gradient(150deg, ${st.from} 0%, ${st.to} 100%)`,
                 border: `1px solid rgba(${st.glow},0.55)`,
                 boxShadow: isActive
-                  ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 8px 20px rgba(${st.glow},0.5), 0 0 0 1px rgba(${st.glow},0.4), 0 0 22px -4px rgba(${st.glow},0.65)`
+                  ? `inset 0 1.5px 1px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.34), 0 8px 20px rgba(${st.glow},0.5), 0 0 0 1px rgba(${st.glow},0.45), 0 0 22px -4px rgba(${st.glow},0.7)`
                   : `inset 0 1.5px 1px rgba(255,255,255,0.45), inset 0 -3px 5px rgba(0,0,0,0.3), 0 5px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)`,
                 color: '#fff',
               }}
             >
-              {/* top specular gloss */}
-              <span className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[12px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.42), transparent)' }} />
-              <Icon className="relative w-[18px] h-[18px]" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
-              {/* sheen sweep on hover */}
-              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[14px]">
+              <span className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.42), transparent)' }} />
+              <Icon className="relative w-[16px] h-[16px]" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
+              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
                 <span className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover/sub:opacity-100 group-hover/sub:left-[150%] transition-all duration-700" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
               </span>
             </span>
-            {/* active edge bar */}
-            {isActive && <span className="absolute -left-[2px] top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-full" style={{ background: st.from, boxShadow: `0 0 10px rgba(${st.glow},0.9)` }} />}
-            {/* cursor-follow glow */}
-            <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 70px at var(--mx,50%) var(--my,50%), rgba(${st.glow},0.45), transparent 70%)` }} />
-            {/* shimmer name label — side-nav style */}
-            <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 translate-y-1 group-hover/sub:opacity-100 group-hover/sub:translate-y-0 transition-all duration-300 z-50">
-              <span className="relative inline-block whitespace-nowrap px-3 py-1.5 rounded-xl" style={{
-                background: 'linear-gradient(135deg, rgba(10,14,26,0.82), rgba(20,26,44,0.70))',
-                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.45), 0 0 18px -6px rgba(${st.glow},0.45)`,
-              }}>
-                <span className="brand-shine text-[12px] font-semibold tracking-wide" style={{
-                  backgroundImage: `linear-gradient(100deg, #ffffff 0%, rgb(${st.glow}) 45%, #ffffff 100%)`,
-                  filter: `drop-shadow(0 0 6px rgba(${st.glow},0.55))`,
-                }}>{item.label || t(item.key)}</span>
+
+            {/* active tab shows its label inline — always visible, user-friendly */}
+            {isActive && (
+              <span
+                className="text-[12px] font-semibold tracking-wide whitespace-nowrap"
+                style={{ color: `rgb(${st.glow})`, textShadow: `0 0 10px rgba(${st.glow},0.45)` }}
+              >
+                {label}
               </span>
-            </span>
+            )}
+
+            {/* cursor-follow glow */}
+            <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 70px at var(--mx,50%) var(--my,50%), rgba(${st.glow},0.4), transparent 70%)` }} />
+
+            {/* hover tooltip — only for inactive tiles */}
+            {!isActive && (
+              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 translate-y-1 group-hover/sub:opacity-100 group-hover/sub:translate-y-0 transition-all duration-300 z-50">
+                <span className="relative inline-block whitespace-nowrap px-3 py-1.5 rounded-xl" style={{
+                  background: 'linear-gradient(135deg, rgba(10,14,26,0.82), rgba(20,26,44,0.70))',
+                  backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.45), 0 0 18px -6px rgba(${st.glow},0.45)`,
+                }}>
+                  <span className="text-[12px] font-semibold tracking-wide" style={{
+                    backgroundImage: `linear-gradient(100deg, #ffffff 0%, rgb(${st.glow}) 45%, #ffffff 100%)`,
+                    WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    filter: `drop-shadow(0 0 6px rgba(${st.glow},0.55))`,
+                  }}>{label}</span>
+                </span>
+              </span>
+            )}
           </Link>
         );
       })}

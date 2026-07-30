@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { QUICK_APPS } from '@/components/layout/quickApps.jsx';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
 
-/* Compact icon row for the top header — unified single-accent styling
-   with a colored hover glow per app, so functions stay visually grouped. */
+/* Top header keeps only the four core communication tools:
+   WhatsApp, Mail, Call, Message. */
+const TOP_KEYS = ['whatsapp', 'gmail', 'call', 'message'];
+
 export default function TopQuickIcons() {
   const [calcOpen, setCalcOpen] = useState(false);
+  const apps = QUICK_APPS.filter((a) => TOP_KEYS.includes(a.key));
 
   const handleAction = (a) => {
     if (a.action === 'calc') setCalcOpen(true);
@@ -15,7 +18,7 @@ export default function TopQuickIcons() {
   return (
     <>
       <div className="hidden xl:flex items-center gap-2">
-        {QUICK_APPS.map((a) => {
+        {apps.map((a) => {
           const Icon = a.icon;
           return (
             <button
@@ -36,9 +39,7 @@ export default function TopQuickIcons() {
                 boxShadow: `inset 0 1px 0 ${a.hex}66, inset 0 -2px 4px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.35), 0 0 0 1px ${a.hex}1a`,
               }}
             >
-              {/* top specular gloss */}
               <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl opacity-70" style={{ background: `linear-gradient(180deg, ${a.hex}40, transparent)` }} />
-              {/* cursor-follow glow */}
               <span className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 50px at var(--mx,50%) var(--my,50%), ${a.hex}66, transparent 70%)` }} />
               <Icon className="relative w-4 h-4 transition-transform duration-200 group-hover:scale-110" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
             </button>
