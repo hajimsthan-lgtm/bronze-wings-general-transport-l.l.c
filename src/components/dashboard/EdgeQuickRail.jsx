@@ -105,18 +105,18 @@ export default function EdgeQuickRail() {
 
   return (
     <>
-      <div
-        className="fixed right-0 top-[70px] md:top-[92px] z-[55] hidden"
-        style={{ width: revealed ? 56 : 8, height: '72vh' }}
-        onMouseEnter={() => setRevealed(true)}
-        onMouseLeave={() => setRevealed(false)}>
-        
-        {revealed &&
-        <div className="absolute top-0 right-1.5 flex flex-col gap-2.5">
-            {apps.map((a, i) => renderItem(a, i))}
-          </div>
-        }
-      </div>
+      
+
+
+
+
+
+
+
+
+
+
+      
       <CalculatorModal open={calcOpen} onClose={() => setCalcOpen(false)} />
     </>);
 
