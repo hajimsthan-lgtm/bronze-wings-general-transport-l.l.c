@@ -7,6 +7,7 @@ import BrandName from '@/components/layout/BrandName';
 import TopQuickIcons from '@/components/layout/TopQuickIcons';
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
+import { Settings as SettingsIcon } from 'lucide-react';
 
 const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981', amethyst: '#a855f7' };
 const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald', amethyst: 'Amethyst' };
@@ -70,6 +71,14 @@ export default function DesktopNav() {
         <div className="flex items-center gap-2">
           <LiveClock />
           <TopQuickIcons />
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            title="Settings"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
+          >
+            <SettingsIcon className="w-4 h-4" />
+          </Link>
           <button
             onClick={toggleTheme}
             className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"

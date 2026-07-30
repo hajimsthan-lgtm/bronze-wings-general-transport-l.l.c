@@ -22,7 +22,7 @@ export default function AppFooter() {
           boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
-        {/* Freeze 8s, then roll 5s, repeating */}
+        {/* Smooth continuous professional scroll */}
         <div className="flex items-center h-full w-max animate-marquee-freeze-roll" style={{ willChange: 'transform' }}>
           {items.map((it, i) => (
             <span key={i} className="flex items-center shrink-0">
