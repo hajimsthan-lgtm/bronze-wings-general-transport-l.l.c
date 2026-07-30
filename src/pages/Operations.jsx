@@ -155,11 +155,14 @@ export default function Operations() {
     if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
     if (search) {
       const q = search.toLowerCase();
-      return trip.from_location?.toLowerCase().includes(q) ||
+      return trip.trip_number?.toLowerCase().includes(q) ||
+        trip.from_location?.toLowerCase().includes(q) ||
         trip.to_location?.toLowerCase().includes(q) ||
         trip.driver_name?.toLowerCase().includes(q) ||
         trip.vehicle_plate?.toLowerCase().includes(q) ||
-        trip.client_name?.toLowerCase().includes(q);
+        trip.client_name?.toLowerCase().includes(q) ||
+        trip.delivery_note_number?.toLowerCase().includes(q) ||
+        (trip.id || '').toLowerCase().slice(-6).includes(q);
     }
     return true;
   }), [trips, dateFrom, dateTo, tripFilter, search]);
@@ -170,7 +173,9 @@ export default function Operations() {
       const q = search.toLowerCase();
       return c.company_name?.toLowerCase().includes(q) ||
         c.vehicle_plate?.toLowerCase().includes(q) ||
-        c.driver_name?.toLowerCase().includes(q);
+        c.driver_name?.toLowerCase().includes(q) ||
+        (c.id || '').toLowerCase().includes(q) ||
+        c.notes?.toLowerCase().includes(q);
     }
     return true;
   }), [contracts, contractFilter, search]);
@@ -358,7 +363,7 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
@@ -366,28 +371,25 @@ export default function Operations() {
                 key={a.label}
                 onClick={() => a.action?.()}
                 onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}
-                className="group relative overflow-hidden animate-fade-in-up cursor-pointer p-4 sm:p-5"
+                className="group relative overflow-hidden animate-fade-in-up cursor-pointer p-3"
                 style={{
                   animationDelay: `${i * 0.03}s`,
-                  borderRadius: '1.25rem',
+                  borderRadius: '1rem',
                   background: 'linear-gradient(145deg, #20242f, #14171f)',
-                  border: `1px solid ${hexToRgba(a.accent, 0.32)}`,
-                  boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.10), inset 0 -3px 6px rgba(0,0,0,0.42), 0 8px 20px rgba(0,0,0,0.4)',
+                  border: `1px solid ${hexToRgba(a.accent, 0.28)}`,
+                  boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.32)',
                 }}
               >
-                {/* cursor-follow lightning blob */}
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 140px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.35)}, transparent 60%)` }} />
-                {/* edge lightning ring */}
-                <div className="absolute inset-0 pointer-events-none rounded-[1.25rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${hexToRgba(a.accent, 0.5)}, 0 0 22px -4px ${hexToRgba(a.accent, 0.55)}` }} />
-                <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full pointer-events-none opacity-40 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.55)} 0%, transparent 70%)` }} />
-                <div className="relative flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.22)}, ${hexToRgba(a.accent, 0.08)})`, border: `1px solid ${hexToRgba(a.accent, 0.35)}`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.12), 0 0 16px -4px ${hexToRgba(a.accent, 0.6)}` }}>
-                    <Icon className="w-5 h-5" style={{ color: a.accent }} />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 100px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.28)}, transparent 60%)` }} />
+                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-30 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
+                <div className="relative flex items-center gap-2 mb-1.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.2)}, ${hexToRgba(a.accent, 0.06)})`, border: `1px solid ${hexToRgba(a.accent, 0.3)}` }}>
+                    <Icon className="w-4 h-4" style={{ color: a.accent }} />
                   </div>
-                  <span className="text-[10px] uppercase tracking-[0.1em] text-white/45 font-semibold">{a.label}</span>
+                  <span className="text-[9px] uppercase tracking-[0.08em] text-white/45 font-semibold truncate">{a.label}</span>
                 </div>
-                <p className="relative text-xl md:text-2xl font-bold text-white tabular-nums truncate tracking-tight">{a.value}</p>
-                {a.sub && <p className="relative text-[11px] text-white/40 mt-1 truncate">{a.sub}</p>}
+                <p className="relative text-base md:text-lg font-bold text-white tabular-nums truncate tracking-tight leading-tight">{a.value}</p>
+                {a.sub && <p className="relative text-[10px] text-white/40 mt-0.5 truncate">{a.sub}</p>}
               </div>
             );
           })}
