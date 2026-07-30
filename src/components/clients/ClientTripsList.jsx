@@ -45,6 +45,7 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
         )}
       </div>
 
+      <div className="max-h-[440px] overflow-y-auto thin-scroll pr-1 space-y-2">
       {trips.map((trip) => {
         const inv = getTripInvoice(trip.id);
         const isSent = inv?.status === 'sent';
@@ -79,6 +80,7 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
           </div>
         );
       })}
+      </div>
 
       {/* floating bulk action bar */}
       {selected.size > 0 && (

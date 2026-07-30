@@ -239,8 +239,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
       <Tabs defaultValue="trips">
         <TabsList>
           <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
-          <TabsTrigger value="invoices">{t('invoices')} ({displayInvoices.length})</TabsTrigger>
-          <TabsTrigger value="generator">Invoice Generator</TabsTrigger>
+          <TabsTrigger value="generator">Invoices ({invoices.length})</TabsTrigger>
           <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
           <TabsTrigger value="charges">{t('fixed_charges')} ({fixedCharges.length})</TabsTrigger>
           <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
@@ -258,40 +257,18 @@ export default function ClientDetail({ id: propId, inline = false }) {
           )}
         </TabsContent>
 
-        <TabsContent value="invoices" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <>
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <Button onClick={() => { setEditInvoice(null); setInvoiceFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> {t('new_invoice')}
-                </Button>
-                <ExportButtons data={filteredInvoices} filename={`invoices-${client.name}`} title={`Invoices - ${client.name}`} columns={invExportCols} />
-              </div>
-              {filteredInvoices.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (
-                <div className="space-y-2">
-                  {filteredInvoices.map(rec => (
-                    <div key={rec.id} onClick={() => { setEditInvoice(rec); setInvoiceFormOpen(true); }} className="row-card flex items-center gap-3 cursor-pointer hover:border-primary/30 transition-colors">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground">{rec.invoice_number || '—'}</p>
-                        <p className="text-xs text-muted-foreground">Issued: {formatDate(rec.issue_date)} · Due: {formatDate(rec.due_date)}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-foreground">{formatCurrency(rec.total_amount)}</span>
-                      <StatusBadge status={rec.status} />
-                      <button onClick={async (e) => { e.stopPropagation(); const s = await getCompanySettings(); downloadInvoicePDF(rec, client.name, s, clientInvoiceSeq[rec.id]); }} className="text-muted-foreground hover:text-primary p-1.5">
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </TabsContent>
-
         <TabsContent value="generator" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : (
-            <InvoiceGeneratorTab client={client} trips={trips} invoices={invoices} onInvoicesChanged={reloadInvoices} />
+            <InvoiceGeneratorTab
+              client={client}
+              trips={trips}
+              invoices={invoices}
+              payments={payments}
+              onInvoicesChanged={reloadInvoices}
+              onNewInvoice={() => { setEditInvoice(null); setInvoiceFormOpen(true); }}
+              onEditInvoice={(inv) => { setEditInvoice(inv); setInvoiceFormOpen(true); }}
+              clientInvoiceSeq={clientInvoiceSeq}
+            />
           )}
         </TabsContent>
 
@@ -321,7 +298,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Invoices</p>
                     <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} unpaid</span>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 max-h-[300px] overflow-y-auto thin-scroll pr-1">
                     {outstandingInvoices.map(inv => {
                       const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
                       const isPartial = (Number(inv.paid_amount) || 0) > 0;
@@ -339,7 +316,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
               )}
 
               {filteredPayments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
                   {filteredPayments.map(p => {
                     const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
                     const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
@@ -382,7 +359,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
                 </Button>
               </div>
               {fixedCharges.length === 0 ? <EmptyState icon={Repeat} title={t('no_data')} /> : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
                   {fixedCharges.map(rec => (
                     <div key={rec.id} className="row-card flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Repeat className="w-4 h-4 text-primary" /></div>
