@@ -9,7 +9,7 @@ import ContentSidebar from '@/components/layout/ContentSidebar';
 
 export default function AppLayout() {
   const location = useLocation();
-  const showHeader = location.pathname === '/' || location.pathname.startsWith('/settings');
+  const showHeader = true;
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
