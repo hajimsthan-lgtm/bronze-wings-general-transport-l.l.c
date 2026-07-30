@@ -24,6 +24,7 @@ import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
+import ClientTripsList from '@/components/clients/ClientTripsList';
 import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
 
 export default function ClientDetail({ id: propId, inline = false }) {
@@ -146,6 +147,20 @@ export default function ClientDetail({ id: propId, inline = false }) {
     const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
     setInvoices(refreshed || []);
   };
+  const reloadTrips = () => base44.entities.Trip.filter({ client_name: client.name }).then(setTrips).catch(() => {});
+  const bulkComplete = async (selTrips) => {
+    const toUpdate = selTrips.filter((t) => t.status !== 'completed');
+    if (toUpdate.length === 0) return;
+    await Promise.all(toUpdate.map((t) => base44.entities.Trip.update(t.id, { status: 'completed' })));
+    await reloadTrips();
+  };
+  const bulkInvoice = async (selTrips, sent) => {
+    const eligible = selTrips.filter((t) => t.status === 'completed');
+    if (eligible.length === 0) return;
+    await Promise.all(eligible.map((t) => setTripInvoiceSent(t, sent)));
+    const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
+    setInvoices(refreshed || []);
+  };
 
   const invExportCols = [
     { label: 'Invoice #', key: 'invoice_number' }, { label: 'Issue Date', key: 'issue_date' },
@@ -232,41 +247,14 @@ export default function ClientDetail({ id: propId, inline = false }) {
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : displayTrips.length === 0 ? <EmptyState icon={Inbox} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {displayTrips.map(trip => {
-                const inv = getTripInvoice(trip.id);
-                const isSent = inv?.status === 'sent';
-                return (
-                  <div key={trip.id} className="row-card flex items-center gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.vehicle_plate} · {trip.driver_name}{trip.contact_person ? ` · ${trip.contact_person}` : ''}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
-                    <StatusBadge status={trip.status} />
-                    {trip.status === 'completed' && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap ${isSent ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`}>
-                            {isSent ? 'Sent' : 'Not Sent'}
-                            <ChevronDown className="w-2.5 h-2.5" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => !isSent && toggleTripInvoiceSent(trip, true)} className="text-xs cursor-pointer">
-                            Mark Sent
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => isSent && toggleTripInvoiceSent(trip, false)} className="text-xs cursor-pointer">
-                            Revert to Not Sent
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+          {dataLoading ? <LoadingSpinner /> : (
+            <ClientTripsList
+              trips={displayTrips}
+              getTripInvoice={getTripInvoice}
+              onToggleInvoiceSent={toggleTripInvoiceSent}
+              onBulkComplete={bulkComplete}
+              onBulkInvoice={bulkInvoice}
+            />
           )}
         </TabsContent>
 
