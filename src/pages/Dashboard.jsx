@@ -238,7 +238,7 @@ export default function Dashboard() {
         {/* Expense breakdown donut */}
         <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <h2 className="text-base font-semibold text-white mb-5">Expense Breakdown</h2>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 h-full">
             <div className="relative" style={{ width: 150, height: 150, flexShrink: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
