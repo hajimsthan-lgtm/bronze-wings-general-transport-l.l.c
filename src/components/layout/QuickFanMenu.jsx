@@ -52,16 +52,17 @@ export default function QuickFanMenu() {
           />
         )}
 
-        {/* ══ Horizontal utility apps — spread to the right ══ */}
-        {open && APPS.map((a, i) => {
+        {/* ══ All apps spread horizontally to the right ══ */}
+        {open && [...APPS, ...NAV].map((a, i) => {
           const GAP = 54;
           const x = 34 + i * GAP;
           const Icon = a.icon;
+          const click = (e) => { e.stopPropagation(); a.to ? handleNav(a) : handleAction(a); };
           return (
             <button
               key={a.key}
               type="button"
-              onClick={() => handleAction(a)}
+              onClick={click}
               onMouseEnter={poke}
               title={a.label}
               className="absolute left-1/2 top-1/2 z-40"
@@ -88,47 +89,6 @@ export default function QuickFanMenu() {
                   />
                 </span>
                 <Icon className="relative w-5 h-5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
-              </span>
-            </button>
-          );
-        })}
-
-        {/* ══ Vertical in-app modules — column rising upward ══ */}
-        {open && NAV.map((a, i) => {
-          const GAP = 50;
-          const y = -(34 + i * GAP);
-          const Icon = a.icon;
-          return (
-            <button
-              key={a.key}
-              type="button"
-              onClick={() => handleNav(a)}
-              onMouseEnter={poke}
-              title={a.label}
-              className="absolute left-1/2 top-1/2 z-40"
-              style={{ transform: `translate(-50%, calc(-50% + ${y}px))` }}
-            >
-              <span
-                className="group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-                style={{
-                  animation: `fan-pop 0.45s cubic-bezier(0.16,1,0.3,1) ${i * 0.05 + 0.1}s both`,
-                  background: `linear-gradient(145deg, ${a.hex}, ${a.hex}cc)`,
-                  border: `1px solid ${a.hex}99`,
-                  boxShadow: `0 0 16px -4px ${a.hex}cc, inset 0 2px 3px rgba(255,255,255,0.4), inset 0 -3px 5px rgba(0,0,0,0.22), 0 6px 16px rgba(0,0,0,0.42)`,
-                  color: '#fff',
-                }}
-              >
-                <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-                  <span
-                    className="absolute top-0 h-full w-1/2 skew-x-[-20deg]"
-                    style={{
-                      left: '-120%',
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)',
-                      animation: `fan-sheen 1.9s ease-in-out ${i * 0.08 + 0.2}s infinite`,
-                    }}
-                  />
-                </span>
-                <Icon className="relative w-[18px] h-[18px]" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.35))' }} />
               </span>
             </button>
           );
