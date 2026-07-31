@@ -35,29 +35,14 @@ export default function AppLayout() {
           MAIN CONTENT — fixed-height panel; body scrolls internally
           beneath the transparent header
           ═══════════════════════════════════════════════════════ */}
-      <main className="flex-1 min-h-0 flex flex-col px-3 md:px-5 lg:px-7 max-w-[1440px] mx-auto w-full relative z-10 pt-3 md:pt-0">
+      <main className="flex-1 min-h-0 flex flex-col max-w-[1440px] mx-auto w-full relative z-10">
+        {/* Scrollable body — content sits directly on the app background */}
         <div
           key={location.pathname}
-          className="animate-fade-in-up flex flex-col rounded-2xl relative overflow-hidden md:flex-1 md:min-h-0"
-          style={{
-            background: 'var(--panel-bg)',
-            backdropFilter: 'var(--panel-blur)',
-            WebkitBackdropFilter: 'var(--panel-blur)',
-            border: '1px solid var(--panel-border-color)',
-            boxShadow: 'var(--panel-inner-highlight), 0 0 0 1px rgba(var(--panel-accent-rgb),0.05), var(--panel-drop-shadow)'
-          }}
+          className="animate-fade-in-up md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll"
         >
-          {/* subtle top highlight only */}
-          <div
-            className="absolute inset-0 pointer-events-none rounded-2xl"
-            style={{ background: 'radial-gradient(ellipse 80% 36% at 50% 0%, rgba(var(--panel-accent-rgb),0.04) 0%, transparent 60%)' }}
-          />
-
-          {/* Scrollable body — content scrolls behind the transparent header */}
-          <div className="relative z-10 md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
-            <div className={`p-4 pb-28 md:pb-28 md:pr-6 md:pl-[60px] ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}>
-              <Outlet />
-            </div>
+          <div className={`p-4 pb-28 md:pb-28 md:pr-6 md:pl-[60px] ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}>
+            <Outlet />
           </div>
         </div>
       </main>
