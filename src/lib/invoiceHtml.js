@@ -80,6 +80,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   return `
 <div id="invoice-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
+  <div id="invoice-header">
   <!-- Header band: logo + brand (left) | contact info (right) -->
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <div style="display:flex;align-items:center;gap:10px;">
@@ -123,6 +124,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       </div>
     </div>
   </div>
+  </div><!-- /invoice-header -->
 
   <!-- Items Table -->
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:9pt;">
@@ -228,6 +230,18 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
       });
     }
 
+    // Capture the company header (logo, brand, title, meta) so it repeats on every page
+    const invoiceHeaderEl = wrapper.querySelector('#invoice-header');
+    let invoiceHeaderCanvas = null;
+    let invoiceHeaderHeightPx = 0;
+    if (invoiceHeaderEl) {
+      invoiceHeaderCanvas = await html2canvas(invoiceHeaderEl, {
+        scale: 1.5,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+    }
+
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     const pdfW = pdf.internal.pageSize.getWidth();
     const pdfH = pdf.internal.pageSize.getHeight();
@@ -244,6 +258,12 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
     if (thead) {
       const thRect = thead.getBoundingClientRect();
       headerHeightPx = Math.round(thRect.height * scaleFactor);
+    }
+
+    // Measure the company header height in main-canvas coordinates
+    if (invoiceHeaderEl) {
+      const ihRect = invoiceHeaderEl.getBoundingClientRect();
+      invoiceHeaderHeightPx = Math.round(ihRect.height * scaleFactor);
     }
 
     // Measure the table body area (for detecting continuation pages)
@@ -272,8 +292,10 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
     let cursor = 0;
     let pageIndex = 0;
     while (cursor < canvas.height) {
-      const isTableCont = pageIndex > 0 && cursor > tableStartPx && cursor < tableEndPx;
-      const effectiveUsable = isTableCont ? usablePx - headerHeightPx : usablePx;
+      const isCont = pageIndex > 0;
+      const isTableCont = isCont && cursor > tableStartPx && cursor < tableEndPx;
+      const overhead = isCont ? (invoiceHeaderHeightPx + (isTableCont ? headerHeightPx : 0)) : 0;
+      const effectiveUsable = usablePx - overhead;
 
       let breakAt = cursor + effectiveUsable;
       if (breakAt >= canvas.height) {
@@ -294,28 +316,36 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
 
     for (let p = 0; p < totalPages; p++) {
       const y0 = p === 0 ? 0 : pageBreaks[p - 1];
-      const isTableCont = p > 0 && y0 > tableStartPx && y0 < tableEndPx;
-      const headerOffset = (isTableCont && headerCanvas) ? headerHeightPx : 0;
+      const isCont = p > 0;
+      const isTableCont = isCont && y0 > tableStartPx && y0 < tableEndPx;
+      const companyHeaderOffset = isCont ? invoiceHeaderHeightPx : 0;
+      const tableHeaderOffset = (isTableCont && headerCanvas) ? headerHeightPx : 0;
+      const totalHeaderOffset = companyHeaderOffset + tableHeaderOffset;
 
       const contentHpx = pageBreaks[p] - y0;
       if (contentHpx <= 0) break;
 
       const sliceCanvas = document.createElement('canvas');
       sliceCanvas.width = canvas.width;
-      sliceCanvas.height = contentHpx + headerOffset;
+      sliceCanvas.height = contentHpx + totalHeaderOffset;
       const ctx = sliceCanvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
 
-      // Draw repeating table header at the top of continuation pages
-      if (headerOffset > 0 && headerCanvas) {
-        ctx.drawImage(headerCanvas, 0, 0, headerCanvas.width, headerCanvas.height, 0, 0, canvas.width, headerHeightPx);
+      // Draw repeating company header at the top of every continuation page
+      if (companyHeaderOffset > 0 && invoiceHeaderCanvas) {
+        ctx.drawImage(invoiceHeaderCanvas, 0, 0, invoiceHeaderCanvas.width, invoiceHeaderCanvas.height, 0, 0, canvas.width, invoiceHeaderHeightPx);
       }
 
-      // Draw the page content (shifted down by headerOffset when header is present)
-      ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, headerOffset, canvas.width, contentHpx);
+      // Draw repeating table header at the top of table continuation pages
+      if (tableHeaderOffset > 0 && headerCanvas) {
+        ctx.drawImage(headerCanvas, 0, 0, headerCanvas.width, headerCanvas.height, 0, companyHeaderOffset, canvas.width, headerHeightPx);
+      }
 
-      const totalHpx = contentHpx + headerOffset;
+      // Draw the page content (shifted down by totalHeaderOffset)
+      ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, totalHeaderOffset, canvas.width, contentHpx);
+
+      const totalHpx = contentHpx + totalHeaderOffset;
       const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
       const sliceHmm = totalHpx / pxPerMm;
       if (p > 0) pdf.addPage();
