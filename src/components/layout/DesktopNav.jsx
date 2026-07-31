@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from '@/lib/theme';
+import AlertBell from '@/components/layout/AlertBell';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
@@ -9,11 +9,7 @@ import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 import { Settings as SettingsIcon } from 'lucide-react';
 
-const THEME_SWATCH = { crimson: '#D62828', navy: '#3E92CC', emerald: '#10b981', amethyst: '#a855f7' };
-const THEME_LABEL = { crimson: 'Crimson', navy: 'Navy', emerald: 'Emerald', amethyst: 'Amethyst' };
-
 export default function DesktopNav() {
-  const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
   const isDashboard = location.pathname === '/';
@@ -71,6 +67,7 @@ export default function DesktopNav() {
         <div className="flex items-center gap-2">
           <LiveClock />
           <TopQuickIcons />
+          <AlertBell />
           <Link
             to="/settings"
             aria-label="Settings"
@@ -79,13 +76,6 @@ export default function DesktopNav() {
           >
             <SettingsIcon className="w-4 h-4" />
           </Link>
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-1.5 h-9 px-3 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-            aria-label="Switch theme">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: THEME_SWATCH[theme] || '#3E92CC', boxShadow: `0 0 8px ${THEME_SWATCH[theme] || '#3E92CC'}` }} />
-            {THEME_LABEL[theme] || 'Navy'}
-          </button>
         </div>
       </div>
     </nav>
