@@ -207,6 +207,8 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
   try {
     const element = wrapper.querySelector('#invoice-container');
     const footerBlock = wrapper.querySelector('#footer-block');
+    const thead = wrapper.querySelector('thead');
+    const tableEl = wrapper.querySelector('table');
 
     const canvas = await html2canvas(element, {
       scale: 1.5,
@@ -214,6 +216,17 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
       backgroundColor: '#ffffff',
       logging: false,
     });
+
+    // Capture the table header separately so it can be repeated on every continuation page
+    let headerCanvas = null;
+    let headerHeightPx = 0;
+    if (thead) {
+      headerCanvas = await html2canvas(thead, {
+        scale: 1.5,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+    }
 
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     const pdfW = pdf.internal.pageSize.getWidth();
@@ -224,24 +237,45 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
     const pxPerMm = canvas.width / imgW;
     const usablePx = Math.floor(usableH * pxPerMm);
 
+    const containerRect = element.getBoundingClientRect();
+    const scaleFactor = canvas.width / containerRect.width;
+
+    // Measure the table header height in main-canvas coordinates
+    if (thead) {
+      const thRect = thead.getBoundingClientRect();
+      headerHeightPx = Math.round(thRect.height * scaleFactor);
+    }
+
+    // Measure the table body area (for detecting continuation pages)
+    let tableStartPx = 0;
+    let tableEndPx = canvas.height;
+    if (tableEl) {
+      const tRect = tableEl.getBoundingClientRect();
+      tableStartPx = Math.round((tRect.top - containerRect.top) * scaleFactor);
+      tableEndPx = Math.round((tRect.bottom - containerRect.top) * scaleFactor);
+    }
+
     // Measure the footer block (totals + signatures) so we never split it across pages.
-    // If a page boundary would cut through it, the entire block jumps to the next page.
     let footerStartPx = 0;
     let footerEndPx = canvas.height;
     if (footerBlock) {
-      const containerRect = element.getBoundingClientRect();
       const fbRect = footerBlock.getBoundingClientRect();
-      const scaleFactor = canvas.width / containerRect.width;
       footerStartPx = Math.round((fbRect.top - containerRect.top) * scaleFactor);
       footerEndPx = Math.round((fbRect.bottom - containerRect.top) * scaleFactor);
     }
 
-    // Build page break boundaries — push the entire footer block to the next page
-    // if a break would otherwise land inside it.
+    // Build page break boundaries.
+    // - Footer block never splits: if a break lands inside it, push to footer start.
+    // - Table continuation pages (page 2+ starting inside the table) have less usable
+    //   height because the repeating header occupies the top.
     const pageBreaks = [];
     let cursor = 0;
+    let pageIndex = 0;
     while (cursor < canvas.height) {
-      let breakAt = cursor + usablePx;
+      const isTableCont = pageIndex > 0 && cursor > tableStartPx && cursor < tableEndPx;
+      const effectiveUsable = isTableCont ? usablePx - headerHeightPx : usablePx;
+
+      let breakAt = cursor + effectiveUsable;
       if (breakAt >= canvas.height) {
         pageBreaks.push(canvas.height);
         break;
@@ -250,28 +284,40 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
       if (breakAt > footerStartPx && breakAt < footerEndPx && footerStartPx > cursor) {
         breakAt = footerStartPx;
       }
-      if (breakAt <= cursor) breakAt = cursor + usablePx; // safety: always progress
+      if (breakAt <= cursor) breakAt = cursor + effectiveUsable; // safety: always progress
       pageBreaks.push(breakAt);
       cursor = breakAt;
+      pageIndex++;
     }
 
     const totalPages = pageBreaks.length;
 
     for (let p = 0; p < totalPages; p++) {
       const y0 = p === 0 ? 0 : pageBreaks[p - 1];
-      const sliceHpx = pageBreaks[p] - y0;
-      if (sliceHpx <= 0) break;
+      const isTableCont = p > 0 && y0 > tableStartPx && y0 < tableEndPx;
+      const headerOffset = (isTableCont && headerCanvas) ? headerHeightPx : 0;
+
+      const contentHpx = pageBreaks[p] - y0;
+      if (contentHpx <= 0) break;
 
       const sliceCanvas = document.createElement('canvas');
       sliceCanvas.width = canvas.width;
-      sliceCanvas.height = sliceHpx;
+      sliceCanvas.height = contentHpx + headerOffset;
       const ctx = sliceCanvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
-      ctx.drawImage(canvas, 0, y0, canvas.width, sliceHpx, 0, 0, canvas.width, sliceHpx);
 
+      // Draw repeating table header at the top of continuation pages
+      if (headerOffset > 0 && headerCanvas) {
+        ctx.drawImage(headerCanvas, 0, 0, headerCanvas.width, headerCanvas.height, 0, 0, canvas.width, headerHeightPx);
+      }
+
+      // Draw the page content (shifted down by headerOffset when header is present)
+      ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, headerOffset, canvas.width, contentHpx);
+
+      const totalHpx = contentHpx + headerOffset;
       const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
-      const sliceHmm = sliceHpx / pxPerMm;
+      const sliceHmm = totalHpx / pxPerMm;
       if (p > 0) pdf.addPage();
       pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, sliceHmm);
 
