@@ -143,6 +143,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     </tbody>
   </table>
 
+  <!-- Footer Block: totals + signatures — never split across pages -->
+  <div id="footer-block">
   <!-- Totals Section: Amount in Words (left) | Totals (right) -->
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;">
     <div style="width:55%;padding-right:20px;">
@@ -173,6 +175,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       <div style="border-top:1.5px solid #555;width:85%;margin:0 auto;padding-top:6px;font-size:8.5pt;color:#666;">Authorized Signature &amp; Stamp</div>
     </div>
   </div>
+  </div><!-- /footer-block -->
 
 </div>`;
 }
@@ -203,6 +206,8 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
 
   try {
     const element = wrapper.querySelector('#invoice-container');
+    const footerBlock = wrapper.querySelector('#footer-block');
+
     const canvas = await html2canvas(element, {
       scale: 1.5,
       useCORS: true,
@@ -218,11 +223,43 @@ export async function downloadInvoicePDF(invoice, clientName, settings = {}, seq
     const imgW = pdfW;
     const pxPerMm = canvas.width / imgW;
     const usablePx = Math.floor(usableH * pxPerMm);
-    const totalPages = Math.max(1, Math.ceil(canvas.height / usablePx));
+
+    // Measure the footer block (totals + signatures) so we never split it across pages.
+    // If a page boundary would cut through it, the entire block jumps to the next page.
+    let footerStartPx = 0;
+    let footerEndPx = canvas.height;
+    if (footerBlock) {
+      const containerRect = element.getBoundingClientRect();
+      const fbRect = footerBlock.getBoundingClientRect();
+      const scaleFactor = canvas.width / containerRect.width;
+      footerStartPx = Math.round((fbRect.top - containerRect.top) * scaleFactor);
+      footerEndPx = Math.round((fbRect.bottom - containerRect.top) * scaleFactor);
+    }
+
+    // Build page break boundaries — push the entire footer block to the next page
+    // if a break would otherwise land inside it.
+    const pageBreaks = [];
+    let cursor = 0;
+    while (cursor < canvas.height) {
+      let breakAt = cursor + usablePx;
+      if (breakAt >= canvas.height) {
+        pageBreaks.push(canvas.height);
+        break;
+      }
+      // If this break lands inside the footer block, move it to the footer start
+      if (breakAt > footerStartPx && breakAt < footerEndPx && footerStartPx > cursor) {
+        breakAt = footerStartPx;
+      }
+      if (breakAt <= cursor) breakAt = cursor + usablePx; // safety: always progress
+      pageBreaks.push(breakAt);
+      cursor = breakAt;
+    }
+
+    const totalPages = pageBreaks.length;
 
     for (let p = 0; p < totalPages; p++) {
-      const y0 = p * usablePx;
-      const sliceHpx = Math.min(usablePx, canvas.height - y0);
+      const y0 = p === 0 ? 0 : pageBreaks[p - 1];
+      const sliceHpx = pageBreaks[p] - y0;
       if (sliceHpx <= 0) break;
 
       const sliceCanvas = document.createElement('canvas');

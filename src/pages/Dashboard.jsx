@@ -86,6 +86,16 @@ function ListRow({ to, icon: Icon, grad, glow, title, subtitle, statusText, stat
   );
 }
 
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+}
+
+const ALERT_DAYS = 14;
+
 const tooltipStyle = {
   background: '#232636',
   border: '1px solid rgba(255,255,255,0.08)',
@@ -103,6 +113,7 @@ export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [drivers, setDrivers] = useState([]);
 
   const loadData = useCallback(async () => {
     const tr = await base44.entities.Trip.list('-created_date', 50).catch(() => []);
@@ -110,7 +121,8 @@ export default function Dashboard() {
     const v = await base44.entities.Vehicle.list().catch(() => []);
     const d = await base44.entities.Document.list().catch(() => []);
     const e = await base44.entities.Expense.list('-created_date', 50).catch(() => []);
-    setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e);
+    const dr = await base44.entities.Driver.list().catch(() => []);
+    setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e); setDrivers(dr);
   }, []);
 
   useEffect(() => {
@@ -182,6 +194,21 @@ export default function Dashboard() {
   const overdueInvoices = invoices.filter(i => i.status === 'overdue');
   const maintenanceVehicles = vehicles.filter(v => v.status === 'maintenance');
   const expiringDocs = documents.filter(d => d.status === 'expiring_soon' || d.status === 'expired');
+
+  // Vehicle service-date alerts (next_service_date within 14 days or overdue)
+  const serviceDueVehicles = vehicles.filter(v => {
+    const days = daysUntil(v.next_service_date);
+    return days !== null && days <= ALERT_DAYS;
+  });
+
+  // Driver document alerts (license_expiry / visa_expiry within 14 days or overdue)
+  const driverDocAlerts = [];
+  drivers.forEach(d => {
+    const licDays = daysUntil(d.license_expiry);
+    if (licDays !== null && licDays <= ALERT_DAYS) driverDocAlerts.push({ name: d.name, type: 'License', days: licDays });
+    const visaDays = daysUntil(d.visa_expiry);
+    if (visaDays !== null && visaDays <= ALERT_DAYS) driverDocAlerts.push({ name: d.name, type: 'Visa', days: visaDays });
+  });
 
   const tripStatusColor = (s) => s === 'completed' ? '#10b981' : s === 'in_transit' ? '#3b82f6' : s === 'cancelled' ? '#ef4444' : '#f59e0b';
   const invStatusColor = (s) => s === 'paid' ? '#10b981' : s === 'sent' ? '#3b82f6' : s === 'overdue' ? '#ef4444' : '#f59e0b';
@@ -332,7 +359,7 @@ export default function Dashboard() {
       </div>
 
       {/* Alerts */}
-      {(overdueInvoices.length > 0 || maintenanceVehicles.length > 0 || expiringDocs.length > 0) && (
+      {(overdueInvoices.length > 0 || maintenanceVehicles.length > 0 || expiringDocs.length > 0 || serviceDueVehicles.length > 0 || driverDocAlerts.length > 0) && (
         <div className="glass-card p-5">
           <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-400" />
@@ -362,6 +389,24 @@ export default function Dashboard() {
                 <div className="flex items-center gap-3">
                   <FileWarning className="w-4 h-4 text-amber-400" />
                   <span className="text-sm text-foreground">{expiringDocs.length} {t('expiring_docs')}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </Link>
+            )}
+            {serviceDueVehicles.length > 0 && (
+              <Link to="/admin/vehicles" className="flex items-center justify-between p-3 rounded-xl bg-orange-500/[0.06] border border-orange-500/10 hover:bg-orange-500/[0.1] transition-colors group">
+                <div className="flex items-center gap-3">
+                  <Wrench className="w-4 h-4 text-orange-400" />
+                  <span className="text-sm text-foreground">{serviceDueVehicles.length} vehicle{serviceDueVehicles.length !== 1 ? 's' : ''} due for service</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </Link>
+            )}
+            {driverDocAlerts.length > 0 && (
+              <Link to="/admin/drivers" className="flex items-center justify-between p-3 rounded-xl bg-red-500/[0.06] border border-red-500/10 hover:bg-red-500/[0.1] transition-colors group">
+                <div className="flex items-center gap-3">
+                  <FileWarning className="w-4 h-4 text-red-400" />
+                  <span className="text-sm text-foreground">{driverDocAlerts.length} driver document{driverDocAlerts.length !== 1 ? 's' : ''} expiring</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </Link>

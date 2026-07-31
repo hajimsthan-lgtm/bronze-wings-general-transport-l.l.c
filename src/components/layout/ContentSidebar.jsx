@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
-import { LayoutDashboard, Truck, BarChart3, Shield, Bot, ChevronsRight, ChevronsLeft } from 'lucide-react';
+import { Home, Truck, BarChart3, Users, Bot, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
@@ -9,10 +9,10 @@ import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 /* Each nav item carries its own modern color model — a duotone gradient,
    a glow color, and a soft tint for the active halo. */
 const navItems = [
-  { key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard', from: '#6366f1', to: '#4338ca', glow: '99,102,241', paths: ['/'] },
+  { key: 'dashboard', icon: Home, label: 'Dashboard', from: '#6366f1', to: '#4338ca', glow: '99,102,241', paths: ['/'] },
   { key: 'operations', icon: Truck, label: 'Operations', from: '#0ea5e9', to: '#0369a1', glow: '14,165,233', paths: ['/trips', '/contracts', '/expenses'] },
   { key: 'reports', icon: BarChart3, label: 'Reports', from: '#a855f7', to: '#6d28d9', glow: '168,85,247', paths: ['/reports'] },
-  { key: 'admin', icon: Shield, label: 'Admin', from: '#f59e0b', to: '#c2410c', glow: '245,158,11', paths: ['/admin'] },
+  { key: 'admin', icon: Users, label: 'Admin', from: '#f59e0b', to: '#c2410c', glow: '245,158,11', paths: ['/admin'] },
   { key: 'agents', icon: Bot, label: 'AI Agents', from: '#10b981', to: '#047857', glow: '16,185,129', paths: ['/agents'] },
 ];
 

@@ -17,16 +17,7 @@ export default function AppLayout() {
           AMBIENT BACKGROUND — stripped to a single subtle layer so
           cards, tables and text stay crisp and high-contrast.
           ═══════════════════════════════════════════════════════ */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div
-          className="absolute top-[8%] left-[12%] w-[460px] h-[460px] rounded-full opacity-[0.12] animate-float"
-          style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.22) 0%, transparent 70%)', filter: 'blur(90px)' }}
-        />
-        <div
-          className="absolute bottom-[6%] right-[8%] w-[380px] h-[380px] rounded-full opacity-[0.10] animate-float"
-          style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent2-rgb),0.20) 0%, transparent 70%)', filter: 'blur(80px)', animationDelay: '-3s' }}
-        />
-      </div>
+      {/* Background is a single clean solid — no floating layers */}
 
       {/* ═══════════════════════════════════════════════════════
           NAVIGATION — overlays content on desktop so scrolling data
