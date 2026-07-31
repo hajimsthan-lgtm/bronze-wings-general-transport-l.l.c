@@ -144,7 +144,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   </table>
 
   <!-- Totals Section: Amount in Words (left) | Totals (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;">
     <div style="width:55%;padding-right:20px;">
       <div style="font-size:8pt;text-transform:uppercase;color:#8C745E;font-weight:600;letter-spacing:1px;margin-bottom:6px;">Amount in Words</div>
       <div style="font-size:9pt;color:#1F2937;font-weight:600;line-height:1.5;">${numberToWords(total).toUpperCase()}</div>
