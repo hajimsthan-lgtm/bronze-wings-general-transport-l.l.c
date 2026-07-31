@@ -96,6 +96,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     </div>
   </div>
   <div style="border-bottom:1.5px solid #8C745E;margin-bottom:14px;"></div>
+  </div><!-- /invoice-header -->
 
   <!-- Title: TAX INVOICE + invoice number (centered) -->
   <div style="text-align:center;margin-bottom:14px;">
@@ -124,7 +125,6 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       </div>
     </div>
   </div>
-  </div><!-- /invoice-header -->
 
   <!-- Items Table -->
   <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:9pt;">
