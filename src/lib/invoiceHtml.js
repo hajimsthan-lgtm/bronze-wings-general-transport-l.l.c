@@ -82,7 +82,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 
   <div id="invoice-header" style="padding:30px 50px 0;">
   <!-- Header band: logo + brand (left) | contact info (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
     <div style="display:flex;align-items:center;gap:10px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:62px;width:62px;border-radius:50%;object-fit:cover;" />` : ''}
       <div>
