@@ -80,9 +80,9 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   return `
 <div id="invoice-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
-  <div id="invoice-header" style="padding:30px 50px 0;">
+  <div id="invoice-header">
   <!-- Header band: logo + brand (left) | contact info (right) -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <div style="display:flex;align-items:center;gap:10px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:62px;width:62px;border-radius:50%;object-fit:cover;" />` : ''}
       <div>
