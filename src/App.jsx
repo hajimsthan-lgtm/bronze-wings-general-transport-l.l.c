@@ -23,8 +23,9 @@ import ResetPassword from '@/pages/ResetPassword';
 import AppLayout from '@/components/layout/AppLayout';
 
 // Pages — code-split for smaller initial bundle on mobile WebView
-import { lazy, Suspense } from 'react';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { lazy, Suspense, useEffect } from 'react';
+import RouteProgress from '@/components/common/RouteProgress';
+import { prefetchRoutes } from '@/lib/prefetchRoutes';
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Operations = lazy(() => import('@/pages/Operations'));
 const Expenses = lazy(() => import('@/pages/Expenses'));
@@ -66,7 +67,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={null}>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
+  useEffect(() => { prefetchRoutes(); }, []);
   return (
     <AuthProvider>
       <ThemeProvider>
@@ -112,6 +114,7 @@ function App() {
           <I18nProvider>
             <Router>
               <ScrollToTop />
+              <RouteProgress />
               <TabHistoryProvider>
                 <TourProvider>
                   <AuthenticatedApp />
