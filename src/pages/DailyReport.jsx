@@ -47,12 +47,11 @@ export default function DailyReport() {
   const reportClient = useReportClient();
 
   const loadData = useCallback(async () => {
-    const [t, e, f, i] = await Promise.all([
-      base44.entities.Trip.list('-trip_date', 500),
-      base44.entities.Expense.list('-date', 500),
-      base44.entities.FuelRecord.list('-date', 500),
-      base44.entities.Invoice.list('-issue_date', 500),
-    ]);
+    // Sequential to avoid rate-limit bursts
+    const t = await base44.entities.Trip.list('-trip_date', 500);
+    const e = await base44.entities.Expense.list('-date', 500);
+    const f = await base44.entities.FuelRecord.list('-date', 500);
+    const i = await base44.entities.Invoice.list('-issue_date', 500);
     const byClient = (x) => reportClient === 'all' || x.client_name === reportClient;
     setTrips((t || []).filter(x => byClient(x) && (!x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo))));
     setExpenses((e || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
