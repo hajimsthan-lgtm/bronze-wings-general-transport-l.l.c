@@ -6,7 +6,6 @@ import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
 import DriverProfileCard from '@/components/admin/DriverProfileCard';
 import StatusBadge from '@/components/common/StatusBadge';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
@@ -20,6 +19,7 @@ import HoursGauge from '@/components/drivers/HoursGauge';
 import TripChecklist from '@/components/drivers/TripChecklist';
 import DriverOutstandingPayments from '@/components/drivers/DriverOutstandingPayments';
 import DriverDeductionsSection from '@/components/drivers/DriverDeductionsSection';
+import TabTableCard from '@/components/admin/TabTableCard';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
@@ -281,118 +281,95 @@ export default function DriverDetail() {
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> :
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
-              <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                <div className="col-span-2">Trip ID</div>
-                <div className="col-span-2">Date</div>
-                <div className="col-span-3">Route</div>
-                <div className="col-span-2">Status</div>
-                <div className="col-span-2 text-right">Amount</div>
-                <div className="col-span-1 text-right">Action</div>
-              </div>
-              {fTrips.length === 0 ?
-            <div className="py-10 text-center">
-                  <Inbox className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">No records found for selected period</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                </div> :
-
-            <div className="divide-y divide-border">
-                  {fTrips.map((trip) =>
+          <TabTableCard
+            title={`Trips — ${driver.name}`}
+            subtitle={`${dateFrom} → ${dateTo}`}
+            loading={dataLoading}
+            columns={[
+              { label: 'Trip ID', className: 'col-span-2' },
+              { label: 'Date', className: 'col-span-2' },
+              { label: 'Route', className: 'col-span-3' },
+              { label: 'Status', className: 'col-span-2' },
+              { label: 'Amount', className: 'col-span-2 text-right' },
+              { label: 'Action', className: 'col-span-1 text-right' },
+            ]}
+            emptyIcon={Inbox}
+          >
+            {fTrips.map((trip) => (
               <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                      <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                      <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
-                      <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
-                      <div className="col-span-2"><StatusBadge status={trip.status} /></div>
-                      <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
-                      <div className="col-span-1 text-right">
-                        <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
-                      </div>
-                    </div>
-              )}
+                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
+                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
+                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
+                <div className="col-span-2"><StatusBadge status={trip.status} /></div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
+                <div className="col-span-1 text-right">
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
                 </div>
-            }
-            </div>
-          }
+              </div>
+            ))}
+          </TabTableCard>
         </TabsContent>
 
         <TabsContent value="salary" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> :
-          <>
-              <div className="flex justify-end mb-3">
-                <Button onClick={() => {setEditSalary(null);setSalaryFormOpen(true);}} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
-                </Button>
+          <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
+          <TabTableCard
+            title="Salary Records"
+            subtitle={`${dateFrom} → ${dateTo}`}
+            loading={dataLoading}
+            actions={
+              <Button onClick={() => { setEditSalary(null); setSalaryFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+                <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
+              </Button>
+            }
+            columns={[
+              { label: 'Period', className: 'col-span-2' },
+              { label: 'Pay Date', className: 'col-span-2' },
+              { label: 'Base', className: 'col-span-2 text-right' },
+              { label: 'Additions', className: 'col-span-2 text-right' },
+              { label: 'Deductions', className: 'col-span-1 text-right' },
+              { label: 'Net', className: 'col-span-2 text-right' },
+              { label: 'Status', className: 'col-span-1 text-right' },
+            ]}
+            emptyIcon={Wallet}
+          >
+            {fSalaries.map((rec) => (
+              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
+                <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
+                <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
+                <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
+                <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
+                <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
               </div>
-              <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
-              <div className="rounded-2xl border border-border bg-card overflow-hidden">
-                <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                  <div className="col-span-2">Period</div>
-                  <div className="col-span-2">Pay Date</div>
-                  <div className="col-span-2 text-right">Base</div>
-                  <div className="col-span-2 text-right">Additions</div>
-                  <div className="col-span-1 text-right">Deductions</div>
-                  <div className="col-span-2 text-right">Net</div>
-                  <div className="col-span-1 text-right">Status</div>
-                </div>
-                {fSalaries.length === 0 ?
-              <div className="py-10 text-center">
-                    <Wallet className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-                    <p className="text-sm text-muted-foreground">No records found for selected period</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                  </div> :
-
-              <div className="divide-y divide-border">
-                    {fSalaries.map((rec) =>
-                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                        <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
-                        <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
-                        <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
-                        <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
-                        <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
-                        <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
-                        <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-                      </div>
-                )}
-                  </div>
-              }
-              </div>
-            </>
-          }
+            ))}
+          </TabTableCard>
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> :
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
-              <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                <div className="col-span-2">Date</div>
-                <div className="col-span-2">Category</div>
-                <div className="col-span-5">Description</div>
-                <div className="col-span-2 text-right">Amount</div>
-                <div className="col-span-1 text-right">Status</div>
-              </div>
-              {fExpenses.length === 0 ?
-            <div className="py-10 text-center">
-                  <Receipt className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">No records found for selected period</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                </div> :
-
-            <div className="divide-y divide-border">
-                  {fExpenses.map((rec) =>
+          <TabTableCard
+            title="Expenses"
+            subtitle={`${dateFrom} → ${dateTo}`}
+            loading={dataLoading}
+            columns={[
+              { label: 'Date', className: 'col-span-2' },
+              { label: 'Category', className: 'col-span-2' },
+              { label: 'Description', className: 'col-span-5' },
+              { label: 'Amount', className: 'col-span-2 text-right' },
+              { label: 'Status', className: 'col-span-1 text-right' },
+            ]}
+            emptyIcon={Receipt}
+          >
+            {fExpenses.map((rec) => (
               <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                      <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
-                      <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
-                      <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
-                      <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
-                      <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-                    </div>
-              )}
-                </div>
-            }
-            </div>
-          }
+                <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
+                <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
+                <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
+                <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+              </div>
+            ))}
+          </TabTableCard>
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4">

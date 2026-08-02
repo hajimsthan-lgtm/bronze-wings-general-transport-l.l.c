@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, FileText, Trash2, Download, Loader2, Paperclip } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
+import TabTableCard from '@/components/admin/TabTableCard';
 
 const TYPES = ['registration', 'insurance', 'license', 'permit', 'contract', 'invoice', 'other'];
 
@@ -78,15 +79,14 @@ export default function EntityDocumentsTab({ entityType, entityId }) {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{t('documents')}</p>
+    <TabTableCard
+      title={t('documents')}
+      actions={
         <Button onClick={() => setAdding((v) => !v)} size="sm" className="bg-primary hover:bg-primary/90 h-8">
           <Plus className="w-3.5 h-3.5 mr-1" /> {adding ? t('cancel') : t('add_new')}
         </Button>
-      </div>
-
-      {adding && (
+      }
+      headerExtra={adding ? (
         <div className="glass-card p-4 mb-4 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -117,45 +117,34 @@ export default function EntityDocumentsTab({ entityType, entityId }) {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save')}
           </Button>
         </div>
-      )}
-
-      {loading ? (
-        <div className="text-sm text-muted-foreground py-6 text-center">Loading…</div>
-      ) : (
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-            <div className="col-span-5">Title</div>
-            <div className="col-span-2">Type</div>
-            <div className="col-span-2">Expiry</div>
-            <div className="col-span-2">Status</div>
-            <div className="col-span-1 text-right">Action</div>
+      ) : null}
+      loading={loading}
+      columns={[
+        { label: 'Title', className: 'col-span-5' },
+        { label: 'Type', className: 'col-span-2' },
+        { label: 'Expiry', className: 'col-span-2' },
+        { label: 'Status', className: 'col-span-2' },
+        { label: 'Action', className: 'col-span-1 text-right' },
+      ]}
+      emptyIcon={FileText}
+      emptyTitle={t('no_data')}
+      emptyHint=""
+    >
+      {docs.map((d) => {
+        const st = d.status || statusOf(d.expiry_date);
+        return (
+          <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+            <div className="col-span-5 text-foreground font-medium truncate">{d.title}</div>
+            <div className="col-span-2 text-muted-foreground capitalize truncate">{d.type}</div>
+            <div className="col-span-2 text-muted-foreground">{d.expiry_date ? formatDate(d.expiry_date) : '—'}</div>
+            <div className={`col-span-2 text-[11px] font-semibold uppercase ${STATUS_TONE[st] || 'text-muted-foreground'}`}>{st.replace('_', ' ')}</div>
+            <div className="col-span-1 text-right flex items-center justify-end gap-1">
+              {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary p-1.5"><Download className="w-4 h-4" /></a>}
+              <button onClick={() => remove(d)} className="text-muted-foreground hover:text-red-400 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>
+            </div>
           </div>
-          {docs.length === 0 ? (
-            <div className="py-10 text-center">
-              <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">{t('no_data')}</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border">
-              {docs.map((d) => {
-                const st = d.status || statusOf(d.expiry_date);
-                return (
-                  <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                    <div className="col-span-5 text-foreground font-medium truncate">{d.title}</div>
-                    <div className="col-span-2 text-muted-foreground capitalize truncate">{d.type}</div>
-                    <div className="col-span-2 text-muted-foreground">{d.expiry_date ? formatDate(d.expiry_date) : '—'}</div>
-                    <div className={`col-span-2 text-[11px] font-semibold uppercase ${STATUS_TONE[st] || 'text-muted-foreground'}`}>{st.replace('_', ' ')}</div>
-                    <div className="col-span-1 text-right flex items-center justify-end gap-1">
-                      {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary p-1.5"><Download className="w-4 h-4" /></a>}
-                      <button onClick={() => remove(d)} className="text-muted-foreground hover:text-red-400 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+        );
+      })}
+    </TabTableCard>
   );
 }
