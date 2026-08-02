@@ -12,16 +12,16 @@ export default function DriverOutstandingPayments({ salaries = [], onMarkPaid, b
   const total = outstanding.reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
 
   if (outstanding.length === 0) {
-    return (
-      <div className="glass-card p-4 mb-4 flex items-center gap-3 hidden">
-        <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
-          <CheckCircle className="w-4 h-4 text-emerald-400" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">No Outstanding Payments</p>
-          <p className="text-[10px] text-muted-foreground">All salary records for this driver are fully paid.</p>
-        </div>
-      </div>);
+    return null;
+
+
+
+
+
+
+
+
+
 
   }
 
