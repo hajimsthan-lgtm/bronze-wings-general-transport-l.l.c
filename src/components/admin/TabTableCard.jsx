@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Inbox, ChevronDown } from 'lucide-react';
 
 /**
- * Reusable card wrapping a 12-col grid table — matches the "top card" model
- * (header with title/subtitle + action buttons, then bordered table inside).
- * Pass `collapsible` to add a chevron toggle that collapses the table body.
+ * Reusable card wrapping a 12-col grid table.
+ * Collapsible cards default to collapsed and expand on hover.
  */
 export default function TabTableCard({
   title,
@@ -17,7 +16,7 @@ export default function TabTableCard({
   loading,
   headerExtra,
   collapsible = false,
-  defaultOpen = true,
+  defaultOpen = false,
   children,
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -25,7 +24,11 @@ export default function TabTableCard({
   const hasRows = rows.length > 0;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div
+      className="glass-card rounded-2xl p-5 transition-all duration-300"
+      onMouseEnter={collapsible ? () => setOpen(true) : undefined}
+      onMouseLeave={collapsible ? () => setOpen(false) : undefined}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           {collapsible && (

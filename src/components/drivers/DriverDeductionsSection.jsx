@@ -27,7 +27,7 @@ export default function DriverDeductionsSection({ driverName }) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,7 +52,12 @@ export default function DriverDeductionsSection({ driverName }) {
   const totalRemaining = deductions.filter((d) => d.status === 'active').reduce((s, d) => s + (Number(d.remaining_balance) || 0), 0);
 
   return (
-    <div className="rounded-2xl border border-border bg-card overflow-hidden" style={{ borderLeft: '4px solid hsl(var(--destructive))' }}>
+    <div
+      className="glass-card rounded-2xl overflow-hidden transition-all duration-300"
+      style={{ borderLeft: '4px solid hsl(var(--destructive))' }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-border">
         <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-3 text-left">
