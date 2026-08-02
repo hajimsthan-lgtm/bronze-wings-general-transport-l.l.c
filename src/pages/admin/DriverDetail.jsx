@@ -159,6 +159,101 @@ export default function DriverDetail() {
             <TabsTrigger value="expenses" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('expenses')} ({fExpenses.length})</TabsTrigger>
             <TabsTrigger value="documents" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('documents')}</TabsTrigger>
           </TabsList>
+          <TabsContent value="trips" className="mt-4">
+            <TabTableCard
+              title={`Trips — ${driver.name}`}
+              subtitle={`${dateFrom} → ${dateTo}`}
+              loading={dataLoading}
+              columns={[
+                { label: 'Trip ID', className: 'col-span-2' },
+                { label: 'Date', className: 'col-span-2' },
+                { label: 'Route', className: 'col-span-3' },
+                { label: 'Status', className: 'col-span-2' },
+                { label: 'Amount', className: 'col-span-2 text-right' },
+                { label: 'Action', className: 'col-span-1 text-right' },
+              ]}
+              emptyIcon={Inbox}
+            >
+              {fTrips.map((trip) => (
+                <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                  <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
+                  <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
+                  <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
+                  <div className="col-span-2"><StatusBadge status={trip.status} /></div>
+                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
+                  <div className="col-span-1 text-right">
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
+                  </div>
+                </div>
+              ))}
+            </TabTableCard>
+          </TabsContent>
+
+          <TabsContent value="salary" className="mt-4">
+            <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
+            <TabTableCard
+              title="Salary Records"
+              subtitle={`${dateFrom} → ${dateTo}`}
+              loading={dataLoading}
+              actions={
+                <Button onClick={() => { setEditSalary(null); setSalaryFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
+                </Button>
+              }
+              columns={[
+                { label: 'Period', className: 'col-span-2' },
+                { label: 'Pay Date', className: 'col-span-2' },
+                { label: 'Base', className: 'col-span-2 text-right' },
+                { label: 'Additions', className: 'col-span-2 text-right' },
+                { label: 'Deductions', className: 'col-span-1 text-right' },
+                { label: 'Net', className: 'col-span-2 text-right' },
+                { label: 'Status', className: 'col-span-1 text-right' },
+              ]}
+              emptyIcon={Wallet}
+            >
+              {fSalaries.map((rec) => (
+                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                  <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
+                  <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
+                  <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
+                  <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
+                  <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
+                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
+                  <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+                </div>
+              ))}
+            </TabTableCard>
+          </TabsContent>
+
+          <TabsContent value="expenses" className="mt-4">
+            <TabTableCard
+              title="Expenses"
+              subtitle={`${dateFrom} → ${dateTo}`}
+              loading={dataLoading}
+              columns={[
+                { label: 'Date', className: 'col-span-2' },
+                { label: 'Category', className: 'col-span-2' },
+                { label: 'Description', className: 'col-span-5' },
+                { label: 'Amount', className: 'col-span-2 text-right' },
+                { label: 'Status', className: 'col-span-1 text-right' },
+              ]}
+              emptyIcon={Receipt}
+            >
+              {fExpenses.map((rec) => (
+                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                  <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
+                  <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
+                  <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
+                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
+                  <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+                </div>
+              ))}
+            </TabTableCard>
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-4">
+            <EntityDocumentsTab entityType="driver" entityId={driver.id} />
+          </TabsContent>
           <WeeklyActivityChart trips={trips} />
           <HoursGauge hours={totalHours} />
           <TripChecklist trips={fTrips} />
@@ -279,101 +374,6 @@ export default function DriverDetail() {
 
       
 
-        <TabsContent value="trips" className="mt-4">
-          <TabTableCard
-            title={`Trips — ${driver.name}`}
-            subtitle={`${dateFrom} → ${dateTo}`}
-            loading={dataLoading}
-            columns={[
-              { label: 'Trip ID', className: 'col-span-2' },
-              { label: 'Date', className: 'col-span-2' },
-              { label: 'Route', className: 'col-span-3' },
-              { label: 'Status', className: 'col-span-2' },
-              { label: 'Amount', className: 'col-span-2 text-right' },
-              { label: 'Action', className: 'col-span-1 text-right' },
-            ]}
-            emptyIcon={Inbox}
-          >
-            {fTrips.map((trip) => (
-              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
-                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
-                <div className="col-span-2"><StatusBadge status={trip.status} /></div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
-                <div className="col-span-1 text-right">
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
-                </div>
-              </div>
-            ))}
-          </TabTableCard>
-        </TabsContent>
-
-        <TabsContent value="salary" className="mt-4">
-          <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
-          <TabTableCard
-            title="Salary Records"
-            subtitle={`${dateFrom} → ${dateTo}`}
-            loading={dataLoading}
-            actions={
-              <Button onClick={() => { setEditSalary(null); setSalaryFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
-              </Button>
-            }
-            columns={[
-              { label: 'Period', className: 'col-span-2' },
-              { label: 'Pay Date', className: 'col-span-2' },
-              { label: 'Base', className: 'col-span-2 text-right' },
-              { label: 'Additions', className: 'col-span-2 text-right' },
-              { label: 'Deductions', className: 'col-span-1 text-right' },
-              { label: 'Net', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-1 text-right' },
-            ]}
-            emptyIcon={Wallet}
-          >
-            {fSalaries.map((rec) => (
-              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
-                <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
-                <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
-                <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
-                <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-              </div>
-            ))}
-          </TabTableCard>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="mt-4">
-          <TabTableCard
-            title="Expenses"
-            subtitle={`${dateFrom} → ${dateTo}`}
-            loading={dataLoading}
-            columns={[
-              { label: 'Date', className: 'col-span-2' },
-              { label: 'Category', className: 'col-span-2' },
-              { label: 'Description', className: 'col-span-5' },
-              { label: 'Amount', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-1 text-right' },
-            ]}
-            emptyIcon={Receipt}
-          >
-            {fExpenses.map((rec) => (
-              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
-                <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
-                <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
-                <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-              </div>
-            ))}
-          </TabTableCard>
-        </TabsContent>
-
-        <TabsContent value="documents" className="mt-4">
-          <EntityDocumentsTab entityType="driver" entityId={driver.id} />
-        </TabsContent>
       </Tabs>
 
       {/* Pending Deductions — full width */}
