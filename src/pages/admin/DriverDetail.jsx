@@ -326,38 +326,71 @@ export default function DriverDetail() {
                 </Button>
               </div>
               <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
-              {fSalaries.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
-                <div className="space-y-2">
-                  {fSalaries.map((rec) => (
-                    <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}><Wallet className="w-4 h-4 text-emerald-400" /></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{rec.month} {rec.year}</p>
-                        <p className="text-xs text-muted-foreground">Base: {formatCurrency(rec.base_salary)} · OT: {formatCurrency(rec.overtime)}</p>
-                      </div>
-                      <span className="text-base font-bold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</span>
-                      <StatusBadge status={rec.status} />
-                    </div>
-                  ))}
+              <div className="rounded-2xl border border-border bg-card overflow-hidden">
+                <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                  <div className="col-span-2">Period</div>
+                  <div className="col-span-2">Pay Date</div>
+                  <div className="col-span-2 text-right">Base</div>
+                  <div className="col-span-2 text-right">Additions</div>
+                  <div className="col-span-1 text-right">Deductions</div>
+                  <div className="col-span-2 text-right">Net</div>
+                  <div className="col-span-1 text-right">Status</div>
                 </div>
-              )}
+                {fSalaries.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <Wallet className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">No records found for selected period</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {fSalaries.map((rec) => (
+                      <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                        <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
+                        <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
+                        <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
+                        <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
+                        <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
+                        <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
+                        <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </>
           )}
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
-            <div className="space-y-2">
-              {fExpenses.map((rec) => (
-                <div key={rec.id} className="glass-card p-3 flex items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</span>
-                  <StatusBadge status={rec.status} />
+          {dataLoading ? <LoadingSpinner /> : (
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                <div className="col-span-2">Date</div>
+                <div className="col-span-2">Category</div>
+                <div className="col-span-5">Description</div>
+                <div className="col-span-2 text-right">Amount</div>
+                <div className="col-span-1 text-right">Status</div>
+              </div>
+              {fExpenses.length === 0 ? (
+                <div className="py-10 text-center">
+                  <Receipt className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">No records found for selected period</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
                 </div>
-              ))}
+              ) : (
+                <div className="divide-y divide-border">
+                  {fExpenses.map((rec) => (
+                    <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                      <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
+                      <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
+                      <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
+                      <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
+                      <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </TabsContent>

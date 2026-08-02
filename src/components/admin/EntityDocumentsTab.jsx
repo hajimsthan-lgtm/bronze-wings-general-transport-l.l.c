@@ -121,28 +121,39 @@ export default function EntityDocumentsTab({ entityType, entityId }) {
 
       {loading ? (
         <div className="text-sm text-muted-foreground py-6 text-center">Loading…</div>
-      ) : docs.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">{t('no_data')}</p>
-        </div>
       ) : (
-        <div className="space-y-2">
-          {docs.map((d) => {
-            const st = d.status || statusOf(d.expiry_date);
-            return (
-              <div key={d.id} className="row-card flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{d.title}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{d.type}{d.expiry_date ? ` · ${formatDate(d.expiry_date)}` : ''}</p>
-                </div>
-                <span className={`text-[10px] font-semibold uppercase ${STATUS_TONE[st] || 'text-muted-foreground'}`}>{st.replace('_', ' ')}</span>
-                {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary p-1.5"><Download className="w-4 h-4" /></a>}
-                <button onClick={() => remove(d)} className="text-muted-foreground hover:text-red-400 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>
-              </div>
-            );
-          })}
+        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <div className="col-span-5">Title</div>
+            <div className="col-span-2">Type</div>
+            <div className="col-span-2">Expiry</div>
+            <div className="col-span-2">Status</div>
+            <div className="col-span-1 text-right">Action</div>
+          </div>
+          {docs.length === 0 ? (
+            <div className="py-10 text-center">
+              <FileText className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">{t('no_data')}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {docs.map((d) => {
+                const st = d.status || statusOf(d.expiry_date);
+                return (
+                  <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                    <div className="col-span-5 text-foreground font-medium truncate">{d.title}</div>
+                    <div className="col-span-2 text-muted-foreground capitalize truncate">{d.type}</div>
+                    <div className="col-span-2 text-muted-foreground">{d.expiry_date ? formatDate(d.expiry_date) : '—'}</div>
+                    <div className={`col-span-2 text-[11px] font-semibold uppercase ${STATUS_TONE[st] || 'text-muted-foreground'}`}>{st.replace('_', ' ')}</div>
+                    <div className="col-span-1 text-right flex items-center justify-end gap-1">
+                      {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary p-1.5"><Download className="w-4 h-4" /></a>}
+                      <button onClick={() => remove(d)} className="text-muted-foreground hover:text-red-400 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
