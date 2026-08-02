@@ -174,13 +174,9 @@ export default function ContentSidebar() {
           style={
             expanded
               ? {
-                  background: active
-                    ? `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.10))`
-                    : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
-                  border: `1px solid ${active ? `rgba(${item.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
-                  boxShadow: active
-                    ? `0 0 34px -4px rgba(${item.glow},0.6), 0 0 0 1px rgba(${item.glow},0.3), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 0 28px rgba(${item.glow},0.12)`
-                    : `0 0 18px -8px rgba(${item.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                  background: 'transparent',
+                  border: '1px solid transparent',
+                  boxShadow: 'none',
                 }
               : {}
           }
@@ -189,8 +185,18 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className={`text-[11px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)', textShadow: active ? `0 0 12px rgba(${item.glow},0.85), 0 0 24px rgba(${item.glow},0.4)` : 'none' }}
+              className={`relative text-[11px] font-mono tracking-[0.1em] uppercase whitespace-nowrap px-2 py-0.5 rounded-md ${active ? 'font-bold' : 'font-medium'}`}
+              style={{
+                color: active ? '#fff' : 'rgba(255,255,255,0.92)',
+                background: active
+                  ? `linear-gradient(135deg, rgba(${item.glow},0.22), rgba(${item.glow},0.08))`
+                  : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${active ? `rgba(${item.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: active
+                  ? `0 0 18px -2px rgba(${item.glow},0.7), 0 0 36px -6px rgba(${item.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.12)`
+                  : `0 0 14px -4px rgba(${item.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                textShadow: active ? `0 0 10px rgba(${item.glow},0.9), 0 0 20px rgba(${item.glow},0.5)` : 'none',
+              }}
             >
               {label}
             </span>
@@ -217,19 +223,25 @@ export default function ContentSidebar() {
                   onClick={() => navigate(child.path)}
                   className="group relative flex items-center gap-2 w-full pl-2 pr-2.5 h-9 rounded-xl transition-all duration-300 hover:translate-x-1"
                   style={{
-                    background: childActive
-                      ? `linear-gradient(135deg, rgba(${child.glow},0.28), rgba(${child.glow},0.10))`
-                      : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
-                    boxShadow: childActive
-                      ? `0 0 26px -4px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${child.glow},0.08)`
-                      : `0 0 18px -8px rgba(${child.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                    background: 'transparent',
+                    border: '1px solid transparent',
+                    boxShadow: 'none',
                   }}
                 >
                   <NavTile item={child} active={childActive} lit={childActive} size={26} />
                   <span
-                    className="text-[10px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.92)' }}
+                    className="relative text-[10px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap px-1.5 py-0.5 rounded-md"
+                    style={{
+                      color: childActive ? '#fff' : 'rgba(255,255,255,0.92)',
+                      background: childActive
+                        ? `linear-gradient(135deg, rgba(${child.glow},0.22), rgba(${child.glow},0.08))`
+                        : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${childActive ? `rgba(${child.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
+                      boxShadow: childActive
+                        ? `0 0 16px -2px rgba(${child.glow},0.7), 0 0 32px -6px rgba(${child.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.12)`
+                        : `0 0 12px -4px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                      textShadow: childActive ? `0 0 10px rgba(${child.glow},0.9), 0 0 20px rgba(${child.glow},0.5)` : 'none',
+                    }}
                   >
                     {childLabel}
                   </span>
