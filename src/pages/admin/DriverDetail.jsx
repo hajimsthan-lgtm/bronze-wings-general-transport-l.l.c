@@ -27,7 +27,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { exportToPDF } from '@/lib/exportUtils';
 
 const yearsSince = (d) =>
-  d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
+d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -40,7 +40,7 @@ export default function DriverDetail() {
   const [salaries, setSalaries] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
+  const [dateFrom, setDateFrom] = useState(() => {const d = new Date();return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];});
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [breakdown, setBreakdown] = useState(null);
   const [salaryFormOpen, setSalaryFormOpen] = useState(false);
@@ -70,20 +70,20 @@ export default function DriverDetail() {
         setTrips(tR || []);
         setSalaries(sR || []);
         setExpenses(eR || []);
-        setVehicle((vR && vR[0]) || null);
+        setVehicle(vR && vR[0] || null);
       } finally {
         if (!cancelled) setDataLoading(false);
       }
-    }).catch(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    }).catch(() => {if (!cancelled) setLoading(false);});
+    return () => {cancelled = true;};
   }, [id]);
 
   if (loading) return <DetailSkeleton />;
   if (!driver) return <EmptyState title="Driver not found" />;
 
-  const fTrips = trips.filter((tt) => !tt.trip_date || (tt.trip_date >= dateFrom && tt.trip_date <= dateTo));
-  const fSalaries = salaries.filter((r) => !r.payment_date || (r.payment_date >= dateFrom && r.payment_date <= dateTo));
-  const fExpenses = expenses.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
+  const fTrips = trips.filter((tt) => !tt.trip_date || tt.trip_date >= dateFrom && tt.trip_date <= dateTo);
+  const fSalaries = salaries.filter((r) => !r.payment_date || r.payment_date >= dateFrom && r.payment_date <= dateTo);
+  const fExpenses = expenses.filter((r) => !r.date || r.date >= dateFrom && r.date <= dateTo);
 
   const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
   const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
@@ -99,11 +99,11 @@ export default function DriverDetail() {
     try {
       await base44.entities.SalaryRecord.update(rec.id, { status: 'paid', payment_date: rec.payment_date || new Date().toISOString().split('T')[0] });
       reloadSalaries();
-    } finally { setSalaryBusyId(null); }
+    } finally {setSalaryBusyId(null);}
   };
   const saveSalary = async (data) => {
-    if (editSalary) await base44.entities.SalaryRecord.update(editSalary.id, data);
-    else await base44.entities.SalaryRecord.create(data);
+    if (editSalary) await base44.entities.SalaryRecord.update(editSalary.id, data);else
+    await base44.entities.SalaryRecord.create(data);
     reloadSalaries();
     setSalaryFormOpen(false);
   };
@@ -111,11 +111,11 @@ export default function DriverDetail() {
   const handleProfitPDF = () => {
     try {
       const data = [
-        { label: 'Trip Revenue', amount: totalTrips },
-        { label: 'Expenses', amount: totalExpenses },
-        { label: 'Salary', amount: totalSalary },
-        { label: 'Net Profit', amount: netProfit },
-      ];
+      { label: 'Trip Revenue', amount: totalTrips },
+      { label: 'Expenses', amount: totalExpenses },
+      { label: 'Salary', amount: totalSalary },
+      { label: 'Net Profit', amount: netProfit }];
+
       exportToPDF(
         data,
         `driver-${driver.name}-profit`,
@@ -142,8 +142,8 @@ export default function DriverDetail() {
             onFromChange={setDateFrom}
             toValue={dateTo}
             onToChange={setDateTo}
-            onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-          />
+            onToday={() => {const today = new Date().toISOString().split('T')[0];setDateFrom(today);setDateTo(today);}} />
+          
         </div>
       </div>
 
@@ -159,7 +159,7 @@ export default function DriverDetail() {
 
       {/* License & Details accordion — full width */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <Accordion type="multiple" defaultValue={['license']} className="w-full">
+        <Accordion type="multiple" defaultValue={['license']} className="w-full hidden">
           <AccordionItem value="license" className="border-b border-border">
             <AccordionTrigger className="px-5 py-4 hover:no-underline text-left">
               <div className="flex items-center gap-3">
@@ -238,7 +238,7 @@ export default function DriverDetail() {
       </div>
 
       {/* Driver Profit Card — full width */}
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-2xl border border-border bg-card p-5 hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <div>
             <h3 className="text-base font-semibold text-foreground">Driver Profit — {driver.name}</h3>
@@ -253,13 +253,13 @@ export default function DriverDetail() {
             </Button>
           </div>
         </div>
-        {!hasProfitData ? (
-          <div className="py-8 text-center">
+        {!hasProfitData ?
+        <div className="py-8 text-center">
             <p className="text-sm text-muted-foreground">No data found for selected period</p>
             <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-          </div>
-        ) : (
-          <div className="space-y-0">
+          </div> :
+
+        <div className="space-y-0">
             <ProfitRow label="Trip Revenue" value={totalTrips} tone="text-emerald-400" />
             <div className="border-t border-border" />
             <ProfitRow label="Expenses" value={totalExpenses} tone="text-amber-400" />
@@ -268,7 +268,7 @@ export default function DriverDetail() {
             <div className="border-t-2 border-border mt-1" />
             <ProfitRow label="Net Profit" value={netProfit} tone={netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'} bold />
           </div>
-        )}
+        }
       </div>
 
       {/* Tabs */}
@@ -281,8 +281,8 @@ export default function DriverDetail() {
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          {dataLoading ? <LoadingSpinner /> :
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
               <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                 <div className="col-span-2">Trip ID</div>
                 <div className="col-span-2">Date</div>
@@ -291,16 +291,16 @@ export default function DriverDetail() {
                 <div className="col-span-2 text-right">Amount</div>
                 <div className="col-span-1 text-right">Action</div>
               </div>
-              {fTrips.length === 0 ? (
-                <div className="py-10 text-center">
+              {fTrips.length === 0 ?
+            <div className="py-10 text-center">
                   <Inbox className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">No records found for selected period</p>
                   <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {fTrips.map((trip) => (
-                    <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                </div> :
+
+            <div className="divide-y divide-border">
+                  {fTrips.map((trip) =>
+              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                       <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
                       <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
                       <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
@@ -310,18 +310,18 @@ export default function DriverDetail() {
                         <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
                       </div>
                     </div>
-                  ))}
-                </div>
               )}
+                </div>
+            }
             </div>
-          )}
+          }
         </TabsContent>
 
         <TabsContent value="salary" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <>
+          {dataLoading ? <LoadingSpinner /> :
+          <>
               <div className="flex justify-end mb-3">
-                <Button onClick={() => { setEditSalary(null); setSalaryFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+                <Button onClick={() => {setEditSalary(null);setSalaryFormOpen(true);}} size="sm" className="bg-primary hover:bg-primary/90 h-8">
                   <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
                 </Button>
               </div>
@@ -336,16 +336,16 @@ export default function DriverDetail() {
                   <div className="col-span-2 text-right">Net</div>
                   <div className="col-span-1 text-right">Status</div>
                 </div>
-                {fSalaries.length === 0 ? (
-                  <div className="py-10 text-center">
+                {fSalaries.length === 0 ?
+              <div className="py-10 text-center">
                     <Wallet className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
                     <p className="text-sm text-muted-foreground">No records found for selected period</p>
                     <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-border">
-                    {fSalaries.map((rec) => (
-                      <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                  </div> :
+
+              <div className="divide-y divide-border">
+                    {fSalaries.map((rec) =>
+                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                         <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
                         <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
                         <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
@@ -354,17 +354,17 @@ export default function DriverDetail() {
                         <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
                         <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
                       </div>
-                    ))}
-                  </div>
                 )}
+                  </div>
+              }
               </div>
             </>
-          )}
+          }
         </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          {dataLoading ? <LoadingSpinner /> :
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
               <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                 <div className="col-span-2">Date</div>
                 <div className="col-span-2">Category</div>
@@ -372,27 +372,27 @@ export default function DriverDetail() {
                 <div className="col-span-2 text-right">Amount</div>
                 <div className="col-span-1 text-right">Status</div>
               </div>
-              {fExpenses.length === 0 ? (
-                <div className="py-10 text-center">
+              {fExpenses.length === 0 ?
+            <div className="py-10 text-center">
                   <Receipt className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">No records found for selected period</p>
                   <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {fExpenses.map((rec) => (
-                    <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                </div> :
+
+            <div className="divide-y divide-border">
+                  {fExpenses.map((rec) =>
+              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                       <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
                       <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
                       <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
                       <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
                       <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
                     </div>
-                  ))}
-                </div>
               )}
+                </div>
+            }
             </div>
-          )}
+          }
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4">
@@ -412,8 +412,8 @@ export default function DriverDetail() {
             editItem={editSalary}
             prefillDriver={driver.name}
             onSave={saveSalary}
-            onCancel={() => setSalaryFormOpen(false)}
-          />
+            onCancel={() => setSalaryFormOpen(false)} />
+          
         </SheetContent>
       </Sheet>
 
@@ -421,10 +421,10 @@ export default function DriverDetail() {
         open={!!breakdown}
         onOpenChange={(o) => !o && setBreakdown(null)}
         title={breakdown?.title}
-        rows={breakdown?.rows}
-      />
-    </div>
-  );
+        rows={breakdown?.rows} />
+      
+    </div>);
+
 }
 
 function DetailField({ icon: Icon, label, value, sub, valueClass }) {
@@ -434,8 +434,8 @@ function DetailField({ icon: Icon, label, value, sub, valueClass }) {
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`text-sm font-semibold ${valueClass || 'text-foreground'}`}>{value || '—'}</p>
       {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-    </div>
-  );
+    </div>);
+
 }
 
 function ProfitRow({ label, value, tone, bold }) {
@@ -443,6 +443,6 @@ function ProfitRow({ label, value, tone, bold }) {
     <div className={`flex items-center justify-between py-3 ${bold ? 'pt-4' : ''}`}>
       <span className="text-sm text-muted-foreground">{label}</span>
       <span className={`${bold ? 'text-lg' : 'text-base'} ${bold ? 'text-foreground' : tone} font-bold tabular-nums`}>{formatCurrency(value)}</span>
-    </div>
-  );
+    </div>);
+
 }
