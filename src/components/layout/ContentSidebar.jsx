@@ -225,46 +225,57 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  className="group relative flex items-center gap-2 w-full pl-3 pr-2.5 h-8 rounded-lg transition-all duration-200 hover:translate-x-1"
+                  className="group relative flex items-center gap-2.5 w-full px-2.5 h-10 rounded-xl transition-all duration-300 hover:translate-x-1"
                   style={{
                     background: childActive
-                      ? `rgba(${child.glow},0.10)`
-                      : 'rgba(255,255,255,0.015)',
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.35)` : 'rgba(255,255,255,0.06)'}`,
-                    borderLeft: `2px solid ${childActive ? child.from : `rgba(${child.glow},0.45)`}`,
+                      ? `linear-gradient(135deg, rgba(${child.glow},0.28), rgba(${child.glow},0.10))`
+                      : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
                     boxShadow: childActive
-                      ? `0 0 14px -6px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.05)`
-                      : 'none',
+                      ? `0 0 26px -4px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${child.glow},0.08)`
+                      : `0 0 18px -8px rgba(${child.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
                   }}
                 >
                   <span
-                    className="relative flex items-center justify-center shrink-0 rounded-md transition-all duration-200 group-hover:scale-110"
+                    className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95"
                     style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 6,
-                      background: childActive
-                        ? `linear-gradient(150deg, ${child.from} 0%, ${child.to} 100%)`
-                        : `rgba(${child.glow},0.12)`,
-                      border: `1px solid ${childActive ? `rgba(${child.glow},0.55)` : `rgba(${child.glow},0.25)`}`,
+                      width: 30,
+                      height: 30,
+                      borderRadius: 10,
+                      background: `linear-gradient(150deg, ${child.from} 0%, ${child.to} 100%)`,
+                      border: `1px solid rgba(${child.glow},0.55)`,
                       boxShadow: childActive
-                        ? `0 0 12px -2px rgba(${child.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.3)`
-                        : 'inset 0 1px 0 rgba(255,255,255,0.04)',
-                      color: childActive ? '#fff' : `rgb(${child.glow})`,
+                        ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 6px 16px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.35), 0 0 18px -4px rgba(${child.glow},0.6), 0 0 32px -2px rgba(${child.glow},0.4)`
+                        : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05), 0 0 14px -6px rgba(${child.glow},0.3)`,
+                      color: '#fff',
                     }}
                   >
-                    <child.icon className="relative w-3 h-3" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
+                    <span
+                      className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[8px]"
+                      style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
+                    />
+                    <span
+                      className="pointer-events-none absolute inset-0 rounded-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{ boxShadow: `0 0 22px 2px rgba(${child.glow},0.55), 0 0 40px 4px rgba(${child.glow},0.25)` }}
+                    />
+                    <child.icon className="relative w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
+                    <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[10px]">
+                      <span
+                        className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover:opacity-100 group-hover:left-[150%] transition-all duration-700"
+                        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }}
+                      />
+                    </span>
                   </span>
                   <span
-                    className="text-[11px] font-mono font-medium tracking-[0.06em] uppercase whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.55)' }}
+                    className="text-[11px] font-mono font-medium tracking-[0.08em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.68)' }}
                   >
                     {childLabel}
                   </span>
                   {childActive && (
                     <span
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
-                      style={{ background: child.from, boxShadow: `0 0 8px rgba(${child.glow},0.8)` }}
+                      className="absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full left-0"
+                      style={{ background: child.from, boxShadow: `0 0 10px rgba(${child.glow},0.9)` }}
                     />
                   )}
                 </button>
