@@ -119,17 +119,14 @@ export default function ContentSidebar() {
     railVisibility.set(true);
   };
 
-  /* ── leave: collapse everything (unless pinned), then auto-vanish ── */
+  /* ── leave: collapse everything immediately (unless pinned) ── */
   const scheduleVanish = () => {
     clearTimeout(vanishTimer.current);
     setHoveredKey(null);
-    /* once opened by click, the rail stays open — auto-hover keeps working, no auto-vanish */
-    if (pinnedRef.current || expandedRef.current) return;
+    if (pinnedRef.current) return; /* only an explicit pin holds the rail open */
     railVisibility.setExpanded(false);
     setClickedOpen(null);
-    vanishTimer.current = setTimeout(() => {
-      if (!pinnedRef.current && !expandedRef.current) railVisibility.set(false);
-    }, VANISH_MS);
+    railVisibility.set(false); /* vanish immediately — no idle timer */
   };
 
   useEffect(() => {
