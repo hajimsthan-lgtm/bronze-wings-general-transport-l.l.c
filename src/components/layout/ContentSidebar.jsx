@@ -98,14 +98,11 @@ export default function ContentSidebar() {
   const expanded = useRailExpanded();
   const [pinned, setPinned] = useState(false);
   const [hoveredKey, setHoveredKey] = useState(null);
-  const [clickedOpen, setClickedOpen] = useState(null);
   const vanishTimer = useRef(null);
   const panelVisibleRef = useRef(panelVisible);
   panelVisibleRef.current = panelVisible;
   const pinnedRef = useRef(pinned);
   pinnedRef.current = pinned;
-  const expandedRef = useRef(expanded);
-  expandedRef.current = expanded;
 
   const isActive = (item) =>
     (item.paths || []).some((p) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)));
@@ -113,10 +110,11 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  /* ── reveal: show rail only (NO expand on hover) ── */
+  /* ── reveal: expand the rail (labels + sub-routes) and dim the page ── */
   const revealPanel = () => {
     clearTimeout(vanishTimer.current);
     railVisibility.set(true);
+    if (!pinnedRef.current) railVisibility.setExpanded(true);
   };
 
   /* ── leave: collapse everything immediately (unless pinned) ── */
@@ -125,12 +123,10 @@ export default function ContentSidebar() {
     setHoveredKey(null);
     if (pinnedRef.current) return; /* only an explicit pin holds the rail open */
     railVisibility.setExpanded(false);
-    setClickedOpen(null);
     railVisibility.set(false); /* vanish immediately — no idle timer */
   };
 
   useEffect(() => {
-    scheduleVanish();
     const onMove = (e) => {
       if (!panelVisibleRef.current && e.clientX < 18) revealPanel();
     };
@@ -140,7 +136,7 @@ export default function ContentSidebar() {
       clearTimeout(vanishTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pinned]);
+  }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
@@ -149,9 +145,9 @@ export default function ContentSidebar() {
     const active = isActive(item);
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
-    const showChildren = expanded && hasChildren && clickedOpen === item.key;
-    /* when one section is clicked open, every other button fades to very low light */
-    const dimmed = expanded && clickedOpen !== null && clickedOpen !== item.key && hoveredKey !== item.key;
+    const showChildren = expanded && hasChildren && hoveredKey === item.key;
+    /* when one section is hovered open, every other button fades to very low light */
+    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
     const lit = active || hoveredKey === item.key;
 
     return (
@@ -162,20 +158,15 @@ export default function ContentSidebar() {
       >
         <button
           onClick={() => {
+            /* parent buttons navigate to their first sub-route; leaf buttons navigate directly */
             if (hasChildren) {
-              /* first click opens the text + sub-route bar; clicking the open one closes it */
-              if (expanded && clickedOpen === item.key) {
-                railVisibility.setExpanded(false);
-                setClickedOpen(null);
-              } else {
-                railVisibility.setExpanded(true);
-                setClickedOpen(item.key);
-              }
+              navigate(item.children[0].path);
             } else {
-              /* leaf buttons (Home, AI Agents) navigate on a single click */
-              railVisibility.setExpanded(false);
-              setClickedOpen(null);
               switchTab(item.key);
+            }
+            if (!pinnedRef.current) {
+              railVisibility.setExpanded(false);
+              railVisibility.set(false);
             }
           }}
           onMouseEnter={() => setHoveredKey(item.key)}
@@ -295,7 +286,6 @@ export default function ContentSidebar() {
               railVisibility.set(true);
             } else {
               railVisibility.setExpanded(false);
-              setClickedOpen(null);
             }
           }}
           title={pinned ? 'Unpin — collapse on leave' : 'Pin open — keep expanded'}
