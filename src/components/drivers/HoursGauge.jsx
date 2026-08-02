@@ -1,7 +1,9 @@
-import { Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Clock, ChevronDown } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function HoursGauge({ hours = 0, target = 40 }) {
+  const [open, setOpen] = useState(true);
   const pct = Math.min(100, (hours / target) * 100);
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
@@ -12,16 +14,23 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
   return (
     <div className="glass-card p-4 relative overflow-hidden row-edge-glow animate-fade-in-up" style={{ ['--row-accent']: '#a855f7', borderTop: '3px solid #a855f7', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)' }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.5)} 0%, transparent 70%)` }} />
-      <div className="relative flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
-          <Clock className="w-4 h-4" style={{ color: '#a855f7' }} />
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-foreground">Time Tracker</h3>
-          <p className="text-[11px] text-muted-foreground">Hours this period</p>
-        </div>
+      <div className="relative flex items-center justify-between mb-2">
+        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
+            <Clock className="w-4 h-4" style={{ color: '#a855f7' }} />
+          </div>
+          <div className="flex items-center gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Time Tracker</h3>
+              <p className="text-[11px] text-muted-foreground">Hours this period</p>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
+          </div>
+        </button>
       </div>
 
+      {open && (
+      <>
       <div className="relative flex items-center justify-center my-2">
         <svg width="140" height="140" className="-rotate-90">
           <circle cx="70" cy="70" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
@@ -42,6 +51,8 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
       <p className="relative text-[11px] text-muted-foreground text-center">
         {hours.toFixed(1)} h of {target}h target
       </p>
+      </>
+      )}
     </div>
   );
 }

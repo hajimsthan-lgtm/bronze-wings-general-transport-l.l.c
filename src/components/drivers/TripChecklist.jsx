@@ -1,8 +1,10 @@
-import { CheckCircle2, Circle, ListChecks } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle2, Circle, ListChecks, ChevronDown } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function TripChecklist({ trips = [] }) {
+  const [open, setOpen] = useState(true);
   const list = trips.slice(0, 6);
   const done = list.filter((t) => t.status === 'completed').length;
 
@@ -10,17 +12,21 @@ export default function TripChecklist({ trips = [] }) {
     <div className="glass-card p-4 relative overflow-hidden row-edge-glow animate-fade-in-up" style={{ ['--row-accent']: '#34d399', borderTop: '3px solid #34d399', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)' }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#34d399', 0.5)} 0%, transparent 70%)` }} />
       <div className="relative flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#34d399', 0.14), border: `1px solid ${hexToRgba('#34d399', 0.3)}` }}>
             <ListChecks className="w-4 h-4" style={{ color: '#34d399' }} />
           </div>
-          <h3 className="text-sm font-semibold text-foreground">Trip Checklist</h3>
-        </div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-foreground">Trip Checklist</h3>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
+          </div>
+        </button>
         <span className="text-xs font-semibold text-foreground tabular-nums px-2 py-1 rounded-full" style={{ background: hexToRgba('#34d399', 0.12), border: `1px solid ${hexToRgba('#34d399', 0.25)}` }}>
           {done}/{list.length}
         </span>
       </div>
 
+      {open && (
       <div className="relative space-y-2">
         {list.length === 0 && <p className="text-xs text-muted-foreground py-2">No trips in this period.</p>}
         {list.map((t) => {
@@ -37,6 +43,7 @@ export default function TripChecklist({ trips = [] }) {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

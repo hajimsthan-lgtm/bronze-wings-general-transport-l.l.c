@@ -1,11 +1,12 @@
-import { useMemo } from 'react';
-import { BarChart3, ExternalLink } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { BarChart3, ExternalLink, ChevronDown } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const weekIdx = (d) => (d.getDay() + 6) % 7;
 
 export default function WeeklyActivityChart({ trips = [] }) {
+  const [open, setOpen] = useState(true);
   const { counts, peakIdx, total } = useMemo(() => {
     const arr = [0, 0, 0, 0, 0, 0, 0];
     const now = new Date();
@@ -26,18 +27,23 @@ export default function WeeklyActivityChart({ trips = [] }) {
     <div className="glass-card p-4 relative overflow-hidden row-edge-glow animate-fade-in-up" style={{ ['--row-accent']: '#3b82f6', borderTop: '3px solid #3b82f6', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)' }}>
       <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
       <div className="relative flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#3b82f6', 0.14), border: `1px solid ${hexToRgba('#3b82f6', 0.3)}` }}>
             <BarChart3 className="w-4 h-4 text-primary" />
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Weekly Activity</h3>
-            <p className="text-[11px] text-muted-foreground">{total} trips this week</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Weekly Activity</h3>
+              <p className="text-[11px] text-muted-foreground">{total} trips this week</p>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
           </div>
-        </div>
+        </button>
         <ExternalLink className="w-4 h-4 text-muted-foreground" />
       </div>
 
+      {open && (
+      <>
       <div className="relative flex items-end justify-between gap-2 h-36">
         {counts.map((c, i) => {
           const isPeak = i === peakIdx;
@@ -62,6 +68,8 @@ export default function WeeklyActivityChart({ trips = [] }) {
         <p className="relative text-[11px] text-muted-foreground mt-3">
           Peak: <span className="text-foreground font-semibold">{DAYS[peakIdx]}</span> · {counts[peakIdx]} trips
         </p>
+      )}
+      </>
       )}
     </div>
   );
