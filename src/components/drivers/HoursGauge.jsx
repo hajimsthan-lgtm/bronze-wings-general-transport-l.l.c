@@ -13,10 +13,12 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
 
   return (
     <div
-      className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300"
+      className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
+      style={{ borderTop: '3px solid #a855f7' }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
+      <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%)' }} />
       <div className="flex items-center justify-between mb-4">
         <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
