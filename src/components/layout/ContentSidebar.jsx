@@ -93,7 +93,7 @@ export default function ContentSidebar() {
   const expanded = useRailExpanded();
   const [pinned, setPinned] = useState(false);
   const [hoveredKey, setHoveredKey] = useState(null);
-  const [clickedOpen, setClickedOpen] = useState(new Set());
+  const [clickedOpen, setClickedOpen] = useState(null);
   const vanishTimer = useRef(null);
   const panelVisibleRef = useRef(panelVisible);
   panelVisibleRef.current = panelVisible;
@@ -143,7 +143,7 @@ export default function ContentSidebar() {
       (item.paths || []).some(p => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)))
     );
     if (activeItem?.children?.length) {
-      setClickedOpen(prev => new Set([...prev, activeItem.key]));
+      setClickedOpen(activeItem.key);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -156,8 +156,8 @@ export default function ContentSidebar() {
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
     const showChildren =
-      expanded && hasChildren && clickedOpen.has(item.key);
-    const dimmed = expanded && !active && hoveredKey !== item.key;
+      expanded && hasChildren && (hoveredKey === item.key || (hoveredKey === null && clickedOpen === item.key));
+    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
 
     return (
       <div
@@ -168,13 +168,8 @@ export default function ContentSidebar() {
         <button
           onClick={() => {
             if (hasChildren) {
-              const isOpen = clickedOpen.has(item.key);
-              setClickedOpen(prev => {
-                const next = new Set(prev);
-                if (next.has(item.key)) next.delete(item.key);
-                else next.add(item.key);
-                return next;
-              });
+              const isOpen = clickedOpen === item.key;
+              setClickedOpen(isOpen ? null : item.key);
               if (!isOpen) switchTab(item.key);
             } else {
               switchTab(item.key);
@@ -324,7 +319,7 @@ export default function ContentSidebar() {
         </button>
 
         {/* Scrollable nav list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-1.5">
+        <div className="flex-1 overflow-y-auto thin-scroll space-y-1.5" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
 
