@@ -6,11 +6,12 @@ import {
   Car, Heart, Users, CheckCircle, TrendingUp, ArrowRight,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import QuickActions from '@/components/dashboard/QuickActions';
 import HeroGreetingCard from '@/components/dashboard/HeroGreetingCard';
+import DateRangeFilter from '@/components/common/DateRangeFilter';
 import { motion } from 'framer-motion';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -108,6 +109,8 @@ const tooltipStyle = {
 export default function Dashboard() {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);
+  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
+  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -135,22 +138,28 @@ export default function Dashboard() {
 
   if (loading) return <LoadingSpinner />;
 
+  // --- Date-filtered data ---
+  const inRange = (d) => !d || (d >= dateFrom && d <= dateTo);
+  const fTrips = trips.filter(t => inRange(t.trip_date));
+  const fExpenses = expenses.filter(e => inRange(e.date));
+  const fInvoices = invoices.filter(i => inRange(i.issue_date));
+
   // --- KPIs ---
-  const activeTrips = trips.filter(t => t.status === 'in_transit' || t.status === 'scheduled').length;
-  const pendingInvoices = invoices.filter(i => i.status === 'draft' || i.status === 'sent').length;
+  const activeTrips = fTrips.filter(t => t.status === 'in_transit' || t.status === 'scheduled').length;
+  const pendingInvoices = fInvoices.filter(i => i.status === 'draft' || i.status === 'sent').length;
   const activeVehicles = vehicles.filter(v => v.status === 'active').length;
   const totalVehicles = vehicles.length;
   const healthPct = totalVehicles > 0 ? Math.round((activeVehicles / totalVehicles) * 100) : 100;
 
-  const unpaidInv = invoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled');
+  const unpaidInv = fInvoices.filter(i => i.status !== 'paid' && i.status !== 'cancelled');
   const pendingCustCount = new Set(unpaidInv.map(i => i.client_name).filter(Boolean)).size;
   const dueAmount = unpaidInv.reduce((s, i) => s + ((Number(i.total_amount) || 0) - (Number(i.paid_amount) || 0)), 0);
 
   // --- Metrics ---
-  const totalTrips = trips.length;
-  const completedTrips = trips.filter(t => t.status === 'completed').length;
+  const totalTrips = fTrips.length;
+  const completedTrips = fTrips.filter(t => t.status === 'completed').length;
   const onTimePct = totalTrips ? Math.round((completedTrips / totalTrips) * 100) : 100;
-  const totalRevenue = trips.reduce((s, t) => s + (Number(t.revenue) || 0), 0);
+  const totalRevenue = fTrips.reduce((s, t) => s + (Number(t.revenue) || 0), 0);
   const avgTripValue = totalTrips ? totalRevenue / totalTrips : 0;
   const assignedVehicles = vehicles.filter(v => v.assigned_driver).length;
   const fleetUtil = totalVehicles ? Math.round((assignedVehicles / totalVehicles) * 100) : 0;
@@ -161,13 +170,13 @@ export default function Dashboard() {
     const d = new Date(); d.setDate(d.getDate() - i);
     const key = d.toISOString().split('T')[0];
     const label = d.toLocaleDateString('en', { weekday: 'short' });
-    const rev = trips.filter(tr => tr.trip_date === key).reduce((s, tr) => s + (Number(tr.revenue) || 0), 0);
+    const rev = fTrips.filter(tr => tr.trip_date === key).reduce((s, tr) => s + (Number(tr.revenue) || 0), 0);
     revData.push({ day: label, revenue: rev });
   }
 
   // --- Expense breakdown donut ---
   const expByCat = { Maintenance: 0, Fuel: 0, Trip: 0, Other: 0 };
-  expenses.forEach((e) => {
+  fExpenses.forEach((e) => {
     const amt = Number(e.amount) || 0;
     if (e.category === 'fuel') expByCat.Fuel += amt;
     else if (e.category === 'maintenance') expByCat.Maintenance += amt;
@@ -183,8 +192,8 @@ export default function Dashboard() {
   const expTotal = donutData.reduce((s, d) => s + d.value, 0);
 
   // --- Lists ---
-  const recentTrips = trips.slice(0, 5);
-  const recentInvoices = invoices.slice(0, 5);
+  const recentTrips = fTrips.slice(0, 5);
+  const recentInvoices = fInvoices.slice(0, 5);
   const completedRecent = recentTrips.filter(tr => tr.status === 'completed').length;
   const paidRecent = recentInvoices.filter(i => i.status === 'paid').length;
   const tripPct = recentTrips.length ? (completedRecent / recentTrips.length) * 100 : 0;
@@ -218,7 +227,21 @@ export default function Dashboard() {
     <PullToRefresh onRefresh={loadData}>
     <div className="space-y-6">
       {/* Hero greeting card */}
-      <HeroGreetingCard activeTrips={activeTrips} totalRevenue={totalRevenue} pendingInvoices={pendingInvoices} />
+      <HeroGreetingCard activeTrips={activeTrips} totalRevenue={totalRevenue} pendingInvoices={pendingInvoices} dateFrom={dateFrom} dateTo={dateTo} />
+
+      {/* Date filter bar */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-xs text-muted-foreground">
+          Showing data for <span className="text-foreground font-medium">{formatDate(dateFrom)}</span> — <span className="text-foreground font-medium">{formatDate(dateTo)}</span>
+        </p>
+        <DateRangeFilter
+          fromValue={dateFrom}
+          onFromChange={setDateFrom}
+          toValue={dateTo}
+          onToChange={setDateTo}
+          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
+        />
+      </div>
 
       {/* Stat cards */}
       <motion.div
