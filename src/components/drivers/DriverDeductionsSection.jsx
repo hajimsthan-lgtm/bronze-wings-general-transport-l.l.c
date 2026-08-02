@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Pencil, Trash2, Home, Car, FileText, Wallet, Wrench, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Home, Car, FileText, Wallet, Wrench, Package, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import DriverDeductionFormSheet from './DriverDeductionFormSheet';
@@ -27,6 +27,7 @@ export default function DriverDeductionsSection({ driverName }) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [open, setOpen] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,20 +55,25 @@ export default function DriverDeductionsSection({ driverName }) {
     <div className="rounded-2xl border border-border bg-card overflow-hidden" style={{ borderLeft: '4px solid hsl(var(--destructive))' }}>
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-border">
-        <div className="flex items-center gap-3">
+        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-3 text-left">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.12)', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}>
             <Wallet className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Pending Deductions</h3>
-            <p className="text-xs text-muted-foreground">Company loans & advances to be deducted monthly</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">Pending Deductions</h3>
+              <p className="text-xs text-muted-foreground">Company loans & advances to be deducted monthly</p>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
           </div>
-        </div>
+        </button>
         <Button onClick={() => { setEditItem(null); setFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 rounded-full">
           <Plus className="w-3.5 h-3.5 mr-1" /> Add Deduction
         </Button>
       </div>
 
+      {open && (
+      <>
       {/* List */}
       <div className="divide-y divide-border">
         {loading ? (
@@ -131,6 +137,8 @@ export default function DriverDeductionsSection({ driverName }) {
             <p className="text-lg font-bold text-foreground tabular-nums">{formatCurrency(totalRemaining)}</p>
           </div>
         </div>
+      )}
+      </>
       )}
 
       <DriverDeductionFormSheet

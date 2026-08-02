@@ -21,7 +21,7 @@ const statusOf = (expiry) => {
 };
 const STATUS_TONE = { valid: 'text-emerald-400', expiring_soon: 'text-amber-400', expired: 'text-red-400' };
 
-export default function EntityDocumentsTab({ entityType, entityId }) {
+export default function EntityDocumentsTab({ entityType, entityId, collapsible = false }) {
   const { t } = useI18n();
   const { toast } = useToast();
   const [docs, setDocs] = useState([]);
@@ -80,6 +80,7 @@ export default function EntityDocumentsTab({ entityType, entityId }) {
 
   return (
     <TabTableCard
+      collapsible={collapsible}
       title={t('documents')}
       actions={
         <Button onClick={() => setAdding((v) => !v)} size="sm" className="bg-primary hover:bg-primary/90 h-8">

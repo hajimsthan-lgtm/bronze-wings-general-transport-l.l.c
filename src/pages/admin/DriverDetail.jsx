@@ -161,7 +161,8 @@ export default function DriverDetail() {
           </TabsList>
           <TabsContent value="trips" className="mt-4">
             <TabTableCard
-              title={`Trips — ${driver.name}`}
+              collapsible
+            title={`Trips — ${driver.name}`}
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
               columns={[
@@ -192,7 +193,8 @@ export default function DriverDetail() {
           <TabsContent value="salary" className="mt-4">
             <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
             <TabTableCard
-              title="Salary Records"
+              collapsible
+            title="Salary Records"
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
               actions={
@@ -227,7 +229,8 @@ export default function DriverDetail() {
 
           <TabsContent value="expenses" className="mt-4">
             <TabTableCard
-              title="Expenses"
+              collapsible
+            title="Expenses"
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
               columns={[
@@ -252,8 +255,9 @@ export default function DriverDetail() {
           </TabsContent>
 
           <TabsContent value="documents" className="mt-4">
-            <EntityDocumentsTab entityType="driver" entityId={driver.id} />
+            <EntityDocumentsTab entityType="driver" entityId={driver.id} collapsible />
           </TabsContent>
+          <DriverDeductionsSection driverName={driver.name} />
           <WeeklyActivityChart trips={trips} />
           <HoursGauge hours={totalHours} />
           <TripChecklist trips={fTrips} />
@@ -375,9 +379,6 @@ export default function DriverDetail() {
       
 
       </Tabs>
-
-      {/* Pending Deductions — full width */}
-      <DriverDeductionsSection driverName={driver.name} />
 
       <Sheet open={salaryFormOpen} onOpenChange={setSalaryFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
