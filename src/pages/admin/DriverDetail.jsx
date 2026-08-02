@@ -147,10 +147,18 @@ export default function DriverDetail() {
         </div>
       </div>
 
-      {/* Grid: profile (left) | widgets (right) */}
+      {/* Tabs wraps the detail area so the bar can sit beside the profile card */}
+      <Tabs defaultValue={initialTab}>
+      {/* Grid: profile (left) | tab bar + widgets (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 items-start">
         <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} />
         <div className="space-y-4">
+          <TabsList className="btn-lightning glass-card rounded-2xl p-1.5 gap-1.5 border border-[rgba(var(--panel-accent-rgb),0.18)] w-full">
+            <TabsTrigger value="trips" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('trips')} ({fTrips.length})</TabsTrigger>
+            <TabsTrigger value="salary" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('salary')} ({fSalaries.length})</TabsTrigger>
+            <TabsTrigger value="expenses" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('expenses')} ({fExpenses.length})</TabsTrigger>
+            <TabsTrigger value="documents" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('documents')}</TabsTrigger>
+          </TabsList>
           <WeeklyActivityChart trips={trips} />
           <HoursGauge hours={totalHours} />
           <TripChecklist trips={fTrips} />
@@ -270,15 +278,6 @@ export default function DriverDetail() {
 
 
       
-
-      {/* Tabs */}
-      <Tabs defaultValue={initialTab}>
-        <TabsList className="btn-lightning glass-card rounded-2xl p-1.5 gap-1.5 border border-[rgba(var(--panel-accent-rgb),0.18)]">
-          <TabsTrigger value="trips" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('trips')} ({fTrips.length})</TabsTrigger>
-          <TabsTrigger value="salary" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('salary')} ({fSalaries.length})</TabsTrigger>
-          <TabsTrigger value="expenses" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('expenses')} ({fExpenses.length})</TabsTrigger>
-          <TabsTrigger value="documents" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('documents')}</TabsTrigger>
-        </TabsList>
 
         <TabsContent value="trips" className="mt-4">
           <TabTableCard
