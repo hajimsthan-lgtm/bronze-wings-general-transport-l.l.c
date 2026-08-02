@@ -371,16 +371,13 @@ export default function Operations() {
                 key={a.label}
                 onClick={() => a.action?.()}
                 onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}
-                className="group relative overflow-hidden animate-fade-in-up cursor-pointer p-3"
+                className="clay clay-hover group relative overflow-hidden animate-fade-in-up cursor-pointer p-3"
                 style={{
                   animationDelay: `${i * 0.03}s`,
-                  borderRadius: '1rem',
-                  background: 'linear-gradient(145deg, #20242f, #14171f)',
-                  border: `1px solid ${hexToRgba(a.accent, 0.28)}`,
-                  boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.08), 0 4px 12px rgba(0,0,0,0.32)',
+                  borderLeft: `3px solid ${hexToRgba(a.accent, 0.55)}`,
                 }}
               >
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 100px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.28)}, transparent 60%)` }} />
+                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 100px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.22)}, transparent 60%)` }} />
                 <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-30 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
                 <div className="relative flex items-center gap-2 mb-1.5">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.2)}, ${hexToRgba(a.accent, 0.06)})`, border: `1px solid ${hexToRgba(a.accent, 0.3)}` }}>
