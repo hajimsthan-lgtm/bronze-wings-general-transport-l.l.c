@@ -159,117 +159,117 @@ export default function DriverDetail() {
 
       {/* License & Details accordion — full width */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        <Accordion type="multiple" defaultValue={['license']} className="w-full hidden">
-          <AccordionItem value="license" className="border-b border-border">
-            <AccordionTrigger className="px-5 py-4 hover:no-underline text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.20)' }}>
-                  <IdCard className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">License & Details</p>
-                  <p className="text-xs text-muted-foreground">License, personal, salary and profit info</p>
-                </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 pb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <DetailField icon={IdCard} label="License No." value={driver.license_number} sub={`Exp: ${formatDate(driver.license_expiry)}`} />
-                <DetailField icon={UserCircle} label="Nationality" value={driver.nationality} sub={`Joined: ${formatDate(driver.join_date)}`} />
-                <DetailField icon={Banknote} label="Base Salary" value={formatCurrency(driver.base_salary)} sub={`Emergency: ${driver.emergency_contact || '—'}`} />
-                <DetailField icon={TrendingUp} label="Visa Expiry" value={formatDate(driver.visa_expiry)} sub={driver.assigned_vehicle ? `Vehicle: ${driver.assigned_vehicle}` : 'No vehicle'} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="personal" className="border-b border-border">
-            <AccordionTrigger className="px-5 py-4 hover:no-underline text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.20)' }}>
-                  <UserCircle className="w-4 h-4 text-primary" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Personal Details</p>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 pb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <DetailField label="Phone" value={driver.phone} />
-                <DetailField label="Email" value={driver.email} />
-                <DetailField label="Status" value={<StatusBadge status={driver.status} />} />
-              </div>
-              {driver.notes && <p className="mt-3 text-xs text-muted-foreground bg-muted/30 rounded-lg p-3 border border-border">{driver.notes}</p>}
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="salary" className="border-b border-border">
-            <AccordionTrigger className="px-5 py-4 hover:no-underline text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.20)' }}>
-                  <Banknote className="w-4 h-4 text-primary" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Base Salary</p>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 pb-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <DetailField label="Base Salary" value={formatCurrency(driver.base_salary)} />
-                <DetailField label="Join Date" value={formatDate(driver.join_date)} />
-                <DetailField label="Experience" value={`${expYears} yr${expYears === 1 ? '' : 's'}`} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="profit">
-            <AccordionTrigger className="px-5 py-4 hover:no-underline text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.20)' }}>
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">Profit Summary</p>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 pb-4">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <DetailField label="Trip Revenue" value={formatCurrency(totalTrips)} valueClass="text-emerald-400" />
-                <DetailField label="Expenses" value={formatCurrency(totalExpenses)} valueClass="text-amber-400" />
-                <DetailField label="Salary" value={formatCurrency(totalSalary)} valueClass="text-sky-400" />
-                <DetailField label="Net Profit" value={formatCurrency(netProfit)} valueClass={netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'} />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
       </div>
 
       {/* Driver Profit Card — full width */}
-      <div className="rounded-2xl border border-border bg-card p-5 hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Driver Profit — {driver.name}</h3>
-            <p className="text-xs text-muted-foreground">{dateFrom} → {dateTo}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={handleProfitPDF} size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-lg">
-              <FileDown className="w-3.5 h-3.5 mr-1" /> PDF
-            </Button>
-            <Button onClick={() => setBreakdown({ title: 'Driver Transactions', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' })), ...fSalaries.map((r) => ({ label: `${r.month} ${r.year} Salary`, sub: `Salary · ${formatDate(r.payment_date)}`, amount: r.net_salary, tone: 'text-sky-400' }))] })} size="sm" variant="outline" className="border-border rounded-lg">
-              <Eye className="w-3.5 h-3.5 mr-1" /> View
-            </Button>
-          </div>
-        </div>
-        {!hasProfitData ?
-        <div className="py-8 text-center">
-            <p className="text-sm text-muted-foreground">No data found for selected period</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Try adjusting the date filter above</p>
-          </div> :
+      
 
-        <div className="space-y-0">
-            <ProfitRow label="Trip Revenue" value={totalTrips} tone="text-emerald-400" />
-            <div className="border-t border-border" />
-            <ProfitRow label="Expenses" value={totalExpenses} tone="text-amber-400" />
-            <div className="border-t border-border" />
-            <ProfitRow label="Salary" value={totalSalary} tone="text-sky-400" />
-            <div className="border-t-2 border-border mt-1" />
-            <ProfitRow label="Net Profit" value={netProfit} tone={netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'} bold />
-          </div>
-        }
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* Tabs */}
       <Tabs defaultValue={initialTab}>
