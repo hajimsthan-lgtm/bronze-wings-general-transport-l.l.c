@@ -3,10 +3,12 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Eye, Pencil, Trash2, MoreVertical, Building2, Repeat, ArrowRight } from 'lucide-react';
-import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
-import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-const CONTRACT_ACCENT = '#a855f7';
+const STATUS_META = {
+  active:    { dot: '#4ECDC4', text: '#4ECDC4', label: 'Active' },
+  expired:   { dot: '#FF6B6B', text: '#FF6B6B', label: 'Expired' },
+  terminated:{ dot: '#FF6B6B', text: '#FF6B6B', label: 'Terminated' },
+};
 
 export default function ContractsList({ contracts, expensesByContract, onEdit, onDelete, onDetails, driverMap, vehicleMap }) {
   const navigate = useNavigate();
@@ -26,80 +28,109 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
         const monthlyRate = Number(c.monthly_rate) || 0;
         const netProfit = monthlyRate - totalExpenses;
         const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
-        const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';
+        const sm = STATUS_META[c.status] || STATUS_META.active;
+        const marginColor = margin >= 30 ? '#4ECDC4' : margin >= 15 ? '#FFB347' : '#FF6B6B';
+
         return (
           <div
             key={c.id}
             onClick={() => onDetails?.(c)}
-            className="group row-card row-edge-glow cursor-pointer animate-fade-in-up mb-2"
-            style={{
-              animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
-              ['--row-accent']: CONTRACT_ACCENT,
-            }}
+            className="contract-row group animate-fade-in-up"
+            style={{ animationDelay: `${Math.min(i * 0.03, 0.4)}s` }}
           >
-            <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: CONTRACT_ACCENT, boxShadow: `0 0 8px ${CONTRACT_ACCENT}` }}
-            />
-            <div className="flex items-center gap-3 p-3 sm:p-3.5">
-              {/* Icon badge */}
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(CONTRACT_ACCENT, 0.12), border: `1px solid ${hexToRgba(CONTRACT_ACCENT, 0.22)}` }}>
-                <Building2 className="w-4 h-4" style={{ color: CONTRACT_ACCENT }} />
+            <div className="flex items-center" style={{ gap: '14px' }}>
+              {/* Icon — 40×40, dark navy bg, white icon */}
+              <div
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: 40, height: 40, borderRadius: 12, background: '#0F1B33', border: '1px solid #2A3B5C' }}
+              >
+                <Building2 className="w-5 h-5" style={{ color: '#FFFFFF' }} />
               </div>
 
-              {/* Main */}
+              {/* Left content group */}
               <div className="flex-1 min-w-0">
-                {/* Line 1 — contract id + date range */}
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
-                  <span className="font-mono text-muted-foreground/80 whitespace-nowrap">#{c.id?.slice(-6).toUpperCase()}</span>
-                  <span className="text-muted-foreground/40">·</span>
+                {/* Line 1 — contract id + date range (11px muted) */}
+                <div className="flex items-center gap-1.5 min-w-0" style={{ color: '#8B9DBF', fontSize: 11 }}>
+                  <span className="font-mono whitespace-nowrap" style={{ opacity: 0.8 }}>#{c.id?.slice(-6).toUpperCase()}</span>
+                  <span style={{ opacity: 0.4 }}>·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(c.start_date)}</span>
-                  <ArrowRight className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
+                  <ArrowRight className="w-3 h-3 flex-shrink-0" style={{ opacity: 0.4 }} />
                   <span className="tabular-nums whitespace-nowrap">{formatDate(c.end_date)}</span>
                 </div>
-                {/* Line 2 — company name */}
+                {/* Line 2 — company name (16px bold white) */}
                 <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{c.company_name || '—'}</p>
-                  {c.auto_renewal && <Repeat className="w-3 h-3 text-primary flex-shrink-0" />}
+                  <p className="font-bold truncate" style={{ color: '#FFFFFF', fontSize: 16, lineHeight: '1.2' }}>{c.company_name || '—'}</p>
+                  {c.auto_renewal && <Repeat className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#4ECDC4' }} />}
                 </div>
-                {/* Line 3 — meta (desktop only) */}
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-1 min-w-0">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                {/* Line 3 — meta (desktop only, 13px muted) */}
+                <div className="hidden sm:flex items-center gap-1.5 mt-1 min-w-0" style={{ color: '#8B9DBF', fontSize: 13 }}>
+                  <span className="uppercase tracking-wider whitespace-nowrap" style={{ opacity: 0.7, fontSize: 10 }}>
                     {t('monthly_contract')}
                   </span>
                   {c.driver_name && (
                     <>
-                      <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, driverMap, c.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate max-w-[120px]">{c.driver_name}</button>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <button
+                        onClick={(e) => handleLink(e, driverMap, c.driver_name, '/admin/drivers')}
+                        className="hover:text-white transition-colors truncate max-w-[120px]"
+                      >{c.driver_name}</button>
                     </>
                   )}
                   {c.vehicle_plate && (
                     <>
-                      <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, vehicleMap, c.vehicle_plate, '/admin/vehicles')} className="hover:text-primary transition-colors tabular-nums whitespace-nowrap">{c.vehicle_plate}</button>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <button
+                        onClick={(e) => handleLink(e, vehicleMap, c.vehicle_plate, '/admin/vehicles')}
+                        className="hover:text-white transition-colors tabular-nums whitespace-nowrap"
+                      >{c.vehicle_plate}</button>
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Right — status + margin + rate + menu */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <div className="w-[112px] sm:w-[152px] flex items-center justify-end gap-1.5">
-                  <StatusPill as="span" variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
-                  <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}%</span>
+              {/* Right group — status + price + menu */}
+              <div className="flex items-center flex-shrink-0" style={{ gap: '16px' }}>
+                {/* Status pill + margin */}
+                <div className="flex items-center" style={{ gap: 12 }}>
+                  {/* Status pill */}
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2.5 rounded-full whitespace-nowrap"
+                    style={{ height: 26, background: '#1A2B4A', border: '1px solid #2A3B5C', color: '#E0E6F0', fontSize: 11, fontWeight: 500 }}
+                  >
+                    <span className="rounded-full" style={{ width: 6, height: 6, background: sm.dot }} />
+                    {sm.label}
+                  </span>
+                  {/* Margin badge */}
+                  <span
+                    className="tabular-nums font-semibold whitespace-nowrap"
+                    style={{ fontSize: 12, color: margin > 0 ? marginColor : '#8B9DBF' }}
+                  >{margin}%</span>
                 </div>
 
-                <div className="h-6 w-px bg-border/50 hidden sm:block" />
+                {/* Divider */}
+                <div className="hidden sm:block" style={{ width: 1, height: 24, background: '#2A3B5C' }} />
 
-                <div className="w-[84px] sm:w-[96px] text-right">
-                  <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(monthlyRate)}</p>
-                  <p className={`text-[10px] tabular-nums leading-tight ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
+                {/* Price block */}
+                <div className="text-right" style={{ minWidth: 84 }}>
+                  <p className="font-bold tabular-nums whitespace-nowrap" style={{ color: '#FFFFFF', fontSize: 18, lineHeight: '1.15' }}>
+                    {formatCurrency(monthlyRate)}
+                  </p>
+                  <p className="tabular-nums whitespace-nowrap" style={{ color: '#8B9DBF', fontSize: 12, lineHeight: '1.2', marginTop: 2 }}>
+                    {formatCurrency(netProfit)}
+                  </p>
                 </div>
 
+                {/* Three-dot menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="w-7 h-7 sm:w-8 sm:h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                      <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center justify-center rounded-lg transition-colors"
+                      style={{ width: 32, height: 32, color: '#8B9DBF' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF'; e.currentTarget.style.background = '#1A2B4A'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = '#8B9DBF'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <MoreVertical className="w-5 h-5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
