@@ -12,8 +12,8 @@ const CYCLE = ['crimson', 'navy', 'emerald', 'amethyst'];
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'navy';
-    return localStorage.getItem('bw-theme-v6') || 'navy';
+    if (typeof window === 'undefined') return 'amethyst';
+    return localStorage.getItem('bw-theme-v6') || 'amethyst';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
