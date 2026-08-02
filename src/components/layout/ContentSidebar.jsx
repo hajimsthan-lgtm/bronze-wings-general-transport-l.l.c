@@ -292,13 +292,11 @@ export default function ContentSidebar() {
           paddingLeft: 8,
           paddingRight: 8,
           gap: 6,
-          background: expanded
-            ? 'linear-gradient(180deg, rgba(var(--surf-2-rgb),0.55) 0%, rgba(var(--surf-1-rgb),0.42) 100%)'
-            : 'transparent',
-          borderRight: expanded ? '1px solid rgba(255,255,255,0.08)' : 'none',
-          backdropFilter: expanded ? 'blur(28px) saturate(1.4)' : 'none',
-          WebkitBackdropFilter: expanded ? 'blur(28px) saturate(1.4)' : 'none',
-          boxShadow: expanded ? 'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 60px rgba(var(--panel-accent-rgb),0.04), 4px 0 24px rgba(0,0,0,0.25)' : 'none',
+          background: 'transparent',
+          borderRight: 'none',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: 'none',
           opacity: panelVisible ? 1 : 0,
           transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
           pointerEvents: panelVisible ? 'auto' : 'none',
