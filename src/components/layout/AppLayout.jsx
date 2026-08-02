@@ -6,15 +6,13 @@ import MobileHeader from '@/components/layout/MobileHeader';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
 import ContentSidebar from '@/components/layout/ContentSidebar';
-import { useRailExpanded } from '@/lib/railVisibility';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppLayout() {
   const location = useLocation();
   const showHeader = true;
-  const expanded = useRailExpanded();
   const isMobile = useIsMobile();
-  const railWidth = expanded ? 244 : 64;
+  const railWidth = 64;
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>

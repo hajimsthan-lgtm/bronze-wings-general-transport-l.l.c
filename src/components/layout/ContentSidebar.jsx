@@ -64,14 +64,18 @@ function IconTile({ item, active, size = 40 }) {
         background: `linear-gradient(150deg, ${item.from} 0%, ${item.to} 100%)`,
         border: `1px solid rgba(${item.glow},0.55)`,
         boxShadow: active
-          ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 6px 16px rgba(${item.glow},0.45), 0 0 0 1px rgba(${item.glow},0.35), 0 0 18px -4px rgba(${item.glow},0.6)`
-          : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05)`,
+          ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 6px 16px rgba(${item.glow},0.45), 0 0 0 1px rgba(${item.glow},0.35), 0 0 18px -4px rgba(${item.glow},0.6), 0 0 32px -2px rgba(${item.glow},0.4)`
+          : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05), 0 0 14px -6px rgba(${item.glow},0.3)`,
         color: '#fff',
       }}
     >
       <span
         className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[10px]"
         style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
+      />
+      <span
+        className="pointer-events-none absolute inset-0 rounded-[12px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ boxShadow: `0 0 22px 2px rgba(${item.glow},0.55), 0 0 40px 4px rgba(${item.glow},0.25)` }}
       />
       <item.icon className="relative w-[17px] h-[17px]" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
       <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
@@ -181,12 +185,12 @@ export default function ContentSidebar() {
             expanded
               ? {
                   background: active
-                    ? `linear-gradient(135deg, rgba(${item.glow},0.20), rgba(${item.glow},0.06))`
-                    : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${active ? `rgba(${item.glow},0.38)` : 'rgba(255,255,255,0.07)'}`,
+                    ? `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.10))`
+                    : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
+                  border: `1px solid ${active ? `rgba(${item.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
                   boxShadow: active
-                    ? `0 0 22px -6px rgba(${item.glow},0.35), inset 0 1px 0 rgba(255,255,255,0.08)`
-                    : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                    ? `0 0 26px -4px rgba(${item.glow},0.45), 0 0 0 1px rgba(${item.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${item.glow},0.08)`
+                    : `0 0 18px -8px rgba(${item.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
                 }
               : {}
           }
@@ -221,29 +225,35 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  className="group relative flex items-center gap-2.5 w-full px-2.5 h-9 rounded-xl transition-all duration-200 hover:translate-x-0.5"
+                  className="group relative flex items-center gap-2 w-full pl-3 pr-2.5 h-8 rounded-lg transition-all duration-200 hover:translate-x-1"
                   style={{
                     background: childActive
-                      ? `linear-gradient(135deg, rgba(${child.glow},0.16), rgba(${child.glow},0.04))`
-                      : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.30)` : 'rgba(255,255,255,0.05)'}`,
+                      ? `rgba(${child.glow},0.10)`
+                      : 'rgba(255,255,255,0.015)',
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.35)` : 'rgba(255,255,255,0.06)'}`,
+                    borderLeft: `2px solid ${childActive ? child.from : `rgba(${child.glow},0.45)`}`,
+                    boxShadow: childActive
+                      ? `0 0 14px -6px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.05)`
+                      : 'none',
                   }}
                 >
                   <span
-                    className="relative flex items-center justify-center shrink-0 rounded-lg transition-transform group-hover:scale-110"
+                    className="relative flex items-center justify-center shrink-0 rounded-md transition-all duration-200 group-hover:scale-110"
                     style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: 7,
-                      background: `linear-gradient(150deg, ${child.from} 0%, ${child.to} 100%)`,
-                      border: `1px solid rgba(${child.glow},0.42)`,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      background: childActive
+                        ? `linear-gradient(150deg, ${child.from} 0%, ${child.to} 100%)`
+                        : `rgba(${child.glow},0.12)`,
+                      border: `1px solid ${childActive ? `rgba(${child.glow},0.55)` : `rgba(${child.glow},0.25)`}`,
                       boxShadow: childActive
-                        ? `inset 0 1px 1px rgba(255,255,255,0.4), 0 3px 8px rgba(${child.glow},0.28)`
-                        : `inset 0 1px 1px rgba(255,255,255,0.3), 0 2px 5px rgba(0,0,0,0.3)`,
-                      color: '#fff',
+                        ? `0 0 12px -2px rgba(${child.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.3)`
+                        : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                      color: childActive ? '#fff' : `rgb(${child.glow})`,
                     }}
                   >
-                    <child.icon className="relative w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
+                    <child.icon className="relative w-3 h-3" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
                   </span>
                   <span
                     className="text-[11px] font-mono font-medium tracking-[0.06em] uppercase whitespace-nowrap"
@@ -282,11 +292,13 @@ export default function ContentSidebar() {
           paddingLeft: 8,
           paddingRight: 8,
           gap: 6,
-          background: 'transparent',
-          borderRight: 'none',
-          backdropFilter: 'none',
-          WebkitBackdropFilter: 'none',
-          boxShadow: 'none',
+          background: expanded
+            ? 'linear-gradient(180deg, rgba(var(--surf-2-rgb),0.55) 0%, rgba(var(--surf-1-rgb),0.42) 100%)'
+            : 'transparent',
+          borderRight: expanded ? '1px solid rgba(255,255,255,0.08)' : 'none',
+          backdropFilter: expanded ? 'blur(28px) saturate(1.4)' : 'none',
+          WebkitBackdropFilter: expanded ? 'blur(28px) saturate(1.4)' : 'none',
+          boxShadow: expanded ? 'inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 60px rgba(var(--panel-accent-rgb),0.04), 4px 0 24px rgba(0,0,0,0.25)' : 'none',
           opacity: panelVisible ? 1 : 0,
           transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
           pointerEvents: panelVisible ? 'auto' : 'none',
