@@ -52,15 +52,16 @@ const COLLAPSED_W = 64;
 const EXPANDED_W = 244;
 const VANISH_MS = 15000;
 
-/* ── Icon tile — the gradient glass square shared by collapsed & expanded ── */
-function IconTile({ item, active, size = 40 }) {
+/* ── Lightning glass tile — small, refined, electric animated edge ── */
+function NavTile({ item, active, lit, size = 34 }) {
   return (
     <span
-      className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95"
+      className={`nav-edge relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95 ${lit ? 'nav-edge-on' : ''}`}
       style={{
+        '--tile-glow': `rgb(${item.glow})`,
         width: size,
         height: size,
-        borderRadius: 12,
+        borderRadius: 11,
         background: `linear-gradient(150deg, ${item.from} 0%, ${item.to} 100%)`,
         border: `1px solid rgba(${item.glow},0.55)`,
         boxShadow: active
@@ -70,15 +71,15 @@ function IconTile({ item, active, size = 40 }) {
       }}
     >
       <span
-        className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[10px]"
+        className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[9px]"
         style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
       />
       <span
-        className="pointer-events-none absolute inset-0 rounded-[12px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="pointer-events-none absolute inset-0 rounded-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ boxShadow: `0 0 22px 2px rgba(${item.glow},0.55), 0 0 40px 4px rgba(${item.glow},0.25)` }}
       />
-      <item.icon className="relative w-[17px] h-[17px]" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
-      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
+      <item.icon className="relative w-4 h-4" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
+      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[11px]">
         <span
           className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover:opacity-100 group-hover:left-[150%] transition-all duration-700"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }}
@@ -110,19 +111,19 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  /* ── reveal: show rail + widen it ── */
+  /* ── reveal: show rail only (NO expand on hover) ── */
   const revealPanel = () => {
     clearTimeout(vanishTimer.current);
     railVisibility.set(true);
-    railVisibility.setExpanded(true);
   };
 
-  /* ── leave: collapse (unless pinned), then auto-vanish after idle ── */
+  /* ── leave: collapse everything (unless pinned), then auto-vanish ── */
   const scheduleVanish = () => {
     clearTimeout(vanishTimer.current);
+    setHoveredKey(null);
     if (pinnedRef.current) return;
     railVisibility.setExpanded(false);
-    setHoveredKey(null);
+    setClickedOpen(null);
     vanishTimer.current = setTimeout(() => {
       if (!pinnedRef.current) railVisibility.set(false);
     }, VANISH_MS);
@@ -141,46 +142,44 @@ export default function ContentSidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pinned]);
 
-  /* ── auto-open the active parent's sub-routes on route change ── */
-  useEffect(() => {
-    const activeItem = navItems.find(item =>
-      (item.paths || []).some(p => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)))
-    );
-    if (activeItem?.children?.length) {
-      setClickedOpen(activeItem.key);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
-
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
-  /* ── Main nav button — glass surface with icon + name when expanded ── */
+  /* ── Main nav button ── */
   const renderItem = (item) => {
     const active = isActive(item);
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
-    const showChildren =
-      expanded && hasChildren && (hoveredKey === item.key || (hoveredKey === null && clickedOpen === item.key));
-    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
+    const showChildren = expanded && hasChildren && clickedOpen === item.key;
+    /* when one section is clicked open, every other button fades to very low light */
+    const dimmed = expanded && clickedOpen !== null && clickedOpen !== item.key && hoveredKey !== item.key;
+    const lit = active || hoveredKey === item.key;
 
     return (
       <div
         key={item.key}
         className="space-y-1 transition-opacity duration-300"
-        style={{ opacity: dimmed ? 0.38 : 1 }}
+        style={{ opacity: dimmed ? 0.12 : 1 }}
       >
         <button
           onClick={() => {
             if (hasChildren) {
-              const isOpen = clickedOpen === item.key;
-              setClickedOpen(isOpen ? null : item.key);
-              if (!isOpen) switchTab(item.key);
+              /* first click opens the text + sub-route bar; clicking the open one closes it */
+              if (expanded && clickedOpen === item.key) {
+                railVisibility.setExpanded(false);
+                setClickedOpen(null);
+              } else {
+                railVisibility.setExpanded(true);
+                setClickedOpen(item.key);
+              }
             } else {
+              /* leaf buttons (Home, AI Agents) navigate on a single click */
+              railVisibility.setExpanded(false);
+              setClickedOpen(null);
               switchTab(item.key);
             }
           }}
           onMouseEnter={() => setHoveredKey(item.key)}
-          className={`group relative flex items-center ${expanded ? 'gap-3 w-full px-2.5 h-12' : 'justify-center w-12 h-12 mx-auto'} rounded-2xl transition-all duration-300`}
+          className={`group relative flex items-center ${expanded ? 'gap-2.5 w-full px-2 h-11' : 'justify-center w-11 h-11 mx-auto'} rounded-2xl transition-all duration-300`}
           style={
             expanded
               ? {
@@ -195,12 +194,12 @@ export default function ContentSidebar() {
               : {}
           }
         >
-          <IconTile item={item} active={active} />
+          <NavTile item={item} active={active} lit={lit} />
 
           {expanded && (
             <span
-              className="text-[12px] font-mono font-medium tracking-[0.08em] uppercase whitespace-nowrap"
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.68)' }}
+              className="text-[11px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)' }}
             >
               {label}
             </span>
@@ -209,13 +208,13 @@ export default function ContentSidebar() {
           {/* active indicator bar */}
           {active && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 h-7 w-[3px] rounded-full ${expanded ? 'left-0' : '-left-[6px]'}`}
+              className={`absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full ${expanded ? 'left-0' : '-left-[6px]'}`}
               style={{ background: item.from, boxShadow: `0 0 10px rgba(${item.glow},0.9)` }}
             />
           )}
         </button>
 
-        {/* ── Sub-routes — indented glass chips ── */}
+        {/* ── Sub-routes — same lightning-glass tile style, smaller ── */}
         {showChildren && (
           <div className="space-y-0.5 pl-3 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
             {item.children.map((child) => {
@@ -225,7 +224,7 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  className="group relative flex items-center gap-2.5 w-full px-2.5 h-10 rounded-xl transition-all duration-300 hover:translate-x-1"
+                  className="group relative flex items-center gap-2 w-full pl-2 pr-2.5 h-9 rounded-xl transition-all duration-300 hover:translate-x-1"
                   style={{
                     background: childActive
                       ? `linear-gradient(135deg, rgba(${child.glow},0.28), rgba(${child.glow},0.10))`
@@ -236,45 +235,16 @@ export default function ContentSidebar() {
                       : `0 0 18px -8px rgba(${child.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
                   }}
                 >
+                  <NavTile item={child} active={childActive} lit={childActive} size={26} />
                   <span
-                    className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95"
-                    style={{
-                      width: 30,
-                      height: 30,
-                      borderRadius: 10,
-                      background: `linear-gradient(150deg, ${child.from} 0%, ${child.to} 100%)`,
-                      border: `1px solid rgba(${child.glow},0.55)`,
-                      boxShadow: childActive
-                        ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 6px 16px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.35), 0 0 18px -4px rgba(${child.glow},0.6), 0 0 32px -2px rgba(${child.glow},0.4)`
-                        : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05), 0 0 14px -6px rgba(${child.glow},0.3)`,
-                      color: '#fff',
-                    }}
-                  >
-                    <span
-                      className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[8px]"
-                      style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
-                    />
-                    <span
-                      className="pointer-events-none absolute inset-0 rounded-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ boxShadow: `0 0 22px 2px rgba(${child.glow},0.55), 0 0 40px 4px rgba(${child.glow},0.25)` }}
-                    />
-                    <child.icon className="relative w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
-                    <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[10px]">
-                      <span
-                        className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover:opacity-100 group-hover:left-[150%] transition-all duration-700"
-                        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }}
-                      />
-                    </span>
-                  </span>
-                  <span
-                    className="text-[11px] font-mono font-medium tracking-[0.08em] uppercase whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.68)' }}
+                    className="text-[10px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.92)' }}
                   >
                     {childLabel}
                   </span>
                   {childActive && (
                     <span
-                      className="absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full left-0"
+                      className="absolute top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full left-0"
                       style={{ background: child.from, boxShadow: `0 0 10px rgba(${child.glow},0.9)` }}
                     />
                   )}
@@ -325,6 +295,7 @@ export default function ContentSidebar() {
               railVisibility.set(true);
             } else {
               railVisibility.setExpanded(false);
+              setClickedOpen(null);
             }
           }}
           title={pinned ? 'Unpin — collapse on leave' : 'Pin open — keep expanded'}

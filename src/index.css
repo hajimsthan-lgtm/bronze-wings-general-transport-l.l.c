@@ -478,6 +478,33 @@
   @property --row-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
   @keyframes row-border-spin { to { --row-angle: 360deg; } }
 
+  /* ===== Lightning nav tile — electric animated edge ===== */
+  @keyframes nav-edge-spin { to { --nav-angle: 360deg; } }
+  .nav-edge { position: relative; }
+  .nav-edge::after {
+    content: '';
+    position: absolute; inset: -1.5px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(from var(--nav-angle, 0deg),
+      transparent 0deg, var(--tile-glow, rgb(var(--panel-accent-rgb))) 40deg,
+      transparent 95deg, transparent 180deg,
+      var(--tile-glow, rgb(var(--panel-accent-rgb))) 220deg, transparent 275deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .nav-edge-on::after {
+    opacity: 1;
+    animation: nav-edge-spin 2.4s linear infinite;
+  }
+  @property --nav-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
   /* ========== 2026 Detail Header Card ========== */
   .detail-header-card {
     border-radius: 20px;
