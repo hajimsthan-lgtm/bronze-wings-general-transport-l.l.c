@@ -413,24 +413,6 @@
     color: #bfdbfe;
   }
 
-  /* ========== Contract Row (elevated dark blue, matches trip row structure) ========== */
-  .contract-row {
-    position: relative;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    background: #1E2A4A;
-    border: 1px solid #2A3B5C;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
-    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-  }
-  .contract-row:hover {
-    transform: translateY(-1px);
-    border-color: #3D5A80;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.32), 0 0 14px rgba(78,205,196,0.08);
-  }
-
   /* ========== 2026 Row Card (liquid glass list row) ========== */
   .row-card {
     position: relative;
