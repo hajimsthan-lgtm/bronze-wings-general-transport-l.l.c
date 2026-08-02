@@ -20,12 +20,12 @@ export default function AppFooter() {
         }}
       >
         <span
-          className="text-[15px] font-bold uppercase tracking-[0.18em]"
+          className="text-[15px] font-bold uppercase tracking-[0.18em] animate-gold-shine"
           style={{
-            backgroundImage: 'linear-gradient(90deg, #ff6b6b 0%, #f59e0b 16%, #facc15 28%, #34d399 40%, #22d3ee 52%, #60a5fa 64%, #a78bfa 76%, #f472b6 88%, #ff6b6b 100%)',
+            backgroundImage: 'linear-gradient(90deg, #FFD700 0%, #FFD700 40%, #FFF8DC 48%, #FFFFFF 50%, #FFF8DC 52%, #FFD700 60%, #FFD700 100%)',
             backgroundSize: '200% auto',
             WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 8px rgba(168,85,247,0.40))',
+            filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.55))',
           }}
         >
           {company}

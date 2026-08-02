@@ -1651,6 +1651,16 @@
   100% { background-position: 200% center; }
 }
 
+/* Pure gold shine — 3s cycle = 20 shines per minute */
+@keyframes gold-shine {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.animate-gold-shine {
+  animation: gold-shine 3s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .animate-gold-shine { animation: none !important; } }
+
 /* Sub-nav tiles light up on page entry */
 @keyframes subnav-light {
   0%   { opacity: 0; transform: translateY(8px) scale(0.95); filter: brightness(1.5); }
