@@ -35,7 +35,7 @@ export default function AppLayout() {
           MAIN CONTENT — fixed-height panel; body scrolls internally
           beneath the transparent header
           ═══════════════════════════════════════════════════════ */}
-      <main className="flex-1 min-h-0 flex flex-col max-w-[1440px] mx-auto w-full relative z-10">
+      <main className="flex-1 min-h-0 flex flex-col w-full relative z-10">
         {/* Scrollable body — content sits directly on the app background */}
         <div
           key={location.pathname}

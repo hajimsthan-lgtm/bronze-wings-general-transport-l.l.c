@@ -150,7 +150,7 @@ export default function DriverDetail() {
       {/* Tabs wraps the detail area so the bar can sit beside the profile card */}
       <Tabs defaultValue={initialTab}>
       {/* Grid: profile (left) | tab bar + widgets (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
         <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} />
         <div className="space-y-4">
           <TabsList className="btn-lightning glass-card rounded-2xl p-1.5 gap-1.5 border border-[rgba(var(--panel-accent-rgb),0.18)] w-full">
