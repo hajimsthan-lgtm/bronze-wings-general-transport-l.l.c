@@ -4,6 +4,11 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function HoursGauge({ hours = 0, target = 40 }) {
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const handleToggle = () => {
+    if (pinned) { setPinned(false); setOpen(false); }
+    else { setPinned(true); setOpen(true); }
+  };
   const pct = Math.min(100, (hours / target) * 100);
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
@@ -14,13 +19,13 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
   return (
     <div
       className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
-      style={{ borderTop: '3px solid #a855f7' }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      style={{ borderLeft: '4px solid #a855f7' }}
+      onMouseEnter={() => { if (!pinned) setOpen(true); }}
+      onMouseLeave={() => { if (!pinned) setOpen(false); }}
     >
       <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%)' }} />
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
+      <div className="flex items-center justify-between mb-4 relative">
+        <button onClick={handleToggle} aria-expanded={open} aria-controls="time-tracker-panel" aria-label="Toggle Time Tracker" className="flex items-center gap-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
             <Clock className="w-4 h-4" style={{ color: '#a855f7' }} />
           </div>
@@ -35,6 +40,7 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
       </div>
 
       {open && (
+      <div id="time-tracker-panel" role="region" aria-label="Time Tracker" className="relative">
       <div className="rounded-xl border border-border overflow-hidden p-4">
         <div className="relative flex items-center justify-center my-2">
           <svg width="140" height="140" className="-rotate-90">
@@ -56,6 +62,7 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
         <p className="relative text-[11px] text-muted-foreground text-center">
           {hours.toFixed(1)} h of {target}h target
         </p>
+      </div>
       </div>
       )}
     </div>

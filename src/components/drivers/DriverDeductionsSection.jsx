@@ -28,6 +28,11 @@ export default function DriverDeductionsSection({ driverName }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const handleToggle = () => {
+    if (pinned) { setPinned(false); setOpen(false); }
+    else { setPinned(true); setOpen(true); }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -55,12 +60,12 @@ export default function DriverDeductionsSection({ driverName }) {
     <div
       className="glass-card rounded-2xl overflow-hidden transition-all duration-300"
       style={{ borderLeft: '4px solid hsl(var(--destructive))' }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => { if (!pinned) setOpen(true); }}
+      onMouseLeave={() => { if (!pinned) setOpen(false); }}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-5 border-b border-border">
-        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-3 text-left">
+        <button onClick={handleToggle} aria-expanded={open} aria-controls="deductions-panel" aria-label="Toggle Pending Deductions" className="flex items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.12)', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}>
             <Wallet className="w-5 h-5 text-primary" />
           </div>
@@ -78,7 +83,7 @@ export default function DriverDeductionsSection({ driverName }) {
       </div>
 
       {open && (
-      <>
+      <div id="deductions-panel" role="region" aria-label="Pending Deductions">
       {/* List */}
       <div className="divide-y divide-border">
         {loading ? (
@@ -143,7 +148,7 @@ export default function DriverDeductionsSection({ driverName }) {
           </div>
         </div>
       )}
-      </>
+      </div>
       )}
 
       <DriverDeductionFormSheet

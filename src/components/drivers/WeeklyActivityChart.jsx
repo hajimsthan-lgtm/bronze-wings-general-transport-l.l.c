@@ -7,6 +7,11 @@ const weekIdx = (d) => (d.getDay() + 6) % 7;
 
 export default function WeeklyActivityChart({ trips = [] }) {
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const handleToggle = () => {
+    if (pinned) { setPinned(false); setOpen(false); }
+    else { setPinned(true); setOpen(true); }
+  };
   const { counts, peakIdx, total } = useMemo(() => {
     const arr = [0, 0, 0, 0, 0, 0, 0];
     const now = new Date();
@@ -26,13 +31,13 @@ export default function WeeklyActivityChart({ trips = [] }) {
   return (
     <div
       className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
-      style={{ borderTop: '3px solid #3b82f6' }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      style={{ borderLeft: '4px solid #3b82f6' }}
+      onMouseEnter={() => { if (!pinned) setOpen(true); }}
+      onMouseLeave={() => { if (!pinned) setOpen(false); }}
     >
       <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18), transparent 70%)' }} />
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 text-left">
+      <div className="flex items-center justify-between mb-4 relative">
+        <button onClick={handleToggle} aria-expanded={open} aria-controls="weekly-activity-panel" aria-label="Toggle Weekly Activity" className="flex items-center gap-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#3b82f6', 0.14), border: `1px solid ${hexToRgba('#3b82f6', 0.3)}` }}>
             <BarChart3 className="w-4 h-4 text-primary" />
           </div>
@@ -48,7 +53,7 @@ export default function WeeklyActivityChart({ trips = [] }) {
       </div>
 
       {open && (
-      <>
+      <div id="weekly-activity-panel" role="region" aria-label="Weekly Activity" className="relative">
       <div className="rounded-xl border border-border overflow-hidden p-4">
         <div className="relative flex items-end justify-between gap-2 h-36">
           {counts.map((c, i) => {
@@ -76,7 +81,7 @@ export default function WeeklyActivityChart({ trips = [] }) {
           </p>
         )}
       </div>
-      </>
+      </div>
       )}
     </div>
   );

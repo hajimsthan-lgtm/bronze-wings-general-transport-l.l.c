@@ -3,7 +3,8 @@ import { Inbox, ChevronDown } from 'lucide-react';
 
 /**
  * Reusable card wrapping a 12-col grid table.
- * Collapsible cards default to collapsed and expand on hover.
+ * Collapsible cards default to collapsed, expand on hover (preview),
+ * and pin open on click until clicked again.
  */
 export default function TabTableCard({
   title,
@@ -20,19 +21,33 @@ export default function TabTableCard({
   children,
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [pinned, setPinned] = useState(false);
   const rows = Array.isArray(children) ? children : children ? [children] : [];
   const hasRows = rows.length > 0;
+  const panelId = `ttc-${(title || 'card').replace(/\s/g, '-').toLowerCase()}`;
+
+  const handleToggle = () => {
+    if (pinned) { setPinned(false); setOpen(false); }
+    else { setPinned(true); setOpen(true); }
+  };
 
   return (
     <div
-      className="glass-card rounded-2xl p-5 transition-all duration-300"
-      onMouseEnter={collapsible ? () => setOpen(true) : undefined}
-      onMouseLeave={collapsible ? () => setOpen(false) : undefined}
+      className="glass-card rounded-2xl p-5 transition-all duration-300 relative overflow-hidden"
+      style={{ borderLeft: '4px solid hsl(var(--destructive))' }}
+      onMouseEnter={collapsible ? () => { if (!pinned) setOpen(true); } : undefined}
+      onMouseLeave={collapsible ? () => { if (!pinned) setOpen(false); } : undefined}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           {collapsible && (
-            <button onClick={() => setOpen((o) => !o)} className="p-1 rounded-lg hover:bg-muted transition-colors flex-shrink-0" aria-label="Toggle table">
+            <button
+              onClick={handleToggle}
+              aria-expanded={open}
+              aria-controls={panelId}
+              aria-label={`Toggle ${title}`}
+              className="p-1 rounded-lg hover:bg-muted transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
+            >
               <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
             </button>
           )}
@@ -45,7 +60,7 @@ export default function TabTableCard({
       </div>
 
       {(!collapsible || open) && (
-        <>
+        <div id={panelId} role="region" aria-label={title}>
           {headerExtra}
 
           <div className="rounded-xl border border-border overflow-hidden">
@@ -66,7 +81,7 @@ export default function TabTableCard({
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
