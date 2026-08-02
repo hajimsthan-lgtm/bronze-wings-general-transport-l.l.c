@@ -6,10 +6,15 @@ import MobileHeader from '@/components/layout/MobileHeader';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
 import ContentSidebar from '@/components/layout/ContentSidebar';
+import { useRailExpanded } from '@/lib/railVisibility';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppLayout() {
   const location = useLocation();
   const showHeader = true;
+  const expanded = useRailExpanded();
+  const isMobile = useIsMobile();
+  const railWidth = expanded ? 244 : 64;
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
@@ -41,7 +46,13 @@ export default function AppLayout() {
           key={location.pathname}
           className="animate-fade-in-up md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll"
         >
-          <div className={`p-4 pb-28 md:pb-28 md:pr-6 md:pl-[60px] ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}>
+          <div
+            className={`p-4 pb-28 md:pb-28 md:pr-6 ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}
+            style={{
+              paddingLeft: isMobile ? undefined : `${railWidth}px`,
+              transition: 'padding-left 0.45s cubic-bezier(0.16,1,0.3,1)',
+            }}
+          >
             <Outlet />
           </div>
         </div>
