@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 
 export function hexToRgba(hex, a) {
   const h = hex.replace('#', '');
@@ -28,13 +26,19 @@ export function useCountUp(target, duration = 1200) {
   return val;
 }
 
-export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra, to }) {
+export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra }) {
   const animated = useCountUp(value);
   const display = format ? format(animated) : Math.round(animated).toLocaleString();
   const rgba = (a) => hexToRgba(color, a);
 
-  const inner = (
-    <>
+  return (
+    <div
+      className="relative overflow-hidden p-4 sm:p-6 animate-fade-in-up hover:-translate-y-[3px] transition-all duration-400 group bg-card border border-white/[0.06] rounded-3xl"
+      style={{
+        animationDelay: `${index * 0.08}s`,
+        boxShadow: `-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)`,
+      }}
+    >
       <div className="flex items-start justify-between mb-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6b7280] pt-1.5">{label}</p>
         {Icon && (
@@ -51,24 +55,6 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
       </div>
       <p className="text-2xl sm:text-4xl font-light text-white tabular-nums tracking-tight">{display}</p>
       {extra && <div className="mt-3 flex items-center justify-between gap-2 relative z-10">{extra}</div>}
-      {to && (
-        <div className="absolute bottom-3 right-4 flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color }}>
-          View <ChevronRight className="w-3 h-3" />
-        </div>
-      )}
-    </>
+    </div>
   );
-
-  const cls = `relative overflow-hidden p-4 sm:p-6 animate-fade-in-up transition-all duration-400 group bg-card border border-white/[0.06] rounded-3xl ${
-    to ? 'hover:-translate-y-[3px] hover:border-white/[0.12] cursor-pointer' : 'hover:-translate-y-[3px]'
-  }`;
-  const style = {
-    animationDelay: `${index * 0.08}s`,
-    boxShadow: `-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)`,
-  };
-
-  if (to) {
-    return <Link to={to} className={cls} style={style}>{inner}</Link>;
-  }
-  return <div className={cls} style={style}>{inner}</div>;
 }

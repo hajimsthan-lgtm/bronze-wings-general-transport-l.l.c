@@ -1,5 +1,4 @@
-import { Truck, Gauge, Fuel as FuelIcon, Wrench, Wallet, CalendarClock, ShieldCheck, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Truck, Gauge, Fuel as FuelIcon, Wrench, Wallet, CalendarClock, ShieldCheck, TrendingUp } from 'lucide-react';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ProgressBar from '@/components/reports/ProgressBar';
@@ -10,7 +9,6 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecords = [], expenses = [], loading }) {
-  const navigate = useNavigate();
   if (loading && vehicles.length === 0) return <LoadingSpinner />;
 
   const active = vehicles.filter((v) => v.status === 'active').length;
@@ -65,8 +63,8 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
   const expiries = vehicles
     .flatMap((v) => {
       const items = [];
-      if (v.registration_expiry) items.push({ type: 'Registration', date: v.registration_expiry, plate: v.plate_number, id: v.id });
-      if (v.insurance_expiry) items.push({ type: 'Insurance', date: v.insurance_expiry, plate: v.plate_number, id: v.id });
+      if (v.registration_expiry) items.push({ type: 'Registration', date: v.registration_expiry, plate: v.plate_number });
+      if (v.insurance_expiry) items.push({ type: 'Insurance', date: v.insurance_expiry, plate: v.plate_number });
       return items;
     })
     .map((x) => ({ ...x, d: new Date(x.date) }))
@@ -75,43 +73,16 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
 
   return (
     <div>
-      {/* Upcoming Inspections & Expiries — moved to top */}
-      <ReportSectionCard index={0} color="#ef4444" title="Upcoming Inspections & Expiries" className="mb-6"
-        action={<button onClick={() => navigate('/admin/vehicles')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
-        {expiries.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-6 text-center">No upcoming expiries.</p>
-        ) : (
-          <div className="space-y-1">
-            {expiries.slice(0, 7).map((e, i) => {
-              const isExp = e.d < today;
-              const tone = isExp ? '#ef4444' : '#f59e0b';
-              return (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.02] rounded-lg px-1 transition-colors" onClick={() => navigate(`/admin/vehicles/${e.id}`)}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
-                    {e.type === 'Registration' ? <CalendarClock className="w-4 h-4" style={{ color: tone }} /> : <ShieldCheck className="w-4 h-4" style={{ color: tone }} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{e.plate}</p>
-                    <p className="text-[11px] text-muted-foreground">{e.type} · {formatDate(e.date)}</p>
-                  </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isExp ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{isExp ? 'Expired' : 'Soon'}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </ReportSectionCard>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#3b82f6" to="/admin/vehicles" />
-        <ReportStatCard index={2} label="Active Fleet" value={active} icon={Truck} color="#34d399" to="/admin/vehicles" />
-        <ReportStatCard index={3} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" to="/admin/vehicles" />
-        <ReportStatCard index={4} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" to="/admin/vehicles" />
-        <ReportStatCard index={5} label="Fleet Expenses" value={fleetExpenses} format={formatCurrency} icon={Wallet} color="#ef4444" to="/expenses" />
+        <ReportStatCard index={0} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#3b82f6" />
+        <ReportStatCard index={1} label="Active Fleet" value={active} icon={Truck} color="#34d399" />
+        <ReportStatCard index={2} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" />
+        <ReportStatCard index={3} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" />
+        <ReportStatCard index={4} label="Fleet Expenses" value={fleetExpenses} format={formatCurrency} icon={Wallet} color="#ef4444" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ReportSectionCard index={6} color="#3b82f6" title="Fleet Status Distribution">
+        <ReportSectionCard index={5} color="#3b82f6" title="Fleet Status Distribution">
           <div className="flex items-center gap-6 flex-wrap">
             <DonutChart data={donutData.length ? donutData : [{ name: 'None', value: 1, color: '#334155' }]} total={donutTotal} height={180} />
             <div className="space-y-2 flex-1 min-w-[140px]">
@@ -127,8 +98,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
           </div>
         </ReportSectionCard>
 
-        <ReportSectionCard index={7} color="#22c55e" title="Top Vehicles by Revenue"
-          action={<button onClick={() => navigate('/admin/vehicles')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
+        <ReportSectionCard index={6} color="#22c55e" title="Top Vehicles by Revenue">
           {topVehicles.length === 0 || topVehicles[0].revenue === 0 ? (
             <p className="text-xs text-muted-foreground py-6 text-center">No revenue data yet.</p>
           ) : (
@@ -151,8 +121,33 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ReportSectionCard index={8} color="#f97316" title="Fleet Expenses & Fuel Trend">
+        <ReportSectionCard index={7} color="#f97316" title="Fleet Expenses & Fuel Trend">
           <TrendChart data={trendData} series={[{ key: 'fuel', name: 'Fuel', color: '#f97316' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={220} />
+        </ReportSectionCard>
+
+        <ReportSectionCard index={8} color="#ef4444" title="Upcoming Inspections & Expiries">
+          {expiries.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-6 text-center">No upcoming expiries.</p>
+          ) : (
+            <div className="space-y-1">
+              {expiries.slice(0, 7).map((e, i) => {
+                const isExp = e.d < today;
+                const tone = isExp ? '#ef4444' : '#f59e0b';
+                return (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04]">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
+                      {e.type === 'Registration' ? <CalendarClock className="w-4 h-4" style={{ color: tone }} /> : <ShieldCheck className="w-4 h-4" style={{ color: tone }} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{e.plate}</p>
+                      <p className="text-[11px] text-muted-foreground">{e.type} · {formatDate(e.date)}</p>
+                    </div>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isExp ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{isExp ? 'Expired' : 'Soon'}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </ReportSectionCard>
       </div>
     </div>
