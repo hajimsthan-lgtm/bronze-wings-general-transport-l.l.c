@@ -195,8 +195,8 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className="text-[13px] font-semibold tracking-wide whitespace-nowrap"
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+              className="text-[12px] font-mono font-medium tracking-[0.08em] uppercase whitespace-nowrap"
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.68)' }}
             >
               {label}
             </span>
@@ -246,8 +246,8 @@ export default function ContentSidebar() {
                     <child.icon className="relative w-3.5 h-3.5" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} />
                   </span>
                   <span
-                    className="text-[12px] font-medium whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.58)' }}
+                    className="text-[11px] font-mono font-medium tracking-[0.06em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.55)' }}
                   >
                     {childLabel}
                   </span>
@@ -282,13 +282,11 @@ export default function ContentSidebar() {
           paddingLeft: 8,
           paddingRight: 8,
           gap: 6,
-          background: expanded
-            ? 'linear-gradient(180deg, rgba(var(--surf-2-rgb),0.94) 0%, rgba(var(--surf-1-rgb),0.88) 100%)'
-            : 'transparent',
-          borderRight: expanded ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          backdropFilter: expanded ? 'blur(24px) saturate(1.3)' : 'none',
-          WebkitBackdropFilter: expanded ? 'blur(24px) saturate(1.3)' : 'none',
-          boxShadow: expanded ? 'inset 0 1px 0 rgba(255,255,255,0.06), 4px 0 24px rgba(0,0,0,0.35)' : 'none',
+          background: 'transparent',
+          borderRight: 'none',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: 'none',
           opacity: panelVisible ? 1 : 0,
           transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
           pointerEvents: panelVisible ? 'auto' : 'none',
