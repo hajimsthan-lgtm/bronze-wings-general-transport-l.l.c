@@ -63,9 +63,9 @@ function NavTile({ item, active, lit, size = 34 }) {
         height: size,
         borderRadius: 11,
         background: `linear-gradient(150deg, ${item.from} 0%, ${item.to} 100%)`,
-        border: `1px solid rgba(${item.glow},0.55)`,
-        boxShadow: active
-          ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 6px 16px rgba(${item.glow},0.45), 0 0 0 1px rgba(${item.glow},0.35), 0 0 18px -4px rgba(${item.glow},0.6), 0 0 32px -2px rgba(${item.glow},0.4)`
+        border: `1px solid rgba(${item.glow},${lit ? 0.8 : 0.55})`,
+        boxShadow: lit
+          ? `inset 0 1.5px 1px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.32), 0 8px 22px rgba(${item.glow},0.55), 0 0 0 1px rgba(${item.glow},0.45), 0 0 24px -2px rgba(${item.glow},0.75), 0 0 44px -2px rgba(${item.glow},0.5)`
           : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05), 0 0 14px -6px rgba(${item.glow},0.3)`,
         color: '#fff',
       }}
@@ -75,8 +75,8 @@ function NavTile({ item, active, lit, size = 34 }) {
         style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
       />
       <span
-        className="pointer-events-none absolute inset-0 rounded-[11px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ boxShadow: `0 0 22px 2px rgba(${item.glow},0.55), 0 0 40px 4px rgba(${item.glow},0.25)` }}
+        className="pointer-events-none absolute inset-0 rounded-[11px] transition-opacity duration-500"
+        style={{ opacity: lit ? 1 : 0, boxShadow: `0 0 26px 3px rgba(${item.glow},0.6), 0 0 48px 6px rgba(${item.glow},0.3)` }}
       />
       <item.icon className="relative w-4 h-4" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
       <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[11px]">
@@ -104,6 +104,8 @@ export default function ContentSidebar() {
   panelVisibleRef.current = panelVisible;
   const pinnedRef = useRef(pinned);
   pinnedRef.current = pinned;
+  const expandedRef = useRef(expanded);
+  expandedRef.current = expanded;
 
   const isActive = (item) =>
     (item.paths || []).some((p) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)));
@@ -121,11 +123,12 @@ export default function ContentSidebar() {
   const scheduleVanish = () => {
     clearTimeout(vanishTimer.current);
     setHoveredKey(null);
-    if (pinnedRef.current) return;
+    /* once opened by click, the rail stays open — auto-hover keeps working, no auto-vanish */
+    if (pinnedRef.current || expandedRef.current) return;
     railVisibility.setExpanded(false);
     setClickedOpen(null);
     vanishTimer.current = setTimeout(() => {
-      if (!pinnedRef.current) railVisibility.set(false);
+      if (!pinnedRef.current && !expandedRef.current) railVisibility.set(false);
     }, VANISH_MS);
   };
 
@@ -188,7 +191,7 @@ export default function ContentSidebar() {
                     : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
                   border: `1px solid ${active ? `rgba(${item.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
                   boxShadow: active
-                    ? `0 0 26px -4px rgba(${item.glow},0.45), 0 0 0 1px rgba(${item.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${item.glow},0.08)`
+                    ? `0 0 34px -4px rgba(${item.glow},0.6), 0 0 0 1px rgba(${item.glow},0.3), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 0 28px rgba(${item.glow},0.12)`
                     : `0 0 18px -8px rgba(${item.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
                 }
               : {}
@@ -198,8 +201,8 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className="text-[11px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)' }}
+              className={`text-[11px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)', textShadow: active ? `0 0 12px rgba(${item.glow},0.85), 0 0 24px rgba(${item.glow},0.4)` : 'none' }}
             >
               {label}
             </span>
