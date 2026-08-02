@@ -159,7 +159,8 @@ export default function ContentSidebar() {
     const active = isActive(item);
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
-    const showChildren = expanded && hasChildren;
+    const showChildren =
+      expanded && hasChildren && (hoveredKey === item.key || (hoveredKey === null && clickedOpen === item.key));
     const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
 
     return (
