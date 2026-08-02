@@ -145,9 +145,14 @@ export default function ContentSidebar() {
     const hasChildren = !!item.children?.length;
     const showChildren =
       expanded && hasChildren && (active || hoveredKey === item.key);
+    const dimmed = expanded && !active && hoveredKey !== item.key;
 
     return (
-      <div key={item.key} className="space-y-1">
+      <div
+        key={item.key}
+        className="space-y-1 transition-opacity duration-300"
+        style={{ opacity: dimmed ? 0.38 : 1 }}
+      >
         <button
           onClick={() => switchTab(item.key)}
           onMouseEnter={() => setHoveredKey(item.key)}
@@ -268,7 +273,7 @@ export default function ContentSidebar() {
           transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
           pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
-            'width .45s cubic-bezier(0.16,1,0.3,1), opacity .55s cubic-bezier(0.16,1,0.3,1), transform .55s cubic-bezier(0.16,1,0.3,1), background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease',
+            `width ${expanded ? '.45s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity .55s cubic-bezier(0.16,1,0.3,1), transform .55s cubic-bezier(0.16,1,0.3,1), background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease`,
         }}
       >
         {/* Pin toggle — keeps the rail expanded */}
