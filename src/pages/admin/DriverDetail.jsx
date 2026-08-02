@@ -273,11 +273,11 @@ export default function DriverDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue={initialTab}>
-        <TabsList className="rounded-xl p-1.5 gap-1.5 bg-card border border-border">
-          <TabsTrigger value="trips">{t('trips')} ({fTrips.length})</TabsTrigger>
-          <TabsTrigger value="salary">{t('salary')} ({fSalaries.length})</TabsTrigger>
-          <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
-          <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
+        <TabsList className="btn-lightning glass-card rounded-2xl p-1.5 gap-1.5 border border-[rgba(var(--panel-accent-rgb),0.18)]">
+          <TabsTrigger value="trips" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('trips')} ({fTrips.length})</TabsTrigger>
+          <TabsTrigger value="salary" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('salary')} ({fSalaries.length})</TabsTrigger>
+          <TabsTrigger value="expenses" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('expenses')} ({fExpenses.length})</TabsTrigger>
+          <TabsTrigger value="documents" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active">{t('documents')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="trips" className="mt-4">
