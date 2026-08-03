@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import {
-  Home, Truck, BarChart3, Users, Bot, ChevronsRight, ChevronsLeft,
+  Home, Truck, BarChart3, Users, Bot,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -48,39 +48,39 @@ const navItems = [
   },
 ];
 
-const COLLAPSED_W = 60;
-const EXPANDED_W = 232;
+const COLLAPSED_W = 56;
+const EXPANDED_W = 228;
 
-/* ── Compact glass tile — small frosted glass with soft accent glow ── */
-function NavTile({ item, active, lit, size = 30 }) {
+/* ── Compact glass tile — small frame, big icon ── */
+function NavTile({ item, active, lit, size = 32 }) {
   return (
     <span
       className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-108 group-active:scale-95"
       style={{
         width: size,
         height: size,
-        borderRadius: 9,
-        background: `linear-gradient(160deg, rgba(${item.glow},0.22) 0%, rgba(${item.glow},0.08) 100%)`,
-        border: `1px solid rgba(${item.glow},${lit ? 0.55 : 0.28})`,
+        borderRadius: 10,
+        background: `linear-gradient(160deg, rgba(${item.glow},0.24) 0%, rgba(${item.glow},0.08) 100%)`,
+        border: `1px solid rgba(${item.glow},${lit ? 0.6 : 0.3})`,
         boxShadow: lit
-          ? `inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 12px rgba(${item.glow},0.18), 0 4px 14px rgba(${item.glow},0.35), 0 0 0 1px rgba(${item.glow},0.22), 0 0 18px -4px rgba(${item.glow},0.5)`
-          : `inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
+          ? `inset 0 1px 0 rgba(255,255,255,0.20), inset 0 0 14px rgba(${item.glow},0.20), 0 4px 16px rgba(${item.glow},0.4), 0 0 0 1px rgba(${item.glow},0.25), 0 0 20px -4px rgba(${item.glow},0.55)`
+          : `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
         color: `rgb(${item.glow})`,
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
       }}
     >
       <span
-        className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[8px]"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.22), transparent)' }}
+        className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[9px]"
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.24), transparent)' }}
       />
       <item.icon
         className="relative"
         style={{
-          width: size * 0.5,
-          height: size * 0.5,
-          color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
-          filter: lit ? `drop-shadow(0 0 6px rgba(${item.glow},0.8))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+          width: size * 0.6,
+          height: size * 0.6,
+          color: lit ? '#fff' : `rgba(${item.glow},0.95)`,
+          filter: lit ? `drop-shadow(0 0 6px rgba(${item.glow},0.85))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
         }}
       />
     </span>
@@ -93,7 +93,6 @@ export default function ContentSidebar() {
   const navigate = useNavigate();
   const { switchTab } = useTabHistory();
   const expanded = useRailExpanded();
-  const [pinned, setPinned] = useState(false);
   const [hoveredKey, setHoveredKey] = useState(null);
 
   const isActive = (item) =>
@@ -130,7 +129,7 @@ export default function ContentSidebar() {
             }
           }}
           onMouseEnter={() => setHoveredKey(item.key)}
-          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-10' : 'justify-center w-10 h-10 mx-auto'} rounded-xl transition-all duration-300`}
+          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-9' : 'justify-center w-9 h-9 mx-auto'} rounded-xl transition-all duration-300`}
           style={
             expanded
               ? {
@@ -186,7 +185,7 @@ export default function ContentSidebar() {
                       : `inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={22} />
+                  <NavTile item={child} active={childActive} lit={childActive} size={24} />
                   <span
                     className="text-[9px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
                     style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.88)' }}
@@ -211,13 +210,16 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
       <aside
-        className="relative flex flex-col h-full overflow-visible"
+        /* click anywhere on the rail opens it; leaving closes it immediately */
+        onClick={() => { if (!expanded) railVisibility.setExpanded(true); }}
+        onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
+        className="relative flex flex-col h-full overflow-visible cursor-pointer"
         style={{
           width,
-          paddingTop: 14,
+          paddingTop: 12,
           paddingBottom: 12,
-          paddingLeft: 8,
-          paddingRight: 8,
+          paddingLeft: 6,
+          paddingRight: 6,
           gap: 5,
           background: 'transparent',
           borderRight: 'none',
@@ -228,23 +230,6 @@ export default function ContentSidebar() {
             `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1)`,
         }}
       >
-        {/* Pin toggle — click to expand/collapse the rail (no auto-open) */}
-        <button
-          onClick={() => {
-            const next = !pinned;
-            setPinned(next);
-            railVisibility.setExpanded(next);
-          }}
-          title={pinned ? 'Collapse' : 'Expand'}
-          className="group relative flex items-center justify-center w-9 h-9 rounded-lg mx-auto mb-1 text-white/55 hover:text-white transition-all duration-200"
-          style={{
-            background: pinned ? 'rgba(var(--panel-accent-rgb),0.14)' : 'rgba(255,255,255,0.03)',
-            border: `1px solid ${pinned ? 'rgba(var(--panel-accent-rgb),0.32)' : 'rgba(255,255,255,0.06)'}`,
-          }}
-        >
-          {pinned ? <ChevronsLeft className="w-3.5 h-3.5 shrink-0" /> : <ChevronsRight className="w-3.5 h-3.5 shrink-0" />}
-        </button>
-
         {/* Scrollable nav list */}
         <div className="flex-1 overflow-y-auto thin-scroll space-y-1" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
