@@ -2,13 +2,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import {
-  Home, Truck, BarChart3, Users, Bot,
+  Home, Truck, BarChart3, Users, Bot, ChevronsRight, ChevronsLeft,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
-  ChevronRight, X,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
-import { railVisibility } from '@/lib/railVisibility';
+import { useRailVisible, useRailExpanded, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
@@ -28,10 +27,10 @@ const navItems = [
     key: 'reports', icon: BarChart3, label: 'Reports',
     from: '#a855f7', to: '#6d28d9', glow: '168,85,247', paths: ['/reports'],
     children: [
-      { key: 'daily_report', label: 'Daily Report', path: '/reports/daily', icon: ClipboardList, from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
-      { key: 'profit_loss', label: 'Profit & Loss', path: '/reports/pnl', icon: TrendingUp, from: '#8b5cf6', to: '#5b21b6', glow: '139,92,246' },
-      { key: 'soa', label: 'Statement of Account', path: '/reports/soa', icon: FileText, from: '#f97316', to: '#9a3412', glow: '249,115,22' },
-      { key: 'bank_reconciliation', label: 'Bank Reconciliation', path: '/reports/bank-reconciliation', icon: Landmark, from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' },
+      { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
+      { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, from: '#8b5cf6', to: '#5b21b6', glow: '139,92,246' },
+      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, from: '#f97316', to: '#9a3412', glow: '249,115,22' },
+      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' },
     ],
   },
   {
@@ -49,8 +48,9 @@ const navItems = [
   },
 ];
 
-const RAIL_W = 64;
-const FLYOUT_W = 248;
+const COLLAPSED_W = 64;
+const EXPANDED_W = 244;
+const VANISH_MS = 15000;
 
 /* ── Lightning glass tile — small, refined, electric animated edge ── */
 function NavTile({ item, active, lit, size = 34 }) {
@@ -89,59 +89,20 @@ function NavTile({ item, active, lit, size = 34 }) {
   );
 }
 
-/* ── Hover tooltip — small glass chip that appears to the right of an icon ── */
-function IconTooltip({ label, glow }) {
-  return (
-    <span
-      className="pointer-events-none absolute left-[52px] top-1/2 -translate-y-1/2 z-[60] whitespace-nowrap px-2.5 py-1 rounded-lg text-[11px] font-mono tracking-[0.08em] uppercase font-semibold"
-      style={{
-        color: '#fff',
-        background: 'linear-gradient(165deg, rgba(30,30,40,0.92), rgba(18,18,28,0.92))',
-        border: `1px solid rgba(${glow},0.35)`,
-        boxShadow: `0 8px 24px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${glow},0.5), inset 0 1px 0 rgba(255,255,255,0.08)`,
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        textShadow: `0 0 8px rgba(${glow},0.6)`,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
 export default function ContentSidebar() {
   const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const { switchTab } = useTabHistory();
-  const [openSection, setOpenSection] = useState(null); // which parent's flyout is open
+  const panelVisible = useRailVisible();
+  const expanded = useRailExpanded();
+  const [pinned, setPinned] = useState(false);
   const [hoveredKey, setHoveredKey] = useState(null);
-  const railRef = useRef(null);
-
-  /* Rail is always visible — no auto-vanish */
-  useEffect(() => {
-    railVisibility.set(true);
-    railVisibility.setExpanded(false);
-  }, []);
-
-  /* Close flyout on Escape */
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') setOpenSection(null); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  /* Close flyout on click outside the rail */
-  useEffect(() => {
-    const onClick = (e) => {
-      if (railRef.current && !railRef.current.contains(e.target)) setOpenSection(null);
-    };
-    window.addEventListener('mousedown', onClick);
-    return () => window.removeEventListener('mousedown', onClick);
-  }, []);
-
-  /* Close flyout when route changes */
-  useEffect(() => { setOpenSection(null); }, [location.pathname]);
+  const vanishTimer = useRef(null);
+  const panelVisibleRef = useRef(panelVisible);
+  panelVisibleRef.current = panelVisible;
+  const pinnedRef = useRef(pinned);
+  pinnedRef.current = pinned;
 
   const isActive = (item) =>
     (item.paths || []).some((p) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)));
@@ -149,155 +110,126 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  const handleItemClick = (item) => {
-    const hasChildren = !!item.children?.length;
-    if (hasChildren) {
-      // toggle flyout; if this section is already open, close it
-      setOpenSection((prev) => (prev === item.key ? null : item.key));
-    } else {
-      switchTab(item.key);
-      setOpenSection(null);
-    }
+  /* ── reveal: expand the rail (labels + sub-routes) and dim the page ── */
+  const revealPanel = () => {
+    clearTimeout(vanishTimer.current);
+    railVisibility.set(true);
+    if (!pinnedRef.current) railVisibility.setExpanded(true);
   };
 
-  const openItem = navItems.find((i) => i.key === openSection && i.children?.length);
+  /* ── leave: collapse everything immediately (unless pinned) ── */
+  const scheduleVanish = () => {
+    clearTimeout(vanishTimer.current);
+    setHoveredKey(null);
+    if (pinnedRef.current) return; /* only an explicit pin holds the rail open */
+    railVisibility.setExpanded(false);
+    railVisibility.set(false); /* vanish immediately — no idle timer */
+  };
 
-  return (
-    <div ref={railRef} className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
-      {/* ── Persistent icon rail ── */}
-      <aside
-        className="relative flex flex-col h-full"
-        style={{
-          width: RAIL_W,
-          paddingTop: 16,
-          paddingBottom: 14,
-          paddingLeft: 8,
-          paddingRight: 8,
-          gap: 6,
-          background: 'transparent',
-        }}
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!panelVisibleRef.current && e.clientX < 18) revealPanel();
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      clearTimeout(vanishTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const width = expanded ? EXPANDED_W : COLLAPSED_W;
+
+  /* ── Main nav button ── */
+  const renderItem = (item) => {
+    const active = isActive(item);
+    const label = t(item.key) || item.label;
+    const hasChildren = !!item.children?.length;
+    const showChildren = expanded && hasChildren && hoveredKey === item.key;
+    /* when one section is hovered open, every other button fades to very low light */
+    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
+    const lit = active || hoveredKey === item.key;
+
+    return (
+      <div
+        key={item.key}
+        className="space-y-1 transition-opacity duration-300"
+        style={{ opacity: dimmed ? 0.12 : 1 }}
       >
-        {/* Scrollable icon list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-2 flex flex-col items-center">
-          {navItems.map((item) => {
-            const active = isActive(item);
-            const lit = active || hoveredKey === item.key || openSection === item.key;
-            const hasChildren = !!item.children?.length;
-            const label = t(item.key) || item.label;
-            return (
-              <div
-                key={item.key}
-                className="relative"
-                onMouseEnter={() => setHoveredKey(item.key)}
-                onMouseLeave={() => setHoveredKey(null)}
-              >
-                <button
-                  onClick={() => handleItemClick(item)}
-                  aria-label={label}
-                  className="group relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-300"
-                  style={{ background: 'transparent', border: 'none' }}
-                >
-                  <NavTile item={item} active={active} lit={lit} />
-                  {/* active indicator bar */}
-                  {active && (
-                    <span
-                      className="absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full -left-[6px]"
-                      style={{ background: item.from, boxShadow: `0 0 10px rgba(${item.glow},0.9)` }}
-                    />
-                  )}
-                  {/* expand cue chevron for parents */}
-                  {hasChildren && openSection === item.key && (
-                    <span
-                      className="absolute -right-[2px] -bottom-[2px] w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                      style={{ background: `rgb(${item.glow})`, boxShadow: `0 0 8px rgba(${item.glow},0.8)` }}
-                    >
-                      <ChevronRight className="w-2 h-2 text-white" />
-                    </span>
-                  )}
-                </button>
-                {/* tooltip — only when flyout is NOT open for this item */}
-                {hoveredKey === item.key && openSection !== item.key && (
-                  <IconTooltip label={label} glow={item.glow} />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Quick-tools fan launcher — pinned to the bottom */}
-        <div className="pt-3 flex justify-center">
-          <QuickFanMenu />
-        </div>
-      </aside>
-
-      {/* ── Flyout panel — opens to the right of the rail for sub-routes ── */}
-      {openItem && (
-        <div
-          className="absolute top-0 h-full flex flex-col"
-          style={{
-            left: RAIL_W,
-            width: FLYOUT_W,
-            paddingTop: 16,
-            paddingBottom: 14,
-            paddingLeft: 10,
-            paddingRight: 10,
-            gap: 8,
-            background: 'linear-gradient(165deg, rgba(28,28,38,0.82) 0%, rgba(16,16,24,0.90) 100%)',
-            borderLeft: `1px solid rgba(${openItem.glow},0.18)`,
-            borderRight: `1px solid rgba(255,255,255,0.06)`,
-            boxShadow: `0 0 0 1px rgba(${openItem.glow},0.08), 0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)`,
-            backdropFilter: 'blur(28px) saturate(1.3)',
-            WebkitBackdropFilter: 'blur(28px) saturate(1.3)',
-            animation: 'slide-in-right 0.22s cubic-bezier(0.16,1,0.3,1) both',
-            zIndex: 54,
+        <button
+          onClick={() => {
+            /* parent buttons navigate to their first sub-route; leaf buttons navigate directly */
+            if (hasChildren) {
+              navigate(item.children[0].path);
+            } else {
+              switchTab(item.key);
+            }
+            if (!pinnedRef.current) {
+              railVisibility.setExpanded(false);
+              railVisibility.set(false);
+            }
           }}
+          onMouseEnter={() => setHoveredKey(item.key)}
+          className={`group relative flex items-center ${expanded ? 'gap-2.5 w-full px-2 h-11' : 'justify-center w-11 h-11 mx-auto'} rounded-2xl transition-all duration-300`}
+          style={
+            expanded
+              ? {
+                  background: active
+                    ? `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.10))`
+                    : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
+                  border: `1px solid ${active ? `rgba(${item.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
+                  boxShadow: active
+                    ? `0 0 34px -4px rgba(${item.glow},0.6), 0 0 0 1px rgba(${item.glow},0.3), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 0 28px rgba(${item.glow},0.12)`
+                    : `0 0 18px -8px rgba(${item.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                }
+              : {}
+          }
         >
-          {/* Section header */}
-          <div className="flex items-center gap-2.5 px-1 pb-2 mb-1" style={{ borderBottom: `1px solid rgba(${openItem.glow},0.15)` }}>
-            <NavTile item={openItem} active={true} lit={true} size={30} />
-            <span
-              className="text-[12px] font-mono font-bold tracking-[0.12em] uppercase whitespace-nowrap"
-              style={{ color: '#fff', textShadow: `0 0 12px rgba(${openItem.glow},0.8)` }}
-            >
-              {t(openItem.key) || openItem.label}
-            </span>
-            <button
-              onClick={() => setOpenSection(null)}
-              className="ml-auto w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white transition-colors"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
-              aria-label="Close"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <NavTile item={item} active={active} lit={lit} />
 
-          {/* Sub-route list */}
-          <div className="flex-1 overflow-y-auto thin-scroll space-y-1">
-            {openItem.children.map((child) => {
+          {expanded && (
+            <span
+              className={`text-[11px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)', textShadow: active ? `0 0 12px rgba(${item.glow},0.85), 0 0 24px rgba(${item.glow},0.4)` : 'none' }}
+            >
+              {label}
+            </span>
+          )}
+
+          {/* active indicator bar */}
+          {active && (
+            <span
+              className={`absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full ${expanded ? 'left-0' : '-left-[6px]'}`}
+              style={{ background: item.from, boxShadow: `0 0 10px rgba(${item.glow},0.9)` }}
+            />
+          )}
+        </button>
+
+        {/* ── Sub-routes — same lightning-glass tile style, smaller ── */}
+        {showChildren && (
+          <div className="space-y-0.5 pl-3 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
+            {item.children.map((child) => {
               const childActive = isChildActive(child);
               const childLabel = child.label || t(child.key);
               return (
                 <button
                   key={child.key}
-                  onClick={() => { navigate(child.path); setOpenSection(null); }}
-                  className="group relative flex items-center gap-2.5 w-full pl-2.5 pr-3 h-11 rounded-xl transition-all duration-300 hover:translate-x-1"
+                  onClick={() => navigate(child.path)}
+                  className="group relative flex items-center gap-2 w-full pl-2 pr-2.5 h-9 rounded-xl transition-all duration-300 hover:translate-x-1"
                   style={{
                     background: childActive
-                      ? `linear-gradient(135deg, rgba(${child.glow},0.22), rgba(${child.glow},0.08))`
-                      : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.45)` : 'rgba(255,255,255,0.07)'}`,
+                      ? `linear-gradient(135deg, rgba(${child.glow},0.28), rgba(${child.glow},0.10))`
+                      : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
                     boxShadow: childActive
-                      ? `0 0 18px -2px rgba(${child.glow},0.6), 0 0 36px -6px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.10)`
-                      : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                      ? `0 0 26px -4px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${child.glow},0.08)`
+                      : `0 0 18px -8px rgba(${child.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={28} />
+                  <NavTile item={child} active={childActive} lit={childActive} size={26} />
                   <span
-                    className="text-[11px] font-mono font-medium tracking-[0.08em] uppercase whitespace-nowrap"
-                    style={{
-                      color: childActive ? '#fff' : 'rgba(255,255,255,0.88)',
-                      textShadow: childActive ? `0 0 10px rgba(${child.glow},0.8)` : 'none',
-                    }}
+                    className="text-[10px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.92)' }}
                   >
                     {childLabel}
                   </span>
@@ -311,8 +243,71 @@ export default function ContentSidebar() {
               );
             })}
           </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
+      {/* invisible edge strip — always hoverable so a vanished rail can be recalled */}
+      <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={revealPanel} />
+
+      <aside
+        onMouseEnter={revealPanel}
+        onMouseLeave={scheduleVanish}
+        className="relative flex flex-col h-full overflow-visible"
+        style={{
+          width,
+          paddingTop: 16,
+          paddingBottom: 14,
+          paddingLeft: 8,
+          paddingRight: 8,
+          gap: 6,
+          background: 'transparent',
+          borderRight: 'none',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+          boxShadow: 'none',
+          opacity: panelVisible ? 1 : 0,
+          transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
+          pointerEvents: panelVisible ? 'auto' : 'none',
+          transition:
+            `width ${expanded ? '.45s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity .55s cubic-bezier(0.16,1,0.3,1), transform .55s cubic-bezier(0.16,1,0.3,1), background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease`,
+        }}
+      >
+        {/* Pin toggle — keeps the rail expanded */}
+        <button
+          onClick={() => {
+            const next = !pinned;
+            setPinned(next);
+            if (next) {
+              railVisibility.setExpanded(true);
+              railVisibility.set(true);
+            } else {
+              railVisibility.setExpanded(false);
+            }
+          }}
+          title={pinned ? 'Unpin — collapse on leave' : 'Pin open — keep expanded'}
+          className="group relative flex items-center justify-center w-10 h-10 rounded-xl mx-auto mb-1 text-white/60 hover:text-white transition-all duration-200"
+          style={{
+            background: pinned ? 'rgba(var(--panel-accent-rgb),0.15)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${pinned ? 'rgba(var(--panel-accent-rgb),0.35)' : 'rgba(255,255,255,0.07)'}`,
+          }}
+        >
+          {pinned ? <ChevronsLeft className="w-4 h-4 shrink-0" /> : <ChevronsRight className="w-4 h-4 shrink-0" />}
+        </button>
+
+        {/* Scrollable nav list */}
+        <div className="flex-1 overflow-y-auto thin-scroll space-y-1.5" onMouseLeave={() => setHoveredKey(null)}>
+          {navItems.map(renderItem)}
         </div>
-      )}
+
+        {/* Quick-tools fan launcher — pinned to the bottom, unchanged */}
+        <div className="pt-3">
+          <QuickFanMenu />
+        </div>
+      </aside>
     </div>
   );
 }

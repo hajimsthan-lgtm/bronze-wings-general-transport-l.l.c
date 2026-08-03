@@ -7,12 +7,14 @@ import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
 import ContentSidebar from '@/components/layout/ContentSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useRailExpanded } from '@/lib/railVisibility';
 
 export default function AppLayout() {
   const location = useLocation();
   const showHeader = true;
   const isMobile = useIsMobile();
   const railWidth = 64;
+  const railExpanded = useRailExpanded();
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
@@ -21,6 +23,14 @@ export default function AppLayout() {
           cards, tables and text stay crisp and high-contrast.
           ═══════════════════════════════════════════════════════ */}
       {/* Background is a single clean solid — no floating layers */}
+
+      {/* ── Page dim overlay — activates when the nav rail is expanded (hover automation) ── */}
+      {railExpanded && (
+        <div
+          className="hidden md:block fixed inset-0 z-[40] pointer-events-none transition-opacity duration-300"
+          style={{ background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(2px)' }}
+        />
+      )}
 
       {/* ═══════════════════════════════════════════════════════
           NAVIGATION — overlays content on desktop so scrolling data
