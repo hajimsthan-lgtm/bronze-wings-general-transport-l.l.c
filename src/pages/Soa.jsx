@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { safeAll } from '@/lib/safeRequest';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -34,14 +35,14 @@ export default function Soa() {
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Invoice.list('-issue_date', 500),
-      base44.entities.Client.list(),
-      base44.entities.Trip.list('-trip_date', 500),
-      base44.entities.Expense.list('-date', 500),
-      base44.entities.FuelRecord.list('-date', 500),
+    safeAll([
+      () => base44.entities.Invoice.list('-issue_date', 500),
+      () => base44.entities.Client.list(),
+      () => base44.entities.Trip.list('-trip_date', 500),
+      () => base44.entities.Expense.list('-date', 500),
+      () => base44.entities.FuelRecord.list('-date', 500),
     ]).then(([inv, cl, tr, ex, fu]) => {
-      setInvoices(inv); setClients(cl); setTrips(tr); setExpenses(ex); setFuelRecords(fu);
+      setInvoices(inv || []); setClients(cl || []); setTrips(tr || []); setExpenses(ex || []); setFuelRecords(fu || []);
     }).finally(() => setLoading(false));
   }, []);
 
