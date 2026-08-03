@@ -52,7 +52,37 @@ const COLLAPSED_W = 60;
 const EXPANDED_W = 228;
 
 /* ── Compact glass tile — small frame, big icon ── */
-function NavTile({ item, active, lit, size = 38 }) {
+function NavTile({ item, active, lit, size = 38, variant = 'glass' }) {
+  if (variant === 'clay') {
+    // clean claymorphism — no glow blob, no shining highlight
+    return (
+      <span
+        className="relative flex items-center justify-center shrink-0"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 9,
+          background: lit
+            ? `linear-gradient(160deg, rgba(${item.glow},0.22), rgba(${item.glow},0.08))`
+            : 'linear-gradient(160deg, hsl(var(--clay-bg)) 0%, hsl(228 22% 13%) 100%)',
+          border: `1px solid ${lit ? `rgba(${item.glow},0.4)` : 'hsl(var(--clay-border))'}`,
+          boxShadow: lit
+            ? `inset 2px 2px 5px hsl(var(--clay-shadow-dark)), inset -2px -2px 5px hsl(var(--clay-shadow-light))`
+            : `3px 3px 6px hsl(var(--clay-shadow-dark)), -3px -3px 6px hsl(var(--clay-shadow-light))`,
+          color: `rgb(${item.glow})`,
+        }}
+      >
+        <item.icon
+          style={{
+            width: size * 0.6,
+            height: size * 0.6,
+            color: lit ? '#fff' : `rgba(${item.glow},0.9)`,
+          }}
+        />
+      </span>
+    );
+  }
+  // clean glassmorphism for main buttons — toned-down glow
   return (
     <span
       className="relative flex items-center justify-center shrink-0"
@@ -60,11 +90,11 @@ function NavTile({ item, active, lit, size = 38 }) {
         width: size,
         height: size,
         borderRadius: 10,
-        background: `linear-gradient(160deg, rgba(${item.glow},0.24) 0%, rgba(${item.glow},0.08) 100%)`,
-        border: `1px solid rgba(${item.glow},${lit ? 0.6 : 0.3})`,
+        background: `linear-gradient(160deg, rgba(${item.glow},0.20) 0%, rgba(${item.glow},0.06) 100%)`,
+        border: `1px solid rgba(${item.glow},${lit ? 0.45 : 0.25})`,
         boxShadow: lit
-          ? `inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 18px rgba(${item.glow},0.28), 0 6px 22px rgba(${item.glow},0.5), 0 0 0 1px rgba(${item.glow},0.35), 0 0 28px -2px rgba(${item.glow},0.7), 0 0 48px -4px rgba(${item.glow},0.4)`
-          : `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
+          ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 14px rgba(${item.glow},0.28), 0 0 0 1px rgba(${item.glow},0.2)`
+          : `inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.3)`,
         color: `rgb(${item.glow})`,
         backdropFilter: 'blur(6px)',
         WebkitBackdropFilter: 'blur(6px)',
@@ -72,7 +102,7 @@ function NavTile({ item, active, lit, size = 38 }) {
     >
       <span
         className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[9px]"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.24), transparent)' }}
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.14), transparent)' }}
       />
       <item.icon
         className="relative"
@@ -80,7 +110,7 @@ function NavTile({ item, active, lit, size = 38 }) {
           width: size * 0.62,
           height: size * 0.62,
           color: lit ? '#fff' : `rgba(${item.glow},0.95)`,
-          filter: lit ? `drop-shadow(0 0 6px rgba(${item.glow},0.85))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+          filter: lit ? `drop-shadow(0 0 4px rgba(${item.glow},0.5))` : 'none',
         }}
       />
     </span>
@@ -198,11 +228,11 @@ export default function ContentSidebar() {
                       : 'linear-gradient(160deg, hsl(var(--clay-bg)) 0%, hsl(228 22% 12%) 100%)',
                     border: `1px solid ${childActive ? `rgba(${child.glow},0.45)` : 'hsl(var(--clay-border))'}`,
                     boxShadow: childActive
-                      ? `inset 3px 3px 7px hsl(var(--clay-shadow-dark)), inset -3px -3px 7px hsl(var(--clay-shadow-light)), 0 0 0 1px rgba(${child.glow},0.4), 0 0 12px rgba(${child.glow},0.25)`
+                      ? `inset 3px 3px 7px hsl(var(--clay-shadow-dark)), inset -3px -3px 7px hsl(var(--clay-shadow-light)), 0 0 0 1px rgba(${child.glow},0.3)`
                       : `4px 4px 9px hsl(var(--clay-shadow-dark)), -4px -4px 9px hsl(var(--clay-shadow-light)), inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={28} />
+                  <NavTile item={child} active={childActive} lit={childActive} size={28} variant="clay" />
                   <span
                     className="text-[9px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
                     style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.88)' }}
