@@ -45,11 +45,6 @@ export const QUICK_APPS_NAV = [
   { key: 'nav-dashboard', label: 'Dashboard', hex: '#6366f1', icon: LayoutDashboard, to: '/' },
   { key: 'nav-trips', label: 'Trips', hex: '#3b82f6', icon: Route, to: '/trips' },
   { key: 'nav-expenses', label: 'Expenses', hex: '#f59e0b', icon: Receipt, to: '/expenses' },
-  { key: 'nav-pnl', label: 'P&L', hex: '#8b5cf6', icon: TrendingUp, to: '/reports/pnl' },
-  { key: 'nav-soa', label: 'SOA', hex: '#f97316', icon: FileText, to: '/reports/soa' },
   { key: 'nav-vehicles', label: 'Vehicles', hex: '#6366f1', icon: Truck, to: '/admin/vehicles' },
-  { key: 'nav-drivers', label: 'Drivers', hex: '#10b981', icon: Users, to: '/admin/drivers' },
   { key: 'nav-clients', label: 'Clients', hex: '#f43f5e', icon: Building2, to: '/admin/clients' },
-  { key: 'nav-documents', label: 'Documents', hex: '#06b6d4', icon: FolderOpen, to: '/admin/documents' },
-  { key: 'nav-agents', label: 'AI Agents', hex: '#22c55e', icon: Bot, to: '/agents' },
 ];

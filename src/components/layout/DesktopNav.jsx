@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
-import TopQuickIcons from '@/components/layout/TopQuickIcons';
+
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -66,7 +66,6 @@ export default function DesktopNav() {
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
-          <TopQuickIcons />
           <AlertBell />
           <Link
             to="/settings"

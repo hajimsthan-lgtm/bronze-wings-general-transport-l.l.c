@@ -6,7 +6,7 @@ import {
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-import QuickFanMenu from '@/components/layout/QuickFanMenu';
+
 import { useRailVisible, useRailDimming, useRailExpanded, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
@@ -287,10 +287,6 @@ export default function ContentSidebar() {
           {navItems.map(renderItem)}
         </div>
 
-        {/* Quick-tools fan launcher — pinned to the bottom, unchanged */}
-        <div className="pt-2">
-          <QuickFanMenu />
-        </div>
       </aside>
     </div>
   );

@@ -12,8 +12,8 @@ const CYCLE = ['crimson', 'navy', 'emerald', 'amethyst'];
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    if (typeof window === 'undefined') return 'amethyst';
-    return localStorage.getItem('bw-theme-v6') || 'amethyst';
+    if (typeof window === 'undefined') return 'crimson';
+    return localStorage.getItem('bw-theme-v7') || 'crimson';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
@@ -22,7 +22,7 @@ export function ThemeProvider({ children }) {
     // remove all theme classes, then add the active one (if any)
     Object.values(THEME_CLASSES).forEach((c) => root.classList.remove(c));
     if (THEME_CLASSES[theme]) root.classList.add(THEME_CLASSES[theme]);
-    localStorage.setItem('bw-theme-v6', theme);
+    localStorage.setItem('bw-theme-v7', theme);
   }, [theme]);
 
   useEffect(() => {

@@ -6,75 +6,75 @@
 
 @layer base {
   :root {
-    /* ===== Charcoal Crimson — corporate dark ===== */
-    --font-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif;
-    --font-body: 'Roboto', ui-sans-serif, system-ui, sans-serif;
-    --font-heading: 'Bebas Neue', 'Roboto', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Bebas Neue', 'Roboto', ui-sans-serif, system-ui, sans-serif;
+    /* ===== Deep Cyan Glass — dark blue + cyan ===== */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 0 0% 10%;              /* #1A1A1A */
-    --background-elevated: 0 0% 18%;     /* #2D2D2D */
-    --card: 0 0% 18%;                   /* #2D2D2D */
-    --card-foreground: 0 0% 92%;        /* #EAEAEA */
-    --foreground: 0 0% 92%;             /* #EAEAEA */
-    --muted: 0 0% 16%;
-    --muted-foreground: 0 0% 62%;
-    --popover: 0 0% 18%;
-    --popover-foreground: 0 0% 92%;
-    --primary: 0 69% 50%;               /* rgb(var(--panel-accent-rgb)) */
-    --primary-light: 0 75% 62%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 18%;             /* #2D2D2D */
-    --secondary-foreground: 0 0% 92%;
-    --accent: 31 100% 48%;             /* rgb(var(--panel-accent2-rgb)) orange */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 69% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --neon: 31 100% 48%;                /* orange */
-    --magenta: 31 100% 48%;
-    --success: 142 60% 45%;
-    --success-light: 142 70% 55%;
-    --warning: 31 100% 48%;             /* rgb(var(--panel-accent2-rgb)) */
-    --danger: 0 69% 50%;
-    --border: 0 0% 28%;
-    --input: 0 0% 18%;
-    --ring: 0 69% 50%;
-    --panel-accent-rgb: 214, 40, 40;
-    --panel-accent2-rgb: 247, 127, 0;
-    --surf-1-rgb: 45, 45, 45;
-    --surf-2-rgb: 26, 26, 26;
+    --background: 216 60% 5%;              /* #050b14 */
+    --background-elevated: 217 46% 10%;    /* #0e1726 */
+    --card: 219 42% 15%;                   /* #162136 */
+    --card-foreground: 0 0% 100%;
+    --foreground: 0 0% 100%;
+    --muted: 217 30% 14%;
+    --muted-foreground: 212 17% 60%;       /* #8898aa */
+    --popover: 219 42% 15%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 183 100% 50%;               /* #00f2ff cyan */
+    --primary-light: 183 100% 60%;
+    --primary-foreground: 216 60% 5%;
+    --secondary: 217 38% 18%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 212 72% 59%;                 /* #4a90e2 electric blue */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --neon: 183 100% 50%;
+    --magenta: 183 100% 50%;
+    --success: 158 99% 36%;
+    --success-light: 158 99% 46%;
+    --warning: 38 92% 50%;
+    --danger: 0 72% 51%;
+    --border: 217 30% 22%;
+    --input: 217 46% 10%;
+    --ring: 183 100% 50%;
+    --panel-accent-rgb: 0, 242, 255;      /* #00f2ff */
+    --panel-accent2-rgb: 74, 144, 226;    /* #4a90e2 */
+    --surf-1-rgb: 22, 33, 54;             /* #162136 */
+    --surf-2-rgb: 5, 11, 20;              /* #050b14 */
     --radius: 1rem;
-    --chart-1: 0 69% 50%;               /* rgb(var(--panel-accent-rgb)) */
-    --chart-2: 31 100% 48%;             /* rgb(var(--panel-accent2-rgb)) */
-    --chart-3: 0 0% 92%;                /* #EAEAEA bars */
-    --chart-4: 0 75% 62%;
-    --chart-5: 31 100% 48%;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 92%;
-    --sidebar-primary: 0 69% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 16%;
-    --sidebar-accent-foreground: 0 0% 92%;
-    --sidebar-border: 0 0% 22%;
-    --sidebar-ring: 0 69% 50%;
-    --clay-bg: 0 0% 18%;                /* #2D2D2D */
-    --clay-border: 0 0% 26%;
-    --clay-shadow-dark: 0 0% 4%;
-    --clay-shadow-light: 0 0% 24%;
+    --chart-1: 183 100% 50%;
+    --chart-2: 212 72% 59%;
+    --chart-3: 212 17% 60%;
+    --chart-4: 183 100% 60%;
+    --chart-5: 217 38% 60%;
+    --sidebar-background: 216 60% 4%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 183 100% 50%;
+    --sidebar-primary-foreground: 216 60% 5%;
+    --sidebar-accent: 217 38% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 217 30% 18%;
+    --sidebar-ring: 183 100% 50%;
+    --clay-bg: 219 42% 15%;
+    --clay-border: 217 30% 24%;
+    --clay-shadow-dark: 216 60% 3%;
+    --clay-shadow-light: 219 42% 22%;
 
     /* Theme-adaptive shell vars */
-    --app-bg: #1A1A1A;
-    --panel-bg: linear-gradient(180deg, rgba(var(--surf-1-rgb),0.70) 0%, rgba(var(--surf-2-rgb),0.88) 50%, rgba(var(--surf-2-rgb),0.92) 100%);
-    --panel-border-color: rgba(var(--panel-accent-rgb),0.18);
-    --panel-inner-highlight: inset 0 1px 0 rgba(234,234,234,0.06);
+    --app-bg: #050b14;
+    --panel-bg: linear-gradient(180deg, rgba(22,33,54,0.75) 0%, rgba(5,11,20,0.88) 50%, rgba(5,11,20,0.92) 100%);
+    --panel-border-color: rgba(0,242,255,0.18);
+    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
     --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
-    --panel-blur: blur(40px) saturate(1.2);
-    --header-tint-1: rgba(var(--surf-2-rgb),0.12);
-    --header-tint-2: rgba(var(--surf-2-rgb),0.05);
-    --nav-inactive: rgba(160,160,160,0.55);
-    --surf-1: rgba(var(--surf-1-rgb),0.6);
-    --surf-2: rgba(var(--surf-2-rgb),0.85);
+    --panel-blur: blur(12px) saturate(1.2);
+    --header-tint-1: rgba(5,11,20,0.12);
+    --header-tint-2: rgba(5,11,20,0.05);
+    --nav-inactive: rgba(136,152,170,0.55);
+    --surf-1: rgba(22,33,54,0.6);
+    --surf-2: rgba(5,11,20,0.85);
   }
 
   .theme-navy {
