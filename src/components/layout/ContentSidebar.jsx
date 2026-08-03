@@ -5,9 +5,9 @@ import {
   Home, Truck, BarChart3, Users, Bot,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
-import { useRailExpanded, railVisibility } from '@/lib/railVisibility';
+import { useRailVisible, useRailExpanded, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
@@ -48,11 +48,11 @@ const navItems = [
   },
 ];
 
-const COLLAPSED_W = 56;
+const COLLAPSED_W = 60;
 const EXPANDED_W = 228;
 
 /* ── Compact glass tile — small frame, big icon ── */
-function NavTile({ item, active, lit, size = 32 }) {
+function NavTile({ item, active, lit, size = 38 }) {
   return (
     <span
       className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-108 group-active:scale-95"
@@ -63,7 +63,7 @@ function NavTile({ item, active, lit, size = 32 }) {
         background: `linear-gradient(160deg, rgba(${item.glow},0.24) 0%, rgba(${item.glow},0.08) 100%)`,
         border: `1px solid rgba(${item.glow},${lit ? 0.6 : 0.3})`,
         boxShadow: lit
-          ? `inset 0 1px 0 rgba(255,255,255,0.20), inset 0 0 14px rgba(${item.glow},0.20), 0 4px 16px rgba(${item.glow},0.4), 0 0 0 1px rgba(${item.glow},0.25), 0 0 20px -4px rgba(${item.glow},0.55)`
+          ? `inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 18px rgba(${item.glow},0.28), 0 6px 22px rgba(${item.glow},0.5), 0 0 0 1px rgba(${item.glow},0.35), 0 0 28px -2px rgba(${item.glow},0.7), 0 0 48px -4px rgba(${item.glow},0.4)`
           : `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
         color: `rgb(${item.glow})`,
         backdropFilter: 'blur(6px)',
@@ -77,8 +77,8 @@ function NavTile({ item, active, lit, size = 32 }) {
       <item.icon
         className="relative"
         style={{
-          width: size * 0.6,
-          height: size * 0.6,
+          width: size * 0.62,
+          height: size * 0.62,
           color: lit ? '#fff' : `rgba(${item.glow},0.95)`,
           filter: lit ? `drop-shadow(0 0 6px rgba(${item.glow},0.85))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
         }}
@@ -93,13 +93,24 @@ export default function ContentSidebar() {
   const navigate = useNavigate();
   const { switchTab } = useTabHistory();
   const expanded = useRailExpanded();
+  const panelVisible = useRailVisible();
   const [hoveredKey, setHoveredKey] = useState(null);
+  const vanishTimer = useRef(null);
+
+  /* reset the 10s idle vanish timer; any activity keeps the rail alive */
+  const poke = () => {
+    clearTimeout(vanishTimer.current);
+    railVisibility.set(true);
+    vanishTimer.current = setTimeout(() => railVisibility.set(false), 10000);
+  };
 
   const isActive = (item) =>
     (item.paths || []).some((p) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)));
 
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
+
+  useEffect(() => { poke(); return () => clearTimeout(vanishTimer.current); }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
@@ -129,7 +140,7 @@ export default function ContentSidebar() {
             }
           }}
           onMouseEnter={() => setHoveredKey(item.key)}
-          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-9' : 'justify-center w-9 h-9 mx-auto'} rounded-xl transition-all duration-300`}
+          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-10' : 'justify-center w-10 h-10 mx-auto'} rounded-xl transition-all duration-300`}
           style={
             expanded
               ? {
@@ -185,7 +196,7 @@ export default function ContentSidebar() {
                       : `inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={24} />
+                  <NavTile item={child} active={childActive} lit={childActive} size={28} />
                   <span
                     className="text-[9px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
                     style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.88)' }}
@@ -209,9 +220,12 @@ export default function ContentSidebar() {
 
   return (
     <div className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
+      {/* invisible edge strip — hover to recall a vanished rail */}
+      <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={poke} />
       <aside
         /* click anywhere on the rail opens it; leaving closes it immediately */
-        onClick={() => { if (!expanded) railVisibility.setExpanded(true); }}
+        onClick={() => { poke(); if (!expanded) railVisibility.setExpanded(true); }}
+        onMouseEnter={poke}
         onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
         className="relative flex flex-col h-full overflow-visible cursor-pointer"
         style={{
@@ -226,8 +240,10 @@ export default function ContentSidebar() {
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
+          opacity: panelVisible ? 1 : 0,
+          pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
-            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1)`,
+            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity 1.2s ease`,
         }}
       >
         {/* Scrollable nav list */}
