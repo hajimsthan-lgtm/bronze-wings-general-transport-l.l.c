@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
-import { useRailVisible, useRailExpanded, railVisibility } from '@/lib/railVisibility';
+import { useRailVisible, useRailDimming, useRailExpanded, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
@@ -94,13 +94,18 @@ export default function ContentSidebar() {
   const { switchTab } = useTabHistory();
   const expanded = useRailExpanded();
   const panelVisible = useRailVisible();
+  const panelDimming = useRailDimming();
   const [hoveredKey, setHoveredKey] = useState(null);
+  const dimTimer = useRef(null);
   const vanishTimer = useRef(null);
 
-  /* reset the 10s idle vanish timer; any activity keeps the rail alive */
+  /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
   const poke = () => {
+    clearTimeout(dimTimer.current);
     clearTimeout(vanishTimer.current);
     railVisibility.set(true);
+    railVisibility.setDimming(false);
+    dimTimer.current = setTimeout(() => railVisibility.setDimming(true), 5000);
     vanishTimer.current = setTimeout(() => railVisibility.set(false), 10000);
   };
 
@@ -110,7 +115,7 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  useEffect(() => { poke(); return () => clearTimeout(vanishTimer.current); }, []);
+  useEffect(() => { poke(); return () => { clearTimeout(dimTimer.current); clearTimeout(vanishTimer.current); }; }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
@@ -219,7 +224,7 @@ export default function ContentSidebar() {
   };
 
   return (
-    <div className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
+    <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
       {/* invisible edge strip — hover to recall a vanished rail */}
       <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={poke} />
       <aside
@@ -240,10 +245,10 @@ export default function ContentSidebar() {
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
-          opacity: panelVisible ? 1 : 0,
+          opacity: panelDimming ? 0 : 1,
           pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
-            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity 1.2s ease`,
+            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`,
         }}
       >
         {/* Scrollable nav list */}

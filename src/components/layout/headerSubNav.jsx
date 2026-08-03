@@ -82,22 +82,27 @@ export default function HeaderSubNav({ className = '' }) {
               e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
               e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
             }}
-            className={`group/sub relative flex items-center gap-2 h-11 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 ${isActive ? 'pl-1.5 pr-3' : 'px-1.5'}`}
+            className={`group/sub relative flex items-center gap-2 h-12 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 ${isActive ? 'pl-1.5 pr-3' : 'px-1.5'}`}
           >
             {/* duotone gradient tile */}
             <span
-              className="relative flex items-center justify-center w-9 h-9 rounded-[12px] transition-all duration-300"
+              className="relative flex items-center justify-center w-10 h-10 rounded-[12px] transition-all duration-300"
               style={{
-                background: `linear-gradient(150deg, ${st.from} 0%, ${st.to} 100%)`,
-                border: `1px solid rgba(${st.glow},0.55)`,
+                background: `linear-gradient(160deg, rgba(${st.glow},0.24) 0%, rgba(${st.glow},0.08) 100%)`,
+                border: `1px solid rgba(${st.glow},${isActive ? 0.6 : 0.3})`,
                 boxShadow: isActive
-                  ? `inset 0 1.5px 1px rgba(255,255,255,0.55), inset 0 -3px 5px rgba(0,0,0,0.32), 0 5px 12px rgba(${st.glow},0.26), 0 0 0 1px rgba(${st.glow},0.32)`
-                  : `inset 0 1.5px 1px rgba(255,255,255,0.40), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.36)`,
-                color: '#fff',
+                  ? `inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 18px rgba(${st.glow},0.28), 0 6px 22px rgba(${st.glow},0.5), 0 0 0 1px rgba(${st.glow},0.35), 0 0 28px -2px rgba(${st.glow},0.7), 0 0 48px -4px rgba(${st.glow},0.4)`
+                  : `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
+                color: `rgb(${st.glow})`,
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
               }}
             >
-              <span className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.42), transparent)' }} />
-              <Icon className="relative w-[16px] h-[16px]" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
+              <span className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.24), transparent)' }} />
+              <Icon className="relative w-5 h-5" style={{
+                color: isActive ? '#fff' : `rgba(${st.glow},0.95)`,
+                filter: isActive ? `drop-shadow(0 0 6px rgba(${st.glow},0.85))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+              }} />
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
                 <span className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover/sub:opacity-100 group-hover/sub:left-[150%] transition-all duration-700" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
               </span>
@@ -106,8 +111,12 @@ export default function HeaderSubNav({ className = '' }) {
             {/* active tab shows its label inline — always visible, user-friendly */}
             {isActive && (
               <span
-                className="text-[12px] font-semibold tracking-wide whitespace-nowrap"
-                style={{ color: `rgb(${st.glow})`, textShadow: `0 0 10px rgba(${st.glow},0.45)` }}
+                className="text-[12px] font-bold tracking-[0.08em] uppercase whitespace-nowrap"
+                style={{
+                  backgroundImage: `linear-gradient(100deg, #ffffff 0%, rgb(${st.glow}) 50%, #ffffff 100%)`,
+                  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  filter: `drop-shadow(0 0 6px rgba(${st.glow},0.55))`,
+                }}
               >
                 {label}
               </span>

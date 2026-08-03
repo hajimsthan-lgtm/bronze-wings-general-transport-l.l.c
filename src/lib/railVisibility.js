@@ -5,6 +5,7 @@ import { useSyncExternalStore } from 'react';
 // `expanded`  — whether the rail is widened to show glass labels + sub-routes
 // The top sub-nav reads `visible` so it vanishes / returns together with the rail.
 let visible = true;
+let dimming = false;
 let expanded = false;
 const listeners = new Set();
 
@@ -15,6 +16,13 @@ export const railVisibility = {
   set(v) {
     if (visible !== v) {
       visible = v;
+      notify();
+    }
+  },
+  isDimming: () => dimming,
+  setDimming(v) {
+    if (dimming !== v) {
+      dimming = v;
       notify();
     }
   },
@@ -33,6 +41,9 @@ export const railVisibility = {
 
 export function useRailVisible() {
   return useSyncExternalStore(railVisibility.subscribe, railVisibility.get, railVisibility.get);
+}
+export function useRailDimming() {
+  return useSyncExternalStore(railVisibility.subscribe, railVisibility.isDimming, railVisibility.isDimming);
 }
 
 export function useRailExpanded() {
