@@ -1736,3 +1736,84 @@
   }
   .lightning-btn:hover::after, .clay-btn:hover::after { left: 160%; }
 }
+
+/* ═══════════════════════════════════════════════════════
+    SMOOTH MOTION LAYER — global micro-interactions & pro feel
+    Applies across every page without touching business logic
+    ═══════════════════════════════════════════════════════ */
+@layer base {
+  /* Universal smooth transitions on interactive elements */
+  button, a, input, select, textarea, [role="button"], [role="tab"], summary {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.25s ease, border-color 0.25s ease,
+                box-shadow 0.3s ease, color 0.2s ease, opacity 0.25s ease, filter 0.25s ease;
+  }
+  /* Refined focus-visible ring */
+  button:focus-visible, a:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible, [role="button"]:focus-visible {
+    outline: 2px solid rgba(var(--panel-accent-rgb), 0.55);
+    outline-offset: 2px;
+    border-radius: 0.5rem;
+  }
+}
+
+@layer components {
+  /* Staggered entrance for card grids — fades up in sequence */
+  .entity-card, .kpi-card, .stat-tile, .detail-header-card {
+    animation: enter-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .entity-card:nth-child(1) { animation-delay: 0.02s; }
+  .entity-card:nth-child(2) { animation-delay: 0.06s; }
+  .entity-card:nth-child(3) { animation-delay: 0.10s; }
+  .entity-card:nth-child(4) { animation-delay: 0.14s; }
+  .entity-card:nth-child(5) { animation-delay: 0.18s; }
+  .entity-card:nth-child(6) { animation-delay: 0.22s; }
+  .entity-card:nth-child(7) { animation-delay: 0.26s; }
+  .entity-card:nth-child(8) { animation-delay: 0.30s; }
+  .entity-card:nth-child(n+9) { animation-delay: 0.34s; }
+
+  .kpi-card:nth-child(1), .stat-tile:nth-child(1) { animation-delay: 0.03s; }
+  .kpi-card:nth-child(2), .stat-tile:nth-child(2) { animation-delay: 0.08s; }
+  .kpi-card:nth-child(3), .stat-tile:nth-child(3) { animation-delay: 0.13s; }
+  .kpi-card:nth-child(4), .stat-tile:nth-child(4) { animation-delay: 0.18s; }
+  .kpi-card:nth-child(n+5), .stat-tile:nth-child(n+5) { animation-delay: 0.23s; }
+
+  /* Row cards slide in from the left in sequence */
+  .row-card {
+    animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .row-card:nth-child(1) { animation-delay: 0.02s; }
+  .row-card:nth-child(2) { animation-delay: 0.05s; }
+  .row-card:nth-child(3) { animation-delay: 0.08s; }
+  .row-card:nth-child(4) { animation-delay: 0.11s; }
+  .row-card:nth-child(5) { animation-delay: 0.14s; }
+  .row-card:nth-child(6) { animation-delay: 0.17s; }
+  .row-card:nth-child(7) { animation-delay: 0.20s; }
+  .row-card:nth-child(8) { animation-delay: 0.23s; }
+  .row-card:nth-child(n+9) { animation-delay: 0.26s; }
+
+  /* Pro button press feedback */
+  button:active, [role="button"]:active {
+    transform: scale(0.97);
+  }
+
+  /* Smooth tab transitions */
+  [role="tab"] {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Smooth popover/dialog entrances */
+  [data-state="open"].animate-fade-in,
+  [role="dialog"], [role="alertdialog"] {
+    animation: fade-in-up 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entity-card, .kpi-card, .stat-tile, .detail-header-card, .row-card {
+    animation: none !important;
+  }
+  button, a, input, select, textarea, [role="button"], [role="tab"] {
+    transition: none !important;
+  }
+}
