@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import {
-  Home, Truck, BarChart3, Users, Bot,
+  LayoutDashboard, Truck, ChartColumn, UsersRound, Bot,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -12,7 +12,7 @@ import { useRailVisible, useRailDimming, useRailExpanded, railVisibility } from 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
   {
-    key: 'dashboard', icon: Home, label: 'Dashboard',
+    key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard',
     from: '#6366f1', to: '#4338ca', glow: '99,102,241', paths: ['/'],
   },
   {
@@ -24,7 +24,7 @@ const navItems = [
     ],
   },
   {
-    key: 'reports', icon: BarChart3, label: 'Reports',
+    key: 'reports', icon: ChartColumn, label: 'Reports',
     from: '#a855f7', to: '#6d28d9', glow: '168,85,247', paths: ['/reports'],
     children: [
       { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
@@ -34,11 +34,11 @@ const navItems = [
     ],
   },
   {
-    key: 'admin', icon: Users, label: 'Admin',
+    key: 'admin', icon: UsersRound, label: 'Admin',
     from: '#f59e0b', to: '#c2410c', glow: '245,158,11', paths: ['/admin'],
     children: [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, from: '#6366f1', to: '#3730a3', glow: '99,102,241' },
-      { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: Users, from: '#10b981', to: '#047857', glow: '16,185,129' },
+      { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, from: '#10b981', to: '#047857', glow: '16,185,129' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, from: '#f43f5e', to: '#9f1239', glow: '244,63,94' },
     ],
   },
@@ -230,7 +230,7 @@ export default function ContentSidebar() {
       <aside
         /* click anywhere on the rail opens it; leaving closes it immediately */
         onClick={() => { poke(); if (!expanded) railVisibility.setExpanded(true); }}
-        onMouseEnter={poke}
+        onMouseEnter={() => { poke(); railVisibility.setExpanded(true); }}
         onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
         className="relative flex flex-col h-full overflow-visible cursor-pointer"
         style={{
@@ -252,7 +252,7 @@ export default function ContentSidebar() {
         }}
       >
         {/* Scrollable nav list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-1" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="flex-1 overflow-y-auto thin-scroll space-y-2" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
 
