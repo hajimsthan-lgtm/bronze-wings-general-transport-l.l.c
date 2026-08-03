@@ -70,7 +70,7 @@ export default function Operations() {
   const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
 
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
-  const [viewMode, setViewMode] = useState('list');
+  const [viewMode, setViewMode] = useState('card');
   const [search, setSearch] = useState('');
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
@@ -204,10 +204,10 @@ export default function Operations() {
       });
       const avgMargin = margins.length ? Math.round(margins.reduce((a, b) => a + b, 0) / margins.length) : 0;
       return [
-        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts`, action: () => setMode('contract') },
-        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active`, action: () => setMode('contract') },
-        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others`, action: () => setContractFilter('active') },
-        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin', action: () => setMode('contract') },
+        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts`, action: () => setMode('contract'), active: contractFilter === 'all' },
+        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active`, action: () => setMode('contract'), active: false },
+        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others`, action: () => setContractFilter('active'), active: contractFilter === 'active' },
+        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin', action: () => setMode('contract'), active: false },
       ];
     }
     const list = filteredTrips;
@@ -216,10 +216,10 @@ export default function Operations() {
     const inTransit = list.filter((tr) => tr.status === 'in_transit').length;
     const scheduled = list.filter((tr) => tr.status === 'scheduled').length;
     return [
-      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips`, action: () => setMode('all') },
-      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed`, action: () => setMode('trip') },
-      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit`, action: () => setTripFilter('completed') },
-      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled`, action: () => setTripFilter('in_transit') },
+      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips`, action: () => setMode('all'), active: mode === 'all' && tripFilter === 'all' },
+      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed`, action: () => setMode('trip'), active: mode === 'trip' && tripFilter === 'all' },
+      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit`, action: () => setTripFilter('completed'), active: tripFilter === 'completed' },
+      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled`, action: () => setTripFilter('in_transit'), active: tripFilter === 'in_transit' },
     ];
   }, [mode, filteredTrips, filteredContracts, expensesByContract]);
 
@@ -309,14 +309,14 @@ export default function Operations() {
   const showContracts = mode === 'all' || mode === 'contract';
 
   const tripGrid = (list) => (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {list.map((trip) => (
         <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
       ))}
     </div>
   );
   const contractGrid = (list) => (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {list.map((c) => (
         <ContractCard key={c.id} contract={c} expenses={expensesByContract[c.id] || []} onEdit={() => openEditContract(c)} onDelete={() => handleDeleteContract(c)} onDetails={() => setDetailContract(c)} />
       ))}
@@ -363,30 +363,34 @@ export default function Operations() {
               : `${trips.length} total trips`}
         />
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
           {analytics.map((a, i) => {
             const Icon = a.icon;
             return (
               <div
                 key={a.label}
                 onClick={() => a.action?.()}
-                onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`); e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`); }}
-                className="clay clay-hover group relative overflow-hidden animate-fade-in-up cursor-pointer p-3"
+                className="group relative flex items-center gap-3 rounded-2xl pl-2.5 pr-3.5 py-2.5 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 animate-fade-in-up overflow-hidden"
                 style={{
-                  animationDelay: `${i * 0.03}s`,
-                  borderLeft: `3px solid ${hexToRgba(a.accent, 0.55)}`,
+                  animationDelay: `${i * 0.04}s`,
+                  background: a.active
+                    ? 'linear-gradient(135deg, rgba(59,130,246,0.22), rgba(59,130,246,0.06))'
+                    : 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.72), rgba(var(--surf-2-rgb),0.85))',
+                  border: a.active ? '1px solid rgba(59,130,246,0.45)' : '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: a.active
+                    ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 24px -4px rgba(59,130,246,0.5), 0 8px 24px rgba(0,0,0,0.4)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 18px rgba(0,0,0,0.28)',
                 }}
               >
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 100px at var(--mx,50%) var(--my,50%), ${hexToRgba(a.accent, 0.22)}, transparent 60%)` }} />
-                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-30 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
-                <div className="relative flex items-center gap-2 mb-1.5">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.2)}, ${hexToRgba(a.accent, 0.06)})`, border: `1px solid ${hexToRgba(a.accent, 0.3)}` }}>
-                    <Icon className="w-4 h-4" style={{ color: a.accent }} />
-                  </div>
-                  <span className="text-[9px] uppercase tracking-[0.08em] text-white/45 font-semibold truncate">{a.label}</span>
+                <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none opacity-25 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
+                <div className="relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.25)}, ${hexToRgba(a.accent, 0.08)})`, border: `1px solid ${hexToRgba(a.accent, 0.35)}` }}>
+                  <Icon className="w-5 h-5" style={{ color: a.accent }} />
                 </div>
-                <p className="relative text-base md:text-lg font-bold text-white tabular-nums truncate tracking-tight leading-tight">{a.value}</p>
-                {a.sub && <p className="relative text-[10px] text-white/40 mt-0.5 truncate">{a.sub}</p>}
+                <div className="relative min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate leading-tight">{a.label}</p>
+                  <p className="text-[10px] text-white/45 truncate leading-tight">{a.sub}</p>
+                </div>
+                <p className="relative text-base font-bold tabular-nums tracking-tight flex-shrink-0" style={{ color: a.accent }}>{a.value}</p>
               </div>
             );
           })}

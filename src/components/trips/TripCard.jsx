@@ -25,7 +25,7 @@ const TYPE_STYLE = {
 /* Circular glowing gauge — 270° arc, colored by trip status */
 function TripGauge({ value, color, glow, gid }) {
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 172, height: 172 }}>
+    <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
       <svg viewBox="0 0 160 160" className="absolute inset-0 w-full h-full">
         <defs>
           <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
@@ -40,7 +40,7 @@ function TripGauge({ value, color, glow, gid }) {
         <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.14em] text-white/45 font-semibold mb-1">
           <Wallet className="w-3 h-3" />AED
         </div>
-        <span className="text-2xl font-bold text-white tabular-nums tracking-tight leading-none">{value}</span>
+        <span className="text-xl font-bold text-white tabular-nums tracking-tight leading-none">{value}</span>
       </div>
     </div>
   );
@@ -98,7 +98,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
   return (
     <div
       onClick={() => onClick?.(trip)}
-      className="group cursor-pointer rounded-[26px] p-4 flex flex-col relative"
+      className="group cursor-pointer rounded-[22px] p-3 flex flex-col relative"
       style={{
         background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.94) 0%, rgba(var(--surf-2-rgb),0.97) 100%)',
         border: `1px solid rgba(${st.glow},0.16)`,

@@ -1,27 +1,45 @@
-import { Building2, Calendar, Pencil, Trash2, AlertTriangle, Truck, User, Repeat, TrendingUp, TrendingDown } from 'lucide-react';
+import { useId } from 'react';
+import { Building2, Calendar, Pencil, Trash2, Truck, User, Repeat, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
-import MetaChip from '@/components/operations/MetaChip';
-import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 
-function Stat({ label, value, highlight, tone, icon: Icon }) {
-  const color = tone === 'eco' ? '#34d399' : tone === 'heat' ? '#f87171' : '#e2e8f0';
+const TONE = {
+  eco:  { color: '#34d399', glow: '52,211,153' },
+  cool: { color: '#60a5fa', glow: '96,165,250' },
+  heat: { color: '#f87171', glow: '248,113,113' },
+};
+const STATUS = {
+  active:     { color: '#34d399', glow: '52,211,153' },
+  expired:    { color: '#fb7185', glow: '251,113,133' },
+  terminated: { color: '#94a3b8', glow: '148,163,184' },
+};
+
+const short = (v) => new Intl.NumberFormat('en', { maximumFractionDigits: 0 }).format(v);
+
+function ContractGauge({ value, color, glow, gid }) {
   return (
-    <div
-      className="flex-1 min-w-0 rounded-lg px-1.5 py-1.5 text-center transition-all duration-200"
-      style={highlight ? { background: tone === 'eco' ? 'rgba(52,211,153,0.10)' : 'rgba(248,113,113,0.10)', border: `1px solid ${color}33` } : { border: '1px solid transparent' }}
-    >
-      <p className="text-[8px] uppercase tracking-wider text-white/40 mb-0.5 truncate">{label}</p>
-      <p className="flex items-center justify-center gap-0.5 text-[10px] font-bold tabular-nums truncate" style={{ color }}>
-        {Icon && <Icon className="w-2.5 h-2.5 flex-shrink-0" />}
-        <span className="truncate">{value}</span>
-      </p>
+    <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
+      <svg viewBox="0 0 160 160" className="absolute inset-0 w-full h-full">
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.95" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.35" />
+          </linearGradient>
+        </defs>
+        <path d="M 34.75 125.25 A 64 64 0 1 1 125.25 125.25" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" strokeLinecap="round" />
+        <path d="M 34.75 125.25 A 64 64 0 1 1 125.25 125.25" fill="none" stroke={`url(#${gid})`} strokeWidth="7" strokeLinecap="round" style={{ filter: `drop-shadow(0 0 6px rgba(${glow},0.65))` }} />
+      </svg>
+      <div className="relative flex flex-col items-center">
+        <span className="text-xl font-bold text-white tabular-nums tracking-tight leading-none">{value}</span>
+        <span className="text-[9px] uppercase tracking-[0.14em] text-white/45 font-semibold mt-1">Margin</span>
+      </div>
     </div>
   );
 }
 
 export default function ContractCard({ contract, expenses = [], onEdit, onDelete, onDetails }) {
   const { t } = useI18n();
+  const gid = useId().replace(/[:]/g, '');
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
   const monthlyRate = Number(contract.monthly_rate) || 0;
   const netProfit = monthlyRate - totalExpenses;
@@ -29,97 +47,88 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const daysLeft = contract.end_date ? Math.ceil((new Date(contract.end_date) - today) / 86400000) : null;
-  const expiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
 
-  // Tone by margin — Eco (green) / Cool (blue) / Heat (red)
   const tone = margin >= 30 ? 'eco' : margin >= 15 ? 'cool' : 'heat';
-  const arc = {
-    eco: { from: '#10b981', to: '#34d399' },
-    cool: { from: '#3b82f6', to: '#60a5fa' },
-    heat: { from: '#f97316', to: '#f87171' },
-  }[tone];
-  const marginColor = tone === 'eco' ? '#34d399' : tone === 'cool' ? '#60a5fa' : '#f87171';
+  const tn = TONE[tone];
+  const st = STATUS[contract.status] || STATUS.active;
 
   return (
-    <div className="entity-card group flex flex-col p-3.5 transition-all duration-300 hover:-translate-y-0.5">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+    <div
+      onClick={onDetails}
+      className="group cursor-pointer rounded-[22px] p-3 flex flex-col relative"
+      style={{
+        background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.94) 0%, rgba(var(--surf-2-rgb),0.97) 100%)',
+        border: `1px solid rgba(${tn.glow},0.16)`,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 28px rgba(0,0,0,0.45)',
+        transition: 'transform .3s cubic-bezier(0.16,1,0.3,1), box-shadow .3s ease, border-color .3s ease',
+      }}
+    >
+      {/* ── Top bar: icon + company + status ── */}
+      <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)' }}>
-            <Building2 className="w-4 h-4 text-blue-400" />
-          </span>
+          <div className="w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0"
+            style={{ background: `linear-gradient(160deg, rgba(${tn.glow},0.22), rgba(${tn.glow},0.06))`, border: `1px solid rgba(${tn.glow},0.3)`, color: tn.color }}>
+            <Building2 className="w-4 h-4" />
+          </div>
           <div className="min-w-0">
-            <p className="text-[9px] uppercase tracking-[0.08em] text-white/40 font-medium">{t('monthly_contract') || 'Monthly Contract'}</p>
-            <p className="text-sm font-bold text-white truncate leading-tight">{contract.company_name || '—'}</p>
+            <p className="text-[9px] uppercase tracking-[0.12em] text-white/40 font-semibold leading-none">{t('monthly_contract') || 'Contract'}</p>
+            <p className="text-sm font-bold text-white truncate leading-tight mt-0.5">{contract.company_name || '—'}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {contract.auto_renewal && (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 border border-primary/20 text-primary" title={t('auto_renewal_help')}>
-              <Repeat className="w-3 h-3" />
-            </span>
-          )}
-          <StatusPill variant={statusVariant(contract.status)} dot>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {contract.auto_renewal && <Repeat className="w-3 h-3 text-primary" />}
+          <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold"
+            style={{ background: `rgba(${st.glow},0.14)`, border: `1px solid rgba(${st.glow},0.32)`, color: st.color }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />
             {t(contract.status || 'active')}
-          </StatusPill>
+          </span>
         </div>
       </div>
 
-      {/* Date range */}
-      <div className="flex items-center gap-1.5 mt-2.5 text-[10px] text-white/40">
-        <Calendar className="w-3 h-3 text-blue-400 flex-shrink-0" />
+      {/* ── Central glowing gauge ── */}
+      <div className="flex justify-center my-1">
+        <ContractGauge value={`${margin}%`} color={tn.color} glow={tn.glow} gid={gid} />
+      </div>
+
+      {/* ── Date range ── */}
+      <div className="flex items-center gap-1.5 mb-2.5 px-1 text-[10px] text-white/45">
+        <Calendar className="w-3 h-3 flex-shrink-0" style={{ color: tn.color }} />
         <span className="tabular-nums">{formatDate(contract.start_date)}</span>
         <span className="text-white/20">→</span>
         <span className="tabular-nums">{formatDate(contract.end_date)}</span>
         {daysLeft !== null && (
-          <span className={`ml-auto px-1.5 h-4 inline-flex items-center rounded-full text-[9px] font-medium ${daysLeft < 0 ? 'bg-red-500/10 text-red-400' : expiringSoon ? 'bg-amber-500/10 text-amber-400' : 'bg-white/5 text-white/50'}`}>
+          <span className={`ml-auto px-1.5 h-4 inline-flex items-center rounded-full text-[9px] font-medium ${daysLeft < 0 ? 'bg-red-500/10 text-red-400' : daysLeft <= 7 ? 'bg-amber-500/10 text-amber-400' : 'bg-white/5 text-white/50'}`}>
             {daysLeft < 0 ? t('expired') : `${daysLeft}d`}
           </span>
         )}
       </div>
 
-      {expiringSoon && (
-        <div className="flex items-center gap-1.5 mt-2 px-2 py-1 rounded-lg bg-amber-500/10 text-[10px] text-amber-400">
-          <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0" />
-          {t('contract_expires_soon')}
+      {/* ── Bottom pill: 3 financial stats ── */}
+      <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 border border-white/5">
+        <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold text-white/70 tabular-nums">
+          <Wallet className="w-3 h-3 text-white/40 flex-shrink-0" />{short(monthlyRate)}
         </div>
-      )}
-
-      {/* Margin bar */}
-      <div className="mt-3 mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[9px] uppercase tracking-wider text-white/40">{t('profit_margin')}</span>
-          <span className="text-sm font-bold tabular-nums" style={{ color: marginColor }}>{margin}%</span>
+        <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold text-white/70 tabular-nums">
+          <Receipt className="w-3 h-3 text-white/40 flex-shrink-0" />{short(totalExpenses)}
         </div>
-        <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.max(2, Math.min(100, margin))}%`, background: `linear-gradient(90deg, ${arc.from}, ${arc.to})`, boxShadow: `0 0 8px ${arc.to}80` }}
-          />
+        <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold tabular-nums"
+          style={{ background: `linear-gradient(135deg, rgba(${tn.glow},0.22), rgba(${tn.glow},0.08))`, color: tn.color, boxShadow: `inset 0 0 0 1px rgba(${tn.glow},0.35)` }}>
+          {netProfit >= 0 ? <TrendingUp className="w-3 h-3 flex-shrink-0" /> : <TrendingDown className="w-3 h-3 flex-shrink-0" />}{short(netProfit)}
         </div>
       </div>
 
-      {/* Footer stat pill */}
-      <div className="rounded-xl p-1 flex gap-1" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.04)' }}>
-        <Stat label={t('monthly_rental')} value={formatCurrency(monthlyRate)} />
-        <Stat label={t('total_expenses')} value={formatCurrency(totalExpenses)} />
-        <Stat label={t('net_profit')} value={formatCurrency(netProfit)} highlight tone={netProfit >= 0 ? 'eco' : 'heat'} icon={netProfit >= 0 ? TrendingUp : TrendingDown} />
-      </div>
-
-      {/* Meta + actions */}
-      <div className="flex items-center gap-1 flex-wrap pt-2.5 mt-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {contract.vehicle_plate && <MetaChip icon={Truck} label={contract.vehicle_plate} />}
-        {contract.driver_name && <MetaChip icon={User} label={contract.driver_name} />}
+      {/* ── Meta + actions ── */}
+      <div className="flex items-center gap-1 flex-wrap pt-2.5 mt-2.5 border-t border-white/5">
+        {contract.vehicle_plate && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/55"><Truck className="w-3 h-3" />{contract.vehicle_plate}</span>
+        )}
+        {contract.driver_name && (
+          <span className="inline-flex items-center gap-1 text-[10px] text-white/55"><User className="w-3 h-3" />{contract.driver_name}</span>
+        )}
         <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={onDetails} className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('details')}>
-            <Building2 className="w-3 h-3" />
-          </button>
-          <button onClick={onEdit} className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('edit')}>
-            <Pencil className="w-3 h-3" />
-          </button>
-          <button onClick={onDelete} className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-red-500/30 hover:text-red-400 transition-colors" title={t('delete')}>
-            <Trash2 className="w-3 h-3" />
-          </button>
+          <button onClick={(e) => { e.stopPropagation(); onDetails(); }} className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('details')}><Building2 className="w-3 h-3" /></button>
+          <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('edit')}><Pencil className="w-3 h-3" /></button>
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-red-500/30 hover:text-red-400 transition-colors" title={t('delete')}><Trash2 className="w-3 h-3" /></button>
         </div>
       </div>
     </div>
