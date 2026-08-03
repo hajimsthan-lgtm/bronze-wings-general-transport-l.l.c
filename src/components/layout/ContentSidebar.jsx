@@ -5,9 +5,9 @@ import {
   Home, Truck, BarChart3, Users, Bot, ChevronsRight, ChevronsLeft,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import QuickFanMenu from '@/components/layout/QuickFanMenu';
-import { useRailVisible, useRailExpanded, railVisibility } from '@/lib/railVisibility';
+import { useRailExpanded, railVisibility } from '@/lib/railVisibility';
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
@@ -48,43 +48,41 @@ const navItems = [
   },
 ];
 
-const COLLAPSED_W = 64;
-const EXPANDED_W = 244;
-const VANISH_MS = 15000;
+const COLLAPSED_W = 60;
+const EXPANDED_W = 232;
 
-/* ── Lightning glass tile — small, refined, electric animated edge ── */
-function NavTile({ item, active, lit, size = 34 }) {
+/* ── Compact glass tile — small frosted glass with soft accent glow ── */
+function NavTile({ item, active, lit, size = 30 }) {
   return (
     <span
-      className={`nav-edge relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110 group-active:scale-95 ${lit ? 'nav-edge-on' : ''}`}
+      className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-108 group-active:scale-95"
       style={{
-        '--tile-glow': `rgb(${item.glow})`,
         width: size,
         height: size,
-        borderRadius: 11,
-        background: `linear-gradient(150deg, ${item.from} 0%, ${item.to} 100%)`,
-        border: `1px solid rgba(${item.glow},${lit ? 0.8 : 0.55})`,
+        borderRadius: 9,
+        background: `linear-gradient(160deg, rgba(${item.glow},0.22) 0%, rgba(${item.glow},0.08) 100%)`,
+        border: `1px solid rgba(${item.glow},${lit ? 0.55 : 0.28})`,
         boxShadow: lit
-          ? `inset 0 1.5px 1px rgba(255,255,255,0.6), inset 0 -3px 5px rgba(0,0,0,0.32), 0 8px 22px rgba(${item.glow},0.55), 0 0 0 1px rgba(${item.glow},0.45), 0 0 24px -2px rgba(${item.glow},0.75), 0 0 44px -2px rgba(${item.glow},0.5)`
-          : `inset 0 1.5px 1px rgba(255,255,255,0.42), inset 0 -3px 5px rgba(0,0,0,0.28), 0 4px 10px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,255,255,0.05), 0 0 14px -6px rgba(${item.glow},0.3)`,
-        color: '#fff',
+          ? `inset 0 1px 0 rgba(255,255,255,0.18), inset 0 0 12px rgba(${item.glow},0.18), 0 4px 14px rgba(${item.glow},0.35), 0 0 0 1px rgba(${item.glow},0.22), 0 0 18px -4px rgba(${item.glow},0.5)`
+          : `inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
+        color: `rgb(${item.glow})`,
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
       }}
     >
       <span
-        className="pointer-events-none absolute inset-x-[3px] top-[2px] h-1/2 rounded-t-[9px]"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.40), transparent)' }}
+        className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[8px]"
+        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.22), transparent)' }}
       />
-      <span
-        className="pointer-events-none absolute inset-0 rounded-[11px] transition-opacity duration-500"
-        style={{ opacity: lit ? 1 : 0, boxShadow: `0 0 26px 3px rgba(${item.glow},0.6), 0 0 48px 6px rgba(${item.glow},0.3)` }}
+      <item.icon
+        className="relative"
+        style={{
+          width: size * 0.5,
+          height: size * 0.5,
+          color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
+          filter: lit ? `drop-shadow(0 0 6px rgba(${item.glow},0.8))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+        }}
       />
-      <item.icon className="relative w-4 h-4" style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.45))' }} />
-      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[11px]">
-        <span
-          className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover:opacity-100 group-hover:left-[150%] transition-all duration-700"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }}
-        />
-      </span>
     </span>
   );
 }
@@ -94,49 +92,15 @@ export default function ContentSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { switchTab } = useTabHistory();
-  const panelVisible = useRailVisible();
   const expanded = useRailExpanded();
   const [pinned, setPinned] = useState(false);
   const [hoveredKey, setHoveredKey] = useState(null);
-  const vanishTimer = useRef(null);
-  const panelVisibleRef = useRef(panelVisible);
-  panelVisibleRef.current = panelVisible;
-  const pinnedRef = useRef(pinned);
-  pinnedRef.current = pinned;
 
   const isActive = (item) =>
     (item.paths || []).some((p) => (p === '/' ? location.pathname === '/' : location.pathname.startsWith(p)));
 
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
-
-  /* ── reveal: expand the rail (labels + sub-routes) and dim the page ── */
-  const revealPanel = () => {
-    clearTimeout(vanishTimer.current);
-    railVisibility.set(true);
-    if (!pinnedRef.current) railVisibility.setExpanded(true);
-  };
-
-  /* ── leave: collapse everything immediately (unless pinned) ── */
-  const scheduleVanish = () => {
-    clearTimeout(vanishTimer.current);
-    setHoveredKey(null);
-    if (pinnedRef.current) return; /* only an explicit pin holds the rail open */
-    railVisibility.setExpanded(false);
-    railVisibility.set(false); /* vanish immediately — no idle timer */
-  };
-
-  useEffect(() => {
-    const onMove = (e) => {
-      if (!panelVisibleRef.current && e.clientX < 18) revealPanel();
-    };
-    window.addEventListener('mousemove', onMove);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      clearTimeout(vanishTimer.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
@@ -164,23 +128,19 @@ export default function ContentSidebar() {
             } else {
               switchTab(item.key);
             }
-            if (!pinnedRef.current) {
-              railVisibility.setExpanded(false);
-              railVisibility.set(false);
-            }
           }}
           onMouseEnter={() => setHoveredKey(item.key)}
-          className={`group relative flex items-center ${expanded ? 'gap-2.5 w-full px-2 h-11' : 'justify-center w-11 h-11 mx-auto'} rounded-2xl transition-all duration-300`}
+          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-10' : 'justify-center w-10 h-10 mx-auto'} rounded-xl transition-all duration-300`}
           style={
             expanded
               ? {
                   background: active
-                    ? `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.10))`
-                    : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
-                  border: `1px solid ${active ? `rgba(${item.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
+                    ? `linear-gradient(135deg, rgba(${item.glow},0.20), rgba(${item.glow},0.06))`
+                    : `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
+                  border: `1px solid ${active ? `rgba(${item.glow},0.40)` : 'rgba(255,255,255,0.08)'}`,
                   boxShadow: active
-                    ? `0 0 34px -4px rgba(${item.glow},0.6), 0 0 0 1px rgba(${item.glow},0.3), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 0 28px rgba(${item.glow},0.12)`
-                    : `0 0 18px -8px rgba(${item.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                    ? `0 0 22px -6px rgba(${item.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 18px rgba(${item.glow},0.08)`
+                    : `inset 0 1px 0 rgba(255,255,255,0.04)`,
                 }
               : {}
           }
@@ -189,8 +149,8 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className={`text-[11px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.92)', textShadow: active ? `0 0 12px rgba(${item.glow},0.85), 0 0 24px rgba(${item.glow},0.4)` : 'none' }}
+              className={`text-[10px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.88)', textShadow: active ? `0 0 10px rgba(${item.glow},0.7)` : 'none' }}
             >
               {label}
             </span>
@@ -199,15 +159,15 @@ export default function ContentSidebar() {
           {/* active indicator bar */}
           {active && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full ${expanded ? 'left-0' : '-left-[6px]'}`}
-              style={{ background: item.from, boxShadow: `0 0 10px rgba(${item.glow},0.9)` }}
+              className={`absolute top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-full ${expanded ? 'left-0' : '-left-[5px]'}`}
+              style={{ background: item.from, boxShadow: `0 0 8px rgba(${item.glow},0.9)` }}
             />
           )}
         </button>
 
-        {/* ── Sub-routes — same lightning-glass tile style, smaller ── */}
+        {/* ── Sub-routes — compact glass tile style ── */}
         {showChildren && (
-          <div className="space-y-0.5 pl-3 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
+          <div className="space-y-0.5 pl-2.5 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
             {item.children.map((child) => {
               const childActive = isChildActive(child);
               const childLabel = child.label || t(child.key);
@@ -215,28 +175,28 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  className="group relative flex items-center gap-2 w-full pl-2 pr-2.5 h-9 rounded-xl transition-all duration-300 hover:translate-x-1"
+                  className="group relative flex items-center gap-1.5 w-full pl-1.5 pr-2 h-8 rounded-lg transition-all duration-300 hover:translate-x-1"
                   style={{
                     background: childActive
-                      ? `linear-gradient(135deg, rgba(${child.glow},0.28), rgba(${child.glow},0.10))`
-                      : `linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))`,
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.50)` : 'rgba(255,255,255,0.10)'}`,
+                      ? `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.06))`
+                      : `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.40)` : 'rgba(255,255,255,0.08)'}`,
                     boxShadow: childActive
-                      ? `0 0 26px -4px rgba(${child.glow},0.45), 0 0 0 1px rgba(${child.glow},0.20), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 20px rgba(${child.glow},0.08)`
-                      : `0 0 18px -8px rgba(${child.glow},0.25), inset 0 1px 0 rgba(255,255,255,0.06)`,
+                      ? `0 0 18px -6px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 14px rgba(${child.glow},0.06)`
+                      : `inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={26} />
+                  <NavTile item={child} active={childActive} lit={childActive} size={22} />
                   <span
-                    className="text-[10px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.92)' }}
+                    className="text-[9px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.88)' }}
                   >
                     {childLabel}
                   </span>
                   {childActive && (
                     <span
-                      className="absolute top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full left-0"
-                      style={{ background: child.from, boxShadow: `0 0 10px rgba(${child.glow},0.9)` }}
+                      className="absolute top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full left-0"
+                      style={{ background: child.from, boxShadow: `0 0 8px rgba(${child.glow},0.9)` }}
                     />
                   )}
                 </button>
@@ -250,61 +210,48 @@ export default function ContentSidebar() {
 
   return (
     <div className="hidden md:block fixed left-0 top-0 z-[55] h-[100dvh]">
-      {/* invisible edge strip — always hoverable so a vanished rail can be recalled */}
-      <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={revealPanel} />
-
       <aside
-        onMouseEnter={revealPanel}
-        onMouseLeave={scheduleVanish}
         className="relative flex flex-col h-full overflow-visible"
         style={{
           width,
-          paddingTop: 16,
-          paddingBottom: 14,
+          paddingTop: 14,
+          paddingBottom: 12,
           paddingLeft: 8,
           paddingRight: 8,
-          gap: 6,
+          gap: 5,
           background: 'transparent',
           borderRight: 'none',
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
-          opacity: panelVisible ? 1 : 0,
-          transform: panelVisible ? 'translateX(0)' : 'translateX(-18px)',
-          pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
-            `width ${expanded ? '.45s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity .55s cubic-bezier(0.16,1,0.3,1), transform .55s cubic-bezier(0.16,1,0.3,1), background .3s ease, backdrop-filter .3s ease, box-shadow .3s ease`,
+            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1)`,
         }}
       >
-        {/* Pin toggle — keeps the rail expanded */}
+        {/* Pin toggle — click to expand/collapse the rail (no auto-open) */}
         <button
           onClick={() => {
             const next = !pinned;
             setPinned(next);
-            if (next) {
-              railVisibility.setExpanded(true);
-              railVisibility.set(true);
-            } else {
-              railVisibility.setExpanded(false);
-            }
+            railVisibility.setExpanded(next);
           }}
-          title={pinned ? 'Unpin — collapse on leave' : 'Pin open — keep expanded'}
-          className="group relative flex items-center justify-center w-10 h-10 rounded-xl mx-auto mb-1 text-white/60 hover:text-white transition-all duration-200"
+          title={pinned ? 'Collapse' : 'Expand'}
+          className="group relative flex items-center justify-center w-9 h-9 rounded-lg mx-auto mb-1 text-white/55 hover:text-white transition-all duration-200"
           style={{
-            background: pinned ? 'rgba(var(--panel-accent-rgb),0.15)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${pinned ? 'rgba(var(--panel-accent-rgb),0.35)' : 'rgba(255,255,255,0.07)'}`,
+            background: pinned ? 'rgba(var(--panel-accent-rgb),0.14)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${pinned ? 'rgba(var(--panel-accent-rgb),0.32)' : 'rgba(255,255,255,0.06)'}`,
           }}
         >
-          {pinned ? <ChevronsLeft className="w-4 h-4 shrink-0" /> : <ChevronsRight className="w-4 h-4 shrink-0" />}
+          {pinned ? <ChevronsLeft className="w-3.5 h-3.5 shrink-0" /> : <ChevronsRight className="w-3.5 h-3.5 shrink-0" />}
         </button>
 
         {/* Scrollable nav list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-1.5" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="flex-1 overflow-y-auto thin-scroll space-y-1" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
 
         {/* Quick-tools fan launcher — pinned to the bottom, unchanged */}
-        <div className="pt-3">
+        <div className="pt-2">
           <QuickFanMenu />
         </div>
       </aside>
