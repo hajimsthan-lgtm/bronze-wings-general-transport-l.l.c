@@ -55,7 +55,7 @@ const EXPANDED_W = 228;
 function NavTile({ item, active, lit, size = 38 }) {
   return (
     <span
-      className="relative flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-108 group-active:scale-95"
+      className="relative flex items-center justify-center shrink-0"
       style={{
         width: size,
         height: size,
@@ -144,7 +144,7 @@ export default function ContentSidebar() {
               switchTab(item.key);
             }
           }}
-          onMouseEnter={() => setHoveredKey(item.key)}
+          onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
           className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-10' : 'justify-center w-10 h-10 mx-auto'} rounded-xl transition-all duration-300`}
           style={
             expanded
@@ -190,15 +190,16 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  className="group relative flex items-center gap-1.5 w-full pl-1.5 pr-2 h-8 rounded-lg transition-all duration-300 hover:translate-x-1"
+                  onMouseEnter={poke}
+                  className="group relative flex items-center gap-1.5 w-full pl-1.5 pr-2 h-8 rounded-lg transition-all duration-300"
                   style={{
                     background: childActive
-                      ? `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.06))`
-                      : `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.40)` : 'rgba(255,255,255,0.08)'}`,
+                      ? `linear-gradient(160deg, rgba(${child.glow},0.18), rgba(${child.glow},0.06))`
+                      : 'linear-gradient(160deg, hsl(var(--clay-bg)) 0%, hsl(228 22% 12%) 100%)',
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.45)` : 'hsl(var(--clay-border))'}`,
                     boxShadow: childActive
-                      ? `0 0 18px -6px rgba(${child.glow},0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 14px rgba(${child.glow},0.06)`
-                      : `inset 0 1px 0 rgba(255,255,255,0.04)`,
+                      ? `inset 3px 3px 7px hsl(var(--clay-shadow-dark)), inset -3px -3px 7px hsl(var(--clay-shadow-light)), 0 0 0 1px rgba(${child.glow},0.4), 0 0 12px rgba(${child.glow},0.25)`
+                      : `4px 4px 9px hsl(var(--clay-shadow-dark)), -4px -4px 9px hsl(var(--clay-shadow-light)), inset 0 1px 0 rgba(255,255,255,0.04)`,
                   }}
                 >
                   <NavTile item={child} active={childActive} lit={childActive} size={28} />
