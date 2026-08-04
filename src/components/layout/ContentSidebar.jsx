@@ -48,74 +48,8 @@ const navItems = [
   },
 ];
 
-const COLLAPSED_W = 60;
-const EXPANDED_W = 228;
-
-/* ── Compact glass tile — small frame, big icon ── */
-function NavTile({ item, active, lit, size = 38, variant = 'glass' }) {
-  if (variant === 'clay') {
-    // clean claymorphism — no glow blob, no shining highlight
-    return (
-      <span
-        className="relative flex items-center justify-center shrink-0"
-        style={{
-          width: size,
-          height: size,
-          borderRadius: 9,
-          background: lit
-            ? `linear-gradient(160deg, rgba(${item.glow},0.22), rgba(${item.glow},0.08))`
-            : 'linear-gradient(160deg, hsl(var(--clay-bg)) 0%, hsl(228 22% 13%) 100%)',
-          border: `1px solid ${lit ? `rgba(${item.glow},0.4)` : 'hsl(var(--clay-border))'}`,
-          boxShadow: lit
-            ? `inset 2px 2px 5px hsl(var(--clay-shadow-dark)), inset -2px -2px 5px hsl(var(--clay-shadow-light))`
-            : `3px 3px 6px hsl(var(--clay-shadow-dark)), -3px -3px 6px hsl(var(--clay-shadow-light))`,
-          color: `rgb(${item.glow})`,
-        }}
-      >
-        <item.icon
-          style={{
-            width: size * 0.6,
-            height: size * 0.6,
-            color: lit ? '#fff' : `rgba(${item.glow},0.9)`,
-          }}
-        />
-      </span>
-    );
-  }
-  // clean glassmorphism for main buttons — toned-down glow
-  return (
-    <span
-      className="relative flex items-center justify-center shrink-0"
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 10,
-        background: `linear-gradient(160deg, rgba(${item.glow},0.20) 0%, rgba(${item.glow},0.06) 100%)`,
-        border: `1px solid rgba(${item.glow},${lit ? 0.45 : 0.25})`,
-        boxShadow: lit
-          ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 14px rgba(${item.glow},0.28), 0 0 0 1px rgba(${item.glow},0.2)`
-          : `inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.3)`,
-        color: `rgb(${item.glow})`,
-        backdropFilter: 'blur(6px)',
-        WebkitBackdropFilter: 'blur(6px)',
-      }}
-    >
-      <span
-        className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[9px]"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.14), transparent)' }}
-      />
-      <item.icon
-        className="relative"
-        style={{
-          width: size * 0.62,
-          height: size * 0.62,
-          color: lit ? '#fff' : `rgba(${item.glow},0.95)`,
-          filter: lit ? `drop-shadow(0 0 4px rgba(${item.glow},0.5))` : 'none',
-        }}
-      />
-    </span>
-  );
-}
+const COLLAPSED_W = 64;
+const EXPANDED_W = 244;
 
 export default function ContentSidebar() {
   const { t } = useI18n();
@@ -149,102 +83,139 @@ export default function ContentSidebar() {
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
-  /* ── Main nav button ── */
+  /* ── Parent floating glass dock ── */
   const renderItem = (item) => {
     const active = isActive(item);
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
     const showChildren = expanded && hasChildren && hoveredKey === item.key;
-    /* when one section is hovered open, every other button fades to very low light */
     const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
     const lit = active || hoveredKey === item.key;
 
     return (
       <div
         key={item.key}
-        className="space-y-1 transition-opacity duration-300"
+        className="relative transition-opacity duration-300"
         style={{ opacity: dimmed ? 0.12 : 1 }}
       >
         <button
           onClick={() => {
-            /* parent buttons navigate to their first sub-route; leaf buttons navigate directly */
-            if (hasChildren) {
-              navigate(item.children[0].path);
-            } else {
-              switchTab(item.key);
-            }
+            poke();
+            if (hasChildren) navigate(item.children[0].path);
+            else switchTab(item.key);
           }}
           onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
-          className={`group relative flex items-center ${expanded ? 'gap-2 w-full px-1.5 h-10' : 'justify-center w-10 h-10 mx-auto'} rounded-xl transition-all duration-300`}
-          style={
-            expanded
-              ? {
-                  background: active
-                    ? `linear-gradient(135deg, rgba(${item.glow},0.20), rgba(${item.glow},0.06))`
-                    : `linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))`,
-                  border: `1px solid ${active ? `rgba(${item.glow},0.40)` : 'rgba(255,255,255,0.08)'}`,
-                  boxShadow: active
-                    ? `0 0 22px -6px rgba(${item.glow},0.5), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 18px rgba(${item.glow},0.08)`
-                    : `inset 0 1px 0 rgba(255,255,255,0.04)`,
-                }
-              : {}
-          }
+          className="group relative flex items-center rounded-2xl transition-all duration-300"
+          style={{
+            height: 46,
+            width: '100%',
+            justifyContent: expanded ? 'flex-start' : 'center',
+            padding: expanded ? '0 14px' : '0',
+            gap: expanded ? 12 : 0,
+            background: `linear-gradient(135deg, rgba(${item.glow},${active ? 0.22 : 0.10}) 0%, rgba(${item.glow},${active ? 0.06 : 0.03}) 100%)`,
+            border: `1px solid rgba(${item.glow},${active ? 0.48 : 0.20})`,
+            boxShadow: active
+              ? `inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 22px rgba(${item.glow},0.10), 0 6px 20px rgba(${item.glow},0.32), 0 0 0 1px rgba(${item.glow},0.22)`
+              : `inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 10px rgba(0,0,0,0.32)`,
+            backdropFilter: 'blur(14px) saturate(1.35)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.35)',
+          }}
         >
-          <NavTile item={item} active={active} lit={lit} />
+          {/* icon node sitting on the spine */}
+          <span
+            className="relative flex items-center justify-center shrink-0 rounded-xl"
+            style={{
+              width: 30, height: 30,
+              background: active
+                ? `linear-gradient(135deg, rgba(${item.glow},0.35), rgba(${item.glow},0.15))`
+                : 'rgba(255,255,255,0.04)',
+              border: `1px solid rgba(${item.glow},${active ? 0.5 : 0.18})`,
+              boxShadow: active ? `inset 0 1px 0 rgba(255,255,255,0.16), 0 0 12px rgba(${item.glow},0.4)` : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+            }}
+          >
+            <item.icon
+              style={{
+                width: 18, height: 18,
+                color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
+                filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none',
+              }}
+            />
+          </span>
 
           {expanded && (
             <span
-              className={`text-[10px] font-mono tracking-[0.1em] uppercase whitespace-nowrap ${active ? 'font-bold' : 'font-medium'}`}
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.88)', textShadow: active ? `0 0 10px rgba(${item.glow},0.7)` : 'none' }}
+              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap"
+              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
             >
               {label}
             </span>
           )}
 
-          {/* active indicator bar */}
-          {active && (
-            <span
-              className={`absolute top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-full ${expanded ? 'left-0' : '-left-[5px]'}`}
-              style={{ background: item.from, boxShadow: `0 0 8px rgba(${item.glow},0.9)` }}
-            />
+          {/* floating label bubble — collapsed only */}
+          {!expanded && (
+            <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-50">
+              <span
+                className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(10,14,26,0.94), rgba(20,26,44,0.86))',
+                  backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                  border: `1px solid rgba(${item.glow},0.30)`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${item.glow},0.5)`,
+                  color: '#fff',
+                }}
+              >
+                {label}
+              </span>
+            </span>
           )}
         </button>
 
-        {/* ── Sub-routes — compact glass tile style ── */}
+        {/* ── Child docks — nested text pills on a branch connector ── */}
         {showChildren && (
-          <div className="space-y-1.5 pl-2.5 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
+          <div className="relative mt-2 space-y-2" style={{ animation: 'fade-in 0.25s ease both', paddingLeft: 26 }}>
+            {/* branch connector from spine to children */}
+            <span
+              className="absolute left-[19px] top-0 bottom-0 w-px pointer-events-none"
+              style={{ background: `linear-gradient(180deg, rgba(${item.glow},0.45), rgba(${item.glow},0.12))` }}
+            />
             {item.children.map((child) => {
               const childActive = isChildActive(child);
               const childLabel = child.label || t(child.key);
               return (
                 <button
                   key={child.key}
-                  onClick={() => navigate(child.path)}
+                  onClick={() => { poke(); navigate(child.path); }}
                   onMouseEnter={poke}
-                  className="group relative flex items-center gap-1.5 w-full pl-1.5 pr-2 h-8 rounded-lg transition-all duration-300"
+                  className="group relative flex items-center rounded-full transition-all duration-300"
                   style={{
+                    height: 34,
+                    padding: '0 16px',
+                    gap: 8,
                     background: childActive
-                      ? `linear-gradient(160deg, rgba(${child.glow},0.18), rgba(${child.glow},0.06))`
-                      : 'linear-gradient(160deg, hsl(var(--clay-bg)) 0%, hsl(228 22% 12%) 100%)',
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.45)` : 'hsl(var(--clay-border))'}`,
+                      ? `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.07))`
+                      : 'rgba(19,28,42,0.82)',
+                    border: `1px solid ${childActive ? `rgba(${child.glow},0.42)` : 'rgba(255,255,255,0.07)'}`,
                     boxShadow: childActive
-                      ? `inset 3px 3px 7px hsl(var(--clay-shadow-dark)), inset -3px -3px 7px hsl(var(--clay-shadow-light)), 0 0 0 1px rgba(${child.glow},0.3)`
-                      : `4px 4px 9px hsl(var(--clay-shadow-dark)), -4px -4px 9px hsl(var(--clay-shadow-light)), inset 0 1px 0 rgba(255,255,255,0.04)`,
+                      ? `inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(${child.glow},0.26)`
+                      : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
                   }}
                 >
-                  <NavTile item={child} active={childActive} lit={childActive} size={28} variant="clay" />
+                  {/* small node dot on the branch line */}
                   <span
-                    className="text-[9px] font-mono font-medium tracking-[0.1em] uppercase whitespace-nowrap"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.88)' }}
+                    className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+                    style={{
+                      background: childActive ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
+                      boxShadow: childActive ? `0 0 6px rgba(${child.glow},0.8)` : 'none',
+                    }}
+                  />
+                  <span
+                    className="text-[10px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.62)' }}
                   >
                     {childLabel}
                   </span>
-                  {childActive && (
-                    <span
-                      className="absolute top-1/2 -translate-y-1/2 h-4 w-[2px] rounded-full left-0"
-                      style={{ background: child.from, boxShadow: `0 0 8px rgba(${child.glow},0.9)` }}
-                    />
-                  )}
                 </button>
               );
             })}
@@ -259,18 +230,17 @@ export default function ContentSidebar() {
       {/* invisible edge strip — hover to recall a vanished rail */}
       <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={poke} />
       <aside
-        /* click anywhere on the rail opens it; leaving closes it immediately */
         onClick={() => { poke(); if (!expanded) railVisibility.setExpanded(true); }}
         onMouseEnter={() => { poke(); railVisibility.setExpanded(true); }}
         onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
         className="relative flex flex-col h-full overflow-visible cursor-pointer"
         style={{
           width,
-          paddingTop: 12,
-          paddingBottom: 12,
-          paddingLeft: 6,
-          paddingRight: 6,
-          gap: 8,
+          paddingTop: 16,
+          paddingBottom: 16,
+          paddingLeft: 8,
+          paddingRight: 8,
+          gap: 10,
           background: 'transparent',
           borderRight: 'none',
           backdropFilter: 'none',
@@ -282,11 +252,19 @@ export default function ContentSidebar() {
             `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`,
         }}
       >
-        {/* Scrollable nav list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-3" onMouseLeave={() => setHoveredKey(null)}>
+        {/* vertical spine connector — runs through all dock nodes */}
+        <span
+          className="absolute pointer-events-none top-8 bottom-8 w-px"
+          style={{
+            left: expanded ? 27 : 31,
+            background: 'linear-gradient(180deg, transparent 0%, rgba(170,184,200,0.22) 8%, rgba(170,184,200,0.22) 92%, transparent 100%)',
+          }}
+        />
+
+        {/* Scrollable dock list */}
+        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-2.5" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
-
       </aside>
     </div>
   );
