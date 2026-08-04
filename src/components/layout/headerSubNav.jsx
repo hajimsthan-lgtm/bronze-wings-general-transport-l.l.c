@@ -66,7 +66,7 @@ export default function HeaderSubNav({ className = '' }) {
   if (!subNav.length) return null;
 
   return (
-    <nav key={location.pathname} className={`flex items-center gap-3 ${className}`}>
+    <nav key={location.pathname} className={`flex items-center gap-2.5 ${className}`}>
       {subNav.map((item, i) => {
         const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
         const Icon = SUBNAV_ICON[item.key] || FileText;
@@ -77,70 +77,34 @@ export default function HeaderSubNav({ className = '' }) {
             key={item.path}
             to={item.path}
             style={{ animation: `subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.07}s both` }}
-            onMouseMove={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
-              e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
-            }}
-            className={`group/sub relative flex items-center gap-2 h-12 rounded-2xl transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 ${isActive ? 'pl-1.5 pr-3' : 'px-1.5'}`}
+            className="group/sub relative flex items-center gap-2 h-9 px-3.5 rounded-full transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0"
           >
-            {/* duotone gradient tile */}
             <span
-              className="relative flex items-center justify-center w-10 h-10 rounded-[12px] transition-all duration-300"
+              className="absolute inset-0 rounded-full transition-all duration-300"
               style={{
-                background: `linear-gradient(160deg, rgba(${st.glow},0.24) 0%, rgba(${st.glow},0.08) 100%)`,
-                border: `1px solid rgba(${st.glow},${isActive ? 0.6 : 0.3})`,
+                background: isActive
+                  ? `linear-gradient(135deg, rgba(${st.glow},0.22), rgba(${st.glow},0.10))`
+                  : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isActive ? `rgba(${st.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
                 boxShadow: isActive
-                  ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 14px rgba(${st.glow},0.35), 0 0 0 1px rgba(${st.glow},0.3)`
-                  : `inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.3)`,
-                color: `rgb(${st.glow})`,
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
+                  ? `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${st.glow},0.22)`
+                  : 'inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
+            />
+            <Icon className="relative w-3.5 h-3.5 transition-colors duration-300" style={{
+              color: isActive ? `rgb(${st.glow})` : 'rgba(255,255,255,0.45)',
+            }} />
+            <span
+              className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap transition-colors duration-300"
+              style={{ color: isActive ? '#fff' : 'rgba(255,255,255,0.55)' }}
             >
-              <span className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.24), transparent)' }} />
-              <Icon className="relative w-5 h-5" style={{
-                color: isActive ? '#fff' : `rgba(${st.glow},0.95)`,
-                filter: isActive ? `drop-shadow(0 0 4px rgba(${st.glow},0.5))` : 'none',
-              }} />
-              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
-                <span className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover/sub:opacity-100 group-hover/sub:left-[150%] transition-all duration-700" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
-              </span>
+              {label}
             </span>
-
-            {/* active tab shows its label inline — always visible, user-friendly */}
             {isActive && (
               <span
-                className="text-[12px] font-bold tracking-[0.08em] uppercase whitespace-nowrap"
-                style={{
-                  backgroundImage: `linear-gradient(100deg, #ffffff 0%, rgb(${st.glow}) 50%, #ffffff 100%)`,
-                  WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                  filter: `drop-shadow(0 0 6px rgba(${st.glow},0.55))`,
-                }}
-              >
-                {label}
-              </span>
-            )}
-
-            {/* cursor-follow glow */}
-            <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover/sub:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(circle 70px at var(--mx,50%) var(--my,50%), rgba(${st.glow},0.4), transparent 70%)` }} />
-
-            {/* hover tooltip — only for inactive tiles */}
-            {!isActive && (
-              <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 translate-y-1 group-hover/sub:opacity-100 group-hover/sub:translate-y-0 transition-all duration-300 z-50">
-                <span className="relative inline-block whitespace-nowrap px-3 py-1.5 rounded-xl" style={{
-                  background: 'linear-gradient(135deg, rgba(10,14,26,0.82), rgba(20,26,44,0.70))',
-                  backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.10)',
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.45), 0 0 18px -6px rgba(${st.glow},0.45)`,
-                }}>
-                  <span className="text-[12px] font-semibold tracking-wide" style={{
-                    backgroundImage: `linear-gradient(100deg, #ffffff 0%, rgb(${st.glow}) 45%, #ffffff 100%)`,
-                    WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    filter: `drop-shadow(0 0 6px rgba(${st.glow},0.55))`,
-                  }}>{label}</span>
-                </span>
-              </span>
+                className="relative h-1.5 w-1.5 rounded-full"
+                style={{ background: `rgb(${st.glow})`, boxShadow: `0 0 6px rgba(${st.glow},0.7)` }}
+              />
             )}
           </Link>
         );
