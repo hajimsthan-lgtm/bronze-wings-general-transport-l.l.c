@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import {
-  LayoutDashboard, Truck, ChartColumn, UsersRound, Bot,
+  Truck, ChartColumn, UsersRound,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
@@ -11,10 +11,6 @@ import { useRailVisible, useRailDimming, useRailExpanded, railVisibility } from 
 
 /* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
 const navItems = [
-  {
-    key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard',
-    from: '#6366f1', to: '#4338ca', glow: '99,102,241', paths: ['/'],
-  },
   {
     key: 'operations', icon: Truck, label: 'Operations',
     from: '#0ea5e9', to: '#0369a1', glow: '14,165,233', paths: ['/trips', '/contracts', '/expenses'],
@@ -42,10 +38,6 @@ const navItems = [
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, from: '#f43f5e', to: '#9f1239', glow: '244,63,94' },
     ],
   },
-  {
-    key: 'agents', icon: Bot, label: 'AI Agents',
-    from: '#10b981', to: '#047857', glow: '16,185,129', paths: ['/agents'],
-  },
 ];
 
 const COLLAPSED_W = 64;
@@ -60,6 +52,7 @@ export default function ContentSidebar() {
   const panelVisible = useRailVisible();
   const panelDimming = useRailDimming();
   const [hoveredKey, setHoveredKey] = useState(null);
+  const [hoveredChild, setHoveredChild] = useState(null);
   const dimTimer = useRef(null);
   const vanishTimer = useRef(null);
 
@@ -188,18 +181,19 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => { poke(); navigate(child.path); }}
-                  onMouseEnter={poke}
+                  onMouseEnter={() => { poke(); setHoveredChild(child.key); }}
+                  onMouseLeave={() => setHoveredChild(null)}
                   aria-label={childLabel}
                   className="group relative flex items-center rounded-full transition-all duration-500 select-none"
                   style={{
                     height: 34,
                     padding: '0 16px',
                     gap: 8,
-                    background: childActive
+                    background: (childActive || hoveredChild === child.key)
                       ? `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.07))`
                       : 'rgba(19,28,42,0.82)',
-                    border: `1px solid ${childActive ? `rgba(${child.glow},0.42)` : 'rgba(255,255,255,0.07)'}`,
-                    boxShadow: childActive
+                    border: `1px solid ${(childActive || hoveredChild === child.key) ? `rgba(${child.glow},0.42)` : 'rgba(255,255,255,0.07)'}`,
+                    boxShadow: (childActive || hoveredChild === child.key)
                       ? `inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(${child.glow},0.26)`
                       : 'inset 0 1px 0 rgba(255,255,255,0.03)',
                     backdropFilter: 'blur(8px)',
@@ -212,13 +206,13 @@ export default function ContentSidebar() {
                   <span
                     className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none"
                     style={{
-                      background: childActive ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
-                      boxShadow: childActive ? `0 0 6px rgba(${child.glow},0.8)` : 'none',
+                      background: (childActive || hoveredChild === child.key) ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
+                      boxShadow: (childActive || hoveredChild === child.key) ? `0 0 6px rgba(${child.glow},0.8)` : 'none',
                     }}
                   />
                   <span
                     className="text-[10px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap pointer-events-none"
-                    style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.62)' }}
+                    style={{ color: (childActive || hoveredChild === child.key) ? '#fff' : 'rgba(255,255,255,0.62)' }}
                   >
                     {childLabel}
                   </span>
@@ -265,7 +259,7 @@ export default function ContentSidebar() {
         />
 
         {/* Scrollable dock list */}
-        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-2.5" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-5" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
       </aside>

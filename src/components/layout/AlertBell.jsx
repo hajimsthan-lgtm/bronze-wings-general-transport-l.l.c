@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Bell, X, Wrench, FileWarning, FileText } from 'lucide-react';
@@ -16,7 +16,6 @@ function daysUntil(dateStr) {
 export default function AlertBell() {
   const [alerts, setAlerts] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
-  const timer = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -52,28 +51,20 @@ export default function AlertBell() {
       });
 
       setAlerts(items);
-      if (items.length > 0) {
-        setShowNotif(true);
-        timer.current = setTimeout(() => setShowNotif(false), 5000);
-      }
     })();
-    return () => clearTimeout(timer.current);
   }, []);
 
-  const closeNotif = () => { clearTimeout(timer.current); setShowNotif(false); };
-  const reopen = () => {
-    if (alerts.length === 0) return;
-    clearTimeout(timer.current);
-    setShowNotif(true);
-    timer.current = setTimeout(() => setShowNotif(false), 5000);
-  };
-
   const count = alerts.length;
+  const open = () => setShowNotif(true);
+  const close = () => setShowNotif(false);
 
   return (
-    <>
+    <div
+      className="relative"
+      onMouseEnter={open}
+      onMouseLeave={close}
+    >
       <button
-        onClick={reopen}
         aria-label="Alerts"
         title="Alerts"
         className="relative flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
@@ -91,7 +82,7 @@ export default function AlertBell() {
 
       {showNotif && count > 0 && (
         <div
-          className="fixed top-20 right-4 z-[60] w-80 max-w-[calc(100vw-2rem)] animate-slide-in-right"
+          className="absolute top-full right-0 mt-2 z-[60] w-80 max-w-[calc(100vw-2rem)] animate-slide-in-right"
           style={{
             background: 'linear-gradient(165deg, rgba(20,22,30,0.95) 0%, rgba(14,16,24,0.95) 100%)',
             backdropFilter: 'blur(20px) saturate(1.3)',
@@ -112,7 +103,7 @@ export default function AlertBell() {
               </span>
             </div>
             <button
-              onClick={closeNotif}
+              onClick={close}
               className="w-6 h-6 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
             >
               <X className="w-3.5 h-3.5" />
@@ -126,7 +117,7 @@ export default function AlertBell() {
                 <Link
                   key={a.id}
                   to={a.to}
-                  onClick={closeNotif}
+                  onClick={close}
                   className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors group"
                 >
                   <span
@@ -148,6 +139,6 @@ export default function AlertBell() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

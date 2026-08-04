@@ -7,7 +7,7 @@ import BrandName from '@/components/layout/BrandName';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Bot } from 'lucide-react';
 
 export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
@@ -58,6 +58,25 @@ export default function DesktopNav() {
           <BrandName variant="desktop" />
         </Link>
 
+        {/* Dashboard quick-link — hidden when already on dashboard */}
+        {!isDashboard && (
+          <Link
+            to="/"
+            aria-label="Dashboard"
+            title="Dashboard"
+            className="hidden md:flex items-center gap-1.5 ml-1 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
+              border: '1px solid rgba(99,102,241,0.35)',
+              color: '#fff',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
+            }}
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            Dashboard
+          </Link>
+        )}
+
         {/* Page sub-nav tiles — synced with the left rail visibility */}
         <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <HeaderSubNav />
@@ -66,6 +85,21 @@ export default function DesktopNav() {
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
+          <Link
+            to="/agents"
+            aria-label="AI Agents"
+            title="AI Agents"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))',
+              border: '1px solid rgba(16,185,129,0.35)',
+              color: '#fff',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)',
+            }}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">AI Agents</span>
+          </Link>
           <AlertBell />
           <Link
             to="/settings"
