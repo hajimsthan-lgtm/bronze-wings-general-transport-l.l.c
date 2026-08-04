@@ -62,7 +62,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
       .then(all => {
         const outstanding = (all || [])
           .filter(inv => !['paid', 'cancelled'].includes(inv.status) && (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0) > 0.001)
-          .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+          .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || '') || String(a.invoice_number || '').localeCompare(String(b.invoice_number || '')));
         setOutstandingInvoices(outstanding);
       })
       .catch(() => setOutstandingInvoices([]))
@@ -144,6 +144,33 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
       .map(({ i }) => i);
     const newSelected = currentSelected.filter(i => !indices.includes(i));
     setAllocations(computeAllocations(form.amount, outstandingInvoices, newSelected));
+  };
+
+  // Manual override: user sets a custom amount for one invoice;
+  // system recalculates the remaining selected invoices in FIFO order
+  const handleManualAllocation = (idx, amount) => {
+    const manualAmount = Math.max(0, Number(amount) || 0);
+    let remaining = (Number(form.amount) || 0) - manualAmount;
+    const newAllocations = outstandingInvoices.map((inv, i) => {
+      const base = {
+        invoice_id: inv.id,
+        invoice_number: inv.invoice_number,
+        invoice_total: Number(inv.total_amount) || 0,
+        already_paid: Number(inv.paid_amount) || 0,
+      };
+      if (i === idx) {
+        return { ...base, allocated_amount: manualAmount, is_selected: true };
+      }
+      const isSelected = allocations[i]?.is_selected;
+      if (!isSelected || remaining <= 0) {
+        return { ...base, allocated_amount: 0, is_selected: isSelected };
+      }
+      const balance = Math.max(0, (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0));
+      const allocation = Math.min(remaining, balance);
+      remaining -= allocation;
+      return { ...base, allocated_amount: allocation, is_selected: true };
+    });
+    setAllocations(newAllocations);
   };
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
@@ -265,13 +292,13 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
                   </button>
                 </div>
               </div>
-              <p className="text-[10px] text-muted-foreground -mt-1 mb-2">Oldest invoice paid first. Toggle invoices to include — amounts auto-allocate in order.</p>
               <InvoiceAllocationList
                 allocations={allocations}
                 outstandingInvoices={outstandingInvoices}
                 onToggle={toggleInvoice}
                 onSelectAll={handleSelectAll}
                 onDeselectAll={handleDeselectAll}
+                onManualAllocation={handleManualAllocation}
                 loading={loadingInvoices}
               />
             </div>

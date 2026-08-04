@@ -303,10 +303,15 @@ export default function ClientDetail({ id: propId, inline = false }) {
                       const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
                       const isPartial = (Number(inv.paid_amount) || 0) > 0;
                       return (
-                        <div key={inv.id} className="flex items-center gap-3">
-                          <span className="text-xs font-medium text-foreground flex-1 min-w-0 truncate">{inv.invoice_number}</span>
+                        <div key={inv.id} className="flex items-center gap-3 py-1">
+                          <div className="w-8 h-8 rounded-lg glass-sm flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 14px -6px rgba(var(--panel-accent-rgb),0.4)' }}>
+                            <FileText className="w-3.5 h-3.5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-foreground truncate">{inv.invoice_number}</p>
+                            <p className="text-[10px] text-muted-foreground">{formatDate(inv.issue_date)}</p>
+                          </div>
                           {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
-                          <span className="text-[10px] text-muted-foreground">{formatDate(inv.issue_date)}</span>
                           <span className="text-xs font-semibold text-foreground tabular-nums">{formatCurrency(balance)}</span>
                         </div>
                       );
@@ -323,7 +328,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
                     return (
                       <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="row-card cursor-pointer hover:border-primary/30 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Receipt className="w-4 h-4 text-primary" /></div>
+                          <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
+                            <Receipt className="w-4 h-4 text-primary" />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
                             <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
@@ -362,7 +369,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
                 <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
                   {fixedCharges.map(rec => (
                     <div key={rec.id} className="row-card flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Repeat className="w-4 h-4 text-primary" /></div>
+                      <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}><Repeat className="w-4 h-4 text-primary" /></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{rec.description}</p>
                         <p className="text-xs text-muted-foreground capitalize">{rec.frequency} · {formatCurrency(rec.amount)}</p>

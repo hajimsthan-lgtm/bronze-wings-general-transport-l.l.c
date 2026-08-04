@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { FileText, Loader2, Search, CheckCheck, Square, Layers } from 'lucide-react';
 
-export default function InvoiceAllocationList({ allocations, outstandingInvoices, onToggle, onSelectAll, onDeselectAll, loading }) {
+export default function InvoiceAllocationList({ allocations, outstandingInvoices, onToggle, onSelectAll, onDeselectAll, onManualAllocation, loading }) {
   const [search, setSearch] = useState('');
 
   if (loading) {
@@ -58,7 +58,7 @@ export default function InvoiceAllocationList({ allocations, outstandingInvoices
         </Button>
       </div>
 
-      <p className="text-[10px] text-muted-foreground -mt-1">Oldest invoice is paid first — priority order shown by #.</p>
+      <p className="text-[10px] text-muted-foreground -mt-1">Oldest invoice paid first. Edit any amount — the rest auto-rebalance in order.</p>
 
       {/* Interactive Invoice Checklist */}
       <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
@@ -88,11 +88,19 @@ export default function InvoiceAllocationList({ allocations, outstandingInvoices
                     <span>Out: {formatCurrency(balance)}</span>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0 min-w-[80px]">
-                  {alloc.allocated_amount > 0 ? (
+                <div className="text-right flex-shrink-0 min-w-[96px]">
+                  {alloc.is_selected ? (
                     <>
-                      <p className="text-sm font-semibold text-emerald-400 tabular-nums">{formatCurrency(alloc.allocated_amount)}</p>
-                      <p className={`text-[10px] ${isFull ? 'text-emerald-400' : 'text-amber-400'}`}>{isFull ? 'Full Pay' : 'Partial'}</p>
+                      <Input
+                        type="number"
+                        value={alloc.allocated_amount || ''}
+                        onChange={e => onManualAllocation(idx, e.target.value)}
+                        className="h-7 w-[88px] text-xs text-right bg-background border-border tabular-nums px-2"
+                        placeholder="0.00"
+                      />
+                      {alloc.allocated_amount > 0 && (
+                        <p className={`text-[10px] mt-0.5 ${isFull ? 'text-emerald-400' : 'text-amber-400'}`}>{isFull ? 'Full Pay' : 'Partial'}</p>
+                      )}
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">—</p>
