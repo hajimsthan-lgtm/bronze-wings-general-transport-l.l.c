@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AlertBell from '@/components/layout/AlertBell';
+import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
@@ -7,11 +8,12 @@ import BrandName from '@/components/layout/BrandName';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
-import { Settings as SettingsIcon, LayoutDashboard, Bot } from 'lucide-react';
+import { Settings as SettingsIcon, LayoutDashboard, Bot, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const isDashboard = location.pathname === '/';
   const railVisible = useRailVisible();
   useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
@@ -58,13 +60,23 @@ export default function DesktopNav() {
           <BrandName variant="desktop" />
         </Link>
 
-        {/* Dashboard quick-link — hidden when already on dashboard */}
+        {/* Step-back button */}
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+          title="Go back"
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </button>
+
+        {/* Dashboard quick-link — icon-only circle, hidden when already on dashboard */}
         {!isDashboard && (
           <Link
             to="/"
             aria-label="Dashboard"
             title="Dashboard"
-            className="hidden md:flex items-center gap-1.5 ml-1 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
+            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300"
             style={{
               background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
               border: '1px solid rgba(99,102,241,0.35)',
@@ -72,10 +84,12 @@ export default function DesktopNav() {
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
             }}
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            Dashboard
+            <LayoutDashboard className="w-4 h-4" />
           </Link>
         )}
+
+        {/* Global date filter — controls all pages simultaneously */}
+        <GlobalDateFilter />
 
         {/* Page sub-nav tiles — synced with the left rail visibility */}
         <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -84,6 +98,15 @@ export default function DesktopNav() {
 
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
+          {/* Step-forward button */}
+          <button
+            onClick={() => navigate(1)}
+            aria-label="Go forward"
+            title="Go forward"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
           <LiveClock />
           <Link
             to="/agents"

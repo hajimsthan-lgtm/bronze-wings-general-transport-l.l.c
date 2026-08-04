@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Settings, GraduationCap } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Settings, GraduationCap, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useTour, gatherTourSteps } from '@/lib/tour';
@@ -7,12 +7,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import BrandName from '@/components/layout/BrandName';
+import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
 
 export default function MobileHeader() {
   const { theme, toggleTheme } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
   const tour = useTour();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const startTour = () => {
     const steps = gatherTourSteps();
     if (!steps.length) { toast({ title: 'No guided sections on this page' }); return; }
@@ -59,6 +61,23 @@ export default function MobileHeader() {
           <BrandName variant="mobile" />
         </Link>
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            title="Go back"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <GlobalDateFilter />
+          <button
+            onClick={() => navigate(1)}
+            aria-label="Go forward"
+            title="Go forward"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
           <button
             onClick={startTour}
             className="w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/40 flex items-center justify-center text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"

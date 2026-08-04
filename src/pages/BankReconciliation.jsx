@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Landmark, Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -39,8 +40,7 @@ export default function BankReconciliation() {
   const [form, setForm] = useState({ date: new Date().toISOString().slice(0, 10), deposit: '', withdrawal: '', description: '' });
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('statement');
-  const [filterFrom, setFilterFrom] = useState('');
-  const [filterTo, setFilterTo] = useState('');
+  const { dateFrom: filterFrom, dateTo: filterTo, setDateFrom: setFilterFrom, setDateTo: setFilterTo } = useGlobalDate();
   const [q, setQ] = useState('');
 
   const load = useCallback(async () => {

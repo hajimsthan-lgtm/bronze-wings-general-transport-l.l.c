@@ -7,7 +7,6 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import ReportStatCard, { hexToRgba } from '@/components/reports/ReportStatCard';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
@@ -16,6 +15,7 @@ import TrendChart from '@/components/reports/TrendChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
 import RadialGauge from '@/components/reports/RadialGauge';
 import { useReportClient } from '@/lib/reportClientFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 
 const contentCardStyle = {
   background: '#232636',
@@ -38,8 +38,7 @@ const statusMeta = (s) => {
 export default function DailyReport() {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo } = useGlobalDate();
   const [trips, setTrips] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
@@ -120,13 +119,6 @@ export default function DailyReport() {
             ]}
             title="Daily Report"
             options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
-          />
-          <DateRangeFilter
-            fromValue={dateFrom}
-            onFromChange={setDateFrom}
-            toValue={dateTo}
-            onToChange={setDateTo}
-            onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
           />
         </div>} />
 

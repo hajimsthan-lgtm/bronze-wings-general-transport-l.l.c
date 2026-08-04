@@ -10,11 +10,11 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import QuickActions from '@/components/dashboard/QuickActions';
 import HeroGreetingCard from '@/components/dashboard/HeroGreetingCard';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
 import BalanceCard from '@/components/dashboard/BalanceCard';
 import GoalsList from '@/components/dashboard/GoalsList';
 import { motion } from 'framer-motion';
 import { safeListAll } from '@/lib/safeRequest';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell,
@@ -70,8 +70,7 @@ const tooltipStyle = {
 export default function Dashboard() {
   const { t } = useI18n();
   const [loading, setLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo } = useGlobalDate();
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -198,13 +197,6 @@ export default function Dashboard() {
         <p className="text-xs text-muted-foreground">
           Showing data for <span className="text-foreground font-medium">{formatDate(dateFrom)}</span> — <span className="text-foreground font-medium">{formatDate(dateTo)}</span>
         </p>
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
       </div>
 
       {/* Balance card — circular gauge + revenue + mini stats */}

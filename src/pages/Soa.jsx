@@ -6,9 +6,9 @@ import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { useReportClient } from '@/lib/reportClientFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
@@ -31,8 +31,7 @@ export default function Soa() {
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
   const reportClient = useReportClient();
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo } = useGlobalDate();
 
   useEffect(() => {
     safeAll([
@@ -120,13 +119,6 @@ export default function Soa() {
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
