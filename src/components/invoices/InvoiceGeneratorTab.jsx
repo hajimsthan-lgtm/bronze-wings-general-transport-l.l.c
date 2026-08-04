@@ -393,7 +393,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
                 const FIcon = fi.Icon;
                 const ageDays = inv.due_date ? Math.max(0, Math.ceil((new Date() - new Date(inv.due_date)) / 86400000)) : 0;
                 return (
-                  <div key={inv.id} onClick={() => onEditInvoice?.(inv)} className={`row-card flex items-center gap-3 cursor-pointer hover:!translate-y-0 transition-colors ${checked ? 'border-amber-500/40' : ''}`}>
+                  <div key={inv.id} onClick={() => toggleInv(inv.id)} onDoubleClick={() => onEditInvoice?.(inv)} className={`row-card flex items-center gap-3 cursor-pointer hover:!translate-y-0 transition-colors ${checked ? 'border-amber-500/40' : ''}`}>
                     <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
                     <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
                     <div className="flex-1 min-w-0">
