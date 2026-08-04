@@ -17,6 +17,7 @@ import SubTabBar from '@/components/common/SubTabBar';
 import ImageUpload from '@/components/common/ImageUpload';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import Services from './Services';
+import { safeListAll } from '@/lib/safeRequest';
 import { Plus, Search, Truck, Pencil, Trash2, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Vehicles() {
@@ -49,12 +50,17 @@ function VehiclesTab() {
   const [fuelRecords, setFuelRecords] = useState([]);
   const [expenses, setExpenses] = useState([]);
 
-  const load = () => {
+  const load = async () => {
     setLoading(true);
-    base44.entities.Vehicle.list('-created_date', 100).then(setItems).finally(() => setLoading(false));
-    base44.entities.Trip.list('-created_date', 200).then(setTrips).catch(() => {});
-    base44.entities.FuelRecord.list('-created_date', 200).then(setFuelRecords).catch(() => {});
-    base44.entities.Expense.list('-created_date', 200).then(setExpenses).catch(() => {});
+    try {
+      const [v, tr, fr, ex] = await safeListAll([
+        () => base44.entities.Vehicle.list('-created_date', 100).catch(() => []),
+        () => base44.entities.Trip.list('-created_date', 200).catch(() => []),
+        () => base44.entities.FuelRecord.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Expense.list('-created_date', 200).catch(() => []),
+      ]);
+      setItems(v || []); setTrips(tr || []); setFuelRecords(fr || []); setExpenses(ex || []);
+    } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

@@ -18,6 +18,9 @@ export async function withRetry(fn, retries = 5) {
   }
 }
 
+// Runs multiple .list() calls sequentially with retry (concurrency 1).
+export const safeListAll = (tasks) => safeAll(tasks, 1);
+
 // Runs async tasks with limited concurrency + retry to avoid rate-limit bursts.
 export async function safeAll(tasks, concurrency = 2) {
   const results = new Array(tasks.length);

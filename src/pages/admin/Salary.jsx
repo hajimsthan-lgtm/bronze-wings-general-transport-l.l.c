@@ -16,6 +16,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { safeListAll } from '@/lib/safeRequest';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -39,18 +40,19 @@ export default function Salary() {
   const [yearFilter, setYearFilter] = useState(String(now.getFullYear()));
   const [statusFilter, setStatusFilter] = useState('');
 
-  const load = () => {
+  const load = async () => {
     setLoading(true);
-    Promise.all([
-      base44.entities.SalaryRecord.list('-created_date', 200).catch(() => []),
-      base44.entities.Driver.list('-created_date', 200).catch(() => []),
-      getCompanySettings(),
-    ]).then(([r, d, s]) => {
+    try {
+      const [r, d, s] = await safeListAll([
+        () => base44.entities.SalaryRecord.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
+        () => getCompanySettings(),
+      ]);
       setRecords(r || []);
       setDrivers(d || []);
       setDriverMap(Object.fromEntries((d || []).map((x) => [x.name, x.id])));
       setSettings(s || {});
-    }).finally(() => setLoading(false));
+    } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

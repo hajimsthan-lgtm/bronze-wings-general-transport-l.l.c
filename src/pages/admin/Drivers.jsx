@@ -17,6 +17,7 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ImageUpload from '@/components/common/ImageUpload';
 import Salary from './Salary';
+import { safeListAll } from '@/lib/safeRequest';
 import { Plus, Search, Users, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Drivers() {
@@ -44,12 +45,15 @@ function DriversTab() {
   const [view, setView] = useState('list');
   const [mode, setMode] = useState('analytics');
 
-  const load = () => {
+  const load = async () => {
     setLoading(true);
-    Promise.all([
-      base44.entities.Driver.list('-created_date', 200).catch(() => []),
-      base44.entities.Trip.list('-trip_date', 500).catch(() => []),
-    ]).then(([d, tr]) => { setDrivers(d || []); setTrips(tr || []); }).finally(() => setLoading(false));
+    try {
+      const [d, tr] = await safeListAll([
+        () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Trip.list('-trip_date', 500).catch(() => []),
+      ]);
+      setDrivers(d || []); setTrips(tr || []);
+    } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 

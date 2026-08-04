@@ -14,6 +14,7 @@ import DateRangeFilter from '@/components/common/DateRangeFilter';
 import BalanceCard from '@/components/dashboard/BalanceCard';
 import GoalsList from '@/components/dashboard/GoalsList';
 import { motion } from 'framer-motion';
+import { safeListAll } from '@/lib/safeRequest';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   PieChart, Pie, Cell,
@@ -79,12 +80,14 @@ export default function Dashboard() {
   const [drivers, setDrivers] = useState([]);
 
   const loadData = useCallback(async () => {
-    const tr = await base44.entities.Trip.list('-created_date', 50).catch(() => []);
-    const inv = await base44.entities.Invoice.list('-created_date', 50).catch(() => []);
-    const v = await base44.entities.Vehicle.list().catch(() => []);
-    const d = await base44.entities.Document.list().catch(() => []);
-    const e = await base44.entities.Expense.list('-created_date', 50).catch(() => []);
-    const dr = await base44.entities.Driver.list().catch(() => []);
+    const [tr, inv, v, d, e, dr] = await safeListAll([
+      () => base44.entities.Trip.list('-created_date', 50).catch(() => []),
+      () => base44.entities.Invoice.list('-created_date', 50).catch(() => []),
+      () => base44.entities.Vehicle.list().catch(() => []),
+      () => base44.entities.Document.list().catch(() => []),
+      () => base44.entities.Expense.list('-created_date', 50).catch(() => []),
+      () => base44.entities.Driver.list().catch(() => []),
+    ]);
     setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e); setDrivers(dr);
   }, []);
 
