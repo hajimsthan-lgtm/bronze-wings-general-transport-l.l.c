@@ -55,6 +55,7 @@ export default function ContentSidebar() {
   const [hoveredChild, setHoveredChild] = useState(null);
   const dimTimer = useRef(null);
   const vanishTimer = useRef(null);
+  const collapseTimer = useRef(null);
 
   /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
   const poke = () => {
@@ -228,8 +229,8 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
       <aside
-        onMouseEnter={() => { poke(); railVisibility.setExpanded(true); }}
-        onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
+        onMouseEnter={() => { poke(); clearTimeout(collapseTimer.current); railVisibility.setExpanded(true); }}
+        onMouseLeave={() => { clearTimeout(collapseTimer.current); collapseTimer.current = setTimeout(() => { railVisibility.setExpanded(false); setHoveredKey(null); }, 2000); }}
         className="relative flex flex-col h-full overflow-visible"
         style={{
           width,
@@ -237,7 +238,7 @@ export default function ContentSidebar() {
           paddingBottom: 16,
           paddingLeft: 8,
           paddingRight: 8,
-          gap: 10,
+          gap: 14,
           background: 'transparent',
           borderRight: 'none',
           backdropFilter: 'none',
@@ -259,7 +260,7 @@ export default function ContentSidebar() {
         />
 
         {/* Scrollable dock list */}
-        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-5" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-7" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
       </aside>

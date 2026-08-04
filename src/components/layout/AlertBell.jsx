@@ -31,6 +31,8 @@ export default function AlertBell() {
   const [closing, setClosing] = useState(false);
   const [progress, setProgress] = useState(100);
   const closeRef = useRef(null);
+  const leaveTimer = useRef(null);
+  const containerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -182,9 +184,32 @@ export default function AlertBell() {
   const handleOpen = () => { if (!showNotif) setShowNotif(true); };
   const handleClose = () => {
     if (closeRef.current) clearInterval(closeRef.current);
+    clearTimeout(leaveTimer.current);
     setClosing(true);
     setTimeout(() => { setShowNotif(false); setClosing(false); }, 200);
   };
+
+  // 3-second hold before closing on mouse leave; outside click closes instantly
+  const handleMouseEnter = () => {
+    clearTimeout(leaveTimer.current);
+    if (!showNotif) setShowNotif(true);
+  };
+  const handleMouseLeave = () => {
+    clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => handleClose(), 3000);
+  };
+
+  useEffect(() => {
+    if (!showNotif) return;
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        clearTimeout(leaveTimer.current);
+        handleClose();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showNotif]);
 
   const handleAlertClick = (to) => {
     handleClose();
@@ -197,9 +222,10 @@ export default function AlertBell() {
 
   return (
     <div
+      ref={containerRef}
       className="relative"
-      onMouseEnter={handleOpen}
-      onMouseLeave={handleClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
         aria-label="Alerts"
@@ -236,8 +262,8 @@ export default function AlertBell() {
               ? 'notif-out 0.2s cubic-bezier(0.16,1,0.3,1) forwards'
               : 'notif-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
           }}
-          onMouseEnter={pauseAutoClose}
-          onMouseLeave={handleClose}
+          onMouseEnter={() => { pauseAutoClose(); clearTimeout(leaveTimer.current); }}
+          onMouseLeave={handleMouseLeave}
         >
           <div
             style={{

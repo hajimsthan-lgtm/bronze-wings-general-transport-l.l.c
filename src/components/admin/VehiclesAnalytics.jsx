@@ -1,4 +1,4 @@
-import { Truck, Gauge, Fuel as FuelIcon, Wrench, Wallet, CalendarClock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Truck, Gauge, Fuel as FuelIcon, Wrench, Wallet, CalendarClock, ShieldCheck, ArrowRight, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
@@ -52,6 +52,22 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
     .map((v) => ({ name: v.plate_number, revenue: revMap[v.plate_number] || 0, trips: tripCountMap[v.plate_number] || 0 }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 6);
+
+  // Vehicle utilization — trips per vehicle
+  const utilization = vehicles
+    .map((v) => ({ name: v.plate_number, trips: tripCountMap[v.plate_number] || 0, revenue: revMap[v.plate_number] || 0, status: v.status }))
+    .sort((a, b) => b.trips - a.trips)
+    .slice(0, 6);
+  const maxTrips = Math.max(1, ...utilization.map((u) => u.trips));
+
+  // Fuel cost by vehicle
+  const fuelCostByVehicle = {};
+  fuelRecords.forEach((r) => { if (r.vehicle_plate) fuelCostByVehicle[r.vehicle_plate] = (fuelCostByVehicle[r.vehicle_plate] || 0) + (Number(r.total_cost) || 0); });
+  const topFuelVehicles = Object.entries(fuelCostByVehicle)
+    .map(([name, cost]) => ({ name, cost }))
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, 5);
+  const totalFuelByTop = topFuelVehicles.reduce((s, v) => s + v.cost, 0);
 
   const months = [];
   const now = new Date();
@@ -153,6 +169,89 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ReportSectionCard index={8} color="#f97316" title="Fleet Expenses & Fuel Trend">
           <TrendChart data={trendData} series={[{ key: 'fuel', name: 'Fuel', color: '#f97316' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={220} />
+        </ReportSectionCard>
+
+        <ReportSectionCard index={9} color="#3b82f6" title="Vehicle Utilization"
+          action={<button onClick={() => navigate('/admin/vehicles')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
+          {utilization.length === 0 || utilization[0].trips === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No trip data yet.</p> : (
+            <div className="space-y-3">
+              {utilization.map((u) => {
+                const pct = maxTrips > 0 ? (u.trips / maxTrips) * 100 : 0;
+                const tone = u.status === 'active' ? '#34d399' : u.status === 'maintenance' ? '#f59e0b' : '#94a3b8';
+                return (
+                  <div key={u.name}>
+                    <div className="flex justify-between text-xs mb-1.5">
+                      <span className="text-white/70 truncate flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: tone }} />
+                        {u.name}
+                      </span>
+                      <span className="text-white/80 tabular-nums">{u.trips} trips · {formatCurrency(u.revenue)}</span>
+                    </div>
+                    <ProgressBar pct={pct} color="#3b82f6" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </ReportSectionCard>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <ReportSectionCard index={10} color="#f97316" title="Fuel Cost by Vehicle">
+          {topFuelVehicles.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No fuel records yet.</p> : (
+            <div className="space-y-3">
+              {topFuelVehicles.map((v) => {
+                const pct = totalFuelByTop > 0 ? (v.cost / totalFuelByTop) * 100 : 0;
+                return (
+                  <div key={v.name}>
+                    <div className="flex justify-between text-xs mb-1.5">
+                      <span className="text-white/70 truncate">{v.name}</span>
+                      <span className="text-white/80 tabular-nums">{formatCurrency(v.cost)}</span>
+                    </div>
+                    <ProgressBar pct={pct} color="#f97316" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </ReportSectionCard>
+
+        <ReportSectionCard index={11} color="#a855f7" title="Fleet Revenue vs Expenses">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.15)' }}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)' }}>
+                  <Wallet className="w-4 h-4 text-emerald-400" />
+                </span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-white/45 font-semibold">Total Revenue</p>
+                  <p className="text-lg font-bold text-white tabular-nums">{formatCurrency(totalRevenue)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)' }}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  <Wallet className="w-4 h-4 text-red-400" />
+                </span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-white/45 font-semibold">Fleet Expenses</p>
+                  <p className="text-lg font-bold text-white tabular-nums">{formatCurrency(fleetExpenses)}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.15)' }}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                  <TrendingUp className="w-4 h-4 text-violet-400" />
+                </span>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-white/45 font-semibold">Net Profit</p>
+                  <p className="text-lg font-bold text-white tabular-nums">{formatCurrency(totalRevenue - fleetExpenses)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </ReportSectionCard>
       </div>
     </div>
