@@ -105,7 +105,7 @@ export default function ContentSidebar() {
             else switchTab(item.key);
           }}
           onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
-          className="group relative flex items-center rounded-2xl transition-all duration-300"
+          className="group relative flex items-center rounded-2xl transition-all duration-500"
           style={{
             height: 46,
             width: '100%',
@@ -153,7 +153,7 @@ export default function ContentSidebar() {
 
           {/* floating label bubble — collapsed only */}
           {!expanded && (
-            <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-50">
+            <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 z-50">
               <span
                 className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
                 style={{
@@ -186,7 +186,7 @@ export default function ContentSidebar() {
                   key={child.key}
                   onClick={() => { poke(); navigate(child.path); }}
                   onMouseEnter={poke}
-                  className="group relative flex items-center rounded-full transition-all duration-300"
+                  className="group relative flex items-center rounded-full transition-all duration-500"
                   style={{
                     height: 34,
                     padding: '0 16px',
@@ -249,7 +249,7 @@ export default function ContentSidebar() {
           opacity: panelDimming ? 0 : 1,
           pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
-            `width ${expanded ? '.4s' : '.15s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`,
+            `width ${expanded ? '.6s' : '.25s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`,
         }}
       >
         {/* vertical spine connector — runs through all dock nodes */}
