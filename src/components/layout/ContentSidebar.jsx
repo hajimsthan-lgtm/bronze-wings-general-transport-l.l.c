@@ -105,7 +105,8 @@ export default function ContentSidebar() {
             else switchTab(item.key);
           }}
           onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
-          className="group relative flex items-center rounded-2xl transition-all duration-500"
+          aria-label={label}
+          className="group relative flex items-center rounded-2xl transition-all duration-500 select-none"
           style={{
             height: 46,
             width: '100%',
@@ -119,11 +120,13 @@ export default function ContentSidebar() {
               : `inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 10px rgba(0,0,0,0.32)`,
             backdropFilter: 'blur(14px) saturate(1.35)',
             WebkitBackdropFilter: 'blur(14px) saturate(1.35)',
+            cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {/* icon node sitting on the spine */}
           <span
-            className="relative flex items-center justify-center shrink-0 rounded-xl"
+            className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none"
             style={{
               width: 30, height: 30,
               background: active
@@ -144,7 +147,7 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap"
+              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none"
               style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
             >
               {label}
@@ -186,7 +189,8 @@ export default function ContentSidebar() {
                   key={child.key}
                   onClick={() => { poke(); navigate(child.path); }}
                   onMouseEnter={poke}
-                  className="group relative flex items-center rounded-full transition-all duration-500"
+                  aria-label={childLabel}
+                  className="group relative flex items-center rounded-full transition-all duration-500 select-none"
                   style={{
                     height: 34,
                     padding: '0 16px',
@@ -200,18 +204,20 @@ export default function ContentSidebar() {
                       : 'inset 0 1px 0 rgba(255,255,255,0.03)',
                     backdropFilter: 'blur(8px)',
                     WebkitBackdropFilter: 'blur(8px)',
+                    cursor: 'pointer',
+                    touchAction: 'manipulation',
                   }}
                 >
                   {/* small node dot on the branch line */}
                   <span
-                    className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+                    className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none"
                     style={{
                       background: childActive ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
                       boxShadow: childActive ? `0 0 6px rgba(${child.glow},0.8)` : 'none',
                     }}
                   />
                   <span
-                    className="text-[10px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+                    className="text-[10px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap pointer-events-none"
                     style={{ color: childActive ? '#fff' : 'rgba(255,255,255,0.62)' }}
                   >
                     {childLabel}
@@ -227,13 +233,10 @@ export default function ContentSidebar() {
 
   return (
     <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
-      {/* invisible edge strip — hover to recall a vanished rail */}
-      <div className="absolute left-0 top-0 w-2 h-full z-[56]" onMouseEnter={poke} />
       <aside
-        onClick={() => { poke(); if (!expanded) railVisibility.setExpanded(true); }}
         onMouseEnter={() => { poke(); railVisibility.setExpanded(true); }}
         onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
-        className="relative flex flex-col h-full overflow-visible cursor-pointer"
+        className="relative flex flex-col h-full overflow-visible"
         style={{
           width,
           paddingTop: 16,
