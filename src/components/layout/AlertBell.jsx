@@ -196,7 +196,11 @@ export default function AlertBell() {
   const dotGlow = criticalCount > 0 ? 'rgba(239,68,68,0.8)' : 'rgba(245,158,11,0.8)';
 
   return (
-    <div className="relative" onMouseEnter={handleOpen}>
+    <div
+      className="relative"
+      onMouseEnter={handleOpen}
+      onMouseLeave={handleClose}
+    >
       <button
         aria-label="Alerts"
         title="Alerts"
@@ -233,6 +237,7 @@ export default function AlertBell() {
               : 'notif-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
           }}
           onMouseEnter={pauseAutoClose}
+          onMouseLeave={handleClose}
         >
           <div
             style={{

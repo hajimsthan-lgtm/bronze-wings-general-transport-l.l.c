@@ -37,76 +37,72 @@ export default function DesktopNav() {
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
 
       <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-3 group/brand">
-          {isDashboard && (
-            <div className="relative">
-              <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
-              {logoUrl ?
-              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
-                border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-                boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
-              }} /> :
-              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+        {/* Brand + step-back at the left corner */}
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 group/brand">
+            {isDashboard && (
+              <div className="relative">
+                <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
+                {logoUrl ?
+                <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
                   border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-                  boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
-                }}>
-                <span className="text-sm font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
-              </div>}
-            </div>
-          )}
-          <BrandName variant="desktop" />
-        </Link>
-
-        {/* Step-back button */}
-        <button
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-          title="Go back"
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-
-        {/* Dashboard quick-link — icon-only circle, hidden when already on dashboard */}
-        {!isDashboard && (
-          <Link
-            to="/"
-            aria-label="Dashboard"
-            title="Dashboard"
-            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
-              border: '1px solid rgba(99,102,241,0.35)',
-              color: '#fff',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
-            }}
-          >
-            <LayoutDashboard className="w-4 h-4" />
+                  boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+                }} /> :
+                <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+                    border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                    boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+                  }}>
+                  <span className="text-sm font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
+                </div>}
+              </div>
+            )}
+            <BrandName variant="desktop" />
           </Link>
-        )}
 
-        {/* Global date filter — controls all pages simultaneously */}
-        <GlobalDateFilter />
-
-        {/* Page sub-nav tiles — synced with the left rail visibility */}
-        <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-          <HeaderSubNav />
-        </div>
-
-        {/* Right controls — dark glass circles */}
-        <div className="flex items-center gap-2">
-          {/* Step-forward button */}
+          {/* Step-back button — left corner */}
           <button
-            onClick={() => navigate(1)}
-            aria-label="Go forward"
-            title="Go forward"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            title="Go back"
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
           >
-            <ArrowRight className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Center cluster — dashboard icon, date filter, sub-nav */}
+        <div className="flex items-center gap-2">
+          {/* Dashboard quick-link — icon-only circle, hidden when already on dashboard */}
+          {!isDashboard && (
+            <Link
+              to="/"
+              aria-label="Dashboard"
+              title="Dashboard"
+              className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
+                border: '1px solid rgba(99,102,241,0.35)',
+                color: '#fff',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
+              }}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+            </Link>
+          )}
+
+          {/* Global date filter — controls all pages simultaneously */}
+          <GlobalDateFilter />
+
+          {/* Page sub-nav tiles — synced with the left rail visibility */}
+          <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <HeaderSubNav />
+          </div>
+        </div>
+
+        {/* Right controls — dark glass circles, step-forward at the far right corner */}
+        <div className="flex items-center gap-2">
           <LiveClock />
           <Link
             to="/agents"
@@ -132,6 +128,15 @@ export default function DesktopNav() {
           >
             <SettingsIcon className="w-4 h-4" />
           </Link>
+          {/* Step-forward button — right corner */}
+          <button
+            onClick={() => navigate(1)}
+            aria-label="Go forward"
+            title="Go forward"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </nav>

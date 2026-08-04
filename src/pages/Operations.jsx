@@ -3,6 +3,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
@@ -17,8 +18,7 @@ import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency } from '@/lib/formatters';
-import { hexToRgba } from '@/components/reports/ReportStatCard';
-import { Truck, FileText, Wallet, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { Truck, FileText } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -69,11 +69,10 @@ export default function Operations() {
   const { data: invoices = [], refetch: refetchInvoices } = useInvoices();
   const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
 
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('card');
   const [search, setSearch] = useState('');
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
 
@@ -191,37 +190,7 @@ export default function Operations() {
     return c;
   }, [contracts]);
 
-  // Light analytics strip — adapts to the active mode
-  const analytics = useMemo(() => {
-    if (mode === 'contract') {
-      const list = filteredContracts;
-      const monthlyTotal = list.reduce((s, c) => s + (Number(c.monthly_rate) || 0), 0);
-      const active = list.filter((c) => c.status === 'active').length;
-      const margins = list.map((c) => {
-        const exp = (expensesByContract[c.id] || []).reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const mr = Number(c.monthly_rate) || 0;
-        return mr > 0 ? Math.round(((mr - exp) / mr) * 100) : 0;
-      });
-      const avgMargin = margins.length ? Math.round(margins.reduce((a, b) => a + b, 0) / margins.length) : 0;
-      return [
-        { label: 'Monthly Total', value: formatCurrency(monthlyTotal), icon: Wallet, accent: '#34d399', sub: `${list.length} contracts`, action: () => setMode('contract'), active: contractFilter === 'all' },
-        { label: 'Contracts', value: list.length, icon: FileText, accent: '#a855f7', sub: `${active} active`, action: () => setMode('contract'), active: false },
-        { label: 'Active', value: active, icon: CheckCircle2, accent: '#34d399', sub: `${list.length - active} others`, action: () => setContractFilter('active'), active: contractFilter === 'active' },
-        { label: 'Avg Margin', value: `${avgMargin}%`, icon: TrendingUp, accent: '#60a5fa', sub: 'avg margin', action: () => setMode('contract'), active: false },
-      ];
-    }
-    const list = filteredTrips;
-    const revenue = list.reduce((s, tr) => s + (Number(tr.revenue) || 0), 0);
-    const completed = list.filter((tr) => tr.status === 'completed').length;
-    const inTransit = list.filter((tr) => tr.status === 'in_transit').length;
-    const scheduled = list.filter((tr) => tr.status === 'scheduled').length;
-    return [
-      { label: 'Revenue', value: formatCurrency(revenue), icon: Wallet, accent: '#34d399', sub: `${list.length} trips`, action: () => setMode('all'), active: mode === 'all' && tripFilter === 'all' },
-      { label: 'Trips', value: list.length, icon: Truck, accent: '#60a5fa', sub: `${completed} completed`, action: () => setMode('trip'), active: mode === 'trip' && tripFilter === 'all' },
-      { label: 'Completed', value: completed, icon: CheckCircle2, accent: '#a855f7', sub: `${inTransit} in transit`, action: () => setTripFilter('completed'), active: tripFilter === 'completed' },
-      { label: 'In Transit', value: inTransit, icon: Clock, accent: '#fbbf24', sub: `${scheduled} scheduled`, action: () => setTripFilter('in_transit'), active: tripFilter === 'in_transit' },
-    ];
-  }, [mode, filteredTrips, filteredContracts, expensesByContract]);
+
 
   // Form handlers
   const openNewTrip = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
@@ -362,39 +331,6 @@ export default function Operations() {
               ? `${trips.length} ${t('trips').toLowerCase()} · ${contracts.length} ${t('monthly_contract').toLowerCase()}`
               : `${trips.length} total trips`}
         />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
-          {analytics.map((a, i) => {
-            const Icon = a.icon;
-            return (
-              <div
-                key={a.label}
-                onClick={() => a.action?.()}
-                className="group relative flex items-center gap-3 rounded-2xl pl-2.5 pr-3.5 py-2.5 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 animate-fade-in-up overflow-hidden"
-                style={{
-                  animationDelay: `${i * 0.04}s`,
-                  background: a.active
-                    ? 'linear-gradient(135deg, rgba(59,130,246,0.22), rgba(59,130,246,0.06))'
-                    : 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.72), rgba(var(--surf-2-rgb),0.85))',
-                  border: a.active ? '1px solid rgba(59,130,246,0.45)' : '1px solid rgba(255,255,255,0.06)',
-                  boxShadow: a.active
-                    ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 24px -4px rgba(59,130,246,0.5), 0 8px 24px rgba(0,0,0,0.4)'
-                    : 'inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 18px rgba(0,0,0,0.28)',
-                }}
-              >
-                <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full pointer-events-none opacity-25 blur-2xl" style={{ background: `radial-gradient(circle, ${hexToRgba(a.accent, 0.5)} 0%, transparent 70%)` }} />
-                <div className="relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `linear-gradient(135deg, ${hexToRgba(a.accent, 0.25)}, ${hexToRgba(a.accent, 0.08)})`, border: `1px solid ${hexToRgba(a.accent, 0.35)}` }}>
-                  <Icon className="w-5 h-5" style={{ color: a.accent }} />
-                </div>
-                <div className="relative min-w-0 flex-1">
-                  <p className="text-sm font-bold text-white truncate leading-tight">{a.label}</p>
-                  <p className="text-[10px] text-white/45 truncate leading-tight">{a.sub}</p>
-                </div>
-                <p className="relative text-base font-bold tabular-nums tracking-tight flex-shrink-0" style={{ color: a.accent }}>{a.value}</p>
-              </div>
-            );
-          })}
-        </div>
 
         {/* All operations controls moved to the sticky sub-head bar (TopBar slot) */}
 

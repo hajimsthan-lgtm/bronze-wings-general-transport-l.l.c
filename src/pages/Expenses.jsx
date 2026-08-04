@@ -18,6 +18,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useExpenses, useExpenseCreate, useExpenseUpdate, useExpenseDelete } from '@/hooks/useEntityQueries';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
@@ -44,8 +45,7 @@ export default function Expenses() {
   const [viewMode, setViewMode] = useState('list');
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useSheetUrlState('expense');
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [editItem, setEditItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const deleteExpense = useExpenseDelete();
