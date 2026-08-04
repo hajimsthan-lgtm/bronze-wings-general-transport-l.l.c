@@ -20,6 +20,7 @@ import TrendChart from '@/components/reports/TrendChart';
 import RadialGauge from '@/components/reports/RadialGauge';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { useReportClient } from '@/lib/reportClientFilter';
+import { safeAll } from '@/lib/safeRequest';
 
 const addDays = (iso, n) => { const d = new Date(iso); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
 
@@ -34,11 +35,11 @@ export default function ProfitLoss() {
   const reportClient = useReportClient();
 
   const loadData = useCallback(async () => {
-    const [t, e, f] = await Promise.all([
-      base44.entities.Trip.list('-trip_date', 500),
-      base44.entities.Expense.list('-date', 500),
-      base44.entities.FuelRecord.list('-date', 500),
-    ]);
+    const [t, e, f] = await safeAll([
+      () => base44.entities.Trip.list('-trip_date', 500),
+      () => base44.entities.Expense.list('-date', 500),
+      () => base44.entities.FuelRecord.list('-date', 500),
+    ], 1);
     setTrips(t); setExpenses(e); setFuelRecords(f);
   }, []);
 

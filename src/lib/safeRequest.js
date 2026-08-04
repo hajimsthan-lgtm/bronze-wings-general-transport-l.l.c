@@ -1,5 +1,5 @@
-// Retries a promise-returning function on rate-limit (429) with exponential backoff.
-export async function withRetry(fn, retries = 3) {
+// Retries a promise-returning function on rate-limit (429) with exponential backoff + jitter.
+export async function withRetry(fn, retries = 5) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await fn();
@@ -9,13 +9,17 @@ export async function withRetry(fn, retries = 3) {
         err?.code === 429 ||
         err?.response?.status === 429;
       if (!isRateLimit || attempt === retries) throw err;
-      await new Promise((r) => setTimeout(r, 400 * Math.pow(2, attempt)));
+      // Respect Retry-After header when available, else exponential backoff with jitter.
+      const retryAfter = err?.response?.headers?.['retry-after'];
+      const base = retryAfter ? parseFloat(retryAfter) * 1000 : 600 * Math.pow(2, attempt);
+      const delay = base + Math.random() * 300; // jitter to spread concurrent retries
+      await new Promise((r) => setTimeout(r, delay));
     }
   }
 }
 
 // Runs async tasks with limited concurrency + retry to avoid rate-limit bursts.
-export async function safeAll(tasks, concurrency = 3) {
+export async function safeAll(tasks, concurrency = 2) {
   const results = new Array(tasks.length);
   let idx = 0;
   const workers = Array.from({ length: Math.min(concurrency, tasks.length) }, async () => {
