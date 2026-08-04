@@ -1583,6 +1583,23 @@
   * { scrollbar-width: none; -ms-overflow-style: none; }
 }
 
+/* ===== AlertBell notification animations ===== */
+@keyframes notif-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes notif-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(0.96); filter: blur(4px); }
+}
+@keyframes notif-item-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notif-in, .notif-out, .notif-item-in { animation: none !important; }
+}
+
 /* ===== Entity detail-page motion ===== */
 @keyframes detail-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes meta-stagger { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
