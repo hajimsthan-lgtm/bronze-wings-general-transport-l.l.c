@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { safeAll } from '@/lib/safeRequest';
 import {
   Bell, X, Wrench, FileWarning, FileText, Truck,
   CalendarClock, IdCard, AlertTriangle, ChevronRight,
@@ -34,13 +35,13 @@ export default function AlertBell() {
 
   useEffect(() => {
     (async () => {
-      const [inv, vehicles, documents, drivers, trips] = await Promise.all([
-        base44.entities.Invoice.list('-created_date', 50).catch(() => []),
-        base44.entities.Vehicle.list().catch(() => []),
-        base44.entities.Document.list().catch(() => []),
-        base44.entities.Driver.list().catch(() => []),
-        base44.entities.Trip.list('-trip_date', 30).catch(() => []),
-      ]);
+      const [inv, vehicles, documents, drivers, trips] = await safeAll([
+        () => base44.entities.Invoice.list('-created_date', 50).catch(() => []),
+        () => base44.entities.Vehicle.list().catch(() => []),
+        () => base44.entities.Document.list().catch(() => []),
+        () => base44.entities.Driver.list().catch(() => []),
+        () => base44.entities.Trip.list('-trip_date', 30).catch(() => []),
+      ], 1);
 
       const items = [];
 
