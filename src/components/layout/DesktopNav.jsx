@@ -35,24 +35,47 @@ export default function DesktopNav() {
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
 
       <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Dashboard — round, far left, hidden on dashboard */}
-          {!isDashboard && (
-            <Link
-              to="/"
-              aria-label="Dashboard"
-              title="Dashboard"
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all duration-300 hover:border-indigo-500/40 hover:bg-indigo-500/10 hover:text-white"
-            >
-              <LayoutDashboard className="w-4 h-4" />
-            </Link>
+        {/* Brand */}
+        <Link to="/" className="flex items-center gap-3 group/brand">
+          {isDashboard && (
+            <div className="relative">
+              <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
+              {logoUrl ?
+              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
+                border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+              }} /> :
+              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+                  border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                  boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
+                }}>
+                <span className="text-sm font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
+              </div>}
+            </div>
           )}
-          {/* Brand */}
-          <Link to="/" className="flex items-center gap-3 group/brand">
-...
           <BrandName variant="desktop" />
+        </Link>
+
+        {/* Dashboard quick-link — hidden when already on dashboard */}
+        {!isDashboard && (
+          <Link
+            to="/"
+            aria-label="Dashboard"
+            title="Dashboard"
+            className="hidden md:flex items-center gap-1.5 ml-1 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
+              border: '1px solid rgba(99,102,241,0.35)',
+              color: '#fff',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
+            }}
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            Dashboard
           </Link>
-        </div>
+        )}
 
         {/* Page sub-nav tiles — synced with the left rail visibility */}
         <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -62,6 +85,21 @@ export default function DesktopNav() {
         {/* Right controls — dark glass circles */}
         <div className="flex items-center gap-2">
           <LiveClock />
+          <Link
+            to="/agents"
+            aria-label="AI Agents"
+            title="AI Agents"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))',
+              border: '1px solid rgba(16,185,129,0.35)',
+              color: '#fff',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)',
+            }}
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">AI Agents</span>
+          </Link>
           <AlertBell />
           <Link
             to="/settings"
@@ -70,15 +108,6 @@ export default function DesktopNav() {
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
           >
             <SettingsIcon className="w-4 h-4" />
-          </Link>
-          {/* AI Agents — round, far right */}
-          <Link
-            to="/agents"
-            aria-label="AI Agents"
-            title="AI Agents"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white"
-          >
-            <Bot className="w-4 h-4" />
           </Link>
         </div>
       </div>

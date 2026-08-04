@@ -53,20 +53,15 @@ export default function ContentSidebar() {
   const panelDimming = useRailDimming();
   const [hoveredKey, setHoveredKey] = useState(null);
   const [hoveredChild, setHoveredChild] = useState(null);
-  const [clickedKey, setClickedKey] = useState(null);
   const dimTimer = useRef(null);
   const vanishTimer = useRef(null);
 
-  /* idle timeline only starts when the cursor leaves the nav bar */
-  const cancelIdle = () => {
+  /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
+  const poke = () => {
     clearTimeout(dimTimer.current);
     clearTimeout(vanishTimer.current);
     railVisibility.set(true);
     railVisibility.setDimming(false);
-  };
-  const startIdle = () => {
-    clearTimeout(dimTimer.current);
-    clearTimeout(vanishTimer.current);
     dimTimer.current = setTimeout(() => railVisibility.setDimming(true), 5000);
     vanishTimer.current = setTimeout(() => railVisibility.set(false), 10000);
   };
@@ -77,12 +72,7 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  useEffect(() => {
-    railVisibility.set(true);
-    railVisibility.setDimming(false);
-    startIdle();
-    return () => { clearTimeout(dimTimer.current); clearTimeout(vanishTimer.current); };
-  }, []);
+  useEffect(() => { poke(); return () => { clearTimeout(dimTimer.current); clearTimeout(vanishTimer.current); }; }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
@@ -91,8 +81,8 @@ export default function ContentSidebar() {
     const active = isActive(item);
     const label = t(item.key) || item.label;
     const hasChildren = !!item.children?.length;
-    const showChildren = expanded && hasChildren && clickedKey === item.key;
-    const dimmed = expanded && clickedKey !== null && clickedKey !== item.key;
+    const showChildren = expanded && hasChildren && hoveredKey === item.key;
+    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
     const lit = active || hoveredKey === item.key;
 
     return (
@@ -103,20 +93,11 @@ export default function ContentSidebar() {
       >
         <button
           onClick={() => {
-            if (hasChildren) {
-              if (expanded && clickedKey === item.key) {
-                railVisibility.setExpanded(false);
-                setClickedKey(null);
-              } else {
-                railVisibility.setExpanded(true);
-                setClickedKey(item.key);
-                navigate(item.children[0].path);
-              }
-            } else {
-              switchTab(item.key);
-            }
+            poke();
+            if (hasChildren) navigate(item.children[0].path);
+            else switchTab(item.key);
           }}
-          onMouseEnter={() => { setHoveredKey(item.key); }}
+          onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
           aria-label={label}
           className="group relative flex items-center rounded-2xl transition-all duration-500 select-none"
           style={{
@@ -199,8 +180,8 @@ export default function ContentSidebar() {
               return (
                 <button
                   key={child.key}
-                  onClick={() => { navigate(child.path); }}
-                  onMouseEnter={() => { setHoveredChild(child.key); }}
+                  onClick={() => { poke(); navigate(child.path); }}
+                  onMouseEnter={() => { poke(); setHoveredChild(child.key); }}
                   onMouseLeave={() => setHoveredChild(null)}
                   aria-label={childLabel}
                   className="group relative flex items-center rounded-full transition-all duration-500 select-none"
@@ -247,8 +228,8 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
       <aside
-        onMouseEnter={() => { cancelIdle(); }}
-        onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); setClickedKey(null); startIdle(); }}
+        onMouseEnter={() => { poke(); railVisibility.setExpanded(true); }}
+        onMouseLeave={() => { railVisibility.setExpanded(false); setHoveredKey(null); }}
         className="relative flex flex-col h-full overflow-visible"
         style={{
           width,

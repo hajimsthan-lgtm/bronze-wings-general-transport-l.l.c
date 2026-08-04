@@ -55,12 +55,16 @@ export default function AlertBell() {
   }, []);
 
   const count = alerts.length;
+  const open = () => setShowNotif(true);
   const close = () => setShowNotif(false);
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onMouseEnter={open}
+      onMouseLeave={close}
+    >
       <button
-        onClick={() => setShowNotif((s) => !s)}
         aria-label="Alerts"
         title="Alerts"
         className="relative flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
