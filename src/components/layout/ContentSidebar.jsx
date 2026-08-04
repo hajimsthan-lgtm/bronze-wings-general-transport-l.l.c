@@ -212,7 +212,7 @@ export default function ContentSidebar() {
 
         {/* ── Sub-routes — compact glass tile style ── */}
         {showChildren && (
-          <div className="space-y-0.5 pl-2.5 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
+          <div className="space-y-1.5 pl-2.5 pr-1" style={{ animation: 'fade-in 0.25s ease both' }}>
             {item.children.map((child) => {
               const childActive = isChildActive(child);
               const childLabel = child.label || t(child.key);
@@ -270,7 +270,7 @@ export default function ContentSidebar() {
           paddingBottom: 12,
           paddingLeft: 6,
           paddingRight: 6,
-          gap: 5,
+          gap: 8,
           background: 'transparent',
           borderRight: 'none',
           backdropFilter: 'none',
@@ -283,7 +283,7 @@ export default function ContentSidebar() {
         }}
       >
         {/* Scrollable nav list */}
-        <div className="flex-1 overflow-y-auto thin-scroll space-y-2" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="flex-1 overflow-y-auto thin-scroll space-y-3" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
 

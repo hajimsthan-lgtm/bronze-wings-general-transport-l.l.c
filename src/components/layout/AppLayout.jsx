@@ -55,7 +55,7 @@ export default function AppLayout() {
           className="animate-fade-in-up md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll"
         >
           <div
-            className={`p-4 pb-28 md:pb-28 md:pr-6 ${showHeader ? 'md:pt-32' : 'md:pt-5'}`}
+            className={`p-5 pb-28 md:pb-28 md:pr-8 ${showHeader ? 'md:pt-36' : 'md:pt-6'}`}
             style={{
               paddingLeft: isMobile ? undefined : `${railWidth}px`,
               transition: 'padding-left 0.45s cubic-bezier(0.16,1,0.3,1)',

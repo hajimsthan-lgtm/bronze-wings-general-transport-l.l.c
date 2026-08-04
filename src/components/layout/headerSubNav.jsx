@@ -66,7 +66,7 @@ export default function HeaderSubNav({ className = '' }) {
   if (!subNav.length) return null;
 
   return (
-    <nav key={location.pathname} className={`flex items-center gap-1.5 ${className}`}>
+    <nav key={location.pathname} className={`flex items-center gap-3 ${className}`}>
       {subNav.map((item, i) => {
         const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
         const Icon = SUBNAV_ICON[item.key] || FileText;
@@ -91,8 +91,8 @@ export default function HeaderSubNav({ className = '' }) {
                 background: `linear-gradient(160deg, rgba(${st.glow},0.24) 0%, rgba(${st.glow},0.08) 100%)`,
                 border: `1px solid rgba(${st.glow},${isActive ? 0.6 : 0.3})`,
                 boxShadow: isActive
-                  ? `inset 0 1px 0 rgba(255,255,255,0.28), inset 0 0 18px rgba(${st.glow},0.28), 0 6px 22px rgba(${st.glow},0.5), 0 0 0 1px rgba(${st.glow},0.35), 0 0 28px -2px rgba(${st.glow},0.7), 0 0 48px -4px rgba(${st.glow},0.4)`
-                  : `inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 6px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.04)`,
+                  ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 4px 14px rgba(${st.glow},0.35), 0 0 0 1px rgba(${st.glow},0.3)`
+                  : `inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.3)`,
                 color: `rgb(${st.glow})`,
                 backdropFilter: 'blur(6px)',
                 WebkitBackdropFilter: 'blur(6px)',
@@ -101,7 +101,7 @@ export default function HeaderSubNav({ className = '' }) {
               <span className="pointer-events-none absolute inset-x-[2px] top-[1px] h-1/2 rounded-t-[10px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.24), transparent)' }} />
               <Icon className="relative w-5 h-5" style={{
                 color: isActive ? '#fff' : `rgba(${st.glow},0.95)`,
-                filter: isActive ? `drop-shadow(0 0 6px rgba(${st.glow},0.85))` : 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))',
+                filter: isActive ? `drop-shadow(0 0 4px rgba(${st.glow},0.5))` : 'none',
               }} />
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]">
                 <span className="absolute top-0 left-[-120%] h-full w-1/2 skew-x-[-20deg] opacity-0 group-hover/sub:opacity-100 group-hover/sub:left-[150%] transition-all duration-700" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)' }} />
