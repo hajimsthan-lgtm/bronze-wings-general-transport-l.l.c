@@ -56,6 +56,7 @@ export default function ContentSidebar() {
   const dimTimer = useRef(null);
   const vanishTimer = useRef(null);
   const collapseTimer = useRef(null);
+  const asideRef = useRef(null);
 
   /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
   const poke = () => {
@@ -75,6 +76,18 @@ export default function ContentSidebar() {
 
   useEffect(() => { poke(); return () => { clearTimeout(dimTimer.current); clearTimeout(vanishTimer.current); }; }, []);
 
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (asideRef.current && !asideRef.current.contains(e.target)) {
+        clearTimeout(collapseTimer.current);
+        railVisibility.setExpanded(false);
+        setHoveredKey(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
 
   /* ── Parent floating glass dock ── */
@@ -89,7 +102,7 @@ export default function ContentSidebar() {
     return (
       <div
         key={item.key}
-        className="relative transition-opacity duration-300"
+        className="relative transition-opacity duration-300 flex flex-col items-start"
         style={{ opacity: dimmed ? 0.12 : 1 }}
       >
         <button
@@ -100,13 +113,11 @@ export default function ContentSidebar() {
           }}
           onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
           aria-label={label}
-          className="group relative flex items-center rounded-2xl transition-all duration-500 select-none"
+          className="group relative inline-flex items-center rounded-full transition-all duration-500 select-none"
           style={{
-            height: 46,
-            width: '100%',
-            justifyContent: expanded ? 'flex-start' : 'center',
+            height: 40,
             padding: expanded ? '0 14px' : '0',
-            gap: expanded ? 12 : 0,
+            gap: expanded ? 10 : 0,
             background: `linear-gradient(135deg, rgba(${item.glow},${active ? 0.22 : 0.10}) 0%, rgba(${item.glow},${active ? 0.06 : 0.03}) 100%)`,
             border: `1px solid rgba(${item.glow},${active ? 0.48 : 0.20})`,
             boxShadow: active
@@ -229,8 +240,9 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
       <aside
+        ref={asideRef}
         onMouseEnter={() => { poke(); clearTimeout(collapseTimer.current); railVisibility.setExpanded(true); }}
-        onMouseLeave={() => { clearTimeout(collapseTimer.current); collapseTimer.current = setTimeout(() => { railVisibility.setExpanded(false); setHoveredKey(null); }, 2000); }}
+        onMouseLeave={() => { clearTimeout(collapseTimer.current); collapseTimer.current = setTimeout(() => { railVisibility.setExpanded(false); setHoveredKey(null); }, 1000); }}
         className="relative flex flex-col h-full overflow-visible"
         style={{
           width,

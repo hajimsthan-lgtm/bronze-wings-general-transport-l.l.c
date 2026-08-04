@@ -5,6 +5,7 @@ import { Inbox, ChevronDown } from 'lucide-react';
  * Reusable card wrapping a 12-col grid table.
  * Collapsible cards default to collapsed, expand on hover (preview),
  * and pin open on click until clicked again.
+ * Slow animated expand/collapse via max-height + opacity transition.
  */
 export default function TabTableCard({
   title,
@@ -25,6 +26,7 @@ export default function TabTableCard({
   const rows = Array.isArray(children) ? children : children ? [children] : [];
   const hasRows = rows.length > 0;
   const panelId = `ttc-${(title || 'card').replace(/\s/g, '-').toLowerCase()}`;
+  const isOpen = !collapsible || open;
 
   const handleToggle = () => {
     if (pinned) { setPinned(false); setOpen(false); }
@@ -48,7 +50,7 @@ export default function TabTableCard({
               aria-label={`Toggle ${title}`}
               className="p-1 rounded-lg hover:bg-muted transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
             >
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-700 ${open ? '' : '-rotate-90'}`} />
             </button>
           )}
           <div>
@@ -59,30 +61,37 @@ export default function TabTableCard({
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
 
-      {(!collapsible || open) && (
-        <div id={panelId} role="region" aria-label={title}>
-          {headerExtra}
+      <div
+        id={panelId}
+        role="region"
+        aria-label={title}
+        className="overflow-hidden transition-all duration-700 ease-in-out"
+        style={{
+          maxHeight: isOpen ? '5000px' : '0',
+          opacity: isOpen ? 1 : 0,
+        }}
+      >
+        {headerExtra}
 
-          <div className="rounded-xl border border-border overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-              {columns.map((c, i) => (
-                <div key={i} className={c.className}>{c.label}</div>
-              ))}
-            </div>
-            {loading ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
-            ) : hasRows ? (
-              <div className="divide-y divide-border">{children}</div>
-            ) : (
-              <div className="py-10 text-center">
-                {EmptyIcon && <EmptyIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />}
-                <p className="text-sm text-muted-foreground">{emptyTitle}</p>
-                {emptyHint && <p className="text-xs text-muted-foreground/70 mt-1">{emptyHint}</p>}
-              </div>
-            )}
+        <div className="rounded-xl border border-border overflow-hidden">
+          <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+            {columns.map((c, i) => (
+              <div key={i} className={c.className}>{c.label}</div>
+            ))}
           </div>
+          {loading ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">Loading…</div>
+          ) : hasRows ? (
+            <div className="divide-y divide-border">{children}</div>
+          ) : (
+            <div className="py-10 text-center">
+              {EmptyIcon && <EmptyIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />}
+              <p className="text-sm text-muted-foreground">{emptyTitle}</p>
+              {emptyHint && <p className="text-xs text-muted-foreground/70 mt-1">{emptyHint}</p>}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

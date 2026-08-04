@@ -191,9 +191,8 @@ export default function DriverDetail() {
           </TabsContent>
 
           <TabsContent value="salary" className="mt-4">
-            <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
+            <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />
             <TabTableCard
-              collapsible
             title="Salary Records"
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
@@ -257,10 +256,12 @@ export default function DriverDetail() {
           <TabsContent value="documents" className="mt-4">
             <EntityDocumentsTab entityType="driver" entityId={driver.id} collapsible />
           </TabsContent>
-          <DriverDeductionsSection driverName={driver.name} />
-          <WeeklyActivityChart trips={trips} />
-          <HoursGauge hours={totalHours} />
-          <TripChecklist trips={fTrips} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DriverDeductionsSection driverName={driver.name} />
+            <WeeklyActivityChart trips={trips} />
+            <HoursGauge hours={totalHours} />
+            <TripChecklist trips={fTrips} />
+          </div>
         </div>
       </div>
 

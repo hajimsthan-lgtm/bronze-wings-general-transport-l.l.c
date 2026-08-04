@@ -176,7 +176,7 @@ export default function VehicleDetail() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')} className="h-full">
+        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} collapsible onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fTrips.slice(0, 5).map((trip, i, arr) => (
               <div key={trip.id} className="flex gap-3">
@@ -197,7 +197,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
+        <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} collapsible onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fFuel.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.16)}` }}>
@@ -212,7 +212,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Service" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
+        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Service" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fServices.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
@@ -228,7 +228,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
+        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} collapsible onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fExpenses.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
