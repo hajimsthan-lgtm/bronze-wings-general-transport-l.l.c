@@ -8,10 +8,9 @@ import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
-import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, ChevronDown, Receipt, Building2, Calendar as CalendarIcon } from 'lucide-react';
+import { Inbox, FileText, Repeat, Plus, Pencil, Trash2, Download, ChevronDown, Receipt, Building2, Calendar as CalendarIcon, Truck } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import FixedChargeFormSheet from '@/components/admin/FixedChargeFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
@@ -27,6 +26,7 @@ import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSel
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 import ClientTripsList from '@/components/clients/ClientTripsList';
 import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
+import CollapsibleSection from '@/components/common/CollapsibleSection';
 
 export default function ClientDetail({ id: propId, inline = false }) {
   const params = useParams();
@@ -203,9 +203,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
   ];
 
   return (
-    <div className="detail-page">
+    <div className="detail-page space-y-4">
       {inline ? (
-        <div className="detail-header-card p-4 mb-4 flex items-center gap-3 animate-fade-in-up">
+        <div className="detail-header-card p-4 flex items-center gap-3 animate-fade-in-up">
           <div className="w-11 h-11 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5" /></div>
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-bold text-foreground truncate">{client.name}</h2>
@@ -219,19 +219,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
         subtitle={client.contact_person}
         badge={<StatusBadge status={client.status} />}
         backTo="/admin/clients"
-        info={[
-          { label: 'Email', value: client.email },
-          { label: 'Phone', value: client.phone },
-          { label: 'TRN', value: client.trn },
-          { label: 'Payment Terms', value: client.payment_terms },
-          { label: 'Address', value: client.address },
-        ]}
       />
       )}
 
-      <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">
-        <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
-      </div>
       <ContactPersonSmartSelector
         contactPersons={client.contact_persons || []}
         activeFilter={contactFilter}
@@ -239,7 +229,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
         onAdd={() => { setEditContactIndex(null); setEditContactOpen(true); }}
         onEdit={openEditContact}
       />
-      <div className="glass-card p-3 mb-4 flex items-center gap-3 flex-wrap">
+      <div className="glass-card p-3 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-primary" />
           <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Page date filter</span>
@@ -254,145 +244,147 @@ export default function ClientDetail({ id: propId, inline = false }) {
         <div className="flex-1" />
         <span className="text-[10px] text-muted-foreground hidden sm:inline">Filters trips · invoices · payments</span>
       </div>
-      <Tabs defaultValue="trips">
-        <TabsList>
-          <TabsTrigger value="trips">{t('trips')} ({displayTrips.length})</TabsTrigger>
-          <TabsTrigger value="generator">Invoices ({invoices.length})</TabsTrigger>
-          <TabsTrigger value="payments">{t('payments')} ({payments.length})</TabsTrigger>
-          <TabsTrigger value="charges">{t('fixed_charges')} ({fixedCharges.length})</TabsTrigger>
-          <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="trips" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <ClientTripsList
-              trips={displayTrips}
-              getTripInvoice={getTripInvoice}
-              onToggleInvoiceSent={toggleTripInvoiceSent}
-              onGenerateInvoice={generateTripInvoiceRow}
-              onBulkComplete={bulkComplete}
-              onBulkInvoice={bulkInvoice}
-            />
-          )}
-        </TabsContent>
+      {/* Grid: profile (left) | sections (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
+        <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">
+          <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
+        </div>
+        <div className="space-y-4">
+          {/* Trips */}
+          <CollapsibleSection title={t('trips')} icon={Truck} accent="#3b82f6" count={displayTrips.length}>
+            {dataLoading ? <LoadingSpinner /> : (
+              <ClientTripsList
+                trips={displayTrips}
+                getTripInvoice={getTripInvoice}
+                onToggleInvoiceSent={toggleTripInvoiceSent}
+                onGenerateInvoice={generateTripInvoiceRow}
+                onBulkComplete={bulkComplete}
+                onBulkInvoice={bulkInvoice}
+              />
+            )}
+          </CollapsibleSection>
 
-        <TabsContent value="generator" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <InvoiceGeneratorTab
-              client={client}
-              trips={trips}
-              invoices={invoices}
-              payments={payments}
-              onInvoicesChanged={reloadInvoices}
-              onNewInvoice={() => { setEditInvoice(null); setInvoiceFormOpen(true); }}
-              onEditInvoice={(inv) => { setEditInvoice(inv); setInvoiceFormOpen(true); }}
-              clientInvoiceSeq={clientInvoiceSeq}
-            />
-          )}
-        </TabsContent>
+          {/* Invoices */}
+          <CollapsibleSection title="Invoices" icon={FileText} accent="#a855f7" count={invoices.length} actions={
+            <Button onClick={() => { setEditInvoice(null); setInvoiceFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" /> New
+            </Button>
+          }>
+            {dataLoading ? <LoadingSpinner /> : (
+              <InvoiceGeneratorTab
+                client={client}
+                trips={trips}
+                invoices={invoices}
+                payments={payments}
+                onInvoicesChanged={reloadInvoices}
+                onNewInvoice={() => { setEditInvoice(null); setInvoiceFormOpen(true); }}
+                onEditInvoice={(inv) => { setEditInvoice(inv); setInvoiceFormOpen(true); }}
+                clientInvoiceSeq={clientInvoiceSeq}
+              />
+            )}
+          </CollapsibleSection>
 
-        <TabsContent value="payments" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <>
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding</span>
-                  <ExportButtons data={outstandingExportData} filename={`${client.name}-outstanding`} columns={outstandingExportCols} title={`${client.name} — Outstanding Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Paid</span>
-                  <ExportButtons data={paidExportData} filename={`${client.name}-payments`} columns={paidExportCols} title={`${client.name} — Paid Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
-                </div>
-              </div>
-
-              {outstandingInvoices.length > 0 && (
-                <div className="row-card mb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Invoices</p>
-                    <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} unpaid</span>
+          {/* Payments */}
+          <CollapsibleSection title={t('payments')} icon={Receipt} accent="#34d399" count={payments.length} actions={
+            <Button onClick={() => { setEditPayment(null); setPaymentFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" /> {t('payments')}
+            </Button>
+          }>
+            {dataLoading ? <LoadingSpinner /> : (
+              <>
+                <div className="flex flex-wrap items-center gap-4 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding</span>
+                    <ExportButtons data={outstandingExportData} filename={`${client.name}-outstanding`} columns={outstandingExportCols} title={`${client.name} — Outstanding Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
                   </div>
-                  <div className="space-y-1.5 max-h-[300px] overflow-y-auto thin-scroll pr-1">
-                    {outstandingInvoices.map(inv => {
-                      const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
-                      const isPartial = (Number(inv.paid_amount) || 0) > 0;
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Paid</span>
+                    <ExportButtons data={paidExportData} filename={`${client.name}-payments`} columns={paidExportCols} title={`${client.name} — Paid Payments`} options={{ dateRange: `${dateFrom} to ${dateTo}` }} />
+                  </div>
+                </div>
+
+                {outstandingInvoices.length > 0 && (
+                  <div className="row-card mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Outstanding Invoices</p>
+                      <span className="text-[10px] text-muted-foreground">{outstandingInvoices.length} unpaid</span>
+                    </div>
+                    <div className="space-y-1.5 max-h-[300px] overflow-y-auto thin-scroll pr-1">
+                      {outstandingInvoices.map(inv => {
+                        const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
+                        const isPartial = (Number(inv.paid_amount) || 0) > 0;
+                        return (
+                          <div key={inv.id} className="flex items-center gap-3 py-1">
+                            <div className="w-8 h-8 rounded-lg glass-sm flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 14px -6px rgba(var(--panel-accent-rgb),0.4)' }}>
+                              <FileText className="w-3.5 h-3.5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-foreground truncate">{inv.invoice_number}</p>
+                              <p className="text-[10px] text-muted-foreground">{formatDate(inv.issue_date)}</p>
+                            </div>
+                            {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
+                            <span className="text-xs font-semibold text-foreground tabular-nums">{formatCurrency(balance)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {filteredPayments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
+                  <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                    {filteredPayments.map(p => {
+                      const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
+                      const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
                       return (
-                        <div key={inv.id} className="flex items-center gap-3 py-1">
-                          <div className="w-8 h-8 rounded-lg glass-sm flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 14px -6px rgba(var(--panel-accent-rgb),0.4)' }}>
-                            <FileText className="w-3.5 h-3.5 text-primary" />
+                        <div key={p.id} className={`row-card transition-colors ${selectedPayments.has(p.id) ? 'border-primary/40' : ''}`}>
+                          <div className="flex items-center gap-3">
+                            <button onClick={() => togglePaymentSelect(p.id)} className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all" style={{ borderColor: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'rgba(255,255,255,0.2)', background: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'transparent' }}>
+                              {selectedPayments.has(p.id) && <span className="w-2 h-2 rounded-full bg-white" />}
+                            </button>
+                            <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
+                              <Receipt className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }}>
+                              <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
+                              <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
+                            </div>
+                            {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
+                            <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
+                            <StatusBadge status={p.status} />
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <button onClick={() => downloadPaymentSlip(p)} title="Download payment slip" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Download className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} title="Edit" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                              <button onClick={() => deletePayment(p)} title="Delete" className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-foreground truncate">{inv.invoice_number}</p>
-                            <p className="text-[10px] text-muted-foreground">{formatDate(inv.issue_date)}</p>
-                          </div>
-                          {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
-                          <span className="text-xs font-semibold text-foreground tabular-nums">{formatCurrency(balance)}</span>
+                          {allocs.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1.5">
+                              {allocs.map(a => (
+                                <span key={a.invoice_id} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 whitespace-nowrap">
+                                  {a.invoice_number}: {formatCurrency(a.allocated_amount)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              )}
+                )}
+              </>
+            )}
+          </CollapsibleSection>
 
-              {filteredPayments.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
-                <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
-                  {filteredPayments.map(p => {
-                    const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
-                    const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
-                    return (
-                      <div key={p.id} className={`row-card transition-colors ${selectedPayments.has(p.id) ? 'border-primary/40' : ''}`}>
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => togglePaymentSelect(p.id)} className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all" style={{ borderColor: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'rgba(255,255,255,0.2)', background: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'transparent' }}>
-                            {selectedPayments.has(p.id) && <span className="w-2 h-2 rounded-full bg-white" />}
-                          </button>
-                          <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
-                            <Receipt className="w-4 h-4 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }}>
-                            <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
-                            <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
-                          </div>
-                          {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
-                          <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
-                          <StatusBadge status={p.status} />
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button onClick={() => downloadPaymentSlip(p)} title="Download payment slip" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Download className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} title="Edit" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => deletePayment(p)} title="Delete" className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                          </div>
-                        </div>
-                        {allocs.length > 0 && (
-                          <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1.5">
-                            {allocs.map(a => (
-                              <span key={a.invoice_id} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 whitespace-nowrap">
-                                {a.invoice_number}: {formatCurrency(a.allocated_amount)}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="charges" className="mt-4">
-          {dataLoading ? <LoadingSpinner /> : (
-            <>
-              <div className="flex justify-end mb-3">
-                <Button onClick={() => { setEditCharge(null); setChargeFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> {t('add_fixed_charge')}
-                </Button>
-              </div>
-              {fixedCharges.length === 0 ? <EmptyState icon={Repeat} title={t('no_data')} /> : (
+          {/* Fixed Charges */}
+          <CollapsibleSection title={t('fixed_charges')} icon={Repeat} accent="#f59e0b" count={fixedCharges.length} actions={
+            <Button onClick={() => { setEditCharge(null); setChargeFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" /> {t('add_fixed_charge')}
+            </Button>
+          }>
+            {dataLoading ? <LoadingSpinner /> : (
+              fixedCharges.length === 0 ? <EmptyState icon={Repeat} title={t('no_data')} /> : (
                 <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
                   {fixedCharges.map(rec => (
                     <div key={rec.id} className="row-card flex items-center gap-3">
@@ -411,15 +403,16 @@ export default function ClientDetail({ id: propId, inline = false }) {
                     </div>
                   ))}
                 </div>
-              )}
-            </>
-          )}
-        </TabsContent>
+              )
+            )}
+          </CollapsibleSection>
 
-        <TabsContent value="documents" className="mt-4">
-          <EntityDocumentsTab entityType="client" entityId={client.id} />
-        </TabsContent>
-      </Tabs>
+          {/* Documents */}
+          <CollapsibleSection title={t('documents')} icon={FileText} accent="#a855f7">
+            <EntityDocumentsTab entityType="client" entityId={client.id} />
+          </CollapsibleSection>
+        </div>
+      </div>
 
       <FixedChargeFormSheet open={chargeFormOpen} onOpenChange={setChargeFormOpen} editItem={editCharge} clientName={client.name} onSaved={reloadCharges} />
       <InvoiceFormSheet open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} editInvoice={editInvoice} defaultClientName={client.name} onSaved={reloadInvoices} />
