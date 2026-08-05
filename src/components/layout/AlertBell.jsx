@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { safeAll } from '@/lib/safeRequest';
 import { buildAlerts, CATEGORIES, SEVERITY } from '@/lib/alertEngine';
+import TripsOperationsSection from './TripsOperationsSection';
 import {
   Bell, X, ChevronRight, ChevronDown, CheckCheck,
   FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
@@ -34,6 +35,9 @@ export default function AlertBell() {
     return e;
   });
   const [activeCategory, setActiveCategory] = useState('all');
+  const [tripsOpsCount, setTripsOpsCount] = useState(0);
+  const [tripsOpsCritical, setTripsOpsCritical] = useState(0);
+  const [tripsOpsExpanded, setTripsOpsExpanded] = useState(false);
   const closeRef = useRef(null);
   const leaveTimer = useRef(null);
   const containerRef = useRef(null);
@@ -63,8 +67,13 @@ export default function AlertBell() {
     return { alerts: all, byCategory: byCat };
   }, [rawAlerts, dismissed]);
 
-  const count = alerts.length;
-  const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
+  const count = alerts.length + tripsOpsCount;
+  const criticalCount = alerts.filter((a) => a.severity === 'critical').length + tripsOpsCritical;
+
+  const handleTripsOpsCount = useCallback((info) => {
+    setTripsOpsCount(info.count || 0);
+    setTripsOpsCritical(info.critical || 0);
+  }, []);
 
   // Auto-expand the first non-empty category on first open
   useEffect(() => {
@@ -292,6 +301,13 @@ export default function AlertBell() {
             {/* Categorized feed */}
             {count > 0 ? (
               <div className="max-h-[380px] overflow-y-auto thin-scroll p-2 space-y-1">
+                {activeCategory === 'all' && (
+                  <TripsOperationsSection
+                    expanded={tripsOpsExpanded}
+                    onToggle={() => setTripsOpsExpanded((p) => !p)}
+                    onCountChange={handleTripsOpsCount}
+                  />
+                )}
                 {visibleCategories
                   .filter((k) => activeCategory === 'all' || activeCategory === k)
                   .map((catKey) => {
