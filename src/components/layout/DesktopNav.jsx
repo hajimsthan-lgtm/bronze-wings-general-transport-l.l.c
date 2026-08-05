@@ -126,7 +126,7 @@ export default function DesktopNav() {
             title="Settings"
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
             
-            <SettingsIcon className="w-4 h-4" />
+            <SettingsIcon className="w-4 h-4" style={{ color: '#c8c8d4', filter: 'drop-shadow(0 0 3px rgba(200,200,212,0.35))' }} />
           </Link>
           {/* Step-forward button — right corner */}
           <button

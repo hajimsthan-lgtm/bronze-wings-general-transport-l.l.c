@@ -1583,6 +1583,20 @@
   * { scrollbar-width: none; -ms-overflow-style: none; }
 }
 
+/* ===== Bell gold swing animation ===== */
+@keyframes bell-swing {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(12deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(6deg); }
+  80% { transform: rotate(-4deg); }
+}
+.bell-gold-swing {
+  transform-origin: top center;
+  animation: bell-swing 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .bell-gold-swing { animation: none !important; } }
+
 /* ===== AlertBell notification animations ===== */
 @keyframes notif-in {
   from { opacity: 0; transform: translateY(-8px) scale(0.96); filter: blur(4px); }

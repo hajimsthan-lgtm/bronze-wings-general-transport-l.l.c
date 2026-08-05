@@ -233,7 +233,7 @@ export default function AlertBell() {
         onClick={() => (showNotif ? handleClose() : handleOpen())}
         className="relative flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-[rgb(var(--panel-accent-rgb))]/30 hover:bg-white/10 hover:text-white"
       >
-        <Bell className="w-4 h-4" />
+        <Bell className="w-4 h-4 bell-gold-swing" style={{ color: '#f5c542', filter: 'drop-shadow(0 0 4px rgba(245,197,66,0.5))' }} />
         {count > 0 && (
           <span
             className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full text-[9px] font-bold text-white flex items-center justify-center"
