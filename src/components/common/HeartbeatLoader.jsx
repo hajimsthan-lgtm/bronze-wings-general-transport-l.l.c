@@ -52,7 +52,6 @@ function injectStyles() {
       transform: translateY(-50%);
       border-radius: 50%;
       filter: blur(12px);
-      opacity: 0.25;
       animation: hb-c-pulse 1.6s ease-in-out infinite;
       pointer-events: none;
     }
@@ -69,51 +68,37 @@ function injectStyles() {
       stroke-linejoin: round;
       animation: hb-c-pulse 1.6s ease-in-out infinite;
     }
-    .hb-compact .hb-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
     .hb-compact .hb-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
+      flex-shrink: 0;
       animation: hb-c-pulse 1.6s ease-in-out infinite;
-    }
-    .hb-compact .hb-label {
-      font-family: var(--font-mono, monospace);
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
-      white-space: nowrap;
     }
     @keyframes hb-c-pulse {
       0%, 100% { opacity: 0.25; }
       50% { opacity: 1; }
     }
-    /* Color variants */
+    /* Color variants — pulse matches stroke color */
     .hb-compact.hb-violet .hb-path { stroke: #a855f7; filter: drop-shadow(0 0 4px #a855f7) drop-shadow(0 0 8px #a855f7); }
     .hb-compact.hb-violet .hb-glow { background: radial-gradient(ellipse at center, rgba(168,85,247,0.4), transparent 70%); }
-    .hb-compact.hb-violet .hb-dot { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+    .hb-compact.hb-violet .hb-dot { background: #a855f7; box-shadow: 0 0 6px #a855f7, 0 0 12px rgba(168,85,247,0.5); }
 
     .hb-compact.hb-green .hb-path { stroke: #10b981; filter: drop-shadow(0 0 4px #10b981) drop-shadow(0 0 8px #10b981); }
     .hb-compact.hb-green .hb-glow { background: radial-gradient(ellipse at center, rgba(16,185,129,0.4), transparent 70%); }
-    .hb-compact.hb-green .hb-dot { background: #10b981; box-shadow: 0 0 6px #10b981; }
+    .hb-compact.hb-green .hb-dot { background: #10b981; box-shadow: 0 0 6px #10b981, 0 0 12px rgba(16,185,129,0.5); }
 
     .hb-compact.hb-red .hb-path { stroke: #ef4444; filter: drop-shadow(0 0 4px #ef4444) drop-shadow(0 0 8px #ef4444); }
     .hb-compact.hb-red .hb-glow { background: radial-gradient(ellipse at center, rgba(239,68,68,0.4), transparent 70%); }
-    .hb-compact.hb-red .hb-dot { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    .hb-compact.hb-red .hb-dot { background: #ef4444; box-shadow: 0 0 6px #ef4444, 0 0 12px rgba(239,68,68,0.5); }
 
     .hb-compact.hb-yellow .hb-path { stroke: #f59e0b; filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 8px #f59e0b); }
     .hb-compact.hb-yellow .hb-glow { background: radial-gradient(ellipse at center, rgba(245,158,11,0.4), transparent 70%); }
-    .hb-compact.hb-yellow .hb-dot { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    .hb-compact.hb-yellow .hb-dot { background: #f59e0b; box-shadow: 0 0 6px #f59e0b, 0 0 12px rgba(245,158,11,0.5); }
 
     .hb-compact.hb-blue .hb-path { stroke: #3b82f6; filter: drop-shadow(0 0 4px #3b82f6) drop-shadow(0 0 8px #3b82f6); }
     .hb-compact.hb-blue .hb-glow { background: radial-gradient(ellipse at center, rgba(59,130,246,0.4), transparent 70%); }
-    .hb-compact.hb-blue .hb-dot { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+    .hb-compact.hb-blue .hb-dot { background: #3b82f6; box-shadow: 0 0 6px #3b82f6, 0 0 12px rgba(59,130,246,0.5); }
   `;
   document.head.appendChild(style);
   injected = true;
@@ -146,10 +131,7 @@ export default function HeartbeatLoader({ color = 'violet', className = '' }) {
           <path d={ECG_PATH} className="hb-path" />
         </svg>
       </div>
-      <div className="hb-info">
-        <div className="hb-dot" />
-        <span className="hb-label">{current.name}</span>
-      </div>
+      <div className="hb-dot" />
     </div>
   );
 }
