@@ -18,6 +18,7 @@ import ImageUpload from '@/components/common/ImageUpload';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import Services from './Services';
 import { safeListAll } from '@/lib/safeRequest';
+import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Truck, Pencil, Trash2, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Vehicles() {
@@ -49,6 +50,7 @@ function VehiclesTab() {
   const [trips, setTrips] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const { dateFrom, dateTo } = useGlobalDate();
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +67,9 @@ function VehiclesTab() {
   useEffect(() => { load(); }, []);
 
   const filtered = items.filter((v) => !search || v.plate_number?.toLowerCase().includes(search.toLowerCase()) || v.make?.toLowerCase().includes(search.toLowerCase()));
+  const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
+  const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
+  const fExpenses = expenses.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
 
   return (
     <div>
@@ -83,7 +88,7 @@ function VehiclesTab() {
 
       {mode === 'analytics' ? (
         <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
-          <VehiclesAnalytics vehicles={filtered} trips={trips} fuelRecords={fuelRecords} expenses={expenses} loading={loading} />
+          <VehiclesAnalytics vehicles={filtered} trips={fTrips} fuelRecords={fFuel} expenses={fExpenses} loading={loading} />
         </div>
       ) : (
         <>

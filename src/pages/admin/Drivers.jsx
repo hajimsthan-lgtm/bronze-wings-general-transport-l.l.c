@@ -18,6 +18,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ImageUpload from '@/components/common/ImageUpload';
 import Salary from './Salary';
 import { safeListAll } from '@/lib/safeRequest';
+import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Drivers() {
@@ -44,6 +45,7 @@ function DriversTab() {
   const [editItem, setEditItem] = useState(null);
   const [view, setView] = useState('list');
   const [mode, setMode] = useState('analytics');
+  const { dateFrom, dateTo } = useGlobalDate();
 
   const load = async () => {
     setLoading(true);
@@ -64,6 +66,7 @@ function DriversTab() {
   }, []);
 
   const filtered = drivers.filter((d) => !search || d.name?.toLowerCase().includes(search.toLowerCase()) || d.phone?.includes(search) || d.license_number?.toLowerCase().includes(search.toLowerCase()));
+  const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
 
   return (
     <div>
@@ -81,7 +84,7 @@ function DriversTab() {
       </div>
 
       {mode === 'analytics' ? (
-        <DriversAnalytics drivers={filtered} trips={trips} loading={loading} />
+        <DriversAnalytics drivers={filtered} trips={fTrips} loading={loading} />
       ) : (
         <>
           <div className="relative mb-5">

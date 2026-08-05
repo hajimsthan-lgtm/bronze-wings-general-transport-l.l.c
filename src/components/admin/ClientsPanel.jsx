@@ -14,6 +14,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Plus, Search, Building2, BarChart3, LayoutGrid } from 'lucide-react';
+import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -27,6 +28,7 @@ export default function ClientsPanel() {
   const [search, setSearch] = useState('');
   const [view, setView] = useState('list');
   const [mode, setMode] = useState('analytics');
+  const { dateFrom, dateTo } = useGlobalDate();
 
   const load = () => {
     setLoading(true);
@@ -39,8 +41,10 @@ export default function ClientsPanel() {
   useEffect(() => { load(); }, []);
 
   const filtered = items.filter((c) => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.contact_person?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search));
+  const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
+  const fInvoices = invoices.filter((i) => inGlobalDateRange(i.issue_date, dateFrom, dateTo));
   const revenueMap = {};
-  trips.forEach((tt) => { if (tt.client_name) revenueMap[tt.client_name] = (revenueMap[tt.client_name] || 0) + (Number(tt.revenue) || 0); });
+  fTrips.forEach((tt) => { if (tt.client_name) revenueMap[tt.client_name] = (revenueMap[tt.client_name] || 0) + (Number(tt.revenue) || 0); });
 
   return (
     <div>
@@ -61,7 +65,7 @@ export default function ClientsPanel() {
       </div>
 
       {mode === 'analytics' ? (
-        <ClientsAnalytics clients={filtered} trips={trips} invoices={invoices} loading={loading} />
+        <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} />
       ) : (
         <>
           <div className="relative mb-5">

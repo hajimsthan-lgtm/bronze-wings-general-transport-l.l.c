@@ -30,3 +30,12 @@ export function useGlobalDate() {
   if (!ctx) return { dateFrom: monthStart(), dateTo: todayStr(), setDateFrom: () => {}, setDateTo: () => {}, setToday: () => {} };
   return ctx;
 }
+
+// Returns true when `dateStr` (yyyy-MM-dd) falls inside the global range [dateFrom, dateTo].
+// Empty/missing dates are treated as in-range so records without a date still show.
+export function inGlobalDateRange(dateStr, dateFrom, dateTo) {
+  if (!dateStr) return true;
+  if (dateFrom && dateStr < dateFrom) return false;
+  if (dateTo && dateStr > dateTo) return false;
+  return true;
+}
