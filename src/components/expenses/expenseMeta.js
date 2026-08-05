@@ -1,6 +1,6 @@
 import { Fuel, Wrench, Car, CreditCard, ShieldCheck, Building, Package } from 'lucide-react';
 
-export const EXPENSE_CATEGORIES = ['all', 'maintenance', 'toll', 'salary', 'insurance', 'registration', 'office', 'other'];
+export const EXPENSE_CATEGORIES = ['all', 'toll', 'insurance', 'registration', 'office', 'other'];
 
 export const categoryIcons = {
   fuel: Fuel, maintenance: Wrench, toll: Car, salary: CreditCard,

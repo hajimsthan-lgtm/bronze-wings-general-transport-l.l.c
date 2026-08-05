@@ -283,7 +283,7 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
           <div><Label className="text-xs text-muted-foreground mb-1.5">Category</Label>
             <Select value={form.category} onValueChange={v => update('category', v)}>
               <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
-              <SelectContent>{['maintenance','toll','salary','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              <SelectContent>{['toll','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
           <div className="grid grid-cols-2 gap-3">
