@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Wallet, Receipt, FileDown, Calendar, IdCard, UserCircle, Banknote, TrendingUp } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
 import TripChecklist from '@/components/drivers/TripChecklist';
@@ -40,8 +40,7 @@ export default function DriverDetail() {
   const [salaries, setSalaries] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(() => {const d = new Date();return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];});
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo } = useGlobalDate();
   const [breakdown, setBreakdown] = useState(null);
   const [salaryBusyId, setSalaryBusyId] = useState(null);
   const [salaryMonth, setSalaryMonth] = useState('all');
@@ -139,19 +138,9 @@ export default function DriverDetail() {
 
   return (
     <div className="detail-page space-y-4">
-      {/* Top row: back + global date filter */}
+      {/* Top row: back header — date filtering is handled by the global top header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <EntityDetailHeader backTo="/admin/drivers" />
-        <div className="flex items-center gap-2 sm:ml-auto">
-          
-          <DateRangeFilter
-            fromValue={dateFrom}
-            onFromChange={setDateFrom}
-            toValue={dateTo}
-            onToChange={setDateTo}
-            onToday={() => {const today = new Date().toISOString().split('T')[0];setDateFrom(today);setDateTo(today);}} />
-          
-        </div>
       </div>
 
       {/* Tabs wraps the detail area so the bar can sit beside the profile card */}
