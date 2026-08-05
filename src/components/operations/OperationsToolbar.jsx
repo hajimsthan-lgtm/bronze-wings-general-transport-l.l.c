@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
+import CsvImportButton from '@/components/common/CsvImportButton';
 
 export default function OperationsToolbar({
   search, setSearch,
@@ -13,6 +14,7 @@ export default function OperationsToolbar({
   mode, onModeChange,
   viewMode, setViewMode,
   exportData, exportFilename, exportTitle, exportColumns,
+  onImported,
 }) {
   const { t } = useI18n();
   const MODE_OPTIONS = [
@@ -86,6 +88,31 @@ export default function OperationsToolbar({
         ]}
       />
       <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
+      {mode !== 'contract' && (
+        <CsvImportButton entityName="Trip" filename="trips" onImported={onImported} label="Import" className="h-9" columns={[
+          { key: 'from_location', label: 'From', sample: 'Dubai' },
+          { key: 'to_location', label: 'To', sample: 'Abu Dhabi' },
+          { key: 'vehicle_plate', label: 'Vehicle Plate', sample: 'AD-1-12345' },
+          { key: 'driver_name', label: 'Driver', sample: 'Ahmed Ali' },
+          { key: 'trip_date', label: 'Trip Date', sample: '2026-08-05' },
+          { key: 'client_name', label: 'Client', sample: 'ABC Transport' },
+          { key: 'trip_type', label: 'Trip Type', sample: 'one_way' },
+          { key: 'revenue', label: 'Revenue', sample: '500' },
+          { key: 'status', label: 'Status', sample: 'completed' },
+          { key: 'payment_status', label: 'Payment', sample: 'corporate_credit' },
+        ]} transform={(r) => ({
+          from_location: r.from_location || r.From || '',
+          to_location: r.to_location || r.To || '',
+          vehicle_plate: r.vehicle_plate || r['Vehicle Plate'] || '',
+          driver_name: r.driver_name || r.Driver || '',
+          trip_date: r.trip_date || r['Trip Date'] || '',
+          client_name: r.client_name || r.Client || '',
+          trip_type: r.trip_type || r['Trip Type'] || 'one_way',
+          revenue: Number(r.revenue || r.Revenue) || 0,
+          status: r.status || r.Status || 'scheduled',
+          payment_status: r.payment_status || r.Payment || 'corporate_credit',
+        })} />
+      )}
     </div>
   );
 }

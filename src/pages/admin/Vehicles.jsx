@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import ExportButtons from '@/components/common/ExportButtons';
+import CsvImportButton from '@/components/common/CsvImportButton';
 import VehicleCard from '@/components/admin/VehicleCard';
 import VehicleListRow from '@/components/admin/VehicleListRow';
 import ViewToggle from '@/components/common/ViewToggle';
@@ -93,6 +94,29 @@ function VehiclesTab() {
           </div>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
+          <CsvImportButton entityName="Vehicle" filename="vehicles" onImported={load} columns={[
+            { key: 'plate_number', label: 'Plate Number', sample: 'AD-1-12345' },
+            { key: 'make', label: 'Make', sample: 'Mitsubishi' },
+            { key: 'model', label: 'Model', sample: 'Fuso' },
+            { key: 'year', label: 'Year', sample: '2022' },
+            { key: 'type', label: 'Type', sample: 'truck' },
+            { key: 'status', label: 'Status', sample: 'active' },
+            { key: 'assigned_driver', label: 'Driver', sample: 'Ahmed Ali' },
+            { key: 'registration_expiry', label: 'Reg Expiry', sample: '2026-12-31' },
+            { key: 'insurance_expiry', label: 'Ins Expiry', sample: '2026-12-31' },
+            { key: 'fuel_type', label: 'Fuel', sample: 'diesel' },
+          ]} transform={(r) => ({
+            plate_number: r.plate_number || r.Plate || '',
+            make: r.make || r.Make || '',
+            model: r.model || r.Model || '',
+            year: r.year || r.Year ? Number(r.year || r.Year) : undefined,
+            type: r.type || r.Type || 'truck',
+            status: r.status || r.Status || 'active',
+            assigned_driver: r.assigned_driver || r.Driver || '',
+            registration_expiry: r.registration_expiry || r['Reg Expiry'] || '',
+            insurance_expiry: r.insurance_expiry || r['Ins Expiry'] || '',
+            fuel_type: r.fuel_type || r.Fuel || 'diesel',
+          })} />
           <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>

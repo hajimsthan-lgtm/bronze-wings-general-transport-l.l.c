@@ -321,6 +321,7 @@ export default function Operations() {
             exportFilename={isContractExport ? 'monthly-contracts' : 'trips'}
             exportTitle={isContractExport ? 'Monthly Contracts' : 'Trips'}
             exportColumns={isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS}
+            onImported={() => { refetchTrips(); refetchInvoices(); }}
           />
         </div>
         <PageHeader

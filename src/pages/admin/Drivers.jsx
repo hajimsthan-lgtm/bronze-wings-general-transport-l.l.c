@@ -13,6 +13,7 @@ import DriverListRow from '@/components/admin/DriverListRow';
 import ViewToggle from '@/components/common/ViewToggle';
 import SubTabBar from '@/components/common/SubTabBar';
 import ExportButtons from '@/components/common/ExportButtons';
+import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ImageUpload from '@/components/common/ImageUpload';
@@ -82,6 +83,27 @@ function DriversTab() {
           </div>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
+          <CsvImportButton entityName="Driver" filename="drivers" onImported={load} columns={[
+            { key: 'name', label: 'Name', sample: 'Ahmed Ali' },
+            { key: 'phone', label: 'Phone', sample: '+971501234567' },
+            { key: 'email', label: 'Email', sample: 'ahmed@example.com' },
+            { key: 'license_number', label: 'License #', sample: 'DL-12345' },
+            { key: 'license_expiry', label: 'License Expiry', sample: '2027-06-15' },
+            { key: 'nationality', label: 'Nationality', sample: 'UAE' },
+            { key: 'status', label: 'Status', sample: 'active' },
+            { key: 'assigned_vehicle', label: 'Vehicle', sample: 'AD-1-12345' },
+            { key: 'base_salary', label: 'Base Salary', sample: '3500' },
+          ]} transform={(r) => ({
+            name: r.name || r.Name || '',
+            phone: r.phone || r.Phone || '',
+            email: r.email || r.Email || '',
+            license_number: r.license_number || r['License #'] || '',
+            license_expiry: r.license_expiry || r['License Expiry'] || '',
+            nationality: r.nationality || r.Nationality || '',
+            status: r.status || r.Status || 'active',
+            assigned_vehicle: r.assigned_vehicle || r.Vehicle || '',
+            base_salary: Number(r.base_salary || r['Base Salary']) || 0,
+          })} />
           <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>
