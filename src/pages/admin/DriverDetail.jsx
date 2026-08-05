@@ -12,7 +12,7 @@ import BreakdownDialog from '@/components/common/BreakdownDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Wallet, Receipt, Plus, FileDown, Eye, Calendar, IdCard, UserCircle, Banknote, TrendingUp } from 'lucide-react';
+import { Inbox, Wallet, Receipt, FileDown, Calendar, IdCard, UserCircle, Banknote, TrendingUp } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
@@ -21,10 +21,10 @@ import DriverOutstandingPayments from '@/components/drivers/DriverOutstandingPay
 import DriverDeductionsSection from '@/components/drivers/DriverDeductionsSection';
 import TabTableCard from '@/components/admin/TabTableCard';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
 import { useToast } from '@/components/ui/use-toast';
 import { exportToPDF } from '@/lib/exportUtils';
+import { downloadPayslipPDF } from '@/lib/payslipHtml';
+import { getCompanySettings } from '@/lib/companySettings';
 
 const yearsSince = (d) =>
 d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
@@ -43,9 +43,10 @@ export default function DriverDetail() {
   const [dateFrom, setDateFrom] = useState(() => {const d = new Date();return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];});
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
   const [breakdown, setBreakdown] = useState(null);
-  const [salaryFormOpen, setSalaryFormOpen] = useState(false);
-  const [editSalary, setEditSalary] = useState(null);
   const [salaryBusyId, setSalaryBusyId] = useState(null);
+  const [salaryMonth, setSalaryMonth] = useState('all');
+  const [companySettings, setCompanySettings] = useState({});
+  const [payslipBusyId, setPayslipBusyId] = useState(null);
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = urlParams.get('tab') || 'trips';
 
@@ -78,11 +79,13 @@ export default function DriverDetail() {
     return () => {cancelled = true;};
   }, [id]);
 
+  useEffect(() => { getCompanySettings().then(setCompanySettings).catch(() => {}); }, []);
+
   if (loading) return <DetailSkeleton />;
   if (!driver) return <EmptyState title="Driver not found" />;
 
   const fTrips = trips.filter((tt) => !tt.trip_date || tt.trip_date >= dateFrom && tt.trip_date <= dateTo);
-  const fSalaries = salaries.filter((r) => !r.payment_date || r.payment_date >= dateFrom && r.payment_date <= dateTo);
+  const fSalaries = salaries.filter((r) => (!r.payment_date || r.payment_date >= dateFrom && r.payment_date <= dateTo) && (salaryMonth === 'all' || r.month === salaryMonth));
   const fExpenses = expenses.filter((r) => !r.date || r.date >= dateFrom && r.date <= dateTo);
 
   const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
@@ -101,11 +104,15 @@ export default function DriverDetail() {
       reloadSalaries();
     } finally {setSalaryBusyId(null);}
   };
-  const saveSalary = async (data) => {
-    if (editSalary) await base44.entities.SalaryRecord.update(editSalary.id, data);else
-    await base44.entities.SalaryRecord.create(data);
-    reloadSalaries();
-    setSalaryFormOpen(false);
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const downloadPayslip = async (rec) => {
+    setPayslipBusyId(rec.id);
+    try {
+      await downloadPayslipPDF(rec, driver, companySettings);
+    } catch {
+      toast({ title: 'Payslip download failed', variant: 'destructive' });
+    } finally { setPayslipBusyId(null); }
   };
 
   const handleProfitPDF = () => {
@@ -197,18 +204,24 @@ export default function DriverDetail() {
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
               actions={
-                <Button onClick={() => { setEditSalary(null); setSalaryFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Generate Salary
-                </Button>
+                <select
+                  value={salaryMonth}
+                  onChange={(e) => setSalaryMonth(e.target.value)}
+                  className="h-8 rounded-lg border border-border bg-input text-foreground text-xs px-2 capitalize"
+                >
+                  <option value="all">All Months</option>
+                  {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
               }
               columns={[
                 { label: 'Period', className: 'col-span-2' },
                 { label: 'Pay Date', className: 'col-span-2' },
-                { label: 'Base', className: 'col-span-2 text-right' },
+                { label: 'Base', className: 'col-span-1 text-right' },
                 { label: 'Additions', className: 'col-span-2 text-right' },
                 { label: 'Deductions', className: 'col-span-1 text-right' },
                 { label: 'Net', className: 'col-span-2 text-right' },
                 { label: 'Status', className: 'col-span-1 text-right' },
+                { label: 'Payslip', className: 'col-span-1 text-right' },
               ]}
               emptyIcon={Wallet}
             >
@@ -216,11 +229,23 @@ export default function DriverDetail() {
                 <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                   <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
                   <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
-                  <div className="col-span-2 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
+                  <div className="col-span-1 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
                   <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
                   <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
                   <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
                   <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
+                  <div className="col-span-1 text-right">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={payslipBusyId === rec.id}
+                      onClick={(e) => { e.stopPropagation(); downloadPayslip(rec); }}
+                      className="h-7 px-2 text-muted-foreground hover:text-primary"
+                      title="Download payslip"
+                    >
+                      <FileDown className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </TabTableCard>
@@ -380,20 +405,6 @@ export default function DriverDetail() {
       
 
       </Tabs>
-
-      <Sheet open={salaryFormOpen} onOpenChange={setSalaryFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6">
-            <SheetTitle className="font-display text-foreground">{editSalary ? t('edit') : 'Generate'} Salary</SheetTitle>
-          </SheetHeader>
-          <SalaryFormSheet
-            editItem={editSalary}
-            prefillDriver={driver.name}
-            onSave={saveSalary}
-            onCancel={() => setSalaryFormOpen(false)} />
-          
-        </SheetContent>
-      </Sheet>
 
       <BreakdownDialog
         open={!!breakdown}
