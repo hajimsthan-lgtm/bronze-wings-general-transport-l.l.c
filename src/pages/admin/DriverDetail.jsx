@@ -9,25 +9,26 @@ import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Wallet, Receipt, FileDown, Calendar, IdCard, UserCircle, Banknote, TrendingUp } from 'lucide-react';
+import TabTableCard from '@/components/admin/TabTableCard';
+import RecordSectionCard from '@/components/common/RecordSectionCard';
+import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { exportToPDF } from '@/lib/exportUtils';
+import { downloadPayslipPDF } from '@/lib/payslipHtml';
+import { getCompanySettings } from '@/lib/companySettings';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
 import TripChecklist from '@/components/drivers/TripChecklist';
 import DriverOutstandingPayments from '@/components/drivers/DriverOutstandingPayments';
 import DriverDeductionsSection from '@/components/drivers/DriverDeductionsSection';
-import TabTableCard from '@/components/admin/TabTableCard';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { exportToPDF } from '@/lib/exportUtils';
-import { downloadPayslipPDF } from '@/lib/payslipHtml';
-import { getCompanySettings } from '@/lib/companySettings';
+import { formatCurrency, formatDate } from '@/lib/formatters';
 
 const yearsSince = (d) =>
-d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
+  d ? Math.max(0, Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000))) : 0;
 
 export default function DriverDetail() {
   const { id } = useParams();
@@ -46,8 +47,7 @@ export default function DriverDetail() {
   const [salaryMonth, setSalaryMonth] = useState('all');
   const [companySettings, setCompanySettings] = useState({});
   const [payslipBusyId, setPayslipBusyId] = useState(null);
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || 'trips';
+  const [viewer, setViewer] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,7 +104,6 @@ export default function DriverDetail() {
     } finally {setSalaryBusyId(null);}
   };
 
-  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const downloadPayslip = async (rec) => {
     setPayslipBusyId(rec.id);
     try {
@@ -114,27 +113,54 @@ export default function DriverDetail() {
     } finally {setPayslipBusyId(null);}
   };
 
-  const handleProfitPDF = () => {
-    try {
-      const data = [
-      { label: 'Trip Revenue', amount: totalTrips },
-      { label: 'Expenses', amount: totalExpenses },
-      { label: 'Salary', amount: totalSalary },
-      { label: 'Net Profit', amount: netProfit }];
+  const salaryPdf = () => exportToPDF(
+    fSalaries.map((r) => ({ period: `${r.month} ${r.year}`, base: r.base_salary, additions: (r.overtime || 0) + (r.bonus || 0), deductions: r.deductions, net: r.net_salary, status: r.status })),
+    `driver-${driver.name}-salary`,
+    [{ label: 'Period', key: 'period' }, { label: 'Base', key: 'base', numeric: true }, { label: 'Additions', key: 'additions', numeric: true }, { label: 'Deductions', key: 'deductions', numeric: true }, { label: 'Net', key: 'net', numeric: true }, { label: 'Status', key: 'status' }],
+    `Salary Records — ${driver.name}`,
+    { dateRange: `${dateFrom} to ${dateTo}` }
+  );
 
-      exportToPDF(
-        data,
-        `driver-${driver.name}-profit`,
-        [{ label: 'Category', key: 'label' }, { label: 'Amount', key: 'amount', numeric: true }],
-        `Driver Profit — ${driver.name}`,
-        { dateRange: `${dateFrom} to ${dateTo}`, skipTotal: true }
-      );
-    } catch (e) {
-      toast({ title: 'PDF generation failed', variant: 'destructive' });
-    }
+  const expensesPdf = () => exportToPDF(
+    fExpenses.map((r) => ({ date: r.date, category: r.category, description: r.description || '', amount: r.amount, status: r.status })),
+    `driver-${driver.name}-expenses`,
+    [{ label: 'Date', key: 'date' }, { label: 'Category', key: 'category' }, { label: 'Description', key: 'description' }, { label: 'Amount', key: 'amount', numeric: true }, { label: 'Status', key: 'status' }],
+    `Expenses — ${driver.name}`,
+    { dateRange: `${dateFrom} to ${dateTo}` }
+  );
+
+  const viewerConfig = {
+    salary: {
+      title: 'Salary Records', icon: WalletIcon, accent: '#10b981', records: fSalaries, dateField: 'payment_date',
+      filename: `driver-${driver.name}-salary`,
+      columns: [
+        { label: 'Period', key: 'period' },
+        { label: 'Net', key: 'net_salary', numeric: true },
+        { label: 'Status', key: 'status' },
+      ],
+      renderRow: (rec) => (
+        <div key={rec.id} className="rounded-xl p-3 border flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), borderColor: hexToRgba('#10b981', 0.18) }}>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
+            <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
+          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
+          <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
+        </div>
+      ),
+    },
+    expenses: {
+      title: 'Expenses', icon: ReceiptIcon, accent: '#f43f5e', records: fExpenses, dateField: 'date',
+      filename: `driver-${driver.name}-expenses`,
+      columns: [
+        { label: 'Date', key: 'date' },
+        { label: 'Category', key: 'category' },
+        { label: 'Description', key: 'description' },
+        { label: 'Amount', key: 'amount', numeric: true },
+        { label: 'Status', key: 'status' },
+      ],
+    },
   };
-
-  const hasProfitData = totalTrips || totalExpenses || totalSalary || netProfit;
 
   return (
     <div className="detail-page space-y-4">
@@ -143,133 +169,106 @@ export default function DriverDetail() {
         <EntityDetailHeader backTo="/admin/drivers" />
       </div>
 
-      {/* Tabs wraps the detail area so the bar can sit beside the profile card */}
-      <Tabs defaultValue={initialTab}>
-      {/* Grid: profile (left) | tab bar + widgets (right) */}
+      {/* Grid: profile (left) | sections + widgets (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
         <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} />
         <div className="space-y-4">
-          <TabsList className="btn-lightning glass-card rounded-2xl p-1.5 gap-1.5 border border-[rgba(var(--panel-accent-rgb),0.18)] w-full">
-            <TabsTrigger value="trips" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('trips')} ({fTrips.length})</TabsTrigger>
-            <TabsTrigger value="salary" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('salary')} ({fSalaries.length})</TabsTrigger>
-            <TabsTrigger value="expenses" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('expenses')} ({fExpenses.length})</TabsTrigger>
-            <TabsTrigger value="documents" className="subnav-pill btn-lightning rounded-xl data-[state=active]:subnav-pill-active flex-1">{t('documents')}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="trips" className="mt-4">
-            <TabTableCard
-                collapsible
-                title={`Trips — ${driver.name}`}
-                subtitle={`${dateFrom} → ${dateTo}`}
-                loading={dataLoading}
-                columns={[
-                { label: 'Trip ID', className: 'col-span-2' },
-                { label: 'Date', className: 'col-span-2' },
-                { label: 'Route', className: 'col-span-3' },
-                { label: 'Status', className: 'col-span-2' },
-                { label: 'Amount', className: 'col-span-2 text-right' },
-                { label: 'Action', className: 'col-span-1 text-right' }]
-                }
-                emptyIcon={Inbox}>
-                
-              {fTrips.map((trip) =>
-                <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                  <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                  <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
-                  <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
-                  <div className="col-span-2"><StatusBadge status={trip.status} /></div>
-                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
-                  <div className="col-span-1 text-right">
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
+          {/* Trips — long table, auto-collapse on hover */}
+          <TabTableCard
+              collapsible
+              title={`Trips — ${driver.name}`}
+              subtitle={`${dateFrom} → ${dateTo}`}
+              loading={dataLoading}
+              columns={[
+              { label: 'Trip ID', className: 'col-span-2' },
+              { label: 'Date', className: 'col-span-2' },
+              { label: 'Route', className: 'col-span-3' },
+              { label: 'Status', className: 'col-span-2' },
+              { label: 'Amount', className: 'col-span-2 text-right' },
+              { label: 'Action', className: 'col-span-1 text-right' }]
+              }
+              emptyIcon={Inbox}>
+            {fTrips.map((trip) =>
+              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
+                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
+                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
+                <div className="col-span-2"><StatusBadge status={trip.status} /></div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
+                <div className="col-span-1 text-right">
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
+                </div>
+              </div>
+              )}
+          </TabTableCard>
+
+          {/* Salary — small card, click-to-collapse */}
+          <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />
+          <RecordSectionCard
+              title="Salary Records"
+              icon={WalletIcon}
+              accent="#10b981"
+              count={fSalaries.length}
+              collapsible
+              onView={() => setViewer('salary')}
+              onPdf={salaryPdf}
+              loading={dataLoading}
+              emptyIcon={WalletIcon}
+              emptyLabel={t('no_data')}
+              className="h-full">
+            <div className="space-y-2">
+              {fSalaries.slice(0, 5).map((rec) => (
+                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
                   </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
+                  <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
                 </div>
-                )}
-            </TabTableCard>
-          </TabsContent>
+              ))}
+            </div>
+          </RecordSectionCard>
 
-          <TabsContent value="salary" className="mt-4">
-            <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />
-            <TabTableCard
-                title="Salary Records"
-                subtitle={`${dateFrom} → ${dateTo}`}
-                loading={dataLoading}
-                actions={
-                <select
-                  value={salaryMonth}
-                  onChange={(e) => setSalaryMonth(e.target.value)}
-                  className="h-8 rounded-lg border border-border bg-input text-foreground text-xs px-2 capitalize">
-                  
-                  <option value="all">All Months</option>
-                  {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-                }
-                columns={[
-                { label: 'Period', className: 'col-span-2' },
-                { label: 'Pay Date', className: 'col-span-2' },
-                { label: 'Base', className: 'col-span-1 text-right' },
-                { label: 'Additions', className: 'col-span-2 text-right' },
-                { label: 'Deductions', className: 'col-span-1 text-right' },
-                { label: 'Net', className: 'col-span-2 text-right' },
-                { label: 'Status', className: 'col-span-1 text-right' },
-                { label: 'Payslip', className: 'col-span-1 text-right' }]
-                }
-                emptyIcon={Wallet}>
-                
-              {fSalaries.map((rec) =>
-                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                  <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
-                  <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
-                  <div className="col-span-1 text-right text-muted-foreground tabular-nums">{formatCurrency(rec.base_salary)}</div>
-                  <div className="col-span-2 text-right text-emerald-400 tabular-nums">{formatCurrency((rec.overtime || 0) + (rec.bonus || 0))}</div>
-                  <div className="col-span-1 text-right text-amber-400 tabular-nums">{formatCurrency(rec.deductions)}</div>
-                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
-                  <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-                  <div className="col-span-1 text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={payslipBusyId === rec.id}
-                      onClick={(e) => {e.stopPropagation();downloadPayslip(rec);}}
-                      className="h-7 px-2 text-muted-foreground hover:text-primary"
-                      title="Download payslip">
-                      
-                      <FileDown className="w-3.5 h-3.5" />
-                    </Button>
+          {/* Expenses — small card, click-to-collapse */}
+          <RecordSectionCard
+              title="Expenses"
+              icon={ReceiptIcon}
+              accent="#f43f5e"
+              count={fExpenses.length}
+              collapsible
+              onView={() => setViewer('expenses')}
+              onPdf={expensesPdf}
+              loading={dataLoading}
+              emptyIcon={ReceiptIcon}
+              emptyLabel={t('no_data')}
+              className="h-full">
+            <div className="space-y-2">
+              {fExpenses.slice(0, 5).map((rec) => (
+                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
                   </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                  <StatusBadge status={rec.status} />
                 </div>
-                )}
-            </TabTableCard>
-          </TabsContent>
+              ))}
+            </div>
+          </RecordSectionCard>
 
-          <TabsContent value="expenses" className="mt-4">
-            <TabTableCard
-                collapsible
-                title="Expenses"
-                subtitle={`${dateFrom} → ${dateTo}`}
-                loading={dataLoading}
-                columns={[
-                { label: 'Date', className: 'col-span-2' },
-                { label: 'Category', className: 'col-span-2' },
-                { label: 'Description', className: 'col-span-5' },
-                { label: 'Amount', className: 'col-span-2 text-right' },
-                { label: 'Status', className: 'col-span-1 text-right' }]
-                }
-                emptyIcon={Receipt}>
-                
-              {fExpenses.map((rec) =>
-                <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                  <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
-                  <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
-                  <div className="col-span-5 text-muted-foreground truncate">{rec.description || '—'}</div>
-                  <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
-                  <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
-                </div>
-                )}
-            </TabTableCard>
-          </TabsContent>
+          {/* Documents — small card, click-to-collapse */}
+          <RecordSectionCard
+              title={t('documents')}
+              icon={FileText}
+              accent="#a855f7"
+              count={null}
+              collapsible
+              loading={false}
+              className="h-full">
+            <EntityDocumentsTab entityType="driver" entityId={driver.id} />
+          </RecordSectionCard>
 
-          <TabsContent value="documents" className="mt-4">
-            <EntityDocumentsTab entityType="driver" entityId={driver.id} collapsible />
-          </TabsContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DriverDeductionsSection driverName={driver.name} />
             <WeeklyActivityChart trips={trips} />
@@ -279,148 +278,17 @@ export default function DriverDetail() {
         </div>
       </div>
 
-      {/* License & Details accordion — full width */}
-      <div className="rounded-2xl border border-border bg-card overflow-hidden">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-      </div>
-
-      {/* Driver Profit Card — full width */}
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-      </Tabs>
-
       <BreakdownDialog
         open={!!breakdown}
         onOpenChange={(o) => !o && setBreakdown(null)}
         title={breakdown?.title}
         rows={breakdown?.rows} />
-      
-    </div>);
 
-}
-
-function DetailField({ icon: Icon, label, value, sub, valueClass }) {
-  return (
-    <div className="rounded-xl border border-border bg-muted/20 p-3">
-      {Icon && <Icon className="w-4 h-4 text-muted-foreground mb-1.5" />}
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className={`text-sm font-semibold ${valueClass || 'text-foreground'}`}>{value || '—'}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
-    </div>);
-
-}
-
-function ProfitRow({ label, value, tone, bold }) {
-  return (
-    <div className={`flex items-center justify-between py-3 ${bold ? 'pt-4' : ''}`}>
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={`${bold ? 'text-lg' : 'text-base'} ${bold ? 'text-foreground' : tone} font-bold tabular-nums`}>{formatCurrency(value)}</span>
-    </div>);
-
+      <RecordsViewerSheet
+        open={!!viewer}
+        onOpenChange={(o) => !o && setViewer(null)}
+        {...(viewer ? viewerConfig[viewer] : {})}
+      />
+    </div>
+  );
 }
