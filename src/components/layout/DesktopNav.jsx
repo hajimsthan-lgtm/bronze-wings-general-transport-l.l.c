@@ -8,7 +8,7 @@ import BrandName from '@/components/layout/BrandName';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
-import { Settings as SettingsIcon, LayoutDashboard, Bot, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Settings as SettingsIcon, Bot, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
@@ -60,31 +60,12 @@ export default function DesktopNav() {
             }
             <BrandName variant="desktop" />
           </Link>
+          {/* Global date filter — sits right of the brand name, controls all pages */}
+          <GlobalDateFilter />
         </div>
 
-        {/* Center cluster — dashboard icon, date filter, sub-nav */}
+        {/* Center cluster — sub-nav tiles */}
         <div className="flex items-center gap-2">
-          {/* Dashboard quick-link — icon-only circle, hidden when already on dashboard */}
-          {!isDashboard &&
-          <Link
-            to="/"
-            aria-label="Dashboard"
-            title="Dashboard"
-            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
-              border: '1px solid rgba(99,102,241,0.35)',
-              color: '#fff',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)'
-            }}>
-            
-              <LayoutDashboard className="w-4 h-4" />
-            </Link>
-          }
-
-          {/* Global date filter — controls all pages simultaneously */}
-          <GlobalDateFilter />
-
           {/* Page sub-nav tiles — synced with the left rail visibility */}
           <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <HeaderSubNav />
