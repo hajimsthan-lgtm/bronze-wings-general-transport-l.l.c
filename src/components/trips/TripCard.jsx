@@ -1,11 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import { formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
-import { useToast } from '@/components/ui/use-toast';
-import { setTripInvoiceSent } from '@/lib/tripInvoice';
-import { User, Truck as TruckIcon, Building2, Copy, Send, Undo2, Calendar, ArrowRight, Wallet, Route } from 'lucide-react';
+import { User, Truck as TruckIcon, Building2, Copy, Calendar, ArrowRight, Wallet, Route } from 'lucide-react';
 
 const STATUS = {
   scheduled:  { short: 'Sched',   color: '#60a5fa', glow: '96,165,250' },
@@ -46,30 +44,11 @@ function TripGauge({ value, color, glow, gid }) {
   );
 }
 
-export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
+export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientMap }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const updateTrip = useTripUpdate();
-  const { toast } = useToast();
-  const [invoiceBusy, setInvoiceBusy] = useState(false);
   const gid = useId().replace(/[:]/g, '');
-  const invoice = invoiceMap?.[trip.id];
-  const isSent = invoice?.status === 'sent';
-
-  const handleInvoiceSent = async (e, sent) => {
-    e.stopPropagation();
-    if (invoiceBusy) return;
-    setInvoiceBusy(true);
-    try {
-      await setTripInvoiceSent(trip, sent);
-      toast({ title: sent ? 'Invoice marked as sent' : 'Invoice reverted to not sent' });
-      onInvoicesChanged?.();
-    } catch {
-      toast({ title: 'Could not update invoice', variant: 'destructive' });
-    } finally {
-      setInvoiceBusy(false);
-    }
-  };
 
   const handleLink = (e, map, name, path) => {
     e.stopPropagation();
@@ -86,7 +65,6 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
     e.stopPropagation();
     if (trip.trip_number) {
       navigator.clipboard.writeText(trip.trip_number);
-      toast({ title: 'Trip Number Copied!', description: trip.trip_number });
     }
   };
 
@@ -94,6 +72,12 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
   const tp = TYPE_STYLE[trip.trip_type] || TYPE_STYLE.one_way;
   const revenue = Number(trip.revenue) || 0;
   const revDisplay = new Intl.NumberFormat('en-AE', { maximumFractionDigits: 0 }).format(revenue);
+
+  const bubbles = [
+    trip.client_name && { icon: Building2, label: trip.client_name, map: clientMap, path: '/admin/clients' },
+    trip.driver_name && { icon: User, label: trip.driver_name, map: driverMap, path: '/admin/drivers' },
+    trip.vehicle_plate && { icon: TruckIcon, label: trip.vehicle_plate, map: vehicleMap, path: '/admin/vehicles' },
+  ].filter(Boolean);
 
   return (
     <div
@@ -106,7 +90,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
         transition: 'transform .3s cubic-bezier(0.16,1,0.3,1), box-shadow .3s ease, border-color .3s ease',
       }}
     >
-      {/* ── Top bar: route icon + trip no + type badge ── */}
+      {/* ── Top bar: route icon + trip no + date ── */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0"
@@ -121,9 +105,9 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
             </button>
           </div>
         </div>
-        <span className="inline-flex items-center px-2 h-6 rounded-full text-[10px] font-semibold flex-shrink-0"
-          style={{ background: `rgba(${tp.glow},0.14)`, border: `1px solid rgba(${tp.glow},0.32)`, color: tp.color }}>
-          {t(trip.trip_type || 'one_way')}
+        <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold tabular-nums flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
+          <Calendar className="w-3 h-3" />{formatDate(trip.trip_date)}
         </span>
       </div>
 
@@ -159,42 +143,32 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
         })}
       </div>
 
-      {/* ── Footer meta ── */}
+      {/* ── Footer: clickable entity bubbles + type badge ── */}
       <div className="flex items-center gap-1.5 flex-wrap pt-3 mt-1 border-t border-white/5">
-        {trip.client_name && (
-          <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="inline-flex items-center gap-1 text-[10px] text-white/55 hover:text-white transition-colors">
-            <Building2 className="w-3 h-3" />{trip.client_name}
-          </button>
-        )}
-        {trip.driver_name && (
-          <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="inline-flex items-center gap-1 text-[10px] text-white/55 hover:text-white transition-colors">
-            <User className="w-3 h-3" />{trip.driver_name}
-          </button>
-        )}
-        {trip.vehicle_plate && (
-          <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="inline-flex items-center gap-1 text-[10px] text-white/55 hover:text-white transition-colors">
-            <TruckIcon className="w-3 h-3" />{trip.vehicle_plate}
-          </button>
-        )}
-        <span className="inline-flex items-center gap-1 text-[10px] text-white/40 ml-auto tabular-nums">
-          <Calendar className="w-3 h-3" />{formatDate(trip.trip_date)}
+        {bubbles.map((b, i) => {
+          const Icon = b.icon;
+          const clickable = !!b.map?.[b.label];
+          return (
+            <button
+              key={i}
+              onClick={(e) => handleLink(e, b.map, b.label, b.path)}
+              className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-medium transition-all"
+              style={clickable
+                ? { background: 'rgba(var(--panel-accent-rgb),0.14)', border: '1px solid rgba(var(--panel-accent-rgb),0.32)', color: '#fff' }
+                : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}
+              onMouseEnter={(e) => { if (clickable) e.currentTarget.style.boxShadow = '0 0 12px -3px rgba(var(--panel-accent-rgb),0.5)'; }}
+              onMouseLeave={(e) => { if (clickable) e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <Icon className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate max-w-[80px]">{b.label}</span>
+            </button>
+          );
+        })}
+        <span className="inline-flex items-center px-2 h-6 rounded-full text-[10px] font-semibold ml-auto flex-shrink-0"
+          style={{ background: `rgba(${tp.glow},0.14)`, border: `1px solid rgba(${tp.glow},0.32)`, color: tp.color }}>
+          {t(trip.trip_type || 'one_way')}
         </span>
       </div>
-
-      {/* ── Invoice toggle (completed only) ── */}
-      {trip.status === 'completed' && (
-        <button
-          onClick={(e) => handleInvoiceSent(e, !isSent)}
-          disabled={invoiceBusy}
-          className="mt-2 self-end inline-flex items-center gap-1.5 px-2.5 h-6 rounded-full text-[10px] font-semibold transition-all"
-          style={isSent
-            ? { background: 'rgba(52,211,153,0.18)', border: '1px solid rgba(52,211,153,0.45)', color: '#34d399' }
-            : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}
-        >
-          {isSent ? <Send className="w-3 h-3" /> : <Undo2 className="w-3 h-3" />}
-          {isSent ? 'Sent' : 'Not Sent'}
-        </button>
-      )}
     </div>
   );
 }
