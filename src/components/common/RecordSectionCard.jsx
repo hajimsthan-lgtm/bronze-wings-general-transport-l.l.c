@@ -9,13 +9,13 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6
   const isOpen = !collapsible || open;
 
   return (
-    <div className={`glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden flex flex-col h-full ${className}`} style={{ borderLeft: `4px solid ${accent}` }}>
+    <div className={`glass-card rounded-2xl p-5 animate-fade-in-up relative overflow-hidden flex flex-col h-full ${className}`} style={{ borderLeft: `4px solid ${accent}` }}>
       <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.18)} 0%, transparent 70%)` }} />
       <div className="flex items-center justify-between mb-4 relative">
         <div className="flex items-center gap-2">
           {collapsible && (
             <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label={`Toggle ${title}`} className="p-1 rounded-lg hover:bg-muted transition-colors flex-shrink-0">
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-700 ${open ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? '' : '-rotate-90'}`} />
             </button>
           )}
           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
@@ -41,7 +41,7 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6
         </div>
       </div>
       <div
-        className="overflow-hidden transition-all duration-700 ease-in-out relative"
+        className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] relative"
         style={{ maxHeight: isOpen ? '5000px' : '0', opacity: isOpen ? 1 : 0 }}
       >
         <div className="rounded-xl border border-border overflow-hidden p-4">

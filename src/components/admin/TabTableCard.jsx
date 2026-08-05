@@ -22,23 +22,17 @@ export default function TabTableCard({
   children,
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const [pinned, setPinned] = useState(false);
   const rows = Array.isArray(children) ? children : children ? [children] : [];
   const hasRows = rows.length > 0;
   const panelId = `ttc-${(title || 'card').replace(/\s/g, '-').toLowerCase()}`;
   const isOpen = !collapsible || open;
 
-  const handleToggle = () => {
-    if (pinned) { setPinned(false); setOpen(false); }
-    else { setPinned(true); setOpen(true); }
-  };
+  const handleToggle = () => setOpen(!open);
 
   return (
     <div
-      className="glass-card rounded-2xl p-5 transition-all duration-300 relative overflow-hidden"
+      className="glass-card rounded-2xl p-5 relative overflow-hidden"
       style={{ borderLeft: '4px solid hsl(var(--destructive))' }}
-      onMouseEnter={collapsible ? () => { if (!pinned) setOpen(true); } : undefined}
-      onMouseLeave={collapsible ? () => { if (!pinned) setOpen(false); } : undefined}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
@@ -50,7 +44,7 @@ export default function TabTableCard({
               aria-label={`Toggle ${title}`}
               className="p-1 rounded-lg hover:bg-muted transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background"
             >
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-700 ${open ? '' : '-rotate-90'}`} />
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? '' : '-rotate-90'}`} />
             </button>
           )}
           <div>
@@ -65,7 +59,7 @@ export default function TabTableCard({
         id={panelId}
         role="region"
         aria-label={title}
-        className="overflow-hidden transition-all duration-700 ease-in-out"
+        className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{
           maxHeight: isOpen ? '5000px' : '0',
           opacity: isOpen ? 1 : 0,

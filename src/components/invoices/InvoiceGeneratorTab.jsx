@@ -8,8 +8,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
-import ExportButtons from '@/components/common/ExportButtons';
-import { FileText, Download, Send, Trash2, Zap, Truck, AlertCircle, CheckCheck, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, DollarSign, MailCheck, Split } from 'lucide-react';
+import { FileText, Download, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
@@ -28,6 +27,7 @@ const flagInfo = (inv, clientAdvance) => {
   const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
   const paid = Number(inv.paid_amount) || 0;
   const isSent = inv.status === 'sent' || inv.status === 'partially_paid';
+  if (inv.voided) return { rank: 5, key: 'voided', label: 'Voided', color: '#94a3b8', bg: 'rgba(148,163,184,0.14)', border: 'rgba(148,163,184,0.4)', Icon: X, sent: false };
   if (inv.status === 'paid' || balance <= 0.001) return { rank: 4, key: 'paid', label: 'Paid', color: '#34d399', bg: 'rgba(52,211,153,0.14)', border: 'rgba(52,211,153,0.4)', Icon: CheckCircle2, sent: isSent };
   if (paid > 0) return { rank: 1, key: 'partial', label: 'Split', color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Split, sent: isSent };
   if (clientAdvance > 0) return { rank: 2, key: 'advance', label: 'Advance', color: '#22d3ee', bg: 'rgba(34,211,238,0.14)', border: 'rgba(34,211,238,0.4)', Icon: Wallet, sent: isSent };
@@ -40,15 +40,39 @@ const flagInfo = (inv, clientAdvance) => {
   return { rank: 3, key: 'open', label: isSent ? 'Sent' : 'Unpaid', color: isSent ? '#818cf8' : '#60a5fa', bg: isSent ? 'rgba(129,140,248,0.14)' : 'rgba(96,165,250,0.12)', border: isSent ? 'rgba(129,140,248,0.4)' : 'rgba(96,165,250,0.35)', Icon: isSent ? MailCheck : Calendar, sent: isSent };
 };
 
-export default function InvoiceGeneratorTab({ client, trips, invoices, payments, onInvoicesChanged, onNewInvoice, onEditInvoice, clientInvoiceSeq }) {
+const FILTER_PILLS = [
+  { key: 'all', label: 'All', color: '#818cf8' },
+  { key: 'paid', label: 'Paid', color: '#34d399' },
+  { key: 'unpaid', label: 'Unpaid', color: '#60a5fa' },
+  { key: 'split', label: 'Split', color: '#fbbf24' },
+  { key: 'overdue', label: 'Overdue', color: '#f87171' },
+];
+
+const matchesFilter = (fi, filterKey) => {
+  if (filterKey === 'all') return true;
+  if (filterKey === 'paid') return fi.key === 'paid';
+  if (filterKey === 'split') return fi.key === 'partial';
+  if (filterKey === 'overdue') return fi.key === 'overdue';
+  if (filterKey === 'unpaid') return ['open', 'soon', 'advance'].includes(fi.key);
+  return true;
+};
+
+export default function InvoiceGeneratorTab({ client, trips, invoices, displayInvoices, payments, onInvoicesChanged, onNewInvoice, onEditInvoice, clientInvoiceSeq, companySettings: propSettings }) {
   const { t } = useI18n();
   const [allInvoices, setAllInvoices] = useState([]);
   const [loadingAll, setLoadingAll] = useState(true);
   const [selectedTrips, setSelectedTrips] = useState(new Set());
   const [selectedInv, setSelectedInv] = useState(new Set());
+  const [expandedInv, setExpandedInv] = useState(new Set());
+  const [invFilter, setInvFilter] = useState('all');
   const [busy, setBusy] = useState(false);
   const [genMode, setGenMode] = useState('single');
   const [progress, setProgress] = useState('');
+  const [companySettings, setCompanySettings] = useState(propSettings || {});
+  const [voidDialogOpen, setVoidDialogOpen] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
+  const [voidTargetIds, setVoidTargetIds] = useState([]);
+  const [voidPendingDeleteIds, setVoidPendingDeleteIds] = useState([]);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -61,6 +85,11 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     return () => { cancelled = true; };
   }, [invoices.length]);
 
+  useEffect(() => {
+    if (!propSettings) getCompanySettings().then(setCompanySettings).catch(() => {});
+  }, [propSettings]);
+
+  // tripInvoiceMap uses ALL invoices (not date-filtered) to know which trips are already invoiced
   const tripInvoiceMap = useMemo(() => {
     const m = {};
     (invoices || []).forEach((inv) => {
@@ -74,14 +103,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
       .sort((a, b) => String(b.trip_date || '').localeCompare(String(a.trip_date || ''))),
     [trips, tripInvoiceMap]
   );
-
-  const tripInvoiceInfo = useMemo(() => {
-    const m = {};
-    (invoices || []).forEach((inv) => {
-      if (inv.trip_id) String(inv.trip_id).split(',').forEach((tid) => { const id = tid.trim(); if (id) m[id] = { number: inv.invoice_number, status: inv.status }; });
-    });
-    return m;
-  }, [invoices]);
 
   const clientAdvance = useMemo(
     () => (payments || []).filter(p => p.status !== 'pending').reduce((s, p) => s + (Number(p.unapplied_balance) || 0), 0),
@@ -97,13 +118,21 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     return max + 1;
   }, [allInvoices]);
 
+  // Use displayInvoices (date-filtered) for the list; fall back to all invoices
+  const listInvoices = displayInvoices || invoices || [];
+
   const allInvoicesSorted = useMemo(
-    () => (invoices || []).filter(inv => inv.status !== 'cancelled').sort((a, b) => {
+    () => listInvoices.filter(inv => inv.status !== 'cancelled').sort((a, b) => {
       const r = flagInfo(a, clientAdvance).rank - flagInfo(b, clientAdvance).rank;
       if (r !== 0) return r;
       return String(b.created_date || '').localeCompare(String(a.created_date || ''));
     }),
-    [invoices, clientAdvance]
+    [listInvoices, clientAdvance]
+  );
+
+  const filteredInvoices = useMemo(
+    () => invFilter === 'all' ? allInvoicesSorted : allInvoicesSorted.filter(inv => matchesFilter(flagInfo(inv, clientAdvance), invFilter)),
+    [allInvoicesSorted, invFilter, clientAdvance]
   );
 
   const flagCounts = allInvoicesSorted.reduce((acc, inv) => { const fi = flagInfo(inv, clientAdvance); acc[fi.key] = (acc[fi.key] || 0) + 1; if (fi.sent) acc.sent = (acc.sent || 0) + 1; return acc; }, { overdue: 0, soon: 0, partial: 0, advance: 0, open: 0, paid: 0, sent: 0 });
@@ -153,7 +182,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     };
   };
 
-  // Chunked generation — creates invoices in batches of 10 to avoid UI freeze
   const generate = async () => {
     if (selectedTrips.size === 0 || busy) return;
     setBusy(true);
@@ -187,66 +215,21 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     return next;
   });
 
-  const allInvSelected = allInvoicesSorted.length > 0 && allInvoicesSorted.every((inv) => selectedInv.has(inv.id));
+  const allInvSelected = filteredInvoices.length > 0 && filteredInvoices.every((inv) => selectedInv.has(inv.id));
   const someInvSelected = selectedInv.size > 0 && !allInvSelected;
-  const toggleAllInv = () => setSelectedInv(allInvSelected ? new Set() : new Set(allInvoicesSorted.map((inv) => inv.id)));
+  const toggleAllInv = () => setSelectedInv(allInvSelected ? new Set() : new Set(filteredInvoices.map((inv) => inv.id)));
   const toggleInv = (id) => setSelectedInv((prev) => {
     const next = new Set(prev);
     next.has(id) ? next.delete(id) : next.add(id);
     return next;
   });
 
-  const bulkMarkSent = async () => {
-    const ids = [...selectedInv];
-    if (!ids.length || busy) return;
-    setBusy(true);
-    try {
-      const BATCH = 25;
-      for (let i = 0; i < ids.length; i += BATCH) {
-        await base44.entities.Invoice.bulkUpdate(ids.slice(i, i + BATCH).map((id) => ({ id, status: 'sent' })));
-        setProgress(`${Math.min(i + BATCH, ids.length)}/${ids.length}`);
-      }
-      setSelectedInv(new Set());
-      onInvoicesChanged();
-    } finally { setBusy(false); setProgress(''); }
-  };
+  const toggleExpand = (id) => setExpandedInv((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
-  const bulkDownload = async () => {
-    const ids = [...selectedInv];
-    if (!ids.length || busy) return;
-    setBusy(true);
-    try {
-      const settings = await getCompanySettings();
-      const list = allInvoicesSorted.filter((i) => selectedInv.has(i.id));
-      for (let i = 0; i < list.length; i++) {
-        setProgress(`${i + 1}/${list.length}`);
-        await downloadInvoicePDF(list[i], client.name, settings, clientInvoiceSeq?.[list[i].id]);
-        if (i < list.length - 1) await new Promise((r) => setTimeout(r, 60));
-      }
-    } finally { setBusy(false); setProgress(''); }
-  };
-
-  const bulkDelete = async () => {
-    const ids = [...selectedInv];
-    if (!ids.length || busy) return;
-    setBusy(true);
-    try {
-      const BATCH = 25;
-      for (let i = 0; i < ids.length; i += BATCH) {
-        await Promise.all(ids.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
-        setProgress(`${Math.min(i + BATCH, ids.length)}/${ids.length}`);
-      }
-      setSelectedInv(new Set());
-      onInvoicesChanged();
-    } finally { setBusy(false); setProgress(''); }
-  };
-
-  const markSentOne = async (inv) => {
-    if (busy) return;
-    setBusy(true);
-    try { await base44.entities.Invoice.update(inv.id, { status: 'sent' }); onInvoicesChanged(); }
-    finally { setBusy(false); setProgress(''); }
-  };
   const downloadOne = async (inv) => {
     if (busy) return;
     setBusy(true);
@@ -255,19 +238,96 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
       await downloadInvoicePDF(inv, client.name, settings, clientInvoiceSeq?.[inv.id]);
     } finally { setBusy(false); setProgress(''); }
   };
-  const deleteOne = async (inv) => {
-    if (busy) return;
-    if (!confirm('Delete this invoice?')) return;
-    setBusy(true);
-    try { await base44.entities.Invoice.delete(inv.id); onInvoicesChanged(); }
-    finally { setBusy(false); setProgress(''); }
+
+  const isPaid = (inv) => {
+    const fi = flagInfo(inv, clientAdvance);
+    return fi.key === 'paid' || inv.status === 'paid';
   };
 
-  const invExportCols = [
-    { label: 'Invoice #', key: 'invoice_number' }, { label: 'Issue Date', key: 'issue_date' },
-    { label: 'Due Date', key: 'due_date' }, { label: 'Status', key: 'status' },
-    { label: 'Total', key: 'total_amount', numeric: true }, { label: 'Paid', key: 'paid_amount', numeric: true },
-  ];
+  const deleteOne = async (inv) => {
+    if (busy) return;
+    if (inv.voided) return;
+    if (isPaid(inv)) {
+      setVoidTargetIds([inv.id]);
+      setVoidPendingDeleteIds([]);
+      setVoidReason('');
+      setVoidDialogOpen(true);
+    } else {
+      if (!confirm('Delete this invoice?')) return;
+      setBusy(true);
+      try { await base44.entities.Invoice.delete(inv.id); onInvoicesChanged(); }
+      finally { setBusy(false); setProgress(''); }
+    }
+  };
+
+  const bulkDelete = async () => {
+    const ids = [...selectedInv];
+    if (!ids.length || busy) return;
+    const paidIds = ids.filter(id => { const inv = allInvoicesSorted.find(i => i.id === id); return inv && !inv.voided && isPaid(inv); });
+    const nonPaidIds = ids.filter(id => !paidIds.includes(id));
+
+    if (paidIds.length > 0) {
+      setVoidTargetIds(paidIds);
+      setVoidPendingDeleteIds(nonPaidIds);
+      setVoidReason('');
+      setVoidDialogOpen(true);
+      return;
+    }
+    // No paid invoices — just delete all
+    setBusy(true);
+    try {
+      const BATCH = 25;
+      for (let i = 0; i < nonPaidIds.length; i += BATCH) {
+        await Promise.all(nonPaidIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
+        setProgress(`${Math.min(i + BATCH, nonPaidIds.length)}/${nonPaidIds.length}`);
+      }
+      setSelectedInv(new Set());
+      onInvoicesChanged();
+    } finally { setBusy(false); setProgress(''); }
+  };
+
+  const confirmVoid = async () => {
+    if (voidReason.trim().length < 10 || busy) return;
+    setBusy(true);
+    try {
+      // Void the paid invoices
+      if (voidTargetIds.length > 0) {
+        await base44.entities.Invoice.bulkUpdate(voidTargetIds.map(id => ({ id, voided: true, void_reason: voidReason.trim() })));
+      }
+      // Delete the non-paid invoices (if from bulk)
+      if (voidPendingDeleteIds.length > 0) {
+        const BATCH = 25;
+        for (let i = 0; i < voidPendingDeleteIds.length; i += BATCH) {
+          await Promise.all(voidPendingDeleteIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
+        }
+      }
+      setVoidDialogOpen(false);
+      setVoidReason('');
+      setVoidTargetIds([]);
+      setVoidPendingDeleteIds([]);
+      setSelectedInv(new Set());
+      onInvoicesChanged();
+    } finally { setBusy(false); setProgress(''); }
+  };
+
+  const shareWhatsApp = (inv) => {
+    const phone = (inv.client_phone || client.phone || '').replace(/\D/g, '');
+    const amount = formatCurrency(inv.total_amount || 0);
+    const link = `${window.location.origin}/admin/clients/${client.id}`;
+    const msg = `Hello ${client.name}, your invoice ${inv.invoice_number || ''} for ${amount} is ready. ${link}`;
+    const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
+  const shareEmail = (inv) => {
+    const email = inv.client_email || client.email || '';
+    const companyName = companySettings.company_name || 'General Transport L.L.C';
+    const subject = `Invoice ${inv.invoice_number || ''} from ${companyName}`;
+    const amount = formatCurrency(inv.total_amount || 0);
+    const link = `${window.location.origin}/admin/clients/${client.id}`;
+    const body = `Hello ${client.name},\n\nYour invoice ${inv.invoice_number || ''} for ${amount} is ready.\nView it here: ${link}\n\nThank you,\n${companyName}`;
+    window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+  };
 
   return (
     <div className="space-y-5">
@@ -304,7 +364,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           <EmptyState icon={Truck} title="No billable trips" description="Completed trips without invoices will appear here." />
         ) : (
           <div className="space-y-1.5">
-            {/* select-all header row — blue accent */}
             <div className="flex items-center gap-3 !mb-1 !py-2 px-4 rounded-xl border border-sky-500/30 bg-sky-500/10">
               <Checkbox checked={allBillableSelected ? true : someBillableSelected ? 'indeterminate' : false} onCheckedChange={toggleAllBillable} id="gen-all" />
               <label htmlFor="gen-all" className="text-[11px] text-sky-300 uppercase tracking-wider font-semibold cursor-pointer">
@@ -314,7 +373,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
                 <span className="ml-auto text-[11px] text-sky-300 font-bold">{selectedTrips.size} selected</span>
               )}
             </div>
-            {/* scrollable billable trips list — non-shakable */}
             <div ref={scrollRef} className={SCROLL_H}>
               {billableTrips.map((tr) => {
                 const checked = selectedTrips.has(tr.id);
@@ -335,94 +393,110 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
         )}
       </div>
 
-      {/* ===== Invoices & Follow-up (merged) ===== */}
+      {/* ===== Invoices ===== */}
       <div className="glass-card p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center"><AlertCircle className="w-4 h-4 text-amber-400" /></div>
             <div>
               <p className="text-sm font-semibold text-foreground">Invoices</p>
-              <p className="text-[11px] text-muted-foreground">{allInvoicesSorted.length} total{clientAdvance > 0 ? ` · ${formatCurrency(clientAdvance)} advance available` : ''}</p>
+              <p className="text-[11px] text-muted-foreground">{filteredInvoices.length} shown · {allInvoicesSorted.length} total{clientAdvance > 0 ? ` · ${formatCurrency(clientAdvance)} advance` : ''}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <ExportButtons data={allInvoicesSorted} filename={`invoices-${client.name}`} title={`Invoices - ${client.name}`} columns={invExportCols} />
-          </div>
+          {selectedInv.size > 0 && (
+            <Button onClick={bulkDelete} disabled={busy} size="sm" className="h-8 bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500/25">
+              <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete {selectedInv.size} selected
+            </Button>
+          )}
         </div>
 
         {/* aging analysis */}
         {allInvoicesSorted.length > 0 && <InvoiceAgingStrip invoices={allInvoicesSorted} />}
 
-        {/* flag summary strip — Sent, Paid, Split, Advance, Unpaid, Overdue, Due Soon */}
-        {allInvoicesSorted.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {[
-              { key: 'sent', label: 'Sent', color: '#818cf8', Icon: MailCheck },
-              { key: 'paid', label: 'Paid', color: '#34d399', Icon: CheckCircle2 },
-              { key: 'partial', label: 'Split', color: '#fbbf24', Icon: Split },
-              { key: 'advance', label: 'Advance', color: '#22d3ee', Icon: Wallet },
-              { key: 'open', label: 'Unpaid', color: '#60a5fa', Icon: Clock },
-              { key: 'overdue', label: 'Overdue', color: '#f87171', Icon: AlertTriangle },
-            ].map((s) => flagCounts[s.key] > 0 && (
-              <div key={s.key} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ background: `${s.color}1f`, border: `1px solid ${s.color}55`, color: s.color }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }} />
-                {s.label} {flagCounts[s.key]}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* filter pills — always visible */}
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          {FILTER_PILLS.map((pill) => {
+            const count = pill.key === 'all'
+              ? allInvoicesSorted.length
+              : allInvoicesSorted.filter(inv => matchesFilter(flagInfo(inv, clientAdvance), pill.key)).length;
+            const active = invFilter === pill.key;
+            return (
+              <button
+                key={pill.key}
+                onClick={() => setInvFilter(pill.key)}
+                className={cn('flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-all',
+                  active ? 'text-white' : 'text-muted-foreground hover:text-foreground')}
+                style={active
+                  ? { background: pill.color, border: `1px solid ${pill.color}`, boxShadow: `0 0 12px -3px ${pill.color}80` }
+                  : { background: `${pill.color}15`, border: `1px solid ${pill.color}40` }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: pill.color }} />
+                {pill.label} {count}
+              </button>
+            );
+          })}
+        </div>
 
-        {allInvoicesSorted.length === 0 ? (
-          <EmptyState icon={FileText} title="No invoices yet" description="Generate from billable trips above or create one manually." />
+        {filteredInvoices.length === 0 ? (
+          <EmptyState icon={FileText} title="No invoices" description="No invoices match this filter." />
         ) : (
           <div className="space-y-1.5">
-            {/* select-all header — amber accent */}
+            {/* select-all header */}
             <div className="flex items-center gap-3 !mb-1 !py-2 px-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
               <Checkbox checked={allInvSelected ? true : someInvSelected ? 'indeterminate' : false} onCheckedChange={toggleAllInv} id="inv-all" />
               <label htmlFor="inv-all" className="text-[11px] text-amber-300 uppercase tracking-wider font-semibold cursor-pointer">
-                {allInvSelected ? `All ${allInvoicesSorted.length} selected` : `Select all (${allInvoicesSorted.length})`}
+                {allInvSelected ? `All ${filteredInvoices.length} selected` : `Select all (${filteredInvoices.length})`}
               </label>
-              <div className="ml-auto flex items-center gap-3 text-[10px] text-muted-foreground">
-                <span><span className="text-emerald-400 font-semibold tabular-nums">{formatCurrency(flagCounts.paid > 0 ? allInvoicesSorted.filter(i => flagInfo(i, clientAdvance).key === 'paid').reduce((s, i) => s + (Number(i.total_amount) || 0), 0) : 0)}</span> paid</span>
-                <span><span className="text-red-400 font-semibold tabular-nums">{formatCurrency(allInvoicesSorted.filter(i => { const fi = flagInfo(i, clientAdvance); return fi.key === 'overdue'; }).reduce((s, i) => s + ((Number(i.total_amount) || 0) - (Number(i.paid_amount) || 0)), 0))}</span> overdue</span>
-              </div>
             </div>
-            {/* scrollable invoice list — non-shakable */}
+            {/* scrollable invoice list */}
             <div className={SCROLL_H}>
-              {allInvoicesSorted.map((inv) => {
+              {filteredInvoices.map((inv) => {
                 const balance = (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0);
                 const checked = selectedInv.has(inv.id);
+                const expanded = expandedInv.has(inv.id);
                 const fi = flagInfo(inv, clientAdvance);
                 const FIcon = fi.Icon;
-                const ageDays = inv.due_date ? Math.max(0, Math.ceil((new Date() - new Date(inv.due_date)) / 86400000)) : 0;
+                const isVoided = inv.voided;
                 return (
-                  <div key={inv.id} onClick={() => toggleInv(inv.id)} onDoubleClick={() => onEditInvoice?.(inv)} className={`row-card flex items-center gap-3 cursor-pointer hover:!translate-y-0 transition-colors ${checked ? 'border-amber-500/40' : ''}`}>
-                    <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
-                    <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{inv.invoice_number || '—'}</p>
-                      <p className="text-xs text-muted-foreground">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}</p>
-                    </div>
-                    {fi.sent && (
-                      <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 whitespace-nowrap">
-                        <MailCheck className="w-2.5 h-2.5" /> Sent
+                  <div key={inv.id} className={`row-card transition-colors ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
+                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
+                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(inv.id)}>
+                        <p className={cn('text-sm font-medium text-foreground truncate', isVoided && 'line-through')}>{inv.invoice_number || '—'}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{isVoided && inv.void_reason ? ` · Voided: ${inv.void_reason}` : ''}</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
+                        <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
+                        {fi.label}
                       </span>
-                    )}
-                    {ageDays > 0 && fi.key !== 'paid' && (
-                      <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap" style={{ background: ageDays > 90 ? 'rgba(248,113,113,0.15)' : ageDays > 30 ? 'rgba(251,191,36,0.15)' : 'rgba(96,165,250,0.12)', color: ageDays > 90 ? '#f87171' : ageDays > 30 ? '#fbbf24' : '#60a5fa', border: `1px solid ${ageDays > 90 ? 'rgba(248,113,113,0.35)' : ageDays > 30 ? 'rgba(251,191,36,0.4)' : 'rgba(96,165,250,0.35)'}` }}>
-                        {ageDays}d
-                      </span>
-                    )}
-                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
-                      <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
-                      {fi.label}
-                    </span>
-                    <span className="text-sm font-semibold text-foreground whitespace-nowrap tabular-nums">{formatCurrency(balance || inv.total_amount)}</span>
-                    <div className="flex items-center gap-0.5 flex-shrink-0">
-                      <button onClick={(e) => { e.stopPropagation(); markSentOne(inv); }} disabled={busy} title="Mark Sent" className="text-sky-300/70 hover:text-sky-300 hover:bg-sky-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Send className="w-3.5 h-3.5" /></button>
-                      <button onClick={(e) => { e.stopPropagation(); downloadOne(inv); }} disabled={busy} title="Download PDF" className="text-emerald-300/70 hover:text-emerald-300 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Download className="w-3.5 h-3.5" /></button>
-                      <button onClick={(e) => { e.stopPropagation(); deleteOne(inv); }} disabled={busy} title="Delete" className="text-red-300/70 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <span className={cn('text-sm font-semibold text-foreground whitespace-nowrap tabular-nums', isVoided && 'line-through')}>{formatCurrency(balance || inv.total_amount)}</span>
+                      <button onClick={() => toggleExpand(inv.id)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg transition-colors flex-shrink-0">
+                        <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
+                      </button>
                     </div>
+                    {/* expanded actions */}
+                    {expanded && (
+                      <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
+                        <button onClick={() => shareWhatsApp(inv)} title="Share via WhatsApp" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#25D366' }}>
+                          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                        </button>
+                        <button onClick={() => shareEmail(inv)} title="Share via Email" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#3b82f6' }}>
+                          <Mail className="w-3.5 h-3.5" /> Email
+                        </button>
+                        <button onClick={() => onEditInvoice?.(inv)} title="Edit invoice" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
+                          <Pencil className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button onClick={() => downloadOne(inv)} disabled={busy} title="Download PDF" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors disabled:opacity-50">
+                          <Download className="w-3.5 h-3.5" /> PDF
+                        </button>
+                        {!isVoided && (
+                          <button onClick={() => deleteOne(inv)} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -430,6 +504,35 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           </div>
         )}
       </div>
+
+      {/* void reason dialog */}
+      {voidDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => { if (voidReason.trim().length < 10) setVoidDialogOpen(false); }}>
+          <div className="glass-card p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-foreground">Void Paid Invoice{voidTargetIds.length > 1 ? 's' : ''}</h3>
+              <button onClick={() => setVoidDialogOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-white/5 transition-colors"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">This invoice is marked as paid. Please provide a reason (minimum 10 characters) to void it instead of deleting.</p>
+            <textarea
+              value={voidReason}
+              onChange={(e) => setVoidReason(e.target.value)}
+              placeholder="Enter reason for voiding..."
+              className="w-full h-24 px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground resize-none focus:outline-none focus:border-primary transition-colors"
+              autoFocus
+            />
+            {voidReason.trim().length > 0 && voidReason.trim().length < 10 && (
+              <p className="text-xs text-red-400 mt-1">Reason must be at least 10 characters ({voidReason.trim().length}/10)</p>
+            )}
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <Button variant="ghost" onClick={() => setVoidDialogOpen(false)} className="h-9">Cancel</Button>
+              <Button onClick={confirmVoid} disabled={busy || voidReason.trim().length < 10} className="h-9 bg-red-500 hover:bg-red-600 text-white">
+                {busy ? 'Processing...' : `Void ${voidTargetIds.length} invoice${voidTargetIds.length > 1 ? 's' : ''}`}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

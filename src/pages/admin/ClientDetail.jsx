@@ -274,13 +274,15 @@ export default function ClientDetail({ id: propId, inline = false }) {
             {dataLoading ? <LoadingSpinner /> : (
               <InvoiceGeneratorTab
                 client={client}
-                trips={trips}
+                trips={displayTrips}
                 invoices={invoices}
+                displayInvoices={displayInvoices}
                 payments={payments}
                 onInvoicesChanged={reloadInvoices}
                 onNewInvoice={() => { setEditInvoice(null); setInvoiceFormOpen(true); }}
                 onEditInvoice={(inv) => { setEditInvoice(inv); setInvoiceFormOpen(true); }}
                 clientInvoiceSeq={clientInvoiceSeq}
+                companySettings={companySettings}
               />
             )}
           </CollapsibleSection>

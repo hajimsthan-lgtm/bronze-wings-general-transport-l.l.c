@@ -95,6 +95,13 @@
     },
     "trip_id": {
       "type": "string"
+    },
+    "voided": {
+      "type": "boolean",
+      "default": false
+    },
+    "void_reason": {
+      "type": "string"
     }
   },
   "required": [
