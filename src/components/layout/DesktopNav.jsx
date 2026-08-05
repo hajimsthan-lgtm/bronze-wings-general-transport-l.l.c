@@ -16,18 +16,18 @@ export default function DesktopNav() {
   const navigate = useNavigate();
   const isDashboard = location.pathname === '/';
   const railVisible = useRailVisible();
-  useEffect(() => { getCompanySettings().then((s) => setLogoUrl(s.logo_url)); }, []);
+  useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
 
   return (
     <nav
       className="hidden md:block sticky top-0 z-50"
-      onMouseEnter={() => railVisibility.set(true)}
-    >
+      onMouseEnter={() => railVisibility.set(true)}>
+      
       {/* dark satin glass surface */}
       <div className="absolute inset-0" style={{
         background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
         backdropFilter: 'blur(14px) saturate(1.3)',
-        WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
+        WebkitBackdropFilter: 'blur(14px) saturate(1.3)'
       }} />
       {/* top specular highlight */}
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)' }} />
@@ -40,24 +40,24 @@ export default function DesktopNav() {
         {/* Brand + step-back at the left corner */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3 group/brand">
-            {isDashboard && (
-              <div className="relative">
+            {isDashboard &&
+            <div className="relative">
                 <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
                 {logoUrl ?
-                <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
-                  border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-                  boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
-                }} /> :
-                <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
-                    border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-                    boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)',
-                  }}>
+              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
+                border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)'
+              }} /> :
+              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
+                border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+                boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.28), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)'
+              }}>
                   <span className="text-sm font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
                 </div>}
               </div>
-            )}
+            }
             <BrandName variant="desktop" />
           </Link>
 
@@ -66,8 +66,8 @@ export default function DesktopNav() {
             onClick={() => navigate(-1)}
             aria-label="Go back"
             title="Go back"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-          >
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
+            
             <ArrowLeft className="w-4 h-4" />
           </button>
         </div>
@@ -75,22 +75,22 @@ export default function DesktopNav() {
         {/* Center cluster — dashboard icon, date filter, sub-nav */}
         <div className="flex items-center gap-2">
           {/* Dashboard quick-link — icon-only circle, hidden when already on dashboard */}
-          {!isDashboard && (
-            <Link
-              to="/"
-              aria-label="Dashboard"
-              title="Dashboard"
-              className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300"
-              style={{
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
-                border: '1px solid rgba(99,102,241,0.35)',
-                color: '#fff',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)',
-              }}
-            >
+          {!isDashboard &&
+          <Link
+            to="/"
+            aria-label="Dashboard"
+            title="Dashboard"
+            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))',
+              border: '1px solid rgba(99,102,241,0.35)',
+              color: '#fff',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(99,102,241,0.22)'
+            }}>
+            
               <LayoutDashboard className="w-4 h-4" />
             </Link>
-          )}
+          }
 
           {/* Global date filter — controls all pages simultaneously */}
           <GlobalDateFilter />
@@ -113,9 +113,9 @@ export default function DesktopNav() {
               background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))',
               border: '1px solid rgba(16,185,129,0.35)',
               color: '#fff',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)',
-            }}
-          >
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)'
+            }}>
+            
             <Bot className="w-3.5 h-3.5" />
             <span className="hidden lg:inline">AI Agents</span>
           </Link>
@@ -124,8 +124,8 @@ export default function DesktopNav() {
             to="/settings"
             aria-label="Settings"
             title="Settings"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-          >
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
+            
             <SettingsIcon className="w-4 h-4" />
           </Link>
           {/* Step-forward button — right corner */}
@@ -133,12 +133,12 @@ export default function DesktopNav() {
             onClick={() => navigate(1)}
             aria-label="Go forward"
             title="Go forward"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white"
-          >
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
+            
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
-    </nav>
-  );
+    </nav>);
+
 }
