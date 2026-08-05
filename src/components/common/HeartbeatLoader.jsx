@@ -14,9 +14,9 @@ function injectStyles() {
       position: relative;
       width: 240px;
       height: 40px;
-      border: 1px solid #1e1e2e;
-      border-radius: 8px;
-      background: #0d0d14;
+      border: none;
+      border-radius: 0;
+      background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;

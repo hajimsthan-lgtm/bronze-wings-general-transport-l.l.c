@@ -102,7 +102,7 @@ export default function ContentSidebar() {
     return (
       <div
         key={item.key}
-        className="relative transition-opacity duration-300 flex flex-col items-start"
+        className={`relative transition-opacity duration-300 flex flex-col ${expanded ? 'items-start' : 'items-center'}`}
         style={{ opacity: dimmed ? 0.12 : 1 }}
       >
         <button
@@ -152,7 +152,7 @@ export default function ContentSidebar() {
 
           {expanded && (
             <span
-              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none"
+              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none animate-fade-in"
               style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
             >
               {label}
@@ -243,7 +243,7 @@ export default function ContentSidebar() {
         ref={asideRef}
         onMouseEnter={() => { poke(); clearTimeout(collapseTimer.current); railVisibility.setExpanded(true); }}
         onMouseLeave={() => { clearTimeout(collapseTimer.current); collapseTimer.current = setTimeout(() => { railVisibility.setExpanded(false); setHoveredKey(null); }, 1000); }}
-        className="relative flex flex-col h-full overflow-visible"
+        className="relative flex flex-col h-full"
         style={{
           width,
           paddingTop: 16,
@@ -256,6 +256,7 @@ export default function ContentSidebar() {
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
+          overflow: expanded ? 'visible' : 'hidden',
           opacity: panelDimming ? 0 : 1,
           pointerEvents: panelVisible ? 'auto' : 'none',
           transition:
