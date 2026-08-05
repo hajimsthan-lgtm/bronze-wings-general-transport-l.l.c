@@ -17,14 +17,17 @@ const expiryTone = (d) => {
   return d <= soon ? 'text-amber-400' : 'text-foreground';
 };
 
+const statusDot = (status) =>
+  status === 'active' ? '#34d399' : status === 'maintenance' ? '#f59e0b' : '#94a3b8';
+
 export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership }) {
   const [expanded, setExpanded] = useState(false);
 
   const statsList = [
-    { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, icon: Gauge, accent: '#60a5fa' },
-    { label: 'Fuel', value: vehicle.fuel_type, icon: FuelIcon, accent: '#f59e0b' },
-    { label: 'Trips', value: stats?.trips ?? 0, icon: Truck, accent: '#a855f7' },
-    { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), icon: Wallet, accent: '#34d399' },
+    { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#60a5fa' },
+    { label: 'Fuel', value: vehicle.fuel_type, accent: '#f59e0b' },
+    { label: 'Trips', value: stats?.trips ?? 0, accent: '#a855f7' },
+    { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
   ];
 
   const detailTiles = [
@@ -40,38 +43,60 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
       <div className="absolute -bottom-12 -left-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba('#a855f7', 0.5)} 0%, transparent 70%)` }} />
 
       <div className="relative">
-        <div className="flex items-start gap-4">
+        <div className="relative flex gap-4">
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.45) 0%, transparent 70%)' }} />
-            <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
-              {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-9 h-9 text-primary/60" />}
+            <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.40) 0%, transparent 70%)' }} />
+            <div className="relative w-24 h-28 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
+              {vehicle.image_url ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-10 h-10 text-primary/60" />}
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-bold text-foreground leading-tight">{vehicle.make} {vehicle.model} {vehicle.year || ''}</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-lg font-bold text-foreground leading-tight truncate">{vehicle.make} {vehicle.model} {vehicle.year || ''}</h2>
               <StatusBadge status={vehicle.status} />
             </div>
-            <p className="text-xs text-muted-foreground capitalize mt-0.5">{vehicle.type} · {vehicle.fuel_type}</p>
-            <div className="mt-2.5"><PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} /></div>
-            <button
-              onClick={() => setExpanded((e) => !e)}
-              className="mt-3 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors"
-            >
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-              {expanded ? 'Hide Details' : 'View Details & Ownership Card'}
-            </button>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="relative flex w-2 h-2">
+                {vehicle.status === 'active' && <span className="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style={{ background: statusDot(vehicle.status) }} />}
+                <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: statusDot(vehicle.status) }} />
+              </span>
+              <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle</span>
+            </div>
+            <div className="mt-2.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.35)' }}>
+                <FuelIcon className="w-3.5 h-3.5" /> {vehicle.fuel_type}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
-          {statsList.map((s) => { const I = s.icon; return (
+        {/* plate & driver pills */}
+        <div className="relative flex flex-wrap gap-2 mt-4 items-center">
+          <PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} />
+          {driver && (
+            <a href={driver.email ? `mailto:${driver.email}` : `tel:${driver.phone}`} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground hover:bg-white/10 transition-colors">
+              <MessageCircle className="w-3.5 h-3.5 text-primary" /> {driver.name}
+            </a>
+          )}
+        </div>
+
+        {/* compact stats */}
+        <div className="relative grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+          {statsList.map((s) => (
             <div key={s.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
-              <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: s.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.label}</p></div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">{s.label}</p>
               <p className="text-sm font-semibold text-foreground tabular-nums truncate">{s.value}</p>
             </div>
-          ); })}
+          ))}
         </div>
+
+        <button
+          onClick={() => setExpanded((e) => !e)}
+          className="relative mt-4 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors"
+        >
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+          {expanded ? 'Hide Details' : 'View Details & Ownership Card'}
+        </button>
 
         {expanded && (
           <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
@@ -118,7 +143,7 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
                   <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: d.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.label}</p></div>
                   <p className={`text-sm font-semibold tabular-nums truncate ${d.tone}`}>{d.value || '—'}</p>
                 </div>
-              ); })}
+              );})}
             </div>
             {vehicle.notes && (
               <div className="mt-2.5 flex items-start gap-2 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#ffffff', 0.03) }}>
