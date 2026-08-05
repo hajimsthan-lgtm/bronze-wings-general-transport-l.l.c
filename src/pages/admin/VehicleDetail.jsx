@@ -95,7 +95,7 @@ export default function VehicleDetail() {
 
   const viewerConfig = {
     trips: {
-      title: 'Trips Timeline', icon: Truck, accent: '#3b82f6', records: trips, dateField: 'trip_date',
+      title: 'Trips Timeline', icon: Truck, accent: '#3b82f6', records: fTrips, dateField: 'trip_date',
       filename: `vehicle-${vehicle.plate_number}-trips`,
       columns: [
         { label: 'Date', key: 'trip_date' },
@@ -107,7 +107,7 @@ export default function VehicleDetail() {
       ],
     },
     fuel: {
-      title: 'Fuel Records', icon: FuelIcon, accent: '#f59e0b', records: fuelRecords, dateField: 'date',
+      title: 'Fuel Records', icon: FuelIcon, accent: '#f59e0b', records: fFuel, dateField: 'date',
       filename: `vehicle-${vehicle.plate_number}-fuel`,
       columns: [
         { label: 'Date', key: 'date' },
@@ -117,7 +117,7 @@ export default function VehicleDetail() {
       ],
     },
     expenses: {
-      title: 'Expenses', icon: Receipt, accent: '#f43f5e', records: expenses, dateField: 'date',
+      title: 'Expenses', icon: Receipt, accent: '#f43f5e', records: fExpenses, dateField: 'date',
       filename: `vehicle-${vehicle.plate_number}-expenses`,
       columns: [
         { label: 'Date', key: 'date' },
@@ -127,8 +127,8 @@ export default function VehicleDetail() {
       ],
     },
     services: {
-      title: 'Service Records', icon: Wrench, accent: '#10b981', records: services, dateField: 'date',
-      filename: `vehicle-${vehicle.plate_number}-services`,
+      title: 'Maintenance Records', icon: Wrench, accent: '#10b981', records: fServices, dateField: 'date',
+      filename: `vehicle-${vehicle.plate_number}-maintenance`,
       columns: [
         { label: 'Date', key: 'date' },
         { label: 'Type', key: 'service_type' },
@@ -212,7 +212,7 @@ export default function VehicleDetail() {
           </div>
         </RecordSectionCard>
 
-        <RecordSectionCard title={t('services')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Service" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
+        <RecordSectionCard title={t('maintenance')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Maintenance" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
           <div className="space-y-2">
             {fServices.slice(0, 5).map((rec) => (
               <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>

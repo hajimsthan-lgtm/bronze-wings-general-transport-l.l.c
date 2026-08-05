@@ -30,7 +30,7 @@ export default function Vehicles() {
   return (
     <div>
       <div className="mb-5">
-        <SubTabBar value={tab} onChange={setTab} options={[{ value: 'vehicles', label: t('vehicles') }, { value: 'services', label: t('services') }]} />
+        <SubTabBar value={tab} onChange={setTab} options={[{ value: 'vehicles', label: t('vehicles') }, { value: 'services', label: t('maintenance') }]} />
       </div>
       {tab === 'vehicles' ? <VehiclesTab /> : <Services />}
     </div>

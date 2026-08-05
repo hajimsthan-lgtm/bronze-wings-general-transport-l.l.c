@@ -23,6 +23,7 @@ export default function Fuel() {
   const [records, setRecords] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [presetPlate, setPresetPlate] = useState('');
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
 
@@ -31,6 +32,7 @@ export default function Fuel() {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
   }, []);
 
   const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
@@ -97,20 +99,20 @@ export default function Fuel() {
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
           <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Fuel Record</SheetTitle></SheetHeader>
-          <FuelForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.FuelRecord.update(editItem.id, data); else await base44.entities.FuelRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+          <FuelForm editItem={editItem} presetPlate={presetPlate} onSave={async (data) => { if (editItem) await base44.entities.FuelRecord.update(editItem.id, data); else await base44.entities.FuelRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
     </div>
   );
 }
 
-function FuelForm({ editItem, onSave, onCancel }) {
+function FuelForm({ editItem, presetPlate, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, liters: editItem.liters || '', price_per_liter: editItem.price_per_liter || '', total_cost: editItem.total_cost || '', odometer_reading: editItem.odometer_reading || '' }); else setForm({ date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' }); }, [editItem]);
+  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], vehicle_plate: presetPlate || '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' });
+  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, liters: editItem.liters || '', price_per_liter: editItem.price_per_liter || '', total_cost: editItem.total_cost || '', odometer_reading: editItem.odometer_reading || '' }); else setForm({ date: new Date().toISOString().split('T')[0], vehicle_plate: presetPlate || '', driver_name: '', liters: '', price_per_liter: '', total_cost: '', odometer_reading: '', station_name: '', notes: '' }); }, [editItem, presetPlate]);
   useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).catch(() => []).then(setVehicles); base44.entities.Driver.list('-created_date', 200).catch(() => []).then(setDrivers); }, []);
   const update = (f, v) => { const next = { ...form, [f]: v }; if (f === 'liters' || f === 'price_per_liter') next.total_cost = (Number(next.liters) || 0) * (Number(next.price_per_liter) || 0); setForm(next); };
   const handle = async () => { setSaving(true); await onSave({ ...form, liters: Number(form.liters) || 0, price_per_liter: Number(form.price_per_liter) || 0, total_cost: Number(form.total_cost) || 0, odometer_reading: Number(form.odometer_reading) || 0 }); setSaving(false); };

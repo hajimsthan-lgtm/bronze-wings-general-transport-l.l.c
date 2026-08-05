@@ -22,6 +22,7 @@ export default function Services() {
   const [records, setRecords] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [presetPlate, setPresetPlate] = useState('');
   const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
 
@@ -30,12 +31,13 @@ export default function Services() {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
   }, []);
   const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
 
   return (
     <div>
-      <PageHeader title={t('services')} description={`${filtered.length} service records`}
+      <PageHeader title={t('maintenance')} description={`${filtered.length} maintenance records`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -65,21 +67,21 @@ export default function Services() {
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Service</SheetTitle></SheetHeader>
-          <ServiceForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.ServiceRecord.update(editItem.id, data); else await base44.entities.ServiceRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Maintenance</SheetTitle></SheetHeader>
+          <ServiceForm editItem={editItem} presetPlate={presetPlate} onSave={async (data) => { if (editItem) await base44.entities.ServiceRecord.update(editItem.id, data); else await base44.entities.ServiceRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
     </div>
   );
 }
 
-function ServiceForm({ editItem, onSave, onCancel }) {
+function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {}); }, []);
-  const [form, setForm] = useState({ vehicle_plate: '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' }); }, [editItem]);
+  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' });
+  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' }); }, [editItem, presetPlate]);
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
   const handle = async () => { setSaving(true); await onSave({ ...form, cost: Number(form.cost) || 0 }); setSaving(false); };
 
