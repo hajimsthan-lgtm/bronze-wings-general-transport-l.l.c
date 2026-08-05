@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Settings, GraduationCap, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Settings, GraduationCap, ArrowLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useTour, gatherTourSteps } from '@/lib/tour';
@@ -60,7 +60,7 @@ export default function MobileHeader() {
           </div>
           <BrandName variant="mobile" />
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
@@ -71,14 +71,6 @@ export default function MobileHeader() {
           </button>
           <GlobalDateFilter />
           <button
-            onClick={() => navigate(1)}
-            aria-label="Go forward"
-            title="Go forward"
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
             onClick={startTour}
             className="w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/40 flex items-center justify-center text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
             aria-label="Info Journey"
@@ -88,11 +80,11 @@ export default function MobileHeader() {
           </button>
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
             aria-label="Switch theme"
+            title="Switch theme"
           >
-            <span className="w-2 h-2 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 6px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
-            {theme === 'crimson' ? 'Crimson' : 'Navy'}
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 6px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
           </button>
           <Link
             to="/settings"
