@@ -1,6 +1,6 @@
 export default function SubTabBar({ value, onChange, options, compact = false, className = '' }) {
   return (
-    <div className={`flex items-center gap-1 w-fit ${className}`}>
+    <div className={`inline-flex items-center gap-1 w-fit p-1 rounded-2xl glass-sm border border-white/[0.06] ${className}`}>
       {options.map((o) => {
         const active = value === o.value;
         const Icon = o.icon;
