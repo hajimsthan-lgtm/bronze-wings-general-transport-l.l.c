@@ -18,6 +18,7 @@ import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
+import { downloadPaymentSlipPDF } from '@/lib/paymentSlipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
@@ -49,6 +50,8 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const [editInvoice, setEditInvoice] = useState(null);
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
   const [editPayment, setEditPayment] = useState(null);
+  const [selectedPayments, setSelectedPayments] = useState(new Set());
+  const [companySettings, setCompanySettings] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -59,17 +62,19 @@ export default function ClientDetail({ id: propId, inline = false }) {
       setLoading(false);
       setDataLoading(true);
       try {
-        const [tR, iR, fR, pR] = await Promise.all([
+        const [tR, iR, fR, pR, sR] = await Promise.all([
           base44.entities.Trip.filter({ client_name: c.name }).catch(() => []),
           base44.entities.Invoice.filter({ client_name: c.name }).catch(() => []),
           base44.entities.FixedCharge.filter({ client_name: c.name }).catch(() => []),
           base44.entities.ClientPayment.filter({ client_name: c.name }).catch(() => []),
+          getCompanySettings(),
         ]);
         if (cancelled) return;
         setTrips(tR || []);
         setInvoices(iR || []);
         setFixedCharges(fR || []);
         setPayments(pR || []);
+        setCompanySettings(sR || {});
       } finally {
         if (!cancelled) setDataLoading(false);
       }
@@ -91,6 +96,14 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const reloadInvoices = () => base44.entities.Invoice.filter({ client_name: client.name }).then(setInvoices).catch(() => {});
   const reloadPayments = () => base44.entities.ClientPayment.filter({ client_name: client.name }).then(setPayments).catch(() => {});
   const deleteCharge = async (charge) => { await base44.entities.FixedCharge.delete(charge.id); reloadCharges(); };
+  const deletePayment = async (payment) => {
+    if (!confirm('Delete this payment?')) return;
+    try { await base44.entities.ClientPayment.delete(payment.id); reloadPayments(); } catch (e) { alert('Failed to delete payment'); }
+  };
+  const togglePaymentSelect = (pid) => setSelectedPayments(prev => { const n = new Set(prev); n.has(pid) ? n.delete(pid) : n.add(pid); return n; });
+  const downloadPaymentSlip = async (p) => {
+    try { await downloadPaymentSlipPDF(p, client, companySettings); } catch (e) { alert('Failed to generate payment slip'); }
+  };
   const inDateRange = (d) => !d || (d >= dateFrom && d <= dateTo);
   const displayTrips = (contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips).filter(tr => inDateRange(tr.trip_date));
   const displayInvoices = (contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices).filter(inv => inDateRange(inv.issue_date));
@@ -326,18 +339,26 @@ export default function ClientDetail({ id: propId, inline = false }) {
                     const allocs = (p.allocated_invoices || []).filter(a => a.allocated_amount > 0);
                     const isPartial = allocs.some(a => (Number(a.allocated_amount) || 0) < (Number(a.invoice_total) || 0) - 0.01);
                     return (
-                      <div key={p.id} onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} className="row-card cursor-pointer hover:border-primary/30 transition-colors">
+                      <div key={p.id} className={`row-card transition-colors ${selectedPayments.has(p.id) ? 'border-primary/40' : ''}`}>
                         <div className="flex items-center gap-3">
+                          <button onClick={() => togglePaymentSelect(p.id)} className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all" style={{ borderColor: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'rgba(255,255,255,0.2)', background: selectedPayments.has(p.id) ? 'rgb(var(--panel-accent-rgb))' : 'transparent' }}>
+                            {selectedPayments.has(p.id) && <span className="w-2 h-2 rounded-full bg-white" />}
+                          </button>
                           <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
                             <Receipt className="w-4 h-4 text-primary" />
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }}>
                             <p className="text-sm font-medium text-foreground">{p.reference_number || '—'}</p>
                             <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)} · {p.payment_mode}{p.notes ? ` · ${p.notes}` : ''}</p>
                           </div>
                           {isPartial && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/25 whitespace-nowrap">Partial</span>}
                           <span className="text-sm font-semibold text-foreground">{formatCurrency(p.amount)}</span>
                           <StatusBadge status={p.status} />
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button onClick={() => downloadPaymentSlip(p)} title="Download payment slip" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Download className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => { setEditPayment(p); setPaymentFormOpen(true); }} title="Edit" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => deletePayment(p)} title="Delete" className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                          </div>
                         </div>
                         {allocs.length > 0 && (
                           <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1.5">
