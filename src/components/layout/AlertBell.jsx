@@ -1,35 +1,39 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { safeAll } from '@/lib/safeRequest';
+import { buildAlerts, CATEGORIES, SEVERITY } from '@/lib/alertEngine';
 import {
-  Bell, X, Wrench, FileWarning, FileText, Truck,
-  CalendarClock, IdCard, AlertTriangle, ChevronRight,
+  Bell, X, ChevronRight, ChevronDown, CheckCheck,
+  FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
+  CalendarClock, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
 
-const ALERT_DAYS = 14;
-const AUTO_CLOSE_MS = 6000;
+const ICONS = { FileWarning, Receipt, Truck, Wrench, IdCard, FileText, CalendarClock, CheckCircle2 };
+const AUTO_CLOSE_MS = 8000;
+const DISMISS_KEY = 'b44_alert_dismissed_v1';
 
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  return Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+function loadDismissed() {
+  try { return new Set(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function saveDismissed(set) {
+  try { localStorage.setItem(DISMISS_KEY, JSON.stringify([...set])); } catch {}
 }
 
-const SEVERITY = {
-  critical: { color: '#ef4444', glow: '239,68,68' },
-  warning: { color: '#f59e0b', glow: '245,158,11' },
-  info: { color: '#3b82f6', glow: '59,130,246' },
-  success: { color: '#10b981', glow: '16,185,129' },
-};
-
 export default function AlertBell() {
-  const [alerts, setAlerts] = useState([]);
+  const [rawAlerts, setRawAlerts] = useState({ alerts: [], byCategory: {} });
   const [showNotif, setShowNotif] = useState(false);
   const [closing, setClosing] = useState(false);
   const [progress, setProgress] = useState(100);
+  const [dismissed, setDismissed] = useState(() => loadDismissed());
+  const [expanded, setExpanded] = useState(() => {
+    // default-expand the first category that has items — set after load
+    const e = {};
+    Object.keys(CATEGORIES).forEach((k) => (e[k] = false));
+    return e;
+  });
+  const [activeCategory, setActiveCategory] = useState('all');
   const closeRef = useRef(null);
   const leaveTimer = useRef(null);
   const containerRef = useRef(null);
@@ -37,124 +41,42 @@ export default function AlertBell() {
 
   useEffect(() => {
     (async () => {
-      const [inv, vehicles, documents, drivers, trips] = await safeAll([
-        () => base44.entities.Invoice.list('-created_date', 50).catch(() => []),
+      const [invoices, vehicles, documents, drivers, trips, clientPayments] = await safeAll([
+        () => base44.entities.Invoice.list('-created_date', 80).catch(() => []),
         () => base44.entities.Vehicle.list().catch(() => []),
         () => base44.entities.Document.list().catch(() => []),
         () => base44.entities.Driver.list().catch(() => []),
-        () => base44.entities.Trip.list('-trip_date', 30).catch(() => []),
+        () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
+        () => base44.entities.ClientPayment.list('-created_date', 50).catch(() => []),
       ], 1);
-
-      const items = [];
-
-      // Overdue invoices
-      inv.filter(i => i.status === 'overdue').forEach(i =>
-        items.push({
-          id: `inv-${i.id}`, icon: FileText, severity: 'critical',
-          title: 'Overdue Invoice', sub: i.client_name || '—',
-          meta: i.invoice_number || '', to: '/admin/clients',
-        })
-      );
-
-      // Vehicle maintenance
-      vehicles.filter(v => v.status === 'maintenance').forEach(v =>
-        items.push({
-          id: `maint-${v.id}`, icon: Wrench, severity: 'warning',
-          title: 'Vehicle In Maintenance', sub: v.plate_number || '—',
-          meta: `${v.make || ''} ${v.model || ''}`.trim(), to: '/admin/vehicles',
-        })
-      );
-
-      // Documents
-      documents.filter(d => d.status === 'expiring_soon' || d.status === 'expired').forEach(d =>
-        items.push({
-          id: `doc-${d.id}`, icon: FileWarning, severity: d.status === 'expired' ? 'critical' : 'warning',
-          title: d.status === 'expired' ? 'Document Expired' : 'Document Expiring',
-          sub: d.title || d.name || '—', to: '/admin/documents',
-        })
-      );
-
-      // Vehicle service due
-      vehicles.forEach(v => {
-        const days = daysUntil(v.next_service_date);
-        if (days !== null && days <= ALERT_DAYS)
-          items.push({
-            id: `svc-${v.id}`, icon: Wrench, severity: days < 0 ? 'critical' : 'warning',
-            title: days < 0 ? 'Service Overdue' : 'Service Due Soon',
-            sub: v.plate_number || '—',
-            meta: days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`,
-            to: '/admin/vehicles',
-          });
-      });
-
-      // Vehicle registration / insurance expiry
-      vehicles.forEach(v => {
-        const regDays = daysUntil(v.registration_expiry);
-        if (regDays !== null && regDays <= ALERT_DAYS)
-          items.push({
-            id: `reg-${v.id}`, icon: FileWarning, severity: regDays < 0 ? 'critical' : 'warning',
-            title: regDays < 0 ? 'Registration Expired' : 'Registration Expiring',
-            sub: v.plate_number || '—', meta: regDays < 0 ? `${Math.abs(regDays)}d ago` : `${regDays}d left`,
-            to: '/admin/vehicles',
-          });
-        const insDays = daysUntil(v.insurance_expiry);
-        if (insDays !== null && insDays <= ALERT_DAYS)
-          items.push({
-            id: `ins-${v.id}`, icon: FileWarning, severity: insDays < 0 ? 'critical' : 'warning',
-            title: insDays < 0 ? 'Insurance Expired' : 'Insurance Expiring',
-            sub: v.plate_number || '—', meta: insDays < 0 ? `${Math.abs(insDays)}d ago` : `${insDays}d left`,
-            to: '/admin/vehicles',
-          });
-      });
-
-      // Driver license & visa
-      drivers.forEach(d => {
-        const licDays = daysUntil(d.license_expiry);
-        if (licDays !== null && licDays <= ALERT_DAYS)
-          items.push({
-            id: `lic-${d.id}`, icon: IdCard, severity: licDays < 0 ? 'critical' : 'warning',
-            title: licDays < 0 ? 'License Expired' : 'License Expiring',
-            sub: d.name || '—', meta: licDays < 0 ? `${Math.abs(licDays)}d ago` : `${licDays}d left`,
-            to: '/admin/drivers',
-          });
-        const visaDays = daysUntil(d.visa_expiry);
-        if (visaDays !== null && visaDays <= ALERT_DAYS)
-          items.push({
-            id: `visa-${d.id}`, icon: IdCard, severity: visaDays < 0 ? 'critical' : 'warning',
-            title: visaDays < 0 ? 'Visa Expired' : 'Visa Expiring',
-            sub: d.name || '—', meta: visaDays < 0 ? `${Math.abs(visaDays)}d ago` : `${visaDays}d left`,
-            to: '/admin/drivers',
-          });
-      });
-
-      // Trip alerts — scheduled (today) & in-transit
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      trips.filter(t => t.status === 'scheduled').forEach(t => {
-        const tDate = t.trip_date ? new Date(t.trip_date) : null;
-        const isToday = tDate && tDate.toDateString() === today.toDateString();
-        if (isToday)
-          items.push({
-            id: `trip-sched-${t.id}`, icon: CalendarClock, severity: 'info',
-            title: 'Trip Scheduled Today', sub: `${t.from_location || '—'} → ${t.to_location || '—'}`,
-            meta: t.vehicle_plate || '', to: '/trips',
-          });
-      });
-      trips.filter(t => t.status === 'in_transit').forEach(t =>
-        items.push({
-          id: `trip-transit-${t.id}`, icon: Truck, severity: 'info',
-          title: 'Trip In Transit', sub: `${t.from_location || '—'} → ${t.to_location || '—'}`,
-          meta: t.driver_name || '', to: '/trips',
-        })
-      );
-
-      setAlerts(items);
+      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments }));
     })();
   }, []);
 
+  // Filter out dismissed alerts
+  const { alerts, byCategory } = useMemo(() => {
+    const all = (rawAlerts.alerts || []).filter((a) => !dismissed.has(a.id));
+    const byCat = {};
+    Object.keys(CATEGORIES).forEach((k) => {
+      byCat[k] = all.filter((a) => a.category === k);
+    });
+    return { alerts: all, byCategory: byCat };
+  }, [rawAlerts, dismissed]);
+
   const count = alerts.length;
-  const criticalCount = alerts.filter(a => a.severity === 'critical').length;
-  const warningCount = alerts.filter(a => a.severity === 'warning').length;
-  const infoCount = alerts.filter(a => a.severity === 'info').length;
+  const criticalCount = alerts.filter((a) => a.severity === 'critical').length;
+
+  // Auto-expand the first non-empty category on first open
+  useEffect(() => {
+    if (showNotif && count > 0) {
+      setExpanded((prev) => {
+        const anyOpen = Object.values(prev).some(Boolean);
+        if (anyOpen) return prev;
+        const firstKey = Object.keys(CATEGORIES).find((k) => byCategory[k]?.length);
+        return firstKey ? { ...prev, [firstKey]: true } : prev;
+      });
+    }
+  }, [showNotif, count]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-close with countdown progress
   useEffect(() => {
@@ -189,7 +111,6 @@ export default function AlertBell() {
     setTimeout(() => { setShowNotif(false); setClosing(false); }, 200);
   };
 
-  // 3-second hold before closing on mouse leave; outside click closes instantly
   const handleMouseEnter = () => {
     clearTimeout(leaveTimer.current);
     if (!showNotif) setShowNotif(true);
@@ -211,14 +132,28 @@ export default function AlertBell() {
     return () => document.removeEventListener('mousedown', handler);
   }, [showNotif]);
 
-  const handleAlertClick = (to) => {
-    handleClose();
-    navigate(to);
+  const handleAlertClick = (to) => { handleClose(); navigate(to); };
+
+  const dismissAlert = (e, id) => {
+    e.stopPropagation();
+    setDismissed((prev) => { const n = new Set(prev); n.add(id); saveDismissed(n); return n; });
   };
 
-  const badgeColor = criticalCount > 0 ? '#ef4444' : '#f59e0b';
-  const badgeGlow = criticalCount > 0 ? 'rgba(239,68,68,0.6)' : 'rgba(245,158,11,0.6)';
-  const dotGlow = criticalCount > 0 ? 'rgba(239,68,68,0.8)' : 'rgba(245,158,11,0.8)';
+  const dismissCategory = (cat) => {
+    const ids = (byCategory[cat] || []).map((a) => a.id);
+    setDismissed((prev) => { const n = new Set(prev); ids.forEach((id) => n.add(id)); saveDismissed(n); return n; });
+  };
+
+  const dismissAll = () => {
+    const ids = alerts.map((a) => a.id);
+    setDismissed((prev) => { const n = new Set(prev); ids.forEach((id) => n.add(id)); saveDismissed(n); return n; });
+  };
+
+  const badgeColor = criticalCount > 0 ? '#ef4444' : count > 0 ? '#f59e0b' : '#10b981';
+  const badgeGlow = criticalCount > 0 ? 'rgba(239,68,68,0.6)' : count > 0 ? 'rgba(245,158,11,0.6)' : 'rgba(16,185,129,0.6)';
+  const dotGlow = criticalCount > 0 ? 'rgba(239,68,68,0.8)' : count > 0 ? 'rgba(245,158,11,0.8)' : 'rgba(16,185,129,0.8)';
+
+  const visibleCategories = Object.keys(CATEGORIES).filter((k) => (byCategory[k] || []).length > 0);
 
   return (
     <div
@@ -245,22 +180,16 @@ export default function AlertBell() {
         {count > 0 && (
           <span
             className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
-            style={{
-              background: badgeColor,
-              boxShadow: `0 0 6px ${dotGlow}`,
-              animation: 'live-pulse 1.6s ease-in-out infinite',
-            }}
+            style={{ background: badgeColor, boxShadow: `0 0 6px ${dotGlow}`, animation: 'live-pulse 1.6s ease-in-out infinite' }}
           />
         )}
       </button>
 
       {showNotif && (
         <div
-          className="absolute top-full right-0 mt-2 z-[60] w-[340px] max-w-[calc(100vw-1.5rem)] overflow-hidden"
+          className="absolute top-full right-0 mt-2 z-[60] w-[360px] max-w-[calc(100vw-1.5rem)] overflow-hidden"
           style={{
-            animation: closing
-              ? 'notif-out 0.2s cubic-bezier(0.16,1,0.3,1) forwards'
-              : 'notif-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
+            animation: closing ? 'notif-out 0.2s cubic-bezier(0.16,1,0.3,1) forwards' : 'notif-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
           }}
           onMouseEnter={() => { pauseAutoClose(); clearTimeout(leaveTimer.current); }}
           onMouseLeave={handleMouseLeave}
@@ -275,58 +204,73 @@ export default function AlertBell() {
               boxShadow: '0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06)',
             }}
           >
-            {/* Header — mobile notification center style */}
+            {/* Header */}
             <div className="relative px-4 pt-3.5 pb-3 border-b border-white/[0.06]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className="relative flex">
-                    <span
-                      className="absolute inline-flex h-2.5 w-2.5 rounded-full opacity-75 animate-ping"
-                      style={{ background: badgeColor }}
-                    />
-                    <span
-                      className="relative inline-flex h-2.5 w-2.5 rounded-full"
-                      style={{ background: badgeColor }}
-                    />
+                    <span className="absolute inline-flex h-2.5 w-2.5 rounded-full opacity-75 animate-ping" style={{ background: badgeColor }} />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full" style={{ background: badgeColor }} />
                   </span>
                   <div>
-                    <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-white leading-none">
-                      Notifications
-                    </p>
+                    <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-white leading-none">Notifications</p>
                     <p className="text-[10px] text-white/45 mt-1 leading-none">
                       {count > 0 ? `${count} active alert${count !== 1 ? 's' : ''}` : 'All clear'}
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleClose}
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center gap-1">
+                  {count > 0 && (
+                    <button
+                      onClick={dismissAll}
+                      title="Dismiss all"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-emerald-400 hover:bg-white/10 transition-all"
+                    >
+                      <CheckCheck className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    onClick={handleClose}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
-              {/* Severity summary chips */}
+              {/* Category filter chips */}
               {count > 0 && (
                 <div className="flex gap-1.5 mt-2.5 flex-wrap">
-                  {criticalCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex items-center gap-1"
-                      style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
-                      <AlertTriangle className="w-2.5 h-2.5" /> {criticalCount} Critical
-                    </span>
-                  )}
-                  {warningCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex items-center gap-1"
-                      style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#fcd34d' }}>
-                      <AlertTriangle className="w-2.5 h-2.5" /> {warningCount} Warning
-                    </span>
-                  )}
-                  {infoCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex items-center gap-1"
-                      style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd' }}>
-                      <Truck className="w-2.5 h-2.5" /> {infoCount} Info
-                    </span>
-                  )}
+                  <button
+                    onClick={() => setActiveCategory('all')}
+                    className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide transition-all"
+                    style={
+                      activeCategory === 'all'
+                        ? { background: 'rgba(var(--panel-accent-rgb),0.2)', border: '1px solid rgba(var(--panel-accent-rgb),0.4)', color: '#fff' }
+                        : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }
+                    }
+                  >
+                    All {count}
+                  </button>
+                  {visibleCategories.map((k) => {
+                    const cat = CATEGORIES[k];
+                    const n = byCategory[k].length;
+                    const isActive = activeCategory === k;
+                    return (
+                      <button
+                        key={k}
+                        onClick={() => setActiveCategory(isActive ? 'all' : k)}
+                        className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide transition-all flex items-center gap-1"
+                        style={
+                          isActive
+                            ? { background: `${cat.color}26`, border: `1px solid ${cat.color}66`, color: '#fff' }
+                            : { background: `${cat.color}14`, border: `1px solid ${cat.color}33`, color: `${cat.color}` }
+                        }
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -345,68 +289,94 @@ export default function AlertBell() {
               )}
             </div>
 
-            {/* Notification feed — mobile-style cards */}
+            {/* Categorized feed */}
             {count > 0 ? (
-              <div className="max-h-[320px] overflow-y-auto thin-scroll p-2 space-y-1.5">
-                {alerts.slice(0, 8).map((a, idx) => {
-                  const Icon = a.icon;
-                  const sev = SEVERITY[a.severity] || SEVERITY.info;
-                  return (
-                    <button
-                      key={a.id}
-                      onClick={() => handleAlertClick(a.to)}
-                      className="group w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left hover:bg-white/[0.04]"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        animation: 'notif-item-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
-                        animationDelay: `${idx * 40}ms`,
-                      }}
-                    >
-                      {/* Icon with severity glow */}
-                      <span
-                        className="relative w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: `${sev.color}1a`,
-                          border: `1px solid ${sev.color}40`,
-                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 12px -4px rgba(${sev.glow},0.4)`,
-                        }}
-                      >
-                        <Icon className="w-4 h-4" style={{ color: sev.color }} />
-                        {a.severity === 'critical' && (
+              <div className="max-h-[380px] overflow-y-auto thin-scroll p-2 space-y-1">
+                {visibleCategories
+                  .filter((k) => activeCategory === 'all' || activeCategory === k)
+                  .map((catKey) => {
+                    const cat = CATEGORIES[catKey];
+                    const catAlerts = byCategory[catKey];
+                    const isOpen = expanded[catKey];
+                    const CatIcon = ICONS[cat.icon] || AlertTriangle;
+                    const catCritical = catAlerts.filter((a) => a.severity === 'critical').length;
+                    return (
+                      <div key={catKey} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        {/* Category header */}
+                        <button
+                          onClick={() => setExpanded((p) => ({ ...p, [catKey]: !p[catKey] }))}
+                          className="w-full flex items-center gap-2.5 px-2.5 py-2 transition-all hover:bg-white/[0.03]"
+                        >
                           <span
-                            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
-                            style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}`, animation: 'live-pulse 1.6s ease-in-out infinite' }}
-                          />
-                        )}
-                      </span>
+                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                            style={{ background: `${cat.color}1a`, border: `1px solid ${cat.color}40`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 10px -4px rgba(${cat.glow},0.4)` }}
+                          >
+                            <CatIcon className="w-3.5 h-3.5" style={{ color: cat.color }} />
+                          </span>
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-[11px] font-bold text-white/90 uppercase tracking-wide leading-none truncate">{cat.label}</p>
+                            <p className="text-[9px] text-white/40 mt-0.5 leading-none">
+                              {catAlerts.length} item{catAlerts.length !== 1 ? 's' : ''}
+                              {catCritical > 0 && <span style={{ color: '#fca5a5' }}> · {catCritical} critical</span>}
+                            </p>
+                          </div>
+                          <span
+                            onClick={(e) => { e.stopPropagation(); dismissCategory(catKey); }}
+                            className="text-[9px] text-white/30 hover:text-white/70 transition-colors px-1.5 py-0.5 rounded uppercase tracking-wide font-mono"
+                            title="Dismiss category"
+                          >
+                            Clear
+                          </span>
+                          <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform flex-shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
+                        </button>
 
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[12.5px] font-semibold text-white truncate leading-tight">{a.title}</p>
-                        <p className="text-[11px] text-white/55 truncate mt-0.5 leading-tight">{a.sub}</p>
-                        {a.meta && (
-                          <p className="text-[9.5px] text-white/35 truncate mt-0.5 leading-tight uppercase tracking-wide font-mono">{a.meta}</p>
+                        {/* Category items */}
+                        {isOpen && (
+                          <div className="px-1.5 pb-1.5 space-y-1" style={{ animation: 'notif-item-in 0.25s cubic-bezier(0.16,1,0.3,1) both' }}>
+                            {catAlerts.map((a, idx) => {
+                              const Icon = ICONS[a.icon] || AlertTriangle;
+                              const sev = SEVERITY[a.severity] || SEVERITY.info;
+                              return (
+                                <div
+                                  key={a.id}
+                                  onClick={() => handleAlertClick(a.to)}
+                                  className="group w-full flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-all hover:bg-white/[0.04]"
+                                  style={{ animation: 'notif-item-in 0.3s cubic-bezier(0.16,1,0.3,1) both', animationDelay: `${idx * 30}ms` }}
+                                >
+                                  <span
+                                    className="relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                    style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 10px -4px rgba(${sev.glow},0.4)` }}
+                                  >
+                                    <Icon className="w-3.5 h-3.5" style={{ color: sev.color }} />
+                                    {a.severity === 'critical' && (
+                                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}`, animation: 'live-pulse 1.6s ease-in-out infinite' }} />
+                                    )}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-semibold text-white truncate leading-tight">{a.title}</p>
+                                    <p className="text-[10.5px] text-white/55 truncate mt-0.5 leading-tight">{a.sub}</p>
+                                    {a.meta && <p className="text-[9px] text-white/35 truncate mt-0.5 leading-tight uppercase tracking-wide font-mono">{a.meta}</p>}
+                                  </div>
+                                  <button
+                                    onClick={(e) => dismissAlert(e, a.id)}
+                                    className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-full flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+                                    title="Dismiss"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                  <ChevronRight className="w-3 h-3 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
-
-                      {/* Chevron */}
-                      <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                    </button>
-                  );
-                })}
-                {count > 8 && (
-                  <p className="text-center text-[10px] text-white/35 py-2 font-mono uppercase tracking-wider">
-                    +{count - 8} more alerts
-                  </p>
-                )}
+                    );
+                  })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 px-4">
-                <span
-                  className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}
-                >
+                <span className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}>
                   <Bell className="w-5 h-5 text-emerald-400" />
                 </span>
                 <p className="text-[12px] font-semibold text-white/70">All caught up</p>
