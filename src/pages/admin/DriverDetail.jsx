@@ -79,7 +79,7 @@ export default function DriverDetail() {
     return () => {cancelled = true;};
   }, [id]);
 
-  useEffect(() => { getCompanySettings().then(setCompanySettings).catch(() => {}); }, []);
+  useEffect(() => {getCompanySettings().then(setCompanySettings).catch(() => {});}, []);
 
   if (loading) return <DetailSkeleton />;
   if (!driver) return <EmptyState title="Driver not found" />;
@@ -105,14 +105,14 @@ export default function DriverDetail() {
     } finally {setSalaryBusyId(null);}
   };
 
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const downloadPayslip = async (rec) => {
     setPayslipBusyId(rec.id);
     try {
       await downloadPayslipPDF(rec, driver, companySettings);
     } catch {
       toast({ title: 'Payslip download failed', variant: 'destructive' });
-    } finally { setPayslipBusyId(null); }
+    } finally {setPayslipBusyId(null);}
   };
 
   const handleProfitPDF = () => {
@@ -143,7 +143,7 @@ export default function DriverDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <EntityDetailHeader backTo="/admin/drivers" />
         <div className="flex items-center gap-2 sm:ml-auto">
-          <Calendar className="w-4 h-4 text-muted-foreground hidden sm:block" />
+          
           <DateRangeFilter
             fromValue={dateFrom}
             onFromChange={setDateFrom}
@@ -168,21 +168,21 @@ export default function DriverDetail() {
           </TabsList>
           <TabsContent value="trips" className="mt-4">
             <TabTableCard
-              collapsible
-            title={`Trips — ${driver.name}`}
-              subtitle={`${dateFrom} → ${dateTo}`}
-              loading={dataLoading}
-              columns={[
+                collapsible
+                title={`Trips — ${driver.name}`}
+                subtitle={`${dateFrom} → ${dateTo}`}
+                loading={dataLoading}
+                columns={[
                 { label: 'Trip ID', className: 'col-span-2' },
                 { label: 'Date', className: 'col-span-2' },
                 { label: 'Route', className: 'col-span-3' },
                 { label: 'Status', className: 'col-span-2' },
                 { label: 'Amount', className: 'col-span-2 text-right' },
-                { label: 'Action', className: 'col-span-1 text-right' },
-              ]}
-              emptyIcon={Inbox}
-            >
-              {fTrips.map((trip) => (
+                { label: 'Action', className: 'col-span-1 text-right' }]
+                }
+                emptyIcon={Inbox}>
+                
+              {fTrips.map((trip) =>
                 <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                   <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
                   <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
@@ -193,27 +193,27 @@ export default function DriverDetail() {
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
                   </div>
                 </div>
-              ))}
+                )}
             </TabTableCard>
           </TabsContent>
 
           <TabsContent value="salary" className="mt-4">
             <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />
             <TabTableCard
-            title="Salary Records"
-              subtitle={`${dateFrom} → ${dateTo}`}
-              loading={dataLoading}
-              actions={
+                title="Salary Records"
+                subtitle={`${dateFrom} → ${dateTo}`}
+                loading={dataLoading}
+                actions={
                 <select
                   value={salaryMonth}
                   onChange={(e) => setSalaryMonth(e.target.value)}
-                  className="h-8 rounded-lg border border-border bg-input text-foreground text-xs px-2 capitalize"
-                >
+                  className="h-8 rounded-lg border border-border bg-input text-foreground text-xs px-2 capitalize">
+                  
                   <option value="all">All Months</option>
                   {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                 </select>
-              }
-              columns={[
+                }
+                columns={[
                 { label: 'Period', className: 'col-span-2' },
                 { label: 'Pay Date', className: 'col-span-2' },
                 { label: 'Base', className: 'col-span-1 text-right' },
@@ -221,11 +221,11 @@ export default function DriverDetail() {
                 { label: 'Deductions', className: 'col-span-1 text-right' },
                 { label: 'Net', className: 'col-span-2 text-right' },
                 { label: 'Status', className: 'col-span-1 text-right' },
-                { label: 'Payslip', className: 'col-span-1 text-right' },
-              ]}
-              emptyIcon={Wallet}
-            >
-              {fSalaries.map((rec) => (
+                { label: 'Payslip', className: 'col-span-1 text-right' }]
+                }
+                emptyIcon={Wallet}>
+                
+              {fSalaries.map((rec) =>
                 <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                   <div className="col-span-2 text-foreground font-medium truncate">{rec.month} {rec.year}</div>
                   <div className="col-span-2 text-muted-foreground">{formatDate(rec.payment_date)}</div>
@@ -239,34 +239,34 @@ export default function DriverDetail() {
                       size="sm"
                       variant="ghost"
                       disabled={payslipBusyId === rec.id}
-                      onClick={(e) => { e.stopPropagation(); downloadPayslip(rec); }}
+                      onClick={(e) => {e.stopPropagation();downloadPayslip(rec);}}
                       className="h-7 px-2 text-muted-foreground hover:text-primary"
-                      title="Download payslip"
-                    >
+                      title="Download payslip">
+                      
                       <FileDown className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
-              ))}
+                )}
             </TabTableCard>
           </TabsContent>
 
           <TabsContent value="expenses" className="mt-4">
             <TabTableCard
-              collapsible
-            title="Expenses"
-              subtitle={`${dateFrom} → ${dateTo}`}
-              loading={dataLoading}
-              columns={[
+                collapsible
+                title="Expenses"
+                subtitle={`${dateFrom} → ${dateTo}`}
+                loading={dataLoading}
+                columns={[
                 { label: 'Date', className: 'col-span-2' },
                 { label: 'Category', className: 'col-span-2' },
                 { label: 'Description', className: 'col-span-5' },
                 { label: 'Amount', className: 'col-span-2 text-right' },
-                { label: 'Status', className: 'col-span-1 text-right' },
-              ]}
-              emptyIcon={Receipt}
-            >
-              {fExpenses.map((rec) => (
+                { label: 'Status', className: 'col-span-1 text-right' }]
+                }
+                emptyIcon={Receipt}>
+                
+              {fExpenses.map((rec) =>
                 <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                   <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
                   <div className="col-span-2 text-foreground capitalize truncate">{rec.category}</div>
@@ -274,7 +274,7 @@ export default function DriverDetail() {
                   <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
                   <div className="col-span-1 text-right"><StatusBadge status={rec.status} /></div>
                 </div>
-              ))}
+                )}
             </TabTableCard>
           </TabsContent>
 
