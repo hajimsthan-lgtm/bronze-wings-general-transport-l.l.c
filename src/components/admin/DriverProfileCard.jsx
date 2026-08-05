@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, BadgeCheck, ChevronDown, Truck, Wallet, ShieldCheck, Globe2, CalendarDays, HeartPulse, TrendingUp, FileText, Car } from 'lucide-react';
+import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -51,70 +52,77 @@ export default function DriverProfileCard({ driver, vehicle, stats }) {
 
   return (
     <div className="space-y-4">
-      {/* ===== Profile Card ===== */}
-      <div className="glass-card p-5 relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
-        <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#34d399', 0.5)} 0%, transparent 70%)` }} />
-        <div className="absolute -bottom-12 -left-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
-
-        <div className="relative flex gap-4">
-          <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1.5 rounded-2xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.40) 0%, transparent 70%)' }} />
-            <div className="relative w-24 h-28 rounded-2xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
-              {driver.image_url
-                ? <img src={driver.image_url} alt="" className="w-full h-full object-cover" />
-                : <span className="text-3xl font-bold text-white entity-avatar w-full h-full flex items-center justify-center">{initialsOf(driver.name)}</span>}
+      {/* ===== Profile Card — banded model ===== */}
+      <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
+        {/* header band */}
+        <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#34d399', 0.10)} 0%, transparent 100%)` }}>
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#34d399', 0.5)} 0%, transparent 70%)` }} />
+          <div className="relative flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(52,211,153,0.40) 0%, transparent 70%)' }} />
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
+                {driver.image_url
+                  ? <img src={driver.image_url} alt="" className="w-full h-full object-cover" />
+                  : <span className="text-xl font-bold text-white entity-avatar w-full h-full flex items-center justify-center">{initialsOf(driver.name)}</span>}
+              </div>
             </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-lg font-bold text-foreground leading-tight truncate">{driver.name}</h2>
-              <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-base font-bold text-foreground leading-tight truncate">{driver.name}</h2>
+                <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
+              </div>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="relative flex w-2 h-2">
+                  {isActive && <span className="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style={{ background: dotColor }} />}
+                  <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                </span>
+                <span className="text-xs text-muted-foreground">Transport Driver</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="relative flex w-2 h-2">
-                {isActive && <span className="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style={{ background: dotColor }} />}
-                <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: dotColor }} />
-              </span>
-              <span className="text-xs text-muted-foreground">Transport Driver</span>
-            </div>
-            <div className="mt-2.5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.35)' }}>
-                <Wallet className="w-3.5 h-3.5" /> {formatCurrency(driver.base_salary)}
-              </span>
-            </div>
+            <StatusBadge status={driver.status} />
           </div>
         </div>
 
-        {/* contact pills */}
-        <div className="relative flex flex-wrap gap-2 mt-4">
-          {driver.phone && (
-            <a href={`tel:${driver.phone}`} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground hover:bg-white/10 transition-colors">
-              <Phone className="w-3.5 h-3.5 text-primary" /> {driver.phone}
-            </a>
-          )}
-          {driver.email && (
-            <a href={`mailto:${driver.email}`} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground hover:bg-white/10 transition-colors truncate">
-              <Mail className="w-3.5 h-3.5 text-primary" /> <span className="truncate">{driver.email}</span>
-            </a>
-          )}
-        </div>
-
-        {/* compact stats */}
-        <div className="relative grid grid-cols-3 gap-2.5 mt-4">
+        {/* inline stats strip */}
+        <div className="grid grid-cols-3 divide-x divide-white/[0.06]">
           {[
             { label: 'Trips', value: stats?.trips ?? 0, accent: '#3b82f6' },
             { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
             { label: 'Experience', value: stats?.experience ?? '—', accent: '#a855f7' },
           ].map((s) => (
-            <div key={s.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(s.accent, 0.06) }}>
+            <div key={s.label} className="px-2 py-3 text-center">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">{s.label}</p>
-              <p className="text-sm font-semibold text-foreground tabular-nums truncate">{s.value}</p>
+              <p className="text-sm font-semibold tabular-nums truncate" style={{ color: s.accent }}>{s.value}</p>
             </div>
           ))}
         </div>
 
+        {/* info rows */}
+        <div className="px-5 py-4 space-y-2.5">
+          {driver.phone && (
+            <a href={`tel:${driver.phone}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
+              <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <span className="text-muted-foreground">Phone</span>
+              <span className="ml-auto font-semibold text-foreground truncate">{driver.phone}</span>
+            </a>
+          )}
+          {driver.email && (
+            <a href={`mailto:${driver.email}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
+              <Mail className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <span className="text-muted-foreground">Email</span>
+              <span className="ml-auto font-semibold text-foreground truncate">{driver.email}</span>
+            </a>
+          )}
+          <div className="flex items-center gap-2.5 text-xs">
+            <Wallet className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+            <span className="text-muted-foreground">Base Salary</span>
+            <span className="ml-auto font-semibold text-foreground">{formatCurrency(driver.base_salary)}</span>
+          </div>
+        </div>
+
+        {/* assigned vehicle */}
         {vehicle && (
-          <div className="relative flex items-center gap-3 rounded-xl p-3 mt-4 border border-white/[0.06]" style={{ background: hexToRgba('#3b82f6', 0.06) }}>
+          <div className="mx-5 mb-5 flex items-center gap-3 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#3b82f6', 0.06) }}>
             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Car className="w-4 h-4 text-primary" /></div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{vehicle.make} {vehicle.model}</p>

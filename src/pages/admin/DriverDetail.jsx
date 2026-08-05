@@ -210,6 +210,7 @@ export default function DriverDetail() {
               accent="#10b981"
               count={fSalaries.length}
               collapsible
+              defaultOpen={false}
               onView={() => setViewer('salary')}
               onPdf={salaryPdf}
               loading={dataLoading}
@@ -237,6 +238,7 @@ export default function DriverDetail() {
               accent="#f43f5e"
               count={fExpenses.length}
               collapsible
+              defaultOpen={false}
               onView={() => setViewer('expenses')}
               onPdf={expensesPdf}
               loading={dataLoading}
@@ -264,6 +266,7 @@ export default function DriverDetail() {
               accent="#a855f7"
               count={null}
               collapsible
+              defaultOpen={false}
               loading={false}
               className="h-full">
             <EntityDocumentsTab entityType="driver" entityId={driver.id} />

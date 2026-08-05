@@ -9,6 +9,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import RecordSectionCard from '@/components/common/RecordSectionCard';
+import TabTableCard from '@/components/admin/TabTableCard';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, FileText } from 'lucide-react';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
@@ -147,12 +148,11 @@ export default function VehicleDetail() {
   );
 
   return (
-    <div className="detail-page">
+    <div className="detail-page space-y-4">
       <EntityDetailHeader backTo="/admin/vehicles" />
 
-      <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} />
-
-      <div className="flex flex-wrap items-center gap-3 mt-4 mb-4">
+      {/* toolbar */}
+      <div className="flex flex-wrap items-center gap-3">
         <DateRangeFilter
           fromValue={dateFrom}
           onFromChange={setDateFrom}
@@ -175,97 +175,107 @@ export default function VehicleDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <RecordSectionCard title={t('trips')} icon={Truck} accent="#3b82f6" count={fTrips.length} collapsible onView={() => setViewer('trips')} onPdf={() => pdfExport('trips', fTrips)} onNew={() => navigate(`/trips?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Trip" loading={dataLoading} emptyIcon={Inbox} emptyLabel={t('no_data')} className="h-full">
-          <div className="space-y-2">
-            {fTrips.slice(0, 5).map((trip, i, arr) => (
-              <div key={trip.id} className="flex gap-3">
-                <div className="flex flex-col items-center flex-shrink-0">
-                  <div className="w-2.5 h-2.5 rounded-full mt-3" style={{ background: '#3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.18)' }} />
-                  {i < arr.length - 1 && <div className="w-0.5 flex-1 bg-blue-500/15 mt-1" />}
-                </div>
-                <div className="flex-1 rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#3b82f6', 0.06), border: `1px solid ${hexToRgba('#3b82f6', 0.16)}` }}>
+      {/* Grid: profile (left) | sections (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
+        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} />
+        <div className="space-y-4">
+          {/* Trips — long table, auto-collapse on hover */}
+          <TabTableCard
+            collapsible
+            title={`Trips — ${vehicle.plate_number}`}
+            subtitle={`${dateFrom} → ${dateTo}`}
+            loading={dataLoading}
+            columns={[
+              { label: 'Trip ID', className: 'col-span-2' },
+              { label: 'Date', className: 'col-span-2' },
+              { label: 'Route', className: 'col-span-3' },
+              { label: 'Driver', className: 'col-span-2' },
+              { label: 'Amount', className: 'col-span-2 text-right' },
+              { label: 'Status', className: 'col-span-1 text-right' }]
+            }
+            emptyIcon={Inbox}>
+            {fTrips.map((trip) =>
+              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
+                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
+                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
+                <div className="col-span-2 text-muted-foreground truncate">{trip.driver_name}</div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
+                <div className="col-span-1 text-right"><StatusBadge status={trip.status} /></div>
+              </div>
+            )}
+          </TabTableCard>
+
+          {/* Fuel — small card, collapsed by default */}
+          <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} collapsible defaultOpen={false} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
+            <div className="space-y-2">
+              {fFuel.slice(0, 5).map((rec) => (
+                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.16)}` }}>
+                  <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.driver_name}</p>
+                    <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name || ''}</p>
                   </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
-                  <StatusBadge status={trip.status} />
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.total_cost)}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        </RecordSectionCard>
-
-        <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} collapsible onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
-          <div className="space-y-2">
-            {fFuel.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.16)}` }}>
-                <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name || ''}</p>
-                </div>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.total_cost)}</span>
-              </div>
-            ))}
-          </div>
-        </RecordSectionCard>
-
-        <RecordSectionCard title={t('maintenance')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Maintenance" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
-          <div className="space-y-2">
-            {fServices.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
-                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
-                </div>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.cost)}</span>
-                <StatusBadge status={rec.status} />
-              </div>
-            ))}
-          </div>
-        </RecordSectionCard>
-
-        <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} collapsible onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
-          <div className="space-y-2">
-            {fExpenses.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
-                </div>
-                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
-                <StatusBadge status={rec.status} />
-              </div>
-            ))}
-          </div>
-        </RecordSectionCard>
-
-        <ProfitCard
-          className="h-full"
-          title={`Vehicle Profit — ${vehicle.plate_number}`}
-          items={[
-            { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
-            { label: 'Expenses', value: totalExpenses, tone: 'text-amber-400' },
-            { label: 'Fuel', value: totalFuel, tone: 'text-sky-400' },
-          ]}
-          netProfit={netProfit}
-          filenameBase={`vehicle-${vehicle.plate_number}-profit`}
-          dateRange={`${dateFrom} to ${dateTo}`}
-          onView={() => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] })}
-        />
-
-        <div className="glass-card p-4 relative overflow-hidden flex flex-col h-full" style={{ borderTop: '3px solid #a855f7' }}>
-          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full pointer-events-none opacity-20" style={{ background: 'radial-gradient(circle, ' + hexToRgba('#a855f7', 0.5) + ' 0%, transparent 70%)' }} />
-          <div className="flex items-center gap-2 mb-3 relative">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba('#a855f7', 0.14), border: '1px solid ' + hexToRgba('#a855f7', 0.3) }}>
-              <FileText className="w-4 h-4" style={{ color: '#a855f7' }} />
+              ))}
             </div>
-            <h3 className="text-sm font-semibold text-foreground">{t('documents')}</h3>
+          </RecordSectionCard>
+
+          {/* Maintenance — small card, collapsed by default */}
+          <RecordSectionCard title={t('maintenance')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible defaultOpen={false} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Maintenance" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
+            <div className="space-y-2">
+              {fServices.slice(0, 5).map((rec) => (
+                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
+                  <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.cost)}</span>
+                  <StatusBadge status={rec.status} />
+                </div>
+              ))}
+            </div>
+          </RecordSectionCard>
+
+          {/* Expenses — small card, collapsed by default */}
+          <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} collapsible defaultOpen={false} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
+            <div className="space-y-2">
+              {fExpenses.slice(0, 5).map((rec) => (
+                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                  <StatusBadge status={rec.status} />
+                </div>
+              ))}
+            </div>
+          </RecordSectionCard>
+
+          {/* Documents — small card, collapsed by default */}
+          <RecordSectionCard title={t('documents')} icon={FileText} accent="#a855f7" count={null} collapsible defaultOpen={false} loading={false} className="h-full">
+            <EntityDocumentsTab entityType="vehicle" entityId={vehicle.id} />
+          </RecordSectionCard>
+
+          {/* Profit summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ProfitCard
+              className="h-full md:col-span-2"
+              title={`Vehicle Profit — ${vehicle.plate_number}`}
+              items={[
+                { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
+                { label: 'Expenses', value: totalExpenses, tone: 'text-amber-400' },
+                { label: 'Fuel', value: totalFuel, tone: 'text-sky-400' },
+              ]}
+              netProfit={netProfit}
+              filenameBase={`vehicle-${vehicle.plate_number}-profit`}
+              dateRange={`${dateFrom} to ${dateTo}`}
+              onView={() => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-amber-400' }))] })}
+            />
           </div>
-          <EntityDocumentsTab entityType="vehicle" entityId={vehicle.id} />
         </div>
       </div>
 
