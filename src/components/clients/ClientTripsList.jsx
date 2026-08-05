@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import StatusBadge from '@/components/common/StatusBadge';
 import EmptyState from '@/components/common/EmptyState';
-import { Inbox, CheckCheck, Send, Undo2, X, ChevronDown } from 'lucide-react';
+import { Inbox, CheckCheck, Send, Undo2, X, FilePlus2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
-export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoiceSent, onBulkComplete, onBulkInvoice }) {
+export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoiceSent, onGenerateInvoice, onBulkComplete, onBulkInvoice }) {
   const [selected, setSelected] = useState(new Set());
   const allSelected = trips.length > 0 && selected.size === trips.length;
   const someSelected = selected.size > 0 && !allSelected;
@@ -48,7 +47,7 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
       <div className="max-h-[440px] overflow-y-auto thin-scroll pr-1 space-y-2">
       {trips.map((trip) => {
         const inv = getTripInvoice(trip.id);
-        const isSent = inv?.status === 'sent';
+        const hasInvoice = !!inv;
         const checked = selected.has(trip.id);
         return (
           <div key={trip.id} className={`row-card flex items-center gap-3 transition-colors ${checked ? 'border-primary/40' : ''}`}>
@@ -60,22 +59,18 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
             <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
             <StatusBadge status={trip.status} />
             {trip.status === 'completed' && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap ${isSent ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-slate-500/20 text-slate-300 border-slate-500/30'}`}>
-                    {isSent ? 'Sent' : 'Not Sent'}
-                    <ChevronDown className="w-2.5 h-2.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => !isSent && onToggleInvoiceSent(trip, true)} className="text-xs cursor-pointer">
-                    Mark Sent
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => isSent && onToggleInvoiceSent(trip, false)} className="text-xs cursor-pointer">
-                    Revert to Not Sent
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              hasInvoice ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                  Generated
+                </span>
+              ) : (
+                <button
+                  onClick={() => onGenerateInvoice(trip)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer transition-colors whitespace-nowrap bg-primary/15 text-primary border-primary/30 hover:bg-primary/25"
+                >
+                  <FilePlus2 className="w-3 h-3" /> Generate
+                </button>
+              )
             )}
           </div>
         );

@@ -20,7 +20,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { downloadPaymentSlipPDF } from '@/lib/paymentSlipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
-import { setTripInvoiceSent } from '@/lib/tripInvoice';
+import { setTripInvoiceSent, generateTripInvoice } from '@/lib/tripInvoice';
 import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
@@ -160,6 +160,11 @@ export default function ClientDetail({ id: propId, inline = false }) {
     const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
     setInvoices(refreshed || []);
   };
+  const generateTripInvoiceRow = async (trip) => {
+    await generateTripInvoice(trip);
+    const refreshed = await base44.entities.Invoice.filter({ client_name: client.name }).catch(() => []);
+    setInvoices(refreshed || []);
+  };
   const reloadTrips = () => base44.entities.Trip.filter({ client_name: client.name }).then(setTrips).catch(() => {});
   const bulkComplete = async (selTrips) => {
     const toUpdate = selTrips.filter((t) => t.status !== 'completed');
@@ -264,6 +269,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
               trips={displayTrips}
               getTripInvoice={getTripInvoice}
               onToggleInvoiceSent={toggleTripInvoiceSent}
+              onGenerateInvoice={generateTripInvoiceRow}
               onBulkComplete={bulkComplete}
               onBulkInvoice={bulkInvoice}
             />
