@@ -241,6 +241,28 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
     } finally { setBusy(false); setProgress(''); }
   };
 
+  const markSentOne = async (inv) => {
+    if (busy) return;
+    setBusy(true);
+    try { await base44.entities.Invoice.update(inv.id, { status: 'sent' }); onInvoicesChanged(); }
+    finally { setBusy(false); setProgress(''); }
+  };
+  const downloadOne = async (inv) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const settings = await getCompanySettings();
+      await downloadInvoicePDF(inv, client.name, settings, clientInvoiceSeq?.[inv.id]);
+    } finally { setBusy(false); setProgress(''); }
+  };
+  const deleteOne = async (inv) => {
+    if (busy) return;
+    if (!confirm('Delete this invoice?')) return;
+    setBusy(true);
+    try { await base44.entities.Invoice.delete(inv.id); onInvoicesChanged(); }
+    finally { setBusy(false); setProgress(''); }
+  };
+
   const invExportCols = [
     { label: 'Invoice #', key: 'invoice_number' }, { label: 'Issue Date', key: 'issue_date' },
     { label: 'Due Date', key: 'due_date' }, { label: 'Status', key: 'status' },
@@ -350,25 +372,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
           </div>
         )}
 
-        {/* bulk action bar */}
-        {selectedInv.size > 0 && (
-          <div className="flex items-center gap-2 mb-3 animate-enter-up">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[11px] font-semibold">
-              <CheckCheck className="w-3 h-3" /> {selectedInv.size} selected
-            </span>
-            <button onClick={bulkMarkSent} disabled={busy} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-colors disabled:opacity-50">
-              <Send className="w-3.5 h-3.5" /> Mark Sent {progress && busy ? progress : ''}
-            </button>
-            <button onClick={bulkDownload} disabled={busy} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors disabled:opacity-50">
-              <Download className="w-3.5 h-3.5" /> {busy && progress ? progress : 'Download PDF'}
-            </button>
-            <button onClick={bulkDelete} disabled={busy} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25 transition-colors disabled:opacity-50">
-              <Trash2 className="w-3.5 h-3.5" /> Delete
-            </button>
-            <button onClick={() => setSelectedInv(new Set())} className="ml-auto text-muted-foreground hover:text-foreground p-1.5 transition-colors text-xs">Clear</button>
-          </div>
-        )}
-
         {allInvoicesSorted.length === 0 ? (
           <EmptyState icon={FileText} title="No invoices yet" description="Generate from billable trips above or create one manually." />
         ) : (
@@ -415,6 +418,11 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, payments,
                       {fi.label}
                     </span>
                     <span className="text-sm font-semibold text-foreground whitespace-nowrap tabular-nums">{formatCurrency(balance || inv.total_amount)}</span>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <button onClick={(e) => { e.stopPropagation(); markSentOne(inv); }} disabled={busy} title="Mark Sent" className="text-sky-300/70 hover:text-sky-300 hover:bg-sky-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Send className="w-3.5 h-3.5" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); downloadOne(inv); }} disabled={busy} title="Download PDF" className="text-emerald-300/70 hover:text-emerald-300 hover:bg-emerald-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Download className="w-3.5 h-3.5" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteOne(inv); }} disabled={busy} title="Delete" className="text-red-300/70 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors disabled:opacity-50"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
                   </div>
                 );
               })}
