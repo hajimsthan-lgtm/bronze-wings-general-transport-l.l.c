@@ -1,7 +1,7 @@
 import HeartbeatLoader from './HeartbeatLoader';
 
 export default function LoadingSpinner({ size = 'md', className = '', color = 'violet' }) {
-  const scaleMap = { sm: 0.75, md: 1, lg: 1.2 };
+  const scaleMap = { sm: 0.8, md: 1, lg: 1.15 };
   const scale = scaleMap[size] || 1;
   return (
     <div className={`flex flex-col items-center justify-center py-10 px-4 w-full ${className}`}>
