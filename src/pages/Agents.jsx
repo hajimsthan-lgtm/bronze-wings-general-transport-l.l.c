@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bot, FileText, Wallet, Truck, ArrowLeft, Sparkles } from 'lucide-react';
+import { Bot, FileText, Wallet, Truck, ArrowLeft, Sparkles, Palette } from 'lucide-react';
 import AgentChat from '@/components/agents/AgentChat';
 import { useI18n } from '@/lib/i18n';
 
@@ -41,6 +41,19 @@ const AGENTS = [
       'Status of today’s trips',
       'Show trips in transit',
       'Mark my trip as completed'
+    ],
+  },
+  {
+    name: 'design_auditor',
+    title: 'Design Auditor',
+    desc: 'Audits CSS & UI concepts against design-system principles, then generates Base44-optimized build prompts.',
+    icon: Palette,
+    accent: '#14b8a6',
+    suggestions: [
+      'Audit this card component CSS for accessibility',
+      'Review my button design and generate a build prompt',
+      'Check this form layout against WCAG 2.1 AA',
+      'Generate a Base44 build prompt for my hero section'
     ],
   },
 ];
