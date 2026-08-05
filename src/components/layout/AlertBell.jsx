@@ -5,29 +5,19 @@ import { safeAll } from '@/lib/safeRequest';
 import { buildAlerts, CATEGORIES, SEVERITY } from '@/lib/alertEngine';
 import TripsOperationsSection from './TripsOperationsSection';
 import {
-  Bell, X, ChevronRight, ChevronDown, CheckCheck,
+  Bell, X, ChevronRight, ChevronDown,
   FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
   CalendarClock, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
 
 const ICONS = { FileWarning, Receipt, Truck, Wrench, IdCard, FileText, CalendarClock, CheckCircle2 };
 const AUTO_CLOSE_MS = 8000;
-const DISMISS_KEY = 'b44_alert_dismissed_v1';
-
-function loadDismissed() {
-  try { return new Set(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]')); }
-  catch { return new Set(); }
-}
-function saveDismissed(set) {
-  try { localStorage.setItem(DISMISS_KEY, JSON.stringify([...set])); } catch {}
-}
 
 export default function AlertBell() {
   const [rawAlerts, setRawAlerts] = useState({ alerts: [], byCategory: {} });
   const [showNotif, setShowNotif] = useState(false);
   const [closing, setClosing] = useState(false);
   const [progress, setProgress] = useState(100);
-  const [dismissed, setDismissed] = useState(() => loadDismissed());
   const [expanded, setExpanded] = useState(() => {
     // default-expand the first category that has items — set after load
     const e = {};
@@ -57,15 +47,14 @@ export default function AlertBell() {
     })();
   }, []);
 
-  // Filter out dismissed alerts
   const { alerts, byCategory } = useMemo(() => {
-    const all = (rawAlerts.alerts || []).filter((a) => !dismissed.has(a.id));
+    const all = rawAlerts.alerts || [];
     const byCat = {};
     Object.keys(CATEGORIES).forEach((k) => {
       byCat[k] = all.filter((a) => a.category === k);
     });
     return { alerts: all, byCategory: byCat };
-  }, [rawAlerts, dismissed]);
+  }, [rawAlerts]);
 
   const count = alerts.length + tripsOpsCount;
   const criticalCount = alerts.filter((a) => a.severity === 'critical').length + tripsOpsCritical;
@@ -143,21 +132,6 @@ export default function AlertBell() {
 
   const handleAlertClick = (to) => { handleClose(); navigate(to); };
 
-  const dismissAlert = (e, id) => {
-    e.stopPropagation();
-    setDismissed((prev) => { const n = new Set(prev); n.add(id); saveDismissed(n); return n; });
-  };
-
-  const dismissCategory = (cat) => {
-    const ids = (byCategory[cat] || []).map((a) => a.id);
-    setDismissed((prev) => { const n = new Set(prev); ids.forEach((id) => n.add(id)); saveDismissed(n); return n; });
-  };
-
-  const dismissAll = () => {
-    const ids = alerts.map((a) => a.id);
-    setDismissed((prev) => { const n = new Set(prev); ids.forEach((id) => n.add(id)); saveDismissed(n); return n; });
-  };
-
   const badgeColor = criticalCount > 0 ? '#ef4444' : count > 0 ? '#f59e0b' : '#10b981';
   const badgeGlow = criticalCount > 0 ? 'rgba(239,68,68,0.6)' : count > 0 ? 'rgba(245,158,11,0.6)' : 'rgba(16,185,129,0.6)';
   const dotGlow = criticalCount > 0 ? 'rgba(239,68,68,0.8)' : count > 0 ? 'rgba(245,158,11,0.8)' : 'rgba(16,185,129,0.8)';
@@ -229,15 +203,6 @@ export default function AlertBell() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  {count > 0 && (
-                    <button
-                      onClick={dismissAll}
-                      title="Dismiss all"
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-emerald-400 hover:bg-white/10 transition-all"
-                    >
-                      <CheckCheck className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                   <button
                     onClick={handleClose}
                     className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
@@ -336,32 +301,27 @@ export default function AlertBell() {
                               {catCritical > 0 && <span style={{ color: '#fca5a5' }}> · {catCritical} critical</span>}
                             </p>
                           </div>
-                          <span
-                            onClick={(e) => { e.stopPropagation(); dismissCategory(catKey); }}
-                            className="text-[9px] text-white/30 hover:text-white/70 transition-colors px-1.5 py-0.5 rounded uppercase tracking-wide font-mono"
-                            title="Dismiss category"
-                          >
-                            Clear
-                          </span>
                           <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform flex-shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
                         </button>
 
-                        {/* Category items */}
-                        {isOpen && (
-                          <div className="px-1.5 pb-1.5 space-y-1" style={{ animation: 'notif-item-in 0.25s cubic-bezier(0.16,1,0.3,1) both' }}>
-                            {catAlerts.map((a, idx) => {
+                        {/* Category items — smooth max-height transition */}
+                        <div
+                          className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                          style={{ maxHeight: isOpen ? '400px' : '0', opacity: isOpen ? 1 : 0 }}
+                        >
+                          <div className="px-1.5 pb-1.5 space-y-1">
+                            {catAlerts.map((a) => {
                               const Icon = ICONS[a.icon] || AlertTriangle;
                               const sev = SEVERITY[a.severity] || SEVERITY.info;
                               return (
                                 <div
                                   key={a.id}
                                   onClick={() => handleAlertClick(a.to)}
-                                  className="group w-full flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-all hover:bg-white/[0.04]"
-                                  style={{ animation: 'notif-item-in 0.3s cubic-bezier(0.16,1,0.3,1) both', animationDelay: `${idx * 30}ms` }}
+                                  className="group w-full flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-colors hover:bg-white/[0.04]"
                                 >
                                   <span
                                     className="relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                                    style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 10px -4px rgba(${sev.glow},0.4)` }}
+                                    style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40` }}
                                   >
                                     <Icon className="w-3.5 h-3.5" style={{ color: sev.color }} />
                                     {a.severity === 'critical' && (
@@ -373,19 +333,12 @@ export default function AlertBell() {
                                     <p className="text-[10.5px] text-white/55 truncate mt-0.5 leading-tight">{a.sub}</p>
                                     {a.meta && <p className="text-[9px] text-white/35 truncate mt-0.5 leading-tight uppercase tracking-wide font-mono">{a.meta}</p>}
                                   </div>
-                                  <button
-                                    onClick={(e) => dismissAlert(e, a.id)}
-                                    className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-full flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
-                                    title="Dismiss"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
                                   <ChevronRight className="w-3 h-3 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                                 </div>
                               );
                             })}
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}

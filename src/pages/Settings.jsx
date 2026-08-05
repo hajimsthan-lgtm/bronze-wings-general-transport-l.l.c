@@ -9,6 +9,7 @@ import ProfileHeader from '@/components/settings/ProfileHeader';
 import LocalizationCard from '@/components/settings/LocalizationCard';
 import SecurityCard from '@/components/settings/SecurityCard';
 import DangerZone from '@/components/settings/DangerZone';
+import FactoryResetCard from '@/components/settings/FactoryResetCard';
 import UserManualCard from '@/components/settings/UserManualCard';
 import DisplaySettingsCard from '@/components/settings/DisplaySettingsCard';
 import SoundSettingsCard from '@/components/settings/SoundSettingsCard';
@@ -62,7 +63,12 @@ export default function Settings() {
     { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
     { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
     { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
-    { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => <DangerZone deleting={deleting} onDelete={handleDelete} /> },
+    { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => (
+      <div className="space-y-6">
+        <DangerZone deleting={deleting} onDelete={handleDelete} />
+        <FactoryResetCard />
+      </div>
+    ) },
   ];
 
   return (

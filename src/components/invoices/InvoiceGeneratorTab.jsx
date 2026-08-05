@@ -8,7 +8,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
-import { FileText, Download, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X } from 'lucide-react';
+import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
@@ -475,8 +475,11 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
                       </button>
                     </div>
-                    {/* expanded actions */}
-                    {expanded && (
+                    {/* expanded actions — smooth max-height transition */}
+                    <div
+                      className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                      style={{ maxHeight: expanded ? '120px' : '0', opacity: expanded ? 1 : 0 }}
+                    >
                       <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
                         <button onClick={() => shareWhatsApp(inv)} title="Share via WhatsApp" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#25D366' }}>
                           <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
@@ -487,16 +490,13 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         <button onClick={() => onEditInvoice?.(inv)} title="Edit invoice" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
                           <Pencil className="w-3.5 h-3.5" /> Edit
                         </button>
-                        <button onClick={() => downloadOne(inv)} disabled={busy} title="Download PDF" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors disabled:opacity-50">
-                          <Download className="w-3.5 h-3.5" /> PDF
-                        </button>
                         {!isVoided && (
                           <button onClick={() => deleteOne(inv)} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}

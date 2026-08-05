@@ -93,7 +93,6 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
           style={{
             background: '#3b82f61a',
             border: '1px solid #3b82f640',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 0 10px -4px rgba(59,130,246,0.4)',
           }}
         >
           <Truck className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} />
@@ -114,12 +113,12 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
         />
       </button>
 
-      {/* Section body — scrollable, same style as existing notification items */}
-      {expanded && (
-        <div
-          className="px-1.5 pb-1.5 space-y-1"
-          style={{ animation: 'notif-item-in 0.25s cubic-bezier(0.16,1,0.3,1) both' }}
-        >
+      {/* Section body — smooth max-height transition, no conditional mount */}
+      <div
+        className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+        style={{ maxHeight: expanded ? '320px' : '0', opacity: expanded ? 1 : 0 }}
+      >
+        <div className="px-1.5 pb-1.5 space-y-1">
           {trips.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-6 px-4">
               <span
@@ -132,17 +131,13 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
             </div>
           ) : (
             <div className="max-h-[200px] overflow-y-auto thin-scroll space-y-1">
-              {trips.map((t, idx) => {
+              {trips.map((t) => {
                 const badge = STATUS_BADGE[t.status] || STATUS_BADGE.scheduled;
                 const route = `${t.from_location || '—'} → ${t.to_location || '—'}`;
                 return (
                   <div
                     key={t.id}
-                    className="p-2 rounded-lg transition-all hover:bg-white/[0.04]"
-                    style={{
-                      animation: 'notif-item-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
-                      animationDelay: `${idx * 30}ms`,
-                    }}
+                    className="p-2 rounded-lg transition-colors hover:bg-white/[0.04]"
                   >
                     {/* Row 1: trip number + status badge */}
                     <div className="flex items-center gap-2 mb-1">
@@ -181,7 +176,7 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
                               e.stopPropagation();
                               updateStatus(t.id, s.key);
                             }}
-                            className="flex-1 px-1 py-1 rounded-md text-[8px] font-bold uppercase tracking-wide transition-all"
+                            className="flex-1 px-1 py-1 rounded-md text-[8px] font-bold uppercase tracking-wide transition-colors"
                             style={
                               isActive
                                 ? {
@@ -207,7 +202,7 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
