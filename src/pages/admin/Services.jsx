@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -12,9 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, Wrench } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { Plus, Wrench, Search, BarChart3, LayoutGrid, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
+import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
+import MaintenanceAnalytics from '@/components/admin/MaintenanceAnalytics';
+
+const TYPE_TONE = {
+  oil_change: '#f97316', tire: '#3b82f6', brake: '#ef4444', engine: '#a855f7',
+  electrical: '#eab308', body: '#ec4899', inspection: '#14b8a6', other: '#94a3b8',
+};
+const TYPE_LABEL = (k) => (k || 'other').replace(/_/g, ' ');
 
 export default function Services() {
   const { t } = useI18n();
@@ -23,46 +29,55 @@ export default function Services() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [presetPlate, setPresetPlate] = useState('');
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const [mode, setMode] = useState('analytics');
+  const [search, setSearch] = useState('');
+  const { dateFrom, dateTo } = useGlobalDate();
 
-  const load = () => { setLoading(true); base44.entities.ServiceRecord.list('-created_date', 100).then(setRecords).finally(() => setLoading(false)); };
+  const load = () => { setLoading(true); base44.entities.ServiceRecord.list('-created_date', 200).then(setRecords).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
-    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); setMode('browse'); }
     if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
   }, []);
-  const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
+
+  const filtered = records.filter(r => inGlobalDateRange(r.date, dateFrom, dateTo));
+  const searched = filtered.filter(r => !search || r.vehicle_plate?.toLowerCase().includes(search.toLowerCase()) || (r.service_type || '').includes(search.toLowerCase()));
 
   return (
     <div>
-      <PageHeader title={t('maintenance')} description={`${filtered.length} maintenance records`}
-        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-display">Maintenance</h1>
+          <p className="text-sm text-muted-foreground">Service records & fleet upkeep</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+          </div>
+          <ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} />
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+        </div>
       </div>
 
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
-        <div className="space-y-2">
-          {filtered.map(r => (
-            <button key={r.id} onClick={() => { setEditItem(r); setFormOpen(true); }} className="w-full text-left row-card flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-amber-400" /></div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground capitalize">{r.service_type?.replace(/_/g, ' ')}</p>
-                <p className="text-xs text-muted-foreground">{r.vehicle_plate} · {r.vendor_name || '—'} · {formatDate(r.date)}</p>
-              </div>
-              <div className="text-right flex-shrink-0"><p className="text-sm font-semibold text-foreground">{formatCurrency(r.cost)}</p><StatusBadge status={r.status} /></div>
-            </button>
-          ))}
-        </div>
+      {mode === 'analytics' ? (
+        <MaintenanceAnalytics records={filtered} loading={loading} onBrowse={() => setMode('browse')} />
+      ) : (
+        <>
+          <div className="relative mb-5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          </div>
+
+          {loading ? <LoadingSpinner /> : searched.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
+            <div className="space-y-2">
+              {searched.map(r => (
+                <ServiceRow key={r.id} r={r} onEdit={() => { setEditItem(r); setFormOpen(true); }} onDelete={async () => { await base44.entities.ServiceRecord.delete(r.id); load(); }} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
@@ -72,6 +87,37 @@ export default function Services() {
         </SheetContent>
       </Sheet>
     </div>
+  );
+}
+
+function ServiceRow({ r, onEdit, onDelete }) {
+  const [confirmDel, setConfirmDel] = useState(false);
+  const tone = TYPE_TONE[r.service_type] || '#94a3b8';
+  return (
+    <>
+      <div className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={onEdit} style={{ ['--row-accent']: tone }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}><Wrench className="w-4 h-4" style={{ color: tone }} /></div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground capitalize truncate">{TYPE_LABEL(r.service_type)}</p>
+          <p className="text-xs text-muted-foreground truncate">{r.vehicle_plate} · {r.vendor_name || '—'} · {formatDate(r.date)}</p>
+        </div>
+        <div className="text-right flex-shrink-0"><p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(r.cost)}</p><StatusBadge status={r.status} /></div>
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <button type="button" onClick={onEdit} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100"><Pencil className="w-3.5 h-3.5" /></button>
+          <button type="button" onClick={() => setConfirmDel(true)} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100"><Trash2 className="w-3.5 h-3.5" /></button>
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+        </div>
+      </div>
+      {confirmDel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setConfirmDel(false)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <p className="text-sm font-semibold text-foreground mb-1">Delete record?</p>
+            <p className="text-xs text-muted-foreground mb-5">This action cannot be undone.</p>
+            <div className="flex gap-3"><Button variant="outline" onClick={() => setConfirmDel(false)} className="flex-1 border-border">Cancel</Button><Button onClick={() => { onDelete(); setConfirmDel(false); }} className="flex-1 bg-destructive">Delete</Button></div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
