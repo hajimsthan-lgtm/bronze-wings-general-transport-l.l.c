@@ -20,7 +20,7 @@ export default function TopBar() {
 
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6 lg:px-8">
+      <div className="w-full px-4 md:px-6">
         <div className="flex items-center justify-between py-1.5 gap-2">
           {/* mobile sub-nav tiles — desktop tiles live in the main header */}
           <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1.5 pb-8" />

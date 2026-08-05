@@ -36,8 +36,8 @@ export default function DesktopNav() {
       {/* centered ambient blue light-leak */}
       <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
 
-      <div className="relative max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand + step-back at the left corner */}
+      <div className="relative w-full px-4 md:px-6 h-20 flex items-center justify-between">
+        {/* Brand at the left corner */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-3 group/brand">
             {isDashboard &&
@@ -60,16 +60,6 @@ export default function DesktopNav() {
             }
             <BrandName variant="desktop" />
           </Link>
-
-          {/* Step-back button — left corner */}
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            title="Go back"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
-            
-            <ArrowLeft className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Center cluster — dashboard icon, date filter, sub-nav */}
@@ -128,6 +118,15 @@ export default function DesktopNav() {
             
             <SettingsIcon className="w-4 h-4" style={{ color: '#c8c8d4', filter: 'drop-shadow(0 0 3px rgba(200,200,212,0.35))' }} />
           </Link>
+          {/* Step-back button — moved to right side, before forward */}
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            title="Go back"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
+            
+            <ArrowLeft className="w-4 h-4" />
+          </button>
           {/* Step-forward button — right corner */}
           <button
             onClick={() => navigate(1)}
