@@ -22,8 +22,10 @@ export default function CollapsibleSection({ title, icon: Icon, accent = '#3b82f
         </button>
         {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
       </div>
-      <div className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ maxHeight: open ? '6000px' : '0', opacity: open ? 1 : 0 }}>
-        <div className="pt-4">{children}</div>
+      <div className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
+        <div className="overflow-hidden">
+          <div className="pt-4">{children}</div>
+        </div>
       </div>
     </div>
   );

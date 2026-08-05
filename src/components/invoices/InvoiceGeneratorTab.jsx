@@ -141,7 +141,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
   const buildInvoice = (trip, number) => {
     const revenue = Number(trip.revenue) || 0;
     const vatRate = 5;
-    const vatAmount = Math.round(revenue * vatRate * 100) / 100;
+    const vatAmount = Math.round(revenue * vatRate) / 100;
     const total = Math.round((revenue + vatAmount) * 100) / 100;
     return {
       invoice_number: number, client_name: client.name,
@@ -165,7 +165,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     }));
     const subtotal = items.reduce((s, i) => s + i.amount, 0);
     const vatRate = 5;
-    const vatAmount = Math.round(subtotal * vatRate * 100) / 100;
+    const vatAmount = Math.round(subtotal * vatRate) / 100;
     const total = Math.round((subtotal + vatAmount) * 100) / 100;
     const tripNumbers = selected.map((tr) => tr.trip_number).filter(Boolean);
     return {
@@ -475,12 +475,13 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
                       </button>
                     </div>
-                    {/* expanded actions — smooth max-height transition */}
+                    {/* expanded actions — smooth grid-rows transition */}
                     <div
-                      className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                      style={{ maxHeight: expanded ? '120px' : '0', opacity: expanded ? 1 : 0 }}
+                      className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                      style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
                     >
-                      <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
+                      <div className="overflow-hidden">
+                        <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
                         <button onClick={() => shareWhatsApp(inv)} title="Share via WhatsApp" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#25D366' }}>
                           <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                         </button>
@@ -495,6 +496,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         )}
+                        </div>
                       </div>
                     </div>
                   </div>

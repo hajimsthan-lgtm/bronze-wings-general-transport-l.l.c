@@ -37,7 +37,7 @@ export async function generateTripInvoice(trip) {
   const settings = await getCompanySettings();
   const vatRate = settings.default_vat_rate || 5;
   const revenue = Number(trip.revenue) || 0;
-  const vatAmount = Math.round(revenue * vatRate * 100) / 100;
+  const vatAmount = Math.round(revenue * vatRate) / 100;
   return base44.entities.Invoice.create({
     invoice_number: invoiceNumber,
     client_name: trip.client_name,
