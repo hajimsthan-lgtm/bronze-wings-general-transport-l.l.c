@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecords = [], expenses = [], loading }) {
+export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecords = [], expenses = [], loading, onBrowseVehicles }) {
   const navigate = useNavigate();
   if (loading && vehicles.length === 0) return <LoadingSpinner />;
 
@@ -119,10 +119,10 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       </ReportSectionCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#3b82f6" to="/admin/vehicles" />
-        <ReportStatCard index={2} label="Active Fleet" value={active} icon={Truck} color="#34d399" to="/admin/vehicles" />
-        <ReportStatCard index={3} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" to="/admin/vehicles" />
-        <ReportStatCard index={4} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" to="/admin/vehicles" />
+        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#3b82f6" onClick={onBrowseVehicles} />
+        <ReportStatCard index={2} label="Active Fleet" value={active} icon={Truck} color="#34d399" onClick={onBrowseVehicles} />
+        <ReportStatCard index={3} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" onClick={onBrowseVehicles} />
+        <ReportStatCard index={4} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" onClick={onBrowseVehicles} />
         <ReportStatCard index={5} label="Fleet Expenses" value={fleetExpenses} format={formatCurrency} icon={Wallet} color="#ef4444" to="/expenses" />
       </div>
 

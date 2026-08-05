@@ -9,7 +9,7 @@ import DonutChart from '@/components/reports/DonutChart';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
-export default function DriversAnalytics({ drivers = [], trips = [], loading }) {
+export default function DriversAnalytics({ drivers = [], trips = [], loading, onBrowseDrivers }) {
   const navigate = useNavigate();
   if (loading && drivers.length === 0) return <LoadingSpinner />;
 
@@ -70,9 +70,9 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading }) 
       </ReportSectionCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#3b82f6" to="/admin/drivers" />
-        <ReportStatCard index={2} label="Active" value={active} icon={UserCheck} color="#34d399" to="/admin/drivers" />
-        <ReportStatCard index={3} label="On Leave" value={onLeave} icon={CalendarClock} color="#f59e0b" to="/admin/drivers" />
+        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#3b82f6" onClick={onBrowseDrivers} />
+        <ReportStatCard index={2} label="Active" value={active} icon={UserCheck} color="#34d399" onClick={onBrowseDrivers} />
+        <ReportStatCard index={3} label="On Leave" value={onLeave} icon={CalendarClock} color="#f59e0b" onClick={onBrowseDrivers} />
         <ReportStatCard index={4} label="Total Trips" value={totalTrips} icon={TrendingUp} color="#a855f7" to="/trips" extra={<Sparkline data={tripSeries} type="bar" color="#a855f7" />} />
       </div>
 

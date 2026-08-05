@@ -84,7 +84,7 @@ function DriversTab() {
       </div>
 
       {mode === 'analytics' ? (
-        <DriversAnalytics drivers={filtered} trips={fTrips} loading={loading} />
+        <DriversAnalytics drivers={filtered} trips={fTrips} loading={loading} onBrowseDrivers={() => setMode('browse')} />
       ) : (
         <>
           <div className="relative mb-5">

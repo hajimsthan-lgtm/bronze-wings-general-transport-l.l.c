@@ -88,7 +88,7 @@ function VehiclesTab() {
 
       {mode === 'analytics' ? (
         <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
-          <VehiclesAnalytics vehicles={filtered} trips={fTrips} fuelRecords={fFuel} expenses={fExpenses} loading={loading} />
+          <VehiclesAnalytics vehicles={filtered} trips={fTrips} fuelRecords={fFuel} expenses={fExpenses} loading={loading} onBrowseVehicles={() => setMode('browse')} />
         </div>
       ) : (
         <>
