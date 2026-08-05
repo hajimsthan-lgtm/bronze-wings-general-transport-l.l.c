@@ -13,7 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Search, Landmark, ArrowUpRight, ArrowDownLeft, CheckCircle2 } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import SatinCard from '@/components/common/SatinCard';
 
 export default function Bank() {
@@ -24,8 +24,7 @@ export default function Bank() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   const load = () => { setLoading(true); base44.entities.BankTransaction.list('-date', 100).then(setTransactions).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
@@ -52,16 +51,6 @@ export default function Bank() {
         <SatinCard className="p-3"><p className="eyebrow">{t('credit')}</p><p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(totalCredits)}</p></SatinCard>
         <SatinCard className="p-3"><p className="eyebrow">{t('debit')}</p><p className="text-lg font-bold mt-1 text-rose-300 tabular-nums font-display">{formatCurrency(totalDebits)}</p></SatinCard>
         <SatinCard className="p-3 col-span-2 md:col-span-1"><p className="eyebrow">Net</p><p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(totalCredits - totalDebits)}</p></SatinCard>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
       </div>
 
       <div className="space-y-3 mb-5">

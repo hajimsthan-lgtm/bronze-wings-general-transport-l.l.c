@@ -11,7 +11,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Receipt, Wrench, Store } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 
 export default function VendorDetail({ id: propId, inline = false }) {
   const params = useParams();
@@ -22,8 +22,7 @@ export default function VendorDetail({ id: propId, inline = false }) {
   const [expenses, setExpenses] = useState([]);
   const [services, setServices] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   useEffect(() => {
     let cancelled = false;
@@ -80,16 +79,6 @@ export default function VendorDetail({ id: propId, inline = false }) {
         ]}
       />
       )}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
-      </div>
-
       <Tabs defaultValue="expenses">
         <TabsList className="bg-card border border-border">
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>

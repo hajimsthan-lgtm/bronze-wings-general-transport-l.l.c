@@ -19,7 +19,6 @@ import { useSheetUrlState } from '@/hooks/useSheetUrlState';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { useExpenses, useExpenseCreate, useExpenseUpdate, useExpenseDelete } from '@/hooks/useEntityQueries';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
 import ReportStatusBadge from '@/components/reports/ReportStatusBadge';
@@ -99,13 +98,6 @@ export default function Expenses() {
             </button>
           )}
         </div>
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
         <div className="flex-1" />
         <SegmentedToggle value={viewMode} onChange={setViewMode} options={[{ value: 'card', label: t('cards_view'), icon: LayoutGrid }, { value: 'list', label: t('list_view'), icon: List }]} />
         <ExportButtons data={filtered} filename="expenses" title="Expenses" columns={EXPENSE_EXPORT_COLUMNS} />

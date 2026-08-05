@@ -13,7 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import SatinCard from '@/components/common/SatinCard';
 
 export default function Cash() {
@@ -22,8 +22,7 @@ export default function Cash() {
   const [transactions, setTransactions] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   const load = () => { setLoading(true); base44.entities.CashTransaction.list('-date', 100).then(setTransactions).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
@@ -42,16 +41,6 @@ export default function Cash() {
         <SatinCard className="p-3"><p className="eyebrow">{t('inflow')}</p><p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(inflows)}</p></SatinCard>
         <SatinCard className="p-3"><p className="eyebrow">{t('outflow')}</p><p className="text-lg font-bold mt-1 text-rose-300 tabular-nums font-display">{formatCurrency(outflows)}</p></SatinCard>
         <SatinCard className="p-3"><p className="eyebrow">Balance</p><p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(inflows - outflows)}</p></SatinCard>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
       </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (

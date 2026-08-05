@@ -20,7 +20,7 @@ import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { downloadPaymentSlipPDF } from '@/lib/paymentSlipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
@@ -40,8 +40,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const [dataLoading, setDataLoading] = useState(true);
   const [chargeFormOpen, setChargeFormOpen] = useState(false);
   const [editCharge, setEditCharge] = useState(null);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [contactFilter, setContactFilter] = useState(null);
   const [editContactIndex, setEditContactIndex] = useState(null);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -224,22 +223,6 @@ export default function ClientDetail({ id: propId, inline = false }) {
         onAdd={() => { setEditContactIndex(null); setEditContactOpen(true); }}
         onEdit={openEditContact}
       />
-      <div className="glass-card p-3 flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-primary" />
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Page date filter</span>
-        </div>
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
-        <div className="flex-1" />
-        <span className="text-[10px] text-muted-foreground hidden sm:inline">Filters trips · invoices · payments</span>
-      </div>
-
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
         <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">

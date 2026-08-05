@@ -43,19 +43,14 @@ export default function GlobalDateFilter() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="flex items-center gap-2 h-9 px-3 rounded-full transition-all duration-300 shrink-0"
-          style={{
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05))',
-            border: '1px solid rgba(59,130,246,0.30)',
-            color: '#fff',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-          }}
+          className="flex items-center gap-2 h-9 px-3 sm:px-4 rounded-xl transition-all shrink-0 bg-input border border-white/10"
+          style={{ boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.03)' }}
           aria-label="Global date filter"
           title="Filter all pages by date"
         >
-          <CalendarIcon className="w-3.5 h-3.5 text-blue-300 shrink-0" />
-          <span className="text-[11px] font-mono tabular-nums truncate hidden lg:inline max-w-[140px]">{label}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-white/50 shrink-0" />
+          <CalendarIcon className="w-4 h-4 text-blue-400 shrink-0" />
+          <span className="text-sm text-foreground font-mono tabular-nums truncate hidden lg:inline max-w-[140px]">{label}</span>
+          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-popover border-border" align="center">

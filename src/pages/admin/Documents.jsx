@@ -13,7 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { formatDate } from '@/lib/formatters';
 import { Plus, Search, FileText, Pencil, Trash2 } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Documents() {
@@ -23,8 +23,7 @@ export default function Documents() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   const load = () => { setLoading(true); base44.entities.Document.list('-created_date', 100).then(setItems).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
@@ -34,15 +33,6 @@ export default function Documents() {
     <div>
       <PageHeader title={t('documents')} description={`${filtered.length} documents`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="documents" title="Documents" columns={[{ label: 'Title', key: 'title' }, { label: 'Type', key: 'type' }, { label: 'Related To', key: 'related_entity' }, { label: 'Expiry', key: 'expiry_date' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
-      </div>
       <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (

@@ -18,7 +18,7 @@ import { useInvoices, useInvoiceUpdate, useInvoiceDelete } from '@/hooks/useEnti
 import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import SatinCard from '@/components/common/SatinCard';
 import PageInfo from '@/components/common/PageInfo';
 
@@ -36,11 +36,7 @@ export default function Invoices() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useSheetUrlState('invoice');
   const [editInvoice, setEditInvoice] = useState(null);
-  const [dateFrom, setDateFrom] = useState(() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
-  });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   const dateFiltered = invoices.filter((inv) => !inv.issue_date || inv.issue_date >= dateFrom && inv.issue_date <= dateTo);
   const filtered = dateFiltered.filter((inv) => {
@@ -110,18 +106,7 @@ export default function Invoices() {
         {/* Unified toolbar */}
         <div className="glass-card p-3 mb-5 space-y-3">
           <div className="flex flex-col lg:flex-row gap-3">
-            <div className="relative flex-1">
-              
-              
             </div>
-            <DateRangeFilter
-              fromValue={dateFrom}
-              onFromChange={setDateFrom}
-              toValue={dateTo}
-              onToChange={setDateTo}
-              onToday={() => {const today = new Date().toISOString().split('T')[0];setDateFrom(today);setDateTo(today);}} />
-            
-          </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
             {STATUSES.map((s) =>
             <button key={s} onClick={() => setFilter(s)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border ${filter === s ? 'bg-primary/15 text-primary border-primary/25 shadow-[0_0_12px_rgba(59,130,246,0.25)]' : 'bg-white/[0.04] text-muted-foreground border-white/10 hover:bg-white/[0.08] hover:text-foreground'}`}>

@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Plus, Fuel as FuelIcon, Droplets, Gauge } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ExportButtons from '@/components/common/ExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
@@ -24,8 +24,7 @@ export default function Fuel() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [presetPlate, setPresetPlate] = useState('');
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
   const load = () => { setLoading(true); base44.entities.FuelRecord.list('-date', 100).then(setRecords).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
@@ -58,16 +57,6 @@ export default function Fuel() {
 
       <PageHeader title={t('fuel')} description={`${filtered.length} records`}
         action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="fuel_records" title="Fuel Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Liters', key: 'liters' }, { label: 'Price/L', key: 'price_per_liter' }, { label: 'Total', key: 'total_cost' }, { label: 'Fuel Type', key: 'fuel_type' }, { label: 'Station', key: 'station_name' }, { label: 'Odometer', key: 'odometer_reading' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
-      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <ReportStatCard index={0} label={`${t('total')} Cost`} value={totalCost} format={formatCurrency} icon={FuelIcon} color="#14b8a6" />

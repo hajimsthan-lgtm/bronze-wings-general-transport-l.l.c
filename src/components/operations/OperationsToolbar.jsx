@@ -2,7 +2,6 @@ import { Search, X, LayoutGrid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
@@ -44,13 +43,6 @@ export default function OperationsToolbar({
           </button>
         )}
       </div>
-
-      <DateRangeFilter
-        fromValue={dateFrom}
-        onFromChange={setDateFrom}
-        toValue={dateTo}
-        onToChange={setDateTo}
-      />
 
       <Select value={mode} onValueChange={onModeChange}>
         <SelectTrigger className="h-9 w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">

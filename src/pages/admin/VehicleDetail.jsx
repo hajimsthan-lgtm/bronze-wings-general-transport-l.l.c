@@ -12,7 +12,7 @@ import RecordSectionCard from '@/components/common/RecordSectionCard';
 import TabTableCard from '@/components/admin/TabTableCard';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, FileText } from 'lucide-react';
-import DateRangeFilter from '@/components/common/DateRangeFilter';
+import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ProfitCard from '@/components/common/ProfitCard';
 import ExportButtons from '@/components/common/ExportButtons';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
@@ -32,8 +32,7 @@ export default function VehicleDetail() {
   const [services, setServices] = useState([]);
   const [driver, setDriver] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
-  const [dateFrom, setDateFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [breakdown, setBreakdown] = useState(null);
   const [viewer, setViewer] = useState(null);
 
@@ -152,14 +151,7 @@ export default function VehicleDetail() {
       <EntityDetailHeader backTo="/admin/vehicles" />
 
       {/* toolbar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <DateRangeFilter
-          fromValue={dateFrom}
-          onFromChange={setDateFrom}
-          toValue={dateTo}
-          onToChange={setDateTo}
-          onToday={() => { const today = new Date().toISOString().split('T')[0]; setDateFrom(today); setDateTo(today); }}
-        />
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <div className="ml-auto">
           <ExportButtons
             data={exportRows}
