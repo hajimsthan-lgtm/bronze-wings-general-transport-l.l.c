@@ -256,7 +256,7 @@ export default function ContentSidebar() {
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
-          overflow: expanded ? 'visible' : 'hidden',
+          overflow: 'visible',
           opacity: panelDimming ? 0 : 1,
           pointerEvents: panelVisible ? 'auto' : 'none',
           transition:

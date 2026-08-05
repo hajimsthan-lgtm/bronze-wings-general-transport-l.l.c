@@ -8,7 +8,7 @@ export default function LoadingSpinner({ size = 'md', className = '', color = 'v
       className={`flex flex-col items-center justify-center py-10 px-4 w-full ${className}`}
       style={{
         position: 'relative',
-        zIndex: 60,
+        zIndex: 9999,
         isolation: 'isolate',
         backdropFilter: 'none',
         WebkitBackdropFilter: 'none',
