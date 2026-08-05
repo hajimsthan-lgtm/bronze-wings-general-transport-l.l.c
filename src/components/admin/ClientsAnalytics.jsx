@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
-export default function ClientsAnalytics({ clients = [], trips = [], invoices = [], loading }) {
+export default function ClientsAnalytics({ clients = [], trips = [], invoices = [], loading, onBrowseClients }) {
   if (loading && clients.length === 0) return <LoadingSpinner />;
 
   const revenueMap = {};
@@ -34,10 +34,10 @@ export default function ClientsAnalytics({ clients = [], trips = [], invoices = 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={0} label="Total Clients" value={clients.length} icon={Users} color="#8b5cf6" />
-        <ReportStatCard index={1} label="Active Clients" value={active} icon={Building2} color="#34d399" />
-        <ReportStatCard index={2} label="Trip Revenue" value={totalRevenue} format={formatCurrency} icon={TrendingUp} color="#22c55e" extra={<Sparkline data={revSeries} type="bar" color="#22c55e" />} />
-        <ReportStatCard index={3} label="Outstanding" value={outstanding} format={formatCurrency} icon={FileText} color="#ef4444" />
+        <ReportStatCard index={0} label="Total Clients" value={clients.length} icon={Users} color="#8b5cf6" onClick={onBrowseClients} />
+        <ReportStatCard index={1} label="Active Clients" value={active} icon={Building2} color="#34d399" onClick={onBrowseClients} />
+        <ReportStatCard index={2} label="Trip Revenue" value={totalRevenue} format={formatCurrency} icon={TrendingUp} color="#22c55e" extra={<Sparkline data={revSeries} type="bar" color="#22c55e" />} to="/trips" />
+        <ReportStatCard index={3} label="Outstanding" value={outstanding} format={formatCurrency} icon={FileText} color="#ef4444" to="/reports/soa" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">

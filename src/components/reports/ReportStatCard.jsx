@@ -28,7 +28,7 @@ export function useCountUp(target, duration = 1200) {
   return val;
 }
 
-export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra, to }) {
+export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra, to, onClick }) {
   const animated = useCountUp(value);
   const display = format ? format(animated) : Math.round(animated).toLocaleString();
   const rgba = (a) => hexToRgba(color, a);
@@ -51,7 +51,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
       </div>
       <p className="text-2xl sm:text-4xl font-light text-white tabular-nums tracking-tight">{display}</p>
       {extra && <div className="mt-3 flex items-center justify-between gap-2 relative z-10">{extra}</div>}
-      {to && (
+      {(to || onClick) && (
         <div className="absolute bottom-3 right-4 flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color }}>
           View <ChevronRight className="w-3 h-3" />
         </div>
@@ -59,8 +59,9 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
     </>
   );
 
+  const clickable = to || onClick;
   const cls = `relative overflow-hidden p-4 sm:p-6 animate-fade-in-up transition-all duration-400 group bg-card border border-white/[0.06] rounded-3xl ${
-    to ? 'hover:-translate-y-[3px] hover:border-white/[0.12] cursor-pointer' : 'hover:-translate-y-[3px]'
+    clickable ? 'hover:-translate-y-[3px] hover:border-white/[0.12] cursor-pointer' : 'hover:-translate-y-[3px]'
   }`;
   const style = {
     animationDelay: `${index * 0.08}s`,
@@ -69,6 +70,9 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
 
   if (to) {
     return <Link to={to} className={cls} style={style}>{inner}</Link>;
+  }
+  if (onClick) {
+    return <button type="button" onClick={onClick} className={cls} style={style}>{inner}</button>;
   }
   return <div className={cls} style={style}>{inner}</div>;
 }

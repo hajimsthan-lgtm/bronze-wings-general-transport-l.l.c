@@ -65,7 +65,7 @@ export default function ClientsPanel() {
       </div>
 
       {mode === 'analytics' ? (
-        <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} />
+        <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} onBrowseClients={() => setMode('browse')} />
       ) : (
         <>
           <div className="relative mb-5">
