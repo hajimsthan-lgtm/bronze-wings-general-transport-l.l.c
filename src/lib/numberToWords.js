@@ -34,7 +34,7 @@ export function numberToWords(num) {
   num = Number(num) || 0;
   const integer = Math.floor(num);
   const decimal = Math.round((num - integer) * 100);
-  let result = 'Dirhams ' + convertInteger(integer);
+  let result = convertInteger(integer) + ' Dirhams';
   if (decimal > 0) result += ' and ' + twoDigits(decimal) + ' Fils';
   return result + ' Only';
 }
