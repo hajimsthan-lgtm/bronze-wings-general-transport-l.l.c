@@ -46,9 +46,11 @@ export default function ProfitLoss() {
 
   if (loading) return <LoadingSpinner />;
 
-  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo)));
-  const fExpenses = expenses.filter(e => !e.date || (e.date >= dateFrom && e.date <= dateTo));
-  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= dateFrom && f.date <= dateTo));
+  const _f = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+  const _t = dateTo || new Date().toISOString().split('T')[0];
+  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= _f && t.trip_date <= _t)));
+  const fExpenses = expenses.filter(e => !e.date || (e.date >= _f && e.date <= _t));
+  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= _f && f.date <= _t));
 
   const totalRevenue = fTrips.reduce((s, t) => s + (t.revenue || 0), 0);
   const totalExpenses = fExpenses.reduce((s, e) => s + (e.amount || 0), 0);
@@ -63,7 +65,7 @@ export default function ProfitLoss() {
 
   // Daily series for sparklines
   const days = [];
-  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const incomeSeries = days.map(d => fTrips.filter(t => t.trip_date === d).reduce((s, t) => s + (t.revenue || 0), 0));
   const expenseSeries = days.map(d => fExpenses.filter(e => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) + fFuel.filter(f => f.date === d).reduce((s, f) => s + (f.total_cost || 0), 0));
   const netSeries = days.map((_, i) => incomeSeries[i] - expenseSeries[i]);

@@ -9,8 +9,8 @@ const monthStart = () => {
 const todayStr = () => new Date().toISOString().split('T')[0];
 
 export function GlobalDateProvider({ children }) {
-  const [dateFrom, setDateFrom] = useState(monthStart);
-  const [dateTo, setDateTo] = useState(todayStr);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const setToday = useCallback(() => {
     const t = todayStr();

@@ -34,14 +34,14 @@ export default function Fuel() {
     if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
   }, []);
 
-  const filtered = records.filter(r => !r.date || (r.date >= dateFrom && r.date <= dateTo));
+  const filtered = records.filter(r => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
   const totalCost = filtered.reduce((s, r) => s + (r.total_cost || 0), 0);
   const totalLiters = filtered.reduce((s, r) => s + (r.liters || 0), 0);
   const avgPrice = totalLiters > 0 ? totalCost / totalLiters : 0;
 
   // Daily consumption trend
   const days = [];
-  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const trendData = days.map((d) => ({
     label: formatDateShort(d),
     cost: filtered.filter((r) => r.date === d).reduce((s, r) => s + (r.total_cost || 0), 0),

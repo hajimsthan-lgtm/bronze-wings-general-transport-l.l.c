@@ -27,7 +27,7 @@ export default function Documents() {
 
   const load = () => { setLoading(true); base44.entities.Document.list('-created_date', 100).then(setItems).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
-  const filtered = items.filter(d => (!search || d.title?.toLowerCase().includes(search.toLowerCase())) && (!d.expiry_date || (d.expiry_date >= dateFrom && d.expiry_date <= dateTo)));
+  const filtered = items.filter(d => (!search || d.title?.toLowerCase().includes(search.toLowerCase())) && (!d.expiry_date || ((!dateFrom || d.expiry_date >= dateFrom) && (!dateTo || d.expiry_date <= dateTo))));
 
   return (
     <div>

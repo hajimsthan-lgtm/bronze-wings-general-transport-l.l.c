@@ -27,7 +27,7 @@ export default function Cash() {
   const load = () => { setLoading(true); base44.entities.CashTransaction.list('-date', 100).then(setTransactions).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
 
-  const filtered = transactions.filter(tx => !tx.date || (tx.date >= dateFrom && tx.date <= dateTo));
+  const filtered = transactions.filter(tx => !tx.date || ((!dateFrom || tx.date >= dateFrom) && (!dateTo || tx.date <= dateTo)));
   const inflows = filtered.filter(t => t.type === 'inflow').reduce((s, t) => s + (t.amount || 0), 0);
   const outflows = filtered.filter(t => t.type === 'outflow').reduce((s, t) => s + (t.amount || 0), 0);
 

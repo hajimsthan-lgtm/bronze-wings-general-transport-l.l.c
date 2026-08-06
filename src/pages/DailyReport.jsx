@@ -58,10 +58,12 @@ export default function DailyReport() {
     await delay(400);
     const i = await base44.entities.Invoice.list('-issue_date', 500).catch(() => []);
     const byClient = (x) => reportClient === 'all' || x.client_name === reportClient;
-    setTrips((t || []).filter(x => byClient(x) && (!x.trip_date || (x.trip_date >= dateFrom && x.trip_date <= dateTo))));
-    setExpenses((e || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
-    setFuelRecords((f || []).filter(x => !x.date || (x.date >= dateFrom && x.date <= dateTo)));
-    setInvoices((i || []).filter(x => byClient(x) && (!x.issue_date || (x.issue_date >= dateFrom && x.issue_date <= dateTo))));
+    const _f = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+    const _t = dateTo || new Date().toISOString().split('T')[0];
+    setTrips((t || []).filter(x => byClient(x) && (!x.trip_date || (x.trip_date >= _f && x.trip_date <= _t))));
+    setExpenses((e || []).filter(x => !x.date || (x.date >= _f && x.date <= _t)));
+    setFuelRecords((f || []).filter(x => !x.date || (x.date >= _f && x.date <= _t)));
+    setInvoices((i || []).filter(x => byClient(x) && (!x.issue_date || (x.issue_date >= _f && x.issue_date <= _t))));
   }, [dateFrom, dateTo, reportClient]);
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function DailyReport() {
 
   // Daily analytics
   const days = [];
-  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const trendData = days.map((d) => ({
     label: formatDateShort(d),
     revenue: trips.filter((t) => t.trip_date === d).reduce((s, t) => s + (t.revenue || 0), 0),

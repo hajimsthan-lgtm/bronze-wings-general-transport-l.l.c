@@ -7,6 +7,7 @@ import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { cn } from '@/lib/utils';
 
 const PRESETS = [
+  { label: 'All', get: () => ({ from: null, to: null }) },
   { label: 'Today', get: () => { const d = new Date(); return { from: d, to: d }; } },
   { label: 'Last 7 Days', get: () => { const d = new Date(); const f = new Date(); f.setDate(f.getDate() - 6); return { from: f, to: d }; } },
   { label: 'Last 30 Days', get: () => { const d = new Date(); const f = new Date(); f.setDate(f.getDate() - 29); return { from: f, to: d }; } },

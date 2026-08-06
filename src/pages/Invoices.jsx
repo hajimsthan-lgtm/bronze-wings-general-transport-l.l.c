@@ -38,7 +38,7 @@ export default function Invoices() {
   const [editInvoice, setEditInvoice] = useState(null);
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
 
-  const dateFiltered = invoices.filter((inv) => !inv.issue_date || inv.issue_date >= dateFrom && inv.issue_date <= dateTo);
+  const dateFiltered = invoices.filter((inv) => !inv.issue_date || ((!dateFrom || inv.issue_date >= dateFrom) && (!dateTo || inv.issue_date <= dateTo)));
   const filtered = dateFiltered.filter((inv) => {
     if (filter === 'all') {
       if (!UNPAID_STATUSES.includes(inv.status)) return false;

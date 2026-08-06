@@ -103,7 +103,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const downloadPaymentSlip = async (p) => {
     try { await downloadPaymentSlipPDF(p, client, companySettings); } catch (e) { alert('Failed to generate payment slip'); }
   };
-  const inDateRange = (d) => !d || (d >= dateFrom && d <= dateTo);
+  const inDateRange = (d) => !d || ((!dateFrom || d >= dateFrom) && (!dateTo || d <= dateTo));
   const displayTrips = (contactFilter ? trips.filter(tr => tr.contact_person === contactFilter) : trips).filter(tr => inDateRange(tr.trip_date));
   const displayInvoices = (contactFilter ? invoices.filter(inv => inv.contact_person === contactFilter) : invoices).filter(inv => inDateRange(inv.issue_date));
   const filteredInvoices = displayInvoices;

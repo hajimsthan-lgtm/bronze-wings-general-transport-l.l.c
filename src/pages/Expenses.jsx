@@ -57,7 +57,7 @@ export default function Expenses() {
 
   const filtered = expenses.filter(e => {
     if (filter !== 'all' && e.category !== filter) return false;
-    if (e.date < dateFrom || e.date > dateTo) return false;
+    if ((dateFrom && e.date < dateFrom) || (dateTo && e.date > dateTo)) return false;
     if (search) { const q = search.toLowerCase(); return e.description?.toLowerCase().includes(q) || e.vendor_name?.toLowerCase().includes(q); }
     return true;
   });
@@ -80,7 +80,7 @@ export default function Expenses() {
 
   // Daily trend
   const days = [];
-  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const trendData = days.map((d) => ({ label: formatDateShort(d), amount: filtered.filter((e) => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) }));
 
   // Portal the expense controls into the sticky sub-head bar slot in TopBar

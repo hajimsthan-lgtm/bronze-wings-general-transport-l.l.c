@@ -69,10 +69,10 @@ export default function VehicleDetail() {
   if (loading) return <DetailSkeleton />;
   if (!vehicle) return <EmptyState title="Vehicle not found" />;
 
-  const fTrips = trips.filter((tt) => !tt.trip_date || (tt.trip_date >= dateFrom && tt.trip_date <= dateTo));
-  const fFuel = fuelRecords.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
-  const fExpenses = expenses.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
-  const fServices = services.filter((r) => !r.date || (r.date >= dateFrom && r.date <= dateTo));
+  const fTrips = trips.filter((tt) => !tt.trip_date || ((!dateFrom || tt.trip_date >= dateFrom) && (!dateTo || tt.trip_date <= dateTo)));
+  const fFuel = fuelRecords.filter((r) => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
+  const fExpenses = expenses.filter((r) => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
+  const fServices = services.filter((r) => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
 
   const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
   const totalFuel = fFuel.reduce((s, x) => s + (Number(x.total_cost) || 0), 0);

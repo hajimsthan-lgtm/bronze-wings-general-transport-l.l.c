@@ -83,9 +83,9 @@ export default function DriverDetail() {
   if (loading) return <DetailSkeleton />;
   if (!driver) return <EmptyState title="Driver not found" />;
 
-  const fTrips = trips.filter((tt) => !tt.trip_date || tt.trip_date >= dateFrom && tt.trip_date <= dateTo);
-  const fSalaries = salaries.filter((r) => (!r.payment_date || r.payment_date >= dateFrom && r.payment_date <= dateTo) && (salaryMonth === 'all' || r.month === salaryMonth));
-  const fExpenses = expenses.filter((r) => !r.date || r.date >= dateFrom && r.date <= dateTo);
+  const fTrips = trips.filter((tt) => !tt.trip_date || ((!dateFrom || tt.trip_date >= dateFrom) && (!dateTo || tt.trip_date <= dateTo)));
+  const fSalaries = salaries.filter((r) => (!r.payment_date || ((!dateFrom || r.payment_date >= dateFrom) && (!dateTo || r.payment_date <= dateTo))) && (salaryMonth === 'all' || r.month === salaryMonth));
+  const fExpenses = expenses.filter((r) => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
 
   const totalTrips = fTrips.reduce((s, x) => s + (Number(x.revenue) || 0), 0);
   const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);

@@ -45,15 +45,17 @@ export default function Soa() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const dateFiltered = invoices.filter(i => !i.issue_date || (i.issue_date >= dateFrom && i.issue_date <= dateTo));
+  const _f = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+  const _t = dateTo || new Date().toISOString().split('T')[0];
+  const dateFiltered = invoices.filter(i => !i.issue_date || (i.issue_date >= _f && i.issue_date <= _t));
   const filtered = reportClient === 'all' ? dateFiltered : dateFiltered.filter(i => i.client_name === reportClient);
   const totalAmount = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
-  const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
-  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= dateFrom && t.trip_date <= dateTo)));
-  const fExpenses = expenses.filter(e => !e.date || (e.date >= dateFrom && e.date <= dateTo));
-  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= dateFrom && f.date <= dateTo));
+  const dateRange = `${formatDate(_f)} - ${formatDate(_t)}`;
+  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= _f && t.trip_date <= _t)));
+  const fExpenses = expenses.filter(e => !e.date || (e.date >= _f && e.date <= _t));
+  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= _f && f.date <= _t));
 
 
 
@@ -83,7 +85,7 @@ export default function Soa() {
 
   // Outstanding sparkline (cumulative issued - cumulative paid per day)
   const days = [];
-  { let d = new Date(dateFrom); const end = new Date(dateTo); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
+  { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const outSeries = days.map((d) => {
     const issued = filtered.filter((i) => i.issue_date && i.issue_date <= d).reduce((s, i) => s + (i.total_amount || 0), 0);
     const paid = filtered.filter((i) => i.status === 'paid' && i.issue_date && i.issue_date <= d).reduce((s, i) => s + (i.total_amount || 0), 0);

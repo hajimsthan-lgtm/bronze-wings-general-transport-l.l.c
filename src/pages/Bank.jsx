@@ -29,7 +29,7 @@ export default function Bank() {
   const load = () => { setLoading(true); base44.entities.BankTransaction.list('-date', 100).then(setTransactions).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
 
-  const dateFiltered = transactions.filter(tx => !tx.date || (tx.date >= dateFrom && tx.date <= dateTo));
+  const dateFiltered = transactions.filter(tx => !tx.date || ((!dateFrom || tx.date >= dateFrom) && (!dateTo || tx.date <= dateTo)));
   const filtered = dateFiltered.filter(tx => {
     if (filter !== 'all' && filter === 'credit' && tx.type !== 'credit') return false;
     if (filter !== 'all' && filter === 'debit' && tx.type !== 'debit') return false;

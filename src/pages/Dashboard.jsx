@@ -101,7 +101,7 @@ export default function Dashboard() {
   if (loading) return <LoadingSpinner />;
 
   // --- Date-filtered data ---
-  const inRange = (d) => !d || (d >= dateFrom && d <= dateTo);
+  const inRange = (d) => !d || ((!dateFrom || d >= dateFrom) && (!dateTo || d <= dateTo));
   const fTrips = trips.filter(t => inRange(t.trip_date));
   const fExpenses = expenses.filter(e => inRange(e.date));
   const fInvoices = invoices.filter(i => inRange(i.issue_date));
