@@ -77,13 +77,6 @@ function DriversTab() {
           <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value="all" onValueChange={(id) => { if (id === 'all') navigate('/admin/drivers'); else if (id) navigate(`/admin/drivers/${id}`); }}>
-            <SelectTrigger className="w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs"><SelectValue placeholder="Select Employee…" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All drivers</SelectItem>
-              {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
           <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
             <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
             <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
