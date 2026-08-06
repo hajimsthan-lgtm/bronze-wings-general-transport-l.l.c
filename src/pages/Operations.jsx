@@ -287,7 +287,7 @@ export default function Operations() {
   const contractGrid = (list) => (
     <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
       {list.map((c) => (
-        <ContractCard key={c.id} contract={c} expenses={expensesByContract[c.id] || []} onEdit={() => openEditContract(c)} onDelete={() => handleDeleteContract(c)} onDetails={() => setDetailContract(c)} />
+        <ContractCard key={c.id} contract={c} expenses={expensesByContract[c.id] || []} onEdit={() => openEditContract(c)} onDelete={() => handleDeleteContract(c)} onDetails={() => setDetailContract(c)} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} />
       ))}
     </div>
   );

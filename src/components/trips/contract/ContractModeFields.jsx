@@ -77,6 +77,54 @@ export default function ContractModeFields({ p }) {
         </div>
       </Section>
 
+      {/* Usage & Pricing */}
+      <Section title={t('usage_pricing') || 'Usage & Pricing'}>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('usage_date') || 'Usage Date'}</Label>
+            <Input type="date" value={contract.usage_date || ''} onChange={(e) => updateContract('usage_date', e.target.value)} className={`${inputCls} date-input-clean`} />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('usage_hours') || 'Hours'}</Label>
+            <Input type="number" value={contract.usage_hours || ''} onChange={(e) => updateContract('usage_hours', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('per_hour_rate') || 'Per Hour (AED)'}</Label>
+            <Input type="number" value={contract.per_hour_rate || ''} onChange={(e) => updateContract('per_hour_rate', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('usage_days') || 'Days'}</Label>
+            <Input type="number" value={contract.usage_days || ''} onChange={(e) => updateContract('usage_days', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('per_day_rate') || 'Per Day (AED)'}</Label>
+            <Input type="number" value={contract.per_day_rate || ''} onChange={(e) => updateContract('per_day_rate', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+        </div>
+        {(() => {
+          const hours = Number(contract.usage_hours) || 0;
+          const days = Number(contract.usage_days) || 0;
+          const perHour = Number(contract.per_hour_rate) || 0;
+          const perDay = Number(contract.per_day_rate) || 0;
+          const hourTotal = hours * perHour;
+          const dayTotal = days * perDay;
+          const total = hourTotal + dayTotal;
+          if (!total) return null;
+          return (
+            <div className="calc-total-glow flex flex-wrap items-center justify-between gap-3 mt-1">
+              <div className="flex items-center gap-3 text-[11px] text-white/70">
+                {hourTotal > 0 && <span className="tabular-nums">{hours}h × {formatCurrency(perHour)} = <b className="text-white">{formatCurrency(hourTotal)}</b></span>}
+                {dayTotal > 0 && <span className="tabular-nums">{days}d × {formatCurrency(perDay)} = <b className="text-white">{formatCurrency(dayTotal)}</b></span>}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="live-pulse-dot" />
+                <span className="text-sm font-bold text-white tabular-nums">{formatCurrency(total)}</span>
+              </div>
+            </div>
+          );
+        })()}
+      </Section>
+
       {/* Assignment */}
       <Section title="Assignment">
         <div className="grid grid-cols-2 gap-3">

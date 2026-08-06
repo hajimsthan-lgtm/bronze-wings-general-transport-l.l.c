@@ -38,6 +38,26 @@
     },
     "notes": {
       "type": "string"
+    },
+    "usage_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "usage_hours": {
+      "type": "number",
+      "default": 0
+    },
+    "usage_days": {
+      "type": "number",
+      "default": 0
+    },
+    "per_hour_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "per_day_rate": {
+      "type": "number",
+      "default": 0
     }
   },
   "required": [

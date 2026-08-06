@@ -25,6 +25,7 @@ import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 import ClientTripsList from '@/components/clients/ClientTripsList';
+import ContractsSection from '@/components/contracts/ContractsSection';
 import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
 import CollapsibleSection from '@/components/common/CollapsibleSection';
 
@@ -355,6 +356,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
               />
             )}
           </CollapsibleSection>
+
+          {/* Contracts */}
+          <ContractsSection filter={{ company_name: client.name }} onInvoiceCreated={reloadInvoices} />
 
           {/* Fixed Charges */}
           <CollapsibleSection title={t('fixed_charges')} icon={Repeat} accent="#f59e0b" count={fixedCharges.length} actions={

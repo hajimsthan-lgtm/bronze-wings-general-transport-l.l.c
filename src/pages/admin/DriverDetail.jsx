@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
 import DriverProfileCard from '@/components/admin/DriverProfileCard';
+import ContractsSection from '@/components/contracts/ContractsSection';
 import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
@@ -201,6 +202,9 @@ export default function DriverDetail() {
               </div>
               )}
           </TabTableCard>
+
+          {/* Contracts */}
+          <ContractsSection filter={{ driver_name: driver.name }} />
 
           {/* Salary — small card, click-to-collapse */}
           <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />

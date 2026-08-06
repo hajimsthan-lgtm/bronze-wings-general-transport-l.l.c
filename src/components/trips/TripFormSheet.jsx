@@ -27,6 +27,7 @@ const DEFAULT_FORM = {
 const DEFAULT_CONTRACT = {
   company_name: '', start_date: '', end_date: '', auto_renewal: false,
   monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
+  usage_date: '', usage_hours: '', usage_days: '', per_hour_rate: '', per_day_rate: '',
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -90,6 +91,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           vehicle_plate: editContract.vehicle_plate || '',
           driver_name: editContract.driver_name || '',
           notes: editContract.notes || '',
+          usage_date: editContract.usage_date || '',
+          usage_hours: editContract.usage_hours || '',
+          usage_days: editContract.usage_days || '',
+          per_hour_rate: editContract.per_hour_rate || '',
+          per_day_rate: editContract.per_day_rate || '',
         });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
         base44.entities.ContractExpense.filter({ contract_id: editContract.id })
@@ -137,6 +143,16 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     if (field === 'vehicle_plate') setCCreatedFlags((prev) => ({ ...prev, vehicle: false }));
     if (field === 'driver_name') setCCreatedFlags((prev) => ({ ...prev, driver: false }));
   };
+
+  // Auto-calculate monthly rate from usage-based pricing (hours × per-hour + days × per-day)
+  useEffect(() => {
+    const hours = Number(contract.usage_hours) || 0;
+    const days = Number(contract.usage_days) || 0;
+    const perHour = Number(contract.per_hour_rate) || 0;
+    const perDay = Number(contract.per_day_rate) || 0;
+    const calc = hours * perHour + days * perDay;
+    if (calc > 0) setContract((prev) => ({ ...prev, monthly_rate: calc }));
+  }, [contract.usage_hours, contract.usage_days, contract.per_hour_rate, contract.per_day_rate]);
 
   useEffect(() => {
     if (form.client_name) {
@@ -303,6 +319,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           vehicle_plate: contract.vehicle_plate,
           driver_name: contract.driver_name,
           notes: contract.notes,
+          usage_date: contract.usage_date || null,
+          usage_hours: Number(contract.usage_hours) || 0,
+          usage_days: Number(contract.usage_days) || 0,
+          per_hour_rate: Number(contract.per_hour_rate) || 0,
+          per_day_rate: Number(contract.per_day_rate) || 0,
         };
         let recordId;
         if (editContract) {

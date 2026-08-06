@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useId } from 'react';
 import { Building2, Calendar, Pencil, Trash2, Truck, User, Repeat, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -37,7 +38,8 @@ function ContractGauge({ value, color, glow, gid }) {
   );
 }
 
-export default function ContractCard({ contract, expenses = [], onEdit, onDelete, onDetails }) {
+export default function ContractCard({ contract, expenses = [], onEdit, onDelete, onDetails, driverMap, vehicleMap, clientMap }) {
+  const navigate = useNavigate();
   const { t } = useI18n();
   const gid = useId().replace(/[:]/g, '');
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
@@ -51,6 +53,18 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
   const tone = margin >= 30 ? 'eco' : margin >= 15 ? 'cool' : 'heat';
   const tn = TONE[tone];
   const st = STATUS[contract.status] || STATUS.active;
+
+  const handleLink = (e, map, name, path) => {
+    e.stopPropagation();
+    const id = map?.[name];
+    if (id) navigate(`${path}/${id}`);
+  };
+
+  const bubbles = [
+    contract.company_name && { icon: Building2, label: contract.company_name, map: clientMap, path: '/admin/clients' },
+    contract.vehicle_plate && { icon: Truck, label: contract.vehicle_plate, map: vehicleMap, path: '/admin/vehicles' },
+    contract.driver_name && { icon: User, label: contract.driver_name, map: driverMap, path: '/admin/drivers' },
+  ].filter(Boolean);
 
   return (
     <div
@@ -117,14 +131,27 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
         </div>
       </div>
 
-      {/* ── Meta + actions ── */}
-      <div className="flex items-center gap-1 flex-wrap pt-2.5 mt-2.5 border-t border-white/5">
-        {contract.vehicle_plate && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-white/55"><Truck className="w-3 h-3" />{contract.vehicle_plate}</span>
-        )}
-        {contract.driver_name && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-white/55"><User className="w-3 h-3" />{contract.driver_name}</span>
-        )}
+      {/* ── Footer: clickable entity bubbles + actions ── */}
+      <div className="flex items-center gap-1.5 flex-wrap pt-2.5 mt-2.5 border-t border-white/5">
+        {bubbles.map((b, i) => {
+          const Icon = b.icon;
+          const clickable = !!b.map?.[b.label];
+          return (
+            <button
+              key={i}
+              onClick={(e) => handleLink(e, b.map, b.label, b.path)}
+              className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-medium transition-all"
+              style={clickable
+                ? { background: 'rgba(var(--panel-accent-rgb),0.14)', border: '1px solid rgba(var(--panel-accent-rgb),0.32)', color: '#fff' }
+                : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}
+              onMouseEnter={(e) => { if (clickable) e.currentTarget.style.boxShadow = '0 0 12px -3px rgba(var(--panel-accent-rgb),0.5)'; }}
+              onMouseLeave={(e) => { if (clickable) e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <Icon className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate max-w-[80px]">{b.label}</span>
+            </button>
+          );
+        })}
         <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button onClick={(e) => { e.stopPropagation(); onDetails(); }} className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('details')}><Building2 className="w-3 h-3" /></button>
           <button onClick={(e) => { e.stopPropagation(); onEdit(); }} className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-white/50 hover:border-blue-500/30 hover:text-blue-400 transition-colors" title={t('edit')}><Pencil className="w-3 h-3" /></button>

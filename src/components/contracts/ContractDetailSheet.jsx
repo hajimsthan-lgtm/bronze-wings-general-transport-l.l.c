@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import StatusBadge from '@/components/common/StatusBadge';
 import { useI18n } from '@/lib/i18n';
+import { useToast } from '@/components/ui/use-toast';
+import { base44 } from '@/api/base44Client';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Pencil, Trash2, Building2, User, Truck, Calendar, Repeat, DollarSign } from 'lucide-react';
+import { Pencil, Trash2, Building2, User, Truck, Calendar, Repeat, DollarSign, FileText } from 'lucide-react';
 
-export default function ContractDetailSheet({ contract, expenses = [], onClose, onEdit, onDelete }) {
+export default function ContractDetailSheet({ contract, expenses = [], onClose, onEdit, onDelete, onInvoiceCreated }) {
   const { t } = useI18n();
+  const { toast } = useToast();
   const [deleting, setDeleting] = useState(false);
+  const [invoicing, setInvoicing] = useState(false);
 
   if (!contract) return null;
 
@@ -22,6 +26,37 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
     setDeleting(true);
     await onDelete(contract);
     setDeleting(false);
+  };
+
+  const handleCreateInvoice = async () => {
+    setInvoicing(true);
+    try {
+      const subtotal = monthlyRate;
+      const vatAmount = Math.round(subtotal * 0.05 * 100) / 100;
+      const total = Math.round((subtotal + vatAmount) * 100) / 100;
+      const now = new Date();
+      const due = new Date(now); due.setDate(due.getDate() + 30);
+      const invNo = `CNT-${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getTime()).slice(-4)}`;
+      await base44.entities.Invoice.create({
+        invoice_number: invNo,
+        client_name: contract.company_name,
+        issue_date: now.toISOString().split('T')[0],
+        due_date: due.toISOString().split('T')[0],
+        line_items: [{ description: `Monthly Contract — ${contract.company_name}`, quantity: 1, unit_price: subtotal, amount: subtotal }],
+        subtotal,
+        vat_rate: 5,
+        vat_amount: vatAmount,
+        total_amount: total,
+        paid_amount: 0,
+        status: 'draft',
+      });
+      toast({ title: t('invoice_created') || 'Invoice created' });
+      onInvoiceCreated?.();
+    } catch {
+      toast({ title: 'Failed to create invoice', variant: 'destructive' });
+    } finally {
+      setInvoicing(false);
+    }
   };
 
   return (
@@ -111,6 +146,9 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
         )}
 
         <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={handleCreateInvoice} disabled={invoicing || monthlyRate <= 0} className="flex-1 border-border">
+            <FileText className="w-4 h-4 mr-1.5" /> {invoicing ? t('loading') : (t('create_invoice') || 'Invoice')}
+          </Button>
           <Button variant="outline" onClick={() => onEdit(contract)} className="flex-1 border-border">
             <Pencil className="w-4 h-4 mr-1.5" /> {t('edit')}
           </Button>

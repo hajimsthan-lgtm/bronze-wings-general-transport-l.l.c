@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
 import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
 import VehicleProfileCard from '@/components/admin/VehicleProfileCard';
+import ContractsSection from '@/components/contracts/ContractsSection';
 import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
@@ -197,6 +198,9 @@ export default function VehicleDetail() {
               </div>
             )}
           </TabTableCard>
+
+          {/* Contracts */}
+          <ContractsSection filter={{ vehicle_plate: vehicle.plate_number }} />
 
           {/* Fuel — small card, collapsed by default */}
           <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} collapsible defaultOpen={false} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
