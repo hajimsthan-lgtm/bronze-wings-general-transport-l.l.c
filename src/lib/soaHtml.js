@@ -179,14 +179,6 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
     const thead = container.querySelector('#soa-table thead');
 
     const canvas = await html2canvas(fullEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-    const headerCanvas = await html2canvas(headerEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-    let tableHeadCanvas = null;
-    let tableHeadHeightPx = 0;
-    if (thead) {
-      tableHeadCanvas = await html2canvas(thead, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
-      const sf = canvas.width / fullEl.getBoundingClientRect().width;
-      tableHeadHeightPx = Math.round(thead.getBoundingClientRect().height * sf);
-    }
 
     const pxPerMm = canvas.width / 210;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -194,18 +186,37 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
     const pdfH = pdf.internal.pageSize.height;
     const marginMm = 8;
     const usableH = pdfH - marginMm * 2;
-    const effectiveUsable = usableH * pxPerMm;
-    const headerHeightPx = headerCanvas.height;
+    const usablePx = usableH * pxPerMm;
+
+    // ── Single page: content fits → one image, no page numbers ──
+    if (canvas.height <= usablePx) {
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgHmm = canvas.height / pxPerMm;
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, imgHmm);
+      pdf.save(`${filename}.pdf`);
+      return;
+    }
+
+    // ── Multi-page: slice header + table-head from the MAIN canvas (correct width, no distortion) ──
+    const sf = canvas.width / fullEl.getBoundingClientRect().width;
+    const headerHeightPx = Math.round(headerEl.getBoundingClientRect().height * sf);
+    let tableHeadStartPx = 0;
+    let tableHeadHeightPx = 0;
+    if (thead) {
+      tableHeadStartPx = Math.round((thead.getBoundingClientRect().top - fullEl.getBoundingClientRect().top) * sf);
+      tableHeadHeightPx = Math.round(thead.getBoundingClientRect().height * sf);
+    }
+    const contGap = 4 * pxPerMm;
 
     const pageBreaks = [];
     let cursor = 0;
     let pageIdx = 0;
     while (cursor < canvas.height) {
       const isCont = pageIdx > 0;
-      const overhead = isCont ? (headerHeightPx + tableHeadHeightPx + 4 * pxPerMm) : 0;
-      let breakAt = cursor + (effectiveUsable - overhead);
+      const overhead = isCont ? (headerHeightPx + tableHeadHeightPx + contGap) : 0;
+      let breakAt = cursor + (usablePx - overhead);
       if (breakAt >= canvas.height) { pageBreaks.push(canvas.height); break; }
-      if (breakAt <= cursor) breakAt = cursor + effectiveUsable;
+      if (breakAt <= cursor) breakAt = cursor + usablePx;
       pageBreaks.push(breakAt);
       cursor = breakAt;
       pageIdx++;
@@ -215,7 +226,7 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
     for (let p = 0; p < totalPages; p++) {
       const y0 = p === 0 ? 0 : pageBreaks[p - 1];
       const isCont = p > 0;
-      const headerOffset = isCont ? (headerHeightPx + tableHeadHeightPx + 4 * pxPerMm) : 0;
+      const headerOffset = isCont ? (headerHeightPx + tableHeadHeightPx + contGap) : 0;
       const contentHpx = pageBreaks[p] - y0;
       if (contentHpx <= 0) break;
 
@@ -226,9 +237,10 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, slice.width, slice.height);
       if (isCont) {
-        ctx.drawImage(headerCanvas, 0, 0, headerCanvas.width, headerCanvas.height, 0, 0, canvas.width, headerHeightPx);
-        if (tableHeadCanvas) {
-          ctx.drawImage(tableHeadCanvas, 0, 0, tableHeadCanvas.width, tableHeadCanvas.height, 0, headerHeightPx + 4 * pxPerMm, canvas.width, tableHeadHeightPx);
+        // Header from top of main canvas — same width, no stretching/distortion
+        ctx.drawImage(canvas, 0, 0, canvas.width, headerHeightPx, 0, 0, canvas.width, headerHeightPx);
+        if (tableHeadHeightPx > 0) {
+          ctx.drawImage(canvas, 0, tableHeadStartPx, canvas.width, tableHeadHeightPx, 0, headerHeightPx + contGap, canvas.width, tableHeadHeightPx);
         }
       }
       ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, headerOffset, canvas.width, contentHpx);
@@ -242,8 +254,7 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
       pdf.text(`Page ${p + 1} of ${totalPages}`, pdfW / 2, pdfH - 4, { align: 'center' });
     }
 
-    const dateStrFile = (meta.date || new Date().toISOString().split('T')[0]).replace(/[\/\s-]+/g, '-');
-    pdf.save(`${filename}-${dateStrFile}.pdf`);
+    pdf.save(`${filename}.pdf`);
   } finally {
     document.body.removeChild(container);
   }
