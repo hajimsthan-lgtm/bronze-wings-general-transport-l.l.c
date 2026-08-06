@@ -23,6 +23,12 @@
     "client_trn": {
       "type": "string"
     },
+    "sub": {
+      "type": "string"
+    },
+    "reg_no": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [

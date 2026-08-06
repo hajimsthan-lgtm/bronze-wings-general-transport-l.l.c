@@ -38,12 +38,22 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
       const now = new Date();
       const due = new Date(now); due.setDate(due.getDate() + 30);
       const invNo = await generateNextInvoiceNumber();
+      let clientData = {};
+      try {
+        const clients = await base44.entities.Client.filter({ name: contract.company_name });
+        clientData = clients?.[0] || {};
+      } catch (e) {}
       await base44.entities.Invoice.create({
         invoice_number: invNo,
         client_name: contract.company_name,
+        contact_person: clientData.contact_person || '',
+        client_address: clientData.address || '',
+        client_trn: clientData.trn || '',
+        sub: contract.notes || '',
+        reg_no: contract.vehicle_plate || '',
         issue_date: now.toISOString().split('T')[0],
         due_date: due.toISOString().split('T')[0],
-        line_items: [{ description: `Monthly Contract — ${contract.company_name}`, quantity: 1, unit_price: subtotal, amount: subtotal }],
+        line_items: [{ description: `Monthly Contract - ${contract.company_name}\nDriver: ${contract.driver_name || '—'} | Vehicle: ${contract.vehicle_plate || '—'}`, quantity: 1, unit_price: subtotal, amount: subtotal }],
         subtotal,
         vat_rate: 5,
         vat_amount: vatAmount,

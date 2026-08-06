@@ -7,7 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
-import { downloadInvoicePDF } from '@/lib/invoiceHtml';
+import { downloadInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { computeNextSeq, formatInvoiceNumber, restructureInvoiceYear, parseInvoiceNumber } from '@/lib/invoiceSequence';
@@ -230,7 +230,9 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     setBusy(true);
     try {
       const settings = await getCompanySettings();
-      await downloadInvoicePDF(inv, client.name, settings, clientInvoiceSeq?.[inv.id]);
+      const isMonthly = inv.line_items?.[0]?.description?.startsWith('Monthly Contract');
+      const downloader = isMonthly ? downloadMonthlyInvoicePDF : downloadInvoicePDF;
+      await downloader(inv, client.name, settings, clientInvoiceSeq?.[inv.id]);
     } finally { setBusy(false); setProgress(''); }
   };
 
