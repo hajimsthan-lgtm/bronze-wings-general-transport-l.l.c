@@ -12,7 +12,6 @@ import SoaExportButtons from '@/components/reports/SoaExportButtons';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
-import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
@@ -57,9 +56,6 @@ export default function Soa() {
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
   const dateRange = `${formatDate(_f)} - ${formatDate(_t)}`;
-  const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= _f && t.trip_date <= _t)));
-  const fExpenses = expenses.filter(e => !e.date || (e.date >= _f && e.date <= _t));
-  const fFuel = fuelRecords.filter(f => !f.date || (f.date >= _f && f.date <= _t));
 
 
 
@@ -102,16 +98,9 @@ export default function Soa() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader title={t('soa')} description="Client account statements"
-        action={
-          <div className="flex items-center gap-2">
-            <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
-            <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} />
-          </div>
-        } />
+      <PageHeader title={t('soa')} description="Client account statements" />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
         <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} clientName={reportClient === 'all' ? '' : reportClient} dateRange={dateRange} />
       </div>
 

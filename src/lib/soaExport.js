@@ -41,6 +41,7 @@ export function buildSoaRows(invoices, trips, vehicles) {
       month,
       vehicle_type: vtype,
       status: STATUS_LABEL[inv.status] || (inv.status || '').toUpperCase(),
+      raw_status: inv.status || '',
       amount: inv.total_amount || 0,
     };
   });
