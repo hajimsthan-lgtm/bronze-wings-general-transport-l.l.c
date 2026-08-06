@@ -106,7 +106,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     : `<div style="font-size:9pt;color:#999;font-style:italic;">Bank details available upon request</div>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:${DK};line-height:1.4;background:#ffffff;box-sizing:border-box;border:1px solid #ddd;padding:8px;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:${DK};line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;padding:8px;position:relative;overflow:hidden;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
@@ -237,9 +237,6 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:relative;z-index:1;background:${MAROON};color:#fff;text-align:center;padding:10px 14px;font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:14px;">
     Thanks for Doing Business with Us!
   </div>
-  <div style="position:relative;z-index:1;background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 14px;font-size:8.5pt;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
-    We Provide All Kinds of General and Refrigerated Transportation Services
-  </div>
 
 </div>`;
 }
@@ -310,7 +307,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   const logoSvg = `<svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="46" fill="none" stroke="${MAROON}" stroke-width="2"/><circle cx="50" cy="50" r="40" fill="none" stroke="${MAROON}" stroke-width="1" stroke-dasharray="3,2"/><circle cx="50" cy="50" r="28" fill="none" stroke="#C4A35A" stroke-width="2"/><path d="M50 22 Q35 35 25 50 Q35 45 50 40 Q65 45 75 50 Q65 35 50 22Z" fill="#C4A35A" opacity="0.9"/><path d="M50 78 Q35 65 25 50 Q35 55 50 60 Q65 55 75 50 Q65 65 50 78Z" fill="#C4A35A" opacity="0.9"/><text x="50" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="${MAROON}">BW</text><text x="50" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="600" fill="${MAROON}">L.L.C</text></svg>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
@@ -433,9 +430,6 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="background:${MAROON};color:#fff;text-align:center;padding:10px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       Thanks for Doing Business with Us!
     </div>
-    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:8px 20px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.6;">
-      We Provide All Kinds of General and Refrigerated Transportation Services
-    </div>
   </div>
 
 </div>`;
@@ -513,7 +507,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   const logoSvg = `<svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="46" fill="none" stroke="${MAROON}" stroke-width="2"/><circle cx="50" cy="50" r="40" fill="none" stroke="${MAROON}" stroke-width="1" stroke-dasharray="3,2"/><circle cx="50" cy="50" r="28" fill="none" stroke="#C4A35A" stroke-width="2"/><path d="M50 22 Q35 35 25 50 Q35 45 50 40 Q65 45 75 50 Q65 35 50 22Z" fill="#C4A35A" opacity="0.9"/><path d="M50 78 Q35 65 25 50 Q35 55 50 60 Q65 55 75 50 Q65 65 50 78Z" fill="#C4A35A" opacity="0.9"/><text x="50" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="${MAROON}">BW</text><text x="50" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="600" fill="${MAROON}">L.L.C</text></svg>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
@@ -640,9 +634,6 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:relative;z-index:1;">
     <div style="background:${MAROON};color:#fff;text-align:center;padding:9px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       Thanks for Doing Business with Us!
-    </div>
-    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 20px;font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
-      We Provide All Kinds of General and Refrigerated Transportation Services
     </div>
   </div>
 
