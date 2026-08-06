@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Sun, Moon, Cloud, Sparkles, Activity, Wallet, FileWarning, TrendingUp, Truck, CalendarDays } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Sun, Moon, Cloud, Sparkles, Activity, Wallet, FileWarning, TrendingUp, Truck, CalendarDays, ArrowUpRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { formatDate } from '@/lib/formatters';
@@ -15,6 +16,24 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
   const [now, setNow] = useState(new Date());
   const [userName, setUserName] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
+  const navigate = useNavigate();
+  const panelRef = useRef(null);
+  const [mouse, setMouse] = useState({ x: 50, y: 50 });
+
+  const handlePanelMove = (e) => {
+    const rect = panelRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMouse({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
+  };
+
+  const handleCardMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+    e.currentTarget.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+  };
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -33,13 +52,13 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   const stats = [
-    { label: 'Active Trips', value: activeTrips, hex: '#34d399', Icon: Activity, sub: 'in progress' },
-    { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#60a5fa', Icon: Wallet, sub: 'period total' },
-    { label: 'Pending Invoices', value: pendingInvoices, hex: '#fbbf24', Icon: FileWarning, sub: 'awaiting' },
+    { label: 'Active Trips', value: activeTrips, hex: '#34d399', Icon: Activity, sub: 'in progress', path: '/trips' },
+    { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#60a5fa', Icon: Wallet, sub: 'period total', path: '/reports/pnl' },
+    { label: 'Pending Invoices', value: pendingInvoices, hex: '#fbbf24', Icon: FileWarning, sub: 'awaiting', path: '/reports/soa' },
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl animate-fade-in-up"
+    <div ref={panelRef} onMouseMove={handlePanelMove} className="relative overflow-hidden rounded-3xl animate-fade-in-up"
       style={{
         background: 'var(--panel-bg)',
         border: '1px solid var(--panel-border-color)',
@@ -47,6 +66,8 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
         backdropFilter: 'var(--panel-blur)',
         WebkitBackdropFilter: 'var(--panel-blur)',
       }}>
+      {/* cursor-following spotlight */}
+      <div className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500" style={{ background: `radial-gradient(500px circle at ${mouse.x}% ${mouse.y}%, rgba(var(--panel-accent-rgb),0.10), transparent 65%)` }} />
       {/* ambient mesh */}
       <div className="pointer-events-none absolute -top-24 right-0 w-72 h-72 rounded-full opacity-50" style={{ background: `radial-gradient(circle, ${gradient}, transparent 70%)` }} />
 
@@ -95,19 +116,34 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
           <span className="text-[11px] text-white/70 font-mono tabular-nums">{formatDate(dateTo)}</span>
         </div>
 
-        {/* Row 3 — minimal stat cards */}
+        {/* Row 3 — clickable stat cards with cursor spotlight */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
           {stats.map((s, i) => (
-            <div key={s.label} className="relative rounded-2xl px-4 py-4 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 animate-fade-in-up"
+            <button
+              key={s.label}
+              onClick={() => navigate(s.path)}
+              onMouseMove={handleCardMove}
+              className="group relative rounded-2xl px-4 py-4 overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up cursor-pointer"
               style={{
                 animationDelay: `${0.1 + i * 0.06}s`,
-                background: 'rgba(255,255,255,0.025)',
+                background: `linear-gradient(165deg, ${s.hex}0d 0%, rgba(255,255,255,0.025) 100%)`,
                 border: '1px solid rgba(255,255,255,0.08)',
-              }}>
-              <p className="text-sm font-semibold text-white truncate mb-2">{s.label}</p>
-              <p className="text-xl sm:text-2xl font-bold text-white tabular-nums tracking-tight truncate leading-none">{s.value}</p>
-              <p className="text-[11px] text-white/40 mt-1.5 truncate">({s.sub})</p>
-            </div>
+              }}
+            >
+              {/* per-card cursor spotlight */}
+              <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(200px circle at var(--mx,50%) var(--my,50%), ${s.hex}22, transparent 70%)` }} />
+              {/* top accent line on hover */}
+              <div className="pointer-events-none absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `linear-gradient(90deg, transparent, ${s.hex}, transparent)` }} />
+              <div className="relative flex items-start justify-between mb-2.5">
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ background: `${s.hex}1a`, border: `1px solid ${s.hex}40`, boxShadow: `0 0 14px -4px ${s.hex}55` }}>
+                  <s.Icon className="w-4 h-4" style={{ color: s.hex }} />
+                </div>
+                <ArrowUpRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
+              <p className="relative text-[11px] font-semibold text-white/55 truncate mb-1 uppercase tracking-wide">{s.label}</p>
+              <p className="relative text-lg sm:text-xl font-bold text-white tabular-nums tracking-tight truncate leading-none">{s.value}</p>
+              <p className="relative text-[10px] text-white/35 mt-1.5 truncate">({s.sub})</p>
+            </button>
           ))}
         </div>
       </div>
