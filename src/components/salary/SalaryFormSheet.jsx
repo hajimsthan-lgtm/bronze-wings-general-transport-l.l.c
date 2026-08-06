@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/formatters';
+import SalaryDeductionsPicker from './SalaryDeductionsPicker';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -30,6 +31,8 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
   const [saving, setSaving] = useState(false);
   const [drivers, setDrivers] = useState([]);
   const [form, setForm] = useState(blank);
+  const [driverDeductions, setDriverDeductions] = useState([]);
+  const [selectedDeductionIds, setSelectedDeductionIds] = useState([]);
 
   useEffect(() => { base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {}); }, []);
 
@@ -44,35 +47,47 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         deductions: editItem.deductions ?? '',
         net_salary: editItem.net_salary ?? '',
       });
+      setSelectedDeductionIds([]);
     } else {
       setForm({ ...blank(), driver_name: prefillDriver || '' });
+      setSelectedDeductionIds([]);
     }
   }, [editItem, prefillDriver]);
 
-  const update = (f, v) => {
-    setForm((prev) => {
-      const next = { ...prev, [f]: v };
-      if (['base_salary', 'overtime', 'bonus', 'deductions'].includes(f)) {
-        next.net_salary =
-          (Number(next.base_salary) || 0) +
-          (Number(next.overtime) || 0) +
-          (Number(next.bonus) || 0) -
-          (Number(next.deductions) || 0);
-      }
-      return next;
-    });
-  };
+  // Fetch active installment deductions for the selected driver (FIFO by issue_date)
+  useEffect(() => {
+    if (!form.driver_name) { setDriverDeductions([]); return; }
+    base44.entities.DriverDeduction.filter({ driver_name: form.driver_name, status: 'active' })
+      .then((res) => {
+        const sorted = (res || [])
+          .filter((d) => Number(d.monthly_deduction) > 0 && Number(d.remaining_balance) > 0)
+          .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+        setDriverDeductions(sorted);
+      })
+      .catch(() => setDriverDeductions([]));
+  }, [form.driver_name]);
+
+  const recalcNet = (f) => ({
+    ...f,
+    net_salary: (Number(f.base_salary) || 0) + (Number(f.overtime) || 0) + (Number(f.bonus) || 0) - (Number(f.deductions) || 0),
+  });
+
+  const update = (f, v) => setForm((prev) => recalcNet({ ...prev, [f]: v }));
 
   const pickDriver = (name) => {
     const drv = drivers.find((d) => d.name === name);
-    setForm((prev) => {
-      const base = drv?.base_salary ?? prev.base_salary;
-      const next = { ...prev, driver_name: name, base_salary: base };
-      next.net_salary =
-        (Number(next.base_salary) || 0) +
-        (Number(next.overtime) || 0) +
-        (Number(next.bonus) || 0) -
-        (Number(next.deductions) || 0);
+    setForm((prev) => recalcNet({ ...prev, driver_name: name, base_salary: drv?.base_salary ?? prev.base_salary }));
+    setSelectedDeductionIds([]);
+  };
+
+  const toggleDeduction = (id) => {
+    setSelectedDeductionIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      const sum = next.reduce((s, did) => {
+        const d = driverDeductions.find((x) => x.id === did);
+        return s + (Number(d?.monthly_deduction) || 0);
+      }, 0);
+      setForm((f) => recalcNet({ ...f, deductions: sum }));
       return next;
     });
   };
@@ -88,6 +103,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         bonus: Number(form.bonus) || 0,
         deductions: Number(form.deductions) || 0,
         net_salary: Number(form.net_salary) || 0,
+        applied_deductions: selectedDeductionIds,
       });
     } finally {
       setSaving(false);
@@ -109,6 +125,12 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
           {drivers.map((d) => <option key={d.id} value={d.name} />)}
         </datalist>
       </div>
+
+      <SalaryDeductionsPicker
+        deductions={driverDeductions}
+        selectedIds={selectedDeductionIds}
+        onToggle={toggleDeduction}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <div>

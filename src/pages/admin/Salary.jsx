@@ -78,24 +78,28 @@ export default function Salary() {
     const month = monthFilter || MONTHS[now.getMonth()];
     const year = Number(yearFilter || now.getFullYear());
     const existing = new Set(records.filter((r) => r.month === month && Number(r.year) === year).map((r) => r.driver_name));
-    const toCreate = drivers
-      .filter((d) => (d.status || 'active') !== 'inactive' && !existing.has(d.name))
-      .map((d) => ({
-        driver_name: d.name,
-        month,
-        year,
-        base_salary: Number(d.base_salary) || 0,
-        overtime: 0,
-        bonus: 0,
-        deductions: 0,
-        net_salary: Number(d.base_salary) || 0,
-        status: 'pending',
-        payment_method: 'bank_transfer',
-        notes: '',
-      }));
-    if (toCreate.length === 0) { alert(`All active drivers already have a salary record for ${month} ${year}.`); return; }
+    const eligible = drivers.filter((d) => (d.status || 'active') !== 'inactive' && !existing.has(d.name));
+    if (eligible.length === 0) { alert(`All active drivers already have a salary record for ${month} ${year}.`); return; }
     setGenerating(true);
     try {
+      // Auto-apply active installment deductions (FIFO) for each driver
+      const toCreate = [];
+      for (const d of eligible) {
+        const deducted = await applyDeductions(d.name, null);
+        toCreate.push({
+          driver_name: d.name,
+          month,
+          year,
+          base_salary: Number(d.base_salary) || 0,
+          overtime: 0,
+          bonus: 0,
+          deductions: deducted,
+          net_salary: (Number(d.base_salary) || 0) - deducted,
+          status: 'pending',
+          payment_method: 'bank_transfer',
+          notes: '',
+        });
+      }
       await base44.entities.SalaryRecord.bulkCreate(toCreate);
       load();
     } finally { setGenerating(false); }
@@ -121,6 +125,30 @@ export default function Salary() {
   const payslip = async (rec) => {
     const drv = drivers.find((d) => d.name === rec.driver_name) || {};
     await downloadPayslipPDF(rec, drv, settings);
+  };
+
+  // Apply installment deductions (FIFO by issue_date) — reduces remaining_balance,
+  // decrements months_left, marks completed when fully paid. Returns total deducted.
+  const applyDeductions = async (driverName, selectedIds) => {
+    const all = await base44.entities.DriverDeduction.filter({ driver_name: driverName, status: 'active' }).catch(() => []);
+    const sorted = (all || [])
+      .filter((d) => Number(d.monthly_deduction) > 0 && Number(d.remaining_balance) > 0)
+      .filter((d) => !selectedIds || selectedIds.includes(d.id))
+      .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+    let total = 0;
+    for (const d of sorted) {
+      const monthly = Number(d.monthly_deduction) || 0;
+      const newRemaining = Math.max(0, (Number(d.remaining_balance) || 0) - monthly);
+      const newMonthsLeft = Math.max(0, (Number(d.months_left) || 0) - 1);
+      const newStatus = newRemaining <= 0 ? 'completed' : 'active';
+      await base44.entities.DriverDeduction.update(d.id, {
+        remaining_balance: newRemaining,
+        months_left: newMonthsLeft,
+        status: newStatus,
+      });
+      total += monthly;
+    }
+    return total;
   };
 
   const exportColumns = [
@@ -255,8 +283,12 @@ export default function Salary() {
             editItem={editItem}
             prefillDriver={prefillDriver}
             onSave={async (data) => {
-              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, data);
-              else await base44.entities.SalaryRecord.create(data);
+              const { applied_deductions, ...salaryData } = data;
+              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, salaryData);
+              else await base44.entities.SalaryRecord.create(salaryData);
+              if (applied_deductions && applied_deductions.length > 0) {
+                await applyDeductions(salaryData.driver_name, applied_deductions);
+              }
               load();
               setFormOpen(false);
             }}
