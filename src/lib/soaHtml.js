@@ -28,107 +28,118 @@ function esc(str) {
 }
 
 function fmtDate(dateStr) {
-  if (!dateStr) return '—';
+  if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
-  return `${dd}/${mm}/${d.getFullYear()}`;
+  return `${dd}-${mm}-${d.getFullYear()}`;
 }
 
 export function buildSoaHTML(rows, settings = {}, meta = {}) {
   const s = settings;
   const total = rows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
-  // Split company name into brand (H1) + suffix (H2)
+  // Split company name into brand (H1) + suffix (H2) — same as invoice letterhead
   const fullName = s.company_name || 'Bronze Wings General Transport L.L.C';
   const gIdx = fullName.toLowerCase().indexOf('general');
   const compH1 = gIdx >= 0 ? fullName.slice(0, gIdx).trim() : fullName;
   const compH2 = gIdx >= 0 ? fullName.slice(gIdx).trim() : '';
 
-  const dateStr = meta.date || format(new Date(), 'dd/MM/yyyy');
+  const dateStr = meta.date || format(new Date(), 'dd-MM-yyyy');
   const clientName = meta.clientName || '';
   const dateRange = meta.dateRange || '';
 
+  // Status colour: DRAFT / OVERDUE / CANCELLED → red, RECEIVED → green, others → black
+  const statusColor = (st) => {
+    const u = String(st || '').toUpperCase();
+    if (u === 'DRAFT' || u === 'OVERDUE' || u === 'CANCELLED') return '#FF0000';
+    if (u === 'RECEIVED' || u === 'PAID') return '#1B7A3D';
+    return '#000000';
+  };
+
   const rowsHtml = rows.map((r) => {
+    const stColor = statusColor(r.status);
     return `<tr>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:center;font-size:9pt;color:#1F2937;">${esc(String(r.sno))}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:center;font-size:9pt;color:#1F2937;font-weight:600;">${esc(r.invoice_number)}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:center;font-size:9pt;color:#1F2937;">${esc(r.month)}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:center;font-size:9pt;color:#1F2937;">${esc(r.vehicle_type)}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:center;font-size:9pt;color:#1F2937;">${esc(r.status)}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #E5E7EB;text-align:right;font-size:9pt;color:#1F2937;font-weight:600;">${fmtMoney(r.amount)}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#000;font-weight:600;">${esc(String(r.sno))}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#000;font-weight:600;">${esc(r.invoice_number)}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#000;">${esc(r.month)}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#000;">${esc(r.vehicle_type)}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:${stColor};font-weight:600;">${esc(r.status)}</td>
+      <td style="padding:7px 6px;border:1px solid #000;text-align:right;font-size:9.5pt;color:#000;font-weight:600;">${fmtMoney(r.amount)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="6" style="padding:14px 6px;text-align:center;font-size:9pt;color:#999;">No invoices in this period</td></tr>`;
+  }).join('') || `<tr><td colspan="6" style="padding:12px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#999;">No invoices in this period</td></tr>`;
 
   return `
-<div id="soa-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
+<div id="soa-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
   <div id="soa-header">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+  <!-- Letterhead: logo + brand (left) | contact info (right) -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
     <div style="display:flex;align-items:center;gap:10px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:62px;width:62px;border-radius:50%;object-fit:cover;" />` : ''}
       <div>
-        <div style="font-size:20pt;font-weight:800;color:#333;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
+        <div style="font-size:20pt;font-weight:800;color:#000;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;">${esc(compH1)}</div>
         ${compH2 ? `<div style="font-size:9pt;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase;margin-top:2px;">${esc(compH2)}</div>` : ''}
       </div>
     </div>
-    <div style="text-align:right;font-size:9pt;color:#333;line-height:1.6;">
+    <div style="text-align:right;font-size:9pt;color:#000;line-height:1.6;">
       ${esc(s.phone1 || '')}${s.phone2 ? `<br>${esc(s.phone2)}` : ''}<br>
       ${s.email ? `${esc(s.email)}<br>` : ''}${esc(s.address || '')}
     </div>
   </div>
-  ${s.tagline ? `<div style="font-size:8.5pt;color:#8C745E;font-style:italic;text-align:center;margin-bottom:8px;letter-spacing:0.5px;">${esc(s.tagline)}</div>` : ''}
-  <div style="border-bottom:1.5px solid #8C745E;margin-bottom:14px;"></div>
-  </div>
-
-  <div style="text-align:center;margin-bottom:14px;">
-    <div style="font-size:18pt;font-weight:700;color:#333;letter-spacing:3px;text-transform:uppercase;line-height:1.1;">Statement of Account</div>
-    <div style="font-size:10pt;color:#8C745E;font-weight:600;margin-top:4px;">${esc(dateRange ? `Period: ${dateRange}` : '')}</div>
-  </div>
-
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-    <div style="text-align:left;">
-      <div style="font-size:8pt;text-transform:uppercase;color:#777;font-weight:700;letter-spacing:1.5px;margin-bottom:5px;">Account Statement For</div>
-      <div style="font-size:10pt;font-weight:700;color:#333;">${esc(clientName || 'All Clients')}</div>
-      ${s.trn ? `<div style="font-size:9pt;color:#555;margin-top:2px;">TRN: ${esc(s.trn)}</div>` : ''}
+  <div style="border-bottom:1.5px solid #8C745E;margin-bottom:10px;"></div>
+  <!-- Address line + ATTN -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+    <div style="text-align:left;font-size:10pt;color:#000;line-height:1.5;">
+      <div style="font-weight:700;">${esc(s.address || 'M-6, Mussafah, Abu Dhabi, UAE')}</div>
+      <div style="text-decoration:underline;font-weight:600;margin-top:4px;">ATTN: ACCOUNTS DEPARTMENT</div>
+      ${clientName ? `<div style="margin-top:4px;">Client: <span style="font-weight:700;">${esc(clientName)}</span></div>` : ''}
     </div>
-    <div style="text-align:right;">
-      <div style="font-size:9pt;color:#333;">Statement Date: ${esc(dateStr)}</div>
-      <div style="font-size:8pt;color:#777;margin-top:4px;">ATTN: ACCOUNTS DEPARTMENT</div>
+    <div style="text-align:right;font-size:10pt;color:#000;line-height:1.5;">
+      <div>Date: <span style="font-weight:700;">${esc(dateStr)}</span></div>
+      ${dateRange ? `<div style="margin-top:4px;font-size:9pt;color:#555;">Period: ${esc(dateRange)}</div>` : ''}
+      ${s.trn ? `<div style="margin-top:4px;font-size:9pt;color:#555;">TRN: ${esc(s.trn)}</div>` : ''}
     </div>
   </div>
+  </div><!-- /soa-header -->
 
-  <table id="soa-table" style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:9pt;">
+  <!-- Centered subject heading -->
+  <div style="text-align:center;margin:10px 0 16px;">
+    <div style="font-size:13pt;font-weight:700;color:#000;text-decoration:underline;letter-spacing:1px;">Sub: Account Statement</div>
+  </div>
+
+  <!-- Data table — black borders, clean grid -->
+  <table id="soa-table" style="width:100%;border-collapse:collapse;margin-bottom:10px;font-size:9.5pt;">
     <thead>
       <tr>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:center;width:8%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">S.NO</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:center;width:20%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Invoice #</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:center;width:15%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Month</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:center;width:22%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Vehicle Type</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:center;width:20%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
-        <th style="background:#9A8471;color:#fff;padding:9px 6px;text-align:right;width:15%;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount (AED)</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:center;width:8%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">S.NO</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:center;width:20%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">Invoice #</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:center;width:14%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">Month</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:center;width:22%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">Vehicle type</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:center;width:18%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">Status</th>
+        <th style="border:1px solid #000;background:#F3F3F3;padding:8px 6px;text-align:right;width:18%;font-weight:700;font-size:9pt;color:#000;text-transform:uppercase;">Amount</th>
       </tr>
     </thead>
     <tbody>
       ${rowsHtml}
     </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="5" style="padding:10px 6px;text-align:right;font-size:10pt;font-weight:700;color:#333;border-top:2px solid #1F2937;">Total</td>
-        <td style="padding:10px 6px;text-align:right;font-size:11pt;font-weight:800;color:#1F2937;border-top:2px solid #1F2937;">${fmtMoney(total)}</td>
-      </tr>
-    </tfoot>
   </table>
 
-  <div style="margin-top:auto;padding-top:30px;">
-    <div style="font-size:8.5pt;color:#8C745E;font-style:italic;margin-bottom:18px;">If you have any questions concerning this statement, please contact our accounts department.</div>
+  <!-- Total row — right aligned, red -->
+  <div style="text-align:right;margin-top:6px;margin-bottom:30px;">
+    <span style="font-size:11pt;font-weight:700;color:#FF0000;">Total: ${fmtMoney(total)}</span>
+  </div>
+
+  <!-- Footer signatures -->
+  <div style="margin-top:auto;padding-top:40px;">
+    <div style="font-size:8.5pt;color:#555;font-style:italic;margin-bottom:24px;">If you have any questions concerning this statement, please contact our accounts department.</div>
     <div style="display:flex;justify-content:space-between;margin-top:20px;">
       <div style="text-align:center;">
-        <div style="border-top:1px solid #333;width:200px;padding-top:6px;font-size:8.5pt;color:#555;">Received By</div>
+        <div style="border-top:1px solid #000;width:200px;padding-top:6px;font-size:9pt;color:#000;font-weight:600;">Received By</div>
       </div>
       <div style="text-align:center;">
-        <div style="border-top:1px solid #333;width:200px;padding-top:6px;font-size:8.5pt;color:#555;">For ${esc(compH1)}</div>
+        <div style="border-top:1px solid #000;width:200px;padding-top:6px;font-size:9pt;color:#000;font-weight:600;">For ${esc(compH1)}</div>
       </div>
     </div>
   </div>
@@ -136,9 +147,24 @@ export function buildSoaHTML(rows, settings = {}, meta = {}) {
 </div>`;
 }
 
+async function fetchLogoDataUrl(url) {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function exportSoaPDF(rows, filename, meta = {}) {
   const settings = meta.settings || (await import('./companySettings').then(m => m.getCompanySettings()));
-  const html = buildSoaHTML(rows, settings, meta);
+  let logoDataUrl = null;
+  if (settings.logo_url) {
+    try { logoDataUrl = await fetchLogoDataUrl(settings.logo_url); } catch (e) {}
+  }
+  const html = buildSoaHTML(rows, { ...settings, logo_url: logoDataUrl || settings.logo_url }, meta);
 
   const container = document.createElement('div');
   container.style.position = 'fixed';
@@ -150,9 +176,17 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
   try {
     const fullEl = container.querySelector('#soa-container');
     const headerEl = container.querySelector('#soa-header');
+    const thead = container.querySelector('#soa-table thead');
 
     const canvas = await html2canvas(fullEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
     const headerCanvas = await html2canvas(headerEl, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+    let tableHeadCanvas = null;
+    let tableHeadHeightPx = 0;
+    if (thead) {
+      tableHeadCanvas = await html2canvas(thead, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const sf = canvas.width / fullEl.getBoundingClientRect().width;
+      tableHeadHeightPx = Math.round(thead.getBoundingClientRect().height * sf);
+    }
 
     const pxPerMm = canvas.width / 210;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -165,19 +199,23 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
 
     const pageBreaks = [];
     let cursor = 0;
+    let pageIdx = 0;
     while (cursor < canvas.height) {
-      let breakAt = cursor + effectiveUsable;
+      const isCont = pageIdx > 0;
+      const overhead = isCont ? (headerHeightPx + tableHeadHeightPx + 4 * pxPerMm) : 0;
+      let breakAt = cursor + (effectiveUsable - overhead);
       if (breakAt >= canvas.height) { pageBreaks.push(canvas.height); break; }
       if (breakAt <= cursor) breakAt = cursor + effectiveUsable;
       pageBreaks.push(breakAt);
       cursor = breakAt;
+      pageIdx++;
     }
 
     const totalPages = pageBreaks.length;
     for (let p = 0; p < totalPages; p++) {
       const y0 = p === 0 ? 0 : pageBreaks[p - 1];
       const isCont = p > 0;
-      const headerOffset = isCont ? headerHeightPx + 4 * pxPerMm : 0;
+      const headerOffset = isCont ? (headerHeightPx + tableHeadHeightPx + 4 * pxPerMm) : 0;
       const contentHpx = pageBreaks[p] - y0;
       if (contentHpx <= 0) break;
 
@@ -189,6 +227,9 @@ export async function exportSoaPDF(rows, filename, meta = {}) {
       ctx.fillRect(0, 0, slice.width, slice.height);
       if (isCont) {
         ctx.drawImage(headerCanvas, 0, 0, headerCanvas.width, headerCanvas.height, 0, 0, canvas.width, headerHeightPx);
+        if (tableHeadCanvas) {
+          ctx.drawImage(tableHeadCanvas, 0, 0, tableHeadCanvas.width, tableHeadCanvas.height, 0, headerHeightPx + 4 * pxPerMm, canvas.width, tableHeadHeightPx);
+        }
       }
       ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, headerOffset, canvas.width, contentHpx);
 
