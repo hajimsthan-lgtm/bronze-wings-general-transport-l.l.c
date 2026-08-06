@@ -8,7 +8,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
-import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X } from 'lucide-react';
+import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
@@ -487,6 +487,9 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         </button>
                         <button onClick={() => shareEmail(inv)} title="Share via Email" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#3b82f6' }}>
                           <Mail className="w-3.5 h-3.5" /> Email
+                        </button>
+                        <button onClick={() => downloadOne(inv)} disabled={busy} title="Download PDF" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors disabled:opacity-50">
+                          <Download className="w-3.5 h-3.5" /> Download
                         </button>
                         <button onClick={() => onEditInvoice?.(inv)} title="Edit invoice" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
                           <Pencil className="w-3.5 h-3.5" /> Edit
