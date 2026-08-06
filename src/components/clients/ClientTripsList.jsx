@@ -79,12 +79,12 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
             <button onClick={() => runBulk(onBulkComplete)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors">
               <CheckCheck className="w-3.5 h-3.5" /> Mark Completed
             </button>
-            <button onClick={() => runBulk((s) => onBulkInvoice(s, true))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-colors hidden">
-              <Send className="w-3.5 h-3.5" /> Invoice Sent
-            </button>
-            <button onClick={() => runBulk((s) => onBulkInvoice(s, false))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-slate-500/15 text-slate-300 border border-slate-500/30 hover:bg-slate-500/25 transition-colors hidden">
-              <Undo2 className="w-3.5 h-3.5" /> Invoice Not Sent
-            </button>
+            
+
+          
+            
+
+          
             <button onClick={clear} className="ml-auto text-muted-foreground hover:text-foreground p-1.5 transition-colors">
               <X className="w-4 h-4" />
             </button>
