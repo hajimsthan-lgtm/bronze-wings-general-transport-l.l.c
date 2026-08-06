@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Moon, Cloud, Sparkles, Activity, Wallet, FileWarning, TrendingUp, Truck, CalendarDays, ArrowUpRight } from 'lucide-react';
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
+import { whatsappUrl } from '@/lib/whatsapp';
 import { formatCurrency } from '@/lib/formatters';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { formatDate } from '@/lib/formatters';
@@ -116,13 +118,16 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
           <span className="text-[11px] text-white/70 font-mono tabular-nums">{formatDate(dateTo)}</span>
         </div>
 
-        {/* Row 3 — clickable stat cards with cursor spotlight */}
+        {/* Row 3 — clickable stat cards with cursor spotlight + WhatsApp share */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
           {stats.map((s, i) => (
-            <button
+            <div
               key={s.label}
               onClick={() => navigate(s.path)}
               onMouseMove={handleCardMove}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') navigate(s.path); }}
               className="group relative rounded-2xl px-4 py-4 overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up cursor-pointer"
               style={{
                 animationDelay: `${0.1 + i * 0.06}s`,
@@ -142,8 +147,21 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
               </div>
               <p className="relative text-[11px] font-semibold text-white/55 truncate mb-1 uppercase tracking-wide">{s.label}</p>
               <p className="relative text-lg sm:text-xl font-bold text-white tabular-nums tracking-tight truncate leading-none">{s.value}</p>
-              <p className="relative text-[10px] text-white/35 mt-1.5 truncate">({s.sub})</p>
-            </button>
+              <div className="relative flex items-center justify-between mt-1.5">
+                <p className="text-[10px] text-white/35 truncate">({s.sub})</p>
+                <a
+                  href={whatsappUrl('', `${s.label}: ${s.value} (${s.sub}) — Bronze Wings Fleet Dashboard`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0 transition-all duration-300 hover:scale-110"
+                  style={{ background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.25)', color: '#25d366' }}
+                  aria-label={`Share ${s.label} via WhatsApp`}
+                >
+                  <WhatsAppIcon size={12} />
+                </a>
+              </div>
+            </div>
           ))}
         </div>
       </div>
