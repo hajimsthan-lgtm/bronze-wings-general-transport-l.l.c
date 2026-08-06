@@ -36,6 +36,21 @@
     "invoice_prefix": {
       "type": "string",
       "default": "BW"
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "bank_account_title": {
+      "type": "string"
+    },
+    "bank_account_no": {
+      "type": "string"
+    },
+    "bank_iban": {
+      "type": "string"
+    },
+    "bank_branch": {
+      "type": "string"
     }
   },
   "required": [

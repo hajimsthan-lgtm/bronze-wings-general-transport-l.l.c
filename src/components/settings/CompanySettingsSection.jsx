@@ -129,6 +129,32 @@ export default function CompanySettingsSection() {
         </div>
       </div>
 
+      <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <Label className="text-xs text-white/50 mb-2 block font-semibold uppercase tracking-wider">Bank Details (for invoices)</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="sm:col-span-2">
+            <Label className="text-xs text-white/40 mb-1.5">Bank Name</Label>
+            <Input value={settings.bank_name || ''} onChange={(e) => update('bank_name', e.target.value)} placeholder="Abu Dhabi Commercial Bank (ADCB)" className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+          <div className="sm:col-span-2">
+            <Label className="text-xs text-white/40 mb-1.5">Account Title</Label>
+            <Input value={settings.bank_account_title || ''} onChange={(e) => update('bank_account_title', e.target.value)} className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/40 mb-1.5">Account No</Label>
+            <Input value={settings.bank_account_no || ''} onChange={(e) => update('bank_account_no', e.target.value)} className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/40 mb-1.5">IBAN</Label>
+            <Input value={settings.bank_iban || ''} onChange={(e) => update('bank_iban', e.target.value)} className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+          <div className="sm:col-span-2">
+            <Label className="text-xs text-white/40 mb-1.5">Branch</Label>
+            <Input value={settings.bank_branch || ''} onChange={(e) => update('bank_branch', e.target.value)} placeholder="Main Branch" className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+        </div>
+      </div>
+
       <Button onClick={handleSave} disabled={saving} className="w-full mt-4 bg-primary hover:bg-primary/90 active:scale-[0.98]">
         {saved ? <><Check className="w-4 h-4 mr-1.5" /> Saved</> : saving ? 'Saving...' : 'Save Settings'}
       </Button>
