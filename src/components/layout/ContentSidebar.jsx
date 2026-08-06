@@ -116,8 +116,8 @@ export default function ContentSidebar() {
             aria-label={label}
             className="group relative inline-flex items-center justify-center rounded-full transition-all duration-500 select-none"
             style={{
-              height: expanded ? 30 : 48,
-              width: expanded ? 30 : 48,
+              height: 38,
+              width: 38,
               padding: 0,
               background: 'transparent',
               border: 'none',
@@ -132,13 +132,13 @@ export default function ContentSidebar() {
             <span
               className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none transition-all duration-300"
               style={{
-                width: expanded ? 30 : 38, height: expanded ? 30 : 38,
-                background: active
-                  ? `linear-gradient(135deg, rgba(${item.glow},0.35), rgba(${item.glow},0.15))`
+                width: 38, height: 38,
+                background: lit
+                  ? `linear-gradient(135deg, rgba(${item.glow},0.40), rgba(${item.glow},0.18))`
                   : `rgba(255,255,255,0.04)`,
-                border: `1px solid rgba(${item.glow},${active ? 0.5 : 0.18})`,
-                boxShadow: active
-                  ? `inset 0 1px 0 rgba(255,255,255,0.16), 0 0 12px rgba(${item.glow},0.4), 0 4px 14px rgba(${item.glow},0.22)`
+                border: `1px solid rgba(${item.glow},${lit ? 0.55 : 0.18})`,
+                boxShadow: lit
+                  ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 0 16px rgba(${item.glow},0.45), 0 4px 16px rgba(${item.glow},0.28)`
                   : `inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.3)`,
               }}
             >
@@ -173,25 +173,32 @@ export default function ContentSidebar() {
 
           {/* text bubble — separate pill, expanded only */}
           {expanded && (
-            <span
-              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none rounded-full"
+            <button
+              onClick={() => {
+                poke();
+                if (hasChildren) navigate(item.children[0].path);
+                else switchTab(item.key);
+              }}
+              onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
+              aria-label={label}
+              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap rounded-full transition-all duration-300 cursor-pointer"
               style={{
                 padding: '0 12px',
                 height: 28,
                 display: 'inline-flex',
                 alignItems: 'center',
-                color: active ? '#fff' : 'rgba(255,255,255,0.72)',
-                background: active
-                  ? `linear-gradient(135deg, rgba(${item.glow},0.22), rgba(${item.glow},0.08))`
+                color: lit ? '#fff' : 'rgba(255,255,255,0.72)',
+                background: lit
+                  ? `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.12))`
                   : 'rgba(255,255,255,0.04)',
-                border: `1px solid rgba(${item.glow},${active ? 0.42 : 0.14})`,
-                boxShadow: active
-                  ? `inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 14px rgba(${item.glow},0.20)`
+                border: `1px solid rgba(${item.glow},${lit ? 0.50 : 0.14})`,
+                boxShadow: lit
+                  ? `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 16px rgba(${item.glow},0.28)`
                   : 'inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
               {label}
-            </span>
+            </button>
           )}
         </div>
 
