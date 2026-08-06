@@ -22,7 +22,7 @@ import { useReportClient } from '@/lib/reportClientFilter';
 import { safeAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 
-const addDays = (iso, n) => { const d = new Date(iso); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+const addDays = (iso, n) => { const d = new Date(iso); if (isNaN(d)) return iso; d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
 
 export default function ProfitLoss() {
   const { t } = useI18n();
@@ -89,7 +89,7 @@ export default function ProfitLoss() {
     const rC = trips.filter(t => !t.trip_date || (t.trip_date >= start && t.trip_date <= end)).reduce((s, t) => s + (t.fuel_cost || 0) + (t.toll_cost || 0) + (t.other_cost || 0), 0);
     return rT - (rE + rF + rC);
   };
-  const cmp = (shift) => { const prev = computeNet(addDays(dateFrom, -shift), addDays(dateTo, -shift)); if (!prev) return null; return ((netProfit - prev) / Math.abs(prev)) * 100; };
+  const cmp = (shift) => { if (!dateFrom || !dateTo) return null; const prev = computeNet(addDays(dateFrom, -shift), addDays(dateTo, -shift)); if (!prev) return null; return ((netProfit - prev) / Math.abs(prev)) * 100; };
   const cmpWeek = cmp(7), cmpMonth = cmp(30), cmpYear = cmp(365);
   const margin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
   const trendData = days.map((d, i) => ({ label: formatDateShort(d), income: incomeSeries[i], expenses: expenseSeries[i] }));
