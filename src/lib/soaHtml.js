@@ -71,7 +71,7 @@ export function buildSoaHTML(rows, settings = {}, meta = {}) {
   }).join('') || `<tr><td colspan="6" style="padding:12px 6px;border:1px solid #000;text-align:center;font-size:9.5pt;color:#999;">No invoices in this period</td></tr>`;
 
   return `
-<div id="soa-container" style="width:794px;min-height:1080px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
+<div id="soa-container" style="width:794px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
   <div id="soa-header">
   <!-- Letterhead: logo + brand (left) | contact info (right) -->
