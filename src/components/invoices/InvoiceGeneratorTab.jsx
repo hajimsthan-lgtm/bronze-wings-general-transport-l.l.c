@@ -10,9 +10,9 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { computeNextSeq, formatInvoiceNumber, restructureInvoiceYear, parseInvoiceNumber } from '@/lib/invoiceSequence';
 import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
-const pad = (n) => String(n).padStart(4, '0');
 const SCROLL_H = 'max-h-[440px] overflow-y-auto thin-scroll pr-1';
 
 const dueFromTerms = (terms) => {
@@ -109,14 +109,9 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     [payments]
   );
 
-  const nextStart = useMemo(() => {
-    let max = 0;
-    allInvoices.forEach((inv) => {
-      const n = parseInt(String(inv.invoice_number || '').replace(/\D/g, ''), 10);
-      if (!isNaN(n) && n > max) max = n;
-    });
-    return max + 1;
-  }, [allInvoices]);
+  const currentYear = new Date().getFullYear();
+  const nextSeq = useMemo(() => computeNextSeq(allInvoices, currentYear), [allInvoices, currentYear]);
+  const nextNumber = formatInvoiceNumber(currentYear, nextSeq);
 
   // Use displayInvoices (date-filtered) for the list; fall back to all invoices
   const listInvoices = displayInvoices || invoices || [];
@@ -189,9 +184,9 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     try {
       const selected = billableTrips.filter((tr) => selectedTrips.has(tr.id));
       if (genMode === 'bulk') {
-        await base44.entities.Invoice.create(buildBulkInvoice(selected, pad(nextStart)));
+        await base44.entities.Invoice.create(buildBulkInvoice(selected, nextNumber));
       } else {
-        const toCreate = selected.map((tr, i) => buildInvoice(tr, pad(nextStart + i)));
+        const toCreate = selected.map((tr, i) => buildInvoice(tr, formatInvoiceNumber(currentYear, nextSeq + i)));
         const BATCH = 10;
         for (let i = 0; i < toCreate.length; i += BATCH) {
           const chunk = toCreate.slice(i, i + BATCH);
@@ -255,7 +250,12 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     } else {
       if (!confirm('Delete this invoice?')) return;
       setBusy(true);
-      try { await base44.entities.Invoice.delete(inv.id); onInvoicesChanged(); }
+      try {
+        await base44.entities.Invoice.delete(inv.id);
+        const yr = parseInvoiceNumber(inv.invoice_number)?.year;
+        if (yr) await restructureInvoiceYear(yr);
+        onInvoicesChanged();
+      }
       finally { setBusy(false); setProgress(''); }
     }
   };
@@ -276,11 +276,14 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     // No paid invoices — just delete all
     setBusy(true);
     try {
+      const toDelete = nonPaidIds.map(id => allInvoicesSorted.find(i => i.id === id)).filter(Boolean);
+      const years = new Set(toDelete.map(inv => parseInvoiceNumber(inv.invoice_number)?.year).filter(Boolean));
       const BATCH = 25;
       for (let i = 0; i < nonPaidIds.length; i += BATCH) {
         await Promise.all(nonPaidIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
         setProgress(`${Math.min(i + BATCH, nonPaidIds.length)}/${nonPaidIds.length}`);
       }
+      for (const y of years) await restructureInvoiceYear(y);
       setSelectedInv(new Set());
       onInvoicesChanged();
     } finally { setBusy(false); setProgress(''); }
@@ -296,10 +299,13 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       }
       // Delete the non-paid invoices (if from bulk)
       if (voidPendingDeleteIds.length > 0) {
+        const toDelete = voidPendingDeleteIds.map(id => allInvoicesSorted.find(i => i.id === id)).filter(Boolean);
+        const years = new Set(toDelete.map(inv => parseInvoiceNumber(inv.invoice_number)?.year).filter(Boolean));
         const BATCH = 25;
         for (let i = 0; i < voidPendingDeleteIds.length; i += BATCH) {
           await Promise.all(voidPendingDeleteIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
         }
+        for (const y of years) await restructureInvoiceYear(y);
       }
       setVoidDialogOpen(false);
       setVoidReason('');
@@ -338,7 +344,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
             <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center"><Zap className="w-4 h-4 text-primary" /></div>
             <div>
               <p className="text-sm font-semibold text-foreground">Invoice Generator</p>
-              <p className="text-[11px] text-muted-foreground">{billableTrips.length} billable trip{billableTrips.length === 1 ? '' : 's'} · next # {loadingAll ? '…' : pad(nextStart)}</p>
+              <p className="text-[11px] text-muted-foreground">{billableTrips.length} billable trip{billableTrips.length === 1 ? '' : 's'} · next # {loadingAll ? '…' : nextNumber}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

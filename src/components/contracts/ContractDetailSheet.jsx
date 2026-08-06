@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { base44 } from '@/api/base44Client';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Pencil, Trash2, Building2, User, Truck, Calendar, Repeat, DollarSign, FileText } from 'lucide-react';
+import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
 
 export default function ContractDetailSheet({ contract, expenses = [], onClose, onEdit, onDelete, onInvoiceCreated }) {
   const { t } = useI18n();
@@ -36,7 +37,7 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
       const total = Math.round((subtotal + vatAmount) * 100) / 100;
       const now = new Date();
       const due = new Date(now); due.setDate(due.getDate() + 30);
-      const invNo = `CNT-${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getTime()).slice(-4)}`;
+      const invNo = await generateNextInvoiceNumber();
       await base44.entities.Invoice.create({
         invoice_number: invNo,
         client_name: contract.company_name,

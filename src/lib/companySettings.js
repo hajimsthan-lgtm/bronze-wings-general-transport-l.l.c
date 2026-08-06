@@ -30,18 +30,4 @@ export async function saveCompanySettings(data) {
   return base44.entities.CompanySettings.create({ ...DEFAULTS, ...data });
 }
 
-export async function generateInvoiceNumber() {
-  const [settings, existing] = await Promise.all([
-    getCompanySettings(),
-    base44.entities.Invoice.list('-created_date', 500).catch(() => []),
-  ]);
-  const year = new Date().getFullYear();
-  const prefix = settings.invoice_prefix || 'BW';
-  const pattern = new RegExp(`^${prefix}-${year}-(\\d+)$`);
-  let maxSeq = 0;
-  existing.forEach(inv => {
-    const match = (inv.invoice_number || '').match(pattern);
-    if (match) maxSeq = Math.max(maxSeq, parseInt(match[1]));
-  });
-  return `${prefix}-${year}-${String(maxSeq + 1).padStart(4, '0')}`;
-}
+export { generateNextInvoiceNumber as generateInvoiceNumber } from '@/lib/invoiceSequence';

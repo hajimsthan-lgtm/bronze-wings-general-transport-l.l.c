@@ -258,7 +258,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Invoice #</Label>
-                  <Input value={form.invoice_number} onChange={e => update('invoice_number', e.target.value)} className={`${inputCls} font-mono text-xs`} />
+                  <Input value={form.invoice_number} readOnly className={`${inputCls} font-mono text-xs opacity-60 cursor-not-allowed`} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>

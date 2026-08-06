@@ -19,6 +19,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import SatinCard from '@/components/common/SatinCard';
 import PageInfo from '@/components/common/PageInfo';
 
@@ -139,12 +140,12 @@ export default function Invoices() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete invoice {deleteTarget?.invoice_number}. The linked trip will revert to "Not Sent" status.
+              This will permanently delete invoice {deleteTarget?.invoice_number}. The linked trip will revert to "Not Sent" status. Subsequent invoice numbers will be automatically renumbered to maintain a strict sequence.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={async () => {if (deleteTarget) {await deleteInvoice.mutateAsync(deleteTarget.id);setDeleteTarget(null);}}} className="bg-red-500 hover:bg-red-600 text-white">
+            <AlertDialogAction onClick={async () => {if (deleteTarget) {const invNum = deleteTarget.invoice_number;await deleteInvoice.mutateAsync(deleteTarget.id);await restructureInvoiceSequence(invNum);refetch();setDeleteTarget(null);}}} className="bg-red-500 hover:bg-red-600 text-white">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

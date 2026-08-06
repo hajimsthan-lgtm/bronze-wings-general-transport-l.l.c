@@ -1,19 +1,8 @@
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 
-export async function nextInvoiceNumber() {
-  const allInvs = await base44.entities.Invoice.list('-created_date', 500).catch(() => []);
-  const year = new Date().getFullYear();
-  const yearPrefix = `BW-${year}-`;
-  let maxSeq = 0;
-  (allInvs || []).forEach((inv) => {
-    if (inv.invoice_number?.startsWith(yearPrefix)) {
-      const seq = parseInt(inv.invoice_number.slice(yearPrefix.length), 10);
-      if (seq > maxSeq) maxSeq = seq;
-    }
-  });
-  return `${yearPrefix}${String(maxSeq + 1).padStart(4, '0')}`;
-}
+import { generateNextInvoiceNumber as nextInvoiceNumber } from '@/lib/invoiceSequence';
+export { nextInvoiceNumber };
 
 export async function getTripInvoice(tripId) {
   const existing = await base44.entities.Invoice.filter({ trip_id: tripId }).catch(() => []);
