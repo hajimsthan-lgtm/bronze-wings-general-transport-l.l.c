@@ -86,12 +86,12 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const invoiceDate = fmtDate(invoice.issue_date);
   const workingDate = fmtDate(invoice.working_date || invoice.issue_date);
 
-  const MAROON = '#8B1538';
-  const DARK_MAROON = '#6B0F2A';
+  const MAROON = '#800020';
+  const DARK_MAROON = '#600018';
   const LB = '#B8D4E3';
   const LBH = '#D6E4F0';
   const DK = '#333333';
-  const DBLUE = '#1a3a5c';
+  const DBLUE = '#214264';
   const nf2 = "font-family:Consolas,'Courier New',monospace;";
 
   // Build bank details lines — only show fields that have real data
@@ -119,11 +119,11 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
         <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.05;">BRONZE WINGS</div>
         <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
       </div>
-      <div style="text-align:right;font-size:9pt;color:#555;line-height:1.7;">
+      <div style="text-align:right;font-size:9pt;color:#000;line-height:1.7;">
         <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
         ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
         <div><strong>Address:</strong> ${esc(s.address || '')}</div>
-        <div style="font-weight:bold;color:${MAROON};">TRN: ${esc(s.trn || '')}</div>
+        <div style="color:${MAROON};"><strong>TRN:</strong> ${esc(s.trn || '')}</div>
       </div>
     </div>
   </div>
@@ -237,8 +237,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:relative;z-index:1;background:${MAROON};color:#fff;text-align:center;padding:10px 14px;font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:14px;">
     Thanks for Doing Business with Us!
   </div>
-  <div style="position:relative;z-index:1;background:${DARK_MAROON};color:#fff;text-align:center;padding:6px 14px;font-size:8pt;text-transform:uppercase;letter-spacing:3px;">
-    General Transport &middot; Heavy Equipment Rental &middot; Logistics &middot; Cold Chain Solutions
+  <div style="position:relative;z-index:1;background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 14px;font-size:8.5pt;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
+    We Provide All Kinds of General and Refrigerated Transportation Services
   </div>
 
 </div>`;
@@ -281,7 +281,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#000;font-weight:700;${nf}">${fmtMoney(grossAmount)}</td>
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#000;font-weight:700;${nf}">${fmtMoney(taxableAmount)}</td>
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#000;font-weight:700;${nf}">${fmtMoney(lineVat)}</td>
-      <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#8B1538;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
+      <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#800020;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
     </tr>`;
   }).join('');
 
@@ -290,11 +290,11 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   const invoiceDate = fmtDate(invoice.issue_date);
   const monthYear = getMonthYear(invoice.issue_date);
 
-  const MAROON = '#8B1538';
-  const DARK_MAROON = '#6B0F2A';
+  const MAROON = '#800020';
+  const DARK_MAROON = '#600018';
   const LB = '#B8D4E3';
   const LBH = '#D6E4F0';
-  const DBLUE = '#1a3a5c';
+  const DBLUE = '#214264';
   const nf2 = "font-family:Consolas,'Courier New',monospace;";
 
   const bankLines = [];
@@ -313,7 +313,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;position:relative;overflow:hidden;">
 
   <!-- Watermark -->
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,21,56,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;display:flex;align-items:center;padding:18px 28px 12px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
@@ -321,14 +321,15 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
     <div style="flex:1;">
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:${MAROON};letter-spacing:4px;line-height:1.2;text-transform:uppercase;">${esc(s.company_name || 'BRONZEWINGS GENERAL TRANSPORT L.L.C')}</div>
-      <div style="font-size:8.5px;font-weight:600;color:#666;letter-spacing:3px;text-transform:uppercase;margin-top:4px;">${esc(s.tagline || 'General Transport · Heavy Equipment Rental · Logistics Services')}</div>
-      <div style="font-size:9px;color:#555;margin-top:8px;letter-spacing:0.3px;">
-        <strong style="color:#333;">Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''} &nbsp;|&nbsp;
-        ${s.email ? `<strong style="color:#333;">Email:</strong> ${esc(s.email)} &nbsp;|&nbsp;` : ''}
-        <strong style="color:#333;">Address:</strong> ${esc(s.address || '')}
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
+      <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">GENERAL TRANSPORT L.L.C</div>
+      <div style="font-size:7.5px;font-weight:600;color:#666;letter-spacing:2.5px;text-transform:uppercase;margin-top:4px;">${esc(s.tagline || 'General Transport · Heavy Equipment Rental · Logistics Services')}</div>
+      <div style="font-size:9px;color:#000;margin-top:8px;letter-spacing:0.3px;">
+        <strong style="color:#000;">Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''} &nbsp;|&nbsp;
+        ${s.email ? `<strong style="color:#000;">Email:</strong> ${esc(s.email)} &nbsp;|&nbsp;` : ''}
+        <strong style="color:#000;">Address:</strong> ${esc(s.address || '')}
       </div>
-      <div style="font-size:11px;font-weight:700;color:${MAROON};margin-top:6px;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
+      <div style="font-size:11px;color:${MAROON};margin-top:6px;letter-spacing:1px;"><strong>TRN:</strong> ${esc(s.trn || '')}</div>
     </div>
   </div>
 
@@ -429,14 +430,11 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   <!-- Footer Banners -->
   <div style="position:relative;z-index:1;margin-top:auto;">
-    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:8px 20px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.6;">
-      We Provide All Kinds of General and Refrigerated Transportation Services
-    </div>
     <div style="background:${MAROON};color:#fff;text-align:center;padding:10px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       Thanks for Doing Business with Us!
     </div>
-    <div style="background:${DARK_MAROON};color:#fff;text-align:center;padding:7px;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:3px;">
-      General Transport &middot; Heavy Equipment Rental &middot; Logistics &middot; Cold Chain Solutions
+    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:8px 20px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.6;">
+      We Provide All Kinds of General and Refrigerated Transportation Services
     </div>
   </div>
 
@@ -487,7 +485,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <td style="padding:7px 5px;border:1px solid #bbb;text-align:right;font-size:9px;color:#000;font-weight:700;${nf}">${fmtMoney(grossAmount)}</td>
       <td style="padding:7px 5px;border:1px solid #bbb;text-align:right;font-size:9px;color:#000;font-weight:700;${nf}">${fmtMoney(taxableAmount)}</td>
       <td style="padding:7px 5px;border:1px solid #bbb;text-align:right;font-size:9px;color:#000;font-weight:700;${nf}">${fmtMoney(lineVat)}</td>
-      <td style="padding:7px 5px;border:1px solid #bbb;text-align:right;font-size:9px;color:#8B1538;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
+      <td style="padding:7px 5px;border:1px solid #bbb;text-align:right;font-size:9px;color:#800020;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
     </tr>`;
   }).join('');
 
@@ -495,11 +493,11 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   const billName = clientName || invoice.client_name || '—';
   const invoiceDate = fmtDate(invoice.issue_date);
 
-  const MAROON = '#8B1538';
-  const DARK_MAROON = '#6B0F2A';
+  const MAROON = '#800020';
+  const DARK_MAROON = '#600018';
   const LB = '#B8D4E3';
   const LBH = '#D6E4F0';
-  const DBLUE = '#1a3a5c';
+  const DBLUE = '#214264';
   const nf2 = "font-family:Consolas,'Courier New',monospace;";
 
   const bankLines = [];
@@ -518,7 +516,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
 <div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;position:relative;overflow:hidden;">
 
   <!-- Watermark -->
-  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,21,56,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;display:flex;align-items:center;padding:14px 28px 10px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
@@ -527,14 +525,14 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
     <div style="flex:1;">
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
+      <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
       <div style="font-size:7.5px;font-weight:600;color:#666;letter-spacing:2.5px;text-transform:uppercase;margin-top:4px;">${esc(s.tagline || 'General Transport · Heavy Equipment Rental · Logistics Services')}</div>
-      <div style="font-size:8px;color:#555;margin-top:5px;letter-spacing:0.3px;">
-        <strong style="color:#333;">Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''} &nbsp;|&nbsp;
-        ${s.email ? `<strong style="color:#333;">Email:</strong> ${esc(s.email)} &nbsp;|&nbsp;` : ''}
-        <strong style="color:#333;">Address:</strong> ${esc(s.address || '')}
+      <div style="font-size:8px;color:#000;margin-top:5px;letter-spacing:0.3px;">
+        <strong style="color:#000;">Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''} &nbsp;|&nbsp;
+        ${s.email ? `<strong style="color:#000;">Email:</strong> ${esc(s.email)} &nbsp;|&nbsp;` : ''}
+        <strong style="color:#000;">Address:</strong> ${esc(s.address || '')}
       </div>
-      <div style="font-size:10px;font-weight:700;color:${MAROON};margin-top:4px;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
+      <div style="font-size:10px;color:${MAROON};margin-top:4px;letter-spacing:1px;"><strong>TRN:</strong> ${esc(s.trn || '')}</div>
     </div>
   </div>
 
@@ -640,14 +638,11 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   <!-- Footer Banners -->
   <div style="position:relative;z-index:1;">
-    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 20px;font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
-      We Provide All Kinds of General and Refrigerated Transportation Services
-    </div>
     <div style="background:${MAROON};color:#fff;text-align:center;padding:9px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       Thanks for Doing Business with Us!
     </div>
-    <div style="background:${DARK_MAROON};color:#fff;text-align:center;padding:6px;font-size:7.5px;font-weight:600;text-transform:uppercase;letter-spacing:3px;">
-      General Transport &middot; Heavy Equipment Rental &middot; Logistics &middot; Cold Chain Solutions
+    <div style="background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 20px;font-size:8.5px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
+      We Provide All Kinds of General and Refrigerated Transportation Services
     </div>
   </div>
 
