@@ -77,9 +77,10 @@ function DriversTab() {
           <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Select onValueChange={(id) => { if (id) navigate(`/admin/drivers/${id}`); }}>
-            <SelectTrigger className="h-10 w-44 bg-muted/40 border-border"><SelectValue placeholder="Select Employee" /></SelectTrigger>
+          <Select value="all" onValueChange={(id) => { if (id === 'all') navigate('/admin/drivers'); else if (id) navigate(`/admin/drivers/${id}`); }}>
+            <SelectTrigger className="w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs"><SelectValue placeholder="Select Employee…" /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All drivers</SelectItem>
               {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
             </SelectContent>
           </Select>
