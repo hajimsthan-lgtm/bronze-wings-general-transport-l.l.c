@@ -229,19 +229,6 @@ export default function ClientDetail({ id: propId, inline = false }) {
           <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} />
         </div>
         <div className="space-y-4">
-          {/* Trips */}
-          <CollapsibleSection title={t('trips')} icon={Truck} accent="#3b82f6" count={displayTrips.length}>
-            {dataLoading ? <LoadingSpinner /> : (
-              <ClientTripsList
-                trips={displayTrips}
-                getTripInvoice={getTripInvoice}
-                onToggleInvoiceSent={toggleTripInvoiceSent}
-                onBulkComplete={bulkComplete}
-                onBulkInvoice={bulkInvoice}
-              />
-            )}
-          </CollapsibleSection>
-
           {/* Invoices */}
           <CollapsibleSection title="Invoices" icon={FileText} accent="#a855f7" count={invoices.length} actions={
             <Button onClick={() => { setEditInvoice(null); setInvoiceFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 h-8">
@@ -353,6 +340,19 @@ export default function ClientDetail({ id: propId, inline = false }) {
                   </div>
                 )}
               </>
+            )}
+          </CollapsibleSection>
+
+          {/* Trips */}
+          <CollapsibleSection title={t('trips')} icon={Truck} accent="#3b82f6" count={displayTrips.length}>
+            {dataLoading ? <LoadingSpinner /> : (
+              <ClientTripsList
+                trips={displayTrips}
+                getTripInvoice={getTripInvoice}
+                onToggleInvoiceSent={toggleTripInvoiceSent}
+                onBulkComplete={bulkComplete}
+                onBulkInvoice={bulkInvoice}
+              />
             )}
           </CollapsibleSection>
 
