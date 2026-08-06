@@ -7,9 +7,10 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { useReportClient } from '@/lib/reportClientFilter';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { buildSoaRows } from '@/lib/soaExport';
+import SoaExportButtons from '@/components/reports/SoaExportButtons';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { FileText } from 'lucide-react';
-import ExportButtons from '@/components/common/ExportButtons';
 import SectionExportButtons from '@/components/reports/SectionExportButtons';
 import AllTransactionsExport from '@/components/reports/AllTransactionsExport';
 import ReportStatCard from '@/components/reports/ReportStatCard';
@@ -30,6 +31,7 @@ export default function Soa() {
   const [trips, setTrips] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const reportClient = useReportClient();
   const { dateFrom, dateTo } = useGlobalDate();
 
@@ -40,8 +42,9 @@ export default function Soa() {
       () => base44.entities.Trip.list('-trip_date', 500),
       () => base44.entities.Expense.list('-date', 500),
       () => base44.entities.FuelRecord.list('-date', 500),
-    ]).then(([inv, cl, tr, ex, fu]) => {
-      setInvoices(inv || []); setClients(cl || []); setTrips(tr || []); setExpenses(ex || []); setFuelRecords(fu || []);
+      () => base44.entities.Vehicle.list(),
+    ]).then(([inv, cl, tr, ex, fu, ve]) => {
+      setInvoices(inv || []); setClients(cl || []); setTrips(tr || []); setExpenses(ex || []); setFuelRecords(fu || []); setVehicles(ve || []);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -49,6 +52,7 @@ export default function Soa() {
   const _t = dateTo || new Date().toISOString().split('T')[0];
   const dateFiltered = invoices.filter(i => !i.issue_date || (i.issue_date >= _f && i.issue_date <= _t));
   const filtered = reportClient === 'all' ? dateFiltered : dateFiltered.filter(i => i.client_name === reportClient);
+  const soaRows = buildSoaRows(filtered, trips, vehicles);
   const totalAmount = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
   const paidAmount = filtered.filter(i => i.status === 'paid').reduce((s, i) => s + (i.total_amount || 0), 0);
   const balance = totalAmount - paidAmount;
@@ -102,25 +106,13 @@ export default function Soa() {
         action={
           <div className="flex items-center gap-2">
             <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
-            <ExportButtons
-              data={filtered.map(inv => ({ invoice_number: inv.invoice_number, client_name: inv.client_name, issue_date: inv.issue_date, status: inv.status, total_amount: inv.total_amount }))}
-              filename="soa"
-              columns={[
-                { label: 'Invoice #', key: 'invoice_number' },
-                { label: 'Client', key: 'client_name' },
-                { label: 'Issue Date', key: 'issue_date' },
-                { label: 'Status', key: 'status' },
-                { label: 'Total (AED)', key: 'total_amount', numeric: true },
-              ]}
-              title="Statement of Account"
-              options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
-            />
-
+            <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} />
           </div>
         } />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
+        <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
