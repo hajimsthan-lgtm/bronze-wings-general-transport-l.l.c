@@ -143,8 +143,9 @@ export default function ContentSidebar() {
             }}
           >
             <item.icon
+              strokeWidth={1.5}
               style={{
-                width: expanded ? 18 : 22, height: expanded ? 18 : 22,
+                width: expanded ? 14 : 16, height: expanded ? 14 : 16,
                 color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
                 filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none',
               }}
@@ -268,13 +269,13 @@ export default function ContentSidebar() {
         <span
           className="absolute pointer-events-none top-8 bottom-8 w-px"
           style={{
-            left: expanded ? 27 : 31,
+            left: expanded ? 37 : 27,
             background: 'linear-gradient(180deg, transparent 0%, rgba(170,184,200,0.22) 8%, rgba(170,184,200,0.22) 92%, transparent 100%)',
           }}
         />
 
         {/* Scrollable dock list */}
-        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-7" onMouseLeave={() => setHoveredKey(null)}>
+        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-5" onMouseLeave={() => setHoveredKey(null)}>
           {navItems.map(renderItem)}
         </div>
       </aside>
