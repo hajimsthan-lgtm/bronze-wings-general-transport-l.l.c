@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
 import { exportSoaCSV, exportSoaPDF } from '@/lib/soaExport';
 
-export default function SoaExportButtons({ rows, filename, date }) {
+export default function SoaExportButtons({ rows, filename, date, clientName, dateRange }) {
   const [busy, setBusy] = useState(false);
   return (
     <div className="flex gap-2">
@@ -14,7 +14,7 @@ export default function SoaExportButtons({ rows, filename, date }) {
         variant="outline"
         size="sm"
         disabled={busy}
-        onClick={async () => { setBusy(true); try { await exportSoaPDF(rows, filename, { date }); } finally { setBusy(false); } }}
+        onClick={async () => { setBusy(true); try { await exportSoaPDF(rows, filename, { date, clientName, dateRange }); } finally { setBusy(false); } }}
         className="h-9"
       >
         <PdfIcon className="w-3.5 h-3.5 mr-1" /> PDF

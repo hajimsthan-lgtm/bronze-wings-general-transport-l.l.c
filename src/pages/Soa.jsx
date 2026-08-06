@@ -112,7 +112,7 @@ export default function Soa() {
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
-        <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} />
+        <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} clientName={reportClient === 'all' ? '' : reportClient} dateRange={dateRange} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
