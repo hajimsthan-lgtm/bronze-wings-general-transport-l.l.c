@@ -105,80 +105,95 @@ export default function ContentSidebar() {
         className={`relative transition-opacity duration-300 flex flex-col ${expanded ? 'items-start' : 'items-center'}`}
         style={{ opacity: dimmed ? 0.12 : 1 }}
       >
-        <button
-          onClick={() => {
-            poke();
-            if (hasChildren) navigate(item.children[0].path);
-            else switchTab(item.key);
-          }}
-          onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
-          aria-label={label}
-          className="group relative inline-flex items-center rounded-full transition-all duration-500 select-none"
-          style={{
-            height: expanded ? 40 : 48,
-            width: expanded ? 'auto' : 48,
-            padding: expanded ? '0 14px' : '0',
-            gap: expanded ? 10 : 0,
-            background: `linear-gradient(135deg, rgba(${item.glow},${active ? 0.22 : 0.10}) 0%, rgba(${item.glow},${active ? 0.06 : 0.03}) 100%)`,
-            border: `1px solid rgba(${item.glow},${active ? 0.48 : 0.20})`,
-            boxShadow: active
-              ? `inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 22px rgba(${item.glow},0.10), 0 6px 20px rgba(${item.glow},0.32), 0 0 0 1px rgba(${item.glow},0.22)`
-              : `inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 10px rgba(0,0,0,0.32)`,
-            backdropFilter: 'blur(14px) saturate(1.35)',
-            WebkitBackdropFilter: 'blur(14px) saturate(1.35)',
-            cursor: 'pointer',
-            touchAction: 'manipulation',
-          }}
-        >
-          {/* icon node sitting on the spine */}
-          <span
-            className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none"
+        <div className={`flex items-center ${expanded ? 'gap-2' : ''}`}>
+          <button
+            onClick={() => {
+              poke();
+              if (hasChildren) navigate(item.children[0].path);
+              else switchTab(item.key);
+            }}
+            onMouseEnter={() => { poke(); setHoveredKey(item.key); }}
+            aria-label={label}
+            className="group relative inline-flex items-center justify-center rounded-full transition-all duration-500 select-none"
             style={{
-              width: expanded ? 30 : 38, height: expanded ? 30 : 38,
-              background: active
-                ? `linear-gradient(135deg, rgba(${item.glow},0.35), rgba(${item.glow},0.15))`
-                : 'rgba(255,255,255,0.04)',
-              border: `1px solid rgba(${item.glow},${active ? 0.5 : 0.18})`,
-              boxShadow: active ? `inset 0 1px 0 rgba(255,255,255,0.16), 0 0 12px rgba(${item.glow},0.4)` : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+              height: expanded ? 30 : 48,
+              width: expanded ? 30 : 48,
+              padding: 0,
+              background: 'transparent',
+              border: 'none',
+              boxShadow: 'none',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
+              cursor: 'pointer',
+              touchAction: 'manipulation',
             }}
           >
-            <item.icon
-              strokeWidth={1.5}
+            {/* icon bubble — sits on the spine */}
+            <span
+              className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none transition-all duration-300"
               style={{
-                width: expanded ? 14 : 16, height: expanded ? 14 : 16,
-                color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
-                filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none',
+                width: expanded ? 30 : 38, height: expanded ? 30 : 38,
+                background: active
+                  ? `linear-gradient(135deg, rgba(${item.glow},0.35), rgba(${item.glow},0.15))`
+                  : `rgba(255,255,255,0.04)`,
+                border: `1px solid rgba(${item.glow},${active ? 0.5 : 0.18})`,
+                boxShadow: active
+                  ? `inset 0 1px 0 rgba(255,255,255,0.16), 0 0 12px rgba(${item.glow},0.4), 0 4px 14px rgba(${item.glow},0.22)`
+                  : `inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.3)`,
               }}
-            />
-          </span>
+            >
+              <item.icon
+                strokeWidth={1.5}
+                style={{
+                  width: expanded ? 14 : 16, height: expanded ? 14 : 16,
+                  color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
+                  filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none',
+                }}
+              />
+            </span>
 
+            {/* floating label bubble — collapsed only */}
+            {!expanded && (
+              <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 z-50">
+                <span
+                  className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(10,14,26,0.94), rgba(20,26,44,0.86))',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                    border: `1px solid rgba(${item.glow},0.30)`,
+                    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${item.glow},0.5)`,
+                    color: '#fff',
+                  }}
+                >
+                  {label}
+                </span>
+              </span>
+            )}
+          </button>
+
+          {/* text bubble — separate pill, expanded only */}
           {expanded && (
             <span
-              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none animate-fade-in"
-              style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+              className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap pointer-events-none rounded-full"
+              style={{
+                padding: '0 12px',
+                height: 28,
+                display: 'inline-flex',
+                alignItems: 'center',
+                color: active ? '#fff' : 'rgba(255,255,255,0.72)',
+                background: active
+                  ? `linear-gradient(135deg, rgba(${item.glow},0.22), rgba(${item.glow},0.08))`
+                  : 'rgba(255,255,255,0.04)',
+                border: `1px solid rgba(${item.glow},${active ? 0.42 : 0.14})`,
+                boxShadow: active
+                  ? `inset 0 1px 0 rgba(255,255,255,0.10), 0 4px 14px rgba(${item.glow},0.20)`
+                  : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
             >
               {label}
             </span>
           )}
-
-          {/* floating label bubble — collapsed only */}
-          {!expanded && (
-            <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 z-50">
-              <span
-                className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(10,14,26,0.94), rgba(20,26,44,0.86))',
-                  backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                  border: `1px solid rgba(${item.glow},0.30)`,
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${item.glow},0.5)`,
-                  color: '#fff',
-                }}
-              >
-                {label}
-              </span>
-            </span>
-          )}
-        </button>
+        </div>
 
         {/* ── Child docks — nested text pills on a branch connector ── */}
         {showChildren && (
