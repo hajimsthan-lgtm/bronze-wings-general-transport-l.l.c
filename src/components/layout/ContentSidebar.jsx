@@ -287,12 +287,12 @@ export default function ContentSidebar() {
         }}>
         
         {/* vertical spine connector — runs through all dock nodes */}
-        <span
-          className="absolute pointer-events-none top-8 bottom-8 w-px hidden"
-          style={{
-            left: expanded ? 37 : 27,
-            background: 'linear-gradient(180deg, transparent 0%, rgba(170,184,200,0.22) 8%, rgba(170,184,200,0.22) 92%, transparent 100%)'
-          }} />
+        
+
+
+
+
+        
         
 
         {/* Scrollable dock list */}
