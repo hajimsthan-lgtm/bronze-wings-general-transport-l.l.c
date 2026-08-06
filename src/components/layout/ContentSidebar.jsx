@@ -130,16 +130,15 @@ export default function ContentSidebar() {
           >
             {/* icon bubble — sits on the spine */}
             <span
-              className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none transition-all duration-300"
+              className={`nav-orb ${lit ? 'nav-orb-lit' : ''} relative flex items-center justify-center shrink-0 rounded-full pointer-events-none transition-all duration-300`}
               style={{
+                '--orb-glow': item.glow,
+                '--orb-glow2': item.glow,
                 width: 38, height: 38,
-                background: lit
-                  ? `linear-gradient(135deg, rgba(${item.glow},0.40), rgba(${item.glow},0.18))`
-                  : `rgba(255,255,255,0.04)`,
                 border: `1px solid rgba(${item.glow},${lit ? 0.55 : 0.18})`,
                 boxShadow: lit
-                  ? `inset 0 1px 0 rgba(255,255,255,0.18), 0 0 16px rgba(${item.glow},0.45), 0 4px 16px rgba(${item.glow},0.28)`
-                  : `inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.3)`,
+                  ? `0 0 16px rgba(${item.glow},0.45), 0 4px 16px rgba(${item.glow},0.28)`
+                  : `0 2px 8px rgba(0,0,0,0.3)`,
               }}
             >
               <item.icon

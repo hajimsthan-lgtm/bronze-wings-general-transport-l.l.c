@@ -505,6 +505,36 @@
   }
   @property --nav-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 
+  /* ===== AI Orb icon — animated plasma sphere for nav rail ===== */
+  @keyframes nav-orb-spin { to { --nav-orb-angle: 360deg; } }
+  @property --nav-orb-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  .nav-orb { position: relative; overflow: hidden; }
+  .nav-orb::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: conic-gradient(from var(--nav-orb-angle, 0deg),
+      rgba(var(--orb-glow), 0.75),
+      rgba(var(--orb-glow), 0.08),
+      rgba(var(--orb-glow2), 0.55),
+      rgba(var(--orb-glow), 0.75));
+    animation: nav-orb-spin 3s linear infinite;
+    opacity: 0;
+    transition: opacity .35s ease;
+    z-index: 0;
+  }
+  .nav-orb.nav-orb-lit::before { opacity: 1; }
+  .nav-orb::after {
+    content: '';
+    position: absolute; inset: 1.5px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.20), transparent 55%),
+                linear-gradient(165deg, rgba(var(--surf-1-rgb),0.90), rgba(var(--surf-2-rgb),0.95));
+    z-index: 1;
+    pointer-events: none;
+  }
+  .nav-orb > * { position: relative; z-index: 2; }
+
   /* ========== 2026 Detail Header Card ========== */
   .detail-header-card {
     border-radius: 20px;
