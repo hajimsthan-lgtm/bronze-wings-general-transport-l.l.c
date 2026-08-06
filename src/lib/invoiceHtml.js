@@ -105,22 +105,19 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 
   <!-- Company Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;padding-bottom:8px;border-bottom:2px solid ${MAROON};">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:80px;width:80px;border-radius:50%;object-fit:cover;" />` : `<div style="height:80px;width:80px;border-radius:50%;border:2px solid ${MAROON};display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:18pt;font-weight:bold;color:${MAROON};">BW</div>`}
-        ${s.tagline ? `<div style="font-size:8pt;font-style:italic;color:#666;font-weight:600;max-width:90px;line-height:1.3;letter-spacing:3px;text-transform:uppercase;">${esc(s.tagline)}</div>` : ''}
+    <div style="display:flex;align-items:center;gap:16px;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:72px;width:72px;border-radius:50%;object-fit:cover;flex-shrink:0;" />` : ''}
+      <div style="flex:1;">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.05;">BRONZE WINGS</div>
+        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
       </div>
-      <div style="text-align:right;flex:1;padding-left:16px;">
-        <div style="font-family:Georgia,'Times New Roman',serif;font-size:24pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.1;">${esc(s.company_name || 'BRONZEWINGS GENERAL TRANSPORT L.L.C')}</div>
-        <div style="font-size:8pt;font-weight:600;color:#666;letter-spacing:3px;text-transform:uppercase;margin-top:5px;">General Transport &middot; Heavy Equipment Rental &middot; Logistics Services</div>
+      <div style="text-align:right;font-size:9pt;color:#555;line-height:1.7;">
+        <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
+        ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
+        <div><strong>Address:</strong> ${esc(s.address || '')}</div>
+        <div style="font-weight:bold;color:${MAROON};">TRN: ${esc(s.trn || '')}</div>
       </div>
     </div>
-    <div style="margin-top:8px;font-size:9pt;color:#555;line-height:1.6;">
-      <strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''} &nbsp;|&nbsp;
-      ${s.email ? `<strong>Email:</strong> ${esc(s.email)} &nbsp;|&nbsp;` : ''}
-      <strong>Address:</strong> ${esc(s.address || '')}
-    </div>
-    <div style="margin-top:2px;font-size:10pt;font-weight:bold;color:${MAROON};">TRN: ${esc(s.trn || '')}</div>
   </div>
 
   <!-- Tax Invoice Banner -->
@@ -192,24 +189,36 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <span style="font-size:10pt;color:#000;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">${numberToWords(total).toUpperCase()}</span>
   </div>
 
-  <!-- Footer Block -->
+  <!-- Footer Block: 3 columns — Bank | Receiver | Authorized -->
   <div id="footer-block" style="position:relative;z-index:1;margin-top:14px;">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+
     <!-- Bank Details -->
-    <div style="width:50%;">
+    <div style="flex:1;">
       <div style="font-size:10pt;font-weight:bold;color:${MAROON};text-transform:uppercase;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid ${MAROON};">Bank Details</div>
       ${bankHtml}
     </div>
-    <!-- Authorization -->
-    <div style="width:42%;text-align:center;">
+
+    <!-- Receiver Signature -->
+    <div style="flex:1;text-align:center;">
+      <div style="font-size:10pt;font-weight:bold;color:${MAROON};text-transform:uppercase;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid ${MAROON};">Received By</div>
+      <div style="height:52px;"></div>
+      <div style="border-top:1px solid #999;width:80%;margin:4px auto 4px;padding-top:3px;font-size:9pt;color:#666;">Receiver Signature</div>
+      <div style="font-size:8pt;color:#999;margin-top:2px;">Name &amp; Date</div>
+    </div>
+
+    <!-- Authorization Stamp -->
+    <div style="flex:1;text-align:center;">
+      <div style="font-size:10pt;font-weight:bold;color:${MAROON};text-transform:uppercase;margin-bottom:6px;padding-bottom:3px;border-bottom:2px solid ${MAROON};">Authorized By</div>
       <div style="width:90px;height:90px;border:2px solid ${MAROON};border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;position:relative;">
         <div style="position:absolute;inset:5px;border:1px dashed ${MAROON};border-radius:50%;"></div>
         <div style="text-align:center;font-size:7pt;color:${MAROON};font-weight:bold;line-height:1.4;position:relative;">BRONZEWINGS<br>GENERAL<br>TRANSPORT<br>L.L.C<br>&mdash;&mdash;<br>ABU DHABI<br>- U.A.E</div>
       </div>
-      <div style="font-size:9pt;font-weight:bold;color:${MAROON};margin-top:4px;">FOR ${esc(s.company_name || 'BRONZEWINGS GENERAL TRANSPORT L.L.C')}</div>
-      <div style="border-top:1px solid #999;width:120px;margin:8px auto 4px;padding-top:3px;font-size:9pt;color:#666;">Authorized Signature</div>
+      <div style="font-size:9pt;font-weight:bold;color:${MAROON};margin-top:2px;">FOR ${esc(s.company_name || 'BRONZEWINGS GENERAL TRANSPORT L.L.C')}</div>
+      <div style="border-top:1px solid #999;width:80%;margin:8px auto 4px;padding-top:3px;font-size:9pt;color:#666;">Authorized Signature</div>
       <div style="font-size:9pt;color:${DK};margin-top:1px;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
     </div>
+
   </div>
   </div><!-- /footer-block -->
 
