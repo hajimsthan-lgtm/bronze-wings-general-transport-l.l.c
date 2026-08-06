@@ -12,7 +12,7 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
 
   const toggle = (id) => setSelected((prev) => {
     const n = new Set(prev);
-    if (n.has(id)) n.delete(id); else n.add(id);
+    if (n.has(id)) n.delete(id);else n.add(id);
     return n;
   });
   const toggleAll = () => setSelected(allSelected ? new Set() : new Set(trips.map((t) => t.id)));
@@ -32,25 +32,25 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
       <div className="row-card flex items-center gap-3 !mb-1">
         <Checkbox
           checked={allSelected ? true : someSelected ? 'indeterminate' : false}
-          onCheckedChange={toggleAll}
-        />
+          onCheckedChange={toggleAll} />
+        
         <span className="text-[11px] uppercase tracking-wider font-medium text-muted-foreground">
           {allSelected ? `All ${trips.length} selected` : `Select all (${trips.length})`}
         </span>
-        {selected.size > 0 && (
-          <button onClick={clear} className="ml-auto text-[11px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+        {selected.size > 0 &&
+        <button onClick={clear} className="ml-auto text-[11px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             <X className="w-3 h-3" /> Clear
           </button>
-        )}
+        }
       </div>
 
       <div className="max-h-[440px] overflow-y-auto thin-scroll pr-1 space-y-2">
       {trips.map((trip) => {
-        const inv = getTripInvoice(trip.id);
-        const hasInvoice = !!inv;
-        const checked = selected.has(trip.id);
-        return (
-          <div key={trip.id} className={`row-card flex items-center gap-3 transition-colors ${checked ? 'border-primary/40' : ''}`}>
+          const inv = getTripInvoice(trip.id);
+          const hasInvoice = !!inv;
+          const checked = selected.has(trip.id);
+          return (
+            <div key={trip.id} className={`row-card flex items-center gap-3 transition-colors ${checked ? 'border-primary/40' : ''}`}>
             <Checkbox checked={checked} onCheckedChange={() => toggle(trip.id)} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
@@ -58,19 +58,19 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
             </div>
             <span className="text-sm font-semibold text-foreground">{formatCurrency(trip.revenue)}</span>
             <StatusBadge status={trip.status} />
-            {trip.status === 'completed' && hasInvoice && (
+            {trip.status === 'completed' && hasInvoice &&
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                 Generated
               </span>
-            )}
-          </div>
-        );
-      })}
+              }
+          </div>);
+
+        })}
       </div>
 
       {/* floating bulk action bar */}
-      {selected.size > 0 && (
-        <div className="sticky bottom-3 z-30 mt-3 animate-enter-up">
+      {selected.size > 0 &&
+      <div className="sticky bottom-3 z-30 mt-3 animate-enter-up">
           <div className="glass-card flex items-center gap-2 px-3 py-2.5 flex-wrap" style={{ borderRadius: 16 }}>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[11px] font-semibold">
               <CheckCheck className="w-3 h-3" /> {selected.size} selected
@@ -79,10 +79,10 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
             <button onClick={() => runBulk(onBulkComplete)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors">
               <CheckCheck className="w-3.5 h-3.5" /> Mark Completed
             </button>
-            <button onClick={() => runBulk((s) => onBulkInvoice(s, true))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-colors">
+            <button onClick={() => runBulk((s) => onBulkInvoice(s, true))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition-colors hidden">
               <Send className="w-3.5 h-3.5" /> Invoice Sent
             </button>
-            <button onClick={() => runBulk((s) => onBulkInvoice(s, false))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-slate-500/15 text-slate-300 border border-slate-500/30 hover:bg-slate-500/25 transition-colors">
+            <button onClick={() => runBulk((s) => onBulkInvoice(s, false))} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-slate-500/15 text-slate-300 border border-slate-500/30 hover:bg-slate-500/25 transition-colors hidden">
               <Undo2 className="w-3.5 h-3.5" /> Invoice Not Sent
             </button>
             <button onClick={clear} className="ml-auto text-muted-foreground hover:text-foreground p-1.5 transition-colors">
@@ -90,7 +90,7 @@ export default function ClientTripsList({ trips, getTripInvoice, onToggleInvoice
             </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
