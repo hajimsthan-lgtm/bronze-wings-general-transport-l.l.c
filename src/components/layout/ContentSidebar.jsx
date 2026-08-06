@@ -115,18 +115,17 @@ export default function ContentSidebar() {
           aria-label={label}
           className="group relative inline-flex items-center rounded-full transition-all duration-500 select-none"
           style={{
-            height: 40,
+            height: expanded ? 40 : 48,
+            width: expanded ? 'auto' : 48,
             padding: expanded ? '0 14px' : '0',
             gap: expanded ? 10 : 0,
-            background: active
-              ? 'rgba(255,255,255,0.06)'
-              : 'rgba(255,255,255,0.02)',
-            border: `1px solid ${active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)'}`,
+            background: `linear-gradient(135deg, rgba(${item.glow},${active ? 0.22 : 0.10}) 0%, rgba(${item.glow},${active ? 0.06 : 0.03}) 100%)`,
+            border: `1px solid rgba(${item.glow},${active ? 0.48 : 0.20})`,
             boxShadow: active
-              ? 'inset 0 1px 0 rgba(255,255,255,0.08)'
-              : 'none',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
+              ? `inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 22px rgba(${item.glow},0.10), 0 6px 20px rgba(${item.glow},0.32), 0 0 0 1px rgba(${item.glow},0.22)`
+              : `inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 10px rgba(0,0,0,0.32)`,
+            backdropFilter: 'blur(14px) saturate(1.35)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.35)',
             cursor: 'pointer',
             touchAction: 'manipulation',
           }}
@@ -135,19 +134,19 @@ export default function ContentSidebar() {
           <span
             className="relative flex items-center justify-center shrink-0 rounded-xl pointer-events-none"
             style={{
-              width: 30, height: 30,
+              width: expanded ? 30 : 38, height: expanded ? 30 : 38,
               background: active
-                ? `rgba(${item.glow},0.14)`
-                : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${active ? `rgba(${item.glow},0.30)` : 'rgba(255,255,255,0.06)'}`,
-              boxShadow: 'none',
+                ? `linear-gradient(135deg, rgba(${item.glow},0.35), rgba(${item.glow},0.15))`
+                : 'rgba(255,255,255,0.04)',
+              border: `1px solid rgba(${item.glow},${active ? 0.5 : 0.18})`,
+              boxShadow: active ? `inset 0 1px 0 rgba(255,255,255,0.16), 0 0 12px rgba(${item.glow},0.4)` : 'inset 0 1px 0 rgba(255,255,255,0.05)',
             }}
           >
             <item.icon
               style={{
-                width: 18, height: 18,
-                color: lit ? '#fff' : 'rgba(255,255,255,0.6)',
-                filter: 'none',
+                width: expanded ? 18 : 22, height: expanded ? 18 : 22,
+                color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
+                filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none',
               }}
             />
           </span>
@@ -165,12 +164,12 @@ export default function ContentSidebar() {
           {!expanded && (
             <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 z-50">
               <span
-                className="inline-block whitespace-nowrap px-3 py-1.5 rounded-lg text-[12px] font-medium tracking-wide"
+                className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
                 style={{
-                  background: 'rgba(10,10,15,0.92)',
+                  background: 'linear-gradient(135deg, rgba(10,14,26,0.94), rgba(20,26,44,0.86))',
                   backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255,255,255,0.10)',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                  border: `1px solid rgba(${item.glow},0.30)`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${item.glow},0.5)`,
                   color: '#fff',
                 }}
               >
@@ -186,7 +185,7 @@ export default function ContentSidebar() {
             {/* branch connector from spine to children */}
             <span
               className="absolute left-[19px] top-0 bottom-0 w-px pointer-events-none"
-              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04))' }}
+              style={{ background: `linear-gradient(180deg, rgba(${item.glow},0.45), rgba(${item.glow},0.12))` }}
             />
             {item.children.map((child) => {
               const childActive = isChildActive(child);
@@ -204,10 +203,12 @@ export default function ContentSidebar() {
                     padding: '0 16px',
                     gap: 8,
                     background: (childActive || hoveredChild === child.key)
-                      ? 'rgba(255,255,255,0.06)'
-                      : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${(childActive || hoveredChild === child.key) ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)'}`,
-                    boxShadow: 'none',
+                      ? `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.07))`
+                      : 'rgba(19,28,42,0.82)',
+                    border: `1px solid ${(childActive || hoveredChild === child.key) ? `rgba(${child.glow},0.42)` : 'rgba(255,255,255,0.07)'}`,
+                    boxShadow: (childActive || hoveredChild === child.key)
+                      ? `inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(${child.glow},0.26)`
+                      : 'inset 0 1px 0 rgba(255,255,255,0.03)',
                     backdropFilter: 'blur(8px)',
                     WebkitBackdropFilter: 'blur(8px)',
                     cursor: 'pointer',
@@ -218,8 +219,8 @@ export default function ContentSidebar() {
                   <span
                     className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none"
                     style={{
-                      background: (childActive || hoveredChild === child.key) ? `rgb(${child.glow})` : 'rgba(170,184,200,0.35)',
-                      boxShadow: 'none',
+                      background: (childActive || hoveredChild === child.key) ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
+                      boxShadow: (childActive || hoveredChild === child.key) ? `0 0 6px rgba(${child.glow},0.8)` : 'none',
                     }}
                   />
                   <span
@@ -268,7 +269,7 @@ export default function ContentSidebar() {
           className="absolute pointer-events-none top-8 bottom-8 w-px"
           style={{
             left: expanded ? 27 : 31,
-            background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.08) 8%, rgba(255,255,255,0.08) 92%, transparent 100%)',
+            background: 'linear-gradient(180deg, transparent 0%, rgba(170,184,200,0.22) 8%, rgba(170,184,200,0.22) 92%, transparent 100%)',
           }}
         />
 
