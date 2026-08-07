@@ -274,7 +274,7 @@ TEMPLATE = """<!DOCTYPE html>
         <div class="section-label">Invoice</div>
         <div class="field"><strong>INVOICE:</strong> {{ data.invoice_no }}</div>
         <div class="field"><strong>DATE:</strong> {{ data.invoice_date }}</div>
-        {% if data.invoice_type == 'monthly' %}<div class="field"><strong>MONTH:</strong> {{ data.month_label }}</div>{% else %}<div class="field"><strong>WORKING DATE:</strong> {{ data.working_date }}</div>{% endif %}
+        {% if data.invoice_type == 'monthly' %}<div class="field"><strong>MONTH:</strong> {{ data.month_label }}</div>{% elif data.invoice_type == 'standard' %}<div class="field"><strong>WORKING DATE:</strong> {{ data.working_date }}</div>{% endif %}
       </div>
     </div>
 

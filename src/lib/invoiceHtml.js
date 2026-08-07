@@ -412,19 +412,20 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       ${bankHtml}
     </div>
     <!-- Signature Area -->
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-size:9.5px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:20px;">FOR ${esc(s.company_name || 'BRONZEWINGS GENERAL TRANSPORT L.L.C')}</div>
-      <div style="display:flex;gap:40px;width:100%;justify-content:center;">
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <div style="width:130px;height:1px;background:#999;margin-bottom:6px;"></div>
-          <div style="font-size:9px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Authorized Signature</div>
+    <div style="flex:1.2;display:flex;flex-direction:column;">
+      <div style="display:flex;gap:25px;justify-content:space-between;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+          <div style="font-size:9px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
+          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
+          <div style="font-size:7.5px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <div style="width:130px;height:1px;background:#999;margin-bottom:6px;"></div>
-          <div style="font-size:9px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Receiver Sign</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+          <div style="font-size:9px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>${esc(billName)}</div>
+          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
+          <div style="font-size:7.5px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
         </div>
       </div>
-      <div style="font-size:9px;color:#555;margin-top:16px;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
+      <div style="font-size:9px;color:#555;margin-top:10px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
     </div>
   </div>
 
@@ -565,7 +566,6 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-size:9px;line-height:1.65;color:#000;">
         <div><strong style="color:#444;font-weight:700;">INVOICE:</strong> ${esc(refNumber)}</div>
         <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
-        <div><strong style="color:#444;font-weight:700;">WORKING DATE:</strong> ${workingDate}</div>
       </div>
     </div>
   </div>
