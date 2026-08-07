@@ -41,18 +41,18 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const s = settings;
   const items = invoice.line_items || [];
 
-  const subtotal = Number(invoice.subtotal ?? items.reduce((sum, i) => {
+  const subtotal = items.reduce((sum, i) => {
     const qty = Number(i.quantity) || 0;
     const price = Number(i.unit_price) || 0;
     return sum + (Number(i.amount ?? (qty * price)));
-  }, 0));
+  }, 0);
 
   const totalDiscount = items.reduce((sum, i) => sum + (Number(i.discount) || 0), 0);
   const totalTaxable = subtotal - totalDiscount;
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
-  const vatAmount = Number(invoice.vat_amount ?? (totalTaxable * vatRate / 100));
-  const total = Number(invoice.total_amount ?? (totalTaxable + vatAmount));
+  const vatAmount = totalTaxable * vatRate / 100;
+  const total = totalTaxable + vatAmount;
 
   const rowsHtml = items.map((item, idx) => {
     const qty = Number(item.quantity) || 0;
@@ -249,16 +249,16 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   const s = settings;
   const items = invoice.line_items || [];
 
-  const subtotal = Number(invoice.subtotal ?? items.reduce((sum, i) => {
+  const subtotal = items.reduce((sum, i) => {
     const qty = Number(i.quantity) || 0;
     const price = Number(i.unit_price) || 0;
     return sum + (Number(i.amount ?? (qty * price)));
-  }, 0));
+  }, 0);
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const totalTaxable = subtotal;
-  const vatAmount = Number(invoice.vat_amount ?? (totalTaxable * vatRate / 100));
-  const total = Number(invoice.total_amount ?? (totalTaxable + vatAmount));
+  const vatAmount = totalTaxable * vatRate / 100;
+  const total = totalTaxable + vatAmount;
 
   const rowsHtml = items.map((item, idx) => {
     const qty = Number(item.quantity) || 0;
@@ -446,16 +446,16 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   const s = settings;
   const items = invoice.line_items || [];
 
-  const subtotal = Number(invoice.subtotal ?? items.reduce((sum, i) => {
+  const subtotal = items.reduce((sum, i) => {
     const qty = Number(i.quantity) || 0;
     const price = Number(i.unit_price) || 0;
     return sum + (Number(i.amount ?? (qty * price)));
-  }, 0));
+  }, 0);
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const totalTaxable = subtotal;
-  const vatAmount = Number(invoice.vat_amount ?? (totalTaxable * vatRate / 100));
-  const total = Number(invoice.total_amount ?? (totalTaxable + vatAmount));
+  const vatAmount = totalTaxable * vatRate / 100;
+  const total = totalTaxable + vatAmount;
 
   const tripDates = items.map(i => i.date).filter(Boolean).sort();
   const workingDate = tripDates.length > 0

@@ -496,15 +496,15 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     }
   }
 
-  // Totals
-  const subtotal = Number(invoice.subtotal ?? items.reduce((sum, i) => {
+  // Totals — ALWAYS compute from line items so footer, line rows, and words match
+  const subtotal = items.reduce((sum, i) => {
     const q = Number(i.quantity) || 0;
     const p = Number(i.unit_price) || 0;
     return sum + Number(i.amount ?? (q * p));
-  }, 0));
+  }, 0);
   const taxable = subtotal;
-  const vat = Number(invoice.vat_amount ?? (taxable * vatRate / 100));
-  const total = Number(invoice.total_amount ?? (taxable + vat));
+  const vat = taxable * vatRate / 100;
+  const total = taxable + vat;
 
   if (y + 7 > contentBottom) {
     pdf.addPage();
