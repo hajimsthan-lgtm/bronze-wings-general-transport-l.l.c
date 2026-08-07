@@ -47,7 +47,6 @@ export function getStatusColor(status) {
     valid: 'bg-[#01B574]/15 text-[#01B574] border-[#01B574]/30',
     expiring_soon: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
     expired: 'bg-red-500/15 text-red-400 border-red-500/20',
-    completed: 'bg-[#01B574]/15 text-[#01B574] border-[#01B574]/30',
     in_progress: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
     partial: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
   };

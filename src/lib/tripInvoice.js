@@ -65,7 +65,7 @@ export async function setTripInvoiceSent(trip, sent) {
     subtotal: revenue,
     vat_rate: vatRate,
     vat_amount: vatAmount,
-    total_amount: revenue + vatAmount,
+    total_amount: Math.round((revenue + vatAmount) * 100) / 100,
     status: 'sent',
     trip_id: trip.id,
   });

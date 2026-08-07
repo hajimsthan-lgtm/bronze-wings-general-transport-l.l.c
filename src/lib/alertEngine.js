@@ -8,9 +8,10 @@ export function daysUntil(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return null;
+  d.setHours(0, 0, 0, 0);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+  return Math.round((d - today) / (1000 * 60 * 60 * 24));
 }
 
 export const CATEGORIES = {
