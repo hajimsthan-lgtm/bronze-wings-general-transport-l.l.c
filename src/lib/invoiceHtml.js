@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { numberToWords } from './numberToWords';
+import { renderInvoicePDF } from './invoicePdfNative';
 
 function fmtDate(dateStr) {
   if (!dateStr) return '—';
@@ -827,28 +828,13 @@ async function renderToPDF(html, invoice) {
 }
 
 export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  let logoDataUrl = null;
-  if (settings.logo_url) {
-    try { logoDataUrl = await fetchLogoDataUrl(settings.logo_url); } catch (e) {}
-  }
-  const html = buildInvoiceHTML(invoice, clientName, { ...settings, logo_url: logoDataUrl || settings.logo_url }, seqNo);
-  await renderToPDF(html, invoice);
+  await renderInvoicePDF(invoice, clientName, settings, 'standard', seqNo);
 }
 
 export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  let logoDataUrl = null;
-  if (settings.logo_url) {
-    try { logoDataUrl = await fetchLogoDataUrl(settings.logo_url); } catch (e) {}
-  }
-  const html = buildMonthlyInvoiceHTML(invoice, clientName, { ...settings, logo_url: logoDataUrl || settings.logo_url }, seqNo);
-  await renderToPDF(html, invoice);
+  await renderInvoicePDF(invoice, clientName, settings, 'monthly', seqNo);
 }
 
 export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  let logoDataUrl = null;
-  if (settings.logo_url) {
-    try { logoDataUrl = await fetchLogoDataUrl(settings.logo_url); } catch (e) {}
-  }
-  const html = buildPerTripInvoiceHTML(invoice, clientName, { ...settings, logo_url: logoDataUrl || settings.logo_url }, seqNo);
-  await renderToPDF(html, invoice);
+  await renderInvoicePDF(invoice, clientName, settings, 'trip', seqNo);
 }
