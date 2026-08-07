@@ -106,7 +106,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     : `<div style="font-size:9pt;color:#999;font-style:italic;">Bank details available upon request</div>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:${DK};line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;padding:8px;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:${DK};line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;padding:8px;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
@@ -310,7 +310,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   const logoSvg = `<svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="46" fill="none" stroke="${MAROON}" stroke-width="2"/><circle cx="50" cy="50" r="40" fill="none" stroke="${MAROON}" stroke-width="1" stroke-dasharray="3,2"/><circle cx="50" cy="50" r="28" fill="none" stroke="#C4A35A" stroke-width="2"/><path d="M50 22 Q35 35 25 50 Q35 45 50 40 Q65 45 75 50 Q65 35 50 22Z" fill="#C4A35A" opacity="0.9"/><path d="M50 78 Q35 65 25 50 Q35 55 50 60 Q65 55 75 50 Q65 65 50 78Z" fill="#C4A35A" opacity="0.9"/><text x="50" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="${MAROON}">BW</text><text x="50" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="600" fill="${MAROON}">L.L.C</text></svg>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
@@ -512,7 +512,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   const logoSvg = `<svg viewBox="0 0 100 100" style="width:100%;height:100%;"><circle cx="50" cy="50" r="46" fill="none" stroke="${MAROON}" stroke-width="2"/><circle cx="50" cy="50" r="40" fill="none" stroke="${MAROON}" stroke-width="1" stroke-dasharray="3,2"/><circle cx="50" cy="50" r="28" fill="none" stroke="#C4A35A" stroke-width="2"/><path d="M50 22 Q35 35 25 50 Q35 45 50 40 Q65 45 75 50 Q65 35 50 22Z" fill="#C4A35A" opacity="0.9"/><path d="M50 78 Q35 65 25 50 Q35 55 50 60 Q65 55 75 50 Q65 65 50 78Z" fill="#C4A35A" opacity="0.9"/><text x="50" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="${MAROON}">BW</text><text x="50" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" font-weight="600" fill="${MAROON}">L.L.C</text></svg>`;
 
   return `
-<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;">
+<div id="invoice-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#000;line-height:1.4;background:#ffffff;box-sizing:border-box;border:3px solid #800020;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
 
   <!-- Watermark -->
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(128,0,32,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
@@ -673,7 +673,7 @@ async function renderToPDF(html, invoice) {
     const tableEl = wrapper.querySelector('table');
 
     const canvas = await html2canvas(element, {
-      scale: 1.5,
+      scale: 3,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
@@ -684,7 +684,7 @@ async function renderToPDF(html, invoice) {
     let headerHeightPx = 0;
     if (thead) {
       headerCanvas = await html2canvas(thead, {
-        scale: 1.5,
+        scale: 3,
         backgroundColor: '#ffffff',
         logging: false,
       });
@@ -696,7 +696,7 @@ async function renderToPDF(html, invoice) {
     let invoiceHeaderHeightPx = 0;
     if (invoiceHeaderEl) {
       invoiceHeaderCanvas = await html2canvas(invoiceHeaderEl, {
-        scale: 1.5,
+        scale: 3,
         backgroundColor: '#ffffff',
         logging: false,
       });
@@ -807,10 +807,10 @@ async function renderToPDF(html, invoice) {
       ctx.drawImage(canvas, 0, y0, canvas.width, contentHpx, 0, totalHeaderOffset, canvas.width, contentHpx);
 
       const totalHpx = contentHpx + totalHeaderOffset;
-      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+      const sliceData = sliceCanvas.toDataURL('image/png');
       const sliceHmm = totalHpx / pxPerMm;
       if (p > 0) pdf.addPage();
-      pdf.addImage(sliceData, 'JPEG', margin, margin, imgW, sliceHmm);
+      pdf.addImage(sliceData, 'PNG', margin, margin, imgW, sliceHmm);
 
       // Page number footer (only for multi-page invoices)
       if (totalPages > 1) {
