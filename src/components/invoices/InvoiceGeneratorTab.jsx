@@ -469,7 +469,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                 const FIcon = fi.Icon;
                 const isVoided = inv.voided;
                 return (
-                  <div key={inv.id} className={`row-card min-h-[64px] overflow-hidden cursor-pointer hover:bg-white/5 ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
+                  <div key={inv.id} onClick={() => toggleInv(inv.id)} className={`row-card min-h-[64px] overflow-hidden cursor-pointer hover:bg-white/5 ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
                     <div className="flex items-center gap-3 h-full">
                       {/* Left: Checkbox + Status Badge */}
                       <div className="flex items-center gap-2 shrink-0">
@@ -480,7 +480,7 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         </span>
                       </div>
                       {/* Middle: Invoice Info */}
-                      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(inv.id)}>
+                      <div className="flex-1 min-w-0">
                         <p className={cn('text-sm font-medium text-foreground truncate', isVoided && 'line-through')}>{inv.invoice_number || '—'}</p>
                         <p className="text-xs text-muted-foreground truncate">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{isVoided && inv.void_reason ? ` · ${inv.void_reason}` : ''}</p>
                       </div>
@@ -500,21 +500,8 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         <button onClick={(e) => { e.stopPropagation(); onEditInvoice?.(inv); }} title="Edit Invoice" className="p-2 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-2 rounded-lg transition-colors">
-                          <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
-                        </button>
                       </div>
                     </div>
-                    {/* expanded details — smooth opacity transition */}
-                    {expanded && (
-                      <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap animate-fade-in">
-                        {!isVoided && (
-                          <button onClick={(e) => { e.stopPropagation(); deleteOne(inv); }} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 );
               })}
