@@ -84,89 +84,132 @@ def _split_brand(name: str):
 CSS = """
 @page { size: A4 portrait; margin: 12mm; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 9pt; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-/* Outer border (critical) */
+body {
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
 .invoice-wrapper { width: 100%; border: 1.5px solid #8B1538; padding: 6px; background: #fff; }
 .invoice-inner { border: 1px solid #ddd; min-height: calc(297mm - 30mm); display: flex; flex-direction: column; }
 
 /* Header */
-.header-band { display: flex; align-items: center; padding: 12px 20px 10px 20px; border-bottom: 2px solid #8B1538; }
-.logo { width: 60px; height: 60px; margin-right: 14px; }
-.brand-h1 { font-family: Georgia, serif; font-size: 20pt; font-weight: 700; color: #8B1538; letter-spacing: 3px; text-transform: uppercase; }
-.brand-h2 { font-family: Georgia, serif; font-size: 12pt; font-weight: 600; color: #1a3a5c; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-.tagline { font-size: 7.5pt; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-.contact-row { font-size: 8pt; color: #555; margin-top: 6px; }
-.trn-line { font-size: 9pt; font-weight: 700; color: #8B1538; margin-top: 4px; letter-spacing: 1px; }
+.header-band { display: flex; align-items: center; padding: 14px 24px 12px 24px; border-bottom: 2px solid #8B1538; }
+.logo { width: 70px; height: 70px; margin-right: 16px; }
+.brand-h1 { font-family: Georgia, serif; font-size: 24pt; font-weight: 700; color: #8B1538; letter-spacing: 3px; text-transform: uppercase; }
+.brand-h2 { font-family: Georgia, serif; font-size: 14pt; font-weight: 600; color: #1a3a5c; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.tagline { font-size: 8pt; font-weight: 600; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.contact-row { font-size: 8.5pt; color: #555; margin-top: 6px; }
+.trn-line { font-size: 10pt; font-weight: 700; color: #8B1538; margin-top: 4px; letter-spacing: 1px; }
 
-/* Tax Invoice banner (centered, light blue gradient) */
-.tax-banner { background: linear-gradient(90deg, #B8D4E3 0%, #D6E4F0 50%, #B8D4E3 100%); padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; position: relative; }
-.tax-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 13pt; font-weight: 800; color: #1a3a5c; text-transform: uppercase; letter-spacing: 2px; }
-.invoice-meta { margin-left: auto; text-align: right; font-size: 9pt; color: #1a3a5c; font-weight: 700; }
+/* Tax Banner */
+.tax-banner { background: linear-gradient(90deg, #B8D4E3, #D6E4F0, #B8D4E3); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+.tax-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 15pt; font-weight: 800; color: #1a3a5c; text-transform: uppercase; letter-spacing: 2px; }
+.invoice-meta { margin-left: auto; text-align: right; font-size: 10pt; color: #1a3a5c; font-weight: 700; }
 .invoice-meta span { font-weight: 400; }
 
-/* Billing section (two columns) */
+/* Billing */
 .billing-section { display: flex; padding: 0; border-bottom: 1px solid #ccc; }
-.bill-to, .invoice-details { flex: 1; padding: 10px 20px; }
+.bill-to, .invoice-details { flex: 1; padding: 12px 24px; }
 .bill-to { border-right: 1px solid #e0e0e0; }
-.section-label { font-size: 8.5pt; font-weight: 800; color: #8B1538; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #8B1538; display: inline-block; }
-.field { font-size: 8.5pt; line-height: 1.6; color: #000; }
+.section-label { font-size: 9.5pt; font-weight: 800; color: #8B1538; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; padding-bottom: 2px; border-bottom: 1px solid #8B1538; display: inline-block; }
+.field { font-size: 9.5pt; line-height: 1.6; color: #000; }
 .field strong { color: #444; font-weight: 700; }
 
-/* Table (fixed layout, light blue header) */
-.items-table { width: calc(100% - 40px); border-collapse: collapse; table-layout: fixed; font-size: 8pt; margin: 8px 20px; }
-.items-table thead th { background: #D6E4F0; color: #1a3a5c; font-weight: 800; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 4px; border: 1px solid #999; text-align: center; }
-.items-table thead th:nth-child(1) { width: 35px; }
-.items-table thead th.desc { text-align: left; padding-left: 8px; }
-.items-table thead th.qty { width: 50px; }
-.items-table thead th.price { width: 75px; text-align: right; }
-.items-table thead th.total { width: 75px; text-align: right; }
-.items-table thead th.tax { width: 75px; text-align: right; }
-.items-table thead th.vat { width: 65px; text-align: right; }
-.items-table thead th.grand { width: 75px; text-align: right; }
-.items-table thead th.trip-date { width: 70px; }
+/* Table — Century Gothic */
+.items-table {
+    width: calc(100% - 48px);
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+    font-size: 9.5pt;
+    margin: 10px 24px;
+}
+.items-table thead th {
+    background: #D6E4F0;
+    color: #1a3a5c;
+    font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 6px;
+    border: 1px solid #999;
+    text-align: center;
+}
+.items-table thead th:nth-child(1) { width: 40px; }
+.items-table thead th.desc { text-align: left; padding-left: 10px; }
+.items-table thead th.qty { width: 55px; }
+.items-table thead th.price { width: 85px; text-align: right; }
+.items-table thead th.total { width: 85px; text-align: right; }
+.items-table thead th.tax { width: 85px; text-align: right; }
+.items-table thead th.vat { width: 70px; text-align: right; }
+.items-table thead th.grand { width: 85px; text-align: right; }
+.items-table thead th.trip-date { width: 80px; }
 
-.items-table tbody td { padding: 6px 4px; border: 1px solid #bbb; color: #000; font-weight: 600; vertical-align: top; font-size: 8pt; }
-.items-table tbody td:first-child { text-align: center; font-family: 'Courier New', monospace; }
-.items-table tbody td.desc { text-align: left; padding-left: 8px; line-height: 1.4; word-wrap: break-word; }
-.items-table tbody td.qty { text-align: center; font-family: 'Courier New', monospace; }
-.items-table tbody td.trip-date { text-align: center; font-family: 'Courier New', monospace; font-size: 7.5pt; }
-.items-table tbody td.num { text-align: right; font-family: 'Courier New', monospace; font-weight: 700; }
+.items-table tbody td {
+    padding: 8px 6px;
+    border: 1px solid #bbb;
+    color: #000;
+    font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+    font-size: 9.5pt;
+    font-weight: 600;
+    vertical-align: top;
+}
+.items-table tbody td:first-child { text-align: center; font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif; }
+.items-table tbody td.desc { text-align: left; padding-left: 10px; line-height: 1.5; word-wrap: break-word; }
+.items-table tbody td.qty { text-align: center; font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif; }
+.items-table tbody td.trip-date { text-align: center; font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif; font-size: 9pt; }
+.items-table tbody td.num { text-align: right; font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif; font-weight: 700; }
 .items-table tbody tr:nth-child(even) { background: #fafbfc; }
 .items-table tbody tr { page-break-inside: avoid; }
 
-.total-row td { background: #D6E4F0 !important; font-weight: 800; border-top: 2px solid #1a3a5c; font-size: 8pt; }
-.total-row td:first-child { text-align: right; padding-right: 8px; font-family: 'Segoe UI', Arial, sans-serif; }
-.total-row td.grand { color: #8B1538; font-size: 8.5pt; }
+.total-row td {
+    background: #D6E4F0 !important;
+    font-family: 'Century Gothic', 'Segoe UI', Arial, sans-serif;
+    font-weight: 800;
+    border-top: 2px solid #1a3a5c;
+    font-size: 9.5pt;
+}
+.total-row td:first-child { text-align: right; padding-right: 10px; font-family: 'Segoe UI', Arial, sans-serif; }
+.total-row td.grand { color: #8B1538; font-size: 10pt; }
 
-/* Amount in words */
-.amount-words { margin: 6px 20px; padding: 6px 12px; background: #F8F8F8; border-top: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; page-break-inside: avoid; }
-.amount-words .prefix { font-size: 9pt; font-weight: 800; color: #8B1538; margin-right: 6px; }
-.amount-words .words { font-size: 8.5pt; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 0.6px; }
+/* Amount Words */
+.amount-words { margin: 8px 24px; padding: 8px 14px; background: #F8F8F8; border-top: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0; page-break-inside: avoid; }
+.amount-words .prefix { font-size: 10.5pt; font-weight: 800; color: #8B1538; margin-right: 8px; }
+.amount-words .words { font-size: 10pt; font-weight: 700; color: #000; text-transform: uppercase; letter-spacing: 0.6px; }
 
-/* Spacer (pushes footer to bottom) */
+/* Spacer */
 .spacer { flex: 1; min-height: 10px; }
 
-/* Bottom section */
-.bottom-section { display: flex; padding: 10px 20px 12px 20px; align-items: flex-start; page-break-inside: avoid; }
+/* Bottom Section */
+.bottom-section { display: flex; padding: 12px 24px 14px 24px; align-items: flex-start; page-break-inside: avoid; }
 .bank-details { flex: 1; padding-right: 20px; }
 .bank-details .section-label { margin-bottom: 6px; }
-.bank-field { font-size: 8pt; line-height: 1.6; color: #000; }
-.bank-field strong { color: #444; font-weight: 700; display: inline-block; min-width: 85px; }
+.bank-field { font-size: 9pt; line-height: 1.7; color: #000; }
+.bank-field strong { color: #444; font-weight: 700; display: inline-block; min-width: 90px; }
 
 .signature-area { flex: 1.3; display: flex; flex-direction: column; }
 .sign-row { display: flex; gap: 40px; justify-content: space-between; }
 .sign-company { flex: 1; display: flex; flex-direction: column; align-items: center; }
-.sign-company-name { font-size: 8pt; font-weight: 700; color: #8B1538; text-align: center; margin-bottom: 12px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.5px; min-height: 32px; }
-.sign-line-box { width: 100%; max-width: 140px; height: 35px; border-bottom: 1px solid #666; margin-bottom: 4px; }
-.sign-label { font-size: 7pt; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
-.sign-mobile { font-size: 8pt; color: #555; margin-top: 8px; text-align: center; }
+.sign-company-name { font-size: 9pt; font-weight: 700; color: #8B1538; text-align: center; margin-bottom: 14px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.5px; min-height: 36px; }
+.sign-line-box { width: 100%; max-width: 150px; height: 40px; border-bottom: 1px solid #666; margin-bottom: 4px; }
+.sign-label { font-size: 8pt; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+.sign-mobile { font-size: 8.5pt; color: #555; margin-top: 10px; text-align: center; }
 
-/* Footer banners (anchored to bottom) */
+/* Footer */
 .footer-banners { page-break-inside: avoid; }
-.footer-tagline { background: #8B1538; color: rgba(255,255,255,0.95); text-align: center; padding: 6px 16px; font-size: 7.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; line-height: 1.4; }
-.thanks-banner { background: #8B1538; color: #fff; text-align: center; padding: 8px; font-size: 10pt; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
-.services-banner { background: #6B0F2A; color: #fff; text-align: center; padding: 5px; font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; }
+.footer-tagline { background: #8B1538; color: rgba(255,255,255,0.95); text-align: center; padding: 7px 18px; font-size: 8.5pt; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; line-height: 1.5; }
+.thanks-banner { background: #8B1538; color: #fff; text-align: center; padding: 9px; font-size: 11pt; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+.services-banner { background: #6B0F2A; color: #fff; text-align: center; padding: 6px; font-size: 8pt; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; }
+
+@media print {
+    body { background: #fff; }
+    .invoice-wrapper { box-shadow: none; margin: 0; width: 100%; }
+}
 """
 
 
