@@ -466,8 +466,8 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                 const FIcon = fi.Icon;
                 const isVoided = inv.voided;
                 return (
-                  <div key={inv.id} className={`row-card ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
-                    <div className="flex items-center gap-3">
+                  <div key={inv.id} className={`row-card min-h-[64px] overflow-hidden cursor-pointer hover:bg-white/5 ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
+                    <div className="flex items-center gap-3 h-full">
                       <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
                       <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(inv.id)}>
@@ -480,21 +480,21 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                       </span>
                       <span className={cn('text-sm font-semibold text-foreground whitespace-nowrap tabular-nums', isVoided && 'line-through')}>{formatCurrency(balance || inv.total_amount)}</span>
                       {/* Quick actions — always visible, right-aligned */}
-                      <div className="flex items-center gap-1 ml-auto shrink-0">
-                        <button onClick={(e) => { e.stopPropagation(); shareWhatsApp(inv); }} title="Share via WhatsApp" className="flex items-center justify-center w-8 h-8 rounded-lg text-white transition-transform hover:scale-110 active:scale-95" style={{ background: '#25D366' }}>
-                          <MessageCircle className="w-3.5 h-3.5" />
+                      <div className="flex items-center space-x-1.5 ml-auto shrink-0">
+                        <button onClick={(e) => { e.stopPropagation(); shareWhatsApp(inv); }} title="Send via WhatsApp" className="p-2 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                          <MessageCircle className="w-4 h-4" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); shareEmail(inv); }} title="Share via Email" className="flex items-center justify-center w-8 h-8 rounded-lg text-white transition-transform hover:scale-110 active:scale-95" style={{ background: '#3b82f6' }}>
-                          <Mail className="w-3.5 h-3.5" />
+                        <button onClick={(e) => { e.stopPropagation(); shareEmail(inv); }} title="Send Email" className="p-2 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-colors">
+                          <Mail className="w-4 h-4" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); downloadOne(inv); }} disabled={busy} title="Download PDF" className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100">
-                          <Download className="w-3.5 h-3.5" />
+                        <button onClick={(e) => { e.stopPropagation(); downloadOne(inv); }} disabled={busy} title="Download PDF" className="p-2 rounded-lg text-purple-400 hover:bg-purple-500/10 transition-colors disabled:opacity-50">
+                          <Download className="w-4 h-4" />
                         </button>
-                        <button onClick={(e) => { e.stopPropagation(); onEditInvoice?.(inv); }} title="Edit invoice" className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-transform hover:scale-110 active:scale-95">
-                          <Pencil className="w-3.5 h-3.5" />
+                        <button onClick={(e) => { e.stopPropagation(); onEditInvoice?.(inv); }} title="Edit Invoice" className="p-2 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-colors">
+                          <Pencil className="w-4 h-4" />
                         </button>
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg transition-colors shrink-0">
+                      <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-2 rounded-lg transition-colors shrink-0">
                         <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
                       </button>
                     </div>
