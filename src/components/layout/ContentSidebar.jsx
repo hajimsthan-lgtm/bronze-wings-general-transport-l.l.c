@@ -57,6 +57,9 @@ export default function ContentSidebar() {
   const vanishTimer = useRef(null);
   const collapseTimer = useRef(null);
   const asideRef = useRef(null);
+  const [scrolling, setScrolling] = useState(false);
+  const scrollTimer = useRef(null);
+  const scrollingRef = useRef(false);
 
   /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
   const poke = () => {
@@ -86,6 +89,24 @@ export default function ContentSidebar() {
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  /* scroll-reactive vanish: nav items fade out while the page scrolls,
+     snap back instantly when scrolling stops (company name in TopBar stays) */
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const onScroll = () => {
+      if (!scrollingRef.current) { scrollingRef.current = true; setScrolling(true); }
+      clearTimeout(scrollTimer.current);
+      scrollTimer.current = setTimeout(() => {
+        scrollingRef.current = false;
+        setScrolling(false);
+        poke();
+      }, 150);
+    };
+    main.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => { main.removeEventListener('scroll', onScroll, { capture: true }); clearTimeout(scrollTimer.current); };
   }, []);
 
   const width = expanded ? EXPANDED_W : COLLAPSED_W;
@@ -280,10 +301,10 @@ export default function ContentSidebar() {
           WebkitBackdropFilter: 'none',
           boxShadow: 'none',
           overflow: 'visible',
-          opacity: panelDimming ? 0 : 1,
-          pointerEvents: panelVisible ? 'auto' : 'none',
+          opacity: scrolling ? 0 : (panelDimming ? 0 : 1),
+          pointerEvents: panelVisible && !scrolling ? 'auto' : 'none',
           transition:
-          `width ${expanded ? '.6s' : '.25s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`
+          `width ${expanded ? '.6s' : '.25s'} cubic-bezier(0.16,1,0.3,1), opacity ${scrolling ? '0.15s' : (panelDimming ? '5s' : '0.3s')} ease`
         }}>
         
         {/* vertical spine connector — runs through all dock nodes */}
