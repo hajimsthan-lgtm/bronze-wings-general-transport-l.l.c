@@ -341,31 +341,30 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     <div className="space-y-5">
       {/* ===== Invoice Generator ===== */}
       <div className="glass-card p-4 sm:p-5">
-        <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center"><Zap className="w-4 h-4 text-primary" /></div>
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center"><Zap className="w-3.5 h-3.5 text-primary" /></div>
             <div>
               <p className="text-sm font-semibold text-foreground">Invoice Generator</p>
-              <p className="text-[11px] text-muted-foreground">{billableTrips.length} billable trip{billableTrips.length === 1 ? '' : 's'} · next # {loadingAll ? '…' : nextNumber}</p>
+              <p className="text-[10px] text-muted-foreground">{billableTrips.length} billable · next # {loadingAll ? '…' : nextNumber} · {genMode === 'bulk' ? 'bulk' : 'single'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <div className="inline-flex p-0.5 rounded-lg bg-background/40 border border-white/10">
-              <button type="button" onClick={() => setGenMode('single')} className={cn('px-3 h-8 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5', genMode === 'single' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}><Zap className="w-3 h-3" /> Single</button>
-              <button type="button" onClick={() => setGenMode('bulk')} className={cn('px-3 h-8 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5', genMode === 'bulk' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}><Layers className="w-3 h-3" /> Bulk</button>
+              <button type="button" onClick={() => setGenMode('single')} title="One invoice per trip" className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1', genMode === 'single' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}><Zap className="w-3 h-3" /> Single</button>
+              <button type="button" onClick={() => setGenMode('bulk')} title="Combine all trips into one invoice" className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1', genMode === 'bulk' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}><Layers className="w-3 h-3" /> Bulk</button>
             </div>
             {onNewInvoice && (
-              <Button onClick={onNewInvoice} variant="outline" size="sm" className="h-9 border-border">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Manual
+              <Button onClick={onNewInvoice} variant="outline" size="sm" className="h-7 px-2.5 border-border text-xs">
+                <Plus className="w-3 h-3 mr-1" /> Manual
               </Button>
             )}
-            <Button onClick={generate} disabled={busy || selectedTrips.size === 0} className="bg-primary hover:bg-primary/90 h-9">
-              {genMode === 'bulk' ? <Layers className="w-3.5 h-3.5 mr-1.5" /> : <Zap className="w-3.5 h-3.5 mr-1.5" />}
-              {genMode === 'bulk' ? `Generate Bulk${selectedTrips.size > 1 ? ` (${selectedTrips.size})` : ''}` : `Generate${selectedTrips.size > 1 ? ` (${selectedTrips.size})` : ''}`}
+            <Button onClick={generate} disabled={busy || selectedTrips.size === 0} className="bg-primary hover:bg-primary/90 h-7 px-3 text-xs">
+              {genMode === 'bulk' ? <Layers className="w-3 h-3 mr-1" /> : <Zap className="w-3 h-3 mr-1" />}
+              Generate{selectedTrips.size > 0 ? ` (${selectedTrips.size})` : ''}
             </Button>
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground mb-3">{genMode === 'bulk' ? 'Bulk mode — all selected trips are combined into a single invoice.' : 'Single mode — one invoice per selected trip.'}</p>
         {busy && progress && <p className="text-[11px] text-primary mb-2 font-medium animate-pulse">Processing {progress}…</p>}
 
         {billableTrips.length === 0 ? (
@@ -418,8 +417,12 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
           )}
         </div>
 
-        {/* aging analysis */}
-        {allInvoicesSorted.length > 0 && <InvoiceAgingStrip invoices={allInvoicesSorted} />}
+        {/* aging analysis — pinned static reference card */}
+        {allInvoicesSorted.length > 0 && (
+          <div className="sticky top-0 z-10 rounded-xl border border-white/10 bg-card/80 backdrop-blur-md p-2 mb-3">
+            <InvoiceAgingStrip invoices={allInvoicesSorted} />
+          </div>
+        )}
 
         {/* filter pills — always visible */}
         <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -468,19 +471,23 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                 return (
                   <div key={inv.id} className={`row-card min-h-[64px] overflow-hidden cursor-pointer hover:bg-white/5 ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
                     <div className="flex items-center gap-3 h-full">
-                      <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
-                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
+                      {/* Left: Checkbox + Status Badge */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
+                          <FIcon className={cn('w-2.5 h-2.5', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
+                          <span className="hidden sm:inline">{fi.label}</span>
+                        </span>
+                      </div>
+                      {/* Middle: Invoice Info */}
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(inv.id)}>
                         <p className={cn('text-sm font-medium text-foreground truncate', isVoided && 'line-through')}>{inv.invoice_number || '—'}</p>
                         <p className="text-xs text-muted-foreground truncate">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{isVoided && inv.void_reason ? ` · ${inv.void_reason}` : ''}</p>
                       </div>
-                      <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
-                        <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
-                        {fi.label}
-                      </span>
-                      <span className={cn('text-sm font-semibold text-foreground whitespace-nowrap tabular-nums', isVoided && 'line-through')}>{formatCurrency(balance || inv.total_amount)}</span>
-                      {/* Quick actions — always visible, right-aligned */}
-                      <div className="flex items-center space-x-1.5 ml-auto shrink-0">
+                      {/* Amount */}
+                      <span className={cn('text-sm font-semibold text-foreground whitespace-nowrap tabular-nums shrink-0', isVoided && 'line-through')}>{formatCurrency(balance || inv.total_amount)}</span>
+                      {/* Actions — right-aligned */}
+                      <div className="flex items-center space-x-1.5 shrink-0">
                         <button onClick={(e) => { e.stopPropagation(); shareWhatsApp(inv); }} title="Send via WhatsApp" className="p-2 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors">
                           <MessageCircle className="w-4 h-4" />
                         </button>
@@ -493,18 +500,14 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                         <button onClick={(e) => { e.stopPropagation(); onEditInvoice?.(inv); }} title="Edit Invoice" className="p-2 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-colors">
                           <Pencil className="w-4 h-4" />
                         </button>
+                        <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-2 rounded-lg transition-colors">
+                          <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
+                        </button>
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-2 rounded-lg transition-colors shrink-0">
-                        <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
-                      </button>
                     </div>
                     {/* expanded details — smooth opacity transition */}
                     {expanded && (
                       <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap animate-fade-in">
-                        <span className="md:hidden inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
-                          <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
-                          {fi.label}
-                        </span>
                         {!isVoided && (
                           <button onClick={(e) => { e.stopPropagation(); deleteOne(inv); }} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
                             <Trash2 className="w-3.5 h-3.5" /> Delete
