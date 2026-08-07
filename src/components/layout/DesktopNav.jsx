@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AlertBell from '@/components/layout/AlertBell';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
@@ -17,6 +17,23 @@ export default function DesktopNav() {
   const isDashboard = location.pathname === '/';
   const railVisible = useRailVisible();
   useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
+
+  const [scrolling, setScrolling] = useState(false);
+  const scrollTimer = useRef(null);
+  const scrollingRef = useRef(false);
+  useEffect(() => {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const onScroll = () => {
+      if (!scrollingRef.current) { scrollingRef.current = true; setScrolling(true); }
+      clearTimeout(scrollTimer.current);
+      scrollTimer.current = setTimeout(() => { scrollingRef.current = false; setScrolling(false); }, 150);
+    };
+    main.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => { main.removeEventListener('scroll', onScroll, { capture: true }); clearTimeout(scrollTimer.current); };
+  }, []);
+
+  const vanishStyle = { opacity: scrolling ? 0 : 1, transition: 'opacity 0.15s ease', pointerEvents: scrolling ? 'none' : 'auto' };
 
   return (
     <nav
@@ -61,11 +78,11 @@ export default function DesktopNav() {
             <BrandName variant="desktop" />
           </Link>
           {/* Global date filter — sits right of the brand name, controls all pages */}
-          <GlobalDateFilter />
+          <div style={vanishStyle}><GlobalDateFilter /></div>
         </div>
 
         {/* Center cluster — sub-nav tiles */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={vanishStyle}>
           {/* Page sub-nav tiles — synced with the left rail visibility */}
           <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <HeaderSubNav />
@@ -73,7 +90,7 @@ export default function DesktopNav() {
         </div>
 
         {/* Right controls — dark glass circles, step-forward at the far right corner */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={vanishStyle}>
           <LiveClock />
           <Link
             to="/agents"
