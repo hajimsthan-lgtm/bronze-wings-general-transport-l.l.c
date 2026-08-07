@@ -359,9 +359,10 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       </div>
     </div>
     <div style="flex:1;padding:14px 28px;">
-      <div style="font-size:10px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
+      <div style="font-size:10px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">From</div>
       <div style="font-size:9.5px;line-height:1.7;color:#000;">
-        <div><strong style="color:#444;font-weight:700;">MONTH:</strong> ${monthYear}</div>
+        <div style="margin-bottom:1px;"><strong style="font-size:10pt;color:#000;">BRONZE WINGS</strong></div>
+        <div><strong style="font-size:9pt;color:#000;">GENERAL TRANSPORT L.L.C</strong></div>
       </div>
     </div>
   </div>
@@ -558,8 +559,10 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       </div>
     </div>
     <div style="flex:1;padding:12px 28px;">
-      <div style="font-size:9.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
+      <div style="font-size:9.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">From</div>
       <div style="font-size:9px;line-height:1.65;color:#000;">
+        <div style="margin-bottom:1px;"><strong style="font-size:10pt;color:#000;">BRONZE WINGS</strong></div>
+        <div><strong style="font-size:9pt;color:#000;">GENERAL TRANSPORT L.L.C</strong></div>
       </div>
     </div>
   </div>

@@ -292,23 +292,20 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   if (invoice.sub)            { pdf.text(`SUB: ${str(invoice.sub)}`, leftX, ly); ly += 3.2; }
   if (invoice.reg_no)          { pdf.text(`REG NO: ${str(invoice.reg_no)}`, leftX, ly); ly += 3.2; }
 
-  // ── RIGHT: INVOICE ──
+  // ── RIGHT: FROM ──
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, MAROON);
-  pdf.text('INVOICE', rightX, y + 4);
+  pdf.text('FROM', rightX, y + 4);
   dc(pdf, MAROON);
   pdf.setLineWidth(0.3);
   pdf.line(rightX, y + 5, rightX + 15, y + 5);
 
-  let ry = y + 9;
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, BLACK);
-
-  if (invoiceType === 'monthly') {
-    pdf.text(`MONTH: ${getMonthYear(invoice.issue_date)}`, rightX, ry); ry += 3.2;
-  }
+  pdf.text('BRONZE WINGS', rightX, y + 9);
+  pdf.text('GENERAL TRANSPORT L.L.C', rightX, y + 12.5);
 
   return y + h + 2;
 }

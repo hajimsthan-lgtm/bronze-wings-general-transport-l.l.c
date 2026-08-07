@@ -81,6 +81,10 @@
           "description": {
             "type": "string"
           },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
           "quantity": {
             "type": "number"
           },
@@ -89,6 +93,10 @@
           },
           "amount": {
             "type": "number"
+          },
+          "discount": {
+            "type": "number",
+            "default": 0
           }
         }
       }
