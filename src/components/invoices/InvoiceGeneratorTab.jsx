@@ -232,7 +232,29 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       const settings = await getCompanySettings();
       const isMonthly = inv.line_items?.[0]?.description?.startsWith('Monthly Contract');
       const downloader = isMonthly ? downloadMonthlyInvoicePDF : downloadPerTripInvoicePDF;
-      await downloader(inv, client.name, settings, clientInvoiceSeq?.[inv.id]);
+
+      // Enrich line items with trip dates from linked trips (fixes old invoices
+      // whose line items were saved before the `date` field existed in the schema)
+      let enrichedInv = inv;
+      if (!isMonthly && inv.trip_id) {
+        const tripIds = String(inv.trip_id).split(',').map(s => s.trim()).filter(Boolean);
+        const needsDate = inv.line_items?.some((item, idx) => !item.date && tripIds[idx]);
+        if (needsDate) {
+          const localMap = {};
+          (trips || []).forEach(t => { localMap[t.id] = t; });
+          const tripRecords = await Promise.all(
+            tripIds.map(id => localMap[id] || base44.entities.Trip.get(id).catch(() => null))
+          );
+          const enrichedItems = inv.line_items.map((item, idx) => {
+            if (item.date) return item;
+            const trip = tripRecords[idx];
+            return { ...item, date: trip?.trip_date || item.date };
+          });
+          enrichedInv = { ...inv, line_items: enrichedItems };
+        }
+      }
+
+      await downloader(enrichedInv, client.name, settings, clientInvoiceSeq?.[inv.id]);
     } finally { setBusy(false); setProgress(''); }
   };
 
