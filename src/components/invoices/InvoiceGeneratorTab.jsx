@@ -466,50 +466,52 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
                 const FIcon = fi.Icon;
                 const isVoided = inv.voided;
                 return (
-                  <div key={inv.id} className={`row-card transition-colors ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
+                  <div key={inv.id} className={`row-card ${checked ? 'border-amber-500/40' : ''} ${isVoided ? 'opacity-50' : ''}`}>
                     <div className="flex items-center gap-3">
                       <Checkbox checked={checked} onCheckedChange={() => toggleInv(inv.id)} onClick={(e) => e.stopPropagation()} />
                       <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-amber-400" /></div>
                       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => toggleExpand(inv.id)}>
                         <p className={cn('text-sm font-medium text-foreground truncate', isVoided && 'line-through')}>{inv.invoice_number || '—'}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{isVoided && inv.void_reason ? ` · Voided: ${inv.void_reason}` : ''}</p>
+                        <p className="text-xs text-muted-foreground truncate">{formatDate(inv.issue_date)} · Due {formatDate(inv.due_date)}{isVoided && inv.void_reason ? ` · ${inv.void_reason}` : ''}</p>
                       </div>
-                      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
+                      <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
                         <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
                         {fi.label}
                       </span>
                       <span className={cn('text-sm font-semibold text-foreground whitespace-nowrap tabular-nums', isVoided && 'line-through')}>{formatCurrency(balance || inv.total_amount)}</span>
-                      <button onClick={() => toggleExpand(inv.id)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg transition-colors flex-shrink-0">
+                      {/* Quick actions — always visible, right-aligned */}
+                      <div className="flex items-center gap-1 ml-auto shrink-0">
+                        <button onClick={(e) => { e.stopPropagation(); shareWhatsApp(inv); }} title="Share via WhatsApp" className="flex items-center justify-center w-8 h-8 rounded-lg text-white transition-transform hover:scale-110 active:scale-95" style={{ background: '#25D366' }}>
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); shareEmail(inv); }} title="Share via Email" className="flex items-center justify-center w-8 h-8 rounded-lg text-white transition-transform hover:scale-110 active:scale-95" style={{ background: '#3b82f6' }}>
+                          <Mail className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); downloadOne(inv); }} disabled={busy} title="Download PDF" className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:hover:scale-100">
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); onEditInvoice?.(inv); }} title="Edit invoice" className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-transform hover:scale-110 active:scale-95">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); toggleExpand(inv.id); }} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg transition-colors shrink-0">
                         <ChevronDown className={cn('w-4 h-4 transition-transform duration-300', expanded ? '' : '-rotate-90')} />
                       </button>
                     </div>
-                    {/* expanded actions — smooth grid-rows transition */}
-                    <div
-                      className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                      style={{ gridTemplateRows: expanded ? '1fr' : '0fr' }}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap">
-                        <button onClick={() => shareWhatsApp(inv)} title="Share via WhatsApp" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#25D366' }}>
-                          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                        </button>
-                        <button onClick={() => shareEmail(inv)} title="Share via Email" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-white transition-all hover:brightness-110" style={{ background: '#3b82f6' }}>
-                          <Mail className="w-3.5 h-3.5" /> Email
-                        </button>
-                        <button onClick={() => downloadOne(inv)} disabled={busy} title="Download PDF" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors disabled:opacity-50">
-                          <Download className="w-3.5 h-3.5" /> Download
-                        </button>
-                        <button onClick={() => onEditInvoice?.(inv)} title="Edit invoice" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
-                          <Pencil className="w-3.5 h-3.5" /> Edit
-                        </button>
+                    {/* expanded details — smooth opacity transition */}
+                    {expanded && (
+                      <div className="mt-2 pt-2 border-t border-border flex items-center gap-2 flex-wrap animate-fade-in">
+                        <span className="md:hidden inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: fi.bg, border: `1px solid ${fi.border}`, color: fi.color }}>
+                          <FIcon className={cn('w-3 h-3', fi.pulse && 'animate-pulse')} style={{ color: fi.color }} />
+                          {fi.label}
+                        </span>
                         {!isVoided && (
-                          <button onClick={() => deleteOne(inv)} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
+                          <button onClick={(e) => { e.stopPropagation(); deleteOne(inv); }} disabled={busy} title="Delete" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50 ml-auto">
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
                         )}
-                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
