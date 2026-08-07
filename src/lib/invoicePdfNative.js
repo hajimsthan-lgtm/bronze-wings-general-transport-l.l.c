@@ -48,25 +48,35 @@ const CELL_BORDER = [187, 187, 187];
 // ═══════════════════════════════════════════════════════════
 const COLS_MONTHLY = [
   { label: '#',              w: 8,  align: 'center' },
-  { label: 'DESCRIPTION',    w: 62, align: 'left'   },
+  { label: 'DESCRIPTION',    w: 72, align: 'left'   },
   { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 21, align: 'right'  },
-  { label: 'TOTAL\nAMOUNT',  w: 21, align: 'right'  },
-  { label: 'TAX\nAMOUNT',    w: 21, align: 'right'  },
-  { label: 'VAT\n5%',        w: 17, align: 'right'  },
-  { label: 'TOTAL\nAMOUNT',  w: 30, align: 'right'  },
+  { label: 'UNIT PRICE\n(AED)', w: 24, align: 'right'  },
+  { label: 'AMOUNT\n(AED)',  w: 24, align: 'right'  },
+  { label: 'VAT\n5%',        w: 20, align: 'right'  },
+  { label: 'TOTAL\n(AED)',   w: 32, align: 'right'  },
 ];
 
 const COLS_TRIP = [
   { label: '#',              w: 8,  align: 'center' },
   { label: 'TRIP\nDATE',     w: 19, align: 'center' },
-  { label: 'DESCRIPTION',    w: 50, align: 'left'   },
+  { label: 'DESCRIPTION',    w: 58, align: 'left'   },
   { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 21, align: 'right'  },
-  { label: 'TOTAL\nAMOUNT',  w: 21, align: 'right'  },
-  { label: 'TAX\nAMOUNT',    w: 21, align: 'right'  },
-  { label: 'VAT\n5%',        w: 17, align: 'right'  },
-  { label: 'TOTAL\nAMOUNT',  w: 23, align: 'right'  },
+  { label: 'UNIT PRICE\n(AED)', w: 24, align: 'right'  },
+  { label: 'AMOUNT\n(AED)',  w: 24, align: 'right'  },
+  { label: 'VAT\n5%',        w: 20, align: 'right'  },
+  { label: 'TOTAL\n(AED)',   w: 27, align: 'right'  },
+];
+
+const COLS_STANDARD = [
+  { label: '#',              w: 7,  align: 'center' },
+  { label: 'DESCRIPTION',    w: 54, align: 'left'   },
+  { label: 'QTY',            w: 12, align: 'center' },
+  { label: 'UNIT PRICE\n(AED)', w: 20, align: 'right'  },
+  { label: 'GROSS\n(AED)',   w: 21, align: 'right'  },
+  { label: 'DISCOUNT\n(AED)', w: 18, align: 'right'  },
+  { label: 'TAXABLE\n(AED)', w: 21, align: 'right'  },
+  { label: 'VAT\n5%',        w: 20, align: 'right'  },
+  { label: 'TOTAL\n(AED)',   w: 21, align: 'right'  },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -363,7 +373,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType) {
   const qty = Number(item.quantity) || 0;
   const unitPrice = Number(item.unit_price) || 0;
   const gross = Number(item.amount ?? (qty * unitPrice));
-  const taxable = gross;
+  const discount = Number(item.discount) || 0;
+  const taxable = gross - discount;
   const lineVat = taxable * (vatRate / 100);
   const lineTotal = taxable + lineVat;
 
@@ -398,7 +409,9 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType) {
   // Numeric columns — courier monospace
   pdf.setFont('courier', 'normal');
   pdf.setFontSize(6);
-  const nums = [qty, unitPrice, gross, taxable, lineVat, lineTotal];
+  const nums = invoiceType === 'standard'
+    ? [qty, unitPrice, gross, discount, taxable, lineVat, lineTotal]
+    : [qty, unitPrice, gross, lineVat, lineTotal];
   for (let i = 0; i < nums.length; i++) {
     const col = cols[ci + i];
     const val = i === 0 ? String(nums[i]) : fmtMoney(nums[i]);
@@ -418,7 +431,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE TOTAL ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableTotal(pdf, cols, y, totals) {
+function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 7;
   fc(pdf, LBH);
   pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
@@ -428,21 +441,27 @@ function drawTableTotal(pdf, cols, y, totals) {
   pdf.setLineWidth(0.5);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
 
+  // Determine value columns count based on invoice type
+  const isStandard = invoiceType === 'standard';
+  const valCount = isStandard ? 5 : 3;
+  const vals = isStandard
+    ? [totals.subtotal, totals.discount, totals.taxable, totals.vat, totals.total]
+    : [totals.subtotal, totals.vat, totals.total];
+  const valCols = cols.slice(-valCount);
+
   // Label "AED" spanning first columns
-  const labelEndIdx = cols.length - 4;
+  const labelEndIdx = cols.length - valCount;
   const labelRight = cols[labelEndIdx - 1].right;
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, BLACK);
   pdf.text('AED', labelRight - 2, y + h / 2 + 1, { align: 'right' });
 
-  // Values in last 4 columns
+  // Values in last columns
   pdf.setFont('courier', 'bold');
   pdf.setFontSize(7);
-  const vals = [totals.subtotal, totals.taxable, totals.vat, totals.total];
-  const valCols = cols.slice(-4);
-  for (let i = 0; i < 4; i++) {
-    tc(pdf, i === 3 ? MAROON : BLACK);
+  for (let i = 0; i < valCount; i++) {
+    tc(pdf, i === valCount - 1 ? MAROON : BLACK);
     pdf.text(fmtMoney(vals[i]), valCols[i].right - 2, y + h / 2 + 1, { align: 'right' });
   }
 
@@ -460,7 +479,11 @@ function drawTableTotal(pdf, cols, y, totals) {
 // DRAW: FULL TABLE (with pagination)
 // ═══════════════════════════════════════════════════════════
 function drawTable(pdf, invoice, s, startY, invoiceType) {
-  const cols = colPositions(invoiceType === 'trip' ? COLS_TRIP : COLS_MONTHLY);
+  const cols = colPositions(
+    invoiceType === 'trip' ? COLS_TRIP
+    : invoiceType === 'standard' ? COLS_STANDARD
+    : COLS_MONTHLY
+  );
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
   const contentBottom = PAGE_H - MARGIN;
@@ -502,7 +525,8 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     const p = Number(i.unit_price) || 0;
     return sum + Number(i.amount ?? (q * p));
   }, 0);
-  const taxable = subtotal;
+  const totalDiscount = items.reduce((sum, i) => sum + (Number(i.discount) || 0), 0);
+  const taxable = subtotal - totalDiscount;
   const vat = taxable * vatRate / 100;
   const total = taxable + vat;
 
@@ -512,7 +536,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     y = drawLetterhead(pdf, s, MARGIN);
     y = drawTableHeader(pdf, cols, y);
   }
-  y = drawTableTotal(pdf, cols, y, { subtotal, taxable, vat, total });
+  y = drawTableTotal(pdf, cols, y, { subtotal, discount: totalDiscount, taxable, vat, total }, invoiceType);
 
   return { y, total };
 }
