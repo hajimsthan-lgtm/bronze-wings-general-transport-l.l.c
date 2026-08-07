@@ -48,7 +48,8 @@ const CELL_BORDER = [187, 187, 187];
 // ═══════════════════════════════════════════════════════════
 const COLS_MONTHLY = [
   { label: '#',              w: 8,  align: 'center' },
-  { label: 'DESCRIPTION',    w: 72, align: 'left'   },
+  { label: 'MONTH',          w: 20, align: 'center' },
+  { label: 'DESCRIPTION',    w: 52, align: 'left'   },
   { label: 'QTY',            w: 14, align: 'center' },
   { label: 'UNIT PRICE\n(AED)', w: 24, align: 'right'  },
   { label: 'AMOUNT\n(AED)',  w: 24, align: 'right'  },
@@ -250,7 +251,7 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate) {
 
   pdf.setFontSize(7);
   pdf.text(`INVOICE #: ${refNumber}`, CONTENT_RIGHT - 2, y + 3, { align: 'right' });
-  pdf.text(`DATE: ${invoiceDate}`, CONTENT_RIGHT - 2, y + 6.5, { align: 'right' });
+  pdf.text(`INVOICE DATE: ${invoiceDate}`, CONTENT_RIGHT - 2, y + 6.5, { align: 'right' });
 
   return y + h + 2;
 }
@@ -304,18 +305,9 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(7);
   tc(pdf, BLACK);
-  pdf.text(`INVOICE: ${refNumber}`, rightX, ry); ry += 3.2;
-  pdf.text(`DATE: ${invoiceDate}`, rightX, ry); ry += 3.2;
 
   if (invoiceType === 'monthly') {
     pdf.text(`MONTH: ${getMonthYear(invoice.issue_date)}`, rightX, ry); ry += 3.2;
-  } else {
-    const items = invoice.line_items || [];
-    const dates = items.map(i => i.date).filter(Boolean).sort();
-    const wd = dates.length === 1 ? fmtDate(dates[0])
-      : dates.length > 1 ? `${fmtDate(dates[0])} - ${fmtDate(dates[dates.length - 1])}`
-      : fmtDate(invoice.working_date || invoice.issue_date);
-    pdf.text(`WORKING DATE: ${wd}`, rightX, ry); ry += 3.2;
   }
 
   return y + h + 2;
@@ -358,7 +350,7 @@ function drawTableHeader(pdf, cols, y) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE DATA ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType) {
+function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
   const descText = normalizeRoute(item.description ?? '');
   const descLines = pdf.splitTextToSize(descText, descCol.w - 4);
@@ -394,6 +386,14 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType) {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(5.5);
     pdf.text(fmtDate(item.date), cols[ci].center, vCenter, { align: 'center' });
+    ci++;
+  }
+
+  // MONTH column (monthly only)
+  if (invoiceType === 'monthly') {
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(5);
+    pdf.text(getMonthYear(item.date || invoice.issue_date), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
@@ -515,7 +515,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
         y = drawLetterhead(pdf, s, MARGIN);
         y = drawTableHeader(pdf, cols, y);
       }
-      y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType);
+      y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice);
     }
   }
 

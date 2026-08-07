@@ -276,6 +276,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
 
     return `<tr style="background:${rowBg};">
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:center;font-size:9px;color:#000;font-weight:600;${nf}">${idx + 1}</td>
+      <td style="padding:8px 6px;border:1px solid #bbb;text-align:center;font-size:9px;color:#000;font-weight:600;${nf}">${getMonthYear(item.date || invoice.issue_date)}</td>
       <td style="padding:8px 10px;border:1px solid #bbb;text-align:left;font-size:9px;color:#000;font-weight:600;line-height:1.5;">${desc}</td>
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:center;font-size:9px;color:#000;font-weight:600;${nf}">${qty}</td>
       <td style="padding:8px 6px;border:1px solid #bbb;text-align:right;font-size:9.5px;color:#000;font-weight:700;${nf}">${fmtMoney(unitPrice)}</td>
@@ -340,7 +341,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
     <div style="text-align:right;margin-left:auto;">
       <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE #: <span style="font-weight:400;">${esc(refNumber)}</span></div>
-      <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
+      <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
     </div>
   </div>
 
@@ -360,8 +361,6 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex:1;padding:14px 28px;">
       <div style="font-size:10px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:9.5px;line-height:1.7;color:#000;">
-        <div><strong style="color:#444;font-weight:700;">INVOICE:</strong> ${esc(refNumber)}</div>
-        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
         <div><strong style="color:#444;font-weight:700;">MONTH:</strong> ${monthYear}</div>
       </div>
     </div>
@@ -373,7 +372,8 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <thead>
       <tr>
         <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #999;text-align:center;white-space:nowrap;width:4%;">#</th>
-        <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 10px;border:1px solid #999;text-align:left;white-space:nowrap;width:36%;">Description</th>
+        <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #999;text-align:center;white-space:nowrap;width:14%;">Month</th>
+        <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 10px;border:1px solid #999;text-align:left;white-space:nowrap;width:22%;">Description</th>
         <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #999;text-align:center;white-space:nowrap;width:8%;">Qty</th>
         <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #999;text-align:right;white-space:nowrap;width:14%;">Unit Price<br>(AED)</th>
         <th style="background:${LBH};color:${DBLUE};font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #999;text-align:right;white-space:nowrap;width:14%;">Amount<br>(AED)</th>
@@ -386,7 +386,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     </tbody>
     <tfoot>
       <tr style="background:${LBH};">
-        <td colspan="3" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
+        <td colspan="5" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
         <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
         <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
         <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:10px;color:${MAROON};text-align:right;${nf2}">${fmtMoney(total)}</td>
@@ -540,7 +540,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
     <div style="text-align:right;margin-left:auto;">
       <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE #: <span style="font-weight:400;">${esc(refNumber)}</span></div>
-      <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
+      <div style="font-size:10px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
     </div>
   </div>
 
@@ -560,8 +560,6 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex:1;padding:12px 28px;">
       <div style="font-size:9.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:9px;line-height:1.65;color:#000;">
-        <div><strong style="color:#444;font-weight:700;">INVOICE:</strong> ${esc(refNumber)}</div>
-        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
       </div>
     </div>
   </div>
@@ -586,7 +584,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </tbody>
     <tfoot>
       <tr style="background:${LBH};">
-        <td colspan="4" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
+        <td colspan="5" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
         <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
         <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
         <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:9.5px;color:${MAROON};text-align:right;${nf2}">${fmtMoney(total)}</td>
