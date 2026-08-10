@@ -249,13 +249,6 @@ function drawLetterhead(pdf, s, y) {
   pdf.setFontSize(11);
   pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 16, { charSpace: 0.5 });
 
-  // TRN — center-aligned near bottom of letterhead
-  if (s.trn) {
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(9);
-    pdf.text(`TRN: ${str(s.trn)}`, CONTENT_X + CONTENT_W / 2, y + boxH - 4, { align: 'center' });
-  }
-
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
   let cy = y + 8;
@@ -277,7 +270,7 @@ function drawLetterhead(pdf, s, y) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TAX INVOICE BANNER (first page only)
 // ═══════════════════════════════════════════════════════════
-function drawTaxBanner(pdf, y, refNumber, invoiceDate) {
+function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
   const h = 8;
   fc(pdf, LBH);
   pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
@@ -291,7 +284,18 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate) {
   pdf.text(`INVOICE #: ${refNumber}`, CONTENT_RIGHT - 2, y + 3, { align: 'right' });
   pdf.text(`INVOICE DATE: ${invoiceDate}`, CONTENT_RIGHT - 2, y + 6.5, { align: 'right' });
 
-  return y + h + 2;
+  let nextY = y + h + 1;
+
+  // TRN — centered below the tax invoice bar
+  if (trn) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    tc(pdf, DARK_BLUE);
+    pdf.text(`TRN: ${str(trn)}`, PAGE_W / 2, nextY + 3, { align: 'center' });
+    nextY += 5;
+  }
+
+  return nextY + 1;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -736,7 +740,7 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   drawPageBorder(pdf);
   let y = MARGIN;
   y = drawLetterhead(pdf, s, y);
-  y = drawTaxBanner(pdf, y, refNumber, invoiceDate);
+  y = drawTaxBanner(pdf, y, refNumber, invoiceDate, s.trn);
   y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate);
 
   // ══ TABLE (with pagination) ══

@@ -129,7 +129,6 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       ${s.address ? `<div>${esc(s.address)}</div>` : ''}
       ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
-    ${s.trn ? `<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;color:#633C1A;font-size:10pt;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Tax Invoice Banner -->
@@ -139,6 +138,9 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       INVOICE #: ${esc(refNumber)}<br>DATE: ${invoiceDate}
     </div>
   </div>
+
+  <!-- TRN -->
+  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5pt;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
 
   <!-- Billing & Work Details -->
   <div style="position:relative;z-index:1;display:flex;gap:0;margin-bottom:10px;border:1px solid #ccc;">
@@ -336,7 +338,6 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       ${s.address ? `<div>${esc(s.address)}</div>` : ''}
       ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
-    ${s.trn ? `<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;color:#633C1A;font-size:10px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Tax Invoice Banner -->
@@ -350,6 +351,9 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
     </div>
   </div>
+
+  <!-- TRN -->
+  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
 
   <!-- Billing Section -->
   <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:14px 28px;overflow:hidden;">
@@ -530,7 +534,6 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       ${s.address ? `<div>${esc(s.address)}</div>` : ''}
       ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
-    ${s.trn ? `<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;color:#633C1A;font-size:9.5px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Tax Invoice Banner -->
@@ -544,6 +547,9 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
     </div>
   </div>
+
+  <!-- TRN -->
+  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
 
   <!-- Billing Section -->
   <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:12px 28px;overflow:hidden;">
