@@ -208,7 +208,7 @@ function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 26;
+  const boxH = 30;
 
   // Bordered box with cream background
   fc(pdf, CREAM);
@@ -237,30 +237,30 @@ function drawLetterhead(pdf, s, y) {
   tc(pdf, BROWN);
 
   // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
 
   // Company name — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(18);
-  pdf.text('BRONZE WINGS', textX, textTop + 9, { charSpace: 0.6 });
+  pdf.setFontSize(21);
+  pdf.text('BRONZE WINGS', textX, textTop + 10, { charSpace: 0.7 });
 
   // Subtitle — left-aligned
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(9);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 12, { charSpace: 0.4 });
+  pdf.setFontSize(10);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 14, { charSpace: 0.5 });
 
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
   let cy = y + 6;
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
+  pdf.setFontSize(8);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3.5; }
   if (s.address) {
     const addrLines = pdf.splitTextToSize(str(s.address), 35);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3.2; }
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3.5; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
