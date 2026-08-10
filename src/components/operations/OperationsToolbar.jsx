@@ -93,6 +93,9 @@ export default function OperationsToolbar({
           { key: 'revenue', label: 'Revenue', sample: '500' },
           { key: 'status', label: 'Status', sample: 'completed' },
           { key: 'payment_status', label: 'Payment', sample: 'corporate_credit' },
+          { key: 'delivery_note_number', label: 'Delivery Note', sample: 'DN-001' },
+          { key: 'load_time', label: 'Load Time', sample: '08:00' },
+          { key: 'offload_time', label: 'Offload Time', sample: '14:00' },
         ]} transform={(r) => ({
           from_location: r.from_location || r.From || '',
           to_location: r.to_location || r.To || '',
@@ -104,6 +107,9 @@ export default function OperationsToolbar({
           revenue: Number(r.revenue || r.Revenue) || 0,
           status: r.status || r.Status || 'scheduled',
           payment_status: r.payment_status || r.Payment || 'corporate_credit',
+          delivery_note_number: r.delivery_note_number || r['Delivery Note'] || '',
+          load_time: r.load_time || r['Load Time'] || '',
+          offload_time: r.offload_time || r['Offload Time'] || '',
         })} />
       )}
     </div>
