@@ -113,16 +113,22 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
 
   <!-- Company Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;text-align:center;padding-bottom:10px;border-bottom:2px solid ${MAROON};">
-    ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:64px;width:64px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block;" />` : ''}
-    <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.05;">BRONZE WINGS</div>
-    <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
-    <div style="color:${MAROON};margin-top:4px;font-size:9pt;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
-    <div style="margin-top:8px;font-size:8.5pt;color:#000;line-height:1.5;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;">
-      <span><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</span>
-      ${s.email ? `<span><strong>Email:</strong> ${esc(s.email)}</span>` : ''}
-      <span><strong>Address:</strong> ${esc(s.address || '')}</span>
-      ${s.website ? `<span>${esc(s.website)}</span>` : ''}
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="flex-shrink:0;">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:70px;width:70px;border-radius:50%;object-fit:cover;" />` : ''}
+    </div>
+    <div style="flex:1;text-align:center;padding:0 10px;">
+      <div style="font-size:10pt;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22pt;font-weight:bold;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10.5pt;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+      ${s.trn ? `<div style="color:#633C1A;margin-top:3px;font-size:8.5pt;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    </div>
+    <div style="flex-shrink:0;text-align:right;font-size:8.5pt;color:#633C1A;line-height:1.6;">
+      ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
+      ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
+      ${s.email ? `<div>${esc(s.email)}</div>` : ''}
+      ${s.address ? `<div>${esc(s.address)}</div>` : ''}
+      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
   </div>
 
@@ -314,18 +320,22 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;text-align:center;padding:14px 28px 12px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
-    <div style="width:80px;height:80px;margin:0 auto 6px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="flex-shrink:0;width:70px;height:70px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
-    <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">GENERAL TRANSPORT L.L.C</div>
-    <div style="color:${MAROON};margin-top:4px;font-size:10px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
-    <div style="margin-top:8px;font-size:9px;color:#000;line-height:1.5;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;">
-      <span><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</span>
-      ${s.email ? `<span><strong>Email:</strong> ${esc(s.email)}</span>` : ''}
-      <span><strong>Address:</strong> ${esc(s.address || '')}</span>
-      ${s.website ? `<span>${esc(s.website)}</span>` : ''}
+    <div style="flex:1;text-align:center;padding:0 10px;">
+      <div style="font-size:10px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10.5px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+      ${s.trn ? `<div style="color:#633C1A;margin-top:3px;font-size:8.5px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    </div>
+    <div style="flex-shrink:0;text-align:right;font-size:8.5px;color:#633C1A;line-height:1.6;">
+      ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
+      ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
+      ${s.email ? `<div>${esc(s.email)}</div>` : ''}
+      ${s.address ? `<div>${esc(s.address)}</div>` : ''}
+      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
   </div>
 
@@ -504,18 +514,22 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;text-align:center;padding:12px 28px 10px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
-    <div style="width:64px;height:64px;margin:0 auto 5px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="flex-shrink:0;width:60px;height:60px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
-    <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
-    <div style="color:${MAROON};margin-top:4px;font-size:9.5px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
-    <div style="margin-top:7px;font-size:8.5px;color:#000;line-height:1.5;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-      <span><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</span>
-      ${s.email ? `<span><strong>Email:</strong> ${esc(s.email)}</span>` : ''}
-      <span><strong>Address:</strong> ${esc(s.address || '')}</span>
-      ${s.website ? `<span>${esc(s.website)}</span>` : ''}
+    <div style="flex:1;text-align:center;padding:0 10px;">
+      <div style="font-size:9.5px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10.5px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+      ${s.trn ? `<div style="color:#633C1A;margin-top:3px;font-size:8px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    </div>
+    <div style="flex-shrink:0;text-align:right;font-size:8px;color:#633C1A;line-height:1.6;">
+      ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
+      ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
+      ${s.email ? `<div>${esc(s.email)}</div>` : ''}
+      ${s.address ? `<div>${esc(s.address)}</div>` : ''}
+      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
   </div>
 

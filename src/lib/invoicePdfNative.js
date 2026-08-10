@@ -182,62 +182,68 @@ function drawDefaultLogo(pdf, x, y, size) {
 // DRAW: LETTERHEAD (all pages)
 // ═══════════════════════════════════════════════════════════
 function drawLetterhead(pdf, s, y) {
-  const logoSize = 16;
-  const centerX = PAGE_W / 2;
+  const BROWN = [99, 60, 26];    // #633C1A
+  const CREAM = [253, 251, 240]; // #FDFBF0
+  const boxH = 34;
 
-  // Logo — centered on top
-  const logoX = centerX - logoSize / 2;
+  // Bordered box with cream background
+  fc(pdf, CREAM);
+  pdf.rect(CONTENT_X, y, CONTENT_W, boxH, 'F');
+  dc(pdf, BROWN);
+  pdf.setLineWidth(0.6);
+  pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
+
+  // Logo — left, vertically centered
+  const logoSize = 18;
+  const logoX = CONTENT_X + 4;
+  const logoY = y + (boxH - logoSize) / 2;
   if (s.logo_url) {
     try {
-      pdf.addImage(s.logo_url, getImgFormat(s.logo_url), logoX, y, logoSize, logoSize);
+      pdf.addImage(s.logo_url, getImgFormat(s.logo_url), logoX, logoY, logoSize, logoSize);
     } catch (e) {
-      drawDefaultLogo(pdf, logoX, y, logoSize);
+      drawDefaultLogo(pdf, logoX, logoY, logoSize);
     }
   } else {
-    drawDefaultLogo(pdf, logoX, y, logoSize);
+    drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // Company name — centered below logo
+  // Center text
+  const centerX = PAGE_W / 2;
+  tc(pdf, BROWN);
+
+  // Company name — centered
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(22);
-  tc(pdf, MAROON);
-  pdf.text('BRONZE WINGS', centerX, y + logoSize + 6, { align: 'center', charSpace: 0.8 });
+  pdf.setFontSize(18);
+  pdf.text('BRONZE WINGS', centerX, y + 10, { align: 'center', charSpace: 0.8 });
 
   // Subtitle — centered
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(14);
-  tc(pdf, DARK_BLUE);
-  pdf.text('GENERAL TRANSPORT L.L.C', centerX, y + logoSize + 11, { align: 'center', charSpace: 0.5 });
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(8);
+  pdf.text('GENERAL TRANSPORT - L.L.C', centerX, y + 15, { align: 'center', charSpace: 0.5 });
 
   // TRN — centered
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  tc(pdf, MAROON);
-  pdf.text(`TRN: ${str(s.trn)}`, centerX, y + logoSize + 15, { align: 'center' });
-
-  // Contact — centered row at bottom
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(5.5);
-  tc(pdf, BLACK);
-  const parts = [];
-  if (s.phone1 || s.phone2) parts.push(`Mobile: ${str(s.phone1)}${s.phone2 ? ' / ' + str(s.phone2) : ''}`);
-  if (s.email) parts.push(`Email: ${str(s.email)}`);
-  if (s.address) parts.push(`Address: ${str(s.address)}`);
-  if (s.website) parts.push(str(s.website));
-  const contactLines = pdf.splitTextToSize(parts.join('   |   '), CONTENT_W - 10);
-  let cy = y + logoSize + 19;
-  for (const line of contactLines) {
-    pdf.text(line, centerX, cy, { align: 'center' });
-    cy += 3.2;
+  if (s.trn) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(6.5);
+    pdf.text(`TRN: ${str(s.trn)}`, centerX, y + 19, { align: 'center' });
   }
 
-  // Separator line
-  dc(pdf, MAROON);
-  pdf.setLineWidth(0.5);
-  const sepY = Math.max(cy, y + logoSize + 22);
-  pdf.line(CONTENT_X, sepY, CONTENT_RIGHT, sepY);
+  // Right contact column — right-aligned, each on its own line
+  const rightX = CONTENT_RIGHT - 4;
+  let cy = y + 6;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(6);
+  tc(pdf, BROWN);
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.address) {
+    const addrLines = pdf.splitTextToSize(str(s.address), 35);
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3.2; }
+  }
+  if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
-  return sepY + 2;
+  return y + boxH + 2;
 }
 
 // ═══════════════════════════════════════════════════════════
