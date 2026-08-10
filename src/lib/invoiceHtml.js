@@ -113,16 +113,16 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
 
   <!-- Company Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
     <div style="flex-shrink:0;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:84px;width:84px;border-radius:50%;object-fit:cover;" />` : ''}
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:60px;width:60px;border-radius:50%;object-fit:cover;" />` : ''}
     </div>
-    <div style="flex:1;text-align:left;padding:4px 10px 0;">
-      <div style="font-size:14pt;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10.5pt;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+    <div style="flex:1;text-align:left;padding:2px 8px 0;">
+      <div style="font-size:11pt;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:20pt;font-weight:bold;color:#633C1A;letter-spacing:2px;line-height:1.1;margin-top:1px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:9pt;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:10pt;color:#633C1A;line-height:1.6;">
+    <div style="flex-shrink:0;text-align:right;font-size:8.5pt;color:#633C1A;line-height:1.5;">
       ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
       ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
       ${s.email ? `<div>${esc(s.email)}</div>` : ''}
@@ -134,7 +134,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 100%);padding:8px 14px;display:flex;justify-content:center;align-items:center;margin-top:8px;margin-bottom:10px;">
     <div style="font-size:16pt;font-weight:bold;color:${DBLUE};text-transform:uppercase;letter-spacing:1px;text-shadow:0 1px 0 rgba(255,255,255,0.5);">Tax Invoice</div>
-    ${s.trn ? `<div style="position:absolute;right:14px;font-size:11.5pt;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    ${s.trn ? `<div style="position:absolute;right:14px;font-size:11.5pt;color:${DBLUE};font-weight:bold;letter-spacing:1px;">Bronze TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing & Work Details -->
@@ -151,7 +151,6 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       </div>
     </div>
     <div style="width:200px;padding:12px;">
-      <div style="font-size:11.5pt;font-weight:bold;color:${MAROON};text-transform:uppercase;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #ccc;">Invoice</div>
       <div style="font-size:10.5pt;color:#000;line-height:1.9;">
         <div><strong>INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong>INVOICE DATE:</strong> ${invoiceDate}</div>
@@ -317,16 +316,16 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-    <div style="flex-shrink:0;width:82px;height:82px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+    <div style="flex-shrink:0;width:58px;height:58px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="flex:1;text-align:left;padding:4px 10px 0;">
-      <div style="font-size:14px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:12px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+    <div style="flex:1;text-align:left;padding:2px 8px 0;">
+      <div style="font-size:11px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;color:#633C1A;letter-spacing:2px;line-height:1.1;margin-top:1px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:10px;color:#633C1A;line-height:1.6;">
+    <div style="flex-shrink:0;text-align:right;font-size:8.5px;color:#633C1A;line-height:1.5;">
       ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
       ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
       ${s.email ? `<div>${esc(s.email)}</div>` : ''}
@@ -338,7 +337,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
     <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">Bronze TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing Section -->
@@ -355,7 +354,6 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       </div>
     </div>
     <div style="flex-shrink:0;text-align:right;">
-      <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:11px;line-height:1.7;color:#000;">
         <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>
@@ -513,16 +511,16 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:12px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-    <div style="flex-shrink:0;width:72px;height:72px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+    <div style="flex-shrink:0;width:54px;height:54px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="flex:1;text-align:left;padding:4px 10px 0;">
-      <div style="font-size:14px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:12px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+    <div style="flex:1;text-align:left;padding:2px 8px 0;">
+      <div style="font-size:11px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;color:#633C1A;letter-spacing:2px;line-height:1.1;margin-top:1px;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:9.5px;color:#633C1A;line-height:1.6;">
+    <div style="flex-shrink:0;text-align:right;font-size:8.5px;color:#633C1A;line-height:1.5;">
       ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
       ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
       ${s.email ? `<div>${esc(s.email)}</div>` : ''}
@@ -534,7 +532,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
     <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
+    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">Bronze TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing Section -->
@@ -551,7 +549,6 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       </div>
     </div>
     <div style="flex-shrink:0;text-align:right;">
-      <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:10.5px;line-height:1.65;color:#000;">
         <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>

@@ -208,7 +208,7 @@ function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 38;
+  const boxH = 30;
 
   // Bordered box with cream background
   fc(pdf, CREAM);
@@ -218,7 +218,7 @@ function drawLetterhead(pdf, s, y) {
   pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
 
   // Logo — left, vertically centered
-  const logoSize = 22;
+  const logoSize = 16;
   const logoX = CONTENT_X + 4;
   const logoY = y + (boxH - logoSize) / 2;
   if (s.logo_url) {
@@ -237,30 +237,30 @@ function drawLetterhead(pdf, s, y) {
   tc(pdf, BROWN);
 
   // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
 
   // Company name — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(24);
-  pdf.text('BRONZE WINGS', textX, textTop + 12, { charSpace: 0.8 });
+  pdf.setFontSize(18);
+  pdf.text('BRONZE WINGS', textX, textTop + 9, { charSpace: 0.6 });
 
   // Subtitle — left-aligned
   pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 16, { charSpace: 0.5 });
+  pdf.setFontSize(9);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 12, { charSpace: 0.4 });
 
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
-  let cy = y + 8;
+  let cy = y + 6;
   pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFontSize(7);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 4; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 4; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 4; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.2; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3.2; }
   if (s.address) {
     const addrLines = pdf.splitTextToSize(str(s.address), 35);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 4; }
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3.2; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
@@ -285,7 +285,7 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
     tc(pdf, DARK_BLUE);
-    pdf.text(`TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 5.5, { align: 'right' });
+    pdf.text(`Bronze TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 5.5, { align: 'right' });
   }
 
   return y + h + 1;
@@ -350,19 +350,11 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   }
 
   // ── RIGHT: INVOICE # and DATE ──
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(10);
-  tc(pdf, MAROON);
-  pdf.text('INVOICE', rightX, y + 4, { align: 'right' });
-  dc(pdf, MAROON);
-  pdf.setLineWidth(0.3);
-  pdf.line(rightX - 15, y + 5, rightX, y + 5);
-
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   tc(pdf, BLACK);
-  pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 9, { align: 'right' });
-  pdf.text(`INVOICE DATE: ${invoiceDate}`, rightX, y + 13, { align: 'right' });
+  pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 5, { align: 'right' });
+  pdf.text(`INVOICE DATE: ${invoiceDate}`, rightX, y + 9, { align: 'right' });
 
   return y + h + 2;
 }
