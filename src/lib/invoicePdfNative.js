@@ -194,7 +194,7 @@ function drawLetterhead(pdf, s, y) {
   pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
 
   // Logo — left, vertically centered
-  const logoSize = 18;
+  const logoSize = 22;
   const logoX = CONTENT_X + 4;
   const logoY = y + (boxH - logoSize) / 2;
   if (s.logo_url) {
@@ -207,25 +207,25 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // Center text
-  const centerX = PAGE_W / 2;
+  // Company text — left-aligned, starting right of logo
+  const textX = logoX + logoSize + 4;
   tc(pdf, BROWN);
 
-  // Company name — centered
+  // Company name — left-aligned
   pdf.setFont('times', 'bold');
   pdf.setFontSize(18);
-  pdf.text('BRONZE WINGS', centerX, y + 10, { align: 'center', charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', textX, y + 10, { charSpace: 0.8 });
 
-  // Subtitle — centered
+  // Subtitle — left-aligned
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(8);
-  pdf.text('GENERAL TRANSPORT - L.L.C', centerX, y + 15, { align: 'center', charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, y + 15, { charSpace: 0.5 });
 
-  // TRN — centered
+  // TRN — left-aligned
   if (s.trn) {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(6.5);
-    pdf.text(`TRN: ${str(s.trn)}`, centerX, y + 19, { align: 'center' });
+    pdf.text(`TRN: ${str(s.trn)}`, textX, y + 19);
   }
 
   // Right contact column — right-aligned, each on its own line
