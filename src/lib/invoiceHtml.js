@@ -125,6 +125,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
         <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
         ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
         <div><strong>Address:</strong> ${esc(s.address || '')}</div>
+        ${s.website ? `<div>${esc(s.website)}</div>` : ''}
       </div>
     </div>
   </div>
@@ -330,6 +331,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
       ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
       <div><strong>Address:</strong> ${esc(s.address || '')}</div>
+      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
   </div>
 
@@ -521,6 +523,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
       ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
       <div><strong>Address:</strong> ${esc(s.address || '')}</div>
+      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
     </div>
   </div>
 

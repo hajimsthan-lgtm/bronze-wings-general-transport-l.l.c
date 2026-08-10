@@ -216,6 +216,7 @@ function drawLetterhead(pdf, s, y) {
   if (s.phone1 || s.phone2) parts.push(`Mobile: ${str(s.phone1)}${s.phone2 ? ' / ' + str(s.phone2) : ''}`);
   if (s.email) parts.push(`Email: ${str(s.email)}`);
   if (s.address) parts.push(`Address: ${str(s.address)}`);
+  if (s.website) parts.push(str(s.website));
   const contactLines = pdf.splitTextToSize(parts.join('  |  '), 95);
   let cy = y + 19;
   for (const line of contactLines) {
