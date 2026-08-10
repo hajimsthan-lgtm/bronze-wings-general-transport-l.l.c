@@ -17,7 +17,8 @@ import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
-import { formatDate, formatCurrency } from '@/lib/formatters';
+import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
+import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
@@ -150,7 +151,7 @@ export default function Operations() {
   }, [allExpenses]);
 
   const filteredTrips = useMemo(() => trips.filter((trip) => {
-    if (trip.trip_date < dateFrom || trip.trip_date > dateTo) return false;
+    if (!inGlobalDateRange(normalizeDate(trip.trip_date), dateFrom, dateTo)) return false;
     if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
     if (search) {
       const q = search.toLowerCase();

@@ -1,5 +1,35 @@
 import moment from 'moment';
 
+/**
+ * Normalize various date formats to ISO yyyy-MM-dd.
+ * Handles: ISO (2026-07-30), dd-MM-yy (30-07-26), dd/MM/yyyy (30/07/2026),
+ * dd-MM-yyyy (30-07-2026), and moment-parsable strings.
+ * Returns the original string if it can't be normalized.
+ */
+export function normalizeDate(date) {
+  if (!date) return '';
+  const s = String(date).trim();
+  // Already ISO
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+  // dd-MM-yy or dd/MM/yy
+  let m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2})$/);
+  if (m) {
+    const [, dd, mm, yy] = m;
+    const year = 2000 + parseInt(yy, 10);
+    return `${year}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+  }
+  // dd-MM-yyyy or dd/MM/yyyy
+  m = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+  if (m) {
+    const [, dd, mm, yyyy] = m;
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+  }
+  // Fall back to moment parsing
+  const parsed = moment(s);
+  if (parsed.isValid()) return parsed.format('YYYY-MM-DD');
+  return s;
+}
+
 export function formatCurrency(amount, currency = 'AED') {
   if (amount == null) return `${currency} 0.00`;
   return `${currency} ${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -7,7 +37,8 @@ export function formatCurrency(amount, currency = 'AED') {
 
 export function formatDate(date) {
   if (!date) return '—';
-  return moment(date).format('DD/MM/YYYY');
+  const normalized = normalizeDate(date);
+  return moment(normalized).format('DD/MM/YYYY');
 }
 
 export function formatDateToLocal(date) {

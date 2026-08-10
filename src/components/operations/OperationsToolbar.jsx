@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
+import { normalizeDate } from '@/lib/formatters';
 
 export default function OperationsToolbar({
   search, setSearch,
@@ -97,7 +98,7 @@ export default function OperationsToolbar({
           to_location: r.to_location || r.To || '',
           vehicle_plate: r.vehicle_plate || r['Vehicle Plate'] || '',
           driver_name: r.driver_name || r.Driver || '',
-          trip_date: r.trip_date || r['Trip Date'] || '',
+          trip_date: normalizeDate(r.trip_date || r['Trip Date'] || ''),
           client_name: r.client_name || r.Client || '',
           trip_type: r.trip_type || r['Trip Type'] || 'one_way',
           revenue: Number(r.revenue || r.Revenue) || 0,
