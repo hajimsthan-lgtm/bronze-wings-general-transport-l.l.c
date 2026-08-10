@@ -264,10 +264,8 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   dc(pdf, LIGHT_GRAY);
   pdf.setLineWidth(0.3);
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
-  pdf.line(PAGE_W / 2, y, PAGE_W / 2, y + h);
 
   const leftX = CONTENT_X + 3;
-  const rightX = PAGE_W / 2 + 3;
 
   // ── LEFT: BILL TO ──
   pdf.setFont('helvetica', 'bold');
@@ -291,21 +289,6 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   if (invoice.client_trn)     { pdf.text(`TRN: ${str(invoice.client_trn)}`, leftX, ly); ly += 3.2; }
   if (invoice.sub)            { pdf.text(`SUB: ${str(invoice.sub)}`, leftX, ly); ly += 3.2; }
   if (invoice.reg_no)          { pdf.text(`REG NO: ${str(invoice.reg_no)}`, leftX, ly); ly += 3.2; }
-
-  // ── RIGHT: FROM ──
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  tc(pdf, MAROON);
-  pdf.text('FROM', rightX, y + 4);
-  dc(pdf, MAROON);
-  pdf.setLineWidth(0.3);
-  pdf.line(rightX, y + 5, rightX + 15, y + 5);
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  tc(pdf, BLACK);
-  pdf.text('BRONZE WINGS', rightX, y + 9);
-  pdf.text('GENERAL TRANSPORT L.L.C', rightX, y + 12.5);
 
   return y + h + 2;
 }
