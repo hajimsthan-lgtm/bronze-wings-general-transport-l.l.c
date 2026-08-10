@@ -29,16 +29,16 @@ const FOOTER_BOTTOM = PAGE_H - BORDER_POS;
 // ═══════════════════════════════════════════════════════════
 // COLORS (RGB)
 // ═══════════════════════════════════════════════════════════
-const MAROON = [139, 21, 56];
-const DARK_BLUE = [26, 58, 92];
-const LBH = [214, 228, 240];
+const MAROON = [139, 58, 46];
+const DARK_BLUE = [107, 42, 32];
+const LBH = [245, 230, 211];
 const BRONZE = [196, 163, 90];
 const BLACK = [0, 0, 0];
 const GRAY = [102, 102, 102];
 const LIGHT_GRAY = [221, 221, 221];
 const BG_GRAY = [248, 248, 248];
 const BORDER_GRAY = [224, 224, 224];
-const DARK_MAROON = [107, 15, 42];
+const DARK_MAROON = [107, 42, 32];
 const WHITE = [255, 255, 255];
 const ROW_ALT = [250, 251, 252];
 const CELL_BORDER = [187, 187, 187];
@@ -183,9 +183,8 @@ function drawDefaultLogo(pdf, x, y, size) {
 // ═══════════════════════════════════════════════════════════
 function drawLetterhead(pdf, s, y) {
   const logoSize = 17;
-  const textX = CONTENT_X + logoSize + 3;
 
-  // Logo
+  // Logo — left
   if (s.logo_url) {
     try {
       pdf.addImage(s.logo_url, getImgFormat(s.logo_url), CONTENT_X, y, logoSize, logoSize);
@@ -196,44 +195,47 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, CONTENT_X, y, logoSize);
   }
 
-  // Company name — Georgia 22pt bold maroon
+  // Company name — centered, Georgia 22pt bold
   pdf.setFont('times', 'bold');
   pdf.setFontSize(22);
   tc(pdf, MAROON);
-  pdf.text('BRONZE WINGS', textX, y + 8, { charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', PAGE_W / 2, y + 8, { align: 'center', charSpace: 0.8 });
 
-  // Subtitle — Georgia 14pt bold dark blue
+  // Subtitle — centered, Georgia 14pt bold
   pdf.setFont('times', 'bold');
   pdf.setFontSize(14);
   tc(pdf, DARK_BLUE);
-  pdf.text('GENERAL TRANSPORT L.L.C', textX, y + 14, { charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT L.L.C', PAGE_W / 2, y + 14, { align: 'center', charSpace: 0.5 });
 
-  // Tagline — 5.5pt gray uppercase
+  // Contact — right-aligned, wrapped to fit
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(5.5);
-  tc(pdf, GRAY);
-  pdf.text('GENERAL TRANSPORT · HEAVY EQUIPMENT RENTAL · LOGISTICS SERVICES', textX, y + 18.5);
-
-  // Contact — 5.5pt black
   tc(pdf, BLACK);
   const parts = [];
   if (s.phone1 || s.phone2) parts.push(`Mobile: ${str(s.phone1)}${s.phone2 ? ' / ' + str(s.phone2) : ''}`);
   if (s.email) parts.push(`Email: ${str(s.email)}`);
   if (s.address) parts.push(`Address: ${str(s.address)}`);
-  pdf.text(parts.join('  |  '), textX, y + 22);
+  const contactLines = pdf.splitTextToSize(parts.join('  |  '), 95);
+  let cy = y + 19;
+  for (const line of contactLines) {
+    pdf.text(line, CONTENT_RIGHT, cy, { align: 'right' });
+    cy += 3.2;
+  }
 
-  // TRN — 7pt bold maroon
+  // TRN — right-aligned
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, MAROON);
-  pdf.text(`TRN: ${str(s.trn)}`, textX, y + 26);
+  pdf.text(`TRN: ${str(s.trn)}`, CONTENT_RIGHT, cy, { align: 'right' });
+  cy += 3;
 
   // Separator line
   dc(pdf, MAROON);
   pdf.setLineWidth(0.5);
-  pdf.line(CONTENT_X, y + 28, CONTENT_RIGHT, y + 28);
+  const sepY = Math.max(cy, y + 22);
+  pdf.line(CONTENT_X, sepY, CONTENT_RIGHT, sepY);
 
-  return y + 30;
+  return sepY + 2;
 }
 
 // ═══════════════════════════════════════════════════════════
