@@ -280,17 +280,15 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
   tc(pdf, DARK_BLUE);
   pdf.text('TAX INVOICE', PAGE_W / 2, y + 5.5, { align: 'center' });
 
-  let nextY = y + h + 1;
+  // TRN — right side of the tax invoice bar
+  if (trn) {
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    tc(pdf, DARK_BLUE);
+    pdf.text(`TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 5.5, { align: 'right' });
+  }
 
-  // INVOICE # and DATE — centered below the tax invoice bar
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(10);
-  tc(pdf, DARK_BLUE);
-  pdf.text(`INVOICE #: ${refNumber}`, PAGE_W / 2, nextY + 3, { align: 'center' });
-  pdf.text(`INVOICE DATE: ${invoiceDate}`, PAGE_W / 2, nextY + 7, { align: 'center' });
-  nextY += 11;
-
-  return nextY + 1;
+  return y + h + 1;
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -134,11 +134,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 100%);padding:8px 14px;display:flex;justify-content:center;align-items:center;margin-top:8px;margin-bottom:10px;">
     <div style="font-size:16pt;font-weight:bold;color:${DBLUE};text-transform:uppercase;letter-spacing:1px;text-shadow:0 1px 0 rgba(255,255,255,0.5);">Tax Invoice</div>
-  </div>
-
-  <!-- INVOICE # and DATE -->
-  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5pt;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
-    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+    ${s.trn ? `<div style="position:absolute;right:14px;font-size:11.5pt;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing & Work Details -->
@@ -342,11 +338,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
     <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-  </div>
-
-  <!-- INVOICE # and DATE -->
-  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
-    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing Section -->
@@ -542,11 +534,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Tax Invoice Banner -->
   <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
     <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-  </div>
-
-  <!-- INVOICE # and DATE -->
-  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
-    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+    ${s.trn ? `<div style="position:absolute;right:28px;font-size:11.5px;color:${DBLUE};font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn)}</div>` : ''}
   </div>
 
   <!-- Billing Section -->
