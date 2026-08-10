@@ -224,11 +224,11 @@ function drawLetterhead(pdf, s, y) {
     cy += 3.2;
   }
 
-  // TRN — centered below subtitle
+  // TRN — left-aligned below subtitle (part of left header group)
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, MAROON);
-  pdf.text(`TRN: ${str(s.trn)}`, PAGE_W / 2, y + 18, { align: 'center' });
+  pdf.text(`TRN: ${str(s.trn)}`, brandX, y + 18, { align: 'left' });
 
   // Separator line
   dc(pdf, MAROON);

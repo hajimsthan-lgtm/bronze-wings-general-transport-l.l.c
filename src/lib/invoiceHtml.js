@@ -115,11 +115,13 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <!-- Company Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;padding-bottom:8px;border-bottom:2px solid ${MAROON};">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:72px;width:72px;border-radius:50%;object-fit:cover;flex-shrink:0;" />` : ''}
-      <div style="flex:1;text-align:left;padding:0 16px;">
-        <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.05;">BRONZE WINGS</div>
-        <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
-        <div style="color:${MAROON};margin-top:4px;font-size:9pt;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
+      <div style="display:flex;align-items:center;gap:14px;flex:1;">
+        ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:72px;width:72px;border-radius:50%;object-fit:cover;flex-shrink:0;" />` : ''}
+        <div style="text-align:left;">
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:${MAROON};letter-spacing:4px;text-transform:uppercase;line-height:1.05;">BRONZE WINGS</div>
+          <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
+          <div style="color:${MAROON};margin-top:4px;font-size:9pt;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
+        </div>
       </div>
       <div style="flex-shrink:0;text-align:left;font-size:8.5pt;color:#000;line-height:1.6;">
         <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
@@ -319,13 +321,15 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   <!-- Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:18px 28px 12px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
-    <div style="flex-shrink:0;width:90px;height:90px;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
-    </div>
-    <div style="flex:1;text-align:left;padding:0 16px;">
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">GENERAL TRANSPORT L.L.C</div>
-      <div style="color:${MAROON};margin-top:4px;font-size:10px;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
+    <div style="display:flex;align-items:center;gap:14px;flex:1;">
+      <div style="flex-shrink:0;width:90px;height:90px;">
+        ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
+      </div>
+      <div style="text-align:left;">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
+        <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">GENERAL TRANSPORT L.L.C</div>
+        <div style="color:${MAROON};margin-top:4px;font-size:10px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
+      </div>
     </div>
     <div style="flex-shrink:0;text-align:left;font-size:9px;color:#000;line-height:1.6;">
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
@@ -511,13 +515,15 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   <!-- Letterhead -->
   <div id="invoice-header" style="position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:14px 28px 10px 28px;border-bottom:2px solid ${MAROON};background:#fff;">
-    <div style="flex-shrink:0;width:70px;height:70px;">
-      ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
-    </div>
-    <div style="flex:1;text-align:left;padding:0 14px;">
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
-      <div style="color:${MAROON};margin-top:4px;font-size:9.5px;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
+    <div style="display:flex;align-items:center;gap:12px;flex:1;">
+      <div style="flex-shrink:0;width:70px;height:70px;">
+        ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
+      </div>
+      <div style="text-align:left;">
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;color:${MAROON};letter-spacing:3px;line-height:1.1;text-transform:uppercase;">BRONZE WINGS</div>
+        <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
+        <div style="color:${MAROON};margin-top:4px;font-size:9.5px;font-weight:bold;letter-spacing:1px;">TRN: ${esc(s.trn || '')}</div>
+      </div>
     </div>
     <div style="flex-shrink:0;text-align:left;font-size:8.5px;color:#000;line-height:1.5;">
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
