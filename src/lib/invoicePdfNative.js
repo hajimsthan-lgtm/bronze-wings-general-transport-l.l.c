@@ -182,33 +182,40 @@ function drawDefaultLogo(pdf, x, y, size) {
 // DRAW: LETTERHEAD (all pages)
 // ═══════════════════════════════════════════════════════════
 function drawLetterhead(pdf, s, y) {
-  const logoSize = 17;
+  const logoSize = 16;
+  const centerX = PAGE_W / 2;
 
-  // Logo — left
+  // Logo — centered on top
+  const logoX = centerX - logoSize / 2;
   if (s.logo_url) {
     try {
-      pdf.addImage(s.logo_url, getImgFormat(s.logo_url), CONTENT_X, y, logoSize, logoSize);
+      pdf.addImage(s.logo_url, getImgFormat(s.logo_url), logoX, y, logoSize, logoSize);
     } catch (e) {
-      drawDefaultLogo(pdf, CONTENT_X, y, logoSize);
+      drawDefaultLogo(pdf, logoX, y, logoSize);
     }
   } else {
-    drawDefaultLogo(pdf, CONTENT_X, y, logoSize);
+    drawDefaultLogo(pdf, logoX, y, logoSize);
   }
 
-  // Company name — left-aligned after logo, Georgia 22pt bold
-  const brandX = CONTENT_X + logoSize + 3;
+  // Company name — centered below logo
   pdf.setFont('times', 'bold');
   pdf.setFontSize(22);
   tc(pdf, MAROON);
-  pdf.text('BRONZE WINGS', brandX, y + 8, { align: 'left', charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', centerX, y + logoSize + 6, { align: 'center', charSpace: 0.8 });
 
-  // Subtitle — left-aligned, Georgia 14pt bold
+  // Subtitle — centered
   pdf.setFont('times', 'bold');
   pdf.setFontSize(14);
   tc(pdf, DARK_BLUE);
-  pdf.text('GENERAL TRANSPORT L.L.C', brandX, y + 14, { align: 'left', charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT L.L.C', centerX, y + logoSize + 11, { align: 'center', charSpace: 0.5 });
 
-  // Contact — right-aligned, wrapped to fit
+  // TRN — centered
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(7);
+  tc(pdf, MAROON);
+  pdf.text(`TRN: ${str(s.trn)}`, centerX, y + logoSize + 15, { align: 'center' });
+
+  // Contact — centered row at bottom
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(5.5);
   tc(pdf, BLACK);
@@ -217,23 +224,17 @@ function drawLetterhead(pdf, s, y) {
   if (s.email) parts.push(`Email: ${str(s.email)}`);
   if (s.address) parts.push(`Address: ${str(s.address)}`);
   if (s.website) parts.push(str(s.website));
-  const contactLines = pdf.splitTextToSize(parts.join('  |  '), 95);
-  let cy = y + 19;
+  const contactLines = pdf.splitTextToSize(parts.join('   |   '), CONTENT_W - 10);
+  let cy = y + logoSize + 19;
   for (const line of contactLines) {
-    pdf.text(line, CONTENT_RIGHT - 95, cy, { align: 'left' });
+    pdf.text(line, centerX, cy, { align: 'center' });
     cy += 3.2;
   }
-
-  // TRN — left-aligned below subtitle (part of left header group)
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  tc(pdf, MAROON);
-  pdf.text(`TRN: ${str(s.trn)}`, brandX, y + 18, { align: 'left' });
 
   // Separator line
   dc(pdf, MAROON);
   pdf.setLineWidth(0.5);
-  const sepY = Math.max(cy, y + 22);
+  const sepY = Math.max(cy, y + logoSize + 22);
   pdf.line(CONTENT_X, sepY, CONTENT_RIGHT, sepY);
 
   return sepY + 2;
