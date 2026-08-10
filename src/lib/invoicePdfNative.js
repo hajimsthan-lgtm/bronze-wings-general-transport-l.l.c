@@ -298,12 +298,37 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate) {
 // DRAW: BILLING SECTION (first page only)
 // ═══════════════════════════════════════════════════════════
 function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate) {
-  const h = 24;
+  const leftX = CONTENT_X + 3;
+  const maxTextWidth = CONTENT_W - 6; // strict inner margin on both sides
+
+  // Build all billing lines, then pre-wrap each to the inner width
+  const rawLines = [];
+  rawLines.push({ text: str(clientName || invoice.client_name || '—'), bold: true });
+  if (invoice.contact_person) rawLines.push({ text: `ATT: ${str(invoice.contact_person)}`, bold: false });
+  if (invoice.client_address) rawLines.push({ text: `ADDRESS: ${str(invoice.client_address)}`, bold: false });
+  if (invoice.client_trn)     rawLines.push({ text: `TRN: ${str(invoice.client_trn)}`, bold: false });
+  if (invoice.sub)            rawLines.push({ text: `SUB: ${str(invoice.sub)}`, bold: false });
+  if (invoice.reg_no)          rawLines.push({ text: `REG NO: ${str(invoice.reg_no)}`, bold: false });
+
+  const lineH = 4;
+  const wrapped = [];
+  let totalLines = 0;
+  for (const line of rawLines) {
+    pdf.setFont('helvetica', line.bold ? 'bold' : 'normal');
+    pdf.setFontSize(10);
+    const parts = pdf.splitTextToSize(line.text, maxTextWidth);
+    wrapped.push({ parts, bold: line.bold });
+    totalLines += parts.length;
+  }
+
+  // Dynamic height: label area + all wrapped lines + padding
+  const labelArea = 9;
+  const h = Math.max(24, labelArea + totalLines * lineH + 3);
+
+  // Draw box border
   dc(pdf, LIGHT_GRAY);
   pdf.setLineWidth(0.3);
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
-
-  const leftX = CONTENT_X + 3;
 
   // ── LEFT: BILL TO ──
   pdf.setFont('helvetica', 'bold');
@@ -314,19 +339,17 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.setLineWidth(0.3);
   pdf.line(leftX, y + 5, leftX + 15, y + 5);
 
-  let ly = y + 9;
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(10);
-  tc(pdf, BLACK);
-  pdf.text(str(clientName || invoice.client_name || '—'), leftX, ly);
-  ly += 4;
-
-  pdf.setFont('helvetica', 'normal');
-  if (invoice.contact_person) { pdf.text(`ATT: ${str(invoice.contact_person)}`, leftX, ly); ly += 4; }
-  if (invoice.client_address) { pdf.text(`ADDRESS: ${str(invoice.client_address)}`, leftX, ly); ly += 4; }
-  if (invoice.client_trn)     { pdf.text(`TRN: ${str(invoice.client_trn)}`, leftX, ly); ly += 4; }
-  if (invoice.sub)            { pdf.text(`SUB: ${str(invoice.sub)}`, leftX, ly); ly += 4; }
-  if (invoice.reg_no)          { pdf.text(`REG NO: ${str(invoice.reg_no)}`, leftX, ly); ly += 4; }
+  // Render each wrapped line strictly within leftX..leftX+maxTextWidth
+  let ly = y + labelArea;
+  for (const line of wrapped) {
+    pdf.setFont('helvetica', line.bold ? 'bold' : 'normal');
+    pdf.setFontSize(10);
+    tc(pdf, BLACK);
+    for (const part of line.parts) {
+      pdf.text(part, leftX, ly);
+      ly += lineH;
+    }
+  }
 
   return y + h + 2;
 }
