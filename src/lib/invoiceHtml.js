@@ -121,7 +121,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
         <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:13pt;font-weight:700;color:${DBLUE};letter-spacing:2px;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
         <div style="color:${MAROON};margin-top:4px;font-size:9pt;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
       </div>
-      <div style="flex-shrink:0;text-align:right;font-size:8.5pt;color:#000;line-height:1.6;">
+      <div style="flex-shrink:0;text-align:left;font-size:8.5pt;color:#000;line-height:1.6;">
         <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
         ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
         <div><strong>Address:</strong> ${esc(s.address || '')}</div>
@@ -327,7 +327,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">GENERAL TRANSPORT L.L.C</div>
       <div style="color:${MAROON};margin-top:4px;font-size:10px;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:9px;color:#000;line-height:1.6;">
+    <div style="flex-shrink:0;text-align:left;font-size:9px;color:#000;line-height:1.6;">
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
       ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
       <div><strong>Address:</strong> ${esc(s.address || '')}</div>
@@ -519,7 +519,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:15px;font-weight:600;color:${DBLUE};letter-spacing:2px;line-height:1.2;text-transform:uppercase;margin-top:2px;">General Transport L.L.C</div>
       <div style="color:${MAROON};margin-top:4px;font-size:9.5px;font-weight:bold;letter-spacing:1px;text-align:center;">TRN: ${esc(s.trn || '')}</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:8.5px;color:#000;line-height:1.5;">
+    <div style="flex-shrink:0;text-align:left;font-size:8.5px;color:#000;line-height:1.5;">
       <div><strong>Mobile:</strong> ${esc(s.phone1 || '')}${s.phone2 ? ` / ${esc(s.phone2)}` : ''}</div>
       ${s.email ? `<div><strong>Email:</strong> ${esc(s.email)}</div>` : ''}
       <div><strong>Address:</strong> ${esc(s.address || '')}</div>

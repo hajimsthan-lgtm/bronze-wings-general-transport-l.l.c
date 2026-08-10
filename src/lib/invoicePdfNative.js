@@ -220,7 +220,7 @@ function drawLetterhead(pdf, s, y) {
   const contactLines = pdf.splitTextToSize(parts.join('  |  '), 95);
   let cy = y + 19;
   for (const line of contactLines) {
-    pdf.text(line, CONTENT_RIGHT, cy, { align: 'right' });
+    pdf.text(line, CONTENT_RIGHT - 95, cy, { align: 'left' });
     cy += 3.2;
   }
 
