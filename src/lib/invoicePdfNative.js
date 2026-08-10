@@ -195,17 +195,18 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, CONTENT_X, y, logoSize);
   }
 
-  // Company name — centered, Georgia 22pt bold
+  // Company name — left-aligned after logo, Georgia 22pt bold
+  const brandX = CONTENT_X + logoSize + 3;
   pdf.setFont('times', 'bold');
   pdf.setFontSize(22);
   tc(pdf, MAROON);
-  pdf.text('BRONZE WINGS', PAGE_W / 2, y + 8, { align: 'center', charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', brandX, y + 8, { align: 'left', charSpace: 0.8 });
 
-  // Subtitle — centered, Georgia 14pt bold
+  // Subtitle — left-aligned, Georgia 14pt bold
   pdf.setFont('times', 'bold');
   pdf.setFontSize(14);
   tc(pdf, DARK_BLUE);
-  pdf.text('GENERAL TRANSPORT L.L.C', PAGE_W / 2, y + 14, { align: 'center', charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT L.L.C', brandX, y + 14, { align: 'left', charSpace: 0.5 });
 
   // Contact — right-aligned, wrapped to fit
   pdf.setFont('helvetica', 'normal');
