@@ -272,8 +272,6 @@ function drawLetterhead(pdf, s, y) {
 // ═══════════════════════════════════════════════════════════
 function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
   const h = 8;
-  fc(pdf, LBH);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(14);
@@ -364,8 +362,6 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 // ═══════════════════════════════════════════════════════════
 function drawTableHeader(pdf, cols, y) {
   const h = 12;
-  fc(pdf, LBH);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
 
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(8);
@@ -479,8 +475,6 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 // ═══════════════════════════════════════════════════════════
 function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 10;
-  fc(pdf, LBH);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
 
   // Top border (thicker dark blue)
   dc(pdf, DARK_BLUE);
@@ -592,8 +586,6 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 function drawAmountInWords(pdf, total, y) {
   const h = 11;
-  fc(pdf, BG_GRAY);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
   dc(pdf, BORDER_GRAY);
   pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
@@ -687,35 +679,44 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
 function drawFooterBanners(pdf) {
   const bw = PAGE_W - 2 * BORDER_POS;
 
-  // Banner 3 (bottom) — DARK_MAROON, 5.5pt
+  // Banner 3 (bottom) — CREAM bg, BROWN text (matches header)
   const b3h = 5;
   const b3y = FOOTER_BOTTOM - b3h;
-  fc(pdf, DARK_MAROON);
+  fc(pdf, [253, 251, 240]);
   pdf.rect(BORDER_POS, b3y, bw, b3h, 'F');
+  dc(pdf, [99, 60, 26]);
+  pdf.setLineWidth(0.4);
+  pdf.rect(BORDER_POS, b3y, bw, b3h);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
-  tc(pdf, WHITE);
+  tc(pdf, [99, 60, 26]);
   pdf.text('GENERAL TRANSPORT · HEAVY EQUIPMENT RENTAL · LOGISTICS · COLD CHAIN SOLUTIONS', PAGE_W / 2, b3y + 3.5, { align: 'center' });
 
-  // Banner 2 — MAROON, 8pt bold
+  // Banner 2 — CREAM bg, BROWN text
   const b2h = 5;
   const b2y = b3y - b2h;
-  fc(pdf, MAROON);
+  fc(pdf, [253, 251, 240]);
   pdf.rect(BORDER_POS, b2y, bw, b2h, 'F');
+  dc(pdf, [99, 60, 26]);
+  pdf.setLineWidth(0.4);
+  pdf.rect(BORDER_POS, b2y, bw, b2h);
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(11);
-  tc(pdf, WHITE);
+  tc(pdf, [99, 60, 26]);
   pdf.text('THANKS FOR DOING BUSINESS WITH US!', PAGE_W / 2, b2y + 3.5, { align: 'center' });
 
-  // Banner 1 — MAROON, 6pt
+  // Banner 1 — CREAM bg, BROWN text
   const b1h = 4;
   const b1y = b2y - b1h;
-  fc(pdf, MAROON);
+  fc(pdf, [253, 251, 240]);
   pdf.rect(BORDER_POS, b1y, bw, b1h, 'F');
+  dc(pdf, [99, 60, 26]);
+  pdf.setLineWidth(0.4);
+  pdf.rect(BORDER_POS, b1y, bw, b1h);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
-  tc(pdf, WHITE);
-  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION SERVICES', PAGE_W / 2, b1y + 3, { align: 'center' });
+  tc(pdf, [99, 60, 26]);
+  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, b1y + 3, { align: 'center' });
 }
 
 // ═══════════════════════════════════════════════════════════
