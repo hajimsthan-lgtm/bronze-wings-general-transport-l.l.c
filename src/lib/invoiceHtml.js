@@ -132,15 +132,14 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   </div>
 
   <!-- Tax Invoice Banner -->
-  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 100%);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;margin-bottom:10px;">
+  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 100%);padding:8px 14px;display:flex;justify-content:center;align-items:center;margin-top:8px;margin-bottom:10px;">
     <div style="font-size:16pt;font-weight:bold;color:${DBLUE};text-transform:uppercase;letter-spacing:1px;text-shadow:0 1px 0 rgba(255,255,255,0.5);">Tax Invoice</div>
-    <div style="text-align:right;font-size:11.5pt;color:${DBLUE};font-weight:bold;line-height:1.5;">
-      INVOICE #: ${esc(refNumber)}<br>DATE: ${invoiceDate}
-    </div>
   </div>
 
-  <!-- TRN -->
-  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5pt;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
+  <!-- INVOICE # and DATE -->
+  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5pt;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
+    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+  </div>
 
   <!-- Billing & Work Details -->
   <div style="position:relative;z-index:1;display:flex;gap:0;margin-bottom:10px;border:1px solid #ccc;">
@@ -341,30 +340,34 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Tax Invoice Banner -->
-  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="width:180px;"></div>
-    <div style="position:absolute;left:50%;transform:translateX(-50%);">
-      <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-    </div>
-    <div style="text-align:right;margin-left:auto;">
-      <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE #: <span style="font-weight:400;">${esc(refNumber)}</span></div>
-      <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
-    </div>
+  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
+    <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
   </div>
 
-  <!-- TRN -->
-  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
+  <!-- INVOICE # and DATE -->
+  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
+    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+  </div>
 
   <!-- Billing Section -->
-  <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:14px 28px;overflow:hidden;">
-    <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Bill To</div>
-    <div style="font-size:11px;line-height:1.7;color:#000;overflow-wrap:break-word;word-break:break-word;">
-      <div><strong style="color:#444;font-weight:700;">BILL TO:</strong> ${esc(billName)}</div>
-      ${invoice.contact_person ? `<div><strong style="color:#444;font-weight:700;">ATT:</strong> ${esc(invoice.contact_person)}</div>` : ''}
-      ${invoice.client_address ? `<div><strong style="color:#444;font-weight:700;">ADDRESS:</strong> ${esc(invoice.client_address)}</div>` : ''}
-      ${invoice.client_trn ? `<div><strong style="color:#444;font-weight:700;">TRN:</strong> ${esc(invoice.client_trn)}</div>` : ''}
-      ${invoice.sub ? `<div><strong style="color:#444;font-weight:700;">SUB:</strong> ${esc(invoice.sub)}</div>` : ''}
-      ${invoice.reg_no ? `<div><strong style="color:#444;font-weight:700;">REG NO:</strong> ${esc(invoice.reg_no)}</div>` : ''}
+  <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:14px 28px;overflow:hidden;display:flex;gap:20px;">
+    <div style="flex:1;">
+      <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Bill To</div>
+      <div style="font-size:11px;line-height:1.7;color:#000;overflow-wrap:break-word;word-break:break-word;">
+        <div><strong style="color:#444;font-weight:700;">BILL TO:</strong> ${esc(billName)}</div>
+        ${invoice.contact_person ? `<div><strong style="color:#444;font-weight:700;">ATT:</strong> ${esc(invoice.contact_person)}</div>` : ''}
+        ${invoice.client_address ? `<div><strong style="color:#444;font-weight:700;">ADDRESS:</strong> ${esc(invoice.client_address)}</div>` : ''}
+        ${invoice.client_trn ? `<div><strong style="color:#444;font-weight:700;">TRN:</strong> ${esc(invoice.client_trn)}</div>` : ''}
+        ${invoice.sub ? `<div><strong style="color:#444;font-weight:700;">SUB:</strong> ${esc(invoice.sub)}</div>` : ''}
+        ${invoice.reg_no ? `<div><strong style="color:#444;font-weight:700;">REG NO:</strong> ${esc(invoice.reg_no)}</div>` : ''}
+      </div>
+    </div>
+    <div style="flex-shrink:0;text-align:right;">
+      <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
+      <div style="font-size:11px;line-height:1.7;color:#000;">
+        <div><strong style="color:#444;font-weight:700;">#:</strong> ${esc(refNumber)}</div>
+        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
+      </div>
     </div>
   </div>
 
@@ -537,30 +540,34 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Tax Invoice Banner -->
-  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="width:180px;"></div>
-    <div style="position:absolute;left:50%;transform:translateX(-50%);">
-      <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
-    </div>
-    <div style="text-align:right;margin-left:auto;">
-      <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE #: <span style="font-weight:400;">${esc(refNumber)}</span></div>
-      <div style="font-size:11.5px;color:${DBLUE};font-weight:700;letter-spacing:0.5px;line-height:1.6;">INVOICE DATE: <span style="font-weight:400;">${invoiceDate}</span></div>
-    </div>
+  <div style="position:relative;z-index:1;background:linear-gradient(90deg,${LB} 0%,${LBH} 50%,${LB} 100%);padding:10px 28px;display:flex;justify-content:center;align-items:center;">
+    <h2 style="font-size:17px;font-weight:800;color:${DBLUE};text-transform:uppercase;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,0.6);margin:0;">Tax Invoice</h2>
   </div>
 
-  <!-- TRN -->
-  ${s.trn ? `<div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">TRN: ${esc(s.trn)}</div>` : ''}
+  <!-- INVOICE # and DATE -->
+  <div style="position:relative;z-index:1;text-align:center;color:${DBLUE};font-size:11.5px;font-weight:bold;letter-spacing:1px;padding:4px 0 6px;">
+    INVOICE #: ${esc(refNumber)}<br>INVOICE DATE: ${invoiceDate}
+  </div>
 
   <!-- Billing Section -->
-  <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:12px 28px;overflow:hidden;">
-    <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Bill To</div>
-    <div style="font-size:10.5px;line-height:1.65;color:#000;overflow-wrap:break-word;word-break:break-word;">
-      <div><strong style="color:#444;font-weight:700;">BILL TO:</strong> ${esc(billName)}</div>
-      ${invoice.contact_person ? `<div><strong style="color:#444;font-weight:700;">ATT:</strong> ${esc(invoice.contact_person)}</div>` : ''}
-      ${invoice.client_address ? `<div><strong style="color:#444;font-weight:700;">ADDRESS:</strong> ${esc(invoice.client_address)}</div>` : ''}
-      ${invoice.client_trn ? `<div><strong style="color:#444;font-weight:700;">TRN:</strong> ${esc(invoice.client_trn)}</div>` : ''}
-      ${invoice.sub ? `<div><strong style="color:#444;font-weight:700;">SUB:</strong> ${esc(invoice.sub)}</div>` : ''}
-      ${invoice.reg_no ? `<div><strong style="color:#444;font-weight:700;">REG NO:</strong> ${esc(invoice.reg_no)}</div>` : ''}
+  <div style="position:relative;z-index:1;border:1px solid #ccc;border-bottom:1px solid #ccc;background:#fff;padding:12px 28px;overflow:hidden;display:flex;gap:20px;">
+    <div style="flex:1;">
+      <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Bill To</div>
+      <div style="font-size:10.5px;line-height:1.65;color:#000;overflow-wrap:break-word;word-break:break-word;">
+        <div><strong style="color:#444;font-weight:700;">BILL TO:</strong> ${esc(billName)}</div>
+        ${invoice.contact_person ? `<div><strong style="color:#444;font-weight:700;">ATT:</strong> ${esc(invoice.contact_person)}</div>` : ''}
+        ${invoice.client_address ? `<div><strong style="color:#444;font-weight:700;">ADDRESS:</strong> ${esc(invoice.client_address)}</div>` : ''}
+        ${invoice.client_trn ? `<div><strong style="color:#444;font-weight:700;">TRN:</strong> ${esc(invoice.client_trn)}</div>` : ''}
+        ${invoice.sub ? `<div><strong style="color:#444;font-weight:700;">SUB:</strong> ${esc(invoice.sub)}</div>` : ''}
+        ${invoice.reg_no ? `<div><strong style="color:#444;font-weight:700;">REG NO:</strong> ${esc(invoice.reg_no)}</div>` : ''}
+      </div>
+    </div>
+    <div style="flex-shrink:0;text-align:right;">
+      <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
+      <div style="font-size:10.5px;line-height:1.65;color:#000;">
+        <div><strong style="color:#444;font-weight:700;">#:</strong> ${esc(refNumber)}</div>
+        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
+      </div>
     </div>
   </div>
 

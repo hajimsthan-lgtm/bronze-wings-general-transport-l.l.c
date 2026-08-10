@@ -280,20 +280,15 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
   tc(pdf, DARK_BLUE);
   pdf.text('TAX INVOICE', PAGE_W / 2, y + 5.5, { align: 'center' });
 
-  pdf.setFontSize(10);
-  pdf.text(`INVOICE #: ${refNumber}`, CONTENT_RIGHT - 2, y + 3, { align: 'right' });
-  pdf.text(`INVOICE DATE: ${invoiceDate}`, CONTENT_RIGHT - 2, y + 6.5, { align: 'right' });
-
   let nextY = y + h + 1;
 
-  // TRN — centered below the tax invoice bar
-  if (trn) {
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(9);
-    tc(pdf, DARK_BLUE);
-    pdf.text(`TRN: ${str(trn)}`, PAGE_W / 2, nextY + 3, { align: 'center' });
-    nextY += 5;
-  }
+  // INVOICE # and DATE — centered below the tax invoice bar
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  tc(pdf, DARK_BLUE);
+  pdf.text(`INVOICE #: ${refNumber}`, PAGE_W / 2, nextY + 3, { align: 'center' });
+  pdf.text(`INVOICE DATE: ${invoiceDate}`, PAGE_W / 2, nextY + 7, { align: 'center' });
+  nextY += 11;
 
   return nextY + 1;
 }
@@ -303,7 +298,8 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
 // ═══════════════════════════════════════════════════════════
 function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate) {
   const leftX = CONTENT_X + 3;
-  const maxTextWidth = CONTENT_W - 6; // strict inner margin on both sides
+  const rightX = CONTENT_RIGHT - 3;
+  const maxTextWidth = CONTENT_W * 0.62; // left column — leave room for right column
 
   // Build all billing lines, then pre-wrap each to the inner width
   const rawLines = [];
@@ -354,6 +350,21 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
       ly += lineH;
     }
   }
+
+  // ── RIGHT: INVOICE # and DATE ──
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  tc(pdf, MAROON);
+  pdf.text('INVOICE', rightX, y + 4, { align: 'right' });
+  dc(pdf, MAROON);
+  pdf.setLineWidth(0.3);
+  pdf.line(rightX - 15, y + 5, rightX, y + 5);
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  tc(pdf, BLACK);
+  pdf.text(`#: ${refNumber}`, rightX, y + 9, { align: 'right' });
+  pdf.text(`DATE: ${invoiceDate}`, rightX, y + 13, { align: 'right' });
 
   return y + h + 2;
 }
