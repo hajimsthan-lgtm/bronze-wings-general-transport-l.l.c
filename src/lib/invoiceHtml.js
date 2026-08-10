@@ -189,7 +189,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
         <td style="padding:8px 3px;border:1px solid #bbb;border-top:2px solid ${DBLUE};font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalDiscount)}</td>
         <td style="padding:8px 3px;border:1px solid #bbb;border-top:2px solid ${DBLUE};font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalTaxable)}</td>
         <td style="padding:8px 3px;border:1px solid #bbb;border-top:2px solid ${DBLUE};font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 3px;border:1px solid #bbb;border-top:2px solid ${DBLUE};font-weight:bold;font-size:11.5pt;color:${MAROON};text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td style="padding:8px 3px;border:1px solid #bbb;border-top:2px solid ${DBLUE};font-weight:bold;font-size:11.5pt;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
@@ -387,7 +387,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
         <td colspan="5" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
         <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
         <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11.5px;color:${MAROON};text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td style="padding:8px 6px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11.5px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
@@ -410,12 +410,12 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex:1.2;display:flex;flex-direction:column;">
       <div style="display:flex;gap:25px;justify-content:space-between;">
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
+          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
           <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
           <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>${esc(billName)}</div>
+          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
           <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
           <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
         </div>
@@ -581,7 +581,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
         <td colspan="5" style="padding:8px 10px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:10.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
         <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
         <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11px;color:${MAROON};text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td style="padding:8px 5px;border:1px solid #999;border-top:2px solid ${DBLUE};font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
@@ -607,12 +607,12 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex:1.2;display:flex;flex-direction:column;">
       <div style="display:flex;gap:25px;justify-content:space-between;">
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
+          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
           <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
           <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:${MAROON};text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>${esc(billName)}</div>
+          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
           <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
           <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
         </div>

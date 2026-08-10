@@ -502,7 +502,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   pdf.setFont('courier', 'bold');
   pdf.setFontSize(10);
   for (let i = 0; i < valCount; i++) {
-    tc(pdf, i === valCount - 1 ? MAROON : BLACK);
+    tc(pdf, BLACK);
     pdf.text(fmtMoney(vals[i]), valCols[i].right - 2, y + h / 2 + 1, { align: 'right' });
   }
 
@@ -611,11 +611,14 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
   const labelLines = label.split('\n');
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(8);
-  tc(pdf, MAROON);
+  tc(pdf, BLACK);
   let ly = y + 4;
   for (const line of labelLines) {
-    pdf.text(line.toUpperCase(), x + w / 2, ly, { align: 'center' });
-    ly += 3.5;
+    const wrapped = pdf.splitTextToSize(line.toUpperCase(), w - 2);
+    for (const wl of wrapped) {
+      pdf.text(wl, x + w / 2, ly, { align: 'center' });
+      ly += 3.5;
+    }
   }
 
   // 12mm signature space then line
