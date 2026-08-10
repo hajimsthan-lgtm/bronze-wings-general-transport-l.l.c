@@ -208,7 +208,7 @@ function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 30;
+  const boxH = 26;
 
   // Bordered box with cream background
   fc(pdf, CREAM);

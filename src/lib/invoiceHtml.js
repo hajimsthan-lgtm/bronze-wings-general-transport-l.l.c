@@ -113,7 +113,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
 
   <!-- Company Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
     <div style="flex-shrink:0;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:60px;width:60px;border-radius:50%;object-fit:cover;" />` : ''}
     </div>
@@ -316,7 +316,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
     <div style="flex-shrink:0;width:58px;height:58px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
@@ -511,7 +511,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:10px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
     <div style="flex-shrink:0;width:54px;height:54px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
