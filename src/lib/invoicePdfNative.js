@@ -237,23 +237,23 @@ function drawLetterhead(pdf, s, y) {
   tc(pdf, BROWN);
 
   // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 3, BROWN);
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
 
   // Company name — left-aligned
   pdf.setFont('times', 'bold');
   pdf.setFontSize(24);
-  pdf.text('BRONZE WINGS', textX, textTop + 10, { charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', textX, textTop + 12, { charSpace: 0.8 });
 
   // Subtitle — left-aligned
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(11);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 15, { charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 16, { charSpace: 0.5 });
 
-  // TRN — left-aligned
+  // TRN — center-aligned near bottom of letterhead
   if (s.trn) {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
-    pdf.text(`TRN: ${str(s.trn)}`, textX, textTop + 19);
+    pdf.text(`TRN: ${str(s.trn)}`, CONTENT_X + CONTENT_W / 2, y + boxH - 4, { align: 'center' });
   }
 
   // Right contact column — right-aligned, each on its own line
