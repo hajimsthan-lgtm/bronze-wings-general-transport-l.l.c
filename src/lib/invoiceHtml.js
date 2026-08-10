@@ -153,8 +153,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <div style="width:200px;padding:12px;">
       <div style="font-size:11.5pt;font-weight:bold;color:${MAROON};text-transform:uppercase;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #ccc;">Invoice</div>
       <div style="font-size:10.5pt;color:#000;line-height:1.9;">
-        <div><strong>INVOICE:</strong> ${esc(refNumber)}</div>
-        <div><strong>DATE:</strong> ${invoiceDate}</div>
+        <div><strong>INVOICE #:</strong> ${esc(refNumber)}</div>
+        <div><strong>INVOICE DATE:</strong> ${invoiceDate}</div>
         <div><strong>WORKING DATE:</strong> ${workingDate}</div>
       </div>
     </div>
@@ -357,8 +357,8 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex-shrink:0;text-align:right;">
       <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:11px;line-height:1.7;color:#000;">
-        <div><strong style="color:#444;font-weight:700;">#:</strong> ${esc(refNumber)}</div>
-        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
+        <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
+        <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>
       </div>
     </div>
   </div>
@@ -553,8 +553,8 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     <div style="flex-shrink:0;text-align:right;">
       <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Invoice</div>
       <div style="font-size:10.5px;line-height:1.65;color:#000;">
-        <div><strong style="color:#444;font-weight:700;">#:</strong> ${esc(refNumber)}</div>
-        <div><strong style="color:#444;font-weight:700;">DATE:</strong> ${invoiceDate}</div>
+        <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
+        <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>
       </div>
     </div>
   </div>

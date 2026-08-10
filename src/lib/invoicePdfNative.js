@@ -361,8 +361,8 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   tc(pdf, BLACK);
-  pdf.text(`#: ${refNumber}`, rightX, y + 9, { align: 'right' });
-  pdf.text(`DATE: ${invoiceDate}`, rightX, y + 13, { align: 'right' });
+  pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 9, { align: 'right' });
+  pdf.text(`INVOICE DATE: ${invoiceDate}`, rightX, y + 13, { align: 'right' });
 
   return y + h + 2;
 }
