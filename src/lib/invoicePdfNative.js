@@ -222,12 +222,11 @@ function drawLetterhead(pdf, s, y) {
     cy += 3.2;
   }
 
-  // TRN — right-aligned
+  // TRN — centered below subtitle
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
   tc(pdf, MAROON);
-  pdf.text(`TRN: ${str(s.trn)}`, CONTENT_RIGHT, cy, { align: 'right' });
-  cy += 3;
+  pdf.text(`TRN: ${str(s.trn)}`, PAGE_W / 2, y + 18, { align: 'center' });
 
   // Separator line
   dc(pdf, MAROON);
