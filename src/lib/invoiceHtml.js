@@ -113,11 +113,11 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
 
   <!-- Company Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
     <div style="flex-shrink:0;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:84px;width:84px;border-radius:50%;object-fit:cover;" />` : ''}
     </div>
-    <div style="flex:1;text-align:left;padding:0 10px;">
+    <div style="flex:1;text-align:left;padding:4px 10px 0;">
       <div style="font-size:11.5pt;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:26pt;font-weight:bold;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
       <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10.5pt;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
@@ -238,7 +238,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="flex:1 1 auto;"></div>
 
   <!-- Footer Banners -->
-  <div style="position:relative;z-index:1;background:${MAROON};color:#fff;text-align:center;padding:10px 14px;font-size:13pt;font-weight:bold;text-transform:uppercase;margin-top:14px;">
+  <div style="position:relative;z-index:1;background:${MAROON};color:#fff;text-align:center;padding:10px 14px;font-size:13pt;font-weight:bold;text-transform:uppercase;margin-top:28px;">
     Thanks for Doing Business with Us!
   </div>
   <div style="position:relative;z-index:1;background:${MAROON};color:rgba(255,255,255,0.95);text-align:center;padding:7px 14px;font-size:10.5pt;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
@@ -320,11 +320,11 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:14px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
     <div style="flex-shrink:0;width:82px;height:82px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="flex:1;text-align:left;padding:0 10px;">
+    <div style="flex:1;text-align:left;padding:4px 10px 0;">
       <div style="font-size:11.5px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
       <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:12px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
@@ -425,7 +425,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Footer Banners -->
-  <div style="position:relative;z-index:1;margin-top:auto;">
+  <div style="position:relative;z-index:1;margin-top:auto;padding-top:14px;">
     <div style="background:${MAROON};color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       Thanks for Doing Business with Us!
     </div>
@@ -514,11 +514,11 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.02);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:12px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
     <div style="flex-shrink:0;width:72px;height:72px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="flex:1;text-align:left;padding:0 10px;">
+    <div style="flex:1;text-align:left;padding:4px 10px 0;">
       <div style="font-size:11px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:700;color:#633C1A;letter-spacing:3px;line-height:1.1;margin-top:2px;">BRONZE WINGS</div>
       <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:12px;font-weight:600;color:#633C1A;letter-spacing:1.5px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
@@ -594,7 +594,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Spacer -->
-  <div style="flex:1 1 auto;min-height:30px;"></div>
+  <div style="flex:1 1 auto;min-height:50px;"></div>
 
   <!-- Bottom Section -->
   <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:12px 28px 15px 28px;align-items:flex-start;margin-top:8px;">

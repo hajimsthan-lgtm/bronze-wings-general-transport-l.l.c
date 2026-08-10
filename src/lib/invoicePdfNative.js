@@ -179,6 +179,30 @@ function drawDefaultLogo(pdf, x, y, size) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// DRAW: ARABIC TEXT (rendered via canvas for Unicode support)
+// ═══════════════════════════════════════════════════════════
+function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const dpi = 3;
+    const fontPx = fontSizeMm * 3.78 * dpi;
+    ctx.font = `bold ${fontPx}px 'Arial', 'Segoe UI', sans-serif`;
+    const metrics = ctx.measureText(text);
+    canvas.width = Math.ceil(metrics.width) + 4;
+    canvas.height = Math.ceil(fontPx * 1.4);
+    ctx.font = `bold ${fontPx}px 'Arial', 'Segoe UI', sans-serif`;
+    ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(text, 2, 0);
+    const dataUrl = canvas.toDataURL('image/png');
+    const imgW = canvas.width / (3.78 * dpi);
+    const imgH = canvas.height / (3.78 * dpi);
+    pdf.addImage(dataUrl, 'PNG', x, y, imgW, imgH);
+  } catch (e) { /* skip if canvas unavailable */ }
+}
+
+// ═══════════════════════════════════════════════════════════
 // DRAW: LETTERHEAD (all pages)
 // ═══════════════════════════════════════════════════════════
 function drawLetterhead(pdf, s, y) {
@@ -207,30 +231,34 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // Company text — left-aligned, starting right of logo
+  // Company text — left-aligned, top-aligned with logo
   const textX = logoX + logoSize + 4;
+  const textTop = logoY;
   tc(pdf, BROWN);
+
+  // Arabic name — above company name, aligned with logo top
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 3, BROWN);
 
   // Company name — left-aligned
   pdf.setFont('times', 'bold');
   pdf.setFontSize(24);
-  pdf.text('BRONZE WINGS', textX, y + 10, { charSpace: 0.8 });
+  pdf.text('BRONZE WINGS', textX, textTop + 10, { charSpace: 0.8 });
 
   // Subtitle — left-aligned
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(11);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, y + 15, { charSpace: 0.5 });
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 15, { charSpace: 0.5 });
 
   // TRN — left-aligned
   if (s.trn) {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
-    pdf.text(`TRN: ${str(s.trn)}`, textX, y + 19);
+    pdf.text(`TRN: ${str(s.trn)}`, textX, textTop + 19);
   }
 
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
-  let cy = y + 6;
+  let cy = y + 8;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
   tc(pdf, BROWN);
@@ -567,8 +595,8 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
     ly += 3.5;
   }
 
-  // 9mm signature space then line
-  const sigY = ly + 9;
+  // 12mm signature space then line
+  const sigY = ly + 12;
   dc(pdf, GRAY);
   pdf.setLineWidth(0.3);
   pdf.line(x, sigY, x + w, sigY);
@@ -619,7 +647,7 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
   drawSignatureBlock(pdf, sigX, y, eachW, 'FOR\nBRONZE WINGS\nGENERAL TRANSPORT L.L.C', 'Authorized Signature & Stamp', null);
   drawSignatureBlock(pdf, sigX + eachW + gap, y, eachW, `FOR\n${str(clientName || invoice.client_name || '')}`, 'Receiver Sign & Stamp', str(s.phone1) || '050-8655601');
 
-  return y + 32;
+  return y + 38;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -690,7 +718,7 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   y = tableY;
 
   // ══ AMOUNT WORDS + SIGNATURES (page-break-inside: avoid) ══
-  const blockH = 11 + 3 + 36; // amount words + gap + bank/signatures
+  const blockH = 11 + 8 + 40; // amount words + gap + bank/signatures
   if (y + blockH > FOOTER_TOP - 2) {
     pdf.addPage();
     drawPageBorder(pdf);
@@ -698,7 +726,7 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   }
 
   y = drawAmountInWords(pdf, total, y);
-  y += 3; // gap before signatures
+  y += 8; // gap before signatures
   drawBankAndSignatures(pdf, invoice, clientName, s, y);
 
   // ══ FOOTER BANNERS (bottom of last page, never floating) ══
