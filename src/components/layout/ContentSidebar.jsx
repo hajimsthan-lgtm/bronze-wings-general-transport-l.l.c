@@ -1,305 +1,143 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useTabHistory } from '@/lib/TabHistoryContext';
 import { useI18n } from '@/lib/i18n';
 import {
   Truck, ChartColumn, UsersRound,
-  Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2 } from
-'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+  Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
+} from 'lucide-react';
 
-import { useRailVisible, useRailDimming, useRailExpanded, railVisibility } from '@/lib/railVisibility';
-
-/* Each nav item carries its own duotone gradient, glow color, and sub-routes. */
+/* Pill Rail — flat glassmorphic pills grouped by section headers, joined by a
+   vertical bronze spine. Always expanded, permanently visible (no auto-hide). */
 const navItems = [
-{
-  key: 'operations', icon: Truck, label: 'Operations',
-  from: '#0ea5e9', to: '#0369a1', glow: '14,165,233', paths: ['/trips', '/contracts', '/expenses'],
-  children: [
-  { key: 'trips', label: 'Trips', path: '/trips', icon: Route, from: '#3b82f6', to: '#1e3a8a', glow: '59,130,246' },
-  { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, from: '#f59e0b', to: '#b45309', glow: '245,158,11' }]
+  {
+    key: 'operations', label: 'Operations',
+    children: [
+      { key: 'trips', label: 'Trips', path: '/trips', icon: Route, glow: '184,70,58' },
+      { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, glow: '196,163,90' },
+    ],
+  },
+  {
+    key: 'reports', label: 'Reports',
+    children: [
+      { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, glow: '196,163,90' },
+      { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, glow: '184,70,58' },
+      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, glow: '212,99,79' },
+      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, glow: '184,70,58' },
+    ],
+  },
+  {
+    key: 'admin', label: 'Admin',
+    children: [
+      { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, glow: '139,58,46' },
+      { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, glow: '196,163,90' },
+      { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, glow: '184,70,58' },
+    ],
+  },
+];
 
-},
-{
-  key: 'reports', icon: ChartColumn, label: 'Reports',
-  from: '#B8463A', to: '#6B2A20', glow: '184,70,58', paths: ['/reports'],
-  children: [
-  { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, from: '#C4A35A', to: '#8B6A2E', glow: '196,163,90' },
-  { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, from: '#A0522D', to: '#6B2A20', glow: '160,82,45' },
-  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, from: '#D4634F', to: '#8B3A2E', glow: '212,99,79' },
-  { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, from: '#B8463A', to: '#6B2A20', glow: '184,70,58' }]
-
-},
-{
-  key: 'admin', icon: UsersRound, label: 'Admin',
-  from: '#f59e0b', to: '#c2410c', glow: '245,158,11', paths: ['/admin'],
-  children: [
-  { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, from: '#8B3A2E', to: '#6B2A20', glow: '139,58,46' },
-  { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, from: '#10b981', to: '#047857', glow: '16,185,129' },
-  { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, from: '#f43f5e', to: '#9f1239', glow: '244,63,94' }]
-
-}];
-
-
-const COLLAPSED_W = 64;
-const EXPANDED_W = 244;
+const RAIL_W = 204;
 
 export default function ContentSidebar() {
   const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { switchTab } = useTabHistory();
-  const expanded = useRailExpanded();
-  const panelVisible = useRailVisible();
-  const panelDimming = useRailDimming();
-  const [hoveredKey, setHoveredKey] = useState(null);
   const [hoveredChild, setHoveredChild] = useState(null);
-  const dimTimer = useRef(null);
-  const vanishTimer = useRef(null);
-  const collapseTimer = useRef(null);
-  const asideRef = useRef(null);
-
-  /* idle timeline: dimming begins at 5s, full vanish at 10s; any activity resets it */
-  const poke = () => {
-    clearTimeout(dimTimer.current);
-    clearTimeout(vanishTimer.current);
-    railVisibility.set(true);
-    railVisibility.setDimming(false);
-    dimTimer.current = setTimeout(() => railVisibility.setDimming(true), 5000);
-    vanishTimer.current = setTimeout(() => railVisibility.set(false), 10000);
-  };
-
-  const isActive = (item) =>
-  (item.paths || []).some((p) => p === '/' ? location.pathname === '/' : location.pathname.startsWith(p));
 
   const isChildActive = (child) =>
-  location.pathname === child.path || location.pathname.startsWith(child.path + '/');
-
-  useEffect(() => {poke();return () => {clearTimeout(dimTimer.current);clearTimeout(vanishTimer.current);};}, []);
-
-  useEffect(() => {
-    const handleClick = (e) => {
-      if (asideRef.current && !asideRef.current.contains(e.target)) {
-        clearTimeout(collapseTimer.current);
-        railVisibility.setExpanded(false);
-        setHoveredKey(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
-
-  const width = expanded ? EXPANDED_W : COLLAPSED_W;
-
-  /* ── Parent floating glass dock ── */
-  const renderItem = (item) => {
-    const active = isActive(item);
-    const label = t(item.key) || item.label;
-    const hasChildren = !!item.children?.length;
-    const showChildren = expanded && hasChildren;
-    const dimmed = expanded && hoveredKey !== null && hoveredKey !== item.key;
-    const lit = active || hoveredKey === item.key;
-
-    return (
-      <div
-        key={item.key}
-        className={`relative transition-opacity duration-300 flex flex-col ${expanded ? 'items-start' : 'items-center'}`}
-        style={{ opacity: dimmed ? 0.12 : 1 }}>
-        
-        <div className={`flex items-center ${expanded ? 'gap-2' : ''}`}>
-          <button
-            onClick={() => {
-              poke();
-              if (hasChildren) navigate(item.children[0].path);else
-              switchTab(item.key);
-            }}
-            onMouseEnter={() => {poke();setHoveredKey(item.key);}}
-            aria-label={label}
-            className="group relative inline-flex items-center justify-center rounded-full transition-all duration-500 select-none"
-            style={{
-              height: 38,
-              width: 38,
-              padding: 0,
-              background: 'transparent',
-              border: 'none',
-              boxShadow: 'none',
-              backdropFilter: 'none',
-              WebkitBackdropFilter: 'none',
-              cursor: 'pointer',
-              touchAction: 'manipulation'
-            }}>
-            
-            {/* icon bubble — sits on the spine */}
-            <span
-              className={`nav-orb ${lit ? 'nav-orb-lit' : ''} relative flex items-center justify-center shrink-0 rounded-full pointer-events-none transition-all duration-300`}
-              style={{
-                '--orb-glow': item.glow,
-                '--orb-glow2': item.glow,
-                width: 38, height: 38,
-                border: `1px solid rgba(${item.glow},${lit ? 0.55 : 0.18})`,
-                boxShadow: lit ?
-                `0 0 16px rgba(${item.glow},0.45), 0 4px 16px rgba(${item.glow},0.28)` :
-                `0 2px 8px rgba(0,0,0,0.3)`
-              }}>
-              
-              <item.icon
-                strokeWidth={1.5}
-                style={{
-                  width: expanded ? 14 : 16, height: expanded ? 14 : 16,
-                  color: lit ? '#fff' : `rgba(${item.glow},0.92)`,
-                  filter: lit ? `drop-shadow(0 0 5px rgba(${item.glow},0.65))` : 'none'
-                }} />
-              
-            </span>
-
-            {/* floating label bubble — collapsed only */}
-            {!expanded &&
-            <span className="pointer-events-none absolute left-full ml-3 top-1/2 -translate-y-1/2 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 z-50">
-                <span
-                className="inline-block whitespace-nowrap px-3 py-1.5 rounded-xl text-[12px] font-semibold tracking-wide"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(10,14,26,0.94), rgba(20,26,44,0.86))',
-                  backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                  border: `1px solid rgba(${item.glow},0.30)`,
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 22px rgba(0,0,0,0.5), 0 0 18px -6px rgba(${item.glow},0.5)`,
-                  color: '#fff'
-                }}>
-                
-                  {label}
-                </span>
-              </span>
-            }
-          </button>
-
-          {/* text bubble — separate pill, expanded only */}
-          {expanded &&
-          <button
-            onClick={() => {
-              poke();
-              if (hasChildren) navigate(item.children[0].path);else
-              switchTab(item.key);
-            }}
-            onMouseEnter={() => {poke();setHoveredKey(item.key);}}
-            aria-label={label}
-            className="text-[11px] font-semibold tracking-[0.07em] uppercase whitespace-nowrap rounded-full transition-all duration-300 cursor-pointer"
-            style={{
-              padding: '0 12px',
-              height: 28,
-              display: 'inline-flex',
-              alignItems: 'center',
-              color: lit ? '#fff' : 'rgba(255,255,255,0.72)',
-              background: lit ?
-              `linear-gradient(135deg, rgba(${item.glow},0.28), rgba(${item.glow},0.12))` :
-              'rgba(255,255,255,0.04)',
-              border: `1px solid rgba(${item.glow},${lit ? 0.50 : 0.14})`,
-              boxShadow: lit ?
-              `inset 0 1px 0 rgba(255,255,255,0.12), 0 4px 16px rgba(${item.glow},0.28)` :
-              'inset 0 1px 0 rgba(255,255,255,0.04)'
-            }}>
-            
-              {label}
-            </button>
-          }
-        </div>
-
-        {/* ── Child docks — nested text pills on a branch connector ── */}
-        {showChildren &&
-        <div className="relative mt-2 space-y-2" style={{ animation: 'fade-in 0.25s ease both', paddingLeft: 26 }}>
-            {/* branch connector from spine to children */}
-            <span
-            className="absolute left-[19px] top-0 bottom-0 w-px pointer-events-none"
-            style={{ background: `linear-gradient(180deg, rgba(${item.glow},0.45), rgba(${item.glow},0.12))` }} />
-          
-            {item.children.map((child) => {
-            const childActive = isChildActive(child);
-            const childLabel = child.label || t(child.key);
-            return (
-              <button
-                key={child.key}
-                onClick={() => {poke();navigate(child.path);}}
-                onMouseEnter={() => {poke();setHoveredChild(child.key);}}
-                onMouseLeave={() => setHoveredChild(null)}
-                aria-label={childLabel}
-                className="group relative flex items-center rounded-full transition-all duration-500 select-none"
-                style={{
-                  height: 34,
-                  padding: '0 16px',
-                  gap: 8,
-                  background: childActive || hoveredChild === child.key ?
-                  `linear-gradient(135deg, rgba(${child.glow},0.20), rgba(${child.glow},0.07))` :
-                  'rgba(19,28,42,0.82)',
-                  border: `1px solid ${childActive || hoveredChild === child.key ? `rgba(${child.glow},0.42)` : 'rgba(255,255,255,0.07)'}`,
-                  boxShadow: childActive || hoveredChild === child.key ?
-                  `inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(${child.glow},0.26)` :
-                  'inset 0 1px 0 rgba(255,255,255,0.03)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  cursor: 'pointer',
-                  touchAction: 'manipulation'
-                }}>
-                
-                  {/* small node dot on the branch line */}
-                  <span
-                  className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full pointer-events-none"
-                  style={{
-                    background: childActive || hoveredChild === child.key ? `rgb(${child.glow})` : 'rgba(170,184,200,0.4)',
-                    boxShadow: childActive || hoveredChild === child.key ? `0 0 6px rgba(${child.glow},0.8)` : 'none'
-                  }} />
-                
-                  <span
-                  className="text-[10px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap pointer-events-none"
-                  style={{ color: childActive || hoveredChild === child.key ? '#fff' : 'rgba(255,255,255,0.62)' }}>
-                  
-                    {childLabel}
-                  </span>
-                </button>);
-
-          })}
-          </div>
-        }
-      </div>);
-
-  };
+    location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
   return (
     <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
       <aside
-        ref={asideRef}
-        onMouseEnter={() => {poke();clearTimeout(collapseTimer.current);railVisibility.setExpanded(true);}}
-        onMouseLeave={() => {clearTimeout(collapseTimer.current);collapseTimer.current = setTimeout(() => {railVisibility.setExpanded(false);setHoveredKey(null);}, 1000);}}
         className="relative flex flex-col h-full"
         style={{
-          width,
-          paddingTop: 16,
-          paddingBottom: 16,
-          paddingLeft: 8,
-          paddingRight: 8,
-          gap: 14,
+          width: RAIL_W,
+          paddingTop: 22,
+          paddingBottom: 22,
+          paddingLeft: 14,
+          paddingRight: 14,
           background: 'linear-gradient(180deg, #1a1010 0%, #140c0c 100%)',
           borderRight: '1px solid rgba(184,70,58,0.18)',
-          backdropFilter: 'none',
-          WebkitBackdropFilter: 'none',
           boxShadow: '4px 0 24px rgba(0,0,0,0.45)',
           overflow: 'visible',
-          opacity: panelDimming ? 0 : 1,
-          pointerEvents: panelVisible ? 'auto' : 'none',
-          transition:
-          `width ${expanded ? '.6s' : '.25s'} cubic-bezier(0.16,1,0.3,1), opacity ${panelDimming ? '5s' : '0.3s'} ease`
-        }}>
-        
-        {/* vertical spine connector — runs through all dock nodes */}
-        
+        }}
+      >
+        {/* vertical bronze spine — runs through the center of every pill */}
+        <span
+          className="absolute top-6 bottom-6 w-px pointer-events-none"
+          style={{
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background:
+              'linear-gradient(180deg, transparent 0%, rgba(196,163,90,0.28) 6%, rgba(196,163,90,0.28) 94%, transparent 100%)',
+            zIndex: 0,
+          }}
+        />
 
+        <div
+          className="relative flex-1 overflow-y-auto thin-scroll flex flex-col gap-6"
+          style={{ zIndex: 1 }}
+          onMouseLeave={() => setHoveredChild(null)}
+        >
+          {navItems.map((section) => (
+            <div key={section.key} className="flex flex-col items-center gap-2.5">
+              {/* section header */}
+              <span
+                className="text-[10px] font-semibold tracking-[0.16em] uppercase whitespace-nowrap my-1"
+                style={{ color: 'rgba(196,163,90,0.88)' }}
+              >
+                {t(section.key) || section.label}
+              </span>
 
-
-
-        
-        
-
-        {/* Scrollable dock list */}
-        <div className="relative flex-1 overflow-y-auto thin-scroll space-y-5" onMouseLeave={() => setHoveredKey(null)}>
-          {navItems.map(renderItem)}
+              {/* pills */}
+              {section.children.map((child) => {
+                const active = isChildActive(child);
+                const lit = active || hoveredChild === child.key;
+                const label = child.label || t(child.key);
+                return (
+                  <button
+                    key={child.key}
+                    onClick={() => navigate(child.path)}
+                    onMouseEnter={() => setHoveredChild(child.key)}
+                    aria-label={label}
+                    className="relative flex items-center justify-center gap-2 rounded-full transition-all duration-300 select-none"
+                    style={{
+                      height: 38,
+                      padding: '0 18px',
+                      background: lit
+                        ? `linear-gradient(135deg, rgba(${child.glow},0.24), rgba(${child.glow},0.08))`
+                        : 'rgba(255,255,255,0.035)',
+                      border: `1px solid ${lit ? 'rgba(196,163,90,0.55)' : 'rgba(255,255,255,0.08)'}`,
+                      boxShadow: lit
+                        ? '0 0 0 1px rgba(196,163,90,0.30), 0 0 20px -4px rgba(196,163,90,0.55), inset 0 1px 0 rgba(255,255,255,0.12)'
+                        : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <child.icon
+                      strokeWidth={1.5}
+                      style={{
+                        width: 15,
+                        height: 15,
+                        color: lit ? '#FDF8ED' : `rgba(${child.glow},0.92)`,
+                        filter: active ? 'drop-shadow(0 0 4px rgba(196,163,90,0.6))' : 'none',
+                      }}
+                    />
+                    <span
+                      className="text-[11px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+                      style={{ color: lit ? '#FDF8ED' : 'rgba(255,255,255,0.72)' }}
+                    >
+                      {label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </aside>
-    </div>);
-
+    </div>
+  );
 }
