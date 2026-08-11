@@ -18,10 +18,10 @@ import { useReportClient } from '@/lib/reportClientFilter';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 
 const contentCardStyle = {
-  background: '#232636',
-  border: '1px solid rgba(255,255,255,0.06)',
+  background: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border))',
   borderRadius: '24px',
-  boxShadow: '-8px -8px 16px rgba(255,255,255,0.05), 8px 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)',
+  boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
 };
 
 const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)';
