@@ -66,30 +66,30 @@ export default function ContentSidebar() {
           paddingLeft: 14,
           paddingRight: 14,
           gap: 14,
-          background: 'linear-gradient(180deg, #faf6ee 0%, #f3ecdf 100%)',
-          borderRight: '1px solid rgba(184,70,58,0.22)',
-          boxShadow: '4px 0 24px rgba(60,40,20,0.08)',
+          background: '#ffffff',
+          borderRight: '1px solid #E5E7EB',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.05)',
           overflow: 'visible',
         }}
       >
         {/* search */}
         <div className="relative flex items-center" style={{ marginBottom: 4 }}>
-          <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'rgba(139,58,46,0.7)' }} />
+          <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: '#9CA3AF' }} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search"
             className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all"
             style={{
-              background: 'rgba(255,255,255,0.7)',
-              border: '1px solid rgba(184,70,58,0.18)',
-              color: '#2a2018',
+              background: '#F3F4F6',
+              border: '1px solid #E5E7EB',
+              color: '#1F1F1F',
               outline: 'none',
             }}
           />
           <span
             className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none"
-            style={{ color: 'rgba(42,32,24,0.5)', background: 'rgba(184,70,58,0.06)', border: '1px solid rgba(184,70,58,0.14)' }}
+            style={{ color: '#9CA3AF', background: '#FFFFFF', border: '1px solid #E5E7EB' }}
           >
             ⌘P
           </span>
@@ -103,7 +103,7 @@ export default function ContentSidebar() {
             <div key={section.key} className="flex flex-col gap-1.5">
               <span
                 className="text-[10px] font-semibold tracking-[0.14em] uppercase px-2 mb-1"
-                style={{ color: 'rgba(139,58,46,0.75)' }}
+                style={{ color: '#9CA3AF' }}
               >
                 {t(section.key) || section.label}
               </span>
@@ -124,13 +124,13 @@ export default function ContentSidebar() {
                       padding: '0 12px',
                       width: '100%',
                       background: active
-                        ? 'linear-gradient(135deg, rgba(184,70,58,0.22), rgba(184,70,58,0.08))'
+                        ? '#F3F4F6'
                         : lit
-                          ? 'rgba(184,70,58,0.06)'
+                          ? '#F9FAFB'
                           : 'transparent',
-                      border: `1px solid ${active ? 'rgba(184,70,58,0.45)' : 'transparent'}`,
+                      border: `1px solid ${active ? '#E5E7EB' : 'transparent'}`,
                       boxShadow: active
-                        ? '0 0 0 1px rgba(184,70,58,0.20), 0 0 18px -6px rgba(184,70,58,0.35), inset 0 1px 0 rgba(255,255,255,0.5)'
+                        ? 'inset 2px 0 0 0 #B8463A'
                         : 'none',
                       cursor: 'pointer',
                     }}
@@ -140,13 +140,12 @@ export default function ContentSidebar() {
                       style={{
                         width: 17,
                         height: 17,
-                        color: active ? '#8B3A2E' : 'rgba(42,32,24,0.62)',
-                        filter: active ? 'drop-shadow(0 0 4px rgba(184,70,58,0.35))' : 'none',
+                        color: active ? '#B8463A' : '#6B7280',
                       }}
                     />
                     <span
                       className="text-[12.5px] font-medium tracking-wide whitespace-nowrap"
-                      style={{ color: active ? '#8B3A2E' : 'rgba(42,32,24,0.78)' }}
+                      style={{ color: active ? '#1F1F1F' : '#4B5563' }}
                     >
                       {label}
                     </span>
@@ -157,7 +156,7 @@ export default function ContentSidebar() {
           ))}
 
           {sections.length === 0 && (
-            <div className="text-center text-xs py-8" style={{ color: 'rgba(42,32,24,0.45)' }}>
+            <div className="text-center text-xs py-8" style={{ color: '#9CA3AF' }}>
               No results
             </div>
           )}
