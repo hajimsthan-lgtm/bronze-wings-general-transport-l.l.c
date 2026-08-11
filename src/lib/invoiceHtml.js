@@ -568,14 +568,14 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <table style="width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:4%;">#</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:10%;">Trip Date</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 10px;border:1px solid #000;text-align:left;white-space:nowrap;width:30%;">Description</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:7%;">Qty</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Unit Price<br>(AED)</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Amount<br>(AED)</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:11%;">VAT<br>5%</th>
-        <th style="background:#1D3F55;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Total<br>(AED)</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:4%;">#</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:10%;">Trip Date</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 10px;border:1px solid #000;text-align:left;white-space:nowrap;width:30%;">Description</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:7%;">Qty</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Unit Price<br>(AED)</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Amount<br>(AED)</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:11%;">VAT<br>5%</th>
+        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Total<br>(AED)</th>
       </tr>
     </thead>
     <tbody>
@@ -583,53 +583,50 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </tbody>
     <tfoot>
       <tr style="">
-        <td colspan="5" style="padding:8px 10px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">Total</td>
-        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td colspan="4" style="padding:8px 10px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;"></td>
+        <td style="padding:8px 5px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;font-weight:800;font-size:10.5px;color:#9e813a;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED</td>
+        <td style="padding:8px 5px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
+        <td style="padding:8px 5px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
+        <td style="padding:8px 5px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
   </div>
 
   <!-- Amount in Words -->
-  <div style="position:relative;z-index:1;margin:8px 28px;padding:8px 14px;border-top:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;">
-    <span style="font-size:11.5px;font-weight:800;color:${MAROON};margin-right:8px;">AED</span>
-    <span style="font-size:11px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.8px;">${numberToWords(total).toUpperCase()}</span>
+  <div style="position:relative;z-index:1;margin:8px 28px;padding:8px 14px;border-top:1px solid #9e813a;border-bottom:1px solid #9e813a;">
+    <span style="font-size:11.5px;font-weight:800;color:#9e813a;margin-right:8px;">AED</span>
+    <span style="font-size:11px;font-weight:700;color:#9e813a;text-transform:uppercase;letter-spacing:0.8px;">${numberToWords(total).toUpperCase()}</span>
   </div>
 
   <!-- Spacer -->
-  <div style="flex:1 1 auto;min-height:50px;"></div>
+  <div style="flex:1 1 auto;min-height:30px;"></div>
 
-  <!-- Bottom Section -->
-  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:12px 28px 15px 28px;align-items:flex-start;margin-top:8px;">
-    <!-- Bank Details -->
-    <div style="flex:1;padding-right:20px;">
-      <div style="font-size:11px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:3px;border-bottom:1px solid ${MAROON};display:inline-block;">Bank Details</div>
+  <!-- Bank Details + Terms & Conditions (two columns) -->
+  <div style="position:relative;z-index:1;margin:0 28px;border-top:1px solid #9e813a;padding-top:12px;display:flex;gap:30px;">
+    <div style="flex:1;padding-right:15px;">
+      <div style="font-size:11px;font-weight:800;color:#9e813a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Bank Details</div>
       ${bankHtml}
     </div>
-    <!-- Signature Area -->
-    <div style="flex:1.2;display:flex;flex-direction:column;">
-      <div style="display:flex;gap:25px;justify-content:space-between;">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
-          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
-          <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
-          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
-          <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
-        </div>
-      </div>
-      <div style="font-size:10.5px;color:#555;margin-top:10px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
+    <div style="flex:1;padding-left:15px;border-left:1px solid #E0E0E0;">
+      <div style="font-size:11px;font-weight:800;color:#9e813a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Terms &amp; Conditions</div>
+      <div style="font-size:10px;color:#333;line-height:1.7;">Payment Terms : 60 days from receipt of the tax invoice.</div>
     </div>
   </div>
 
-  <!-- Terms & Conditions -->
-  <div style="position:relative;z-index:1;margin-top:14px;border:1px solid #1D3F55;">
-    <div style="background:#1D3F55;color:#fff;font-weight:bold;font-size:10pt;text-transform:uppercase;letter-spacing:1px;padding:5px 14px;">Terms &amp; Conditions</div>
-    <div style="padding:6px 14px;font-size:9.5pt;color:#333;line-height:1.6;">Payment Terms : 60 days from receipt of the tax invoice.</div>
+  <!-- Signature Section -->
+  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:20px 28px 15px 28px;gap:25px;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
+      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #9e813a;margin-bottom:5px;"></div>
+      <div style="font-size:9px;color:#9e813a;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
+      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #9e813a;margin-bottom:5px;"></div>
+      <div style="font-size:9px;color:#9e813a;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
+      <div style="font-size:10px;color:#555;margin-top:6px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
+    </div>
   </div>
 
   <!-- Footer Banner -->

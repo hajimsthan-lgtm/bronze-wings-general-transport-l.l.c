@@ -33,6 +33,7 @@ const MAROON = [139, 58, 46];
 const DARK_BLUE = [107, 42, 32];
 const LBH = [245, 230, 211];
 const BRONZE = [196, 163, 90];
+const GOLD = [158, 129, 58]; // #9e813a — per-trip invoice accent
 const BLACK = [0, 0, 0];
 const GRAY = [102, 102, 102];
 const LIGHT_GRAY = [221, 221, 221];
@@ -360,11 +361,11 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE HEADER ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableHeader(pdf, cols, y) {
+function drawTableHeader(pdf, cols, y, invoiceType) {
   const h = 12;
 
   pdf.setFont('helvetica', 'bold');
-  fc(pdf, [29, 63, 85]);
+  fc(pdf, invoiceType === 'trip' ? GOLD : [29, 63, 85]);
   pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
   pdf.setFontSize(8);
   tc(pdf, WHITE);
@@ -500,9 +501,11 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 // ═══════════════════════════════════════════════════════════
 function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 10;
+  const isTrip = invoiceType === 'trip';
+  const accent = isTrip ? GOLD : BLACK;
 
   // Top border
-  dc(pdf, BLACK);
+  dc(pdf, accent);
   pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
 
@@ -511,13 +514,18 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const vals = [totals.subtotal, totals.vat, totals.total];
   const valCols = cols.slice(-valCount);
 
-  // Label "AED" spanning first columns
+  // Label — "AED" for trip, "Total" for others
   const labelEndIdx = cols.length - valCount;
   const labelRight = cols[labelEndIdx - 1].right;
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(10);
-  tc(pdf, BLACK);
-  pdf.text('Total', labelRight - 2, y + h / 2 + 1, { align: 'right' });
+  if (isTrip) {
+    tc(pdf, GOLD);
+    pdf.text('AED', labelRight - 2, y + h / 2 + 1, { align: 'right' });
+  } else {
+    tc(pdf, BLACK);
+    pdf.text('Total', labelRight - 2, y + h / 2 + 1, { align: 'right' });
+  }
 
   // Values in last columns
   pdf.setFont('courier', 'bold');
@@ -528,7 +536,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   }
 
   // Bottom border only (no vertical dividers)
-  dc(pdf, BLACK);
+  dc(pdf, accent);
   pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y + h, CONTENT_RIGHT, y + h);
   return y + h;
@@ -547,7 +555,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   const items = invoice.line_items || [];
   const contentBottom = PAGE_H - MARGIN;
 
-  let y = drawTableHeader(pdf, cols, startY);
+  let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
   if (items.length === 0) {
     // Empty row
@@ -572,7 +580,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
         pdf.addPage();
         drawPageBorder(pdf);
         y = drawLetterhead(pdf, s, MARGIN);
-        y = drawTableHeader(pdf, cols, y);
+        y = drawTableHeader(pdf, cols, y, invoiceType);
       }
       y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice);
     }
@@ -593,7 +601,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     pdf.addPage();
     drawPageBorder(pdf);
     y = drawLetterhead(pdf, s, MARGIN);
-    y = drawTableHeader(pdf, cols, y);
+    y = drawTableHeader(pdf, cols, y, invoiceType);
   }
   y = drawTableTotal(pdf, cols, y, { subtotal, discount: totalDiscount, taxable, vat, total }, invoiceType);
 
@@ -603,9 +611,11 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: AMOUNT IN WORDS
 // ═══════════════════════════════════════════════════════════
-function drawAmountInWords(pdf, total, y) {
+function drawAmountInWords(pdf, total, y, invoiceType) {
   const h = 11;
-  dc(pdf, BORDER_GRAY);
+  const isTrip = invoiceType === 'trip';
+  const accent = isTrip ? GOLD : BORDER_GRAY;
+  dc(pdf, accent);
   pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
   pdf.line(CONTENT_X, y + h, CONTENT_RIGHT, y + h);
@@ -613,10 +623,17 @@ function drawAmountInWords(pdf, total, y) {
   const words = numberToWords(total).toUpperCase();
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(9);
-  tc(pdf, MAROON);
-  pdf.text('AED', CONTENT_X + 3, y + h / 2 + 1);
-  tc(pdf, BLACK);
-  pdf.text(words, CONTENT_X + 12, y + h / 2 + 1);
+  if (isTrip) {
+    tc(pdf, GOLD);
+    pdf.text('AED', CONTENT_X + 3, y + h / 2 + 1);
+    tc(pdf, GOLD);
+    pdf.text(words, CONTENT_X + 12, y + h / 2 + 1);
+  } else {
+    tc(pdf, MAROON);
+    pdf.text('AED', CONTENT_X + 3, y + h / 2 + 1);
+    tc(pdf, BLACK);
+    pdf.text(words, CONTENT_X + 12, y + h / 2 + 1);
+  }
   return y + h;
 }
 
@@ -655,17 +672,18 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: BANK DETAILS + DUAL SIGNATURES
 // ═══════════════════════════════════════════════════════════
-function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
+function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
   const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
+  const accent = invoiceType === 'trip' ? GOLD : MAROON;
 
   // ── LEFT: Bank details ──
   if (hasBank) {
     const lx = CONTENT_X + 2;
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
-    tc(pdf, MAROON);
+    tc(pdf, accent);
     pdf.text('BANK DETAILS', lx, y + 4);
-    dc(pdf, MAROON);
+    dc(pdf, accent);
     pdf.setLineWidth(0.3);
     pdf.line(lx, y + 5, lx + 22, y + 5);
 
@@ -695,14 +713,14 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TERMS & CONDITIONS
 // ═══════════════════════════════════════════════════════════
-function drawTermsConditions(pdf) {
+function drawTermsConditions(pdf, invoiceType) {
   const bw = PAGE_W - 2 * BORDER_POS;
   const bannerH = 5;
   const bannerY = FOOTER_BOTTOM - bannerH;
   const y = bannerY - 12;
 
-  // Header bar — dark teal
-  fc(pdf, [29, 63, 85]);
+  // Header bar — gold for trip, dark teal for others
+  fc(pdf, invoiceType === 'trip' ? GOLD : [29, 63, 85]);
   pdf.rect(BORDER_POS, y, bw, 5, 'F');
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(9);
@@ -774,12 +792,12 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     y = drawLetterhead(pdf, s, MARGIN);
   }
 
-  y = drawAmountInWords(pdf, total, y);
+  y = drawAmountInWords(pdf, total, y, invoiceType);
   y += 8; // gap before signatures
-  drawBankAndSignatures(pdf, invoice, clientName, s, y);
+  drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType);
 
   // ══ TERMS & CONDITIONS ══
-  drawTermsConditions(pdf);
+  drawTermsConditions(pdf, invoiceType);
 
   // ══ FOOTER BANNERS (bottom of last page, never floating) ══
   drawFooterBanners(pdf);
