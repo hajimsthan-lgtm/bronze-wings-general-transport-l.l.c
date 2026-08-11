@@ -6,6 +6,7 @@ import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import { normalizeDate } from '@/lib/formatters';
+import { enrichTripsWithNumbers } from '@/lib/tripSequence';
 
 export default function OperationsToolbar({
   search, setSearch,
@@ -82,7 +83,7 @@ export default function OperationsToolbar({
       />
       <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
       {mode !== 'contract' && (
-        <CsvImportButton entityName="Trip" filename="trips" onImported={onImported} label="Import" className="h-9" columns={[
+        <CsvImportButton entityName="Trip" filename="trips" onImported={onImported} label="Import" className="h-9" enrichRows={enrichTripsWithNumbers} columns={[
           { key: 'from_location', label: 'From', sample: 'Dubai' },
           { key: 'to_location', label: 'To', sample: 'Abu Dhabi' },
           { key: 'vehicle_plate', label: 'Vehicle Plate', sample: 'AD-1-12345' },

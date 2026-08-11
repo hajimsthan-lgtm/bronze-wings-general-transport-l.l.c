@@ -43,7 +43,7 @@ function downloadSampleCsv(filename, columns) {
   URL.revokeObjectURL(url);
 }
 
-export default function CsvImportButton({ entityName, filename, columns, transform, onImported, label = 'Import CSV', className = '' }) {
+export default function CsvImportButton({ entityName, filename, columns, transform, enrichRows, onImported, label = 'Import CSV', className = '' }) {
   const { toast } = useToast();
   const fileRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -71,8 +71,12 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
   const doImport = async () => {
     setImporting(true);
     try {
-      const created = await base44.entities[entityName].bulkCreate(rows);
-      setResults({ success: created.length, failed: rows.length - created.length });
+      let finalRows = rows;
+      if (typeof enrichRows === 'function') {
+        finalRows = await enrichRows(rows);
+      }
+      const created = await base44.entities[entityName].bulkCreate(finalRows);
+      setResults({ success: created.length, failed: finalRows.length - created.length });
       toast({ title: `Imported ${created.length} ${entityName.toLowerCase()}s` });
       onImported?.();
     } catch (err) {
