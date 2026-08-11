@@ -106,11 +106,11 @@ export default function HeaderSubNav({ className = '' }) {
                 }}
               />
               <Icon className="relative w-3.5 h-3.5 transition-colors duration-300" style={{
-                color: isActive ? `rgb(${st.glow})` : 'rgba(255,255,255,0.45)',
+                color: isActive ? `rgb(${st.glow})` : 'hsl(var(--muted-foreground))',
               }} />
               <span
                 className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap transition-colors duration-300"
-                style={{ color: isActive ? '#fff' : 'rgba(255,255,255,0.55)' }}
+                style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
               >
                 {label}
               </span>
@@ -157,7 +157,7 @@ export default function HeaderSubNav({ className = '' }) {
           <ActiveIcon className="relative w-3.5 h-3.5 flex-shrink-0" style={{ color: `rgb(${activeSt.glow})` }} />
           <span
             className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap truncate"
-            style={{ color: '#fff' }}
+            style={{ color: 'hsl(var(--foreground))' }}
           >
             {activeLabel}
           </span>
