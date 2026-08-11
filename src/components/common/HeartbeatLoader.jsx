@@ -56,19 +56,22 @@ function injectStyles() {
       from { transform: translateX(0); }
       to   { transform: translateX(-22px); }
     }
-    /* ===== Truck body ===== */
+    /* ===== Truck body — drives across the scene ===== */
     .lorry-truck {
       position: absolute;
       bottom: 10px;
-      left: 50%;
+      left: -80px;
       width: 72px;
       height: 40px;
-      transform: translateX(-50%);
-      animation: lorry-bob 0.35s ease-in-out infinite alternate;
+      animation: lorry-drive 2.2s linear infinite, lorry-bob 0.35s ease-in-out infinite alternate;
+    }
+    @keyframes lorry-drive {
+      0%   { left: -80px; }
+      100% { left: 100%; }
     }
     @keyframes lorry-bob {
-      from { transform: translateX(-50%) translateY(0); }
-      to   { transform: translateX(-50%) translateY(-1.5px); }
+      from { transform: translateY(0); }
+      to   { transform: translateY(-1.5px); }
     }
     .lorry-truck svg {
       width: 100%;
@@ -83,26 +86,25 @@ function injectStyles() {
     @keyframes lorry-wheel-spin {
       to { transform: rotate(360deg); }
     }
-    /* ===== Exhaust puffs ===== */
+    /* ===== Exhaust puffs — trail behind the moving truck ===== */
     .lorry-smoke {
       position: absolute;
-      bottom: 22px;
-      left: 50%;
-      margin-left: -42px;
+      bottom: 14px;
+      left: -20px;
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: hsl(var(--muted-foreground));
       opacity: 0;
-      animation: lorry-puff 1.2s ease-out infinite;
+      animation: lorry-puff 2.2s ease-out infinite;
     }
-    .lorry-smoke:nth-child(1) { animation-delay: 0s; }
-    .lorry-smoke:nth-child(2) { animation-delay: 0.4s; }
-    .lorry-smoke:nth-child(3) { animation-delay: 0.8s; }
+    .lorry-smoke:nth-child(1) { animation-delay: 0.2s; }
+    .lorry-smoke:nth-child(2) { animation-delay: 0.9s; }
+    .lorry-smoke:nth-child(3) { animation-delay: 1.6s; }
     @keyframes lorry-puff {
       0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
-      20%  { opacity: 0.4; }
-      100% { opacity: 0; transform: translate(-22px, -16px) scale(1.6); }
+      10%  { opacity: 0.35; }
+      100% { opacity: 0; transform: translate(-30px, -22px) scale(1.8); }
     }
     /* ===== Color variants ===== */
     .lorry-loader.lorry-violet .lorry-truck svg path,
