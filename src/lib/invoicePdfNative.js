@@ -69,15 +69,15 @@ const COLS_TRIP = [
 ];
 
 const COLS_STANDARD = [
-  { label: '#',              w: 7,  align: 'center' },
-  { label: 'DESCRIPTION',    w: 54, align: 'left'   },
-  { label: 'QTY',            w: 12, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 20, align: 'right'  },
-  { label: 'GROSS\n(AED)',   w: 21, align: 'right'  },
-  { label: 'DISCOUNT\n(AED)', w: 18, align: 'right'  },
-  { label: 'TAXABLE\n(AED)', w: 21, align: 'right'  },
-  { label: 'VAT\n5%',        w: 20, align: 'right'  },
-  { label: 'TOTAL\n(AED)',   w: 21, align: 'right'  },
+  { label: 'SL\nNO.',           w: 8,  align: 'center' },
+  { label: 'SERVICE',           w: 14, align: 'center' },
+  { label: 'DESCRIPTION',       w: 40, align: 'left'   },
+  { label: 'QTY',               w: 12, align: 'center' },
+  { label: 'UOM',               w: 12, align: 'center' },
+  { label: 'UNIT\nPRICE',       w: 20, align: 'right'  },
+  { label: 'TOTAL',             w: 20, align: 'right'  },
+  { label: 'VAT\n5%',           w: 18, align: 'right'  },
+  { label: 'TOTAL PRICE\n(AED)', w: 50, align: 'right'  },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -425,6 +425,14 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   let ci = 1;
 
+  // SERVICE column (standard only)
+  if (invoiceType === 'standard') {
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.text(String(item.service || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
+    ci++;
+  }
+
   // TRIP DATE column (trip only)
   if (invoiceType === 'trip') {
     pdf.setFont('helvetica', 'normal');
@@ -450,16 +458,31 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
   }
   ci++;
 
+  // QTY and UOM columns (standard only — center-aligned text)
+  if (invoiceType === 'standard') {
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    pdf.text(String(qty), cols[ci].center, vCenter, { align: 'center' });
+    ci++;
+    pdf.text(String(item.uom || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
+    ci++;
+  }
+
   // Numeric columns — courier monospace
   pdf.setFont('courier', 'normal');
   pdf.setFontSize(8);
-  const nums = invoiceType === 'standard'
-    ? [qty, unitPrice, gross, discount, taxable, lineVat, lineTotal]
-    : [qty, unitPrice, gross, lineVat, lineTotal];
-  for (let i = 0; i < nums.length; i++) {
-    const col = cols[ci + i];
-    const val = i === 0 ? String(nums[i]) : fmtMoney(nums[i]);
-    pdf.text(val, col.right - 2, vCenter, { align: 'right' });
+  if (invoiceType === 'standard') {
+    const stdNums = [unitPrice, gross, lineVat, lineTotal];
+    for (let i = 0; i < stdNums.length; i++) {
+      pdf.text(fmtMoney(stdNums[i]), cols[ci + i].right - 2, vCenter, { align: 'right' });
+    }
+  } else {
+    const nums = [qty, unitPrice, gross, lineVat, lineTotal];
+    for (let i = 0; i < nums.length; i++) {
+      const col = cols[ci + i];
+      const val = i === 0 ? String(nums[i]) : fmtMoney(nums[i]);
+      pdf.text(val, col.right - 2, vCenter, { align: 'right' });
+    }
   }
 
   // Grid
@@ -484,11 +507,8 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
 
   // Determine value columns count based on invoice type
-  const isStandard = invoiceType === 'standard';
-  const valCount = isStandard ? 5 : 3;
-  const vals = isStandard
-    ? [totals.subtotal, totals.discount, totals.taxable, totals.vat, totals.total]
-    : [totals.subtotal, totals.vat, totals.total];
+  const valCount = 3;
+  const vals = [totals.subtotal, totals.vat, totals.total];
   const valCols = cols.slice(-valCount);
 
   // Label "AED" spanning first columns

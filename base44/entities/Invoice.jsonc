@@ -97,6 +97,14 @@
           "discount": {
             "type": "number",
             "default": 0
+          },
+          "service": {
+            "type": "string",
+            "default": "TRIP"
+          },
+          "uom": {
+            "type": "string",
+            "default": "TRIP"
           }
         }
       }
