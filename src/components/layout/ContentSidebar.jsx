@@ -72,30 +72,30 @@ export default function ContentSidebar() {
           paddingLeft: 14,
           paddingRight: 14,
           gap: 14,
-          background: '#ffffff',
-          borderRight: '1px solid #E5E7EB',
-          boxShadow: '4px 0 24px rgba(0,0,0,0.05)',
+          background: 'hsl(var(--sidebar-background))',
+          borderRight: '1px solid hsl(var(--sidebar-border))',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.3)',
           overflow: 'visible',
         }}
       >
         {/* search */}
         <div className="relative flex items-center" style={{ marginBottom: 4 }}>
-          <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: '#9CA3AF' }} />
+          <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search"
             className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all"
             style={{
-              background: '#F3F4F6',
-              border: '1px solid #E5E7EB',
-              color: '#1F1F1F',
+              background: 'hsl(var(--input))',
+              border: '1px solid hsl(var(--border))',
+              color: 'hsl(var(--foreground))',
               outline: 'none',
             }}
           />
           <span
             className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none"
-            style={{ color: '#9CA3AF', background: '#FFFFFF', border: '1px solid #E5E7EB' }}
+            style={{ color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}
           >
             ⌘P
           </span>
@@ -109,7 +109,7 @@ export default function ContentSidebar() {
             <div key={section.key} className="flex flex-col gap-1.5">
               <span
                 className="text-[10px] font-semibold tracking-[0.14em] uppercase px-2 mb-1"
-                style={{ color: '#9CA3AF' }}
+                style={{ color: 'hsl(var(--muted-foreground))' }}
               >
                 {t(section.key) || section.label}
               </span>
@@ -130,13 +130,13 @@ export default function ContentSidebar() {
                       padding: '0 12px',
                       width: '100%',
                       background: active
-                        ? '#F3F4F6'
+                        ? 'hsl(var(--sidebar-accent))'
                         : lit
-                          ? '#F9FAFB'
+                          ? 'hsl(var(--sidebar-accent))'
                           : 'transparent',
-                      border: `1px solid ${active ? '#E5E7EB' : 'transparent'}`,
+                      border: `1px solid ${active ? 'hsl(var(--sidebar-border))' : 'transparent'}`,
                       boxShadow: active
-                        ? 'inset 2px 0 0 0 #B8463A'
+                        ? 'inset 2px 0 0 0 hsl(var(--sidebar-primary))'
                         : 'none',
                       cursor: 'pointer',
                     }}
@@ -146,12 +146,12 @@ export default function ContentSidebar() {
                       style={{
                         width: 17,
                         height: 17,
-                        color: active ? '#B8463A' : '#6B7280',
+                        color: active ? 'hsl(var(--sidebar-primary))' : 'hsl(var(--muted-foreground))',
                       }}
                     />
                     <span
                       className="text-[12.5px] font-medium tracking-wide whitespace-nowrap"
-                      style={{ color: active ? '#1F1F1F' : '#4B5563' }}
+                      style={{ color: active ? 'hsl(var(--sidebar-foreground))' : 'hsl(var(--muted-foreground))' }}
                     >
                       {label}
                     </span>
@@ -162,7 +162,7 @@ export default function ContentSidebar() {
           ))}
 
           {sections.length === 0 && (
-            <div className="text-center text-xs py-8" style={{ color: '#9CA3AF' }}>
+            <div className="text-center text-xs py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
               No results
             </div>
           )}

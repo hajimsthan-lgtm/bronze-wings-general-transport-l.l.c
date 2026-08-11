@@ -96,9 +96,9 @@ function injectStyles() {
  * Compact heartbeat ECG loader with 5 fixed scenario colors.
  * @param {string} color - one of: violet (default), green (save/success), red (error/delete), yellow (pending), blue (sync/refresh)
  */
-export default function HeartbeatLoader({ color = 'bronze', className = '' }) {
+export default function HeartbeatLoader({ color = 'blue', className = '' }) {
   useEffect(() => { injectStyles(); }, []);
-  const safeColor = COLORS.includes(color) ? color : 'bronze';
+  const safeColor = COLORS.includes(color) ? color : 'blue';
 
   return (
     <div className={`hb-compact hb-${safeColor} ${className}`}>

@@ -6,75 +6,75 @@
 
 @layer base {
   :root {
-    /* ===== Clean B2B Light — white cards, neutral gray, bronze brand ===== */
+    /* ===== VextCRM Dark — near-black bg, dark grey cards, blue accent ===== */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 220 14% 97%;            /* #F6F7F8 off-white */
-    --background-elevated: 220 12% 95%;    /* #ECEEF0 */
-    --card: 0 0% 100%;                    /* #FFFFFF pure white */
-    --card-foreground: 0 0% 12%;          /* #1F1F1F charcoal */
-    --foreground: 0 0% 12%;               /* #1F1F1F charcoal */
-    --muted: 220 12% 93%;                 /* #E8EAEC */
-    --muted-foreground: 220 8% 42%;       /* #6B7280 neutral gray */
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
-    --primary: 5 52% 47%;                 /* #B8463A bronze red (brand) */
-    --primary-light: 7 60% 57%;           /* #D4634F */
+    --background: 0 0% 5%;                /* #0d0d0d near-black */
+    --background-elevated: 0 0% 10%;      /* #1a1a1a */
+    --card: 0 0% 15%;                    /* #262626 dark grey */
+    --card-foreground: 0 0% 98%;         /* #fafafa */
+    --foreground: 0 0% 98%;              /* #fafafa */
+    --muted: 0 0% 15%;                   /* #262626 */
+    --muted-foreground: 0 0% 64%;        /* #a3a3a3 light grey */
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 91% 60%;              /* #3b82f6 vibrant blue */
+    --primary-light: 217 91% 68%;        /* #60a5fa */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 12% 94%;
-    --secondary-foreground: 0 0% 14%;
-    --accent: 42 44% 46%;                 /* gold-bronze */
-    --accent-foreground: 20 30% 10%;
-    --destructive: 350 89% 50%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 98%;
+    --accent: 217 91% 60%;               /* blue */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 5 52% 47%;
-    --magenta: 42 44% 46%;
-    --success: 160 70% 34%;
-    --success-light: 160 70% 42%;
-    --warning: 38 92% 42%;
-    --danger: 350 89% 50%;
-    --border: 220 12% 88%;                /* #DEE1E4 soft gray border */
-    --input: 220 12% 94%;
-    --ring: 5 52% 47%;
-    --panel-accent-rgb: 184, 70, 58;      /* #B8463A bronze red */
-    --panel-accent2-rgb: 139, 58, 46;     /* #8B3A2E maroon */
-    --surf-1-rgb: 255, 255, 255;          /* #FFFFFF white */
-    --surf-2-rgb: 246, 247, 248;          /* #F6F7F8 off-white */
-    --radius: 0.75rem;
-    --chart-1: 5 52% 47%;
-    --chart-2: 210 90% 52%;               /* blue */
-    --chart-3: 160 70% 40%;               /* teal */
-    --chart-4: 28 92% 52%;                /* orange */
-    --chart-5: 265 70% 60%;               /* purple */
-    --sidebar-background: 0 0% 100%;      /* white sidebar */
-    --sidebar-foreground: 0 0% 14%;
-    --sidebar-primary: 5 52% 47%;
+    --neon: 217 91% 60%;
+    --magenta: 217 91% 60%;
+    --success: 142 71% 45%;              /* #22c55e green */
+    --success-light: 142 71% 52%;
+    --warning: 38 92% 50%;
+    --danger: 0 72% 51%;
+    --border: 0 0% 22%;                  /* #383838 */
+    --input: 0 0% 18%;
+    --ring: 217 91% 60%;
+    --panel-accent-rgb: 59, 130, 246;    /* #3b82f6 blue */
+    --panel-accent2-rgb: 96, 165, 250;   /* #60a5fa light blue */
+    --surf-1-rgb: 38, 38, 38;           /* #262626 */
+    --surf-2-rgb: 26, 26, 26;           /* #1a1a1a */
+    --radius: 0.625rem;
+    --chart-1: 217 91% 60%;              /* blue */
+    --chart-2: 142 71% 45%;              /* green */
+    --chart-3: 38 92% 50%;               /* orange */
+    --chart-4: 265 70% 60%;              /* purple */
+    --chart-5: 0 0% 64%;                 /* grey */
+    --sidebar-background: 0 0% 8%;       /* #141414 */
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 12% 95%;
-    --sidebar-accent-foreground: 0 0% 14%;
-    --sidebar-border: 220 12% 90%;
-    --sidebar-ring: 5 52% 47%;
-    --clay-bg: 220 12% 96%;
-    --clay-border: 220 12% 88%;
-    --clay-shadow-dark: 220 10% 82%;
-    --clay-shadow-light: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 217 91% 60%;
+    --clay-bg: 0 0% 12%;
+    --clay-border: 0 0% 20%;
+    --clay-shadow-dark: 0 0% 4%;
+    --clay-shadow-light: 0 0% 18%;
 
     /* Theme-adaptive shell vars */
-    --app-bg: #F6F7F8;
-    --panel-bg: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,247,248,0.98) 100%);
-    --panel-border-color: rgba(0,0,0,0.08);
-    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.9);
-    --panel-drop-shadow: 0 12px 40px rgba(0,0,0,0.06);
-    --panel-blur: blur(12px) saturate(1.05);
-    --header-tint-1: rgba(255,255,255,0.6);
-    --header-tint-2: rgba(255,255,255,0.4);
-    --nav-inactive: rgba(60,60,70,0.55);
-    --surf-1: rgba(255,255,255,0.85);
-    --surf-2: rgba(246,247,248,0.95);
+    --app-bg: #0d0d0d;
+    --panel-bg: linear-gradient(180deg, rgba(38,38,38,0.92) 0%, rgba(26,26,26,0.96) 100%);
+    --panel-border-color: rgba(255,255,255,0.06);
+    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.04);
+    --panel-drop-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    --panel-blur: blur(12px) saturate(1.1);
+    --header-tint-1: rgba(38,38,38,0.6);
+    --header-tint-2: rgba(26,26,26,0.4);
+    --nav-inactive: rgba(163,163,163,0.5);
+    --surf-1: rgba(38,38,38,0.85);
+    --surf-2: rgba(26,26,26,0.95);
   }
 
   .theme-navy {
@@ -1870,14 +1870,12 @@
 }
 
 /* ═══════════════════════════════════════════════════════
-   LIGHT-THEME TEXT NORMALIZATION
-   Leftover dark-theme white text → foreground charcoal.
-   In dark themes --foreground is white, so this is a no-op there.
+   DARK-THEME TEXT NORMALIZATION (VextCRM)
+   Ensure white text reads on dark surfaces; preserve white on accents.
    ═══════════════════════════════════════════════════════ */
 [class*="text-white"] {
   color: hsl(var(--foreground)) !important;
 }
-/* Preserve white text on colored/bronze buttons & active pills */
 .clay-btn,
 .lightning-btn,
 .btn-new-trip,
@@ -1892,146 +1890,6 @@
 .badge-pulse {
   color: hsl(var(--primary-foreground)) !important;
 }
-
-/* ── Light-theme surface normalization ──
-   Translucent white backgrounds and white borders are dark-theme glass
-   tints that vanish on white. Map them to theme tokens so every card
-   reads correctly without per-component edits. */
-[class*="bg-white/"] {
-  background-color: hsl(var(--muted)) !important;
-}
-[class*="border-white/"] {
-  border-color: hsl(var(--border)) !important;
-}
-
-/* ── Dark-theme remnant normalization ──
-   Force dark backgrounds, dark glass surfaces, and dark search/input
-   chrome to clean white-theme surfaces so every page reads as white. */
-.clay-rail,
-.obsidian-header,
-.obsidian-header-row,
-.obsidian-subnav-row,
-.industrial-search,
-.industrial-search-cap,
-.industrial-search-core,
-.black-card {
-  background: hsl(var(--card)) !important;
-  color: hsl(var(--foreground)) !important;
-  border-color: hsl(var(--border)) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.industrial-search-input {
-  color: hsl(var(--foreground)) !important;
-}
-.industrial-search-input::placeholder {
-  color: hsl(var(--muted-foreground)) !important;
-}
-.industrial-search-icon {
-  color: hsl(var(--primary)) !important;
-}
-.industrial-search-cap {
-  background: hsl(var(--muted)) !important;
-}
-.industrial-search-cap::before,
-.industrial-search-cap::after {
-  background: hsl(var(--muted-foreground)) !important;
-}
-
-/* Dark glass cards → clean white cards */
-.glass-card,
-.clay-card,
-.glass,
-.glass-sm,
-.glass-panel,
-.glass-card-hover,
-.clay,
-.clay-sm {
-  background: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.glass-card::before,
-.glass-card::after,
-.clay-card::before {
-  display: none !important;
-}
-
-/* Stat tiles & KPI cards → clean white */
-.stat-tile,
-.kpi-card,
-.entity-card,
-.detail-header-card {
-  background: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.stat-tile::after,
-.kpi-card::after {
-  display: none !important;
-}
-
-/* Row cards → clean white */
-.row-card {
-  background: hsl(var(--card)) !important;
-  border-color: hsl(var(--border)) !important;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.row-card::before {
-  display: none !important;
-}
-
-/* Sub-tabs → light theme */
-.sub-tab {
-  color: hsl(var(--muted-foreground)) !important;
-  background: transparent !important;
-}
-.sub-tab:hover {
-  color: hsl(var(--foreground)) !important;
-  background: hsl(var(--muted)) !important;
-}
-.sub-tab-active {
-  background: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  border-color: hsl(var(--primary)) !important;
-  box-shadow: 0 1px 4px rgba(var(--panel-accent-rgb), 0.25) !important;
-}
-
-/* Search 2026 → light theme */
-.search-2026 {
-  background: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  color: hsl(var(--foreground)) !important;
-}
-.search-2026::placeholder {
-  color: hsl(var(--muted-foreground)) !important;
-}
-.search-2026:focus {
-  border-color: hsl(var(--primary)) !important;
-  background: hsl(var(--card)) !important;
-  box-shadow: 0 0 0 3px rgba(var(--panel-accent-rgb), 0.1) !important;
-}
-
-/* Empty orb → light theme */
-.empty-orb {
-  background: hsl(var(--muted)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  box-shadow: none !important;
-}
-
-/* Eyebrow text → muted foreground */
-.eyebrow {
-  color: hsl(var(--muted-foreground)) !important;
-}
-
-/* Hairline borders → light border */
 .hairline {
   border-color: hsl(var(--border)) !important;
 }
