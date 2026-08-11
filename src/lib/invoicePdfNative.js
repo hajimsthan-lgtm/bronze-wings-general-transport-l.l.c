@@ -148,6 +148,34 @@ function tc(pdf, [r, g, b]) { pdf.setTextColor(r, g, b); }
 function fc(pdf, [r, g, b]) { pdf.setFillColor(r, g, b); }
 function dc(pdf, [r, g, b]) { pdf.setDrawColor(r, g, b); }
 
+// Hex (#rrggbb) → [r, g, b]
+function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return null;
+  const m = hex.replace('#', '').match(/^([0-9a-fA-F]{6})$/);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+// Extract invoice appearance settings with defaults
+function getInvStyle(s) {
+  const headerBg = hexToRgb(s.inv_header_bg) || [240, 240, 240];
+  const headerText = hexToRgb(s.inv_header_text) || [0, 0, 0];
+  const rowText = hexToRgb(s.inv_row_text) || [0, 0, 0];
+  const rowAltBg = hexToRgb(s.inv_row_alt_bg) || [250, 251, 252];
+  const logoUrl = s.inv_logo_source === 'custom' ? (s.inv_logo_url || s.logo_url) : s.logo_url;
+  return {
+    headerBg,
+    headerText,
+    rowText,
+    rowAltBg,
+    descAlign: s.inv_desc_align || 'left',
+    numAlign: s.inv_num_align || 'right',
+    logoUrl,
+    logoSize: s.inv_logo_size || 16,
+  };
+}
+
 // Compute column x-positions from a column definition array
 function colPositions(cols) {
   let x = CONTENT_X;
@@ -227,13 +255,14 @@ function drawLetterhead(pdf, s, y) {
   pdf.setLineWidth(0.6);
   pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
 
-  // Logo — left, vertically centered
-  const logoSize = 16;
+  // Logo — left, vertically centered (configurable size & source)
+  const invStyle = getInvStyle(s);
+  const logoSize = invStyle.logoSize;
   const logoX = CONTENT_X + 4;
   const logoY = y + (boxH - logoSize) / 2;
-  if (s.logo_url) {
+  if (invStyle.logoUrl) {
     try {
-      pdf.addImage(s.logo_url, getImgFormat(s.logo_url), logoX, logoY, logoSize, logoSize);
+      pdf.addImage(invStyle.logoUrl, getImgFormat(invStyle.logoUrl), logoX, logoY, logoSize, logoSize);
     } catch (e) {
       drawDefaultLogo(pdf, logoX, logoY, logoSize);
     }
@@ -379,14 +408,15 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE HEADER ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableHeader(pdf, cols, y, invoiceType) {
+function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
   const h = 12;
   const isTrip = invoiceType === 'trip';
+  const style = invStyle || getInvStyle({});
 
   pdf.setFont('times', 'bold');
-  fc(pdf, [240, 240, 240]);
+  fc(pdf, style.headerBg);
   pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
-  tc(pdf, BLACK);
+  tc(pdf, style.headerText);
   pdf.setFontSize(9);
 
   for (const col of cols) {
@@ -414,7 +444,8 @@ function drawTableHeader(pdf, cols, y, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE DATA ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
+function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, invStyle) {
+  const style = invStyle || getInvStyle({});
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
   const descText = normalizeRoute(item.description ?? '');
   const descLines = pdf.splitTextToSize(descText, descCol.w - 4);
@@ -423,7 +454,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
   const rowH = Math.max(minH, descLines.length * lineH + 3);
 
   // Background
-  fc(pdf, idx % 2 === 0 ? WHITE : ROW_ALT);
+  fc(pdf, idx % 2 === 0 ? WHITE : style.rowAltBg);
   pdf.rect(CONTENT_X, y, CONTENT_W, rowH, 'F');
 
   const qty = Number(item.quantity) || 0;
@@ -438,7 +469,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   const fSize = invoiceType === 'monthly' ? 10 : 9;
   pdf.setFontSize(fSize);
-  tc(pdf, BLACK);
+  tc(pdf, style.rowText);
 
   // # column
   pdf.setFont('times', 'normal');
@@ -470,12 +501,17 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
     ci++;
   }
 
-  // DESCRIPTION column
+  // DESCRIPTION column (configurable alignment)
   pdf.setFont('times', 'bold');
   pdf.setFontSize(fSize);
   const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
+  const descAlign = style.descAlign;
+  const descTextX = descAlign === 'right' ? descCol.right - 2
+                  : descAlign === 'center' ? descCol.center
+                  : descCol.x + 2;
+  const descPdfAlign = descAlign === 'right' ? 'right' : descAlign === 'center' ? 'center' : 'left';
   for (let i = 0; i < descLines.length; i++) {
-    pdf.text(descLines[i], descCol.x + 2, descStartY + i * lineH);
+    pdf.text(descLines[i], descTextX, descStartY + i * lineH, { align: descPdfAlign });
   }
   ci++;
 
@@ -489,20 +525,23 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
     ci++;
   }
 
-  // Numeric columns — courier monospace
+  // Numeric columns — courier monospace (configurable alignment)
   pdf.setFont('courier', 'bold');
   pdf.setFontSize(fSize);
+  const numAlign = style.numAlign;
+  const numPdfAlign = numAlign === 'left' ? 'left' : numAlign === 'center' ? 'center' : 'right';
+  const numTextX = (col) => numAlign === 'left' ? col.x + 2 : numAlign === 'center' ? col.center : col.right - 2;
   if (invoiceType === 'standard') {
     const stdNums = [unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < stdNums.length; i++) {
-      pdf.text(fmtMoney(stdNums[i]), cols[ci + i].right - 2, vCenter, { align: 'right' });
+      pdf.text(fmtMoney(stdNums[i]), numTextX(cols[ci + i]), vCenter, { align: numPdfAlign });
     }
   } else {
     const nums = [qty, unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < nums.length; i++) {
       const col = cols[ci + i];
       const val = i === 0 ? String(nums[i]) : fmtMoney(nums[i]);
-      pdf.text(val, col.right - 2, vCenter, { align: 'right' });
+      pdf.text(val, numTextX(col), vCenter, { align: numPdfAlign });
     }
   }
 
@@ -519,10 +558,12 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE TOTAL ROW
 // ═══════════════════════════════════════════════════════════
-function drawTableTotal(pdf, cols, y, totals, invoiceType) {
+function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
   const h = 10;
   const isTrip = invoiceType === 'trip';
+  const style = invStyle || getInvStyle({});
   const accent = BLACK;
+  const totalText = style.rowText;
 
   // Top border
   dc(pdf, accent);

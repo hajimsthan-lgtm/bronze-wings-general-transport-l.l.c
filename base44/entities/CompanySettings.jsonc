@@ -51,6 +51,55 @@
     },
     "bank_branch": {
       "type": "string"
+    },
+    "inv_header_bg": {
+      "type": "string",
+      "default": "#f0f0f0"
+    },
+    "inv_header_text": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "inv_row_text": {
+      "type": "string",
+      "default": "#000000"
+    },
+    "inv_row_alt_bg": {
+      "type": "string",
+      "default": "#fafbfc"
+    },
+    "inv_desc_align": {
+      "type": "string",
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ],
+      "default": "left"
+    },
+    "inv_num_align": {
+      "type": "string",
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ],
+      "default": "right"
+    },
+    "inv_logo_source": {
+      "type": "string",
+      "enum": [
+        "company",
+        "custom"
+      ],
+      "default": "company"
+    },
+    "inv_logo_url": {
+      "type": "string"
+    },
+    "inv_logo_size": {
+      "type": "number",
+      "default": 16
     }
   },
   "required": [
