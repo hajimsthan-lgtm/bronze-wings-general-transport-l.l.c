@@ -361,9 +361,17 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.setFont('times', 'normal');
   pdf.setFontSize(10);
   tc(pdf, BLACK);
-  pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 5, { align: 'right' });
-  pdf.text(`INVOICE DATE: ${invoiceDate}`, rightX, y + 9, { align: 'right' });
-  pdf.text(`LPO Ref #: ${str(invoice.lpo_ref || '—')}`, rightX, y + 13, { align: 'right' });
+  // Right-align labels so colons line up; left-align values right after
+  const labels = ['INVOICE #:', 'INVOICE DATE:', 'LPO Ref #:'];
+  const values = [refNumber, invoiceDate, str(invoice.lpo_ref || '—')];
+  const widestLabelW = Math.max(...labels.map(l => pdf.getTextWidth(l)));
+  const colonX = rightX - widestLabelW - 1;
+  const valueX = colonX + 1.5;
+  const yPos = [y + 5, y + 9, y + 13];
+  for (let i = 0; i < 3; i++) {
+    pdf.text(labels[i], colonX, yPos[i], { align: 'right' });
+    pdf.text(values[i], valueX, yPos[i], { align: 'left' });
+  }
 
   return y + h + 2;
 }
