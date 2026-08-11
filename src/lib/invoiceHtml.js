@@ -31,10 +31,11 @@ function esc(str) {
 // Fix: "Dubai !' Fujairah" → "Dubai-Fujairah"
 function normalizeRoute(str) {
   return String(str ?? '')
-    .replace(/\s*->\s*/g, ' → ')
-    .replace(/(\w{2,})\s*[!'‘’]+\s*(\w{2,})/g, '$1-$2')
-    .replace(/(\w{2,})\s*[–—]\s*(\w{2,})/g, '$1-$2')
-    .replace(/-{2,}/g, '-');
+    .replace(/\s*->\s*/g, ' To ')
+    .replace(/(\w{2,})\s*[!'‘’]+\s*(\w{2,})/gi, '$1 To $2')
+    .replace(/(\w{2,})\s*[–—]\s*(\w{2,})/gi, '$1 To $2')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
@@ -284,7 +285,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <td style="padding:8px 6px;border:1px solid #000;text-align:right;font-size:11px;color:#000;font-weight:700;${nf}">${fmtMoney(unitPrice)}</td>
       <td style="padding:8px 6px;border:1px solid #000;text-align:right;font-size:11px;color:#000;font-weight:700;${nf}">${fmtMoney(grossAmount)}</td>
       <td style="padding:8px 6px;border:1px solid #000;text-align:right;font-size:11px;color:#000;font-weight:700;${nf}">${fmtMoney(lineVat)}</td>
-      <td style="padding:8px 6px;border:1px solid #000;text-align:right;font-size:11px;color:#8B3A2E;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
+      <td style="padding:8px 6px;border:1px solid #000;text-align:right;font-size:11px;color:#000;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
     </tr>`;
   }).join('');
 
@@ -489,7 +490,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <td style="padding:7px 5px;border:1px solid #000;text-align:right;font-size:10.5px;color:#000;font-weight:700;${nf}">${fmtMoney(unitPrice)}</td>
       <td style="padding:7px 5px;border:1px solid #000;text-align:right;font-size:10.5px;color:#000;font-weight:700;${nf}">${fmtMoney(grossAmount)}</td>
       <td style="padding:7px 5px;border:1px solid #000;text-align:right;font-size:10.5px;color:#000;font-weight:700;${nf}">${fmtMoney(lineVat)}</td>
-      <td style="padding:7px 5px;border:1px solid #000;text-align:right;font-size:10.5px;color:#8B3A2E;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
+      <td style="padding:7px 5px;border:1px solid #000;text-align:right;font-size:10.5px;color:#000;font-weight:700;${nf}">${fmtMoney(lineTotal)}</td>
     </tr>`;
   }).join('');
 
@@ -573,14 +574,14 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <table style="width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:4%;">#</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:10%;">Trip Date</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 10px;border:1px solid #000;text-align:left;white-space:nowrap;width:30%;">Description</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:7%;">Qty</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Unit Price<br>(AED)</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Amount<br>(AED)</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:11%;">VAT<br>5%</th>
-        <th style="background:#9e813a;color:#fff;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Total<br>(AED)</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:4%;">#</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:10%;">Trip Date</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 10px;border:1px solid #000;text-align:left;white-space:nowrap;width:30%;">Description</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;white-space:nowrap;width:7%;">Qty</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Unit Price<br>(AED)</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Amount<br>(AED)</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:11%;">VAT<br>5%</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:right;white-space:nowrap;width:13%;">Total<br>(AED)</th>
       </tr>
     </thead>
     <tbody>
@@ -592,9 +593,9 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Totals Area: Amount in Words (left) + Subtotal/VAT/Total (right) -->
   <div style="position:relative;z-index:1;margin:10px 28px 0;display:flex;gap:0;align-items:stretch;">
     <!-- Amount in Words box (dashed gold border) -->
-    <div style="flex:1;border:1.5px dashed #9e813a;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;">
+    <div style="flex:1;border:1.5px dashed #333;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;">
       <div style="font-size:10px;font-weight:700;color:#333;margin-bottom:4px;">Amount in Words:</div>
-      <div style="font-size:11px;font-weight:700;color:#9e813a;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">AED ${numberToWords(total).toUpperCase()} ONLY</div>
+      <div style="font-size:11px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">AED ${numberToWords(total).toUpperCase()} ONLY</div>
     </div>
     <!-- Subtotal / VAT / Total rows (right) -->
     <div style="flex-shrink:0;width:300px;">
@@ -606,7 +607,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
         <span style="color:#333;font-weight:600;">VAT (5%):</span>
         <span style="color:#000;font-weight:700;${nf2}">AED ${fmtMoney(vatAmount)}</span>
       </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 14px;border-top:2px solid #9e813a;border-bottom:2px solid #9e813a;font-size:11px;">
+      <div style="display:flex;justify-content:space-between;padding:8px 14px;border-top:2px solid #000;border-bottom:2px solid #000;font-size:11px;">
         <span style="color:#000;font-weight:800;">Total Amount:</span>
         <span style="color:#000;font-weight:800;${nf2}">AED ${fmtMoney(total)}</span>
       </div>

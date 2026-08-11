@@ -109,10 +109,11 @@ function str(v) { return String(v ?? ''); }
 
 function normalizeRoute(s) {
   return str(s)
-    .replace(/\s*->\s*/g, ' → ')
-    .replace(/(\w{2,})\s*[!'']+\s*(\w{2,})/g, '$1-$2')
-    .replace(/(\w{2,})\s*[–—]\s*(\w{2,})/g, '$1-$2')
-    .replace(/-{2,}/g, '-');
+    .replace(/\s*->\s*/g, ' To ')
+    .replace(/(\w{2,})\s*[!'\u2019\u2018`\u00B4]+\s*(\w{2,})/gi, '$1 To $2')
+    .replace(/(\w{2,})\s*[–—]+\s*(\w{2,})/g, '$1 To $2')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 async function fetchLogoDataUrl(url) {
@@ -363,12 +364,19 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 // ═══════════════════════════════════════════════════════════
 function drawTableHeader(pdf, cols, y, invoiceType) {
   const h = 12;
+  const isTrip = invoiceType === 'trip';
 
   pdf.setFont('helvetica', 'bold');
-  fc(pdf, invoiceType === 'trip' ? GOLD : [29, 63, 85]);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
+  if (isTrip) {
+    fc(pdf, [240, 240, 240]);
+    pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
+    tc(pdf, BLACK);
+  } else {
+    fc(pdf, [29, 63, 85]);
+    pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
+    tc(pdf, WHITE);
+  }
   pdf.setFontSize(8);
-  tc(pdf, WHITE);
 
   for (const col of cols) {
     const lines = col.label.split('\n');
@@ -502,7 +510,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 10;
   const isTrip = invoiceType === 'trip';
-  const accent = isTrip ? GOLD : BLACK;
+  const accent = BLACK;
 
   // Top border
   dc(pdf, accent);
@@ -520,7 +528,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(10);
   if (isTrip) {
-    tc(pdf, GOLD);
+    tc(pdf, BLACK);
     pdf.text('AED', labelRight - 2, y + h / 2 + 1, { align: 'right' });
   } else {
     tc(pdf, BLACK);
