@@ -679,44 +679,18 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
 function drawFooterBanners(pdf) {
   const bw = PAGE_W - 2 * BORDER_POS;
 
-  // Banner 3 (bottom) — CREAM bg, BROWN text (matches header)
-  const b3h = 5;
-  const b3y = FOOTER_BOTTOM - b3h;
+  // Single banner — CREAM bg, BROWN text
+  const bh = 5;
+  const by = FOOTER_BOTTOM - bh;
   fc(pdf, [253, 251, 240]);
-  pdf.rect(BORDER_POS, b3y, bw, b3h, 'F');
+  pdf.rect(BORDER_POS, by, bw, bh, 'F');
   dc(pdf, [99, 60, 26]);
   pdf.setLineWidth(0.4);
-  pdf.rect(BORDER_POS, b3y, bw, b3h);
+  pdf.rect(BORDER_POS, by, bw, bh);
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
   tc(pdf, [99, 60, 26]);
-  pdf.text('GENERAL TRANSPORT · HEAVY EQUIPMENT RENTAL · LOGISTICS · COLD CHAIN SOLUTIONS', PAGE_W / 2, b3y + 3.5, { align: 'center' });
-
-  // Banner 2 — CREAM bg, BROWN text
-  const b2h = 5;
-  const b2y = b3y - b2h;
-  fc(pdf, [253, 251, 240]);
-  pdf.rect(BORDER_POS, b2y, bw, b2h, 'F');
-  dc(pdf, [99, 60, 26]);
-  pdf.setLineWidth(0.4);
-  pdf.rect(BORDER_POS, b2y, bw, b2h);
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  tc(pdf, [99, 60, 26]);
-  pdf.text('THANKS FOR DOING BUSINESS WITH US!', PAGE_W / 2, b2y + 3.5, { align: 'center' });
-
-  // Banner 1 — CREAM bg, BROWN text
-  const b1h = 4;
-  const b1y = b2y - b1h;
-  fc(pdf, [253, 251, 240]);
-  pdf.rect(BORDER_POS, b1y, bw, b1h, 'F');
-  dc(pdf, [99, 60, 26]);
-  pdf.setLineWidth(0.4);
-  pdf.rect(BORDER_POS, b1y, bw, b1h);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
-  tc(pdf, [99, 60, 26]);
-  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, b1y + 3, { align: 'center' });
+  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, by + 3.5, { align: 'center' });
 }
 
 // ═══════════════════════════════════════════════════════════

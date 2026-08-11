@@ -233,11 +233,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <!-- Spacer pushes footer banners to bottom -->
   <div style="flex:1 1 auto;"></div>
 
-  <!-- Footer Banners -->
+  <!-- Footer Banner -->
   <div style="position:relative;z-index:1;background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:10px 14px;font-size:13pt;font-weight:bold;text-transform:uppercase;margin-top:28px;">
-    Thanks for Doing Business with Us!
-  </div>
-  <div style="position:relative;z-index:1;background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:7px 14px;font-size:10.5pt;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
     We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
   </div>
 
@@ -421,12 +418,9 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
   </div>
 
-  <!-- Footer Banners -->
+  <!-- Footer Banner -->
   <div style="position:relative;z-index:1;margin-top:auto;padding-top:14px;">
     <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:10px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
-      Thanks for Doing Business with Us!
-    </div>
-    <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:8px 20px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.6;">
       We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
     </div>
   </div>
@@ -619,12 +613,9 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
   </div>
 
-  <!-- Footer Banners -->
+  <!-- Footer Banner -->
   <div style="position:relative;z-index:1;">
     <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:9px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
-      Thanks for Doing Business with Us!
-    </div>
-    <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:7px 20px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:2px;line-height:1.5;">
       We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
     </div>
   </div>
