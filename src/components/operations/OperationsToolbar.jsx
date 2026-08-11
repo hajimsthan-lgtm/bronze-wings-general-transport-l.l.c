@@ -27,7 +27,7 @@ export default function OperationsToolbar({
   return (
     <div className="glass-sm rounded-2xl p-2.5 flex flex-wrap items-center gap-2">
       {/* Search */}
-      <div className="relative flex-1 min-w-[160px] max-w-[260px]">
+      <div className="relative flex-1 min-w-[140px] sm:max-w-[260px]">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
         <Input
           value={search}
@@ -47,7 +47,7 @@ export default function OperationsToolbar({
       </div>
 
       <Select value={mode} onValueChange={onModeChange}>
-        <SelectTrigger className="h-9 w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
+        <SelectTrigger className="h-9 w-full sm:w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -58,7 +58,7 @@ export default function OperationsToolbar({
       </Select>
 
       <Select value={statusValue} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-9 w-[110px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
+        <SelectTrigger className="h-9 w-full sm:w-[110px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

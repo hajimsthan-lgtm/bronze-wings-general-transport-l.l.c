@@ -60,27 +60,19 @@ export default function MobileHeader() {
           </div>
           <BrandName variant="mobile" />
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
             title="Go back"
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <GlobalDateFilter />
           <button
-            onClick={startTour}
-            className="w-8 h-8 rounded-full bg-blue-500/15 border border-blue-500/40 flex items-center justify-center text-blue-200 transition-all hover:bg-blue-500/25 hover:text-white"
-            aria-label="Info Journey"
-            title="Info Journey"
-          >
-            <GraduationCap className="w-4 h-4" />
-          </button>
-          <button
             onClick={toggleMode}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0"
             style={{
               background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
               border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
@@ -93,7 +85,7 @@ export default function MobileHeader() {
           </button>
           <Link
             to="/settings"
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
+            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white flex-shrink-0"
             aria-label="Settings"
           >
             <Settings className="w-4 h-4" />

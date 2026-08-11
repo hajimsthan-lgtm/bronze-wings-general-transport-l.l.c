@@ -16,9 +16,9 @@ export default function MobileNav() {
   const { activeTab, switchTab } = useTabHistory();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] pt-2 px-4">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 px-3">
       <div
-        className="relative rounded-full flex items-center justify-between gap-1 px-2 py-1.5 max-w-md mx-auto"
+        className="relative rounded-full flex items-center justify-between gap-0.5 px-1.5 py-1.5 max-w-md mx-auto"
         style={{
           background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
           backdropFilter: 'blur(16px) saturate(1.4)',

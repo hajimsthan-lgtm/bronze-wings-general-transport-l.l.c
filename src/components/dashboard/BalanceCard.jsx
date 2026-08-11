@@ -56,17 +56,17 @@ export default function BalanceCard({ healthPct, totalRevenue, activeTrips, pend
             </span>
             <span className="text-[11px] text-white/40">vs yesterday</span>
           </div>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            {stats.map((s) => (
-              <div key={s.label} className="rounded-xl p-2.5" style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <s.icon className="w-3.5 h-3.5" style={{ color: s.color }} />
-                  <span className="text-[9px] uppercase tracking-wider text-white/40 truncate">{s.label}</span>
-                </div>
-                <p className="text-sm font-bold text-white tabular-nums truncate">{s.value}</p>
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mt-4">
+             {stats.map((s) => (
+               <div key={s.label} className="rounded-xl p-2 sm:p-2.5" style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}>
+                 <div className="flex items-center gap-1 mb-1">
+                   <s.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" style={{ color: s.color }} />
+                   <span className="text-[8px] sm:text-[9px] uppercase tracking-wider text-white/40 truncate">{s.label}</span>
+                 </div>
+                 <p className="text-xs sm:text-sm font-bold text-white tabular-nums truncate">{s.value}</p>
+               </div>
+             ))}
+           </div>
         </div>
       </div>
     </div>
