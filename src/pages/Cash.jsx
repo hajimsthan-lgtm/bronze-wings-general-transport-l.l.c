@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
@@ -60,12 +60,12 @@ export default function Cash() {
         </div>
       )}
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Cash Entry</SheetTitle></SheetHeader>
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader className="mb-4"><DialogTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Cash Entry</DialogTitle></DialogHeader>
           <CashForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.CashTransaction.update(editItem.id, data); else await base44.entities.CashTransaction.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
     </PullToRefresh>
   );
