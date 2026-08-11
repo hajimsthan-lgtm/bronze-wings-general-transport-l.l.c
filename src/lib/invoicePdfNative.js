@@ -614,8 +614,8 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   );
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
-  // Leave room for the footer banner (5mm at y=288) — stop table above it
-  const contentBottom = FOOTER_BOTTOM - 5 - 2; // = 286
+  // Leave room for the footer banner (now at y=284) — stop table above it
+  const contentBottom = PAGE_H - MARGIN - 5 - 2; // = 282
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
@@ -839,9 +839,10 @@ function drawTermsConditions(pdf, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 function drawFooterBanners(pdf) {
   // Separate bordered box — same inset as the header letterhead (CONTENT_X / CONTENT_W)
+  // Position so the bottom border aligns with MARGIN (same gap as header at top)
   const bw = CONTENT_W;
   const bh = 5;
-  const by = FOOTER_BOTTOM - bh;
+  const by = PAGE_H - MARGIN - bh;
   fc(pdf, [253, 251, 240]); // CREAM bg — same as header
   pdf.rect(CONTENT_X, by, bw, bh, 'F');
   dc(pdf, [99, 60, 26]); // BROWN border — same as header
@@ -1046,7 +1047,7 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     pdf.setFont('times', 'normal');
     pdf.setFontSize(9);
     tc(pdf, GRAY);
-    pdf.text(`Page No ${i} of ${pageCount}`, CONTENT_RIGHT, 286, { align: 'right' });
+    pdf.text(`Page No ${i} of ${pageCount}`, CONTENT_RIGHT, 282, { align: 'right' });
   }
 
   // Save
