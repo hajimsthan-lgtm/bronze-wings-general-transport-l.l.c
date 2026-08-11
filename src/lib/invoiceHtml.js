@@ -635,18 +635,18 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </div>
 
     <!-- Signature Blocks (Two Columns) -->
-    <div style="display:flex;border-top:1px solid #ddd;padding:16px 14px;gap:20px;">
-      <!-- Left: Receiver -->
+    <div style="display:flex;border-top:1px solid #ddd;padding:24px 14px;gap:20px;">
+      <!-- Left: Authorized By -->
       <div style="flex:1;text-align:center;">
-        <div style="border-bottom:1px solid #9e813a;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
-        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
-        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;overflow-wrap:break-word;word-break:break-word;">${esc(billName)}</div>
+        <div style="font-size:10pt;font-weight:bold;color:#9e8d7d;text-transform:uppercase;letter-spacing:1px;margin-bottom:30px;">AUTHORIZED BY</div>
+        <div style="border-bottom:1px solid #333;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8.5pt;color:#7d7d7d;">Authorized Signature</div>
       </div>
-      <!-- Right: Authorized -->
+      <!-- Right: Received By -->
       <div style="flex:1;text-align:center;">
-        <div style="border-bottom:1px solid #9e813a;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
-        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
-        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;">BRONZE WINGS GENERAL TRANSPORT L.L.C</div>
+        <div style="font-size:10pt;font-weight:bold;color:#9e8d7d;text-transform:uppercase;letter-spacing:1px;margin-bottom:30px;">RECEIVED BY</div>
+        <div style="border-bottom:1px solid #333;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8.5pt;color:#7d7d7d;">Client Signature</div>
       </div>
     </div>
   </div>
