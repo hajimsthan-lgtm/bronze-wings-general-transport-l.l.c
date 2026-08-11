@@ -15,6 +15,10 @@ export function ThemeProvider({ children }) {
     if (typeof window === 'undefined') return 'crimson';
     return localStorage.getItem('bw-theme-v7') || 'crimson';
   });
+  const [mode, setModeState] = useState(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem('bw-mode-v1') || 'dark';
+  });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 
   useEffect(() => {
@@ -24,6 +28,13 @@ export function ThemeProvider({ children }) {
     if (THEME_CLASSES[theme]) root.classList.add(THEME_CLASSES[theme]);
     localStorage.setItem('bw-theme-v7', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (mode === 'light') root.classList.add('theme-light');
+    else root.classList.remove('theme-light');
+    localStorage.setItem('bw-mode-v1', mode);
+  }, [mode]);
 
   useEffect(() => {
     const onFs = () => setIsFullscreen(!!document.fullscreenElement);
@@ -36,8 +47,10 @@ export function ThemeProvider({ children }) {
     return CYCLE[(i + 1) % CYCLE.length];
   });
 
+  const toggleMode = () => setModeState((p) => (p === 'dark' ? 'light' : 'dark'));
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: setThemeState, toggleTheme, isFullscreen, toggleFullscreen: async () => {
+    <ThemeContext.Provider value={{ theme, setTheme: setThemeState, toggleTheme, mode, setMode: setModeState, toggleMode, isFullscreen, toggleFullscreen: async () => {
       try {
         if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
         else await document.exitFullscreen();
@@ -50,6 +63,6 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) return { theme: 'navy', setTheme: () => {}, toggleTheme: () => {}, isFullscreen: false, toggleFullscreen: () => {} };
+  if (!ctx) return { theme: 'navy', setTheme: () => {}, toggleTheme: () => {}, mode: 'dark', setMode: () => {}, toggleMode: () => {}, isFullscreen: false, toggleFullscreen: () => {} };
   return ctx;
 }

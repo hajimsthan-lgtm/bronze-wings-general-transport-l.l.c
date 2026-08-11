@@ -8,7 +8,8 @@ import BrandName from '@/components/layout/BrandName';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
-import { Settings as SettingsIcon, Bot, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTheme } from '@/lib/theme';
+import { Settings as SettingsIcon, Bot, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
 
 export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
@@ -16,6 +17,7 @@ export default function DesktopNav() {
   const navigate = useNavigate();
   const isDashboard = location.pathname === '/';
   const railVisible = useRailVisible();
+  const { mode, toggleMode } = useTheme();
   useEffect(() => {getCompanySettings().then((s) => setLogoUrl(s.logo_url));}, []);
 
   const [scrolling, setScrolling] = useState(false);
@@ -108,6 +110,19 @@ export default function DesktopNav() {
             <span className="hidden lg:inline">AI Agents</span>
           </Link>
           <AlertBell />
+          <button
+            onClick={toggleMode}
+            aria-label={mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={mode === 'dark' ? 'Light mode' : 'Dark mode'}
+            className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300"
+            style={{
+              background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+              color: 'hsl(var(--muted-foreground))',
+            }}
+          >
+            {mode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <Link
             to="/settings"
             aria-label="Settings"

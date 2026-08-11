@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Settings, GraduationCap, ArrowLeft } from 'lucide-react';
+import { Settings, GraduationCap, ArrowLeft, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useTour, gatherTourSteps } from '@/lib/tour';
@@ -10,7 +10,7 @@ import BrandName from '@/components/layout/BrandName';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
 
 export default function MobileHeader() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mode, toggleMode } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
   const tour = useTour();
   const { toast } = useToast();
@@ -79,12 +79,17 @@ export default function MobileHeader() {
             <GraduationCap className="w-4 h-4" />
           </button>
           <button
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white"
-            aria-label="Switch theme"
-            title="Switch theme"
+            onClick={toggleMode}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+            style={{
+              background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+              color: 'hsl(var(--muted-foreground))',
+            }}
+            aria-label={mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            title={mode === 'dark' ? 'Light mode' : 'Dark mode'}
           >
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme === 'crimson' ? '#D62828' : '#3E92CC', boxShadow: `0 0 6px ${theme === 'crimson' ? '#D62828' : '#3E92CC'}` }} />
+            {mode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           <Link
             to="/settings"
