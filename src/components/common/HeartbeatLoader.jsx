@@ -10,8 +10,8 @@ function injectStyles() {
   style.textContent = `
     .lorry-loader {
       position: relative;
-      width: 240px;
-      height: 64px;
+      width: 280px;
+      height: 72px;
       border: none;
       background: transparent;
       display: flex;
@@ -60,13 +60,13 @@ function injectStyles() {
     .lorry-truck {
       position: absolute;
       bottom: 10px;
-      left: -80px;
-      width: 72px;
-      height: 40px;
-      animation: lorry-drive 2.2s linear infinite, lorry-bob 0.35s ease-in-out infinite alternate;
+      left: -130px;
+      width: 120px;
+      height: 52px;
+      animation: lorry-drive 2.6s linear infinite, lorry-bob 0.35s ease-in-out infinite alternate;
     }
     @keyframes lorry-drive {
-      0%   { left: -80px; }
+      0%   { left: -130px; }
       100% { left: 100%; }
     }
     @keyframes lorry-bob {
@@ -86,25 +86,25 @@ function injectStyles() {
     @keyframes lorry-wheel-spin {
       to { transform: rotate(360deg); }
     }
-    /* ===== Exhaust puffs — trail behind the moving truck ===== */
+    /* ===== Exhaust puffs — trail from the exhaust stack ===== */
     .lorry-smoke {
       position: absolute;
-      bottom: 14px;
+      bottom: 30px;
       left: -20px;
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: hsl(var(--muted-foreground));
       opacity: 0;
-      animation: lorry-puff 2.2s ease-out infinite;
+      animation: lorry-puff 2.6s ease-out infinite;
     }
-    .lorry-smoke:nth-child(1) { animation-delay: 0.2s; }
-    .lorry-smoke:nth-child(2) { animation-delay: 0.9s; }
-    .lorry-smoke:nth-child(3) { animation-delay: 1.6s; }
+    .lorry-smoke:nth-child(1) { animation-delay: 0.3s; }
+    .lorry-smoke:nth-child(2) { animation-delay: 1.1s; }
+    .lorry-smoke:nth-child(3) { animation-delay: 1.9s; }
     @keyframes lorry-puff {
-      0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
-      10%  { opacity: 0.35; }
-      100% { opacity: 0; transform: translate(-30px, -22px) scale(1.8); }
+      0%   { opacity: 0; transform: translate(0, 0) scale(0.3); }
+      10%  { opacity: 0.3; }
+      100% { opacity: 0; transform: translate(-28px, -26px) scale(2); }
     }
     /* ===== Color variants ===== */
     .lorry-loader.lorry-violet .lorry-truck svg path,
@@ -162,24 +162,59 @@ export default function HeartbeatLoader({ color = 'blue', className = '' }) {
         <div className="lorry-smoke" />
         <div className="lorry-smoke" />
         <div className="lorry-truck">
-          <svg viewBox="0 0 72 40" preserveAspectRatio="xMidYMid meet">
-            {/* Cargo box */}
-            <rect x="2" y="6" width="40" height="22" rx="2" />
-            {/* Cab */}
-            <path d="M42 14 L52 14 L60 20 L60 28 L42 28 Z" />
-            {/* Window */}
-            <rect x="46" y="17" width="10" height="6" rx="1" fill="rgba(255,255,255,0.25)" />
+          <svg viewBox="0 0 120 52" preserveAspectRatio="xMidYMid meet">
+            {/* ===== Trailer container ===== */}
+            <rect x="2" y="8" width="62" height="26" rx="1.5" />
+            {/* Container ridge lines */}
+            <line x1="2" y1="15" x2="64" y2="15" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+            <line x1="2" y1="22" x2="64" y2="22" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+            <line x1="2" y1="29" x2="64" y2="29" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+            {/* Container vertical ribs */}
+            <line x1="18" y1="8" x2="18" y2="34" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+            <line x1="34" y1="8" x2="34" y2="34" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+            <line x1="50" y1="8" x2="50" y2="34" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+
+            {/* ===== Hitch gap ===== */}
+
+            {/* ===== Cab ===== */}
+            {/* Cab body */}
+            <path d="M66 16 L78 16 L88 20 L92 24 L92 34 L66 34 Z" />
+            {/* Windshield */}
+            <path d="M78.5 17.5 L86.5 21 L86.5 24 L78.5 24 Z" fill="rgba(255,255,255,0.28)" />
+            {/* Door line */}
+            <line x1="78" y1="24" x2="78" y2="34" stroke="rgba(0,0,0,0.25)" strokeWidth="0.6" />
+            {/* Door handle */}
+            <rect x="74" y="27" width="2.5" height="1" rx="0.3" fill="rgba(255,255,255,0.35)" />
+            {/* Grille */}
+            <rect x="87" y="28" width="4.5" height="5" rx="0.5" fill="rgba(0,0,0,0.3)" />
+            <line x1="87" y1="30" x2="91.5" y2="30" stroke="rgba(255,255,255,0.15)" strokeWidth="0.4" />
+            <line x1="87" y1="31.5" x2="91.5" y2="31.5" stroke="rgba(255,255,255,0.15)" strokeWidth="0.4" />
             {/* Headlight */}
-            <circle cx="59" cy="25" r="1.5" fill="rgba(255,255,255,0.6)" />
-            {/* Front wheel */}
-            <g className="lorry-wheel" style={{ transformOrigin: '52px 30px' }}>
-              <circle cx="52" cy="30" r="6" />
-              <circle className="lorry-wheel-ring" cx="52" cy="30" r="3" fill="none" strokeWidth="1.5" />
+            <ellipse cx="90" cy="26" rx="1.6" ry="1.2" fill="rgba(255,255,235,0.75)" />
+            {/* Exhaust stack */}
+            <rect x="68" y="10" width="2.5" height="8" rx="0.6" />
+            <ellipse cx="69.25" cy="10" rx="1.25" ry="0.8" fill="rgba(0,0,0,0.4)" />
+            {/* Side mirror */}
+            <line x1="78" y1="18" x2="75.5" y2="16.5" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" />
+            <ellipse cx="75.5" cy="16.5" rx="1.2" ry="0.8" fill="rgba(255,255,255,0.15)" />
+
+            {/* ===== Wheels — rear tandem axle ===== */}
+            <g className="lorry-wheel" style={{ transformOrigin: '14px 38px' }}>
+              <circle cx="14" cy="38" r="6" />
+              <circle className="lorry-wheel-ring" cx="14" cy="38" r="3" fill="none" strokeWidth="1.5" />
             </g>
-            {/* Rear wheel */}
-            <g className="lorry-wheel" style={{ transformOrigin: '14px 30px' }}>
-              <circle cx="14" cy="30" r="6" />
-              <circle className="lorry-wheel-ring" cx="14" cy="30" r="3" fill="none" strokeWidth="1.5" />
+            <g className="lorry-wheel" style={{ transformOrigin: '26px 38px' }}>
+              <circle cx="26" cy="38" r="6" />
+              <circle className="lorry-wheel-ring" cx="26" cy="38" r="3" fill="none" strokeWidth="1.5" />
+            </g>
+            <g className="lorry-wheel" style={{ transformOrigin: '50px 38px' }}>
+              <circle cx="50" cy="38" r="6" />
+              <circle className="lorry-wheel-ring" cx="50" cy="38" r="3" fill="none" strokeWidth="1.5" />
+            </g>
+            {/* Front cab wheel */}
+            <g className="lorry-wheel" style={{ transformOrigin: '82px 38px' }}>
+              <circle cx="82" cy="38" r="6" />
+              <circle className="lorry-wheel-ring" cx="82" cy="38" r="3" fill="none" strokeWidth="1.5" />
             </g>
           </svg>
         </div>
