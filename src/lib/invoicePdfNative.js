@@ -850,7 +850,7 @@ function drawFooterBanners(pdf) {
   pdf.rect(CONTENT_X, by, bw, bh);
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
-  tc(pdf, [99, 60, 26]);
+  tc(pdf, [94, 84, 74]); // greyish-brown — matches reference
   pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, by + 3.5, { align: 'center' });
 }
 
