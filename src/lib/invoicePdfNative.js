@@ -675,6 +675,7 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
 function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
   const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
   const accent = invoiceType === 'trip' ? GOLD : MAROON;
+  const isTrip = invoiceType === 'trip';
 
   // ── LEFT: Bank details ──
   if (hasBank) {
@@ -698,16 +699,53 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
     if (s.bank_branch)         { pdf.text(`Branch: ${str(s.bank_branch)}`, lx, ly); ly += 4; }
   }
 
-  // ── RIGHT: Dual signatures ──
-  const sigX = PAGE_W / 2;
-  const sigW = CONTENT_RIGHT - sigX;
-  const gap = 10;
-  const eachW = (sigW - gap) / 2;
+  if (isTrip) {
+    // ── TRIP: Full-width dual signatures (AUTHORIZED BY / RECEIVED BY) ──
+    const sigW = CONTENT_W / 2;
+    const leftX = CONTENT_X;
+    const rightX = CONTENT_X + sigW;
+    const sigTopGap = 18; // space above the line for signing
+    const lineY = y + sigTopGap;
 
-  drawSignatureBlock(pdf, sigX, y, eachW, 'FOR\nBRONZE WINGS\nGENERAL TRANSPORT L.L.C', 'Authorized Signature & Stamp', null);
-  drawSignatureBlock(pdf, sigX + eachW + gap, y, eachW, `FOR\n${str(clientName || invoice.client_name || '')}`, 'Receiver Sign & Stamp', str(s.phone1) || '050-8655601');
+    // Left — AUTHORIZED BY
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    tc(pdf, [158, 141, 125]); // warm gold-grey
+    pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 4, { align: 'center' });
+    dc(pdf, [51, 51, 51]);
+    pdf.setLineWidth(0.3);
+    pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    tc(pdf, GRAY);
+    pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
 
-  return y + 38;
+    // Right — RECEIVED BY
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    tc(pdf, [158, 141, 125]);
+    pdf.text('RECEIVED BY', rightX + sigW / 2, y + 4, { align: 'center' });
+    dc(pdf, [51, 51, 51]);
+    pdf.setLineWidth(0.3);
+    pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    tc(pdf, GRAY);
+    pdf.text('Client Signature', rightX + sigW / 2, lineY + 4, { align: 'center' });
+
+    return y + sigTopGap + 8;
+  } else {
+    // ── STANDARD / MONTHLY: Original right-side dual signatures ──
+    const sigX = PAGE_W / 2;
+    const sigW = CONTENT_RIGHT - sigX;
+    const gap = 10;
+    const eachW = (sigW - gap) / 2;
+
+    drawSignatureBlock(pdf, sigX, y, eachW, 'FOR\nBRONZE WINGS\nGENERAL TRANSPORT L.L.C', 'Authorized Signature & Stamp', null);
+    drawSignatureBlock(pdf, sigX + eachW + gap, y, eachW, `FOR\n${str(clientName || invoice.client_name || '')}`, 'Receiver Sign & Stamp', str(s.phone1) || '050-8655601');
+
+    return y + 38;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
