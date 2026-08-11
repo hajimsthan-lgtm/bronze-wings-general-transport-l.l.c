@@ -178,42 +178,30 @@ export function buildBronzeInvoiceHTML(invoice, clientName, settings = {}, seqNo
     <div style="font-size:11pt;font-weight:bold;color:${DARK_BRONZE};letter-spacing:0.5px;">AED ${words} ONLY</div>
   </div>
 
-  <!-- ══ BANK DETAILS & TERMS (Two Columns) ══ -->
-  <div style="padding:14px 30px 0;margin-top:10px;border-top:1px solid ${LINE_GRAY};display:flex;">
-    <div style="flex:1;padding-right:20px;">
-      <div style="font-size:10pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:8px;letter-spacing:1px;">BANK DETAILS</div>
-      <div style="font-size:9pt;color:${DARK_TEXT};line-height:1.8;">
-        <div>Bank: ${esc(s.bank_name || 'ADCB Abu Dhabi Commercial Bank')}</div>
-        <div>Account Title: ${esc(s.bank_account_title || s.company_name || 'Driving license typing services L L C')}</div>
-        <div>Account No: ${esc(s.bank_account_no || '13545851920001')}</div>
-        <div>IBAN: ${esc(s.bank_iban || 'AE68 0030 0135 4585 1920 001')}</div>
-        <div>Branch: ${esc(s.bank_branch || 'Main Branch')}</div>
-      </div>
-    </div>
-    <div style="flex:1;padding-left:20px;border-left:1px solid ${LINE_GRAY};">
-      <div style="font-size:10pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:8px;letter-spacing:1px;">TERMS &amp; CONDITIONS</div>
-      <div style="font-size:9pt;color:${DARK_TEXT};line-height:1.8;">Payment Terms: 60 days from receipt of the tax invoice.</div>
-    </div>
+  <!-- ══ TERMS & CONDITIONS ══ -->
+  <div style="padding:14px 30px 0;margin-top:10px;border-top:1px solid ${LINE_GRAY};">
+    <div style="font-size:10pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:8px;letter-spacing:1px;">TERMS &amp; CONDITIONS</div>
+    <div style="font-size:9pt;color:${DARK_TEXT};line-height:1.8;">Payment Terms: 60 days from receipt of the tax invoice.</div>
   </div>
 
   <!-- ══ SIGNATURE BLOCKS (Three Equal Columns) ══ -->
   <div style="padding:24px 30px 0;display:flex;gap:20px;">
     <!-- Left -->
-    <div style="flex:1;text-align:center;">
+    <div style="flex:1;text-align:left;">
       <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR BRONZE WINGS<br>GENERAL TRANSPORT</div>
-      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;"></div>
+      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:75%;"></div>
       <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
     </div>
     <!-- Middle -->
     <div style="flex:1;text-align:center;">
       <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR TRAVERSE</div>
-      <div style="border-bottom:1px solid ${LINE_GRAY};margin-bottom:5px;"></div>
+      <div style="border-bottom:1px solid ${LINE_GRAY};margin-bottom:5px;width:75%;margin-left:auto;margin-right:auto;"></div>
       <div style="font-size:8pt;color:${MED_GRAY};">&nbsp;</div>
     </div>
     <!-- Right -->
-    <div style="flex:1;text-align:center;">
+    <div style="flex:1;text-align:right;">
       <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR PREZIOSO TRAVERSE</div>
-      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;"></div>
+      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:75%;margin-left:auto;"></div>
       <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
       <div style="font-size:8pt;color:${MED_GRAY};margin-top:3px;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
     </div>
@@ -455,50 +443,23 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
   pdf.text(`AED ${words} ONLY`, M, y);
   y += 10;
 
-  // ══ BANK DETAILS & TERMS ══
+  // ══ TERMS & CONDITIONS ══
   setDraw([221, 221, 221]);
   pdf.setLineWidth(0.3);
   pdf.line(M, y, R, y);
   y += 6;
 
-  const colW = (CW - 4) / 2;
-  const leftX = M;
-  const rightX2 = M + colW + 4;
-
-  // Left: BANK DETAILS
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(10);
   setText(DB_RGB);
-  pdf.text('BANK DETAILS', leftX, y);
+  pdf.text('TERMS & CONDITIONS', M, y);
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
   setText(DT_RGB);
-  let bdy = y + 6;
-  pdf.text(`Bank: ${s.bank_name || 'ADCB Abu Dhabi Commercial Bank'}`, leftX, bdy); bdy += 5;
-  pdf.text(`Account Title: ${s.bank_account_title || s.company_name || 'Driving license typing services L L C'}`, leftX, bdy); bdy += 5;
-  pdf.text(`Account No: ${s.bank_account_no || '13545851920001'}`, leftX, bdy); bdy += 5;
-  pdf.text(`IBAN: ${s.bank_iban || 'AE68 0030 0135 4585 1920 001'}`, leftX, bdy); bdy += 5;
-  pdf.text(`Branch: ${s.bank_branch || 'Main Branch'}`, leftX, bdy); bdy += 5;
+  pdf.text('Payment Terms: 60 days from receipt of the tax invoice.', M, y + 6);
 
-  // Right: TERMS & CONDITIONS
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(10);
-  setText(DB_RGB);
-  pdf.text('TERMS & CONDITIONS', rightX2, y);
-
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(9);
-  setText(DT_RGB);
-  pdf.text('Payment Terms: 60 days from receipt', rightX2, y + 6);
-  pdf.text('of the tax invoice.', rightX2, y + 11);
-
-  // Vertical separator
-  setDraw([221, 221, 221]);
-  pdf.setLineWidth(0.3);
-  pdf.line(M + colW + 2, y - 2, M + colW + 2, Math.max(bdy, y + 16));
-
-  y = Math.max(bdy, y + 16) + 8;
+  y += 16;
 
   // ══ SIGNATURE BLOCKS (Three Equal Columns) ══
   const sigW = CW / 3;
@@ -514,6 +475,10 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
   for (let i = 0; i < 3; i++) {
     const blk = sigBlocks[i];
     const sx = M + i * sigW;
+    const align = i === 0 ? 'left' : i === 2 ? 'right' : 'center';
+    const textX = align === 'left' ? sx + 2 : align === 'right' ? sx + sigW - 2 : sx + sigW / 2;
+    const lineStart = align === 'left' ? sx : align === 'right' ? sx + sigW * 0.25 : sx + sigW * 0.125;
+    const lineEnd = align === 'left' ? sx + sigW * 0.75 : align === 'right' ? sx + sigW : sx + sigW * 0.875;
 
     // Company name (bold dark bronze)
     pdf.setFont('helvetica', 'bold');
@@ -522,7 +487,7 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
     const labelLines = blk.label.split('\n');
     let sly = sigY + 4;
     for (const line of labelLines) {
-      pdf.text(line, sx + sigW / 2, sly, { align: 'center' });
+      pdf.text(line, textX, sly, { align });
       sly += 5;
     }
 
@@ -530,16 +495,16 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
     const lineY = sigY + 30;
     setDraw(i === 1 ? [221, 221, 221] : DB_RGB);
     pdf.setLineWidth(0.3);
-    pdf.line(sx + 5, lineY, sx + sigW - 5, lineY);
+    pdf.line(lineStart, lineY, lineEnd, lineY);
 
     // Caption
     if (blk.caption) {
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(8);
       setText(MG_RGB);
-      pdf.text(blk.caption, sx + sigW / 2, lineY + 4, { align: 'center' });
+      pdf.text(blk.caption, textX, lineY + 4, { align });
       if (blk.mobile) {
-        pdf.text(blk.mobile, sx + sigW / 2, lineY + 8, { align: 'center' });
+        pdf.text(blk.mobile, textX, lineY + 8, { align });
       }
     }
   }
