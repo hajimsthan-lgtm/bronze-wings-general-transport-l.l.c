@@ -13,7 +13,7 @@ export default function AppLayout() {
   const location = useLocation();
   const showHeader = true;
   const isMobile = useIsMobile();
-  const railWidth = 64;
+  const railWidth = 208;
   const railExpanded = useRailExpanded();
 
   return (

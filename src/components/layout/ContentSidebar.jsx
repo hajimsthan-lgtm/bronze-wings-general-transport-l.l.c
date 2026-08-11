@@ -35,7 +35,7 @@ const navItems = [
   },
 ];
 
-const RAIL_W = 232;
+const RAIL_W = 196;
 
 export default function ContentSidebar() {
   const { t } = useI18n();
