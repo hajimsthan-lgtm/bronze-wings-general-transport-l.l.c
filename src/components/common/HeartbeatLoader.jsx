@@ -2,115 +2,188 @@ import { useEffect } from 'react';
 
 const COLORS = ['violet', 'green', 'red', 'yellow', 'blue', 'bronze'];
 
-const ECG_PATH = 'M0,25 L60,25 L75,25 L90,5 L105,45 L120,10 L135,40 L150,25 L165,25 L180,25 L195,25 L210,5 L225,45 L240,10 L255,40 L270,25 L285,25 L300,25 L315,25 L330,5 L345,45 L360,10 L375,40 L390,25 L405,25 L420,25 L435,25 L450,5 L465,45 L480,10 L495,40 L510,25 L525,25 L540,25 L555,25 L570,25 L600,25';
-
 let injected = false;
 function injectStyles() {
   if (injected || typeof document === 'undefined') return;
   const style = document.createElement('style');
   style.setAttribute('data-hb-compact', 'true');
   style.textContent = `
-    .hb-compact {
+    .lorry-loader {
       position: relative;
       width: 240px;
-      height: 40px;
+      height: 64px;
       border: none;
-      border-radius: 0;
       background: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 8px;
+      padding: 0;
       user-select: none;
+      overflow: hidden;
     }
-    .hb-compact .hb-wave-box {
+    .lorry-scene {
       position: relative;
-      width: 92%;
-      height: 75%;
+      width: 100%;
+      height: 100%;
     }
-    .hb-compact .hb-bg-line {
+    /* ===== Road ===== */
+    .lorry-road {
       position: absolute;
-      left: 0; right: 0; top: 50%;
-      height: 1px;
+      left: 0; right: 0;
+      bottom: 8px;
+      height: 2px;
       background: hsl(var(--border));
-      transform: translateY(-0.5px);
+      border-radius: 2px;
+      overflow: hidden;
     }
-    .hb-compact .hb-glow {
+    .lorry-road::before {
+      content: '';
       position: absolute;
-      left: 0; right: 0; top: 50%;
-      height: 30px;
-      transform: translateY(-50%);
-      border-radius: 50%;
-      filter: blur(10px);
-      animation: hb-glow-pulse 2s ease-in-out infinite;
-      pointer-events: none;
+      left: 0; top: -1px;
+      width: 200%;
+      height: 4px;
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 10px,
+        hsl(var(--muted-foreground)) 10px,
+        hsl(var(--muted-foreground)) 22px
+      );
+      opacity: 0.35;
+      animation: lorry-road-move 0.5s linear infinite;
     }
-    .hb-compact .hb-svg {
-      position: relative;
+    @keyframes lorry-road-move {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-22px); }
+    }
+    /* ===== Truck body ===== */
+    .lorry-truck {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      width: 72px;
+      height: 40px;
+      transform: translateX(-50%);
+      animation: lorry-bob 0.35s ease-in-out infinite alternate;
+    }
+    @keyframes lorry-bob {
+      from { transform: translateX(-50%) translateY(0); }
+      to   { transform: translateX(-50%) translateY(-1.5px); }
+    }
+    .lorry-truck svg {
       width: 100%;
       height: 100%;
       overflow: visible;
     }
-    .hb-compact .hb-path {
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 1000;
-      stroke-dashoffset: 1000;
-      animation: hb-draw-beat 2s ease-in-out infinite;
+    /* ===== Wheels ===== */
+    .lorry-wheel {
+      animation: lorry-wheel-spin 0.45s linear infinite;
+      transform-origin: center;
     }
-    @keyframes hb-draw-beat {
-      0%   { stroke-dashoffset: 1000; opacity: 0.3; }
-      50%  { stroke-dashoffset: 0; opacity: 1; }
-      100% { stroke-dashoffset: -1000; opacity: 0.3; }
+    @keyframes lorry-wheel-spin {
+      to { transform: rotate(360deg); }
     }
-    @keyframes hb-glow-pulse {
-      0%, 100% { opacity: 0.15; }
-      50%      { opacity: 0.45; }
+    /* ===== Exhaust puffs ===== */
+    .lorry-smoke {
+      position: absolute;
+      bottom: 22px;
+      left: 50%;
+      margin-left: -42px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: hsl(var(--muted-foreground));
+      opacity: 0;
+      animation: lorry-puff 1.2s ease-out infinite;
     }
-    /* ===== 5 fixed scenario colors ===== */
-    .hb-compact.hb-violet .hb-path { stroke: #a855f7; filter: drop-shadow(0 0 3px #a855f7) drop-shadow(0 0 6px #a855f7); }
-    .hb-compact.hb-violet .hb-glow { background: radial-gradient(ellipse at center, rgba(168,85,247,0.4), transparent 70%); }
+    .lorry-smoke:nth-child(1) { animation-delay: 0s; }
+    .lorry-smoke:nth-child(2) { animation-delay: 0.4s; }
+    .lorry-smoke:nth-child(3) { animation-delay: 0.8s; }
+    @keyframes lorry-puff {
+      0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+      20%  { opacity: 0.4; }
+      100% { opacity: 0; transform: translate(-22px, -16px) scale(1.6); }
+    }
+    /* ===== Color variants ===== */
+    .lorry-loader.lorry-violet .lorry-truck svg path,
+    .lorry-loader.lorry-violet .lorry-truck svg rect { fill: #a855f7; }
+    .lorry-loader.lorry-violet .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-violet .lorry-wheel-ring { stroke: #a855f7; }
 
-    .hb-compact.hb-green .hb-path { stroke: #10b981; filter: drop-shadow(0 0 3px #10b981) drop-shadow(0 0 6px #10b981); }
-    .hb-compact.hb-green .hb-glow { background: radial-gradient(ellipse at center, rgba(16,185,129,0.4), transparent 70%); }
+    .lorry-loader.lorry-green .lorry-truck svg path,
+    .lorry-loader.lorry-green .lorry-truck svg rect { fill: #10b981; }
+    .lorry-loader.lorry-green .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-green .lorry-wheel-ring { stroke: #10b981; }
 
-    .hb-compact.hb-red .hb-path { stroke: #ef4444; filter: drop-shadow(0 0 3px #ef4444) drop-shadow(0 0 6px #ef4444); }
-    .hb-compact.hb-red .hb-glow { background: radial-gradient(ellipse at center, rgba(239,68,68,0.4), transparent 70%); }
+    .lorry-loader.lorry-red .lorry-truck svg path,
+    .lorry-loader.lorry-red .lorry-truck svg rect { fill: #ef4444; }
+    .lorry-loader.lorry-red .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-red .lorry-wheel-ring { stroke: #ef4444; }
 
-    .hb-compact.hb-yellow .hb-path { stroke: #f59e0b; filter: drop-shadow(0 0 3px #f59e0b) drop-shadow(0 0 6px #f59e0b); }
-    .hb-compact.hb-yellow .hb-glow { background: radial-gradient(ellipse at center, rgba(245,158,11,0.4), transparent 70%); }
+    .lorry-loader.lorry-yellow .lorry-truck svg path,
+    .lorry-loader.lorry-yellow .lorry-truck svg rect { fill: #f59e0b; }
+    .lorry-loader.lorry-yellow .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-yellow .lorry-wheel-ring { stroke: #f59e0b; }
 
-    .hb-compact.hb-blue .hb-path { stroke: #3b82f6; filter: drop-shadow(0 0 3px #3b82f6) drop-shadow(0 0 6px #3b82f6); }
-    .hb-compact.hb-blue .hb-glow { background: radial-gradient(ellipse at center, rgba(59,130,246,0.4), transparent 70%); }
+    .lorry-loader.lorry-blue .lorry-truck svg path,
+    .lorry-loader.lorry-blue .lorry-truck svg rect { fill: #3b82f6; }
+    .lorry-loader.lorry-blue .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-blue .lorry-wheel-ring { stroke: #3b82f6; }
 
-    .hb-compact.hb-bronze .hb-path { stroke: #B8463A; filter: drop-shadow(0 0 3px #B8463A) drop-shadow(0 0 6px #B8463A); }
-    .hb-compact.hb-bronze .hb-glow { background: radial-gradient(ellipse at center, rgba(184,70,58,0.4), transparent 70%); }
+    .lorry-loader.lorry-bronze .lorry-truck svg path,
+    .lorry-loader.lorry-bronze .lorry-truck svg rect { fill: #B8463A; }
+    .lorry-loader.lorry-bronze .lorry-truck svg circle { fill: #1a1a1a; }
+    .lorry-loader.lorry-bronze .lorry-wheel-ring { stroke: #B8463A; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lorry-truck, .lorry-wheel, .lorry-smoke, .lorry-road::before { animation: none !important; }
+    }
   `;
   document.head.appendChild(style);
   injected = true;
 }
 
 /**
- * Compact heartbeat ECG loader with 5 fixed scenario colors.
- * @param {string} color - one of: violet (default), green (save/success), red (error/delete), yellow (pending), blue (sync/refresh)
+ * Lorry driving loader — a truck with spinning wheels on a moving road.
+ * Same API as the previous heartbeat loader (drop-in replacement).
+ * @param {string} color - one of: violet, green, red, yellow, blue (default), bronze
  */
 export default function HeartbeatLoader({ color = 'blue', className = '' }) {
   useEffect(() => { injectStyles(); }, []);
   const safeColor = COLORS.includes(color) ? color : 'blue';
 
   return (
-    <div className={`hb-compact hb-${safeColor} ${className}`}>
-      <div className="hb-wave-box">
-        <div className="hb-bg-line" />
-        <div className="hb-glow" />
-        <svg className="hb-svg" viewBox="0 0 600 50" preserveAspectRatio="none">
-          <path d={ECG_PATH} className="hb-path" />
-        </svg>
+    <div className={`lorry-loader lorry-${safeColor} ${className}`}>
+      <div className="lorry-scene">
+        <div className="lorry-road" />
+        <div className="lorry-smoke" />
+        <div className="lorry-smoke" />
+        <div className="lorry-smoke" />
+        <div className="lorry-truck">
+          <svg viewBox="0 0 72 40" preserveAspectRatio="xMidYMid meet">
+            {/* Cargo box */}
+            <rect x="2" y="6" width="40" height="22" rx="2" />
+            {/* Cab */}
+            <path d="M42 14 L52 14 L60 20 L60 28 L42 28 Z" />
+            {/* Window */}
+            <rect x="46" y="17" width="10" height="6" rx="1" fill="rgba(255,255,255,0.25)" />
+            {/* Headlight */}
+            <circle cx="59" cy="25" r="1.5" fill="rgba(255,255,255,0.6)" />
+            {/* Front wheel */}
+            <g className="lorry-wheel" style={{ transformOrigin: '52px 30px' }}>
+              <circle cx="52" cy="30" r="6" />
+              <circle className="lorry-wheel-ring" cx="52" cy="30" r="3" fill="none" strokeWidth="1.5" />
+            </g>
+            {/* Rear wheel */}
+            <g className="lorry-wheel" style={{ transformOrigin: '14px 30px' }}>
+              <circle cx="14" cy="30" r="6" />
+              <circle className="lorry-wheel-ring" cx="14" cy="30" r="3" fill="none" strokeWidth="1.5" />
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   );
 }
 
-export { COLORS, ECG_PATH };
+export { COLORS };
