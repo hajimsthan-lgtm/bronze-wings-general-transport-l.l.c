@@ -108,12 +108,20 @@ function getMonthYear(dateStr) {
 function str(v) { return String(v ?? ''); }
 
 function normalizeRoute(s) {
-  return str(s)
-    .replace(/\s*->\s*/g, ' To ')
-    .replace(/(\w{2,})\s*[!'\u2019\u2018`\u00B4]+\s*(\w{2,})/gi, '$1 To $2')
-    .replace(/(\w{2,})\s*[–—]+\s*(\w{2,})/g, '$1 To $2')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  let v = str(s);
+  // Collapse spaced-out "To" (e.g., "T o") into "To"
+  v = v.replace(/\b[Tt]\s+[Oo]\b/g, 'To');
+  // Split on "To" (as a word) or any sequence of non-alphanumeric, non-space characters
+  const parts = v.split(/\b[Tt]o\b|[^a-zA-Z0-9\s]+/);
+  // If only one part (no separator found), return trimmed original
+  if (parts.length <= 1) {
+    return v.replace(/\s+/g, ' ').trim();
+  }
+  // For each part, remove internal spaces (collapse spaced-out letters into words)
+  const words = parts
+    .map(p => p.replace(/\s+/g, ''))
+    .filter(p => p.length > 0);
+  return words.join(' To ');
 }
 
 async function fetchLogoDataUrl(url) {
@@ -247,15 +255,15 @@ function drawLetterhead(pdf, s, y) {
   pdf.text('BRONZE WINGS', textX, textTop + 10, { charSpace: 0.7 });
 
   // Subtitle — left-aligned
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(10);
   pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 14, { charSpace: 0.5 });
 
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
   let cy = y + 6;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, BROWN);
   if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
   if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
@@ -275,14 +283,14 @@ function drawLetterhead(pdf, s, y) {
 function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
   const h = 8;
 
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(14);
   tc(pdf, DARK_BLUE);
   pdf.text('TAX INVOICE', PAGE_W / 2, y + 5.5, { align: 'center' });
 
   // TRN — right side of the tax invoice bar
   if (trn) {
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('times', 'bold');
     pdf.setFontSize(9);
     tc(pdf, DARK_BLUE);
     pdf.text(`Bronze TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 5.5, { align: 'right' });
@@ -312,7 +320,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   const wrapped = [];
   let totalLines = 0;
   for (const line of rawLines) {
-    pdf.setFont('helvetica', line.bold ? 'bold' : 'normal');
+    pdf.setFont('times', line.bold ? 'bold' : 'normal');
     pdf.setFontSize(10);
     const parts = pdf.splitTextToSize(line.text, maxTextWidth);
     wrapped.push({ parts, bold: line.bold });
@@ -329,7 +337,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
 
   // ── LEFT: BILL TO ──
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(10);
   tc(pdf, MAROON);
   pdf.text('BILL TO', leftX, y + 4);
@@ -340,7 +348,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   // Render each wrapped line strictly within leftX..leftX+maxTextWidth
   let ly = y + labelArea;
   for (const line of wrapped) {
-    pdf.setFont('helvetica', line.bold ? 'bold' : 'normal');
+    pdf.setFont('times', line.bold ? 'bold' : 'normal');
     pdf.setFontSize(10);
     tc(pdf, BLACK);
     for (const part of line.parts) {
@@ -350,7 +358,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   }
 
   // ── RIGHT: INVOICE # and DATE ──
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('times', 'normal');
   pdf.setFontSize(10);
   tc(pdf, BLACK);
   pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 5, { align: 'right' });
@@ -366,7 +374,7 @@ function drawTableHeader(pdf, cols, y, invoiceType) {
   const h = 12;
   const isTrip = invoiceType === 'trip';
 
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   if (isTrip) {
     fc(pdf, [240, 240, 240]);
     pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
@@ -376,7 +384,7 @@ function drawTableHeader(pdf, cols, y, invoiceType) {
     pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
     tc(pdf, WHITE);
   }
-  pdf.setFontSize(8);
+  pdf.setFontSize(9);
 
   for (const col of cols) {
     const lines = col.label.split('\n');
@@ -425,42 +433,42 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   const vCenter = y + rowH / 2 + 1;
 
-  pdf.setFontSize(8);
+  pdf.setFontSize(9);
   tc(pdf, BLACK);
 
   // # column
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('times', 'normal');
   pdf.text(String(idx + 1), cols[0].center, vCenter, { align: 'center' });
 
   let ci = 1;
 
   // SERVICE column (standard only)
   if (invoiceType === 'standard') {
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     pdf.text(String(item.service || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
   // TRIP DATE column (trip only)
   if (invoiceType === 'trip') {
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     pdf.text(fmtDate(item.date), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
   // MONTH column (monthly only)
   if (invoiceType === 'monthly') {
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     pdf.text(getMonthYear(item.date || invoice.issue_date), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
   // DESCRIPTION column
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
   for (let i = 0; i < descLines.length; i++) {
     pdf.text(descLines[i], descCol.x + 2, descStartY + i * lineH);
@@ -469,8 +477,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   // QTY and UOM columns (standard only — center-aligned text)
   if (invoiceType === 'standard') {
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     pdf.text(String(qty), cols[ci].center, vCenter, { align: 'center' });
     ci++;
     pdf.text(String(item.uom || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
@@ -479,7 +487,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   // Numeric columns — courier monospace
   pdf.setFont('courier', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFontSize(9);
   if (invoiceType === 'standard') {
     const stdNums = [unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < stdNums.length; i++) {
@@ -525,7 +533,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   // Label — "AED" for trip, "Total" for others
   const labelEndIdx = cols.length - valCount;
   const labelRight = cols[labelEndIdx - 1].right;
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(10);
   if (isTrip) {
     tc(pdf, BLACK);
@@ -569,8 +577,8 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     // Empty row
     fc(pdf, WHITE);
     pdf.rect(CONTENT_X, y, CONTENT_W, 7, 'F');
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     tc(pdf, GRAY);
     pdf.text('No items', CONTENT_X + 2, y + 4.5);
     dc(pdf, BLACK);
@@ -622,19 +630,19 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
 function drawAmountInWords(pdf, total, y, invoiceType) {
   const h = 11;
   const isTrip = invoiceType === 'trip';
-  const accent = isTrip ? GOLD : BORDER_GRAY;
+  const accent = isTrip ? BLACK : BORDER_GRAY;
   dc(pdf, accent);
   pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
   pdf.line(CONTENT_X, y + h, CONTENT_RIGHT, y + h);
 
   const words = numberToWords(total).toUpperCase();
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   if (isTrip) {
-    tc(pdf, GOLD);
+    tc(pdf, BLACK);
     pdf.text('AED', CONTENT_X + 3, y + h / 2 + 1);
-    tc(pdf, GOLD);
+    tc(pdf, BLACK);
     pdf.text(words, CONTENT_X + 12, y + h / 2 + 1);
   } else {
     tc(pdf, MAROON);
@@ -650,8 +658,8 @@ function drawAmountInWords(pdf, total, y, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
   const labelLines = label.split('\n');
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
   tc(pdf, BLACK);
   let ly = y + 4;
   for (const line of labelLines) {
@@ -668,8 +676,8 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
   pdf.setLineWidth(0.3);
   pdf.line(x, sigY, x + w, sigY);
 
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, GRAY);
   pdf.text(caption.toUpperCase(), x + w / 2, sigY + 3, { align: 'center' });
   if (mobile) {
@@ -682,13 +690,13 @@ function drawSignatureBlock(pdf, x, y, w, label, caption, mobile) {
 // ═══════════════════════════════════════════════════════════
 function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
   const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
-  const accent = invoiceType === 'trip' ? GOLD : MAROON;
+  const accent = MAROON;
   const isTrip = invoiceType === 'trip';
 
   // ── LEFT: Bank details ──
   if (hasBank) {
     const lx = CONTENT_X + 2;
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('times', 'bold');
     pdf.setFontSize(9);
     tc(pdf, accent);
     pdf.text('BANK DETAILS', lx, y + 4);
@@ -696,7 +704,7 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
     pdf.setLineWidth(0.3);
     pdf.line(lx, y + 5, lx + 22, y + 5);
 
-    pdf.setFont('helvetica', 'normal');
+    pdf.setFont('times', 'normal');
     pdf.setFontSize(10);
     tc(pdf, BLACK);
     let ly = y + 9;
@@ -716,28 +724,28 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType) {
     const lineY = y + sigTopGap;
 
     // Left — AUTHORIZED BY
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('times', 'bold');
     pdf.setFontSize(9);
-    tc(pdf, [158, 141, 125]); // warm gold-grey
+    tc(pdf, [51, 51, 51]); // warm gold-grey
     pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 4, { align: 'center' });
     dc(pdf, [51, 51, 51]);
     pdf.setLineWidth(0.3);
     pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     tc(pdf, GRAY);
     pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
 
     // Right — RECEIVED BY
-    pdf.setFont('helvetica', 'bold');
+    pdf.setFont('times', 'bold');
     pdf.setFontSize(9);
-    tc(pdf, [158, 141, 125]);
+    tc(pdf, [51, 51, 51]);
     pdf.text('RECEIVED BY', rightX + sigW / 2, y + 4, { align: 'center' });
     dc(pdf, [51, 51, 51]);
     pdf.setLineWidth(0.3);
     pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     tc(pdf, GRAY);
     pdf.text('Client Signature', rightX + sigW / 2, lineY + 4, { align: 'center' });
 
@@ -766,16 +774,16 @@ function drawTermsConditions(pdf, invoiceType) {
   const y = bannerY - 12;
 
   // Header bar — gold for trip, dark teal for others
-  fc(pdf, invoiceType === 'trip' ? GOLD : [29, 63, 85]);
+  fc(pdf, [29, 63, 85]);
   pdf.rect(BORDER_POS, y, bw, 5, 'F');
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, WHITE);
   pdf.text('TERMS & CONDITIONS', BORDER_POS + 3, y + 3.5);
 
   // Content
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, [51, 51, 51]);
   pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', BORDER_POS + 3, y + 8);
 }
@@ -794,8 +802,8 @@ function drawFooterBanners(pdf) {
   dc(pdf, [99, 60, 26]);
   pdf.setLineWidth(0.4);
   pdf.rect(BORDER_POS, by, bw, bh);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, [99, 60, 26]);
   pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, by + 3.5, { align: 'center' });
 }
@@ -806,17 +814,17 @@ function drawFooterBanners(pdf) {
 function drawTermsInline(pdf, y, invoiceType) {
   const bw = CONTENT_W;
   const bannerH = 5;
-  const accent = invoiceType === 'trip' ? GOLD : [29, 63, 85];
+  const accent = [29, 63, 85];
 
   fc(pdf, accent);
   pdf.rect(CONTENT_X, y, bw, bannerH, 'F');
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, WHITE);
   pdf.text('TERMS & CONDITIONS', CONTENT_X + 3, y + 3.5);
 
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, [51, 51, 51]);
   pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', CONTENT_X + 3, y + 8);
 
@@ -828,12 +836,12 @@ function drawTermsInline(pdf, y, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 function drawBankDetailsBlock(pdf, s, y, invoiceType) {
   const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
-  const accent = invoiceType === 'trip' ? GOLD : MAROON;
+  const accent = MAROON;
 
   if (!hasBank) return 4;
 
   const lx = CONTENT_X + 2;
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, accent);
   pdf.text('BANK DETAILS', lx, y + 4);
@@ -841,7 +849,7 @@ function drawBankDetailsBlock(pdf, s, y, invoiceType) {
   pdf.setLineWidth(0.3);
   pdf.line(lx, y + 5, lx + 22, y + 5);
 
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, BLACK);
   let ly = y + 9;
@@ -862,40 +870,40 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
   const rightX = CONTENT_X + sigW;
   const sigTopGap = 18;
   const lineY = y + sigTopGap;
-  const warmGold = [158, 141, 125];
+  const warmGold = [51, 51, 51];
   const darkGray = [51, 51, 51];
 
   // Left — AUTHORIZED BY
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, warmGold);
   pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 4, { align: 'center' });
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, GRAY);
   pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
   tc(pdf, BLACK);
   pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 8, { align: 'center' });
 
   // Right — RECEIVED BY
-  pdf.setFont('helvetica', 'bold');
+  pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, warmGold);
   pdf.text('RECEIVED BY', rightX + sigW / 2, y + 4, { align: 'center' });
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
   tc(pdf, GRAY);
   pdf.text('Client Signature', rightX + sigW / 2, lineY + 4, { align: 'center' });
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(8);
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
   tc(pdf, BLACK);
   const clientText = str(clientName || invoice.client_name || '');
   const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
@@ -985,8 +993,8 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   const pageCount = pdf.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     pdf.setPage(i);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
     tc(pdf, GRAY);
     pdf.text(`Page No ${i} of ${pageCount}`, PAGE_W / 2, 295.5, { align: 'center' });
   }

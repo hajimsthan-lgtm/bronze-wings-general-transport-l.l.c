@@ -30,12 +30,20 @@ function esc(str) {
 
 // Fix: "Dubai !' Fujairah" → "Dubai-Fujairah"
 function normalizeRoute(str) {
-  return String(str ?? '')
-    .replace(/\s*->\s*/g, ' To ')
-    .replace(/(\w{2,})\s*[!'‘’]+\s*(\w{2,})/gi, '$1 To $2')
-    .replace(/(\w{2,})\s*[–—]\s*(\w{2,})/gi, '$1 To $2')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  let v = String(str ?? '');
+  // Collapse spaced-out "To" (e.g., "T o") into "To"
+  v = v.replace(/\b[Tt]\s+[Oo]\b/g, 'To');
+  // Split on "To" (as a word) or any sequence of non-alphanumeric, non-space characters
+  const parts = v.split(/\b[Tt]o\b|[^a-zA-Z0-9\s]+/);
+  // If only one part (no separator found), return trimmed original
+  if (parts.length <= 1) {
+    return v.replace(/\s+/g, ' ').trim();
+  }
+  // For each part, remove internal spaces (collapse spaced-out letters into words)
+  const words = parts
+    .map(p => p.replace(/\s+/g, ''))
+    .filter(p => p.length > 0);
+  return words.join(' To ');
 }
 
 export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
@@ -618,14 +626,14 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="flex:1 1 auto;min-height:20px;"></div>
 
   <!-- Footer Container (bordered) -->
-  <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #9e813a;border-right:1px solid #9e813a;border-bottom:1px solid #9e813a;">
+  <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #1D3F55;border-right:1px solid #1D3F55;border-bottom:1px solid #1D3F55;">
     <!-- Terms Bar -->
-    <div style="background:#9e813a;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+    <div style="background:#1D3F55;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
     <div style="padding:6px 14px;font-size:9pt;color:#555;">Payment Terms : 60 days from receipt of the tax invoice.</div>
 
     <!-- Bank Details -->
     <div style="padding:8px 14px;border-top:1px solid #ddd;">
-      <div style="font-size:10pt;font-weight:bold;color:#9e813a;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Bank Details</div>
+      <div style="font-size:10pt;font-weight:bold;color:#1D3F55;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Bank Details</div>
       <div style="font-size:9pt;color:#1A1A1A;line-height:1.8;">
         <div>Bank: ${esc(s.bank_name || '—')}</div>
         <div>Account Title: ${esc(s.bank_account_title || s.company_name || '—')}</div>
@@ -653,8 +661,8 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Bottom Footer Bar -->
-  <div style="position:relative;z-index:1;margin:0 28px 8px;border:1px solid #9e813a;background:#FAF7F2;padding:8px;text-align:center;">
-    <div style="font-size:9pt;font-weight:bold;color:#9e813a;letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
+  <div style="position:relative;z-index:1;margin:0 28px 8px;border:1px solid #1D3F55;background:#FAF7F2;padding:8px;text-align:center;">
+    <div style="font-size:9pt;font-weight:bold;color:#1D3F55;letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
   </div>
 
 </div>`;
