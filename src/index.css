@@ -6,75 +6,75 @@
 
 @layer base {
   :root {
-    /* ===== Midnight Violet — deep black + purple ===== */
+    /* ===== Warm Light Bronze — cream + bronze ===== */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 20 20% 5%;              /* #0d0a09 warm near-black */
-    --background-elevated: 20 16% 9%;     /* #1a1413 warm dark */
-    --card: 20 14% 12%;                   /* #211a18 warm brown-dark */
-    --card-foreground: 0 0% 100%;
-    --foreground: 0 0% 100%;
-    --muted: 20 12% 16%;
-    --muted-foreground: 28 10% 60%;        /* #a89690 warm gray */
-    --popover: 20 14% 12%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 5 52% 47%;                  /* #B8463A bronze red */
-    --primary-light: 7 60% 57%;            /* #D4634F */
+    --background: 38 44% 95%;             /* #f6efe4 warm cream */
+    --background-elevated: 38 36% 93%;     /* #f1e8d8 */
+    --card: 40 50% 99%;                   /* #fdfaf3 near-white cream */
+    --card-foreground: 20 32% 12%;
+    --foreground: 20 32% 12%;             /* #2a2018 deep brown */
+    --muted: 38 28% 89%;
+    --muted-foreground: 22 14% 42%;      /* #6b5a4f warm gray */
+    --popover: 40 50% 99%;
+    --popover-foreground: 20 32% 12%;
+    --primary: 5 52% 47%;                 /* #B8463A bronze red */
+    --primary-light: 7 60% 57%;           /* #D4634F */
     --primary-foreground: 0 0% 100%;
-    --secondary: 20 18% 18%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 42 44% 56%;                  /* #C4A35A gold-bronze */
-    --accent-foreground: 20 30% 8%;
-    --destructive: 350 89% 60%;            /* #f43f5e rose */
+    --secondary: 38 28% 91%;
+    --secondary-foreground: 20 32% 14%;
+    --accent: 42 44% 46%;                 /* #B58A38 gold-bronze (deeper for light) */
+    --accent-foreground: 20 30% 10%;
+    --destructive: 350 89% 50%;
     --destructive-foreground: 0 0% 100%;
     --neon: 5 52% 47%;
-    --magenta: 42 44% 56%;
-    --success: 160 84% 39%;                /* #10b981 emerald */
-    --success-light: 160 84% 47%;
-    --warning: 38 92% 50%;
-    --danger: 350 89% 60%;                 /* rose for alerts */
-    --border: 20 14% 22%;                 /* brown-tinted border */
-    --input: 20 16% 12%;
+    --magenta: 42 44% 46%;
+    --success: 160 84% 32%;               /* deeper emerald for light */
+    --success-light: 160 84% 40%;
+    --warning: 38 92% 42%;
+    --danger: 350 89% 50%;
+    --border: 36 24% 82%;                 /* warm light border */
+    --input: 38 30% 90%;
     --ring: 5 52% 47%;
-    --panel-accent-rgb: 184, 70, 58;       /* #B8463A bronze red */
-    --panel-accent2-rgb: 139, 58, 46;      /* #8B3A2E maroon */
-    --surf-1-rgb: 38, 24, 22;             /* #261816 warm dark brown */
-    --surf-2-rgb: 20, 12, 12;             /* #140c0c near-black warm */
+    --panel-accent-rgb: 184, 70, 58;      /* #B8463A bronze red */
+    --panel-accent2-rgb: 139, 58, 46;     /* #8B3A2E maroon */
+    --surf-1-rgb: 252, 247, 238;          /* #fcf7ee light cream */
+    --surf-2-rgb: 255, 252, 246;          /* #fffcf6 near-white */
     --radius: 1rem;
-    --chart-1: 5 52% 47%;                  /* bronze red */
-    --chart-2: 42 44% 56%;                 /* gold-bronze */
-    --chart-3: 7 50% 36%;                  /* maroon */
-    --chart-4: 160 84% 39%;                /* emerald */
-    --chart-5: 350 89% 60%;                /* rose */
-    --sidebar-background: 20 20% 5%;
-    --sidebar-foreground: 0 0% 100%;
+    --chart-1: 5 52% 47%;
+    --chart-2: 42 44% 46%;
+    --chart-3: 7 50% 36%;
+    --chart-4: 160 84% 32%;
+    --chart-5: 350 89% 50%;
+    --sidebar-background: 38 40% 94%;
+    --sidebar-foreground: 20 32% 14%;
     --sidebar-primary: 5 52% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 20 14% 12%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 20 14% 16%;
+    --sidebar-accent: 38 28% 90%;
+    --sidebar-accent-foreground: 20 32% 14%;
+    --sidebar-border: 36 24% 84%;
     --sidebar-ring: 5 52% 47%;
-    --clay-bg: 20 16% 14%;
-    --clay-border: 20 14% 24%;
-    --clay-shadow-dark: 20 20% 4%;
-    --clay-shadow-light: 20 16% 22%;
+    --clay-bg: 38 32% 92%;
+    --clay-border: 36 24% 84%;
+    --clay-shadow-dark: 36 18% 80%;
+    --clay-shadow-light: 40 50% 99%;
 
     /* Theme-adaptive shell vars */
-    --app-bg: #140c0c;
-    --panel-bg: linear-gradient(180deg, rgba(38,24,22,0.85) 0%, rgba(26,16,16,0.92) 50%, rgba(20,12,12,0.95) 100%);
-    --panel-border-color: rgba(184,70,58,0.22);
-    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
-    --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
-    --panel-blur: blur(12px) saturate(1.2);
-    --header-tint-1: rgba(20,12,12,0.12);
-    --header-tint-2: rgba(20,12,12,0.05);
-    --nav-inactive: rgba(200,170,150,0.55);
-    --surf-1: rgba(38,24,22,0.7);
-    --surf-2: rgba(20,12,12,0.9);
+    --app-bg: #f6efe4;
+    --panel-bg: linear-gradient(180deg, rgba(252,247,238,0.88) 0%, rgba(255,252,246,0.94) 100%);
+    --panel-border-color: rgba(184,70,58,0.20);
+    --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.65);
+    --panel-drop-shadow: 0 20px 60px rgba(60,40,20,0.10);
+    --panel-blur: blur(12px) saturate(1.1);
+    --header-tint-1: rgba(255,252,246,0.5);
+    --header-tint-2: rgba(255,252,246,0.3);
+    --nav-inactive: rgba(107,90,79,0.6);
+    --surf-1: rgba(252,247,238,0.7);
+    --surf-2: rgba(255,252,246,0.9);
   }
 
   .theme-navy {
