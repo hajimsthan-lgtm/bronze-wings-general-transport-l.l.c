@@ -839,19 +839,19 @@ function drawTermsConditions(pdf, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 function drawFooterBanners(pdf) {
   // Separate bordered box — same inset as the header letterhead (CONTENT_X / CONTENT_W)
-  // Position so the bottom border aligns with MARGIN (same gap as header at top)
+  // Position near the main margin border with a small gap (not touching)
   const bw = CONTENT_W;
-  const bh = 5;
-  const by = PAGE_H - MARGIN - bh;
+  const bh = 7;
+  const by = FOOTER_BOTTOM - 2 - bh;
   fc(pdf, [253, 251, 240]); // CREAM bg — same as header
   pdf.rect(CONTENT_X, by, bw, bh, 'F');
   dc(pdf, [99, 60, 26]); // BROWN border — same as header
   pdf.setLineWidth(0.6);  // same weight as header
   pdf.rect(CONTENT_X, by, bw, bh);
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, [94, 84, 74]); // greyish-brown — matches reference
-  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', PAGE_W / 2, by + 3.5, { align: 'center' });
+  pdf.text('We provide all kinds of general and refrigerated transportation and heavy equipment rental services', PAGE_W / 2, by + 4.5, { align: 'center' });
 }
 
 // ═══════════════════════════════════════════════════════════
