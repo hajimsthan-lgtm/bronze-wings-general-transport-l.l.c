@@ -106,7 +106,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
           </div>
         </div>
         <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold tabular-nums flex-shrink-0"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
+          style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))' }}>
           <Calendar className="w-3 h-3" />{formatDate(trip.trip_date)}
         </span>
       </div>
@@ -135,7 +135,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
               className="flex-1 flex items-center justify-center h-7 rounded-full text-[10px] font-semibold transition-all"
               style={active
                 ? { background: `linear-gradient(135deg, rgba(${opt.glow},0.28), rgba(${opt.glow},0.1))`, color: '#fff', boxShadow: `inset 0 0 0 1px rgba(${opt.glow},0.42), 0 0 12px -2px rgba(${opt.glow},0.5)` }
-                : { color: 'rgba(255,255,255,0.4)' }}
+                : { color: 'hsl(var(--muted-foreground))' }}
             >
               {opt.short}
             </button>
@@ -154,8 +154,8 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
               onClick={(e) => handleLink(e, b.map, b.label, b.path)}
               className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-medium transition-all"
               style={clickable
-                ? { background: 'rgba(var(--panel-accent-rgb),0.14)', border: '1px solid rgba(var(--panel-accent-rgb),0.32)', color: '#fff' }
-                : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}
+                ? { background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.30)', color: 'hsl(var(--primary))' }
+                : { background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))', cursor: 'default' }}
               onMouseEnter={(e) => { if (clickable) e.currentTarget.style.boxShadow = '0 0 12px -3px rgba(var(--panel-accent-rgb),0.5)'; }}
               onMouseLeave={(e) => { if (clickable) e.currentTarget.style.boxShadow = 'none'; }}
             >

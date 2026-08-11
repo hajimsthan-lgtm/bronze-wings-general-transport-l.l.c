@@ -1876,3 +1876,28 @@
     transition: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT-THEME TEXT NORMALIZATION
+   Leftover dark-theme white text → foreground charcoal.
+   In dark themes --foreground is white, so this is a no-op there.
+   ═══════════════════════════════════════════════════════ */
+.text-white,
+[class*="text-white/"] {
+  color: hsl(var(--foreground)) !important;
+}
+/* Preserve white text on colored/bronze buttons & active pills */
+.clay-btn,
+.lightning-btn,
+.btn-new-trip,
+.btn-new-expense,
+.nav-pill-inner,
+.subnav-pill-active,
+.obsidian-nav-pill-active,
+.obsidian-subnav-pill-active,
+.filter-chip-active,
+.sub-tab-active,
+[role="tab"][data-state="active"],
+.badge-pulse {
+  color: hsl(var(--primary-foreground)) !important;
+}
