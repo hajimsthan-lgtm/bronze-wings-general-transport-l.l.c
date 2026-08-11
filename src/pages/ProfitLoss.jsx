@@ -97,23 +97,23 @@ export default function ProfitLoss() {
   const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
 
   const Badge = ({ pct }) => pct == null ? null : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium" style={{ background: pct >= 0 ? 'rgba(34,197,94,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${pct >= 0 ? 'rgba(34,197,94,0.20)' : 'rgba(239,68,68,0.20)'}`, color: pct >= 0 ? '#4ade80' : '#f87171' }}>
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium" style={{ background: pct >= 0 ? 'rgba(34,197,94,0.10)' : 'rgba(239,68,68,0.10)', border: `1px solid ${pct >= 0 ? 'rgba(34,197,94,0.20)' : 'rgba(239,68,68,0.20)'}`, color: pct >= 0 ? '#16a34a' : '#dc2626' }}>
       {pct >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{Math.abs(pct).toFixed(1)}%
     </span>
   );
 
   const Row = ({ label, amount, positive }) => (
-    <div className="group relative flex justify-between items-center py-3 hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors border-b border-white/[0.04]">
+    <div className="group relative flex justify-between items-center py-3 hover:bg-muted/60 rounded-lg px-2 -mx-2 transition-colors border-b border-border">
       <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: positive ? '#22c55e' : '#ef4444' }} />
-      <span className="text-sm font-medium text-white/70 pl-2">{label}</span>
-      <span className="text-sm font-semibold tabular-nums" style={{ color: positive ? '#4ade80' : '#f87171' }}>{formatCurrency(amount)}</span>
+      <span className="text-sm font-medium text-foreground pl-2">{label}</span>
+      <span className="text-sm font-semibold tabular-nums" style={{ color: positive ? '#16a34a' : '#dc2626' }}>{formatCurrency(amount)}</span>
     </div>
   );
 
   const TotalRow = ({ label, amount, color, positive }) => (
     <div className="flex justify-between items-center mt-3 px-4 py-3.5 rounded-xl" style={{ background: hexToRgba(color, 0.06), border: `1px solid ${hexToRgba(color, 0.12)}` }}>
-      <span className="text-sm font-bold text-white/80">{label}</span>
-      <span className="text-sm font-bold tabular-nums" style={{ color: positive ? '#4ade80' : '#f87171' }}><CountUpText value={amount} /></span>
+      <span className="text-sm font-bold text-foreground">{label}</span>
+      <span className="text-sm font-bold tabular-nums" style={{ color: positive ? '#16a34a' : '#dc2626' }}><CountUpText value={amount} /></span>
     </div>
   );
 
@@ -178,8 +178,8 @@ export default function ProfitLoss() {
       <ReportSectionCard index={5} color="#3b82f6" title="Net Profit / Loss" className="mb-4" action={<SectionExportButtons data={[{ label: 'Net Profit', amount: netProfit }]} filename="pnl_net_profit" columns={[{ label: 'Item', key: 'label' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Net Profit / Loss" options={{ dateRange }} />}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-sm text-white/60">Net Profit</p>
-            <p className="text-3xl font-bold tabular-nums mt-1" style={{ color: netProfit >= 0 ? '#4ade80' : '#f87171' }}>
+            <p className="text-sm text-muted-foreground">Net Profit</p>
+            <p className="text-3xl font-bold tabular-nums mt-1" style={{ color: netProfit >= 0 ? '#16a34a' : '#dc2626' }}>
               <CountUpText value={netProfit} />
             </p>
           </div>
@@ -217,8 +217,8 @@ export default function ProfitLoss() {
                 return (
                   <div key={d.name}>
                     <div className="flex justify-between text-xs mb-1.5">
-                      <span className="flex items-center gap-2 text-white/70"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />{d.name}</span>
-                      <span className="text-white/80 tabular-nums">{formatCurrency(d.value)} · {pct.toFixed(1)}%</span>
+                      <span className="flex items-center gap-2 text-foreground"><span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />{d.name}</span>
+                      <span className="text-foreground tabular-nums">{formatCurrency(d.value)} · {pct.toFixed(1)}%</span>
                     </div>
                     <ProgressBar pct={pct} color={d.color} />
                   </div>
@@ -232,9 +232,9 @@ export default function ProfitLoss() {
       {/* Comparison mini-cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         {[{ label: 'vs Last Week', pct: cmpWeek }, { label: 'vs Last Month', pct: cmpMonth }, { label: 'vs Last Year', pct: cmpYear }].map((c, i) => (
-          <div key={c.label} className="rounded-2xl p-4 animate-fade-in-up" style={{ animationDelay: `${0.4 + i * 0.08}s`, background: '#232636', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '-6px -6px 12px rgba(255,255,255,0.04), 6px 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)' }}>
-            <p className="text-[10px] uppercase tracking-wider text-white/40">{c.label}</p>
-            <p className="text-lg font-bold mt-1 tabular-nums" style={{ color: c.pct == null ? 'rgba(255,255,255,0.3)' : c.pct >= 0 ? '#4ade80' : '#f87171' }}>
+          <div key={c.label} className="rounded-2xl p-4 animate-fade-in-up bg-card border border-border shadow-sm" style={{ animationDelay: `${0.4 + i * 0.08}s` }}>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</p>
+            <p className="text-lg font-bold mt-1 tabular-nums" style={{ color: c.pct == null ? 'hsl(var(--muted-foreground))' : c.pct >= 0 ? '#16a34a' : '#dc2626' }}>
               {c.pct == null ? '—' : `${c.pct >= 0 ? '↑' : '↓'} ${Math.abs(c.pct).toFixed(1)}%`}
             </p>
           </div>

@@ -138,7 +138,7 @@ export default function Soa() {
               right={
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <ReportStatusBadge status={inv.status} />
-                  <span className="text-sm font-semibold text-white/90 tabular-nums">{formatCurrency(inv.total_amount)}</span>
+                  <span className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(inv.total_amount)}</span>
                 </div>
               }
             />

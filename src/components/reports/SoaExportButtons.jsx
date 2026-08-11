@@ -20,13 +20,13 @@ export default function SoaExportButtons({ rows, filename, date, clientName, dat
   const pill = (key) =>
     `px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${
       filter === key
-        ? 'bg-primary/25 text-white border border-primary/50 shadow-[0_0_10px_-2px_rgba(var(--panel-accent-rgb),0.5)]'
-        : 'text-white/45 hover:text-white/80 border border-transparent'
+        ? 'bg-primary/20 text-primary border border-primary/40 shadow-[0_0_10px_-2px_rgba(var(--panel-accent-rgb),0.4)]'
+        : 'text-muted-foreground hover:text-foreground border border-transparent'
     }`;
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 h-9 px-1.5 rounded-lg border border-white/10 bg-[#232636] shadow-[-4px_-4px_8px_rgba(255,255,255,0.05),4px_4px_12px_rgba(0,0,0,0.3)]">
+      <div className="flex items-center gap-1 h-9 px-1.5 rounded-lg border border-border bg-card shadow-sm">
         {FILTERS.map((f) => (
           <button key={f.key} className={pill(f.key)} onClick={() => setFilter(f.key)}>
             {f.label}
