@@ -18,6 +18,8 @@ const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, ma
 
 const EXPORT_COLS = [
   { key: 'date', label: 'Date' },
+  { key: 'recipient', label: 'Recipient' },
+  { key: 'receipt_number', label: 'Receipt #' },
   { key: 'description', label: 'Description' },
   { key: 'inflow', label: 'Inflow', numeric: true },
   { key: 'outflow', label: 'Outflow', numeric: true },
@@ -39,11 +41,11 @@ export default function Cash() {
   const [rows, setRows] = useState(null);
   const [form, setForm] = useState({
     date: new Date().toISOString().slice(0, 10),
-    type: 'outflow',
-    amount: '',
+    recipient: '',
+    receipt_number: '',
     description: '',
-    received_from: '',
-    paid_to: '',
+    inflow: '',
+    outflow: '',
   });
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('statement');
@@ -83,7 +85,7 @@ export default function Cash() {
   let rb = 0;
   const reportRows = filtered.map((r) => {
     rb += (Number(r.inflow) || 0) - (Number(r.outflow) || 0);
-    return { ...r, running_balance: rb };
+    return { ...r, recipient: r.type === 'inflow' ? (r.received_from || '') : (r.paid_to || ''), running_balance: rb };
   });
 
   const display = view === 'report' ? reportRows : statementRows;
@@ -97,18 +99,23 @@ export default function Cash() {
 
   const addEntry = async (e) => {
     e.preventDefault();
-    if (!form.date || !form.amount) return;
+    if (!form.date) return;
+    const inflow = Number(form.inflow) || 0;
+    const outflow = Number(form.outflow) || 0;
+    if (!inflow && !outflow) return;
+    const isOutflow = outflow > 0;
     setSaving(true);
     try {
       await base44.entities.CashTransaction.create({
         date: form.date,
-        type: form.type,
-        amount: Number(form.amount) || 0,
+        type: isOutflow ? 'outflow' : 'inflow',
+        amount: isOutflow ? outflow : inflow,
         description: form.description || '',
-        received_from: form.type === 'inflow' ? form.received_from : '',
-        paid_to: form.type === 'outflow' ? form.paid_to : '',
+        receipt_number: form.receipt_number || '',
+        received_from: !isOutflow ? form.recipient : '',
+        paid_to: isOutflow ? form.recipient : '',
       });
-      setForm({ date: new Date().toISOString().slice(0, 10), type: 'outflow', amount: '', description: '', received_from: '', paid_to: '' });
+      setForm({ date: new Date().toISOString().slice(0, 10), recipient: '', receipt_number: '', description: '', inflow: '', outflow: '' });
       await load();
     } finally {
       setSaving(false);
@@ -161,28 +168,29 @@ export default function Cash() {
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Date</label>
                     <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Recipient</label>
+                    <input type="text" value={form.recipient} onChange={(e) => setForm({ ...form, recipient: e.target.value })} placeholder="Paid to / Received from" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Receipt #</label>
+                    <input type="text" value={form.receipt_number} onChange={(e) => setForm({ ...form, receipt_number: e.target.value })} placeholder="Receipt number" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
                   <div className="md:col-span-3">
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Description</label>
                     <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Transaction description" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Type</label>
-                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }}>
-                      <option value="outflow">Outflow</option>
-                      <option value="inflow">Inflow</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">{form.type === 'inflow' ? 'Received From' : 'Paid To'}</label>
-                    <input type="text" value={form.type === 'inflow' ? form.received_from : form.paid_to} onChange={(e) => form.type === 'inflow' ? setForm({ ...form, received_from: e.target.value }) : setForm({ ...form, paid_to: e.target.value })} placeholder={form.type === 'inflow' ? 'Source' : 'Recipient'} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  <div className="md:col-span-1">
+                    <label className="block text-[11px] uppercase tracking-wider text-emerald-400 mb-1">Inflow</label>
+                    <input type="number" step="0.01" min="0" value={form.inflow} onChange={(e) => setForm({ ...form, inflow: e.target.value })} placeholder="0.00" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
                   </div>
                   <div className="md:col-span-1">
-                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Amount</label>
-                    <input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0.00" required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                    <label className="block text-[11px] uppercase tracking-wider text-rose-400 mb-1">Outflow</label>
+                    <input type="number" step="0.01" min="0" value={form.outflow} onChange={(e) => setForm({ ...form, outflow: e.target.value })} placeholder="0.00" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
                   </div>
-                  <div className="md:col-span-2">
-                    <button type="submit" disabled={saving} className="clay-btn w-full flex items-center justify-center gap-2" style={{ padding: '11px 20px' }}>
-                      <Plus className="w-4 h-4" /> {saving ? 'Saving...' : 'Add Entry'}
+                  <div className="md:col-span-1">
+                    <button type="submit" disabled={saving} className="clay-btn w-full flex items-center justify-center gap-2" style={{ padding: '11px 14px' }}>
+                      <Plus className="w-4 h-4" /> {saving ? '...' : 'Add'}
                     </button>
                   </div>
                 </div>
@@ -225,8 +233,9 @@ export default function Cash() {
                 <thead>
                   <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     <th className="text-left font-semibold px-5 py-3">Date</th>
+                    <th className="text-left font-semibold px-5 py-3">Recipient</th>
+                    <th className="text-left font-semibold px-5 py-3">Receipt #</th>
                     <th className="text-left font-semibold px-5 py-3">Description</th>
-                    <th className="text-left font-semibold px-5 py-3">Party</th>
                     <th className="text-right font-semibold px-5 py-3 text-emerald-400">Inflow</th>
                     <th className="text-right font-semibold px-5 py-3 text-rose-400">Outflow</th>
                     <th className="text-right font-semibold px-5 py-3 text-[rgb(var(--panel-accent-rgb))]">Running Balance</th>
@@ -237,8 +246,9 @@ export default function Cash() {
                   {display.map((r) => (
                     <tr key={r.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
                       <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums">{r.date}</td>
+                      <td className="px-5 py-3 text-white/80">{r.type === 'inflow' ? (r.received_from || '—') : (r.paid_to || '—')}</td>
+                      <td className="px-5 py-3 text-white/60 font-mono text-xs">{r.receipt_number || '—'}</td>
                       <td className="px-5 py-3 text-white/80">{r.description || '—'}</td>
-                      <td className="px-5 py-3 text-white/60">{r.type === 'inflow' ? (r.received_from || '—') : (r.paid_to || '—')}</td>
                       <td className="px-5 py-3 text-right text-emerald-400 tabular-nums">{r.inflow ? fmt(r.inflow) : '—'}</td>
                       <td className="px-5 py-3 text-right text-rose-400 tabular-nums">{r.outflow ? fmt(r.outflow) : '—'}</td>
                       <td className="px-5 py-3 text-right font-semibold text-white tabular-nums">{fmt(r.running_balance)}</td>

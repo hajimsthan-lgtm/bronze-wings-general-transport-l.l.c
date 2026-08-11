@@ -32,6 +32,9 @@
     "paid_to": {
       "type": "string"
     },
+    "receipt_number": {
+      "type": "string"
+    },
     "notes": {
       "type": "string"
     }
