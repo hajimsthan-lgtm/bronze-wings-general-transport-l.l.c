@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { formatCurrency } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,6 +9,15 @@ import { Check, Send, Undo2, ArrowRight, ChevronDown } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+function dateBlock(dateStr) {
+  if (!dateStr) return { day: '—', month: '' };
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return { day: '—', month: '' };
+  return { day: String(d.getDate()).padStart(2, '0'), month: MONTHS[d.getMonth()] };
+}
 
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
@@ -65,50 +74,56 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
         const statusOpt = STATUS_OPTIONS.find((s) => s.value === trip.status) || STATUS_OPTIONS[0];
         const color = STATUS_HEX[trip.status] || '#94a3b8';
         const profit = (Number(trip.revenue) || 0) - (Number(trip.fuel_cost) || 0) - (Number(trip.toll_cost) || 0) - (Number(trip.other_cost) || 0);
+        const db = dateBlock(trip.trip_date);
         return (
           <div
             key={trip.id}
             onClick={() => onOpenDetail?.(trip)}
-            className="group row-card row-edge-glow cursor-pointer animate-fade-in-up mb-2"
+            className="group row-card row-edge-glow cursor-pointer animate-fade-in-up mb-1.5"
             style={{
               animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
               ['--row-accent']: color,
             }}
           >
             <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-9 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
-            <div className="flex items-center gap-3 p-3 sm:p-3.5">
+            <div className="flex items-center gap-2.5 p-2 sm:p-2.5">
+              {/* Prominent date block — big like a company name heading */}
+              <div
+                className="flex flex-col items-center justify-center w-11 h-11 rounded-xl flex-shrink-0"
+                style={{ background: hexToRgba(color, 0.10), border: `1px solid ${hexToRgba(color, 0.24)}` }}
+              >
+                <span className="text-base font-bold text-foreground leading-none tabular-nums">{db.day}</span>
+                <span className="text-[8px] uppercase tracking-[0.1em] text-muted-foreground/80 mt-0.5">{db.month}</span>
+              </div>
+
               {/* Route badge */}
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.22)}` }}>
-                <ArrowRight className="w-4 h-4" style={{ color }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.12), border: `1px solid ${hexToRgba(color, 0.22)}` }}>
+                <ArrowRight className="w-3.5 h-3.5" style={{ color }} />
               </div>
 
               {/* Main */}
               <div className="flex-1 min-w-0">
-                {/* Line 1 — trip number + date */}
+                {/* Line 1 — trip number + type */}
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
                   <span className="font-mono text-muted-foreground/80 truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
                   <span className="text-muted-foreground/40">·</span>
-                  <span className="tabular-nums whitespace-nowrap">{formatDate(trip.trip_date)}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                    {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
+                  </span>
                 </div>
                 {/* Line 2 — from → to */}
-                <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
                   <p className="text-sm font-semibold text-foreground truncate">{trip.from_location || '—'}</p>
                   <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0" />
                   <p className="text-sm font-semibold text-foreground truncate">{trip.to_location || '—'}</p>
                 </div>
-                {/* Line 3 — meta (desktop only, keeps mobile tap target clean) */}
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-1 min-w-0">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
-                    {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
-                  </span>
+                {/* Line 3 — meta (desktop only) */}
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0">
                   {trip.client_name && (
-                    <>
-                      <span className="text-muted-foreground/40">·</span>
-                      <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="hover:text-primary transition-colors truncate max-w-[140px]">{trip.client_name}</button>
-                    </>
+                    <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="hover:text-primary transition-colors truncate max-w-[140px]">{trip.client_name}</button>
                   )}
                   {trip.driver_name && (
                     <>
@@ -125,9 +140,9 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                 </div>
               </div>
 
-              {/* Right — status + amount (fixed columns for perfect alignment) */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <div className="w-[104px] sm:w-[168px] flex items-center justify-end gap-1.5">
+              {/* Right — status + amount */}
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+                <div className="w-[96px] sm:w-[160px] flex items-center justify-end gap-1.5">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
@@ -164,7 +179,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-                <div className="w-[82px] sm:w-[96px] text-right">
+                <div className="w-[76px] sm:w-[88px] text-right">
                   <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(trip.revenue)}</p>
                   <p className={`text-[10px] tabular-nums leading-tight ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(profit)}</p>
                 </div>
