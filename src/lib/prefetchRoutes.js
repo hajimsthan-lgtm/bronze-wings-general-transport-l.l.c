@@ -19,6 +19,7 @@ const chunkLoaders = [
   () => import('@/pages/Settings'),
   () => import('@/pages/PromptGenerator'),
   () => import('@/pages/Agents'),
+  () => import('@/pages/InvoiceCreator'),
 ];
 
 export function prefetchRoutes() {

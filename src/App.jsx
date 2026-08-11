@@ -47,6 +47,7 @@ const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 const Agents = lazy(() => import('@/pages/Agents'));
+const InvoiceCreator = lazy(() => import('@/pages/InvoiceCreator'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/prompt-generator" element={<PromptGenerator />} />
           <Route path="/agents" element={<Agents />} />
+          <Route path="/invoice-creator" element={<InvoiceCreator />} />
         </Route>
       </Route>
 
