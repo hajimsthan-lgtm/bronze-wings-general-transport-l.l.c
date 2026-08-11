@@ -96,7 +96,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                 style={{ background: hexToRgba(color, 0.10), border: `1px solid ${hexToRgba(color, 0.24)}` }}
               >
                 <span className="text-base font-bold text-foreground leading-none tabular-nums">{db.day}</span>
-                <span className="text-[8px] uppercase tracking-[0.1em] text-muted-foreground/80 mt-0.5">{db.month}</span>
+                <span className="text-[8px] uppercase tracking-[0.1em] text-foreground mt-0.5">{db.month}</span>
               </div>
 
               {/* Route badge */}
@@ -108,9 +108,9 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               <div className="flex-1 min-w-0">
                 {/* Line 1 — trip number + type */}
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
-                  <span className="font-mono text-muted-foreground/80 truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
+                  <span className="font-mono text-foreground truncate">{trip.trip_number || `#${trip.id?.slice(-6)}`}</span>
                   <span className="text-muted-foreground/40">·</span>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
+                  <span className="text-[10px] uppercase tracking-wider text-foreground whitespace-nowrap">
                     {t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}
                   </span>
                 </div>
@@ -121,7 +121,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
                   <p className="text-sm font-semibold text-foreground truncate">{trip.to_location || '—'}</p>
                 </div>
                 {/* Line 3 — meta (desktop only) */}
-                <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5 min-w-0">
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-foreground mt-0.5 min-w-0">
                   {trip.client_name && (
                     <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="hover:text-primary transition-colors truncate max-w-[140px]">{trip.client_name}</button>
                   )}

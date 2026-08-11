@@ -11,7 +11,7 @@ const PANEL = {
   WebkitBackdropFilter: 'blur(28px) saturate(1.3)',
   border: '1px solid rgba(var(--panel-accent-rgb),0.12)',
   borderRadius: 22,
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 16px 44px -14px rgba(0,0,0,0.6)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 16px 44px -14px rgba(0,0,0,0.1)',
 };
 
 const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
