@@ -27,11 +27,11 @@ export default function AppFooter() {
         className="w-full flex items-center justify-center"
         style={{
           height: 42,
-          background: 'rgba(10,14,23,0.38)',
+          background: 'rgba(255,255,255,0.82)',
           backdropFilter: 'blur(18px) saturate(1.3)',
           WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+          borderTop: '1px solid hsl(var(--border))',
+          boxShadow: '0 -4px 16px rgba(0,0,0,0.05)',
         }}
       >
         <span
