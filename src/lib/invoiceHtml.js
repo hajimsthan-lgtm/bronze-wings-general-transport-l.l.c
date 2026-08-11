@@ -181,12 +181,12 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     </tbody>
     <tfoot>
       <tr style="">
-        <td colspan="4" style="padding:8px 5px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;">AED</td>
-        <td style="padding:8px 3px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 3px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalDiscount)}</td>
-        <td style="padding:8px 3px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalTaxable)}</td>
-        <td style="padding:8px 3px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 3px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:bold;font-size:11.5pt;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td colspan="4" style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;">Total</td>
+        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
+        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalDiscount)}</td>
+        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(totalTaxable)}</td>
+        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
+        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:11.5pt;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
@@ -386,10 +386,10 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     </tbody>
     <tfoot>
       <tr style="">
-        <td colspan="5" style="padding:8px 10px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:11px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
-        <td style="padding:8px 6px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 6px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 6px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:11.5px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td colspan="5" style="padding:8px 10px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">Total</td>
+        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
+        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
+        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11.5px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>
@@ -585,10 +585,10 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     </tbody>
     <tfoot>
       <tr style="">
-        <td colspan="5" style="padding:8px 10px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:10.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">AED.</td>
-        <td style="padding:8px 5px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 5px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 5px;border:1px solid #000;border-top:2px solid #1D3F55;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
+        <td colspan="5" style="padding:8px 10px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">Total</td>
+        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
+        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:10.5px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
+        <td style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
       </tr>
     </tfoot>
   </table>

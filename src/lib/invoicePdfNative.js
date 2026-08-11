@@ -478,9 +478,9 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 10;
 
-  // Top border (thicker dark teal)
-  dc(pdf, [29, 63, 85]);
-  pdf.setLineWidth(0.5);
+  // Top border
+  dc(pdf, BLACK);
+  pdf.setLineWidth(0.3);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
 
   // Determine value columns count based on invoice type
@@ -497,7 +497,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(10);
   tc(pdf, BLACK);
-  pdf.text('AED', labelRight - 2, y + h / 2 + 1, { align: 'right' });
+  pdf.text('Total', labelRight - 2, y + h / 2 + 1, { align: 'right' });
 
   // Values in last columns
   pdf.setFont('courier', 'bold');
@@ -507,13 +507,10 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
     pdf.text(fmtMoney(vals[i]), valCols[i].right - 2, y + h / 2 + 1, { align: 'right' });
   }
 
-  // Grid
+  // Bottom border only (no vertical dividers)
   dc(pdf, BLACK);
   pdf.setLineWidth(0.3);
-  pdf.rect(CONTENT_X, y, CONTENT_W, h);
-  for (let i = 1; i < cols.length; i++) {
-    pdf.line(cols[i].x, y, cols[i].x, y + h);
-  }
+  pdf.line(CONTENT_X, y + h, CONTENT_RIGHT, y + h);
   return y + h;
 }
 
