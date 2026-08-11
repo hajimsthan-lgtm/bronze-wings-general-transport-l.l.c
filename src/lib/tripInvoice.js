@@ -4,6 +4,17 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { generateNextInvoiceNumber as nextInvoiceNumber } from '@/lib/invoiceSequence';
 export { nextInvoiceNumber };
 
+/**
+ * Build a trip description string: "FromLocation To ToLocation (driver, vehicle)".
+ * Omits the parenthetical if neither driver nor vehicle is present.
+ */
+export function buildTripDesc(trip) {
+  const extra = [trip.driver_name, trip.vehicle_plate].filter(Boolean).join(', ');
+  return extra
+    ? `${trip.from_location} To ${trip.to_location} (${extra})`
+    : `${trip.from_location} To ${trip.to_location}`;
+}
+
 export async function getTripInvoice(tripId) {
   const existing = await base44.entities.Invoice.filter({ trip_id: tripId }).catch(() => []);
   return existing?.[0] || null;
@@ -33,7 +44,7 @@ export async function generateTripInvoice(trip) {
     contact_person: trip.contact_person || '',
     issue_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-    line_items: [{ description: `${trip.from_location} → ${trip.to_location} (${trip.trip_number || ''})`, quantity: 1, unit_price: revenue, amount: revenue }],
+    line_items: [{ description: buildTripDesc(trip), quantity: 1, unit_price: revenue, amount: revenue }],
     subtotal: revenue,
     vat_rate: vatRate,
     vat_amount: vatAmount,
@@ -61,7 +72,7 @@ export async function setTripInvoiceSent(trip, sent) {
     contact_person: trip.contact_person || '',
     issue_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-    line_items: [{ description: `${trip.from_location} → ${trip.to_location} (${trip.trip_number || ''})`, quantity: 1, unit_price: revenue, amount: revenue }],
+    line_items: [{ description: buildTripDesc(trip), quantity: 1, unit_price: revenue, amount: revenue }],
     subtotal: revenue,
     vat_rate: vatRate,
     vat_amount: vatAmount,

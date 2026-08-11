@@ -59,14 +59,14 @@ const COLS_MONTHLY = [
 ];
 
 const COLS_TRIP = [
-  { label: '#',              w: 8,  align: 'center' },
-  { label: 'TRIP\nDATE',     w: 19, align: 'center' },
-  { label: 'DESCRIPTION',    w: 58, align: 'left'   },
-  { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 24, align: 'right'  },
-  { label: 'AMOUNT\n(AED)',  w: 24, align: 'right'  },
-  { label: 'VAT\n5%',        w: 20, align: 'right'  },
-  { label: 'TOTAL\n(AED)',   w: 27, align: 'right'  },
+  { label: '#',              w: 7,  align: 'center' },
+  { label: 'TRIP\nDATE',     w: 16, align: 'center' },
+  { label: 'DESCRIPTION',    w: 75, align: 'left'   },
+  { label: 'QTY',            w: 10, align: 'center' },
+  { label: 'UNIT PRICE\n(AED)', w: 21, align: 'right'  },
+  { label: 'AMOUNT\n(AED)',  w: 22, align: 'right'  },
+  { label: 'VAT\n5%',        w: 18, align: 'right'  },
+  { label: 'TOTAL\n(AED)',   w: 25, align: 'right'  },
 ];
 
 const COLS_STANDARD = [
@@ -109,19 +109,26 @@ function str(v) { return String(v ?? ''); }
 
 function normalizeRoute(s) {
   let v = str(s);
+  // Extract and preserve parenthetical content (e.g., driver, vehicle info)
+  const parenMatch = v.match(/\([^)]*\)/);
+  const parenContent = parenMatch ? parenMatch[0].replace(/\s+/g, ' ').trim() : '';
+  if (parenContent) {
+    v = v.replace(/\s*\([^)]*\)\s*/, ' ').trim();
+  }
   // Collapse spaced-out "To" (e.g., "T o") into "To"
   v = v.replace(/\b[Tt]\s+[Oo]\b/g, 'To');
   // Split on "To" (as a word) or any sequence of non-alphanumeric, non-space characters
   const parts = v.split(/\b[Tt]o\b|[^a-zA-Z0-9\s]+/);
-  // If only one part (no separator found), return trimmed original
+  let result;
   if (parts.length <= 1) {
-    return v.replace(/\s+/g, ' ').trim();
+    result = v.replace(/\s+/g, ' ').trim();
+  } else {
+    const words = parts
+      .map(p => p.replace(/\s+/g, ''))
+      .filter(p => p.length > 0);
+    result = words.join(' To ');
   }
-  // For each part, remove internal spaces (collapse spaced-out letters into words)
-  const words = parts
-    .map(p => p.replace(/\s+/g, ''))
-    .filter(p => p.length > 0);
-  return words.join(' To ');
+  return parenContent ? `${result} ${parenContent}` : result;
 }
 
 async function fetchLogoDataUrl(url) {

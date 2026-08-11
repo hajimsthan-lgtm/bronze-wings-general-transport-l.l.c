@@ -138,6 +138,8 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     const vatRate = 5;
     const vatAmount = Math.round(revenue * vatRate) / 100;
     const total = Math.round((revenue + vatAmount) * 100) / 100;
+    const extra = [trip.driver_name, trip.vehicle_plate].filter(Boolean).join(', ');
+    const desc = extra ? `${trip.from_location} To ${trip.to_location} (${extra})` : `${trip.from_location} To ${trip.to_location}`;
     return {
       invoice_number: number, client_name: client.name,
       contact_person: trip.contact_person || client.contact_person || '',
@@ -147,17 +149,21 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       due_date: dueFromTerms(client.payment_terms),
       subtotal: revenue, vat_rate: vatRate, vat_amount: vatAmount,
       total_amount: total, paid_amount: 0, currency: 'AED',
-      line_items: [{ description: `${trip.from_location} → ${trip.to_location}`, date: trip.trip_date, quantity: 1, unit_price: revenue, amount: revenue }],
+      line_items: [{ description: desc, date: trip.trip_date, quantity: 1, unit_price: revenue, amount: revenue }],
       trip_id: trip.id, notes: trip.trip_number ? `Trip ${trip.trip_number}` : '',
       payment_terms: client.payment_terms || 'Net 30',
     };
   };
 
   const buildBulkInvoice = (selected, number) => {
-    const items = selected.map((tr) => ({
-      description: `${tr.from_location} → ${tr.to_location}`, date: tr.trip_date,
-      quantity: 1, unit_price: Number(tr.revenue) || 0, amount: Number(tr.revenue) || 0,
-    }));
+    const items = selected.map((tr) => {
+      const extra = [tr.driver_name, tr.vehicle_plate].filter(Boolean).join(', ');
+      const desc = extra ? `${tr.from_location} To ${tr.to_location} (${extra})` : `${tr.from_location} To ${tr.to_location}`;
+      return {
+        description: desc, date: tr.trip_date,
+        quantity: 1, unit_price: Number(tr.revenue) || 0, amount: Number(tr.revenue) || 0,
+      };
+    });
     const subtotal = items.reduce((s, i) => s + i.amount, 0);
     const vatRate = 5;
     const vatAmount = Math.round(subtotal * vatRate) / 100;
