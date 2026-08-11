@@ -25,6 +25,11 @@ const fmtDate = (d) => {
   return d;
 };
 
+const nowLocal = () => {
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
+
 const EXPORT_COLS = [
   { key: 'date', label: 'Date' },
   { key: 'recipient', label: 'Recipient' },
@@ -49,7 +54,7 @@ function StatCell({ label, value, color, icon }) {
 export default function Cash() {
   const [rows, setRows] = useState(null);
   const [form, setForm] = useState({
-    date: new Date().toISOString().slice(0, 16),
+    date: nowLocal(),
     recipient: '',
     receipt_number: '',
     description: '',
@@ -125,7 +130,7 @@ export default function Cash() {
         received_from: !isOutflow ? form.recipient : '',
         paid_to: isOutflow ? form.recipient : '',
       });
-      setForm({ date: new Date().toISOString().slice(0, 16), recipient: '', receipt_number: '', description: '', inflow: '', outflow: '' });
+      setForm({ date: nowLocal(), recipient: '', receipt_number: '', description: '', inflow: '', outflow: '' });
       await load();
     } finally {
       setSaving(false);
