@@ -102,7 +102,7 @@ function getMonthYear(dateStr) {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return String(dateStr);
   const months = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
-  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+  return `${months[d.getMonth()]}`;
 }
 
 function str(v) { return String(v ?? ''); }
