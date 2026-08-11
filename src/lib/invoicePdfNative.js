@@ -773,12 +773,12 @@ function drawTermsConditions(pdf, invoiceType) {
   const bannerY = FOOTER_BOTTOM - bannerH;
   const y = bannerY - 12;
 
-  // Header bar — gold for trip, dark teal for others
-  fc(pdf, [29, 63, 85]);
+  // Header bar — grey (same as table head)
+  fc(pdf, [240, 240, 240]);
   pdf.rect(BORDER_POS, y, bw, 5, 'F');
   pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
-  tc(pdf, WHITE);
+  tc(pdf, BLACK);
   pdf.text('TERMS & CONDITIONS', BORDER_POS + 3, y + 3.5);
 
   // Content
@@ -814,13 +814,13 @@ function drawFooterBanners(pdf) {
 function drawTermsInline(pdf, y, invoiceType) {
   const bw = CONTENT_W;
   const bannerH = 5;
-  const accent = [29, 63, 85];
+  const accent = [240, 240, 240];
 
   fc(pdf, accent);
   pdf.rect(CONTENT_X, y, bw, bannerH, 'F');
   pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
-  tc(pdf, WHITE);
+  tc(pdf, BLACK);
   pdf.text('TERMS & CONDITIONS', CONTENT_X + 3, y + 3.5);
 
   pdf.setFont('times', 'normal');

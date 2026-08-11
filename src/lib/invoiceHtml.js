@@ -243,7 +243,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 
   <!-- Terms & Conditions -->
   <div style="position:relative;z-index:1;margin-top:14px;border:1px solid #1D3F55;">
-    <div style="background:#1D3F55;color:#fff;font-weight:bold;font-size:10pt;text-transform:uppercase;letter-spacing:1px;padding:5px 14px;">Terms &amp; Conditions</div>
+    <div style="background:#f0f0f0;color:#000;font-weight:bold;font-size:10pt;text-transform:uppercase;letter-spacing:1px;padding:5px 14px;">Terms &amp; Conditions</div>
     <div style="padding:6px 14px;font-size:9.5pt;color:#333;line-height:1.6;">Payment Terms : 60 days from receipt of the tax invoice.</div>
   </div>
 
@@ -414,7 +414,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Footer Container (bordered) -->
   <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #1D3F55;border-right:1px solid #1D3F55;border-bottom:1px solid #1D3F55;">
     <!-- Terms Bar -->
-    <div style="background:#1D3F55;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+    <div style="background:#f0f0f0;color:#000;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
     <div style="padding:6px 14px;font-size:9pt;color:#555;">Payment Terms : 60 days from receipt of the tax invoice.</div>
 
     <!-- Bank Details -->
@@ -628,7 +628,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Footer Container (bordered) -->
   <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #1D3F55;border-right:1px solid #1D3F55;border-bottom:1px solid #1D3F55;">
     <!-- Terms Bar -->
-    <div style="background:#1D3F55;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+    <div style="background:#f0f0f0;color:#000;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
     <div style="padding:6px 14px;font-size:9pt;color:#555;">Payment Terms : 60 days from receipt of the tax invoice.</div>
 
     <!-- Bank Details -->
