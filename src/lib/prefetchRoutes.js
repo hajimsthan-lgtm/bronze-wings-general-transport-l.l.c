@@ -7,6 +7,7 @@ const chunkLoaders = [
   () => import('@/pages/ProfitLoss'),
   () => import('@/pages/Soa'),
   () => import('@/pages/BankReconciliation'),
+  () => import('@/pages/Cash'),
   () => import('@/pages/admin/Vehicles'),
   () => import('@/pages/admin/Drivers'),
   () => import('@/pages/admin/Clients'),

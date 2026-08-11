@@ -34,7 +34,7 @@ export default function Cash() {
   return (
     <PullToRefresh onRefresh={load}>
     <div>
-      <PageHeader title={t('cash')} description="Cash flow tracking"
+      <PageHeader title="Petty Cash" description="Cash flow tracking"
         action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
 
       <div className="grid grid-cols-3 gap-3 mb-5">

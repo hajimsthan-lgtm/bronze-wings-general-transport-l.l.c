@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import {
   Truck, ChartColumn, UsersRound, Search,
-  Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2,
+  Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
 } from 'lucide-react';
 
 /* Sectioned sidebar model — search at top, grouped sections, full-width
@@ -17,12 +17,10 @@ const navItems = [
     ],
   },
   {
-    key: 'reports', label: 'Reports',
+    key: 'accounts', label: 'Accounts',
     children: [
-      { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList },
-      { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp },
-      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText },
       { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
+      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
     ],
   },
   {
@@ -31,6 +29,14 @@ const navItems = [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck },
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2 },
+    ],
+  },
+  {
+    key: 'reports', label: 'Reports',
+    children: [
+      { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList },
+      { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp },
+      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText },
     ],
   },
 ];
