@@ -178,41 +178,47 @@ export function buildBronzeInvoiceHTML(invoice, clientName, settings = {}, seqNo
     <div style="font-size:11pt;font-weight:bold;color:${DARK_BRONZE};letter-spacing:0.5px;">AED ${words} ONLY</div>
   </div>
 
-  <!-- ══ TERMS & CONDITIONS ══ -->
-  <div style="padding:14px 30px 0;margin-top:10px;border-top:1px solid ${LINE_GRAY};">
-    <div style="font-size:10pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:8px;letter-spacing:1px;">TERMS &amp; CONDITIONS</div>
-    <div style="font-size:9pt;color:${DARK_TEXT};line-height:1.8;">Payment Terms: 60 days from receipt of the tax invoice.</div>
+  <!-- Spacer -->
+  <div style="flex:1 1 auto;min-height:20px;"></div>
+
+  <!-- Footer Container (bordered) -->
+  <div id="footer-block" style="margin:0 30px;border-left:1px solid ${DARK_BRONZE};border-right:1px solid ${DARK_BRONZE};border-bottom:1px solid ${DARK_BRONZE};">
+    <!-- Terms Bar -->
+    <div style="background:${DARK_BRONZE};color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">TERMS &amp; CONDITIONS</div>
+    <div style="padding:6px 14px;font-size:9pt;color:${MED_GRAY};">Payment Terms : 60 days from receipt of the tax invoice.</div>
+
+    <!-- Bank Details -->
+    <div style="padding:8px 14px;border-top:1px solid ${LINE_GRAY};">
+      <div style="font-size:10pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">BANK DETAILS</div>
+      <div style="font-size:9pt;color:${DARK_TEXT};line-height:1.8;">
+        <div>Bank: ${esc(s.bank_name || '—')}</div>
+        <div>Account Title: ${esc(s.bank_account_title || s.company_name || '—')}</div>
+        <div>Account No: ${esc(s.bank_account_no || '—')}</div>
+        <div>IBAN #: ${esc(s.bank_iban || '—')}</div>
+        <div>Branch: ${esc(s.bank_branch || '—')}</div>
+      </div>
+    </div>
+
+    <!-- Signature Blocks (Two Columns) -->
+    <div style="display:flex;border-top:1px solid ${LINE_GRAY};padding:16px 14px;gap:20px;">
+      <!-- Left: Receiver -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:${DARK_TEXT};margin-top:3px;overflow-wrap:break-word;word-break:break-word;">${esc(billName)}</div>
+      </div>
+      <!-- Right: Authorized -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:${DARK_TEXT};margin-top:3px;">BRONZE WINGS GENERAL TRANSPORT L.L.C</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ══ SIGNATURE BLOCKS (Three Equal Columns) ══ -->
-  <div style="padding:24px 30px 0;display:flex;gap:20px;">
-    <!-- Left -->
-    <div style="flex:1;text-align:left;">
-      <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR BRONZE WINGS<br>GENERAL TRANSPORT</div>
-      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:75%;"></div>
-      <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
-    </div>
-    <!-- Middle -->
-    <div style="flex:1;text-align:center;">
-      <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR TRAVERSE</div>
-      <div style="border-bottom:1px solid ${LINE_GRAY};margin-bottom:5px;width:75%;margin-left:auto;margin-right:auto;"></div>
-      <div style="font-size:8pt;color:${MED_GRAY};">&nbsp;</div>
-    </div>
-    <!-- Right -->
-    <div style="flex:1;text-align:right;">
-      <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};margin-bottom:36px;line-height:1.4;letter-spacing:0.5px;">FOR PREZIOSO TRAVERSE</div>
-      <div style="border-bottom:1px solid ${DARK_BRONZE};margin-bottom:5px;width:75%;margin-left:auto;"></div>
-      <div style="font-size:8pt;color:${MED_GRAY};letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
-      <div style="font-size:8pt;color:${MED_GRAY};margin-top:3px;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
-    </div>
-  </div>
-
-  <!-- ══ FOOTER ══ -->
-  <div style="position:absolute;bottom:0;left:0;right:0;">
-    <div style="border-top:1px solid ${DARK_BRONZE};background:${LIGHT_BG};padding:10px 30px;text-align:center;">
-      <div style="font-size:9pt;font-weight:bold;color:${MED_BRONZE};letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
-      <div style="font-size:8pt;color:${MED_GRAY};margin-top:5px;letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
-    </div>
+  <!-- Bottom Footer Bar -->
+  <div style="margin:0 30px 8px;border:1px solid ${DARK_BRONZE};background:${LIGHT_BG};padding:8px;text-align:center;">
+    <div style="font-size:9pt;font-weight:bold;color:${DARK_BRONZE};letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
   </div>
 
 </div>`;

@@ -400,40 +400,46 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   </div>
 
   <!-- Spacer -->
-  <div style="flex:1 1 auto;min-height:30px;"></div>
+  <div style="flex:1 1 auto;min-height:20px;"></div>
 
-  <!-- Bank Details + Terms & Conditions (two columns) -->
-  <div style="position:relative;z-index:1;margin:0 28px;border-top:1px solid #1D3F55;padding-top:12px;display:flex;gap:30px;">
-    <div style="flex:1;padding-right:15px;">
-      <div style="font-size:11px;font-weight:800;color:#1D3F55;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Bank Details</div>
-      ${bankHtml}
+  <!-- Footer Container (bordered) -->
+  <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #1D3F55;border-right:1px solid #1D3F55;border-bottom:1px solid #1D3F55;">
+    <!-- Terms Bar -->
+    <div style="background:#1D3F55;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+    <div style="padding:6px 14px;font-size:9pt;color:#555;">Payment Terms : 60 days from receipt of the tax invoice.</div>
+
+    <!-- Bank Details -->
+    <div style="padding:8px 14px;border-top:1px solid #ddd;">
+      <div style="font-size:10pt;font-weight:bold;color:#1D3F55;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Bank Details</div>
+      <div style="font-size:9pt;color:#1A1A1A;line-height:1.8;">
+        <div>Bank: ${esc(s.bank_name || '—')}</div>
+        <div>Account Title: ${esc(s.bank_account_title || s.company_name || '—')}</div>
+        <div>Account No: ${esc(s.bank_account_no || '—')}</div>
+        <div>IBAN #: ${esc(s.bank_iban || '—')}</div>
+        <div>Branch: ${esc(s.bank_branch || '—')}</div>
+      </div>
     </div>
-    <div style="flex:1;padding-left:15px;border-left:1px solid #E0E0E0;">
-      <div style="font-size:11px;font-weight:800;color:#1D3F55;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Terms &amp; Conditions</div>
-      <div style="font-size:10px;color:#333;line-height:1.7;">Payment Terms : 60 days from receipt of the tax invoice.</div>
+
+    <!-- Signature Blocks (Two Columns) -->
+    <div style="display:flex;border-top:1px solid #ddd;padding:16px 14px;gap:20px;">
+      <!-- Left: Receiver -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid #1D3F55;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;overflow-wrap:break-word;word-break:break-word;">${esc(billName)}</div>
+      </div>
+      <!-- Right: Authorized -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid #1D3F55;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;">BRONZE WINGS GENERAL TRANSPORT L.L.C</div>
+      </div>
     </div>
   </div>
 
-  <!-- Signature Section -->
-  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:20px 28px 15px 28px;gap:25px;">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
-      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #1D3F55;margin-bottom:5px;"></div>
-      <div style="font-size:9px;color:#1D3F55;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
-      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #1D3F55;margin-bottom:5px;"></div>
-      <div style="font-size:9px;color:#1D3F55;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
-      <div style="font-size:10px;color:#555;margin-top:6px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
-    </div>
-  </div>
-
-  <!-- Footer Banner -->
-  <div style="position:relative;z-index:1;">
-    <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:10px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
-      We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
-    </div>
+  <!-- Bottom Footer Bar -->
+  <div style="position:relative;z-index:1;margin:0 28px 8px;border:1px solid #1D3F55;background:#FAF7F2;padding:8px;text-align:center;">
+    <div style="font-size:9pt;font-weight:bold;color:#1D3F55;letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
   </div>
 
 </div>`;
@@ -610,46 +616,44 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <!-- Spacer -->
   <div style="flex:1 1 auto;min-height:20px;"></div>
 
-  <!-- Bank Payment Details (bordered container) -->
-  <div style="position:relative;z-index:1;margin:0 28px;border:1px solid #ddd;padding:12px 16px;">
-    <div style="font-size:11px;font-weight:800;color:#9e813a;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;">Bank Payment Details</div>
-    <div style="display:flex;flex-wrap:wrap;gap:0;font-size:10.5px;line-height:1.9;">
-      <div style="flex:1 1 50%;padding-right:10px;">
-        <div><span style="font-weight:700;color:#333;">Bank Name:</span> <span style="color:#000;">${esc(s.bank_name || '—')}</span></div>
-        <div><span style="font-weight:700;color:#333;">Account No:</span> <span style="color:#000;">${esc(s.bank_account_no || '—')}</span></div>
-        <div><span style="font-weight:700;color:#333;">IBAN:</span> <span style="color:#000;">${esc(s.bank_iban || '—')}</span></div>
+  <!-- Footer Container (bordered) -->
+  <div id="footer-block" style="position:relative;z-index:1;margin:0 28px;border-left:1px solid #9e813a;border-right:1px solid #9e813a;border-bottom:1px solid #9e813a;">
+    <!-- Terms Bar -->
+    <div style="background:#9e813a;color:#fff;padding:6px 14px;font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+    <div style="padding:6px 14px;font-size:9pt;color:#555;">Payment Terms : 60 days from receipt of the tax invoice.</div>
+
+    <!-- Bank Details -->
+    <div style="padding:8px 14px;border-top:1px solid #ddd;">
+      <div style="font-size:10pt;font-weight:bold;color:#9e813a;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Bank Details</div>
+      <div style="font-size:9pt;color:#1A1A1A;line-height:1.8;">
+        <div>Bank: ${esc(s.bank_name || '—')}</div>
+        <div>Account Title: ${esc(s.bank_account_title || s.company_name || '—')}</div>
+        <div>Account No: ${esc(s.bank_account_no || '—')}</div>
+        <div>IBAN #: ${esc(s.bank_iban || '—')}</div>
+        <div>Branch: ${esc(s.bank_branch || '—')}</div>
       </div>
-      <div style="flex:1 1 50%;padding-left:10px;">
-        <div><span style="font-weight:700;color:#333;">Account Title:</span> <span style="color:#000;">${esc(s.bank_account_title || s.company_name || '—')}</span></div>
-        <div><span style="font-weight:700;color:#333;">Branch:</span> <span style="color:#000;">${esc(s.bank_branch || '—')}</span></div>
+    </div>
+
+    <!-- Signature Blocks (Two Columns) -->
+    <div style="display:flex;border-top:1px solid #ddd;padding:16px 14px;gap:20px;">
+      <!-- Left: Receiver -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid #9e813a;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">RECEIVER SIGN &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;overflow-wrap:break-word;word-break:break-word;">${esc(billName)}</div>
+      </div>
+      <!-- Right: Authorized -->
+      <div style="flex:1;text-align:center;">
+        <div style="border-bottom:1px solid #9e813a;margin-bottom:5px;width:80%;margin-left:auto;margin-right:auto;"></div>
+        <div style="font-size:8pt;color:#555;letter-spacing:0.5px;">AUTHORIZED SIGNATURE &amp; STAMP</div>
+        <div style="font-size:9pt;font-weight:bold;color:#1A1A1A;margin-top:3px;">BRONZE WINGS GENERAL TRANSPORT L.L.C</div>
       </div>
     </div>
   </div>
 
-  <!-- Terms & Conditions (grey bg, gold left accent) -->
-  <div style="position:relative;z-index:1;margin:8px 28px 0;background:#f9f9f9;border-left:4px solid #9e813a;padding:8px 14px;font-size:10px;color:#333;line-height:1.6;">
-    <span style="font-weight:700;">Terms &amp; Conditions:</span> Payment terms are 60 days from the date of receipt of this tax invoice.
-  </div>
-
-  <!-- Signature Section -->
-  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:24px 28px 15px 28px;gap:40px;">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-      <div style="width:100%;height:40px;border-bottom:1px solid #9e813a;margin-bottom:8px;"></div>
-      <div style="font-size:10px;font-weight:700;color:#000;text-align:center;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;">BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
-      <div style="font-size:9px;color:#9e813a;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;margin-top:4px;">Authorized Signature &amp; Stamp</div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-      <div style="width:100%;height:40px;border-bottom:1px solid #9e813a;margin-bottom:8px;"></div>
-      <div style="font-size:10px;font-weight:700;color:#000;text-align:center;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;overflow-wrap:break-word;word-break:break-word;">${esc(billName)}</div>
-      <div style="font-size:9px;color:#9e813a;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;margin-top:4px;">Receiver Signature &amp; Stamp</div>
-    </div>
-  </div>
-
-  <!-- Footer Banner -->
-  <div style="position:relative;z-index:1;">
-    <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:9px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
-      We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
-    </div>
+  <!-- Bottom Footer Bar -->
+  <div style="position:relative;z-index:1;margin:0 28px 8px;border:1px solid #9e813a;background:#FAF7F2;padding:8px;text-align:center;">
+    <div style="font-size:9pt;font-weight:bold;color:#9e813a;letter-spacing:1px;">WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES</div>
   </div>
 
 </div>`;
