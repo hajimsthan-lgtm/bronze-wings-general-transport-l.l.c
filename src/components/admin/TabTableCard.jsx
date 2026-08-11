@@ -49,7 +49,7 @@ export default function TabTableCard({
           }
           <div>
             <h3 className="text-base font-semibold text-foreground">{title}</h3>
-            {subtitle && <p className="text-xs text-muted-foreground hidden">{subtitle}</p>}
+            
           </div>
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
