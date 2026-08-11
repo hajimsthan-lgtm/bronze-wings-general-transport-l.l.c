@@ -793,6 +793,110 @@ function drawFooterBanners(pdf) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// DRAW: TERMS & CONDITIONS (INLINE — right below amount in words)
+// ═══════════════════════════════════════════════════════════
+function drawTermsInline(pdf, y, invoiceType) {
+  const bw = CONTENT_W;
+  const bannerH = 5;
+  const accent = invoiceType === 'trip' ? GOLD : [29, 63, 85];
+
+  fc(pdf, accent);
+  pdf.rect(CONTENT_X, y, bw, bannerH, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, WHITE);
+  pdf.text('TERMS & CONDITIONS', CONTENT_X + 3, y + 3.5);
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  tc(pdf, [51, 51, 51]);
+  pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', CONTENT_X + 3, y + 8);
+
+  return y + 12;
+}
+
+// ═══════════════════════════════════════════════════════════
+// DRAW: BANK DETAILS BLOCK (standalone, full-width)
+// ═══════════════════════════════════════════════════════════
+function drawBankDetailsBlock(pdf, s, y, invoiceType) {
+  const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
+  const accent = invoiceType === 'trip' ? GOLD : MAROON;
+
+  if (!hasBank) return 4;
+
+  const lx = CONTENT_X + 2;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, accent);
+  pdf.text('BANK DETAILS', lx, y + 4);
+  dc(pdf, accent);
+  pdf.setLineWidth(0.3);
+  pdf.line(lx, y + 5, lx + 22, y + 5);
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  let ly = y + 9;
+  if (s.bank_name)           { pdf.text(`Bank: ${str(s.bank_name)}`, lx, ly); ly += 4; }
+  if (s.bank_account_title || s.company_name) { pdf.text(`Account Title: ${str(s.bank_account_title || s.company_name)}`, lx, ly); ly += 4; }
+  if (s.bank_account_no)     { pdf.text(`Account No: ${str(s.bank_account_no)}`, lx, ly); ly += 4; }
+  if (s.bank_iban)           { pdf.text(`IBAN #: ${str(s.bank_iban)}`, lx, ly); ly += 4; }
+  if (s.bank_branch)         { pdf.text(`Branch: ${str(s.bank_branch)}`, lx, ly); ly += 4; }
+  return ly - y + 2;
+}
+
+// ═══════════════════════════════════════════════════════════
+// DRAW: TRIP SIGNATURES (with company names, positioned near footer)
+// ═══════════════════════════════════════════════════════════
+function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
+  const sigW = CONTENT_W / 2;
+  const leftX = CONTENT_X;
+  const rightX = CONTENT_X + sigW;
+  const sigTopGap = 18;
+  const lineY = y + sigTopGap;
+  const warmGold = [158, 141, 125];
+  const darkGray = [51, 51, 51];
+
+  // Left — AUTHORIZED BY
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, warmGold);
+  pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 4, { align: 'center' });
+  dc(pdf, darkGray);
+  pdf.setLineWidth(0.3);
+  pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  tc(pdf, GRAY);
+  pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(8);
+  tc(pdf, BLACK);
+  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 8, { align: 'center' });
+
+  // Right — RECEIVED BY
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, warmGold);
+  pdf.text('RECEIVED BY', rightX + sigW / 2, y + 4, { align: 'center' });
+  dc(pdf, darkGray);
+  pdf.setLineWidth(0.3);
+  pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  tc(pdf, GRAY);
+  pdf.text('Client Signature', rightX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(8);
+  tc(pdf, BLACK);
+  const clientText = str(clientName || invoice.client_name || '');
+  const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
+  for (let i = 0; i < Math.min(clientLines.length, 2); i++) {
+    pdf.text(clientLines[i], rightX + sigW / 2, lineY + 8 + i * 3.5, { align: 'center' });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // MAIN: RENDER INVOICE PDF
 // ═══════════════════════════════════════════════════════════
 export async function renderInvoicePDF(invoice, clientName, settings, invoiceType = 'monthly', seqNo) {
@@ -822,23 +926,62 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   const { y: tableY, total } = drawTable(pdf, invoice, s, y, invoiceType);
   y = tableY;
 
-  // ══ AMOUNT WORDS + SIGNATURES (page-break-inside: avoid) ══
-  const blockH = 11 + 8 + 40; // amount words + gap + bank/signatures
-  if (y + blockH > FOOTER_TOP - 2) {
-    pdf.addPage();
-    drawPageBorder(pdf);
-    y = drawLetterhead(pdf, s, MARGIN);
+  if (invoiceType === 'trip') {
+    // ══ TRIP LAYOUT: Amount Words → Terms → Bank → Signatures(near footer) ══
+
+    // Amount in words
+    if (y + 11 > FOOTER_TOP - 2) {
+      pdf.addPage();
+      drawPageBorder(pdf);
+      y = drawLetterhead(pdf, s, MARGIN);
+    }
+    y = drawAmountInWords(pdf, total, y, invoiceType);
+
+    // Terms & Conditions inline (right below amount in words)
+    y += 3;
+    y = drawTermsInline(pdf, y, invoiceType);
+
+    // Bank details
+    y += 4;
+    drawBankDetailsBlock(pdf, s, y, invoiceType);
+
+    // Signatures near footer (with company names)
+    const sigH = 30; // header + gap + line + labels + company name
+    const sigY = FOOTER_TOP - sigH - 2;
+    drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
+
+    // Footer banner at bottom
+    drawFooterBanners(pdf);
+
+  } else {
+    // ══ STANDARD / MONTHLY LAYOUT ══
+    const blockH = 11 + 8 + 40; // amount words + gap + bank/signatures
+    if (y + blockH > FOOTER_TOP - 2) {
+      pdf.addPage();
+      drawPageBorder(pdf);
+      y = drawLetterhead(pdf, s, MARGIN);
+    }
+
+    y = drawAmountInWords(pdf, total, y, invoiceType);
+    y += 8; // gap before signatures
+    drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType);
+
+    // Terms & Conditions (anchored to bottom)
+    drawTermsConditions(pdf, invoiceType);
+
+    // Footer banner
+    drawFooterBanners(pdf);
   }
 
-  y = drawAmountInWords(pdf, total, y, invoiceType);
-  y += 8; // gap before signatures
-  drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType);
-
-  // ══ TERMS & CONDITIONS ══
-  drawTermsConditions(pdf, invoiceType);
-
-  // ══ FOOTER BANNERS (bottom of last page, never floating) ══
-  drawFooterBanners(pdf);
+  // ══ PAGE NUMBERS (Page No X of Y) ══
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8);
+    tc(pdf, GRAY);
+    pdf.text(`Page No ${i} of ${pageCount}`, PAGE_W / 2, 295.5, { align: 'center' });
+  }
 
   // Save
   pdf.save(`invoice-${invoice.invoice_number || invoice.id}.pdf`);
