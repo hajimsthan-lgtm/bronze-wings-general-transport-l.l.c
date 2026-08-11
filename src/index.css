@@ -13,68 +13,68 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 240 20% 5%;              /* #0a0a0f near-black */
-    --background-elevated: 240 18% 9%;     /* #12121a */
-    --card: 240 16% 12%;                   /* #1a1a24 */
+    --background: 20 20% 5%;              /* #0d0a09 warm near-black */
+    --background-elevated: 20 16% 9%;     /* #1a1413 warm dark */
+    --card: 20 14% 12%;                   /* #211a18 warm brown-dark */
     --card-foreground: 0 0% 100%;
     --foreground: 0 0% 100%;
-    --muted: 240 16% 16%;
-    --muted-foreground: 240 7% 57%;        /* #8b8b9a slate gray */
-    --popover: 240 16% 12%;
+    --muted: 20 12% 16%;
+    --muted-foreground: 28 10% 60%;        /* #a89690 warm gray */
+    --popover: 20 14% 12%;
     --popover-foreground: 0 0% 100%;
-    --primary: 271 76% 63%;                /* #a855f7 violet */
-    --primary-light: 271 80% 70%;
-    --primary-foreground: 240 20% 5%;
-    --secondary: 240 16% 18%;
+    --primary: 5 52% 47%;                  /* #B8463A bronze red */
+    --primary-light: 7 60% 57%;            /* #D4634F */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 20 18% 18%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 255 83% 58%;                 /* #7c3aed deep violet */
-    --accent-foreground: 0 0% 100%;
+    --accent: 42 44% 56%;                  /* #C4A35A gold-bronze */
+    --accent-foreground: 20 30% 8%;
     --destructive: 350 89% 60%;            /* #f43f5e rose */
     --destructive-foreground: 0 0% 100%;
-    --neon: 271 76% 63%;
-    --magenta: 255 83% 58%;
+    --neon: 5 52% 47%;
+    --magenta: 42 44% 56%;
     --success: 160 84% 39%;                /* #10b981 emerald */
     --success-light: 160 84% 47%;
     --warning: 38 92% 50%;
     --danger: 350 89% 60%;                 /* rose for alerts */
-    --border: 240 16% 20%;                /* #2a2a3a */
-    --input: 240 18% 9%;
-    --ring: 271 76% 63%;
-    --panel-accent-rgb: 168, 85, 247;      /* #a855f7 */
-    --panel-accent2-rgb: 124, 58, 237;    /* #7c3aed */
-    --surf-1-rgb: 26, 26, 36;             /* #1a1a24 */
-    --surf-2-rgb: 10, 10, 15;             /* #0a0a0f */
+    --border: 20 14% 22%;                 /* brown-tinted border */
+    --input: 20 16% 12%;
+    --ring: 5 52% 47%;
+    --panel-accent-rgb: 184, 70, 58;       /* #B8463A bronze red */
+    --panel-accent2-rgb: 139, 58, 46;      /* #8B3A2E maroon */
+    --surf-1-rgb: 38, 24, 22;             /* #261816 warm dark brown */
+    --surf-2-rgb: 20, 12, 12;             /* #140c0c near-black warm */
     --radius: 1rem;
-    --chart-1: 271 76% 63%;                /* violet */
-    --chart-2: 255 83% 58%;                /* deep violet */
-    --chart-3: 240 7% 57%;                 /* slate gray */
+    --chart-1: 5 52% 47%;                  /* bronze red */
+    --chart-2: 42 44% 56%;                 /* gold-bronze */
+    --chart-3: 7 50% 36%;                  /* maroon */
     --chart-4: 160 84% 39%;                /* emerald */
     --chart-5: 350 89% 60%;                /* rose */
-    --sidebar-background: 240 20% 4%;
+    --sidebar-background: 20 20% 5%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 271 76% 63%;
-    --sidebar-primary-foreground: 240 20% 5%;
-    --sidebar-accent: 240 16% 14%;
+    --sidebar-primary: 5 52% 47%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 14% 12%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 16% 18%;
-    --sidebar-ring: 271 76% 63%;
-    --clay-bg: 240 16% 12%;
-    --clay-border: 240 16% 22%;
-    --clay-shadow-dark: 240 20% 3%;
-    --clay-shadow-light: 240 16% 20%;
+    --sidebar-border: 20 14% 16%;
+    --sidebar-ring: 5 52% 47%;
+    --clay-bg: 20 16% 14%;
+    --clay-border: 20 14% 24%;
+    --clay-shadow-dark: 20 20% 4%;
+    --clay-shadow-light: 20 16% 22%;
 
     /* Theme-adaptive shell vars */
-    --app-bg: #0a0a0f;
-    --panel-bg: linear-gradient(180deg, rgba(26,26,36,0.75) 0%, rgba(18,18,26,0.88) 50%, rgba(10,10,15,0.92) 100%);
-    --panel-border-color: rgba(168,85,247,0.18);
+    --app-bg: #140c0c;
+    --panel-bg: linear-gradient(180deg, rgba(38,24,22,0.85) 0%, rgba(26,16,16,0.92) 50%, rgba(20,12,12,0.95) 100%);
+    --panel-border-color: rgba(184,70,58,0.22);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
     --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
     --panel-blur: blur(12px) saturate(1.2);
-    --header-tint-1: rgba(10,10,15,0.12);
-    --header-tint-2: rgba(10,10,15,0.05);
-    --nav-inactive: rgba(139,139,154,0.55);
-    --surf-1: rgba(26,26,36,0.6);
-    --surf-2: rgba(10,10,15,0.85);
+    --header-tint-1: rgba(20,12,12,0.12);
+    --header-tint-2: rgba(20,12,12,0.05);
+    --nav-inactive: rgba(200,170,150,0.55);
+    --surf-1: rgba(38,24,22,0.7);
+    --surf-2: rgba(20,12,12,0.9);
   }
 
   .theme-navy {

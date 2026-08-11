@@ -21,19 +21,19 @@ const navItems = [
 },
 {
   key: 'reports', icon: ChartColumn, label: 'Reports',
-  from: '#a855f7', to: '#6d28d9', glow: '168,85,247', paths: ['/reports'],
+  from: '#B8463A', to: '#6B2A20', glow: '184,70,58', paths: ['/reports'],
   children: [
-  { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
-  { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, from: '#8b5cf6', to: '#5b21b6', glow: '139,92,246' },
-  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, from: '#f97316', to: '#9a3412', glow: '249,115,22' },
-  { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' }]
+  { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, from: '#C4A35A', to: '#8B6A2E', glow: '196,163,90' },
+  { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, from: '#A0522D', to: '#6B2A20', glow: '160,82,45' },
+  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, from: '#D4634F', to: '#8B3A2E', glow: '212,99,79' },
+  { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, from: '#B8463A', to: '#6B2A20', glow: '184,70,58' }]
 
 },
 {
   key: 'admin', icon: UsersRound, label: 'Admin',
   from: '#f59e0b', to: '#c2410c', glow: '245,158,11', paths: ['/admin'],
   children: [
-  { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, from: '#6366f1', to: '#3730a3', glow: '99,102,241' },
+  { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, from: '#8B3A2E', to: '#6B2A20', glow: '139,58,46' },
   { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, from: '#10b981', to: '#047857', glow: '16,185,129' },
   { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, from: '#f43f5e', to: '#9f1239', glow: '244,63,94' }]
 
@@ -274,11 +274,11 @@ export default function ContentSidebar() {
           paddingLeft: 8,
           paddingRight: 8,
           gap: 14,
-          background: 'transparent',
-          borderRight: 'none',
+          background: 'linear-gradient(180deg, #1a1010 0%, #140c0c 100%)',
+          borderRight: '1px solid rgba(184,70,58,0.18)',
           backdropFilter: 'none',
           WebkitBackdropFilter: 'none',
-          boxShadow: 'none',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.45)',
           overflow: 'visible',
           opacity: panelDimming ? 0 : 1,
           pointerEvents: panelVisible ? 'auto' : 'none',
