@@ -6,11 +6,9 @@ export default function ReportRowCard({ icon: Icon, iconColor = '#3b82f6', title
       onClick={onClick}
       className={`group relative rounded-2xl mb-2 transition-all duration-200 hover:-translate-y-px ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{
-        background: 'linear-gradient(180deg, rgba(20,24,38,0.50) 0%, rgba(14,18,30,0.60) 100%)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.04)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.25)',
+        background: 'hsl(var(--card))',
+        border: '1px solid hsl(var(--border))',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
       }}
     >
       <span

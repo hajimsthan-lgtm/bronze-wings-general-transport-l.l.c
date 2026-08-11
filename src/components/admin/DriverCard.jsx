@@ -55,9 +55,9 @@ export default function DriverCard({ d, onOpen, onEdit, onDelete }) {
 
       <p className="relative mt-1 text-xl font-bold tracking-tight text-foreground font-display truncate">{d.name}</p>
 
-      <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-white/10 flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${ACCENT}33 0%, rgba(12,16,26,0.6) 70%)` }}>
+      <div className="relative mt-3 h-28 rounded-xl overflow-hidden border border-border flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${ACCENT}26 0%, hsl(var(--muted)) 70%)` }}>
         <div className="absolute inset-0 opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1.5px)', backgroundSize: '18px 18px' }} />
-        <div className="relative w-16 h-16 rounded-full overflow-hidden flex items-center justify-center text-xl font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, boxShadow: `0 0 24px -6px ${ACCENT}, inset 0 1px 0 rgba(255,255,255,0.15)`, color: '#fff' }}>
+        <div className="relative w-16 h-16 rounded-full overflow-hidden flex items-center justify-center text-xl font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, boxShadow: `0 0 24px -6px ${ACCENT}, inset 0 1px 0 rgba(255,255,255,0.4)`, color: 'hsl(var(--foreground))' }}>
           {d.image_url ? <img src={d.image_url} alt={d.name} className="w-full h-full object-cover" /> : getInitials(d.name)}
         </div>
       </div>

@@ -3,10 +3,10 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const ACCENTS = {
   primary: { icon: 'text-primary', glow: '59,130,246', value: 'text-foreground' },
-  amber: { icon: 'text-amber-300', glow: '251,191,36', value: 'text-amber-300' },
-  teal: { icon: 'text-teal-300', glow: '45,212,191', value: 'text-teal-300' },
-  emerald: { icon: 'text-emerald-300', glow: '52,211,153', value: 'text-emerald-300' },
-  red: { icon: 'text-rose-300', glow: '251,113,133', value: 'text-rose-300' },
+  amber: { icon: 'text-amber-600', glow: '251,191,36', value: 'text-amber-600' },
+  teal: { icon: 'text-teal-600', glow: '45,212,191', value: 'text-teal-600' },
+  emerald: { icon: 'text-emerald-600', glow: '52,211,153', value: 'text-emerald-600' },
+  red: { icon: 'text-rose-600', glow: '251,113,133', value: 'text-rose-600' },
 };
 
 export default function KpiCard({ title, value, subtitle, icon: Icon, trend, trendValue, accent = 'primary', className = '' }) {
@@ -61,7 +61,7 @@ export default function KpiCard({ title, value, subtitle, icon: Icon, trend, tre
           {trendValue && (
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                isPositive ? 'text-emerald-300 border-emerald-400/25 bg-emerald-400/10' : 'text-red-300 border-red-400/25 bg-red-400/10'
+                isPositive ? 'text-emerald-600 border-emerald-500/25 bg-emerald-500/10' : 'text-red-600 border-red-500/25 bg-red-500/10'
               }`}
             >
               {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}

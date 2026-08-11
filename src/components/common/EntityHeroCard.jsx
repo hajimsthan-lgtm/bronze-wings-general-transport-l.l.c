@@ -8,7 +8,7 @@ export default function EntityHeroCard({ icon: Icon, title, total, stats = [], a
       className="relative overflow-hidden rounded-2xl p-5 mb-5 border border-white/[0.06]"
       style={{
         background: `linear-gradient(135deg, rgba(${accent},0.16) 0%, var(--surf-1) 55%, var(--surf-2) 100%)`,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 36px rgba(0,0,0,0.35)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 12px 36px rgba(0,0,0,0.08)',
       }}
     >
       {/* ambient glow */}

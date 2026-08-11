@@ -21,7 +21,7 @@ export default function BalanceCard({ healthPct, totalRevenue, activeTrips, pend
 
   return (
     <div className="rounded-3xl p-5 sm:p-6 relative overflow-hidden"
-      style={{ background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.82) 0%, rgba(var(--surf-2-rgb),0.92) 100%)', border: '1px solid rgba(var(--panel-accent-rgb),0.14)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 36px rgba(0,0,0,0.4)', backdropFilter: 'blur(20px) saturate(1.3)', WebkitBackdropFilter: 'blur(20px) saturate(1.3)' }}>
+      style={{ background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.82) 0%, rgba(var(--surf-2-rgb),0.92) 100%)', border: '1px solid rgba(var(--panel-accent-rgb),0.14)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 12px 36px rgba(0,0,0,0.08)', backdropFilter: 'blur(20px) saturate(1.3)', WebkitBackdropFilter: 'blur(20px) saturate(1.3)' }}>
       <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.6) 0%, transparent 70%)' }} />
       <div className="relative flex flex-col sm:flex-row items-center gap-6">
         {/* circular gauge */}
@@ -58,7 +58,7 @@ export default function BalanceCard({ healthPct, totalRevenue, activeTrips, pend
           </div>
           <div className="grid grid-cols-3 gap-2 mt-4">
             {stats.map((s) => (
-              <div key={s.label} className="rounded-xl p-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div key={s.label} className="rounded-xl p-2.5" style={{ background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))' }}>
                 <div className="flex items-center gap-1.5 mb-1">
                   <s.icon className="w-3.5 h-3.5" style={{ color: s.color }} />
                   <span className="text-[9px] uppercase tracking-wider text-white/40 truncate">{s.label}</span>

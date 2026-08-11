@@ -339,10 +339,10 @@
     backdrop-filter: blur(22px) saturate(1.4);
     -webkit-backdrop-filter: blur(22px) saturate(1.4);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.10),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.03),
       inset 0 0 60px rgba(var(--panel-accent-rgb), 0.04),
-      0 10px 30px -8px rgba(0, 0, 0, 0.5),
+      0 10px 30px -8px rgba(0, 0, 0, 0.08),
       0 0 0 1px rgba(var(--panel-accent-rgb), 0.05);
   }
   .glass-card::before {
@@ -402,7 +402,7 @@
   .entity-card:hover {
     transform: translateY(-3px);
     border-color: rgba(var(--panel-accent-rgb),0.28);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 48px rgba(var(--panel-accent-rgb),0.07), 0 14px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(var(--panel-accent-rgb),0.12), 0 0 28px -8px rgba(var(--panel-accent-rgb),0.30);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 48px rgba(var(--panel-accent-rgb),0.07), 0 14px 36px rgba(0,0,0,0.1), 0 0 0 1px rgba(var(--panel-accent-rgb),0.12), 0 0 28px -8px rgba(var(--panel-accent-rgb),0.30);
   }
   .entity-avatar {
     background: linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.35), rgba(var(--panel-accent-rgb),0.15));
@@ -433,9 +433,9 @@
   }
   .row-card:hover {
     transform: translateY(-1px);
-    background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.62) 0%, rgba(18,22,36,0.72) 100%);
+    background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.62) 0%, rgba(var(--surf-2-rgb),0.72) 100%);
     border-color: rgba(var(--panel-accent-rgb),0.20);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 40px rgba(var(--panel-accent-rgb),0.05), 0 10px 26px rgba(0,0,0,0.42), 0 0 0 1px rgba(var(--panel-accent-rgb),0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 40px rgba(var(--panel-accent-rgb),0.05), 0 8px 22px rgba(0,0,0,0.08), 0 0 0 1px rgba(var(--panel-accent-rgb),0.10);
   }
   .row-card:hover::before { opacity: 1; }
 
@@ -541,7 +541,7 @@
     backdrop-filter: blur(26px) saturate(1.3);
     -webkit-backdrop-filter: blur(26px) saturate(1.3);
     border: 1px solid rgba(var(--panel-accent-rgb),0.14);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 50px rgba(var(--panel-accent-rgb),0.05), 0 14px 44px rgba(0,0,0,0.45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 50px rgba(var(--panel-accent-rgb),0.05), 0 14px 44px rgba(0,0,0,0.1);
   }
 
   /* ========== 2026 Sub-Tab Pill ========== */
@@ -631,7 +631,7 @@
     -webkit-backdrop-filter: blur(28px) saturate(1.3);
     border: 1px solid rgba(var(--panel-accent-rgb),0.12);
     border-radius: calc(var(--radius) + 4px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 16px 44px -14px rgba(0,0,0,0.6);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 16px 44px -14px rgba(0,0,0,0.1);
   }
 
   /* New glassmorphism surface (matches 4-layer bg) */
@@ -640,7 +640,7 @@
     backdrop-filter: blur(40px) saturate(1.25);
     -webkit-backdrop-filter: blur(40px) saturate(1.25);
     border: 1px solid rgba(var(--panel-accent-rgb),0.12);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 20px 60px rgba(0,0,0,0.45);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 20px 60px rgba(0,0,0,0.08);
   }
   .glass-sm {
     background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.62) 0%, rgba(var(--surf-2-rgb),0.78) 100%);
@@ -652,7 +652,7 @@
 
   /* ========== Stat Tile (KPI) — Charcoal + Blue ========== */
   .stat-tile {
-    background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.78) 0%, rgba(22,26,38,0.88) 100%);
+    background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.78) 0%, rgba(var(--surf-2-rgb),0.88) 100%);
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(255,255,255,0.08);
@@ -661,10 +661,10 @@
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 8px 24px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
       inset 0 0 32px rgba(var(--panel-accent-rgb), 0.04),
-      inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+      inset 0 -2px 4px rgba(0, 0, 0, 0.03);
   }
   .stat-tile::after {
     content: '';
@@ -679,17 +679,17 @@
     transform: translateY(-2px);
     border-color: rgba(var(--panel-accent-rgb), 0.45);
     box-shadow:
-      0 10px 30px rgba(0, 0, 0, 0.5),
+      0 10px 30px rgba(0, 0, 0, 0.1),
       0 0 0 1px rgba(var(--panel-accent-rgb), 0.18),
       0 0 28px -8px rgba(var(--panel-accent-rgb), 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
   .stat-tile:hover::after {
     opacity: 1;
   }
   .stat-tile-active {
     border-color: rgba(var(--panel-accent-rgb),0.45) !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--panel-accent-rgb),0.3), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(var(--panel-accent-rgb),0.3), inset 0 1px 0 rgba(255,255,255,0.8) !important;
   }
 
   /* ========== 2026 KPI Card (dotted glass + cursor spotlight) ========== */
@@ -698,13 +698,13 @@
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 28px rgba(0,0,0,0.32);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 28px rgba(0,0,0,0.08);
     transition: transform .3s cubic-bezier(0.16,1,0.3,1), border-color .3s ease, box-shadow .3s ease;
   }
   .kpi-card:hover {
     transform: translateY(-2px);
     border-color: rgba(255,255,255,0.10);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 14px 36px rgba(0,0,0,0.42);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 14px 36px rgba(0,0,0,0.1);
   }
   .kpi-dots {
     background-size: 14px 14px;
@@ -1899,4 +1899,15 @@
 [role="tab"][data-state="active"],
 .badge-pulse {
   color: hsl(var(--primary-foreground)) !important;
+}
+
+/* ── Light-theme surface normalization ──
+   Translucent white backgrounds and white borders are dark-theme glass
+   tints that vanish on white. Map them to theme tokens so every card
+   reads correctly without per-component edits. */
+[class*="bg-white/"] {
+  background-color: hsl(var(--muted)) !important;
+}
+[class*="border-white/"] {
+  border-color: hsl(var(--border)) !important;
 }

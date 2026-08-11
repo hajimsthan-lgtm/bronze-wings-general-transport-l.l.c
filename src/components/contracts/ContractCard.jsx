@@ -73,7 +73,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
       style={{
         background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.94) 0%, rgba(var(--surf-2-rgb),0.97) 100%)',
         border: `1px solid rgba(${tn.glow},0.16)`,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 28px rgba(0,0,0,0.45)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 28px rgba(0,0,0,0.08)',
         transition: 'transform .3s cubic-bezier(0.16,1,0.3,1), box-shadow .3s ease, border-color .3s ease',
       }}
     >
@@ -118,7 +118,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
       </div>
 
       {/* ── Bottom pill: 3 financial stats ── */}
-      <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 border border-white/5">
+      <div className="flex items-center gap-1 p-1 rounded-full bg-muted border border-border">
         <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold text-white/70 tabular-nums">
           <Wallet className="w-3 h-3 text-white/40 flex-shrink-0" />{short(monthlyRate)}
         </div>
@@ -142,8 +142,8 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
               onClick={(e) => handleLink(e, b.map, b.label, b.path)}
               className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-medium transition-all"
               style={clickable
-                ? { background: 'rgba(var(--panel-accent-rgb),0.14)', border: '1px solid rgba(var(--panel-accent-rgb),0.32)', color: '#fff' }
-                : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.45)', cursor: 'default' }}
+                ? { background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.30)', color: 'hsl(var(--primary))' }
+                : { background: 'hsl(var(--muted))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))', cursor: 'default' }}
               onMouseEnter={(e) => { if (clickable) e.currentTarget.style.boxShadow = '0 0 12px -3px rgba(var(--panel-accent-rgb),0.5)'; }}
               onMouseLeave={(e) => { if (clickable) e.currentTarget.style.boxShadow = 'none'; }}
             >

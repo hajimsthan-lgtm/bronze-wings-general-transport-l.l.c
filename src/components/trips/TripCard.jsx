@@ -86,7 +86,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
       style={{
         background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.94) 0%, rgba(var(--surf-2-rgb),0.97) 100%)',
         border: `1px solid rgba(${st.glow},0.16)`,
-        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 28px rgba(0,0,0,0.45)`,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 28px rgba(0,0,0,0.08)`,
         transition: 'transform .3s cubic-bezier(0.16,1,0.3,1), box-shadow .3s ease, border-color .3s ease',
       }}
     >
@@ -124,7 +124,7 @@ export default function TripCard({ trip, onClick, driverMap, vehicleMap, clientM
       </div>
 
       {/* ── Bottom pill: status selector ── */}
-      <div className="flex items-center gap-1 p-1 rounded-full bg-black/30 border border-white/5">
+      <div className="flex items-center gap-1 p-1 rounded-full bg-muted border border-border">
         {STATUS_LIST.map((s) => {
           const opt = STATUS[s];
           const active = trip.status === s;
