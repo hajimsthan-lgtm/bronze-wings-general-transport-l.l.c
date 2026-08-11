@@ -17,13 +17,6 @@ const navItems = [
     ],
   },
   {
-    key: 'accounts', label: 'Accounts',
-    children: [
-      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
-      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
-    ],
-  },
-  {
     key: 'admin', label: 'Admin',
     children: [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck },
@@ -37,6 +30,13 @@ const navItems = [
       { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList },
       { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp },
       { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText },
+    ],
+  },
+  {
+    key: 'accounts', label: 'Accounts',
+    children: [
+      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
+      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
     ],
   },
 ];
