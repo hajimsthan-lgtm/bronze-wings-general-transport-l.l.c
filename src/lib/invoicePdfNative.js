@@ -789,7 +789,7 @@ function drawTermsConditions(pdf, invoiceType) {
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, [51, 51, 51]);
-  pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', BORDER_POS + 3, y + 8);
+  pdf.text('Payment due within 60 days.', BORDER_POS + 3, y + 8);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -830,7 +830,7 @@ function drawTermsInline(pdf, y, invoiceType) {
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, [51, 51, 51]);
-  pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', CONTENT_X + 3, y + 8);
+  pdf.text('Payment due within 60 days.', CONTENT_X + 3, y + 8);
 
   return y + 12;
 }
