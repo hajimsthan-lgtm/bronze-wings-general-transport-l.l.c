@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const COLORS = ['violet', 'green', 'red', 'yellow', 'blue'];
+const COLORS = ['violet', 'green', 'red', 'yellow', 'blue', 'bronze'];
 
 const ECG_PATH = 'M0,25 L60,25 L75,25 L90,5 L105,45 L120,10 L135,40 L150,25 L165,25 L180,25 L195,25 L210,5 L225,45 L240,10 L255,40 L270,25 L285,25 L300,25 L315,25 L330,5 L345,45 L360,10 L375,40 L390,25 L405,25 L420,25 L435,25 L450,5 L465,45 L480,10 L495,40 L510,25 L525,25 L540,25 L555,25 L570,25 L600,25';
 
@@ -32,7 +32,7 @@ function injectStyles() {
       position: absolute;
       left: 0; right: 0; top: 50%;
       height: 1px;
-      background: rgba(255,255,255,0.06);
+      background: hsl(var(--border));
       transform: translateY(-0.5px);
     }
     .hb-compact .hb-glow {
@@ -84,6 +84,9 @@ function injectStyles() {
 
     .hb-compact.hb-blue .hb-path { stroke: #3b82f6; filter: drop-shadow(0 0 3px #3b82f6) drop-shadow(0 0 6px #3b82f6); }
     .hb-compact.hb-blue .hb-glow { background: radial-gradient(ellipse at center, rgba(59,130,246,0.4), transparent 70%); }
+
+    .hb-compact.hb-bronze .hb-path { stroke: #B8463A; filter: drop-shadow(0 0 3px #B8463A) drop-shadow(0 0 6px #B8463A); }
+    .hb-compact.hb-bronze .hb-glow { background: radial-gradient(ellipse at center, rgba(184,70,58,0.4), transparent 70%); }
   `;
   document.head.appendChild(style);
   injected = true;
@@ -93,9 +96,9 @@ function injectStyles() {
  * Compact heartbeat ECG loader with 5 fixed scenario colors.
  * @param {string} color - one of: violet (default), green (save/success), red (error/delete), yellow (pending), blue (sync/refresh)
  */
-export default function HeartbeatLoader({ color = 'violet', className = '' }) {
+export default function HeartbeatLoader({ color = 'bronze', className = '' }) {
   useEffect(() => { injectStyles(); }, []);
-  const safeColor = COLORS.includes(color) ? color : 'violet';
+  const safeColor = COLORS.includes(color) ? color : 'bronze';
 
   return (
     <div className={`hb-compact hb-${safeColor} ${className}`}>

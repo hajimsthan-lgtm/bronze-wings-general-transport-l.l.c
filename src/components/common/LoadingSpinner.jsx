@@ -1,6 +1,6 @@
 import HeartbeatLoader from './HeartbeatLoader';
 
-export default function LoadingSpinner({ size = 'md', className = '', color = 'violet' }) {
+export default function LoadingSpinner({ size = 'md', className = '', color = 'bronze' }) {
   const scaleMap = { sm: 0.8, md: 1, lg: 1.15 };
   const scale = scaleMap[size] || 1;
   return (

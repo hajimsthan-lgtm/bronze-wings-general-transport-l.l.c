@@ -1903,3 +1903,135 @@
 [class*="border-white/"] {
   border-color: hsl(var(--border)) !important;
 }
+
+/* ── Dark-theme remnant normalization ──
+   Force dark backgrounds, dark glass surfaces, and dark search/input
+   chrome to clean white-theme surfaces so every page reads as white. */
+.clay-rail,
+.obsidian-header,
+.obsidian-header-row,
+.obsidian-subnav-row,
+.industrial-search,
+.industrial-search-cap,
+.industrial-search-core,
+.black-card {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.industrial-search-input {
+  color: hsl(var(--foreground)) !important;
+}
+.industrial-search-input::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.industrial-search-icon {
+  color: hsl(var(--primary)) !important;
+}
+.industrial-search-cap {
+  background: hsl(var(--muted)) !important;
+}
+.industrial-search-cap::before,
+.industrial-search-cap::after {
+  background: hsl(var(--muted-foreground)) !important;
+}
+
+/* Dark glass cards → clean white cards */
+.glass-card,
+.clay-card,
+.glass,
+.glass-sm,
+.glass-panel,
+.glass-card-hover,
+.clay,
+.clay-sm {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.glass-card::before,
+.glass-card::after,
+.clay-card::before {
+  display: none !important;
+}
+
+/* Stat tiles & KPI cards → clean white */
+.stat-tile,
+.kpi-card,
+.entity-card,
+.detail-header-card {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.stat-tile::after,
+.kpi-card::after {
+  display: none !important;
+}
+
+/* Row cards → clean white */
+.row-card {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.row-card::before {
+  display: none !important;
+}
+
+/* Sub-tabs → light theme */
+.sub-tab {
+  color: hsl(var(--muted-foreground)) !important;
+  background: transparent !important;
+}
+.sub-tab:hover {
+  color: hsl(var(--foreground)) !important;
+  background: hsl(var(--muted)) !important;
+}
+.sub-tab-active {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 1px 4px rgba(var(--panel-accent-rgb), 0.25) !important;
+}
+
+/* Search 2026 → light theme */
+.search-2026 {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+.search-2026::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.search-2026:focus {
+  border-color: hsl(var(--primary)) !important;
+  background: hsl(var(--card)) !important;
+  box-shadow: 0 0 0 3px rgba(var(--panel-accent-rgb), 0.1) !important;
+}
+
+/* Empty orb → light theme */
+.empty-orb {
+  background: hsl(var(--muted)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: none !important;
+}
+
+/* Eyebrow text → muted foreground */
+.eyebrow {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Hairline borders → light border */
+.hairline {
+  border-color: hsl(var(--border)) !important;
+}
