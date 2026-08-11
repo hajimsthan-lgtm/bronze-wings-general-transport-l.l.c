@@ -838,16 +838,15 @@ function drawTermsConditions(pdf, invoiceType) {
 // DRAW: FOOTER BANNERS (anchored to bottom of last page)
 // ═══════════════════════════════════════════════════════════
 function drawFooterBanners(pdf) {
-  const bw = PAGE_W - 2 * BORDER_POS;
-
-  // Single banner — CREAM bg, BROWN text
+  // Separate bordered box — same inset as the header letterhead (CONTENT_X / CONTENT_W)
+  const bw = CONTENT_W;
   const bh = 5;
   const by = FOOTER_BOTTOM - bh;
-  fc(pdf, [253, 251, 240]);
-  pdf.rect(BORDER_POS, by, bw, bh, 'F');
-  dc(pdf, [99, 60, 26]);
-  pdf.setLineWidth(0.4);
-  pdf.rect(BORDER_POS, by, bw, bh);
+  fc(pdf, [253, 251, 240]); // CREAM bg — same as header
+  pdf.rect(CONTENT_X, by, bw, bh, 'F');
+  dc(pdf, [99, 60, 26]); // BROWN border — same as header
+  pdf.setLineWidth(0.6);  // same weight as header
+  pdf.rect(CONTENT_X, by, bw, bh);
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, [99, 60, 26]);
