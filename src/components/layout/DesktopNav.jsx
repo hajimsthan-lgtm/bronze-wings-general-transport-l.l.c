@@ -100,7 +100,7 @@ export default function DesktopNav() {
             style={{
               background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))',
               border: '1px solid rgba(16,185,129,0.35)',
-              color: '#fff',
+              color: 'hsl(var(--foreground))',
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)'
             }}>
             
@@ -114,7 +114,7 @@ export default function DesktopNav() {
             title="Settings"
             className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white">
             
-            <SettingsIcon className="w-4 h-4" style={{ color: '#c8c8d4', filter: 'drop-shadow(0 0 3px rgba(200,200,212,0.35))' }} />
+            <SettingsIcon className="w-4 h-4" style={{ color: 'hsl(var(--muted-foreground))' }} />
           </Link>
           {/* Step-back button — moved to right side, before forward */}
           <button

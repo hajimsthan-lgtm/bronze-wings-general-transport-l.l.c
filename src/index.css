@@ -1882,8 +1882,7 @@
    Leftover dark-theme white text → foreground charcoal.
    In dark themes --foreground is white, so this is a no-op there.
    ═══════════════════════════════════════════════════════ */
-.text-white,
-[class*="text-white/"] {
+[class*="text-white"] {
   color: hsl(var(--foreground)) !important;
 }
 /* Preserve white text on colored/bronze buttons & active pills */
