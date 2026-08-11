@@ -364,8 +364,10 @@ function drawTableHeader(pdf, cols, y) {
   const h = 12;
 
   pdf.setFont('helvetica', 'bold');
+  fc(pdf, [29, 63, 85]);
+  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
   pdf.setFontSize(8);
-  tc(pdf, DARK_BLUE);
+  tc(pdf, WHITE);
 
   for (const col of cols) {
     const lines = col.label.split('\n');
@@ -380,7 +382,7 @@ function drawTableHeader(pdf, cols, y) {
   }
 
   // Grid
-  dc(pdf, CELL_BORDER);
+  dc(pdf, BLACK);
   pdf.setLineWidth(0.3);
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
   for (let i = 1; i < cols.length; i++) {
@@ -461,7 +463,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
   }
 
   // Grid
-  dc(pdf, CELL_BORDER);
+  dc(pdf, BLACK);
   pdf.setLineWidth(0.3);
   pdf.rect(CONTENT_X, y, CONTENT_W, rowH);
   for (let i = 1; i < cols.length; i++) {
@@ -476,8 +478,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   const h = 10;
 
-  // Top border (thicker dark blue)
-  dc(pdf, DARK_BLUE);
+  // Top border (thicker dark teal)
+  dc(pdf, [29, 63, 85]);
   pdf.setLineWidth(0.5);
   pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
 
@@ -506,7 +508,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType) {
   }
 
   // Grid
-  dc(pdf, CELL_BORDER);
+  dc(pdf, BLACK);
   pdf.setLineWidth(0.3);
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
   for (let i = 1; i < cols.length; i++) {
@@ -538,7 +540,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     pdf.setFontSize(8);
     tc(pdf, GRAY);
     pdf.text('No items', CONTENT_X + 2, y + 4.5);
-    dc(pdf, CELL_BORDER);
+    dc(pdf, BLACK);
     pdf.setLineWidth(0.3);
     pdf.rect(CONTENT_X, y, CONTENT_W, 7);
     y += 7;
@@ -674,6 +676,30 @@ function drawBankAndSignatures(pdf, invoice, clientName, s, y) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// DRAW: TERMS & CONDITIONS
+// ═══════════════════════════════════════════════════════════
+function drawTermsConditions(pdf) {
+  const bw = PAGE_W - 2 * BORDER_POS;
+  const bannerH = 5;
+  const bannerY = FOOTER_BOTTOM - bannerH;
+  const y = bannerY - 12;
+
+  // Header bar — dark teal
+  fc(pdf, [29, 63, 85]);
+  pdf.rect(BORDER_POS, y, bw, 5, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, WHITE);
+  pdf.text('TERMS & CONDITIONS', BORDER_POS + 3, y + 3.5);
+
+  // Content
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  tc(pdf, [51, 51, 51]);
+  pdf.text('Payment Terms : 60 days from receipt of the tax invoice.', BORDER_POS + 3, y + 8);
+}
+
+// ═══════════════════════════════════════════════════════════
 // DRAW: FOOTER BANNERS (anchored to bottom of last page)
 // ═══════════════════════════════════════════════════════════
 function drawFooterBanners(pdf) {
@@ -734,6 +760,9 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   y = drawAmountInWords(pdf, total, y);
   y += 8; // gap before signatures
   drawBankAndSignatures(pdf, invoice, clientName, s, y);
+
+  // ══ TERMS & CONDITIONS ══
+  drawTermsConditions(pdf);
 
   // ══ FOOTER BANNERS (bottom of last page, never floating) ══
   drawFooterBanners(pdf);
