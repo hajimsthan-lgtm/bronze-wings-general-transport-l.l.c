@@ -970,22 +970,30 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     drawFooterBanners(pdf);
 
   } else {
-    // ══ STANDARD / MONTHLY LAYOUT ══
-    const blockH = 11 + 8 + 40; // amount words + gap + bank/signatures
-    if (y + blockH > FOOTER_TOP - 2) {
+    // ══ STANDARD / MONTHLY LAYOUT (same as trip model) ══
+
+    // Amount in words
+    if (y + 11 > FOOTER_TOP - 2) {
       pdf.addPage();
       drawPageBorder(pdf);
       y = drawLetterhead(pdf, s, MARGIN);
     }
-
     y = drawAmountInWords(pdf, total, y, invoiceType);
-    y += 8; // gap before signatures
-    drawBankAndSignatures(pdf, invoice, clientName, s, y, invoiceType);
 
-    // Terms & Conditions (anchored to bottom)
-    drawTermsConditions(pdf, invoiceType);
+    // Terms & Conditions inline (right below amount in words)
+    y += 3;
+    y = drawTermsInline(pdf, y, invoiceType);
 
-    // Footer banner
+    // Bank details
+    y += 4;
+    drawBankDetailsBlock(pdf, s, y, invoiceType);
+
+    // Signatures near footer (with company names — same as trip model)
+    const sigH = 30;
+    const sigY = FOOTER_TOP - sigH - 2;
+    drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
+
+    // Footer banner at bottom
     drawFooterBanners(pdf);
   }
 
@@ -996,7 +1004,7 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     pdf.setFont('times', 'normal');
     pdf.setFontSize(9);
     tc(pdf, GRAY);
-    pdf.text(`Page No ${i} of ${pageCount}`, PAGE_W / 2, 295.5, { align: 'center' });
+    pdf.text(`Page No ${i} of ${pageCount}`, CONTENT_RIGHT, 286, { align: 'right' });
   }
 
   // Save
