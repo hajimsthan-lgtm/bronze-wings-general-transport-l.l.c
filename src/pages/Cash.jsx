@@ -1,101 +1,262 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useI18n } from '@/lib/i18n';
-import PageHeader from '@/components/common/PageHeader';
+import { Wallet, Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import PullToRefresh from '@/components/common/PullToRefresh';
-import EmptyState from '@/components/common/EmptyState';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, Wallet, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import ExportButtons from '@/components/common/ExportButtons';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
-import SatinCard from '@/components/common/SatinCard';
 
-export default function Cash() {
-  const { t } = useI18n();
-  const [loading, setLoading] = useState(true);
-  const [transactions, setTransactions] = useState([]);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState(null);
-  const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
+const PANEL = {
+  background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
+  backdropFilter: 'blur(28px) saturate(1.3)',
+  WebkitBackdropFilter: 'blur(28px) saturate(1.3)',
+  border: '1px solid rgba(var(--panel-accent-rgb),0.12)',
+  borderRadius: 22,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 16px 44px -14px rgba(0,0,0,0.1)',
+};
 
-  const load = () => { setLoading(true); base44.entities.CashTransaction.list('-date', 100).then(setTransactions).finally(() => setLoading(false)); };
-  useEffect(() => { load(); }, []);
+const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
 
-  const filtered = transactions.filter(tx => !tx.date || ((!dateFrom || tx.date >= dateFrom) && (!dateTo || tx.date <= dateTo)));
-  const inflows = filtered.filter(t => t.type === 'inflow').reduce((s, t) => s + (t.amount || 0), 0);
-  const outflows = filtered.filter(t => t.type === 'outflow').reduce((s, t) => s + (t.amount || 0), 0);
+const EXPORT_COLS = [
+  { key: 'date', label: 'Date' },
+  { key: 'description', label: 'Description' },
+  { key: 'inflow', label: 'Inflow', numeric: true },
+  { key: 'outflow', label: 'Outflow', numeric: true },
+  { key: 'running_balance', label: 'Running Balance', numeric: true },
+];
 
+function StatCell({ label, value, color, icon }) {
   return (
-    <PullToRefresh onRefresh={load}>
-    <div>
-      <PageHeader title="Petty Cash" description="Cash flow tracking"
-        action={<Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>} />
-
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <SatinCard className="p-3"><p className="eyebrow">{t('inflow')}</p><p className="text-lg font-bold mt-1 text-emerald-300 tabular-nums font-display">{formatCurrency(inflows)}</p></SatinCard>
-        <SatinCard className="p-3"><p className="eyebrow">{t('outflow')}</p><p className="text-lg font-bold mt-1 text-rose-300 tabular-nums font-display">{formatCurrency(outflows)}</p></SatinCard>
-        <SatinCard className="p-3"><p className="eyebrow">Balance</p><p className="text-lg font-bold mt-1 text-foreground tabular-nums font-display">{formatCurrency(inflows - outflows)}</p></SatinCard>
+    <div className="flex flex-col justify-center px-5 py-3 flex-1 min-w-0">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold mb-0.5" style={{ color }}>
+        {icon}{label}
       </div>
-
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Wallet} title={t('no_data')} /> : (
-        <div className="space-y-2">
-          {filtered.map(tx => (
-            <button key={tx.id} onClick={() => { setEditItem(tx); setFormOpen(true); }} className="w-full text-left glass-card-hover p-4 flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${tx.type === 'inflow' ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
-                {tx.type === 'inflow' ? <ArrowDownLeft className="w-4 h-4 text-emerald-400" /> : <ArrowUpRight className="w-4 h-4 text-red-400" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{tx.description || '—'}</p>
-                <p className="text-xs text-muted-foreground">{tx.type === 'inflow' ? tx.received_from : tx.paid_to} · {formatDate(tx.date)}</p>
-              </div>
-              <span className={`text-sm font-semibold ${tx.type === 'inflow' ? 'text-emerald-400' : 'text-red-400'}`}>{tx.type === 'inflow' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="bg-card border-border sm:max-w-md">
-          <DialogHeader className="mb-4"><DialogTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Cash Entry</DialogTitle></DialogHeader>
-          <CashForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.CashTransaction.update(editItem.id, data); else await base44.entities.CashTransaction.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <div className="text-xl font-bold text-white tabular-nums truncate">{value}</div>
     </div>
-    </PullToRefresh>
   );
 }
 
-function CashForm({ editItem, onSave, onCancel }) {
-  const { t } = useI18n();
+export default function Cash() {
+  const [rows, setRows] = useState(null);
+  const [form, setForm] = useState({
+    date: new Date().toISOString().slice(0, 10),
+    type: 'outflow',
+    amount: '',
+    description: '',
+    received_from: '',
+    paid_to: '',
+  });
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], description: '', type: 'outflow', amount: '', category: '', received_from: '', paid_to: '', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, amount: editItem.amount || '' }); else setForm({ date: new Date().toISOString().split('T')[0], description: '', type: 'outflow', amount: '', category: '', received_from: '', paid_to: '', notes: '' }); }, [editItem]);
-  const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
-  const handle = async () => { setSaving(true); await onSave({ ...form, amount: Number(form.amount) || 0 }); setSaving(false); };
+  const [view, setView] = useState('statement');
+  const { dateFrom: filterFrom, dateTo: filterTo, setDateFrom: setFilterFrom, setDateTo: setFilterTo } = useGlobalDate();
+  const [q, setQ] = useState('');
+
+  const load = useCallback(async () => {
+    const data = await base44.entities.CashTransaction.list('-date', 500).catch(() => []);
+    setRows(data || []);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  // sorted ascending by date then created_date for running balance
+  const sorted = (rows || []).slice().sort((a, b) => {
+    const d = (a.date || '').localeCompare(b.date || '');
+    if (d !== 0) return d;
+    return (a.created_date || '').localeCompare(b.created_date || '');
+  });
+
+  // map to statement rows: inflow → inflow column, outflow → outflow column
+  let run = 0;
+  const statementRows = sorted.map((r) => {
+    const inflow = r.type === 'inflow' ? (Number(r.amount) || 0) : 0;
+    const outflow = r.type === 'outflow' ? (Number(r.amount) || 0) : 0;
+    run += inflow - outflow;
+    return { ...r, inflow, outflow, running_balance: run };
+  });
+
+  // report view: apply filters then recompute running balance
+  const filtered = statementRows.filter((r) => {
+    if (filterFrom && (r.date || '') < filterFrom) return false;
+    if (filterTo && (r.date || '') > filterTo) return false;
+    if (q && !((r.description || '').toLowerCase().includes(q.toLowerCase()))) return false;
+    return true;
+  });
+  let rb = 0;
+  const reportRows = filtered.map((r) => {
+    rb += (Number(r.inflow) || 0) - (Number(r.outflow) || 0);
+    return { ...r, running_balance: rb };
+  });
+
+  const display = view === 'report' ? reportRows : statementRows;
+  const totalInflow = display.reduce((s, r) => s + (Number(r.inflow) || 0), 0);
+  const totalOutflow = display.reduce((s, r) => s + (Number(r.outflow) || 0), 0);
+  const closingBalance = display.length ? display[display.length - 1].running_balance : 0;
+
+  const dateRangeLabel = (filterFrom || filterTo)
+    ? `${filterFrom || 'start'} → ${filterTo || 'today'}`
+    : 'All dates';
+
+  const addEntry = async (e) => {
+    e.preventDefault();
+    if (!form.date || !form.amount) return;
+    setSaving(true);
+    try {
+      await base44.entities.CashTransaction.create({
+        date: form.date,
+        type: form.type,
+        amount: Number(form.amount) || 0,
+        description: form.description || '',
+        received_from: form.type === 'inflow' ? form.received_from : '',
+        paid_to: form.type === 'outflow' ? form.paid_to : '',
+      });
+      setForm({ date: new Date().toISOString().slice(0, 10), type: 'outflow', amount: '', description: '', received_from: '', paid_to: '' });
+      await load();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id) => {
+    await base44.entities.CashTransaction.delete(id);
+    await load();
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Type</Label>
-          <Select value={form.type} onValueChange={v => update('type', v)}>
-            <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="inflow">{t('inflow')}</SelectItem><SelectItem value="outflow">{t('outflow')}</SelectItem></SelectContent>
-          </Select></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border" /></div>
+    <div className="professional-page-bg min-h-screen pb-28 md:pb-20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+        {/* header + toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="hud-icon-tile w-12 h-12">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Petty Cash Statement</h1>
+              <p className="text-sm text-muted-foreground">Record cash inflows & outflows — running balance is calculated automatically.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
+            <button onClick={() => setView('statement')} className={`sub-tab ${view === 'statement' ? 'sub-tab-active' : ''}`}>Statement</button>
+            <button onClick={() => setView('report')} className={`sub-tab ${view === 'report' ? 'sub-tab-active' : ''}`}>Report</button>
+          </div>
+        </div>
+
+        {/* single panel for all content */}
+        <div style={PANEL} className="overflow-hidden">
+          {/* summary row */}
+          <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5">
+            <StatCell label="Total Inflows" value={fmt(totalInflow)} color="#34d399" icon={<ArrowDownLeft className="w-3.5 h-3.5" />} />
+            <StatCell label="Total Outflows" value={fmt(totalOutflow)} color="#fb7185" icon={<ArrowUpRight className="w-3.5 h-3.5" />} />
+            <StatCell label="Closing Balance" value={fmt(closingBalance)} color="rgb(var(--panel-accent-rgb))" icon={<Wallet className="w-3.5 h-3.5" />} />
+          </div>
+
+          <div className="h-px bg-white/5" />
+
+          {/* STATEMENT VIEW — inline add form */}
+          {view === 'statement' && (
+            <>
+              <form onSubmit={addEntry} className="p-5">
+                <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2"><Plus className="w-4 h-4 text-[rgb(var(--panel-accent-rgb))]" /> Add Entry</h2>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Date</label>
+                    <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Description</label>
+                    <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Transaction description" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Type</label>
+                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }}>
+                      <option value="outflow">Outflow</option>
+                      <option value="inflow">Inflow</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">{form.type === 'inflow' ? 'Received From' : 'Paid To'}</label>
+                    <input type="text" value={form.type === 'inflow' ? form.received_from : form.paid_to} onChange={(e) => form.type === 'inflow' ? setForm({ ...form, received_from: e.target.value }) : setForm({ ...form, paid_to: e.target.value })} placeholder={form.type === 'inflow' ? 'Source' : 'Recipient'} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
+                  <div className="md:col-span-1">
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Amount</label>
+                    <input type="number" step="0.01" min="0" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0.00" required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <button type="submit" disabled={saving} className="clay-btn w-full flex items-center justify-center gap-2" style={{ padding: '11px 20px' }}>
+                      <Plus className="w-4 h-4" /> {saving ? 'Saving...' : 'Add Entry'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+
+              <div className="h-px bg-white/5" />
+            </>
+          )}
+
+          {/* REPORT VIEW — filters + export */}
+          {view === 'report' && (
+            <>
+              <div className="p-5 flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><CalendarRange className="w-3 h-3" /> From</label>
+                  <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="clay-input" style={{ padding: '9px 12px', fontSize: 13 }} />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">To</label>
+                  <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="clay-input" style={{ padding: '9px 12px', fontSize: 13 }} />
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Search className="w-3 h-3" /> Item</label>
+                  <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search description..." className="clay-input w-full" style={{ padding: '9px 12px', fontSize: 13 }} />
+                </div>
+                <ExportButtons data={reportRows} filename="petty-cash" columns={EXPORT_COLS} title="Petty Cash Statement" options={{ dateRange: dateRangeLabel }} />
+              </div>
+              <div className="h-px bg-white/5" />
+            </>
+          )}
+
+          {/* table */}
+          <div className="overflow-x-auto thin-scroll">
+            {rows === null ? (
+              <div className="p-10"><LoadingSpinner /></div>
+            ) : display.length === 0 ? (
+              <div className="p-10 text-center text-muted-foreground text-sm">{view === 'report' ? 'No entries match your filters.' : 'No entries yet — add your first transaction above.'}</div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    <th className="text-left font-semibold px-5 py-3">Date</th>
+                    <th className="text-left font-semibold px-5 py-3">Description</th>
+                    <th className="text-left font-semibold px-5 py-3">Party</th>
+                    <th className="text-right font-semibold px-5 py-3 text-emerald-400">Inflow</th>
+                    <th className="text-right font-semibold px-5 py-3 text-rose-400">Outflow</th>
+                    <th className="text-right font-semibold px-5 py-3 text-[rgb(var(--panel-accent-rgb))]">Running Balance</th>
+                    {view === 'statement' && <th className="px-5 py-3"></th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {display.map((r) => (
+                    <tr key={r.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums">{r.date}</td>
+                      <td className="px-5 py-3 text-white/80">{r.description || '—'}</td>
+                      <td className="px-5 py-3 text-white/60">{r.type === 'inflow' ? (r.received_from || '—') : (r.paid_to || '—')}</td>
+                      <td className="px-5 py-3 text-right text-emerald-400 tabular-nums">{r.inflow ? fmt(r.inflow) : '—'}</td>
+                      <td className="px-5 py-3 text-right text-rose-400 tabular-nums">{r.outflow ? fmt(r.outflow) : '—'}</td>
+                      <td className="px-5 py-3 text-right font-semibold text-white tabular-nums">{fmt(r.running_balance)}</td>
+                      {view === 'statement' && (
+                        <td className="px-5 py-3 text-right">
+                          <button onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-400 transition-colors" aria-label="Delete entry">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
       </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{form.type === 'inflow' ? 'From' : 'Paid To'}</Label><Input value={form.type === 'inflow' ? form.received_from : form.paid_to} onChange={e => update(form.type === 'inflow' ? 'received_from' : 'paid_to', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('notes')}</Label><Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} className="bg-background border-border" /></div>
-      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
   );
 }
