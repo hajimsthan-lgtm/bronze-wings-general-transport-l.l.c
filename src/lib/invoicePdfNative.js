@@ -375,15 +375,9 @@ function drawTableHeader(pdf, cols, y, invoiceType) {
   const isTrip = invoiceType === 'trip';
 
   pdf.setFont('times', 'bold');
-  if (isTrip) {
-    fc(pdf, [240, 240, 240]);
-    pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
-    tc(pdf, BLACK);
-  } else {
-    fc(pdf, [29, 63, 85]);
-    pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
-    tc(pdf, WHITE);
-  }
+  fc(pdf, [240, 240, 240]);
+  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
+  tc(pdf, BLACK);
   pdf.setFontSize(9);
 
   for (const col of cols) {
@@ -433,7 +427,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   const vCenter = y + rowH / 2 + 1;
 
-  pdf.setFontSize(9);
+  const fSize = invoiceType === 'monthly' ? 10 : 9;
+  pdf.setFontSize(fSize);
   tc(pdf, BLACK);
 
   // # column
@@ -460,15 +455,15 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
 
   // MONTH column (monthly only)
   if (invoiceType === 'monthly') {
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
+    pdf.setFont('times', 'bold');
+    pdf.setFontSize(fSize);
     pdf.text(getMonthYear(item.date || invoice.issue_date), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
   // DESCRIPTION column
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(fSize);
   const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
   for (let i = 0; i < descLines.length; i++) {
     pdf.text(descLines[i], descCol.x + 2, descStartY + i * lineH);
@@ -486,8 +481,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice) {
   }
 
   // Numeric columns — courier monospace
-  pdf.setFont('courier', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFont('courier', 'bold');
+  pdf.setFontSize(fSize);
   if (invoiceType === 'standard') {
     const stdNums = [unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < stdNums.length; i++) {
