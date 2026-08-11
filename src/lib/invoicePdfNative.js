@@ -614,7 +614,8 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   );
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
-  const contentBottom = PAGE_H - MARGIN;
+  // Leave room for the footer banner (5mm at y=288) — stop table above it
+  const contentBottom = FOOTER_BOTTOM - 5 - 2; // = 286
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
@@ -1011,9 +1012,6 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     const sigY = FOOTER_TOP - sigH - 2;
     drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
 
-    // Footer banner at bottom
-    drawFooterBanners(pdf);
-
   } else {
     // ══ STANDARD / MONTHLY LAYOUT (same as trip model) ══
 
@@ -1037,15 +1035,15 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     const sigH = 30;
     const sigY = FOOTER_TOP - sigH - 2;
     drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
-
-    // Footer banner at bottom
-    drawFooterBanners(pdf);
   }
 
-  // ══ PAGE NUMBERS (Page No X of Y) ══
+  // ══ FOOTER BANNER + PAGE NUMBERS (on every page) ══
   const pageCount = pdf.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     pdf.setPage(i);
+    // Footer banner — "WE PROVIDE ALL KINDS..." on every page
+    drawFooterBanners(pdf);
+    // Page number
     pdf.setFont('times', 'normal');
     pdf.setFontSize(9);
     tc(pdf, GRAY);
