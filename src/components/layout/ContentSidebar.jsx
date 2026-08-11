@@ -37,6 +37,7 @@ const navItems = [
     children: [
       { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
       { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
+      { key: 'invoice_creator', label: 'Invoices', path: '/invoice-creator', icon: FileText },
     ],
   },
 ];

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { getCompanySettings } from '@/lib/companySettings';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Printer, Trash2, FileText, ClipboardList } from 'lucide-react';
@@ -13,6 +14,11 @@ export default function InvoiceHistory() {
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['invoiceRecords'],
     queryFn: () => base44.entities.InvoiceRecord.list('-date', 200),
+  });
+
+  const { data: settings = {} } = useQuery({
+    queryKey: ['companySettings'],
+    queryFn: getCompanySettings,
   });
 
   const handleDelete = async (rec) => {
@@ -51,16 +57,27 @@ export default function InvoiceHistory() {
     thead tr{background:#1e40af;color:#fff}
     th{padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
     @media print{body{padding:24px}}</style></head><body>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:16px;border-bottom:3px solid #1e40af">
-      <div><h1 style="font-size:20px;font-weight:800;color:#1e40af">DrivingLicense Typing Services LLC</h1>
-      <p style="color:#6b7280;font-size:11px;margin-top:2px">Abu Dhabi, United Arab Emirates</p>
-      <p style="color:#6b7280;font-size:11px">+971 502535289 · Drivemetyping@gmail.com</p></div>
-      <div style="text-align:right">
-        <div style="background:#1e40af;color:#fff;font-size:15px;font-weight:700;padding:5px 16px;border-radius:6px;display:inline-block;margin-bottom:8px">${label}</div>
-        <p style="font-size:11px;color:#6b7280">No: <strong style="color:#111">${rec.number}</strong></p>
-        <p style="font-size:11px;color:#6b7280">Date: <strong style="color:#111">${moment(rec.date).format('DD MMM YYYY')}</strong></p>
-        ${rec.due_date ? `<p style="font-size:11px;color:#6b7280">Due: <strong style="color:#e11d48">${moment(rec.due_date).format('DD MMM YYYY')}</strong></p>` : ''}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding:10px 14px;background:#FDFBF0;border:2px solid #633C1A;border-radius:8px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        ${settings.logo_url ? `<img src="${settings.logo_url}" style="height:56px;width:56px;border-radius:50%;object-fit:cover" />` : ''}
+        <div>
+          <div style="font-size:11px;color:#633C1A;font-weight:600">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+          <h1 style="font-size:22px;font-weight:800;color:#633C1A;letter-spacing:2px;font-family:Georgia,serif">BRONZE WINGS</h1>
+          <p style="font-size:10px;font-weight:600;color:#633C1A;letter-spacing:1px">GENERAL TRANSPORT - L.L.C</p>
+        </div>
       </div>
+      <div style="text-align:right">
+        <div style="background:#8B3A2E;color:#fff;font-size:15px;font-weight:700;padding:5px 16px;border-radius:6px;display:inline-block;margin-bottom:8px">${label}</div>
+        ${settings.trn ? `<p style="font-size:10px;color:#633C1A;font-weight:600;margin-bottom:4px">TRN: ${settings.trn}</p>` : ''}
+        <p style="font-size:11px;color:#633C1A">Mob: ${settings.phone1 || ''}${settings.phone2 ? ' · ' + settings.phone2 : ''}</p>
+        <p style="font-size:11px;color:#633C1A">${settings.email || ''}</p>
+        <p style="font-size:11px;color:#633C1A">${settings.address || ''}</p>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:24px;margin-bottom:16px">
+      <p style="font-size:11px;color:#6b7280">No: <strong style="color:#111">${rec.number}</strong></p>
+      <p style="font-size:11px;color:#6b7280">Date: <strong style="color:#111">${moment(rec.date).format('DD MMM YYYY')}</strong></p>
+      ${rec.due_date ? `<p style="font-size:11px;color:#6b7280">Due: <strong style="color:#e11d48">${moment(rec.due_date).format('DD MMM YYYY')}</strong></p>` : ''}
     </div>
     <div style="margin-bottom:20px">
       <p style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:4px">Bill To</p>
@@ -82,13 +99,15 @@ export default function InvoiceHistory() {
       </tr></tbody></table>
     </div>
     ${rec.notes ? `<div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb"><p style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:4px">Notes</p><p style="font-size:11px;color:#374151">${rec.notes}</p></div>` : ''}
-    <div style="margin-top:20px;padding:10px 14px;background:#f0f7ff;border-radius:8;border:1px solid #bfdbfe">
-      <p style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:6px">Bank Details</p>
-      <p style="font-size:11px;color:#374151">Bank: ADCB Abu Dhabi Commercial Bank</p>
-      <p style="font-size:11px;color:#374151">Account: 13545851920001 · IBAN: AE680030013545851920001</p>
+    <div style="margin-top:20px;padding:10px 14px;background:#FDFBF0;border-radius:8;border:1px solid #633C1A">
+      <p style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#633C1A;margin-bottom:6px;font-weight:700">Bank Details</p>
+      <p style="font-size:11px;color:#374151">Bank: ${settings.bank_name || '—'}</p>
+      <p style="font-size:11px;color:#374151">Account: ${settings.bank_account_no || '—'} · IBAN: ${settings.bank_iban || '—'}</p>
     </div>
-    <div style="margin-top:40px;border-top:1px solid #e5e7eb;padding-top:10px">
-      <p style="text-align:center;font-size:10px;color:#9ca3af">DrivingLicense Typing Services LLC · Abu Dhabi, UAE</p>
+    <div style="margin-top:24px">
+      <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px">
+        ${settings.tagline || 'We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services'}
+      </div>
       <p style="text-align:right;font-size:9px;color:#d1d5db;margin-top:4px">Prepared by: ${rec.prepared_by || ''}</p>
     </div>
     </body></html>`);

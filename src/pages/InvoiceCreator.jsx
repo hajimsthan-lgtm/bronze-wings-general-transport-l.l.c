@@ -9,20 +9,23 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Plus, Trash2, Printer, FileText, ClipboardList, History } from 'lucide-react';
 import moment from 'moment';
 import InvoiceHistory from '@/components/invoices/InvoiceHistory';
+import { getCompanySettings } from '@/lib/companySettings';
 
-const COMPANY = {
-  name: 'DrivingLicense Typing Services LLC',
-  short: 'DLTS',
-  address: 'Abu Dhabi, United Arab Emirates',
-  phone: '+971 502535289',
-  email: 'Drivemetyping@gmail.com',
-};
-
-const BANK = {
-  bank: 'ADCB Abu Dhabi Commercial Bank',
-  name: 'Driving License Typing Services LLC',
-  account: '13545851920001',
-  iban: 'AE680030013545851920001',
+const BRONZE_DEFAULTS = {
+  company_name: 'Bronze Wings General Transport L.L.C',
+  tagline: 'We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services',
+  address: 'M-6, Mussafah, Abu Dhabi, UAE',
+  phone1: '050-8655601',
+  phone2: '050-6816879',
+  email: 'hire@bronzewings.ae',
+  website: 'www.bronzewings.ae',
+  trn: '100567890123456',
+  logo_url: 'https://media.base44.com/images/public/6a4bb0cd26acd23dab1111c4/359e600d7_98ac009f-e0ee-449f-bece-907c49f2e5e0.png',
+  bank_name: 'ADCB',
+  bank_account_title: 'Bronze Wings General Transport L.L.C',
+  bank_account_no: '13545851920001',
+  bank_iban: 'AE680030013545851920001',
+  bank_branch: 'Mussafah, Abu Dhabi',
 };
 
 const emptyItem = () => ({ description: '', qty: 1, price: 0 });
@@ -54,6 +57,11 @@ function DocForm({ type }) {
   const { data: transactions = [] } = useQuery({
     queryKey: ['transactions-for-invoice'],
     queryFn: () => base44.entities.Transaction.list('-date', 1000),
+  });
+
+  const { data: settings = BRONZE_DEFAULTS } = useQuery({
+    queryKey: ['companySettings'],
+    queryFn: getCompanySettings,
   });
 
   const [showSignModal, setShowSignModal] = useState(false);
@@ -196,7 +204,7 @@ function DocForm({ type }) {
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
         body { background:#fff; color:#111; padding:40px; font-size:13px; }
         table { width:100%; border-collapse:collapse; margin-bottom:24px; }
-        thead tr { background:#1e40af; color:#fff; }
+        thead tr { background:#1D3F55; color:#fff; }
         th { padding:10px 12px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
         td { padding:10px 12px; border-bottom:1px solid #e5e7eb; font-size:13px; }
         tr:nth-child(even) td { background:#f9fafb; }
@@ -357,19 +365,30 @@ function DocForm({ type }) {
       {/* Live Preview */}
       <div className="rounded-xl border border-border/50 bg-white overflow-auto max-h-[85vh] shadow-2xl">
         <div ref={printRef} className="p-8 text-[#111] min-h-[600px]" style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}>
-          {/* Header */}
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:28, paddingBottom:16, borderBottom:'3px solid #1e40af' }}>
-            <div>
-              <h1 style={{ fontSize:20, fontWeight:800, color:'#1e40af', letterSpacing:-0.5 }}>{COMPANY.name}</h1>
-              <p style={{ color:'#6b7280', fontSize:11, marginTop:2 }}>{COMPANY.address}</p>
-              <p style={{ color:'#6b7280', fontSize:11 }}>{COMPANY.phone} · {COMPANY.email}</p>
+          {/* Header — Bronze Wings Letterhead */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:28, paddingBottom:12, borderBottom:'3px solid #8B3A2E', background:'#FDFBF0', padding:'10px 14px', borderRadius:8, border:'2px solid #633C1A' }}>
+            <div style={{ display:'flex', gap:12, alignItems:'flex-start' }}>
+              {settings.logo_url && <img src={settings.logo_url} crossOrigin="anonymous" style={{ height:56, width:56, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} />}
+              <div>
+                <div style={{ fontSize:11, color:'#633C1A', fontWeight:600, lineHeight:1.3 }}>الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+                <h1 style={{ fontSize:22, fontWeight:800, color:'#633C1A', letterSpacing:2, fontFamily:'Georgia, serif', lineHeight:1.1, marginTop:2 }}>BRONZE WINGS</h1>
+                <p style={{ fontSize:10, fontWeight:600, color:'#633C1A', letterSpacing:1, marginTop:2 }}>GENERAL TRANSPORT - L.L.C</p>
+              </div>
             </div>
             <div style={{ textAlign:'right' }}>
-              <div style={{ background:'#1e40af', color:'#fff', fontSize:15, fontWeight:700, padding:'5px 16px', borderRadius:6, display:'inline-block', marginBottom:8 }}>{label.toUpperCase()}</div>
-              <p style={{ fontSize:11, color:'#6b7280' }}>No: <strong style={{ color: doc.number ? '#111' : '#9ca3af' }}>{doc.number || `${type === 'invoice' ? 'INV' : 'QUO'}-${moment().format('YYYYMM')}-XXXX`}</strong></p>
-              <p style={{ fontSize:11, color:'#6b7280' }}>Date: <strong style={{ color:'#111' }}>{moment(doc.date).format('DD MMM YYYY')}</strong></p>
-              {isInvoice && <p style={{ fontSize:11, color:'#6b7280' }}>Due: <strong style={{ color:'#e11d48' }}>{moment(doc.due_date).format('DD MMM YYYY')}</strong></p>}
+              <div style={{ background:'#8B3A2E', color:'#fff', fontSize:15, fontWeight:700, padding:'5px 16px', borderRadius:6, display:'inline-block', marginBottom:8 }}>{label.toUpperCase()}</div>
+              {settings.trn && <p style={{ fontSize:10, color:'#633C1A', fontWeight:600, marginBottom:4 }}>TRN: {settings.trn}</p>}
+              <p style={{ fontSize:11, color:'#633C1A', lineHeight:1.5 }}>Mob: {settings.phone1}{settings.phone2 ? ` · ${settings.phone2}` : ''}</p>
+              <p style={{ fontSize:11, color:'#633C1A' }}>{settings.email}</p>
+              <p style={{ fontSize:11, color:'#633C1A' }}>{settings.address}</p>
+              {settings.website && <p style={{ fontSize:11, color:'#633C1A' }}>{settings.website}</p>}
             </div>
+          </div>
+          {/* Doc meta row */}
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:24, marginBottom:16 }}>
+            <p style={{ fontSize:11, color:'#6b7280' }}>No: <strong style={{ color: doc.number ? '#111' : '#9ca3af' }}>{doc.number || `${type === 'invoice' ? 'INV' : 'QUO'}-${moment().format('YYYYMM')}-XXXX`}</strong></p>
+            <p style={{ fontSize:11, color:'#6b7280' }}>Date: <strong style={{ color:'#111' }}>{moment(doc.date).format('DD MMM YYYY')}</strong></p>
+            {isInvoice && <p style={{ fontSize:11, color:'#6b7280' }}>Due: <strong style={{ color:'#e11d48' }}>{moment(doc.due_date).format('DD MMM YYYY')}</strong></p>}
           </div>
 
           {/* Bill To */}
@@ -383,7 +402,7 @@ function DocForm({ type }) {
           {/* Items Table */}
           <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:20 }}>
             <thead>
-              <tr style={{ background:'#1e40af', color:'#fff' }}>
+              <tr style={{ background:'#1D3F55', color:'#fff' }}>
                 <th style={{ padding:'8px 10px', textAlign:'left', fontSize:10, textTransform:'uppercase', letterSpacing:0.5 }}>#</th>
                 <th style={{ padding:'8px 10px', textAlign:'left', fontSize:10, textTransform:'uppercase', letterSpacing:0.5 }}>Description</th>
                 <th style={{ padding:'8px 10px', textAlign:'center', fontSize:10, textTransform:'uppercase', letterSpacing:0.5 }}>Qty</th>
@@ -408,9 +427,9 @@ function DocForm({ type }) {
           <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:24 }}>
             <table style={{ width:240 }}>
               <tbody>
-                <tr style={{ borderTop:'2px solid #1e40af' }}>
-                  <td style={{ padding:'8px 8px', fontSize:14, fontWeight:700, color:'#1e40af' }}>TOTAL</td>
-                  <td style={{ padding:'8px 8px', fontSize:14, fontWeight:700, color:'#1e40af', textAlign:'right' }}>AED {total.toFixed(2)}</td>
+                <tr style={{ borderTop:'2px solid #8B3A2E' }}>
+                  <td style={{ padding:'8px 8px', fontSize:14, fontWeight:700, color:'#8B3A2E' }}>TOTAL</td>
+                  <td style={{ padding:'8px 8px', fontSize:14, fontWeight:700, color:'#8B3A2E', textAlign:'right' }}>AED {total.toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
@@ -425,25 +444,25 @@ function DocForm({ type }) {
           )}
 
           {/* Bank Details */}
-          <div style={{ marginTop:20, padding:'10px 14px', background:'#f0f7ff', borderRadius:8, border:'1px solid #bfdbfe' }}>
-            <p style={{ fontSize:9, textTransform:'uppercase', letterSpacing:1, color:'#9ca3af', marginBottom:6 }}>Payment / Bank Details</p>
+          <div style={{ marginTop:20, padding:'10px 14px', background:'#FDFBF0', borderRadius:8, border:'1px solid #633C1A' }}>
+            <p style={{ fontSize:9, textTransform:'uppercase', letterSpacing:1, color:'#633C1A', marginBottom:6, fontWeight:700 }}>Payment / Bank Details</p>
             <table style={{ fontSize:11, color:'#374151', borderCollapse:'collapse', width:'100%' }}>
               <tbody>
                 <tr>
                   <td style={{ paddingRight:16, color:'#6b7280', paddingBottom:3, width:120 }}>Bank</td>
-                  <td style={{ fontWeight:600 }}>{BANK.bank}</td>
+                  <td style={{ fontWeight:600 }}>{settings.bank_name || '—'}</td>
                 </tr>
                 <tr>
                   <td style={{ paddingRight:16, color:'#6b7280', paddingBottom:3 }}>Account Name</td>
-                  <td style={{ fontWeight:600 }}>{BANK.name}</td>
+                  <td style={{ fontWeight:600 }}>{settings.bank_account_title || settings.company_name || '—'}</td>
                 </tr>
                 <tr>
                   <td style={{ paddingRight:16, color:'#6b7280', paddingBottom:3 }}>Account No.</td>
-                  <td style={{ fontWeight:600, fontFamily:'monospace' }}>{BANK.account}</td>
+                  <td style={{ fontWeight:600, fontFamily:'monospace' }}>{settings.bank_account_no || '—'}</td>
                 </tr>
                 <tr>
                   <td style={{ paddingRight:16, color:'#6b7280' }}>IBAN</td>
-                  <td style={{ fontWeight:600, fontFamily:'monospace' }}>{BANK.iban}</td>
+                  <td style={{ fontWeight:600, fontFamily:'monospace' }}>{settings.bank_iban || '—'}</td>
                 </tr>
               </tbody>
             </table>
@@ -460,8 +479,10 @@ function DocForm({ type }) {
           )}
 
           {/* Footer */}
-          <div style={{ marginTop:40, borderTop:'1px solid #e5e7eb', paddingTop:10 }}>
-            <p style={{ textAlign:'center', fontSize:10, color:'#9ca3af' }}>{COMPANY.name} · {COMPANY.address} · {COMPANY.email}</p>
+          <div style={{ marginTop:24, paddingTop:0 }}>
+            <div style={{ background:'#FDFBF0', border:'2px solid #633C1A', color:'#633C1A', textAlign:'center', padding:'10px 14px', fontSize:12, fontWeight:700, textTransform:'uppercase', letterSpacing:1 }}>
+              {settings.tagline || 'We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services'}
+            </div>
             <p style={{ textAlign:'right', fontSize:9, color:'#d1d5db', marginTop:4 }}>Prepared by: {preparedBy}</p>
           </div>
         </div>
@@ -479,7 +500,7 @@ export default function InvoiceCreator() {
         </div>
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Invoice & Quotation</h1>
-          <p className="text-sm text-white/40">Create professional documents for DrivingLicense Typing Services LLC</p>
+          <p className="text-sm text-white/40">Create professional invoices and quotations with Bronze Wings letterhead</p>
         </div>
       </div>
 
