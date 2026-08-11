@@ -621,8 +621,9 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   );
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
-  // Leave room for the footer banner (now at y=284) — stop table above it
-  const contentBottom = PAGE_H - MARGIN - 5 - 2; // = 282
+  // Leave room for the footer banner + page number (page number at y=282, banner at y=284)
+  // Stop table at 278 so up to 18 rows fit on one page without overlapping the page number
+  const contentBottom = 278;
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
