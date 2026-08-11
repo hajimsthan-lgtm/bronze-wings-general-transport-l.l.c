@@ -363,6 +363,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   tc(pdf, BLACK);
   pdf.text(`INVOICE #: ${refNumber}`, rightX, y + 5, { align: 'right' });
   pdf.text(`INVOICE DATE: ${invoiceDate}`, rightX, y + 9, { align: 'right' });
+  pdf.text(`LPO Ref #: ${str(invoice.lpo_ref || '—')}`, rightX, y + 13, { align: 'right' });
 
   return y + h + 2;
 }

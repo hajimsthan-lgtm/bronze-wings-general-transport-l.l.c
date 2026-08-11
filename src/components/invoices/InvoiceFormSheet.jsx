@@ -47,7 +47,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     client_name: '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
     invoice_number: '', issue_date: new Date().toISOString().split('T')[0],
     due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
-    trip_id: '', line_items: [{ ...emptyItem }],
+    trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
   });
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         client_name: defaultClientName || '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
         invoice_number: '', issue_date: new Date().toISOString().split('T')[0],
         due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
-        trip_id: '', line_items: [{ ...emptyItem }],
+        trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
       });
       setReceivePayment(false);
       Promise.all([generateInvoiceNumber(), getCompanySettings()]).then(([num, settings]) => {
@@ -286,6 +286,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Payment Terms</Label>
                   <Input value={form.payment_terms} onChange={e => update('payment_terms', e.target.value)} className={inputCls} />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs text-muted-foreground mb-1.5">LPO Ref #</Label>
+                  <Input value={form.lpo_ref} onChange={e => update('lpo_ref', e.target.value)} placeholder="Enter LPO reference number" className={inputCls} />
                 </div>
               </div>
             </Section>

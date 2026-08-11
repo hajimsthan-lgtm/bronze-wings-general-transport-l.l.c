@@ -164,6 +164,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       <div style="font-size:10.5pt;color:#000;line-height:1.9;">
         <div><strong>INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong>INVOICE DATE:</strong> ${invoiceDate}</div>
+        ${invoice.lpo_ref ? `<div><strong>LPO Ref #:</strong> ${esc(invoice.lpo_ref)}</div>` : '<div><strong>LPO Ref #:</strong> —</div>'}
         <div><strong>WORKING DATE:</strong> ${workingDate}</div>
       </div>
     </div>
@@ -369,6 +370,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-size:11px;line-height:1.7;color:#000;">
         <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>
+        <div><strong style="color:#444;font-weight:700;">LPO Ref #:</strong> ${esc(invoice.lpo_ref || '—')}</div>
       </div>
     </div>
   </div>
@@ -573,6 +575,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
       <div style="font-size:10.5px;line-height:1.65;color:#000;">
         <div><strong style="color:#444;font-weight:700;">INVOICE #:</strong> ${esc(refNumber)}</div>
         <div><strong style="color:#444;font-weight:700;">INVOICE DATE:</strong> ${invoiceDate}</div>
+        <div><strong style="color:#444;font-weight:700;">LPO Ref #:</strong> ${esc(invoice.lpo_ref || '—')}</div>
       </div>
     </div>
   </div>

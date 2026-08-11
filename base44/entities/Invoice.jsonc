@@ -29,6 +29,9 @@
     "reg_no": {
       "type": "string"
     },
+    "lpo_ref": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [
