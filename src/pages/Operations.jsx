@@ -165,6 +165,10 @@ export default function Operations() {
         (trip.id || '').toLowerCase().slice(-6).includes(q);
     }
     return true;
+  }).sort((a, b) => {
+    const da = new Date(a.trip_date || a.created_date).getTime();
+    const db = new Date(b.trip_date || b.created_date).getTime();
+    return db - da;
   }), [trips, dateFrom, dateTo, tripFilter, search]);
 
   const filteredContracts = useMemo(() => contracts.filter((c) => {
