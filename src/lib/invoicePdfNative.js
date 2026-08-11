@@ -838,19 +838,19 @@ function drawTermsConditions(pdf, invoiceType) {
 // DRAW: FOOTER BANNERS (anchored to bottom of last page)
 // ═══════════════════════════════════════════════════════════
 function drawFooterBanners(pdf) {
-  // Separate bordered box — same inset as the header letterhead (CONTENT_X / CONTENT_W)
-  // Position near the main margin border with a small gap (not touching)
-  const bw = CONTENT_W;
+  // Separate bordered box — closer to the main margin border on both sides
+  const fbX = BORDER_POS + 2;
+  const fbW = PAGE_W - 2 * (BORDER_POS + 2);
   const bh = 7;
   const by = FOOTER_BOTTOM - 2 - bh;
-  fc(pdf, [253, 251, 240]); // CREAM bg — same as header
-  pdf.rect(CONTENT_X, by, bw, bh, 'F');
-  dc(pdf, [99, 60, 26]); // BROWN border — same as header
-  pdf.setLineWidth(0.6);  // same weight as header
-  pdf.rect(CONTENT_X, by, bw, bh);
+  fc(pdf, [253, 251, 240]); // CREAM bg
+  pdf.rect(fbX, by, fbW, bh, 'F');
+  dc(pdf, [99, 60, 26]); // BROWN border
+  pdf.setLineWidth(0.6);
+  pdf.rect(fbX, by, fbW, bh);
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(8);
-  tc(pdf, [94, 84, 74]); // greyish-brown — matches reference
+  pdf.setFontSize(9);
+  tc(pdf, [0, 0, 0]); // black text
   pdf.text('We provide all kinds of general and refrigerated transportation and heavy equipment rental services', PAGE_W / 2, by + 4.5, { align: 'center' });
 }
 
