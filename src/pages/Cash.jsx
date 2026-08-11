@@ -16,6 +16,15 @@ const PANEL = {
 
 const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
 
+const fmtDate = (d) => {
+  if (!d) return '—';
+  if (d.includes('T')) {
+    const [date, time] = d.split('T');
+    return `${date} · ${time.slice(0, 5)}`;
+  }
+  return d;
+};
+
 const EXPORT_COLS = [
   { key: 'date', label: 'Date' },
   { key: 'recipient', label: 'Recipient' },
@@ -40,7 +49,7 @@ function StatCell({ label, value, color, icon }) {
 export default function Cash() {
   const [rows, setRows] = useState(null);
   const [form, setForm] = useState({
-    date: new Date().toISOString().slice(0, 10),
+    date: new Date().toISOString().slice(0, 16),
     recipient: '',
     receipt_number: '',
     description: '',
@@ -77,15 +86,16 @@ export default function Cash() {
 
   // report view: apply filters then recompute running balance
   const filtered = statementRows.filter((r) => {
-    if (filterFrom && (r.date || '') < filterFrom) return false;
-    if (filterTo && (r.date || '') > filterTo) return false;
+    const rDate = (r.date || '').slice(0, 10);
+    if (filterFrom && rDate < filterFrom) return false;
+    if (filterTo && rDate > filterTo) return false;
     if (q && !((r.description || '').toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
   let rb = 0;
   const reportRows = filtered.map((r) => {
     rb += (Number(r.inflow) || 0) - (Number(r.outflow) || 0);
-    return { ...r, recipient: r.type === 'inflow' ? (r.received_from || '') : (r.paid_to || ''), running_balance: rb };
+    return { ...r, date: fmtDate(r.date), recipient: r.type === 'inflow' ? (r.received_from || '') : (r.paid_to || ''), running_balance: rb };
   });
 
   const display = view === 'report' ? reportRows : statementRows;
@@ -115,7 +125,7 @@ export default function Cash() {
         received_from: !isOutflow ? form.recipient : '',
         paid_to: isOutflow ? form.recipient : '',
       });
-      setForm({ date: new Date().toISOString().slice(0, 10), recipient: '', receipt_number: '', description: '', inflow: '', outflow: '' });
+      setForm({ date: new Date().toISOString().slice(0, 16), recipient: '', receipt_number: '', description: '', inflow: '', outflow: '' });
       await load();
     } finally {
       setSaving(false);
@@ -166,7 +176,7 @@ export default function Cash() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-2">
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Date</label>
-                    <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                    <input type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Recipient</label>
@@ -232,25 +242,25 @@ export default function Cash() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <th className="text-left font-semibold px-5 py-3">Date</th>
+                    <th className="text-left font-semibold px-5 py-3 w-32">Date</th>
                     <th className="text-left font-semibold px-5 py-3">Recipient</th>
-                    <th className="text-left font-semibold px-5 py-3">Receipt #</th>
+                    <th className="text-left font-semibold px-5 py-3 w-20">Receipt #</th>
                     <th className="text-left font-semibold px-5 py-3">Description</th>
-                    <th className="text-right font-semibold px-5 py-3 text-emerald-400">Inflow</th>
-                    <th className="text-right font-semibold px-5 py-3 text-rose-400">Outflow</th>
+                    <th className="text-right font-semibold px-5 py-3 text-emerald-400 w-44">Inflow</th>
+                    <th className="text-right font-semibold px-5 py-3 text-rose-400 w-44">Outflow</th>
                     <th className="text-right font-semibold px-5 py-3 text-[rgb(var(--panel-accent-rgb))]">Running Balance</th>
-                    {view === 'statement' && <th className="px-5 py-3"></th>}
+                    {view === 'statement' && <th className="px-5 py-3 w-10"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {display.map((r) => (
                     <tr key={r.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums">{r.date}</td>
+                      <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums text-xs">{fmtDate(r.date)}</td>
                       <td className="px-5 py-3 text-white/80">{r.type === 'inflow' ? (r.received_from || '—') : (r.paid_to || '—')}</td>
-                      <td className="px-5 py-3 text-white/60 font-mono text-xs">{r.receipt_number || '—'}</td>
+                      <td className="px-5 py-3 text-white/60 font-mono text-xs whitespace-nowrap">{r.receipt_number || '—'}</td>
                       <td className="px-5 py-3 text-white/80">{r.description || '—'}</td>
-                      <td className="px-5 py-3 text-right text-emerald-400 tabular-nums">{r.inflow ? fmt(r.inflow) : '—'}</td>
-                      <td className="px-5 py-3 text-right text-rose-400 tabular-nums">{r.outflow ? fmt(r.outflow) : '—'}</td>
+                      <td className="px-5 py-3 text-right text-emerald-400 tabular-nums text-base font-semibold">{r.inflow ? fmt(r.inflow) : '—'}</td>
+                      <td className="px-5 py-3 text-right text-rose-400 tabular-nums text-base font-semibold">{r.outflow ? fmt(r.outflow) : '—'}</td>
                       <td className="px-5 py-3 text-right font-semibold text-white tabular-nums">{fmt(r.running_balance)}</td>
                       {view === 'statement' && (
                         <td className="px-5 py-3 text-right">
