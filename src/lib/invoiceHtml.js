@@ -399,39 +399,38 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <span style="font-size:12px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.8px;">${numberToWords(total).toUpperCase()}</span>
   </div>
 
-  <!-- Bottom Section -->
-  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:14px 28px;flex:1;align-items:flex-start;margin-top:16px;">
-    <!-- Bank Details -->
-    <div style="flex:1;padding-right:20px;">
-      <div style="font-size:11.5px;font-weight:800;color:${MAROON};text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid ${MAROON};display:inline-block;">Bank Details</div>
+  <!-- Spacer -->
+  <div style="flex:1 1 auto;min-height:30px;"></div>
+
+  <!-- Bank Details + Terms & Conditions (two columns) -->
+  <div style="position:relative;z-index:1;margin:0 28px;border-top:1px solid #1D3F55;padding-top:12px;display:flex;gap:30px;">
+    <div style="flex:1;padding-right:15px;">
+      <div style="font-size:11px;font-weight:800;color:#1D3F55;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Bank Details</div>
       ${bankHtml}
     </div>
-    <!-- Signature Area -->
-    <div style="flex:1.2;display:flex;flex-direction:column;">
-      <div style="display:flex;gap:25px;justify-content:space-between;">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
-          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
-          <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
-          <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #999;margin-bottom:5px;"></div>
-          <div style="font-size:9px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
-        </div>
-      </div>
-      <div style="font-size:10.5px;color:#555;margin-top:10px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
+    <div style="flex:1;padding-left:15px;border-left:1px solid #E0E0E0;">
+      <div style="font-size:11px;font-weight:800;color:#1D3F55;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Terms &amp; Conditions</div>
+      <div style="font-size:10px;color:#333;line-height:1.7;">Payment Terms : 60 days from receipt of the tax invoice.</div>
     </div>
   </div>
 
-  <!-- Terms & Conditions -->
-  <div style="position:relative;z-index:1;margin-top:14px;border:1px solid #1D3F55;">
-    <div style="background:#1D3F55;color:#fff;font-weight:bold;font-size:10pt;text-transform:uppercase;letter-spacing:1px;padding:5px 14px;">Terms &amp; Conditions</div>
-    <div style="padding:6px 14px;font-size:9.5pt;color:#333;line-height:1.6;">Payment Terms : 60 days from receipt of the tax invoice.</div>
+  <!-- Signature Section -->
+  <div id="footer-block" style="position:relative;z-index:1;display:flex;padding:20px 28px 15px 28px;gap:25px;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;">FOR<br>BRONZE WINGS<br>GENERAL TRANSPORT L.L.C</div>
+      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #1D3F55;margin-bottom:5px;"></div>
+      <div style="font-size:9px;color:#1D3F55;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Authorized Signature &amp; Stamp</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:10.5px;font-weight:700;color:#000;text-align:center;margin-bottom:14px;line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;min-height:36px;overflow-wrap:break-word;word-break:break-word;">FOR<br>${esc(billName)}</div>
+      <div style="width:100%;max-width:150px;height:40px;border-bottom:1px solid #1D3F55;margin-bottom:5px;"></div>
+      <div style="font-size:9px;color:#1D3F55;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;text-align:center;">Receiver Sign &amp; Stamp</div>
+      <div style="font-size:10px;color:#555;margin-top:6px;text-align:center;">Mobile: ${esc(s.phone1 || '050-8655601')}</div>
+    </div>
   </div>
 
   <!-- Footer Banner -->
-  <div style="position:relative;z-index:1;margin-top:auto;padding-top:14px;">
+  <div style="position:relative;z-index:1;">
     <div style="background:#FDFBF0;border:2px solid #633C1A;color:#633C1A;text-align:center;padding:10px;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;">
       We Provide All Kinds of General and Refrigerated Transportation and Heavy Equipment Rental Services
     </div>
