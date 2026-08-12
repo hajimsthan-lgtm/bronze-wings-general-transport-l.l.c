@@ -67,7 +67,7 @@ export default function Expenses() {
   const approvedCount = filtered.filter((e) => e.status === 'approved').length;
   const analytics = [
     { label: 'Total', value: formatCurrency(totalAmount), icon: Wallet, color: '#f97316' },
-    { label: 'Expenses', value: filtered.length, icon: Receipt, color: '#1ED760' },
+    { label: 'Expenses', value: filtered.length, icon: Receipt, color: '#3b82f6' },
     { label: 'Pending', value: pendingCount, icon: Clock, color: '#f59e0b' },
     { label: 'Approved', value: approvedCount, icon: CheckCircle2, color: '#22c55e' },
   ];
