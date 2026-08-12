@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import VehicleCard from '@/components/admin/VehicleCard';
@@ -184,12 +184,9 @@ function VehiclesTab() {
         </>
       )}
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Vehicle</SheetTitle></SheetHeader>
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Register a new vehicle in the fleet">
           <VehicleForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vehicle.update(editItem.id, data); else await base44.entities.Vehicle.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      </EntityFormDialog>
     </div>
   );
 }

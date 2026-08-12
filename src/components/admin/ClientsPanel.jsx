@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ClientsAnalytics from '@/components/admin/ClientsAnalytics';
@@ -106,12 +106,9 @@ export default function ClientsPanel() {
         </>
       )}
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Client</SheetTitle></SheetHeader>
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Building2} title={`${editItem ? t('edit') : t('add_new')} Client`} subtitle="Add a new client company">
           <ClientForm editItem={editItem} onSave={async (data, existingId) => { if (existingId) await base44.entities.Client.update(existingId, data); else if (editItem) await base44.entities.Client.update(editItem.id, data); else await base44.entities.Client.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      </EntityFormDialog>
     </div>
   );
 }

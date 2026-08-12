@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Plus, Search, Receipt, MoreVertical, Pencil, Trash2, Wallet, Clock, CheckCircle2, LayoutGrid, List, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -267,9 +267,7 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-        <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Expense</SheetTitle></SheetHeader>
+    <EntityFormDialog open={open} onOpenChange={onOpenChange} icon={Receipt} title={`${editItem ? t('edit') : t('add_new')} Expense`} subtitle="Record a new expense transaction">
         <div className="space-y-4">
           <div><Label className="text-xs text-muted-foreground mb-1.5">Category</Label>
             <Select value={form.category} onValueChange={v => update('category', v)}>
@@ -297,7 +295,6 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
           <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 border-border">{t('cancel')}</Button>
           <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button>
         </div>
-      </SheetContent>
-    </Sheet>
+    </EntityFormDialog>
   );
 }

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import DriversAnalytics from '@/components/admin/DriversAnalytics';
 import DriverCard from '@/components/admin/DriverCard';
 import DriverListRow from '@/components/admin/DriverListRow';
@@ -130,12 +130,9 @@ function DriversTab() {
         </>
       )}
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Driver</SheetTitle></SheetHeader>
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Users} title={`${editItem ? t('edit') : t('add_new')} Driver`} subtitle="Register a new driver">
           <DriverForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Driver.update(editItem.id, data); else await base44.entities.Driver.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      </EntityFormDialog>
     </div>
   );
 }
