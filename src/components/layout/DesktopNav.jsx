@@ -80,6 +80,8 @@ export default function DesktopNav() {
             }
             <BrandName variant="desktop" />
           </Link>
+          <div className="w-px h-7 hidden lg:block" style={{ background: 'hsl(var(--border))' }} />
+          <PageTitleIndicator />
         </div>
 
         {/* Center cluster — sub-nav tiles */}
@@ -90,11 +92,8 @@ export default function DesktopNav() {
           </div>
         </div>
 
-        {/* Right controls — page title + dark glass circles */}
-        <div className="flex items-center gap-3">
-          <PageTitleIndicator />
-          <div className="w-px h-7 hidden lg:block" style={{ background: 'hsl(var(--border))' }} />
-          <div className="flex items-center gap-2" style={vanishStyle}>
+        {/* Right controls — dark glass circles */}
+        <div className="flex items-center gap-2" style={vanishStyle}>
             <GlobalDateFilter />
           <LiveClock />
           <AlertBell />
@@ -137,7 +136,6 @@ export default function DesktopNav() {
             
             <ArrowRight className="w-4 h-4" />
           </button>
-          </div>
         </div>
       </div>
     </nav>);
