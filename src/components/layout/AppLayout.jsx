@@ -15,7 +15,7 @@ export default function AppLayout() {
   const isMobile = useIsMobile();
   const railExpanded = useRailExpanded();
   const railCollapsed = useRailCollapsed();
-  const railWidth = railCollapsed ? 64 : 196;
+  const railWidth = railCollapsed ? 76 : 212;
   const headerLeft = railCollapsed ? 64 : 196;
 
   return (
