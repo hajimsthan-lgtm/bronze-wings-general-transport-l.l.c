@@ -7,7 +7,7 @@ import { useSyncExternalStore } from 'react';
 let visible = true;
 let dimming = false;
 let expanded = false;
-let collapsed = false;
+let collapsed = true;
 const listeners = new Set();
 
 const notify = () => listeners.forEach((l) => l());
