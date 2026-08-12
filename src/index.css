@@ -291,64 +291,64 @@
   }
 
   .theme-light {
-    /* ===== VextCRM Light — white bg, light grey surfaces, blue accent ===== */
+    /* ===== VextCRM Light — clean white, blue primary, amber accent ===== */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 220 14% 97%;           /* #f1f5f9 near-white */
-    --background-elevated: 0 0% 100%;      /* #ffffff */
-    --card: 0 0% 100%;                    /* #ffffff white cards */
-    --card-foreground: 222 47% 11%;       /* #1e293b dark slate */
-    --foreground: 222 47% 11%;            /* #1e293b dark slate */
-    --muted: 220 14% 94%;                 /* #e2e8f0 light grey */
-    --muted-foreground: 220 9% 46%;       /* #64748b medium grey */
+    --background: 220 20% 97%;
+    --background-elevated: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --foreground: 222 47% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 217 91% 50%;              /* #3b82f6 blue */
-    --primary-light: 217 91% 60%;
+    --primary: 217 91% 60%;
+    --primary-light: 217 91% 68%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 94%;
+    --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
-    --accent: 217 91% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 217 91% 50%;
-    --magenta: 217 91% 50%;
-    --success: 142 71% 40%;
-    --success-light: 142 71% 48%;
-    --warning: 38 92% 45%;
-    --danger: 0 72% 51%;
-    --border: 220 13% 88%;               /* #dcdfe5 light grey */
-    --input: 220 14% 96%;
-    --ring: 217 91% 50%;
+    --neon: 217 91% 60%;
+    --magenta: 217 91% 60%;
+    --success: 160 84% 39%;
+    --success-light: 160 84% 47%;
+    --warning: 43 96% 56%;
+    --danger: 0 84% 60%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
     --panel-accent-rgb: 59, 130, 246;
     --panel-accent2-rgb: 96, 165, 250;
     --surf-1-rgb: 255, 255, 255;
     --surf-2-rgb: 248, 250, 252;
-    --radius: 0.625rem;
-    --chart-1: 217 91% 50%;
-    --chart-2: 142 71% 40%;
-    --chart-3: 38 92% 45%;
-    --chart-4: 265 70% 55%;
-    --chart-5: 220 9% 46%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 217 91% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 95%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 13% 88%;
-    --sidebar-ring: 217 91% 50%;
+    --radius: 0.75rem;
+    --chart-1: 217 91% 60%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 43 96% 56%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 60%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
     --clay-bg: 220 14% 96%;
-    --clay-border: 220 13% 88%;
+    --clay-border: 220 13% 91%;
     --clay-shadow-dark: 220 14% 80%;
     --clay-shadow-light: 0 0% 100%;
 
-    --app-bg: #f1f5f9;
+    --app-bg: #f7f9fa;
     --panel-bg: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%);
     --panel-border-color: rgba(0,0,0,0.06);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.8);
