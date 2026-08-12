@@ -5,12 +5,10 @@ import {
   Truck, ChartColumn, UsersRound, Search,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
   FileSignature, FilePlus2, PanelLeftClose, PanelLeftOpen,
-  ChevronRight, Sparkles } from 'lucide-react';
+  ChevronRight } from 'lucide-react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { railVisibility, useRailCollapsed } from '@/lib/railVisibility';
 
-/* Sectioned sidebar model — search at top, grouped collapsible sections,
-   full-width icon+label rows, active row as a neon-bordered pill. */
 const navItems = [
   {
     key: 'operations', label: 'Operations', icon: Route, color: '#00f2c3',
@@ -42,8 +40,8 @@ const navItems = [
   }
 ];
 
-const RAIL_W = 232;
-const RAIL_W_COLLAPSED = 68;
+const RAIL_W = 236;
+const RAIL_W_COLLAPSED = 72;
 
 export default function ContentSidebar() {
   const { t } = useI18n();
@@ -60,7 +58,6 @@ export default function ContentSidebar() {
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
 
-  // Auto-expand the section containing the active route
   useEffect(() => {
     navItems.forEach((s) => {
       if (s.children.some((c) => isChildActive(c))) {
@@ -86,20 +83,17 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-0 z-[55] h-[calc(100dvh-42px)]">
       <aside
-        className="skeuo-sidebar relative flex flex-col h-full"
+        className="morph-sidebar relative flex flex-col h-full"
         style={{
           width,
           paddingTop: 18,
           paddingBottom: 14,
-          paddingLeft: collapsed ? 10 : 14,
-          paddingRight: collapsed ? 10 : 14,
+          paddingLeft: collapsed ? 12 : 14,
+          paddingRight: collapsed ? 12 : 14,
           gap: collapsed ? 10 : 12,
           overflow: 'visible',
           transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), padding 0.35s cubic-bezier(0.16,1,0.3,1)'
         }}>
-
-        {/* beveled right edge highlight */}
-        <span className="skeuo-sidebar-right-edge" />
 
         {/* company brand — click to navigate home */}
         <button
@@ -109,70 +103,72 @@ export default function ContentSidebar() {
           className="flex items-center gap-2.5 px-1 flex-shrink-0 transition-all duration-200"
           style={{ justifyContent: collapsed ? 'center' : 'flex-start', cursor: 'pointer' }}>
           {company?.logo_url ?
-            <div className="skeuo-brand-frame rounded-xl p-0.5 flex-shrink-0">
+            <div className="morph-tile rounded-xl p-0.5 flex-shrink-0">
               <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain" />
             </div> :
-            <div className="skeuo-brand-frame w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="morph-tile w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0">
               <span className="text-[11px] font-bold tracking-wide" style={{ color: 'hsl(var(--sidebar-primary))', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>BW</span>
             </div>
           }
-          <span className="text-[12.5px] font-bold tracking-wide leading-tight skeuo-emboss" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
+          <span className="text-[12.5px] font-bold tracking-wide leading-tight" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
             {company?.company_name || 'Bronze Wings'}
           </span>
         </button>
 
         {/* search */}
         {!collapsed && (
-          <div className="skeuo-search relative flex items-center rounded-xl" style={{ marginBottom: 2 }}>
+          <div className="morph-search relative flex items-center rounded-xl" style={{ marginBottom: 2 }}>
             <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search…"
-              className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all bg-transparent"
+              className="w-full h-9 rounded-xl text-xs pl-9 pr-3 transition-all bg-transparent"
               style={{ border: 'none', color: 'hsl(var(--foreground))', outline: 'none', boxShadow: 'none' }} />
-            <span className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none skeuo-tile" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              ⌘P
-            </span>
           </div>
         )}
         {collapsed && (
           <button
             onClick={() => railVisibility.setCollapsed(false)}
             aria-label="Search"
-            className="skeuo-search flex items-center justify-center w-full h-9 rounded-xl transition-all">
+            className="morph-search flex items-center justify-center w-full h-9 rounded-xl transition-all">
             <Search className="w-4 h-4" style={{ color: 'hsl(var(--muted-foreground))' }} />
           </button>
         )}
 
         <div
           className="relative flex-1 overflow-y-auto thin-scroll flex flex-col"
-          style={{ gap: collapsed ? 10 : 14 }}
+          style={{ gap: collapsed ? 0 : 12 }}
           onMouseLeave={() => setHovered(null)}>
 
-          {sections.map((section) => {
+          {sections.map((section, sIdx) => {
             const secCollapsed = collapsedSections[section.key] === true;
             const hasActive = section.children.some((c) => isChildActive(c));
             const sc = section.color || 'rgb(var(--panel-accent-rgb))';
             return (
-              <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 4 : 4 }}>
+              <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 6 : 4 }}>
+                {/* category boundary divider — visible when collapsed */}
+                {collapsed && sIdx > 0 && (
+                  <div className="morph-divider" style={{ margin: '2px 8px 6px', opacity: 0.7 }} />
+                )}
+
                 {/* collapsible section header */}
                 {!collapsed && (
                   <button
                     onClick={() => toggleSection(section.key)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 skeuo-nav-row"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 morph-row"
                     style={{
                       cursor: 'pointer',
                       border: 'none',
-                      background: hasActive ? `${sc}10` : 'transparent',
-                      boxShadow: hasActive ? `inset 0 0 0 1px ${sc}25` : 'none',
+                      background: hasActive ? `${sc}12` : undefined,
+                      boxShadow: hasActive ? `inset 0 0 0 1px ${sc}30` : undefined,
                     }}>
                     <span className="flex items-center justify-center rounded-md flex-shrink-0" style={{ width: 18, height: 18 }}>
                       <section.icon
                         strokeWidth={2.2}
                         style={{ width: 13, height: 13, color: hasActive ? sc : 'hsl(var(--muted-foreground))', filter: hasActive ? `drop-shadow(0 0 4px ${sc}88)` : 'none' }} />
                     </span>
-                    <span className="skeuo-emboss text-[10px] font-bold tracking-[0.16em] uppercase flex-1 text-left" style={{ color: hasActive ? sc : 'hsl(var(--muted-foreground))' }}>
+                    <span className="text-[10px] font-bold tracking-[0.16em] uppercase flex-1 text-left" style={{ color: hasActive ? sc : 'hsl(var(--muted-foreground))' }}>
                       {t(section.key) || section.label}
                     </span>
                     <ChevronRight
@@ -208,7 +204,7 @@ export default function ContentSidebar() {
                         if (collapsed) setTooltip(null);
                       }}
                       aria-label={label}
-                      className={`nav-shine skeuo-nav-row relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden ${active ? 'skeuo-nav-row-active' : ''}`}
+                      className={`morph-row relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden ${active ? 'morph-row-active' : ''}`}
                       style={{
                         height: 42,
                         padding: collapsed ? 0 : '0 10px',
@@ -218,19 +214,10 @@ export default function ContentSidebar() {
                         width: collapsed ? '100%' : 'calc(100% - 6px)',
                         border: 'none',
                         cursor: 'pointer',
-                        ['--nav-shine-color']: c,
-                        ...(active ? {
-                          boxShadow: `inset 2px 2px 5px rgba(0,0,0,0.35), inset -1px -1px 2px rgba(255,255,255,0.06), 0 0 0 1px ${c}40, 0 0 18px -4px ${c}55`,
-                          background: `linear-gradient(180deg, ${c}1a 0%, ${c}08 100%)`,
-                        } : lit ? {
-                          boxShadow: `0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px ${c}25, 0 0 14px -6px ${c}44`,
-                        } : {})
+                        ...(active ? { background: `linear-gradient(180deg, ${c}1c 0%, ${c}08 100%)` } : {})
                       }}>
 
-                      {/* shine sweep on hover */}
-                      <span className="nav-shine-sweep" />
-
-                      {/* active left accent bar — neon beveled inset */}
+                      {/* active left accent bar — glowing inset */}
                       {active && (
                         <span
                           className="absolute left-0 top-1.5 bottom-1.5 rounded-r-full"
@@ -241,21 +228,21 @@ export default function ContentSidebar() {
                           }} />
                       )}
 
-                      {/* skeuomorphic icon tile with neon glow */}
+                      {/* morph icon tile with glow */}
                       <span
-                        className={`relative flex items-center justify-center rounded-lg flex-shrink-0 ${active ? 'skeuo-tile-pressed' : lit ? 'skeuo-tile-raised' : 'skeuo-tile'}`}
+                        className={`relative flex items-center justify-center rounded-lg flex-shrink-0 ${active ? 'morph-tile-pressed' : lit ? 'morph-tile-raised' : 'morph-tile'}`}
                         style={{
-                          width: collapsed ? 30 : 28,
-                          height: collapsed ? 30 : 28,
-                          ...(active ? { boxShadow: `inset 2px 2px 4px rgba(0,0,0,0.35), inset -1px -1px 2px rgba(255,255,255,0.06), 0 0 0 1px ${c}50, 0 0 12px -2px ${c}66` } : {}),
+                          width: collapsed ? 32 : 28,
+                          height: collapsed ? 32 : 28,
+                          ...(active ? { boxShadow: `inset 2px 2px 5px rgba(0,0,0,0.36), inset -1px -1px 2px rgba(255,255,255,0.05), 0 0 0 1px ${c}55, 0 0 14px -2px ${c}66` } : {}),
                         }}>
                         <child.icon
                           strokeWidth={2.1}
                           fill={active ? c : 'currentColor'}
                           fillOpacity={active ? 0.22 : 0}
                           style={{
-                            width: collapsed ? 17 : 16,
-                            height: collapsed ? 17 : 16,
+                            width: collapsed ? 18 : 16,
+                            height: collapsed ? 18 : 16,
                             color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
                             filter: active ? `drop-shadow(0 0 6px ${c})` : lit ? `drop-shadow(0 0 4px ${c}88)` : 'none',
                             transition: 'all 0.25s ease'
@@ -264,7 +251,7 @@ export default function ContentSidebar() {
 
                       {!collapsed && (
                         <span
-                          className="text-[12.5px] font-semibold tracking-wide whitespace-nowrap skeuo-emboss"
+                          className="text-[12.5px] font-semibold tracking-wide whitespace-nowrap"
                           style={{
                             color: active ? 'hsl(var(--sidebar-foreground))' : lit ? c : 'hsl(var(--muted-foreground))',
                             textShadow: active ? `0 0 12px ${c}44` : 'none',
@@ -280,7 +267,7 @@ export default function ContentSidebar() {
           })}
 
           {sections.length === 0 &&
-            <div className="text-center text-xs py-8 skeuo-emboss" style={{ color: 'hsl(var(--muted-foreground))' }}>
+            <div className="text-center text-xs py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
               No results
             </div>
           }
@@ -291,7 +278,7 @@ export default function ContentSidebar() {
           onClick={() => railVisibility.toggleCollapsed()}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand' : 'Collapse'}
-          className="skeuo-toggle flex items-center rounded-xl transition-all duration-300 flex-shrink-0"
+          className="morph-toggle flex items-center rounded-xl transition-all duration-300 flex-shrink-0"
           style={{
             height: 38,
             justifyContent: 'center',
@@ -305,7 +292,7 @@ export default function ContentSidebar() {
             <PanelLeftOpen className="w-4 h-4" strokeWidth={2.2} style={{ color: 'hsl(var(--sidebar-primary))', filter: 'drop-shadow(0 0 4px hsl(var(--sidebar-primary)))' }} /> :
             <>
               <PanelLeftClose className="w-4 h-4" strokeWidth={2.2} style={{ color: 'hsl(var(--sidebar-primary))', filter: 'drop-shadow(0 0 4px hsl(var(--sidebar-primary)))' }} />
-              <span className="text-[11px] font-semibold tracking-wide skeuo-emboss" style={{ color: 'hsl(var(--sidebar-foreground))' }}>Collapse</span>
+              <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'hsl(var(--sidebar-foreground))' }}>Collapse</span>
             </>
           }
         </button>
@@ -316,7 +303,7 @@ export default function ContentSidebar() {
             className="fixed z-[60] pointer-events-none animate-fade-in"
             style={{ left: width + 10, top: tooltip.top, transform: 'translateY(-50%)' }}>
             <div
-              className="skeuo-brand-frame px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
+              className="morph-tile px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
               style={{
                 color: 'hsl(var(--popover-foreground))',
                 boxShadow: `0 6px 18px rgba(0,0,0,0.35), 0 0 14px -4px ${tooltip.color || 'transparent'}66, inset 0 1px 0 rgba(255,255,255,0.1)`,
