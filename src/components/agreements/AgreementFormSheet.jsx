@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FileDown, Loader2, Plus, Trash2 } from 'lucide-react';
+import { FileDown, Loader2, Plus, Trash2, Building2, FileSignature, ScrollText } from 'lucide-react';
+import Section from '@/components/trips/Section';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
@@ -137,76 +138,85 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
 
         <div className="flex-1 flex overflow-hidden">
           {/* LEFT: Form */}
-          <div className="w-1/2 overflow-y-auto px-6 py-4 space-y-4 border-r border-border">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <Label>Agreement Number</Label>
-                <Input value={form.agreement_number} onChange={e => update('agreement_number', e.target.value)} />
-              </div>
+          <div className="w-1/2 overflow-y-auto px-5 py-5 space-y-4 border-r border-border">
+            {/* CLIENT SECTION */}
+            <Section title="Client" icon={Building2} accent="59, 130, 246" delay={0}>
               <ClientAutocomplete form={form} update={update} />
-              <div>
-                <Label>Contact Person</Label>
-                <Input value={form.contact_person || ''} onChange={e => update('contact_person', e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Contact Person</Label>
+                  <Input value={form.contact_person || ''} onChange={e => update('contact_person', e.target.value)} />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input value={form.client_phone || ''} onChange={e => update('client_phone', e.target.value)} />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input value={form.client_email || ''} onChange={e => update('client_email', e.target.value)} />
+                </div>
+                <div>
+                  <Label>TRN</Label>
+                  <Input value={form.client_trn || ''} onChange={e => update('client_trn', e.target.value)} />
+                </div>
               </div>
               <div>
-                <Label>Phone</Label>
-                <Input value={form.client_phone || ''} onChange={e => update('client_phone', e.target.value)} />
-              </div>
-              <div>
-                <Label>Email</Label>
-                <Input value={form.client_email || ''} onChange={e => update('client_email', e.target.value)} />
-              </div>
-              <div>
-                <Label>TRN</Label>
-                <Input value={form.client_trn || ''} onChange={e => update('client_trn', e.target.value)} />
-              </div>
-              <div className="col-span-2">
                 <Label>Address</Label>
                 <Input value={form.client_address || ''} onChange={e => update('client_address', e.target.value)} />
               </div>
-              <div className="col-span-2">
+            </Section>
+
+            {/* AGREEMENT DETAILS SECTION */}
+            <Section title="Agreement Details" icon={FileSignature} accent="168, 85, 247" delay={40}>
+              <div>
+                <Label>Agreement Number</Label>
+                <Input value={form.agreement_number} onChange={e => update('agreement_number', e.target.value)} />
+              </div>
+              <div>
                 <Label>Agreement Title *</Label>
                 <Input value={form.title || ''} onChange={e => update('title', e.target.value)} />
               </div>
-              <div>
-                <Label>Type</Label>
-                <select
-                  value={form.agreement_type || 'service'}
-                  onChange={e => update('agreement_type', e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm ring-offset-background"
-                >
-                  <option value="service">Service</option>
-                  <option value="rental">Rental</option>
-                  <option value="transport">Transport</option>
-                  <option value="partnership">Partnership</option>
-                  <option value="other">Other</option>
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Type</Label>
+                  <select
+                    value={form.agreement_type || 'service'}
+                    onChange={e => update('agreement_type', e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm ring-offset-background"
+                  >
+                    <option value="service">Service</option>
+                    <option value="rental">Rental</option>
+                    <option value="transport">Transport</option>
+                    <option value="partnership">Partnership</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Amount (AED)</Label>
+                  <Input
+                    type="number"
+                    value={hasItems ? itemsTotal.toFixed(2) : (form.amount || 0)}
+                    onChange={e => update('amount', Number(e.target.value))}
+                    disabled={hasItems}
+                    className={hasItems ? 'bg-muted/50' : ''}
+                  />
+                </div>
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" value={form.start_date || ''} onChange={e => update('start_date', e.target.value)} />
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
+                </div>
               </div>
-              <div>
-                <Label>Amount (AED)</Label>
-                <Input
-                  type="number"
-                  value={hasItems ? itemsTotal.toFixed(2) : (form.amount || 0)}
-                  onChange={e => update('amount', Number(e.target.value))}
-                  disabled={hasItems}
-                  className={hasItems ? 'bg-muted/50' : ''}
-                />
-              </div>
-              <div>
-                <Label>Start Date</Label>
-                <Input type="date" value={form.start_date || ''} onChange={e => update('start_date', e.target.value)} />
-              </div>
-              <div>
-                <Label>End Date</Label>
-                <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
-              </div>
-            </div>
+            </Section>
 
-            {/* Line Items */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label className="text-sm font-semibold">Service Items</Label>
-                <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-4 h-4 mr-1" />Add</Button>
+            {/* SERVICE ITEMS SECTION */}
+            <Section title="Service Items" icon={Plus} accent="16, 185, 129" delay={80}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Add line items for itemized billing</span>
+                <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-3.5 h-3.5 mr-1" />Add Item</Button>
               </div>
               <div className="space-y-2">
                 {(form.line_items || []).map((item, idx) => (
@@ -236,33 +246,36 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
                 ))}
               </div>
               {hasItems && (
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end">
                   <div className="text-sm font-bold border-t border-border pt-1">
                     Total: <span className="font-mono text-primary">AED {itemsTotal.toFixed(2)}</span>
                   </div>
                 </div>
               )}
-            </div>
+            </Section>
 
-            <div>
-              <Label>Agreement Content</Label>
-              <Textarea
-                value={form.content || ''}
-                onChange={e => update('content', e.target.value)}
-                rows={6}
-                placeholder="Enter the full agreement body text..."
-              />
-            </div>
-            <div>
-              <Label>Terms & Conditions</Label>
-              <Textarea value={form.terms_conditions || ''} onChange={e => update('terms_conditions', e.target.value)} rows={3} />
-            </div>
-            <div>
-              <Label>Notes</Label>
-              <Textarea value={form.notes || ''} onChange={e => update('notes', e.target.value)} rows={2} />
-            </div>
+            {/* TERMS SECTION */}
+            <Section title="Terms & Content" icon={ScrollText} accent="245, 158, 11" delay={120}>
+              <div>
+                <Label>Agreement Content</Label>
+                <Textarea
+                  value={form.content || ''}
+                  onChange={e => update('content', e.target.value)}
+                  rows={5}
+                  placeholder="Enter the full agreement body text..."
+                />
+              </div>
+              <div>
+                <Label>Terms & Conditions</Label>
+                <Textarea value={form.terms_conditions || ''} onChange={e => update('terms_conditions', e.target.value)} rows={3} />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea value={form.notes || ''} onChange={e => update('notes', e.target.value)} rows={2} />
+              </div>
+            </Section>
 
-            <div className="flex gap-2 pt-2 pb-6">
+            <div className="flex gap-2 pt-1 pb-6">
               <Button onClick={handleSave} disabled={saving} className="flex-1">
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
