@@ -63,6 +63,7 @@ export default function Cash() {
   });
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('statement');
+  const [mode, setMode] = useState('cash'); // 'cash' | 'card' — independent balances
   const { dateFrom: filterFrom, dateTo: filterTo, setDateFrom: setFilterFrom, setDateTo: setFilterTo } = useGlobalDate();
   const [q, setQ] = useState('');
 
@@ -73,8 +74,11 @@ export default function Cash() {
 
   useEffect(() => { load(); }, [load]);
 
+  // filter by selected mode (cash vs card) — untagged defaults to cash
+  const modeRows = (rows || []).filter((r) => (r.category || 'cash') === mode);
+
   // sorted ascending by date then created_date for running balance
-  const sorted = (rows || []).slice().sort((a, b) => {
+  const sorted = modeRows.slice().sort((a, b) => {
     const d = (a.date || '').localeCompare(b.date || '');
     if (d !== 0) return d;
     return (a.created_date || '').localeCompare(b.created_date || '');
@@ -127,6 +131,7 @@ export default function Cash() {
         amount: isOutflow ? outflow : inflow,
         description: form.description || '',
         receipt_number: form.receipt_number || '',
+        category: mode,
         received_from: !isOutflow ? form.recipient : '',
         paid_to: isOutflow ? form.recipient : '',
       });
@@ -146,7 +151,12 @@ export default function Cash() {
     <div className="professional-page-bg min-h-screen pb-28 md:pb-20">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
         {/* header + toggle */}
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* card / cash toggle — independent balances */}
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
+            <button onClick={() => setMode('cash')} className={`sub-tab ${mode === 'cash' ? 'sub-tab-active' : ''}`}>Cash</button>
+            <button onClick={() => setMode('card')} className={`sub-tab ${mode === 'card' ? 'sub-tab-active' : ''}`}>Card</button>
+          </div>
           <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
             <button onClick={() => setView('statement')} className={`sub-tab ${view === 'statement' ? 'sub-tab-active' : ''}`}>Statement</button>
             <button onClick={() => setView('report')} className={`sub-tab ${view === 'report' ? 'sub-tab-active' : ''}`}>Report</button>
