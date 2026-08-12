@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Truck, FileText, X, Check, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -404,10 +405,25 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-5xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
-        <DialogHeader className="mb-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <DialogTitle className="font-display text-foreground text-lg">{title}</DialogTitle>
-            <ModeToggle mode={mode} onChange={setMode} t={t} />
+        <DialogHeader className="mb-5 pb-4 border-b border-border/50">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="hud-icon-tile w-10 h-10">
+                {mode === 'trip' ? <Truck className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+              </div>
+              <div>
+                <DialogTitle className="font-display text-foreground text-lg leading-tight">{title}</DialogTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {mode === 'trip' ? 'Fill in trip details · Live calculation on the right' : 'Set up monthly contract terms'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <ModeToggle mode={mode} onChange={setMode} t={t} />
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
@@ -471,10 +487,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         )}
 
         {/* Footer */}
-        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border/50">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border">{t('cancel')}</Button>
+        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2">
+            <X className="w-4 h-4" />
+            {t('cancel')}
+          </Button>
           <div className="flex-1" />
-          <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90">
+          <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90 gap-2 min-w-[120px]">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {saving ? t('loading') : t('submit')}
           </Button>
         </div>
