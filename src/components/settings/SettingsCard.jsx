@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Shared premium surface for Settings sections.
- * Layered depth: subtle border + multi-stop gradient + backdrop blur.
+ * Uses glass-panel + CSS variables for full theme adaptation.
  * Optional accent ("danger") shifts the icon halo to rose.
  */
 export default function SettingsCard({
@@ -20,13 +20,7 @@ export default function SettingsCard({
 
   return (
     <section
-      className={cn('relative rounded-[20px] border border-white/[0.06] overflow-hidden', className)}
-      style={{
-        background: 'linear-gradient(180deg, rgba(18,22,34,0.72) 0%, rgba(12,16,26,0.90) 100%)',
-        backdropFilter: 'blur(24px) saturate(1.2)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.2)',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 16px 44px -14px rgba(0,0,0,0.7)',
-      }}
+      className={cn('glass-panel relative rounded-[20px] overflow-hidden', className)}
     >
       {/* top hairline */}
       <div
@@ -49,8 +43,8 @@ export default function SettingsCard({
               </div>
             )}
             <div className="min-w-0">
-              <h2 className="font-display font-semibold text-white text-[15px] tracking-tight truncate">{title}</h2>
-              {description && <p className="text-xs text-white/40 mt-0.5 truncate">{description}</p>}
+              <h2 className="font-display font-semibold text-foreground text-[15px] tracking-tight truncate">{title}</h2>
+              {description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>}
             </div>
           </div>
           {action}

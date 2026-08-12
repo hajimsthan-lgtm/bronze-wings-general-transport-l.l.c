@@ -1994,3 +1994,70 @@
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
   background-size: 200% 100%;
 }
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT THEME POLISH — refine white-opacity variants
+   across all components for a clean, high-contrast look
+   ═══════════════════════════════════════════════════════ */
+
+/* Muted text: white/20–white/50 → muted-foreground (grey) */
+.theme-light [class*="text-white/20"],
+.theme-light [class*="text-white/25"],
+.theme-light [class*="text-white/30"],
+.theme-light [class*="text-white/35"],
+.theme-light [class*="text-white/40"],
+.theme-light [class*="text-white/45"],
+.theme-light [class*="text-white/50"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Medium text: white/55–white/80 → foreground (dark) */
+.theme-light [class*="text-white/55"],
+.theme-light [class*="text-white/60"],
+.theme-light [class*="text-white/65"],
+.theme-light [class*="text-white/70"],
+.theme-light [class*="text-white/75"],
+.theme-light [class*="text-white/80"] {
+  color: hsl(var(--foreground)) !important;
+  opacity: 0.88;
+}
+
+/* White-opacity backgrounds → subtle dark tints (visible on white) */
+.theme-light [class*="bg-white/"] {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+.theme-light [class*="hover:bg-white/"]:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* White-opacity borders → visible light borders */
+.theme-light [class*="border-white/"] {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+.theme-light [class*="divide-white/"] {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Glass panel: ensure clean white surface in light mode */
+.theme-light .glass-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+}
+.theme-light .glass {
+  background: linear-gradient(165deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%) !important;
+}
+.theme-light .glass-sm {
+  background: linear-gradient(165deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.92) 100%) !important;
+}
+
+/* Ring focus: use blue instead of white */
+.theme-light [class*="ring-white/"] {
+  --tw-ring-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Gradient overlays: from-white/to-white → subtle grey */
+.theme-light [class*="from-white/"] {
+  --tw-gradient-from: rgba(248, 250, 252, 1) var(--tw-gradient-from-position) !important;
+}
+.theme-light [class*="to-white/"] {
+  --tw-gradient-to: rgba(248, 250, 252, 1) var(--tw-gradient-to-position) !important;
+}
