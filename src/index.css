@@ -1945,6 +1945,15 @@
   color: #1e293b;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
 }
+/* Light-mode input: replace dark neumorphic inset shadow with a subtle light one */
+.theme-light input.bg-input,
+.theme-light input[class*="bg-input"] {
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+.theme-light input.bg-input:focus-visible,
+.theme-light input[class*="bg-input"]:focus-visible {
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), 0 0 0 3px rgba(30,215,96,0.12) !important;
+}
 .theme-light .clay-input:focus {
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 3px rgba(30,215,96,0.12);
