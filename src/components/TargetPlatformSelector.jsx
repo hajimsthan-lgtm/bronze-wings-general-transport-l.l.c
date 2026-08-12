@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Boxes, Heart, Zap, Rocket, Check } from 'lucide-react';
 
 const PLATFORMS = [
-  { id: 'base44',  name: 'Base44',   badge: 'BaaS',     description: 'AI-native backend-as-a-service with instant entities & auth.', accent: 'blue',    rgb: '59,130,246',  icon: Boxes },
+  { id: 'base44',  name: 'Base44',   badge: 'BaaS',     description: 'AI-native backend-as-a-service with instant entities & auth.', accent: 'blue',    rgb: '30,215,96',  icon: Boxes },
   { id: 'lovable', name: 'Lovable',  badge: 'AI Dev',   description: 'Conversational full-stack app builder for rapid prototypes.',   accent: 'rose',    rgb: '244,63,94',   icon: Heart },
   { id: 'bolt',    name: 'Bolt.new', badge: 'AI IDE',   description: 'In-browser AI IDE for shipping web apps at speed.',            accent: 'cyan',    rgb: '34,211,238',  icon: Zap },
   { id: 'emergent',name: 'Emergent', badge: 'Agent OS', description: 'Agent orchestration platform for autonomous workflows.',      accent: 'emerald', rgb: '16,185,129',  icon: Rocket },

@@ -34,14 +34,14 @@ export default function ClientsAnalytics({ clients = [], trips = [], invoices = 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={0} label="Total Clients" value={clients.length} icon={Users} color="#8b5cf6" onClick={onBrowseClients} />
+        <ReportStatCard index={0} label="Total Clients" value={clients.length} icon={Users} color="#14b8a6" onClick={onBrowseClients} />
         <ReportStatCard index={1} label="Active Clients" value={active} icon={Building2} color="#34d399" onClick={onBrowseClients} />
         <ReportStatCard index={2} label="Trip Revenue" value={totalRevenue} format={formatCurrency} icon={TrendingUp} color="#22c55e" extra={<Sparkline data={revSeries} type="bar" color="#22c55e" />} to="/trips" />
         <ReportStatCard index={3} label="Outstanding" value={outstanding} format={formatCurrency} icon={FileText} color="#ef4444" to="/reports/soa" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ReportSectionCard index={4} color="#8b5cf6" title="Top Clients by Revenue">
+        <ReportSectionCard index={4} color="#14b8a6" title="Top Clients by Revenue">
           {topClients.length === 0 || topClients[0].revenue === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No revenue data yet.</p> : (
             <div className="space-y-3">
               {topClients.map((c) => {
@@ -52,7 +52,7 @@ export default function ClientsAnalytics({ clients = [], trips = [], invoices = 
                       <span className="text-white/70 truncate">{c.name}</span>
                       <span className="text-white/80 tabular-nums">{formatCurrency(c.revenue)} · {pct.toFixed(0)}%</span>
                     </div>
-                    <ProgressBar pct={pct} color="#8b5cf6" />
+                    <ProgressBar pct={pct} color="#14b8a6" />
                   </div>
                 );
               })}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const TINTS = [
-  { name: 'Blue',   rgb: '59,130,246',  rgb2: '37,99,235',  swatch: '#1ED760' },
+  { name: 'Blue',   rgb: '30,215,96',  rgb2: '37,99,235',  swatch: '#1ED760' },
   { name: 'Purple', rgb: '168,85,247',  rgb2: '147,51,234', swatch: '#a855f7' },
   { name: 'Teal',   rgb: '20,184,166',  rgb2: '13,148,136', swatch: '#14b8a6' },
   { name: 'Orange', rgb: '249,115,22',  rgb2: '234,88,12',  swatch: '#f97316' },

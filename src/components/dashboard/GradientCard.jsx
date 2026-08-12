@@ -6,7 +6,7 @@ const VARIANTS = {
   purple: { gradient: 'linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(147,51,234,0.08) 50%, hsl(var(--card)) 100%)', rgb: '168,85,247', glow: '#a855f7' },
   teal:   { gradient: 'linear-gradient(135deg, rgba(45,212,191,0.20) 0%, rgba(20,184,166,0.08) 50%, hsl(var(--card)) 100%)', rgb: '45,212,191', glow: '#14b8a6' },
   orange: { gradient: 'linear-gradient(135deg, rgba(251,146,60,0.20) 0%, rgba(249,115,22,0.08) 50%, hsl(var(--card)) 100%)', rgb: '251,146,60', glow: '#f97316' },
-  blue:   { gradient: 'linear-gradient(135deg, rgba(30,215,96,0.22) 0%, rgba(37,99,235,0.08) 50%, hsl(var(--card)) 100%)', rgb: '59,130,246', glow: '#1ED760' },
+  blue:   { gradient: 'linear-gradient(135deg, rgba(30,215,96,0.22) 0%, rgba(37,99,235,0.08) 50%, hsl(var(--card)) 100%)', rgb: '30,215,96', glow: '#1ED760' },
   red:    { gradient: 'linear-gradient(135deg, rgba(239,68,68,0.20) 0%, rgba(220,38,38,0.08) 50%, hsl(var(--card)) 100%)', rgb: '239,68,68', glow: '#ef4444' },
   pink:   { gradient: 'linear-gradient(135deg, rgba(236,72,153,0.20) 0%, rgba(217,70,239,0.08) 50%, hsl(var(--card)) 100%)', rgb: '236,72,153', glow: '#ec4899' },
   yellow: { gradient: 'linear-gradient(135deg, rgba(245,158,11,0.20) 0%, rgba(217,119,6,0.08) 50%, hsl(var(--card)) 100%)', rgb: '245,158,11', glow: '#f59e0b' },

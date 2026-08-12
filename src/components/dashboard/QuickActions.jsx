@@ -17,7 +17,7 @@ const ACTIONS = [
   { label: 'Add Driver', icon: UserPlus, grad: ['#06b6d4', '#22d3ee'], glow: 'rgba(6,182,212,0.3)', to: '/admin/drivers?new=1' },
   { label: 'Fuel Entry', icon: Fuel, grad: ['#10b981', '#34d399'], glow: 'rgba(16,185,129,0.3)', to: '/admin/vehicles' },
 ];
-const INVOICE = { label: '+ New Invoice', icon: FileText, grad: ['#8b5cf6', '#a78bfa'], glow: 'rgba(139,92,246,0.3)' };
+const INVOICE = { label: '+ New Invoice', icon: FileText, grad: ['#14b8a6', '#5eead4'], glow: 'rgba(20,184,166,0.3)' };
 
 function IconBox({ a }) {
   return (

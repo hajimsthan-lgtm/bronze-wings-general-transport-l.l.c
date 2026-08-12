@@ -23,9 +23,9 @@ const APPS = [
 { key: 'gmail', label: 'Gmail', hex: '#EA4335', icon: GmailIcon, action: () => {window.location.href = 'mailto:?subject=Transport%20Update';} },
 { key: 'call', label: 'Call', hex: '#10b981', icon: Phone, action: () => {window.location.href = 'tel:';} },
 { key: 'maps', label: 'Maps', hex: '#1ED760', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
-{ key: 'trip', label: 'New Trip', hex: '#0ea5e9', icon: Truck, to: '/trips' },
+{ key: 'trip', label: 'New Trip', hex: '#14b8a6', icon: Truck, to: '/trips' },
 { key: 'expense', label: 'Expense', hex: '#f97316', icon: Receipt, to: '/expenses' },
-{ key: 'reports', label: 'Reports', hex: '#8b5cf6', icon: FileBarChart, to: '/reports/daily' }];
+{ key: 'reports', label: 'Reports', hex: '#14b8a6', icon: FileBarChart, to: '/reports/daily' }];
 
 
 /* ── Sound ── */

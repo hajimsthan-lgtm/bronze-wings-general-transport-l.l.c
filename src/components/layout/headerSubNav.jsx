@@ -53,17 +53,17 @@ export const SUBNAV_ICON = {
 };
 
 export const SUBNAV_STYLE = {
-  trips: { from: '#1ED760', to: '#1e3a8a', glow: '59,130,246' },
+  trips: { from: '#1ED760', to: '#15803d', glow: '30,215,96' },
   expenses: { from: '#f59e0b', to: '#b45309', glow: '245,158,11' },
   vehicles: { from: '#1ED760', to: '#15803d', glow: '99,102,241' },
   drivers: { from: '#10b981', to: '#047857', glow: '16,185,129' },
   clients: { from: '#f43f5e', to: '#9f1239', glow: '244,63,94' },
   daily_report: { from: '#06b6d4', to: '#0e7490', glow: '6,182,212' },
-  profit_loss: { from: '#8b5cf6', to: '#5b21b6', glow: '139,92,246' },
+  profit_loss: { from: '#14b8a6', to: '#0f766e', glow: '20,184,166' },
   soa: { from: '#f97316', to: '#9a3412', glow: '249,115,22' },
-  bank_reconciliation: { from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' },
+  bank_reconciliation: { from: '#14b8a6', to: '#0f766e', glow: '20,184,166' },
   petty_cash: { from: '#f59e0b', to: '#b45309', glow: '245,158,11' },
-  quotations: { from: '#8b5cf6', to: '#6d28d9', glow: '139,92,246' },
+  quotations: { from: '#14b8a6', to: '#0f766e', glow: '20,184,166' },
   agreements: { from: '#0d9488', to: '#0f766e', glow: '13,148,136' },
 };
 

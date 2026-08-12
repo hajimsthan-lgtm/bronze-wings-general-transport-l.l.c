@@ -29,7 +29,7 @@ export default function TripModeFields({ p }) {
   return (
     <>
       {/* Client */}
-      <Section title={t('client')} icon={Building2} accent="59,130,246" delay={0}>
+      <Section title={t('client')} icon={Building2} accent="30,215,96" delay={0}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('client')}</Label>
           <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={inputCls} />
@@ -115,7 +115,7 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Assignment */}
-      <Section title="Assignment" icon={Truck} accent="139,92,246" delay={180}>
+      <Section title="Assignment" icon={Truck} accent="20,184,166" delay={180}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>

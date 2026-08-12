@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const ACCENTS = {
-  primary: { icon: 'text-primary', glow: '59,130,246', value: 'text-foreground' },
+  primary: { icon: 'text-primary', glow: '30,215,96', value: 'text-foreground' },
   amber: { icon: 'text-amber-600', glow: '251,191,36', value: 'text-amber-600' },
   teal: { icon: 'text-teal-600', glow: '45,212,191', value: 'text-teal-600' },
   emerald: { icon: 'text-emerald-600', glow: '52,211,153', value: 'text-emerald-600' },

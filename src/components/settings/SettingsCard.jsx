@@ -16,7 +16,7 @@ export default function SettingsCard({
   className = '',
 }) {
   const isDanger = accent === 'danger';
-  const rgb = isDanger ? '244,63,94' : '59,130,246';
+  const rgb = isDanger ? '244,63,94' : '30,215,96';
 
   return (
     <section

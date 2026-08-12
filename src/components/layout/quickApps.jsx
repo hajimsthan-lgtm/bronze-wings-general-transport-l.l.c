@@ -28,7 +28,7 @@ export const QUICK_APPS = [
   { key: 'calendar', label: 'Calendar', hex: '#4285f4', icon: Calendar, action: () => window.open('https://calendar.google.com', '_blank') },
   { key: 'drive', label: 'Drive', hex: '#0f9d58', icon: HardDrive, action: () => window.open('https://drive.google.com', '_blank') },
   { key: 'notes', label: 'Notes', hex: '#f59e0b', icon: StickyNote, action: () => window.open('https://keep.google.com', '_blank') },
-  { key: 'translate', label: 'Translate', hex: '#8b5cf6', icon: Languages, action: () => window.open('https://translate.google.com', '_blank') },
+  { key: 'translate', label: 'Translate', hex: '#14b8a6', icon: Languages, action: () => window.open('https://translate.google.com', '_blank') },
 ];
 
 /* In-app tools — rendered as the horizontal fan row. Every entry stays inside the app. */
@@ -36,7 +36,7 @@ export const QUICK_APPS_TOOLS = [
   { key: 'tool-calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
   { key: 'tool-contracts', label: 'Contracts', hex: '#1ED760', icon: FileText, to: '/contracts' },
   { key: 'tool-daily', label: 'Daily Report', hex: '#06b6d4', icon: ClipboardList, to: '/reports/daily' },
-  { key: 'tool-settings', label: 'Settings', hex: '#8b5cf6', icon: Settings, to: '/settings' },
+  { key: 'tool-settings', label: 'Settings', hex: '#14b8a6', icon: Settings, to: '/settings' },
   { key: 'tool-prompts', label: 'Prompts', hex: '#f59e0b', icon: Sparkles, to: '/prompt-generator' },
 ];
 

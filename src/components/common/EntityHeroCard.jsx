@@ -2,7 +2,7 @@
  * Beautiful hero banner card for entity list pages (Drivers, Clients, Vehicles).
  * On-brand dark glass + accent gradient with a big total and mini stat chips.
  */
-export default function EntityHeroCard({ icon: Icon, title, total, stats = [], accent = '59,130,246' }) {
+export default function EntityHeroCard({ icon: Icon, title, total, stats = [], accent = '30,215,96' }) {
   return (
     <div
       className="relative overflow-hidden rounded-2xl p-5 mb-5 border border-white/[0.06]"
