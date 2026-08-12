@@ -7,6 +7,7 @@ import { useSyncExternalStore } from 'react';
 let visible = true;
 let dimming = false;
 let expanded = false;
+let collapsed = false;
 const listeners = new Set();
 
 const notify = () => listeners.forEach((l) => l());
@@ -33,6 +34,17 @@ export const railVisibility = {
       notify();
     }
   },
+  isCollapsed: () => collapsed,
+  setCollapsed(v) {
+    if (collapsed !== v) {
+      collapsed = v;
+      notify();
+    }
+  },
+  toggleCollapsed() {
+    collapsed = !collapsed;
+    notify();
+  },
   subscribe(l) {
     listeners.add(l);
     return () => listeners.delete(l);
@@ -48,4 +60,7 @@ export function useRailDimming() {
 
 export function useRailExpanded() {
   return useSyncExternalStore(railVisibility.subscribe, railVisibility.isExpanded, railVisibility.isExpanded);
+}
+export function useRailCollapsed() {
+  return useSyncExternalStore(railVisibility.subscribe, railVisibility.isCollapsed, railVisibility.isCollapsed);
 }
