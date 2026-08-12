@@ -20,7 +20,8 @@ import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import Services from './Services';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Plus, Search, Truck, Pencil, Trash2, BarChart3, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Truck, Pencil, Trash2, BarChart3, LayoutGrid, Sparkles } from 'lucide-react';
+import { useTheme } from '@/lib/theme';
 
 export default function Vehicles() {
   const { t } = useI18n();
@@ -40,6 +41,7 @@ export default function Vehicles() {
 
 function VehiclesTab() {
   const { t } = useI18n();
+  const { mode: themeMode } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
@@ -139,11 +141,39 @@ function VehiclesTab() {
 
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
           view === 'grid' ? (
+            themeMode === 'light' ? (
+              <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക.">
+                {filtered.length > 4 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                    {filtered.slice(0, 4).map((v) => (
+                      <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
+                    ))}
+                  </div>
+                )}
+                {filtered.length > 4 && (
+                  <div className="flex items-center gap-3 mb-5 mt-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-amber-500" />
+                      <div>
+                        <h2 className="text-lg font-bold text-gray-900">Top picks of the day</h2>
+                        <p className="text-xs text-gray-500">These vehicles are tailored just for you</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {filtered.slice(filtered.length > 4 ? 4 : 0).map((v) => (
+                    <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
+                  ))}
+                </div>
+              </div>
+            ) : (
             <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filtered.map((v) => (
                 <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
               ))}
             </div>
+            )
           ) : (
             <div data-tour data-tour-title="Vehicle List" data-tour-en="Each row is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر قطار ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ വരിയും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="space-y-2">
               {selected.size > 0 && (

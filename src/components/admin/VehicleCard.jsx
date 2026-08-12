@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
+import { useTheme } from '@/lib/theme';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock, ChevronDown, FileText } from 'lucide-react';
 import CardChip from '@/components/admin/CardChip';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
+import VehicleCardLight from './VehicleCardLight';
 
 const ACCENT = '#3b82f6';
 const STATUS_DOT = { active: '#34d399', maintenance: '#f59e0b', inactive: '#94a3b8' };
@@ -22,9 +24,14 @@ function yearsLeft(dateStr) {
 
 export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipChange }) {
   const { t } = useI18n();
+  const { mode } = useTheme();
   const [confirmDel, setConfirmDel] = useState(false);
   const [licenseOpen, setLicenseOpen] = useState(false);
   const dot = STATUS_DOT[v.status] || '#94a3b8';
+
+  if (mode === 'light') {
+    return <VehicleCardLight v={v} onOpen={onOpen} onEdit={onEdit} onDelete={onDelete} onOwnershipChange={onOwnershipChange} />;
+  }
 
   return (
     <div
