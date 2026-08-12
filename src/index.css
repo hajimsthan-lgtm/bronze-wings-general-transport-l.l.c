@@ -2082,6 +2082,39 @@
 }
 
 /* ═══════════════════════════════════════════════════════
+   NO-JERK TABLES — disable hover lift & click scale inside
+   table/accordion containers for stable, non-shaking rows
+   ═══════════════════════════════════════════════════════ */
+.no-jerk .glass-card,
+.no-jerk .glass-card-hover,
+.no-jerk .row-card,
+.no-jerk .entity-card,
+.no-jerk .kpi-card,
+.no-jerk .stat-tile {
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.no-jerk .glass-card:hover,
+.no-jerk .glass-card-hover:hover,
+.no-jerk .row-card:hover,
+.no-jerk .entity-card:hover,
+.no-jerk .kpi-card:hover,
+.no-jerk .stat-tile:hover,
+.no-jerk .glass-card:active,
+.no-jerk .row-card:active,
+.no-jerk .entity-card:active,
+.no-jerk .kpi-card:active,
+.no-jerk .stat-tile:active {
+  transform: none !important;
+}
+.no-jerk button:active,
+.no-jerk [role="button"]:active,
+.no-jerk button:hover,
+.no-jerk [role="button"]:hover {
+  transform: none !important;
+}
+.no-jerk .row-card::before { transition: opacity 0.2s ease; }
+
+/* ═══════════════════════════════════════════════════════
    DARK-THEME TEXT NORMALIZATION (VextCRM)
    Ensure white text reads on dark surfaces; preserve white on accents.
    ═══════════════════════════════════════════════════════ */

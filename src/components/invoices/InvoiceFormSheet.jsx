@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, Receipt, User, FileText, Sparkles, Wallet } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, Receipt, User, FileText, Sparkles, Wallet, X } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
 
@@ -151,7 +150,6 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         invoiceNumber = created?.invoice_number || form.invoice_number;
       }
 
-      // Create linked client payment when a payment is received at creation
       if (receivePayment && payAmount > 0 && invoiceId) {
         const d = new Date();
         const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
@@ -192,27 +190,32 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     } finally { setSaving(false); }
   };
 
+  if (!open) return null;
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] p-0 max-h-screen overflow-y-auto w-full sm:max-w-2xl lg:max-w-5xl rounded-l-2xl shadow-2xl">
+    <div className="fixed inset-0 z-[100] bg-background/96 backdrop-blur-2xl overflow-y-auto animate-fade-in">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {/* Hero header */}
-        <div className="relative overflow-hidden px-6 pt-6 pb-5 pl-14 border-b border-white/[0.06]">
+        <div className="relative overflow-hidden px-5 sm:px-6 pt-5 pb-5 border-b border-white/[0.06] glass-card rounded-2xl mb-5">
           <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 0% 0%, rgba(30,215,96,0.15), transparent 70%)' }} />
-          <SheetHeader className="relative">
-            <div className="flex items-center justify-between pr-12">
-              <div>
-                <SheetTitle className="font-display text-foreground text-lg flex items-center gap-2">
-                  <Receipt className="w-5 h-5 text-primary" />
-                  {editInvoice ? 'Edit Invoice' : t('new_invoice')}
-                </SheetTitle>
-                <p className="text-[11px] text-muted-foreground mt-1 font-mono">{form.invoice_number || '—'}</p>
-              </div>
-              <StatusPill status={resultingStatus} />
+          <div className="relative flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-foreground text-lg flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-primary" />
+                {editInvoice ? 'Edit Invoice' : t('new_invoice')}
+              </h2>
+              <p className="text-[11px] text-muted-foreground mt-1 font-mono">{form.invoice_number || '—'}</p>
             </div>
-          </SheetHeader>
+            <div className="flex items-center gap-3">
+              <StatusPill status={resultingStatus} />
+              <button onClick={() => onOpenChange(false)} className="w-9 h-9 rounded-full glass-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start px-6 pt-5">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
           {/* Left: form */}
           <div className="space-y-5">
             <Section title="Client" icon={User}>
@@ -411,7 +414,6 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
               </div>
 
-              {/* Payment breakdown */}
               {receivePayment && payAmount > 0 && (
                 <div className="glass-card p-4 space-y-3 animate-fade-in">
                   <div className="flex items-center justify-between">
@@ -459,7 +461,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-3 mt-2 px-6 py-4 border-t border-border/50 sticky bottom-0 bg-card/80 backdrop-blur-xl">
+        <div className="flex items-center gap-3 mt-6 px-6 py-4 border-t border-border/50 sticky bottom-0 bg-card/80 backdrop-blur-xl rounded-2xl">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border">{t('cancel')}</Button>
           <div className="flex-1" />
           <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 min-w-[160px] btn-lightning">
@@ -467,8 +469,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             {saving ? t('loading') : (editInvoice ? 'Save Invoice' : 'Create Invoice')}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 }
 

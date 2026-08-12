@@ -268,12 +268,6 @@ export default function InvoicesPage() {
               </>
             )}
 
-            <button
-              onClick={openNew}
-              className="w-full mt-3 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" /> New Invoice
-            </button>
           </aside>
 
           {/* ── Main content ── */}
@@ -319,6 +313,7 @@ export default function InvoicesPage() {
                     <Button onClick={openNew} variant="outline" className="border-border"><Plus className="w-4 h-4 mr-1.5" /> {t('new_invoice')}</Button>
                   } />
                 ) : (
+                  <div className="no-jerk">
                   <InvoiceAccordion
                     invoices={filtered}
                     onEdit={openEdit}
@@ -327,6 +322,7 @@ export default function InvoicesPage() {
                     downloadingId={downloadingId}
                     onMarkPaid={(inv) => updateInvoice.mutateAsync({ id: inv.id, data: { status: 'paid' } })}
                   />
+                  </div>
                 )}
               </>
             )}
