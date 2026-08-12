@@ -58,9 +58,9 @@ export default function CalculatorModal({ open, onClose }) {
       num: 'bg-[#232636] text-white hover:bg-[#2a2e42]',
       op: 'text-white',
       eq: 'text-white',
-      fn: 'bg-[#1e2130] text-[#a0a5b8] hover:bg-[#262a3d]',
+      fn: 'bg-[#1a1f1c] text-[#a0a5b8] hover:bg-[#262a3d]',
     };
-    const opBg = variant === 'op' ? 'linear-gradient(135deg,#1ED760,#2563eb)' : variant === 'eq' ? 'linear-gradient(135deg,#10b981,#059669)' : null;
+    const opBg = variant === 'op' ? 'linear-gradient(135deg,#1ED760,#1ED760)' : variant === 'eq' ? 'linear-gradient(135deg,#10b981,#059669)' : null;
     return (
       <button
         onClick={onClick}

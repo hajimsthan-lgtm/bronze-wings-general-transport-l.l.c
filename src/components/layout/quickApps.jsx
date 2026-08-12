@@ -42,9 +42,9 @@ export const QUICK_APPS_TOOLS = [
 
 /* In-app module shortcuts — rendered as the vertical fan column. */
 export const QUICK_APPS_NAV = [
-  { key: 'nav-dashboard', label: 'Dashboard', hex: '#6366f1', icon: LayoutDashboard, to: '/' },
+  { key: 'nav-dashboard', label: 'Dashboard', hex: '#1ED760', icon: LayoutDashboard, to: '/' },
   { key: 'nav-trips', label: 'Trips', hex: '#1ED760', icon: Route, to: '/trips' },
   { key: 'nav-expenses', label: 'Expenses', hex: '#f59e0b', icon: Receipt, to: '/expenses' },
-  { key: 'nav-vehicles', label: 'Vehicles', hex: '#6366f1', icon: Truck, to: '/admin/vehicles' },
+  { key: 'nav-vehicles', label: 'Vehicles', hex: '#1ED760', icon: Truck, to: '/admin/vehicles' },
   { key: 'nav-clients', label: 'Clients', hex: '#f43f5e', icon: Building2, to: '/admin/clients' },
 ];

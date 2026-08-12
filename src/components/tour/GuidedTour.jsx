@@ -175,7 +175,7 @@ export default function GuidedTour() {
 
           {/* tour controls */}
           <div className="flex items-center gap-2">
-            <button onClick={handleNext} className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold text-white transition-colors" style={{ background: 'linear-gradient(135deg, #1ED760, #2563eb)', boxShadow: '0 4px 12px rgba(30,215,96,0.4)' }}>
+            <button onClick={handleNext} className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold text-white transition-colors" style={{ background: 'linear-gradient(135deg, #1ED760, #1ED760)', boxShadow: '0 4px 12px rgba(30,215,96,0.4)' }}>
               <ArrowRight className="w-4 h-4" /> {isLast ? 'Finish' : 'Next'}
             </button>
             <button onClick={stop} title="Skip tour" className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-colors">

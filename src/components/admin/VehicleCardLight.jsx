@@ -6,11 +6,11 @@ import { Truck, MoreVertical, Pencil, Trash2, ExternalLink, FileText, ChevronDow
 import OwnershipCard from '@/components/common/OwnershipCard';
 
 const TYPE_THEMES = {
-  truck:   { bg: '#F0F7FF', icon: '#1ED760', glow: 'rgba(30,215,96,0.18)' },
+  truck:   { bg: '#F0FDF4', icon: '#1ED760', glow: 'rgba(30,215,96,0.18)' },
   tanker:  { bg: '#FFFBEB', icon: '#F59E0B', glow: 'rgba(245,158,11,0.18)' },
   pickup:  { bg: '#F5F3FF', icon: '#8B5CF6', glow: 'rgba(139,92,246,0.18)' },
   trailer: { bg: '#F0FDF4', icon: '#22C55E', glow: 'rgba(34,197,94,0.18)' },
-  other:   { bg: '#F0F7FF', icon: '#1ED760', glow: 'rgba(30,215,96,0.18)' },
+  other:   { bg: '#F0FDF4', icon: '#1ED760', glow: 'rgba(30,215,96,0.18)' },
 };
 
 const STATUS_LABEL = { active: 'Active', maintenance: 'Maintenance', inactive: 'Inactive' };
