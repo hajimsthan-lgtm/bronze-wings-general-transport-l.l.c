@@ -10,6 +10,7 @@ import ClientCard from '@/components/admin/ClientCard';
 import ClientListRow from '@/components/admin/ClientListRow';
 import ClientForm from '@/components/admin/ClientForm';
 import ViewToggle from '@/components/common/ViewToggle';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
@@ -51,10 +52,15 @@ export default function ClientsPanel() {
     <div>
       <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
+          <Select value={mode} onValueChange={setMode}>
+            <SelectTrigger className="w-[150px] h-10 bg-background/60 border-white/10 hover:border-white/20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="analytics"><span className="inline-flex items-center gap-2"><BarChart3 className="w-3.5 h-3.5" />Analytics</span></SelectItem>
+              <SelectItem value="browse"><span className="inline-flex items-center gap-2"><LayoutGrid className="w-3.5 h-3.5" />Browse</span></SelectItem>
+            </SelectContent>
+          </Select>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered.map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status, revenue: revenueMap[c.name] || 0 }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Revenue', key: 'revenue', numeric: true }]} />
           <CsvImportButton entityName="Client" filename="clients" onImported={load} columns={[
