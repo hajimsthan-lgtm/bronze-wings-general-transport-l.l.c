@@ -152,34 +152,28 @@ export default function ContentSidebar() {
                   <div className="morph-divider" style={{ margin: '4px 8px 8px', opacity: 0.7 }} />
                 )}
 
-                {/* collapsible section header */}
+                {/* minimal section header — plain label + divider */}
                 {!collapsed && (
                   <button
                     onClick={() => toggleSection(section.key)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 morph-row"
-                    style={{
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: hasActive ? `${sc}12` : undefined,
-                      boxShadow: hasActive ? `inset 0 0 0 1px ${sc}30` : undefined,
-                    }}>
-                    <span className="flex items-center justify-center rounded-md flex-shrink-0" style={{ width: 18, height: 18 }}>
-                      <section.icon
-                        strokeWidth={2.2}
-                        style={{ width: 13, height: 13, color: hasActive ? sc : 'hsl(var(--muted-foreground))', filter: hasActive ? `drop-shadow(0 0 4px ${sc}88)` : 'none' }} />
-                    </span>
-                    <span className="text-[10px] font-bold tracking-[0.16em] uppercase flex-1 text-left" style={{ color: hasActive ? sc : 'hsl(var(--muted-foreground))' }}>
+                    className="flex items-center gap-2 px-2 pt-1 pb-1.5 transition-all duration-200 group"
+                    style={{ cursor: 'pointer', border: 'none', background: 'transparent' }}>
+                    <span className="text-[10px] font-bold tracking-[0.18em] uppercase flex-1 text-left" style={{ color: hasActive ? sc : 'hsl(var(--muted-foreground))' }}>
                       {t(section.key) || section.label}
                     </span>
                     <ChevronRight
                       strokeWidth={2.5}
                       style={{
-                        width: 14, height: 14,
+                        width: 13, height: 13,
                         color: 'hsl(var(--muted-foreground))',
+                        opacity: 0.6,
                         transform: secCollapsed ? 'rotate(0deg)' : 'rotate(90deg)',
                         transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1)'
                       }} />
                   </button>
+                )}
+                {!collapsed && (
+                  <div className="morph-divider" style={{ margin: '0 4px 6px', opacity: 0.4 }} />
                 )}
 
                 {/* section children — collapsible */}
@@ -204,57 +198,69 @@ export default function ContentSidebar() {
                         if (collapsed) setTooltip(null);
                       }}
                       aria-label={label}
-                      className={`morph-row relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden ${active ? 'morph-row-active' : ''}`}
+                      className={`relative flex items-center rounded-xl transition-all duration-200 select-none overflow-hidden ${collapsed ? 'morph-row' : ''} ${active && collapsed ? 'morph-row-active' : ''}`}
                       style={{
-                        height: 42,
+                        height: collapsed ? 42 : 36,
                         padding: collapsed ? 0 : '0 10px',
                         justifyContent: collapsed ? 'center' : 'flex-start',
-                        gap: collapsed ? 0 : 11,
-                        marginLeft: collapsed ? 0 : 6,
-                        width: collapsed ? '100%' : 'calc(100% - 6px)',
+                        gap: collapsed ? 0 : 10,
+                        marginLeft: collapsed ? 0 : 0,
+                        width: '100%',
                         border: 'none',
                         cursor: 'pointer',
-                        ...(active ? { background: `linear-gradient(180deg, ${c}1c 0%, ${c}08 100%)` } : {})
+                        ...(active && !collapsed ? { background: `${c}14` } : {}),
+                        ...(!active && lit && !collapsed ? { background: 'rgba(255,255,255,0.04)' } : {}),
                       }}>
 
-                      {/* active left accent bar — glowing inset */}
+                      {/* active left accent bar */}
                       {active && (
                         <span
-                          className="absolute left-0 top-1.5 bottom-1.5 rounded-r-full"
+                          className="absolute left-0 rounded-r-full"
                           style={{
+                            top: collapsed ? 6 : 8,
+                            bottom: collapsed ? 6 : 8,
                             width: 3,
                             background: c,
-                            boxShadow: `0 0 10px ${c}, 0 0 4px ${c}, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                            boxShadow: collapsed ? `0 0 10px ${c}, 0 0 4px ${c}` : 'none',
                           }} />
                       )}
 
-                      {/* morph icon tile with glow */}
-                      <span
-                        className={`relative flex items-center justify-center rounded-lg flex-shrink-0 ${active ? 'morph-tile-pressed' : lit ? 'morph-tile-raised' : 'morph-tile'}`}
-                        style={{
-                          width: collapsed ? 32 : 28,
-                          height: collapsed ? 32 : 28,
-                          ...(active ? { boxShadow: `inset 2px 2px 5px rgba(0,0,0,0.36), inset -1px -1px 2px rgba(255,255,255,0.05), 0 0 0 1px ${c}55, 0 0 14px -2px ${c}66` } : {}),
-                        }}>
-                        <child.icon
-                          strokeWidth={2.1}
-                          fill={active ? c : 'currentColor'}
-                          fillOpacity={active ? 0.22 : 0}
+                      {/* icon — morph tile when collapsed, flat when expanded */}
+                      {collapsed ? (
+                        <span
+                          className={`relative flex items-center justify-center rounded-lg flex-shrink-0 ${active ? 'morph-tile-pressed' : lit ? 'morph-tile-raised' : 'morph-tile'}`}
                           style={{
-                            width: collapsed ? 18 : 16,
-                            height: collapsed ? 18 : 16,
-                            color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
-                            filter: active ? `drop-shadow(0 0 6px ${c})` : lit ? `drop-shadow(0 0 4px ${c}88)` : 'none',
-                            transition: 'all 0.25s ease'
-                          }} />
-                      </span>
+                            width: 32, height: 32,
+                            ...(active ? { boxShadow: `inset 2px 2px 5px rgba(0,0,0,0.36), inset -1px -1px 2px rgba(255,255,255,0.05), 0 0 0 1px ${c}55, 0 0 14px -2px ${c}66` } : {}),
+                          }}>
+                          <child.icon
+                            strokeWidth={2.1}
+                            fill={active ? c : 'currentColor'}
+                            fillOpacity={active ? 0.22 : 0}
+                            style={{
+                              width: 18, height: 18,
+                              color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
+                              filter: active ? `drop-shadow(0 0 6px ${c})` : lit ? `drop-shadow(0 0 4px ${c}88)` : 'none',
+                              transition: 'all 0.25s ease'
+                            }} />
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22 }}>
+                          <child.icon
+                            strokeWidth={2}
+                            style={{
+                              width: 16, height: 16,
+                              color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
+                              transition: 'all 0.2s ease'
+                            }} />
+                        </span>
+                      )}
 
                       {!collapsed && (
                         <span
-                          className="text-[12.5px] font-semibold tracking-wide whitespace-nowrap"
+                          className="text-[13px] font-medium tracking-wide whitespace-nowrap"
                           style={{
-                            color: active ? 'hsl(var(--sidebar-foreground))' : lit ? c : 'hsl(var(--muted-foreground))',
-                            textShadow: active ? `0 0 12px ${c}44` : 'none',
+                            color: active ? 'hsl(var(--sidebar-foreground))' : 'hsl(var(--muted-foreground))',
                           }}>
                           {label}
                         </span>
