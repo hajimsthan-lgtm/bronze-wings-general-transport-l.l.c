@@ -185,20 +185,20 @@ export default function QuotationPreview({ form, settings }) {
             </div>
           </div>
 
-          {/* Spacer */}
-          <div style={{ flex: 1, minHeight: '10px' }} />
-
           {/* Terms & Conditions */}
           {(form.terms_conditions || form.notes) && (
             <div style={{ marginTop: '6px' }}>
               <div style={{ background: '#f0f0f0', color: BLACK, fontWeight: 'bold', fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '3px 6px' }}>
                 TERMS &amp; CONDITIONS
               </div>
-              <div style={{ padding: '3px 6px', fontSize: '8px', color: '#333', lineHeight: 1.5 }}>
+              <div style={{ padding: '3px 6px', fontSize: '8px', color: '#333', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                 {esc(form.terms_conditions || form.notes || '')}
               </div>
             </div>
           )}
+
+          {/* Spacer */}
+          <div style={{ flex: 1, minHeight: '10px' }} />
 
           {/* Signatures */}
           <div style={{ display: 'flex', marginTop: '12px', gap: '8px' }}>

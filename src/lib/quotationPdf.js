@@ -262,9 +262,19 @@ function drawTotals(pdf, y, totals) {
 }
 
 function drawTermsAndSignatures(pdf, q, s, y) {
+  const PAGE_BOTTOM = FOOTER_TOP - 4;
+  const TERMS_LINE_H = 4;
+
   // Terms & Conditions
   if (q.terms_conditions || q.notes) {
     y += 4;
+    // If not enough room for terms header + at least 2 lines, start new page
+    if (y + 12 > PAGE_BOTTOM) {
+      pdf.addPage();
+      drawPageBorder(pdf);
+      y = MARGIN;
+    }
+
     fc(pdf, [240, 240, 240]);
     pdf.rect(CONTENT_X, y, CONTENT_W, 5, 'F');
     pdf.setFont('times', 'bold');
@@ -279,18 +289,29 @@ function drawTermsAndSignatures(pdf, q, s, y) {
     const termsLines = pdf.splitTextToSize(termsText, CONTENT_W - 6);
     let ty = y + 8;
     for (const tl of termsLines) {
-      if (ty > FOOTER_TOP - 30) break;
+      if (ty > PAGE_BOTTOM) {
+        pdf.addPage();
+        drawPageBorder(pdf);
+        ty = MARGIN + 2;
+      }
       pdf.text(tl, CONTENT_X + 3, ty);
-      ty += 4;
+      ty += TERMS_LINE_H;
     }
     y = ty;
   }
 
-  // Signatures
+  // Signatures — ensure they fit on the current page
+  const sigH = 28;
+  if (y + sigH > PAGE_BOTTOM) {
+    pdf.addPage();
+    drawPageBorder(pdf);
+    y = MARGIN;
+  }
+
   const sigW = CONTENT_W / 2;
   const leftX = CONTENT_X;
   const rightX = CONTENT_X + sigW;
-  const sigY = Math.max(y + 6, FOOTER_TOP - 28);
+  const sigY = y + 6;
   const lineY = sigY + 16;
 
   pdf.setFont('times', 'bold');
