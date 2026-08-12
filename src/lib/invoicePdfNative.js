@@ -48,7 +48,7 @@ const CELL_BORDER = [187, 187, 187];
 // COLUMN DEFINITIONS
 // ═══════════════════════════════════════════════════════════
 const COLS_MONTHLY = [
-  { label: 'SL.No',          w: 8,  align: 'center' },
+  { label: 'SL.\nNo',       w: 8,  align: 'center' },
   { label: 'MONTH',          w: 20, align: 'center' },
   { label: 'DESCRIPTION',    w: 52, align: 'center' },
   { label: 'QTY',            w: 14, align: 'center' },
@@ -59,7 +59,7 @@ const COLS_MONTHLY = [
 ];
 
 const COLS_TRIP = [
-  { label: 'SL.No',          w: 7,  align: 'center' },
+  { label: 'SL.\nNo',       w: 7,  align: 'center' },
   { label: 'TRIP\nDATE',     w: 16, align: 'center' },
   { label: 'DESCRIPTION',    w: 75, align: 'center' },
   { label: 'QTY',            w: 10, align: 'center' },
@@ -70,7 +70,7 @@ const COLS_TRIP = [
 ];
 
 const COLS_STANDARD = [
-  { label: 'SL.No',              w: 8,  align: 'center' },
+  { label: 'SL.\nNo',            w: 8,  align: 'center' },
   { label: 'SERVICE',           w: 14, align: 'center' },
   { label: 'DESCRIPTION',       w: 40, align: 'center' },
   { label: 'QTY',               w: 12, align: 'center' },

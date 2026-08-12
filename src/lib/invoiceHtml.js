@@ -175,7 +175,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <table style="width:100%;border-collapse:collapse;font-size:10.5pt;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:6%;">SL.No</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:6%;">SL.<br>No</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">Service</th>
         <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:26%;">Description</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">Qty</th>
@@ -391,7 +391,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <table style="width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">SL.No</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">SL.<br>No</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #000;text-align:center;vertical-align:middle;width:12%;">Month</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 10px;border:1px solid #000;text-align:center;vertical-align:middle;width:22%;">Description</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;padding:8px 6px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">Qty</th>
@@ -607,7 +607,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
   <table style="width:100%;border-collapse:collapse;font-size:10.5px;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">SL.No</th>
+        <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">SL.<br>No</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;vertical-align:middle;width:11%;">Trip<br>Date</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 10px;border:1px solid #000;text-align:center;vertical-align:middle;width:28%;">Description</th>
         <th style="background:#f0f0f0;color:#000;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;padding:7px 5px;border:1px solid #000;text-align:center;vertical-align:middle;width:6%;">Qty</th>
