@@ -26,7 +26,7 @@ export default function ClientNavDropdown() {
 
   return (
     <Select value="all" onValueChange={onSelect}>
-      <SelectTrigger className="w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs">
+      <SelectTrigger className="w-[130px] sm:w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs">
         <SelectValue placeholder={`Select a ${label}…`} />
       </SelectTrigger>
       <SelectContent>

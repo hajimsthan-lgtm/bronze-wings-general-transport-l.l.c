@@ -162,7 +162,7 @@ export default function HeaderSubNav({ className = '' }) {
           />
           <ActiveIcon className="relative w-3.5 h-3.5 flex-shrink-0" style={{ color: `rgb(${activeSt.glow})` }} />
           <span
-            className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap truncate"
+            className="relative text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap"
             style={{ color: 'hsl(var(--foreground))' }}
           >
             {activeLabel}
