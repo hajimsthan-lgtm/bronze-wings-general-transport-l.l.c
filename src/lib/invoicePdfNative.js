@@ -563,51 +563,85 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
 }
 
 // ═══════════════════════════════════════════════════════════
-// DRAW: TABLE TOTAL ROW
+// DRAW: TABLE TOTALS — Column-based (Subtotal/VAT/Total stacked right)
 // ═══════════════════════════════════════════════════════════
 function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
-  const h = 10;
-  const isTrip = invoiceType === 'trip';
-  const style = invStyle || getInvStyle({});
-  const accent = BLACK;
-  const totalText = style.rowText;
+  const wordsBoxW = CONTENT_W - 80;  // left box for amount in words
+  const colX = CONTENT_X + wordsBoxW;
+  const rowH = 7;
+  const totalRowH = 9;
+  const boxH = rowH * 2 + totalRowH;  // subtotal + vat + total
 
-  // Top border
-  dc(pdf, accent);
+  // ── Left: Amount in Words box (dashed border) ──
+  dc(pdf, [51, 51, 51]);
   pdf.setLineWidth(0.3);
-  pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
+  pdf.setLineDashPattern([1.5, 1], 0);
+  pdf.rect(CONTENT_X, y, wordsBoxW, boxH);
+  pdf.setLineDashPattern([], 0);
 
-  // Determine value columns count based on invoice type
-  const valCount = 3;
-  const vals = [totals.subtotal, totals.vat, totals.total];
-  const valCols = cols.slice(-valCount);
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(8);
+  tc(pdf, [51, 51, 51]);
+  pdf.text('Amount in Words:', CONTENT_X + 3, y + 4);
 
-  // Label — "AED" for trip, "Total" for others
-  const labelEndIdx = cols.length - valCount;
-  const labelRight = cols[labelEndIdx - 1].right;
+  const words = numberToWords(totals.total).toUpperCase();
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  const wordsLines = pdf.splitTextToSize(`AED ${words} ONLY`, wordsBoxW - 6);
+  let wy = y + 8;
+  for (const wl of wordsLines) {
+    pdf.text(wl, CONTENT_X + 3, wy);
+    wy += 4;
+  }
+
+  // ── Right: Subtotal / VAT / Total column ──
+  let ry = y;
+
+  // Subtotal row
+  dc(pdf, [224, 224, 224]);
+  pdf.setLineWidth(0.2);
+  pdf.line(colX, ry, CONTENT_RIGHT, ry);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
+  tc(pdf, [51, 51, 51]);
+  pdf.text('Subtotal:', colX + 2, ry + 4.5);
+  pdf.setFont('courier', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  pdf.text(`AED ${fmtMoney(totals.subtotal)}`, CONTENT_RIGHT - 2, ry + 4.5, { align: 'right' });
+  ry += rowH;
+
+  // VAT row
+  dc(pdf, [224, 224, 224]);
+  pdf.setLineWidth(0.2);
+  pdf.line(colX, ry, CONTENT_RIGHT, ry);
+  pdf.setFont('times', 'normal');
+  pdf.setFontSize(9);
+  tc(pdf, [51, 51, 51]);
+  pdf.text('VAT (5%):', colX + 2, ry + 4.5);
+  pdf.setFont('courier', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  pdf.text(`AED ${fmtMoney(totals.vat)}`, CONTENT_RIGHT - 2, ry + 4.5, { align: 'right' });
+  ry += rowH;
+
+  // Total row (double border top & bottom)
+  dc(pdf, BLACK);
+  pdf.setLineWidth(0.5);
+  pdf.line(colX, ry, CONTENT_RIGHT, ry);
   pdf.setFont('times', 'bold');
   pdf.setFontSize(10);
-  if (isTrip) {
-    tc(pdf, BLACK);
-    pdf.text('AED', labelRight - 2, y + h / 2 + 1, { align: 'right' });
-  } else {
-    tc(pdf, BLACK);
-    pdf.text('Total', labelRight - 2, y + h / 2 + 1, { align: 'right' });
-  }
-
-  // Values in last columns
+  tc(pdf, BLACK);
+  pdf.text('Total Amount:', colX + 2, ry + 5.5);
   pdf.setFont('courier', 'bold');
   pdf.setFontSize(10);
-  for (let i = 0; i < valCount; i++) {
-    tc(pdf, BLACK);
-    pdf.text(fmtMoney(vals[i]), valCols[i].right - 2, y + h / 2 + 1, { align: 'right' });
-  }
+  pdf.text(`AED ${fmtMoney(totals.total)}`, CONTENT_RIGHT - 2, ry + 5.5, { align: 'right' });
+  dc(pdf, BLACK);
+  pdf.setLineWidth(0.5);
+  pdf.line(colX, ry + totalRowH, CONTENT_RIGHT, ry + totalRowH);
 
-  // Bottom border only (no vertical dividers)
-  dc(pdf, accent);
-  pdf.setLineWidth(0.3);
-  pdf.line(CONTENT_X, y + h, CONTENT_RIGHT, y + h);
-  return y + h;
+  return y + boxH;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -996,54 +1030,26 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   const { y: tableY, total } = drawTable(pdf, invoice, s, y, invoiceType);
   y = tableY;
 
-  if (invoiceType === 'trip') {
-    // ══ TRIP LAYOUT: Amount Words → Terms → Bank → Signatures(near footer) ══
+  // ══ TERMS → BANK → SIGNATURES (unified for all invoice types) ══
+  // Amount in words is now integrated into the column-based totals box above.
 
-    // Amount in words
-    if (y + 11 > FOOTER_TOP - 2) {
-      pdf.addPage();
-      drawPageBorder(pdf);
-      y = drawLetterhead(pdf, s, MARGIN);
-    }
-    y = drawAmountInWords(pdf, total, y, invoiceType);
-
-    // Terms & Conditions inline (right below amount in words)
-    y += 3;
-    y = drawTermsInline(pdf, y, invoiceType);
-
-    // Bank details
-    y += 4;
-    drawBankDetailsBlock(pdf, s, y, invoiceType);
-
-    // Signatures near footer (with company names)
-    const sigH = 30; // header + gap + line + labels + company name
-    const sigY = FOOTER_TOP - sigH - 2;
-    drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
-
-  } else {
-    // ══ STANDARD / MONTHLY LAYOUT (same as trip model) ══
-
-    // Amount in words
-    if (y + 11 > FOOTER_TOP - 2) {
-      pdf.addPage();
-      drawPageBorder(pdf);
-      y = drawLetterhead(pdf, s, MARGIN);
-    }
-    y = drawAmountInWords(pdf, total, y, invoiceType);
-
-    // Terms & Conditions inline (right below amount in words)
-    y += 3;
-    y = drawTermsInline(pdf, y, invoiceType);
-
-    // Bank details
-    y += 4;
-    drawBankDetailsBlock(pdf, s, y, invoiceType);
-
-    // Signatures near footer (with company names — same as trip model)
-    const sigH = 30;
-    const sigY = FOOTER_TOP - sigH - 2;
-    drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
+  // Terms & Conditions inline (right below totals)
+  y += 3;
+  if (y + 12 > FOOTER_TOP - 2) {
+    pdf.addPage();
+    drawPageBorder(pdf);
+    y = drawLetterhead(pdf, s, MARGIN);
   }
+  y = drawTermsInline(pdf, y, invoiceType);
+
+  // Bank details
+  y += 4;
+  drawBankDetailsBlock(pdf, s, y, invoiceType);
+
+  // Signatures near footer (with company names)
+  const sigH = 30;
+  const sigY = FOOTER_TOP - sigH - 2;
+  drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
 
   // ══ FOOTER BANNER + PAGE NUMBERS (on every page) ══
   const pageCount = pdf.getNumberOfPages();

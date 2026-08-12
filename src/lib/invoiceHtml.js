@@ -189,21 +189,32 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <tbody>
       ${rowsHtml || `<tr><td colspan="9" style="padding:14px;border:1px solid #000;text-align:center;font-size:10.5pt;color:#999;">No items</td></tr>`}
     </tbody>
-    <tfoot>
-      <tr style="">
-        <td colspan="6" style="padding:8px 5px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;">Total</td>
-        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:10.5pt;color:${DK};text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 3px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:bold;font-size:11.5pt;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
-      </tr>
     </tfoot>
   </table>
   </div>
 
-  <!-- Amount in Words -->
-  <div style="position:relative;z-index:1;border-top:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;padding:10px 16px;margin-top:6px;">
-    <span style="font-weight:bold;font-size:11.5pt;color:${MAROON};">AED </span>
-    <span style="font-size:11.5pt;color:#000;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">${numberToWords(total).toUpperCase()}</span>
+  <!-- Totals Area: Amount in Words (left) + Subtotal/VAT/Total column (right) -->
+  <div style="position:relative;z-index:1;margin:6px 0 0;display:flex;gap:0;align-items:stretch;">
+    <!-- Amount in Words box (dashed border) -->
+    <div style="flex:1;border:1.5px dashed #333;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:10pt;font-weight:700;color:#333;margin-bottom:4px;">Amount in Words:</div>
+      <div style="font-size:11pt;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">AED ${numberToWords(total).toUpperCase()} ONLY</div>
+    </div>
+    <!-- Subtotal / VAT / Total rows (right column) -->
+    <div style="flex-shrink:0;width:300px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #E0E0E0;font-size:10.5pt;">
+        <span style="color:#333;font-weight:600;">Subtotal:</span>
+        <span style="color:#000;font-weight:700;${nf2}">AED ${fmtMoney(subtotal)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #E0E0E0;font-size:10.5pt;">
+        <span style="color:#333;font-weight:600;">VAT (5%):</span>
+        <span style="color:#000;font-weight:700;${nf2}">AED ${fmtMoney(vatAmount)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 14px;border-top:2px solid #000;border-bottom:2px solid #000;font-size:11.5pt;">
+        <span style="color:#000;font-weight:800;">Total Amount:</span>
+        <span style="color:#000;font-weight:800;${nf2}">AED ${fmtMoney(total)}</span>
+      </div>
+    </div>
   </div>
 
   <!-- Footer Block: 3 columns — Bank | Receiver | Authorized -->
@@ -393,21 +404,32 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     <tbody>
       ${rowsHtml || `<tr><td colspan="7" style="padding:14px;border:1px solid #000;text-align:center;font-size:10.5pt;color:#999;">No items</td></tr>`}
     </tbody>
-    <tfoot>
-      <tr style="">
-        <td colspan="5" style="padding:8px 10px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;">Total</td>
-        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(subtotal)}</td>
-        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11px;color:#000;text-align:right;${nf2}">${fmtMoney(vatAmount)}</td>
-        <td style="padding:8px 6px;border-top:1px solid #000;border-bottom:1px solid #000;font-weight:800;font-size:11.5px;color:#000;text-align:right;${nf2}">${fmtMoney(total)}</td>
-      </tr>
     </tfoot>
   </table>
   </div>
 
-  <!-- Amount in Words -->
-  <div style="position:relative;z-index:1;margin:10px 28px;padding:10px 16px;border-top:1px solid #E0E0E0;border-bottom:1px solid #E0E0E0;">
-    <span style="font-size:13px;font-weight:800;color:${MAROON};margin-right:8px;">AED</span>
-    <span style="font-size:12px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.8px;">${numberToWords(total).toUpperCase()}</span>
+  <!-- Totals Area: Amount in Words (left) + Subtotal/VAT/Total column (right) -->
+  <div style="position:relative;z-index:1;margin:10px 28px 0;display:flex;gap:0;align-items:stretch;">
+    <!-- Amount in Words box (dashed border) -->
+    <div style="flex:1;border:1.5px dashed #333;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:10px;font-weight:700;color:#333;margin-bottom:4px;">Amount in Words:</div>
+      <div style="font-size:11px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">AED ${numberToWords(total).toUpperCase()} ONLY</div>
+    </div>
+    <!-- Subtotal / VAT / Total rows (right column) -->
+    <div style="flex-shrink:0;width:300px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #E0E0E0;font-size:10.5px;">
+        <span style="color:#333;font-weight:600;">Subtotal:</span>
+        <span style="color:#000;font-weight:700;${nf2}">AED ${fmtMoney(subtotal)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 14px;border-bottom:1px solid #E0E0E0;font-size:10.5px;">
+        <span style="color:#333;font-weight:600;">VAT (5%):</span>
+        <span style="color:#000;font-weight:700;${nf2}">AED ${fmtMoney(vatAmount)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 14px;border-top:2px solid #000;border-bottom:2px solid #000;font-size:11.5px;">
+        <span style="color:#000;font-weight:800;">Total Amount:</span>
+        <span style="color:#000;font-weight:800;${nf2}">AED ${fmtMoney(total)}</span>
+      </div>
+    </div>
   </div>
 
   <!-- Spacer -->
