@@ -404,7 +404,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-5xl max-h-[calc(92vh-80px)] overflow-y-auto rounded-2xl shadow-2xl !top-20 !translate-y-0">
+      <DialogContent className="bg-card/90 backdrop-blur-2xl border border-primary/25 max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%]">
         <DialogHeader className="px-6 pt-5 pb-4 border-b border-border/50">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
