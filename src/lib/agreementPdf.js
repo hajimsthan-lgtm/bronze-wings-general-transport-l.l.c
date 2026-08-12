@@ -91,6 +91,119 @@ function drawPartiesSection(pdf, a, y) {
   return y + h + 2;
 }
 
+const AGREEMENT_COLS = [
+  { label: 'SL.\nNo',    w: 10, align: 'center' },
+  { label: 'DESCRIPTION', w: 80, align: 'center' },
+  { label: 'QTY',         w: 18, align: 'center' },
+  { label: 'UNIT\nPRICE', w: 30, align: 'center' },
+  { label: 'AMOUNT',      w: 56, align: 'center' },
+];
+
+function colPositionsAgreement(cols) {
+  let x = CONTENT_X;
+  return cols.map(c => {
+    const pos = { ...c, x, right: x + c.w, center: x + c.w / 2 };
+    x += c.w;
+    return pos;
+  });
+}
+
+function drawItemsTable(pdf, a, y) {
+  const items = (a.line_items || []).filter(i => i.description && String(i.description).trim());
+  if (items.length === 0) return y;
+
+  const cols = colPositionsAgreement(AGREEMENT_COLS);
+  const h = 12;
+
+  // Header
+  fc(pdf, [240, 240, 240]);
+  pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  for (const col of cols) {
+    const lines = col.label.split('\n');
+    const lineH = 4;
+    const startY = y + (h - lines.length * lineH) / 2 + lineH;
+    const textX = col.align === 'center' ? col.center : col.x + 2;
+    for (let i = 0; i < lines.length; i++) {
+      pdf.text(lines[i], textX, startY + i * lineH, { align: 'center' });
+    }
+  }
+  dc(pdf, BLACK);
+  pdf.setLineWidth(0.3);
+  pdf.rect(CONTENT_X, y, CONTENT_W, h);
+  for (let i = 1; i < cols.length; i++) pdf.line(cols[i].x, y, cols[i].x, y + h);
+  y += h;
+
+  // Rows
+  const contentBottom = FOOTER_TOP - 40;
+  for (let idx = 0; idx < items.length; idx++) {
+    const item = items[idx];
+    const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
+    const descLines = pdf.splitTextToSize(str(item.description ?? ''), descCol.w - 4);
+    const lineH = 3.5;
+    const rowH = Math.max(10, descLines.length * lineH + 3);
+
+    if (y + rowH > contentBottom) {
+      pdf.addPage();
+      drawPageBorder(pdf);
+      y = drawLetterhead(pdf, { logo_url: null, company_name: '' }, MARGIN);
+    }
+
+    fc(pdf, idx % 2 === 0 ? [255, 255, 255] : [250, 251, 252]);
+    pdf.rect(CONTENT_X, y, CONTENT_W, rowH, 'F');
+
+    const qty = Number(item.quantity) || 0;
+    const unitPrice = Number(item.unit_price) || 0;
+    const amount = Number(item.amount ?? (qty * unitPrice));
+    const vCenter = y + rowH / 2 + 1;
+
+    pdf.setFontSize(9);
+    tc(pdf, BLACK);
+    pdf.setFont('times', 'normal');
+    pdf.text(String(idx + 1), cols[0].center, vCenter, { align: 'center' });
+
+    pdf.setFont('times', 'bold');
+    const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
+    for (let i = 0; i < descLines.length; i++) {
+      pdf.text(descLines[i], descCol.x + 2, descStartY + i * lineH, { align: 'left' });
+    }
+
+    pdf.setFont('times', 'normal');
+    pdf.text(String(qty), cols[2].center, vCenter, { align: 'center' });
+
+    pdf.setFont('courier', 'bold');
+    pdf.text(fmtMoney(unitPrice), cols[3].center, vCenter, { align: 'center' });
+    pdf.text(fmtMoney(amount), cols[4].center, vCenter, { align: 'center' });
+
+    dc(pdf, BLACK);
+    pdf.setLineWidth(0.3);
+    pdf.rect(CONTENT_X, y, CONTENT_W, rowH);
+    for (let i = 1; i < cols.length; i++) pdf.line(cols[i].x, y, cols[i].x, y + rowH);
+    y += rowH;
+  }
+
+  // Total row
+  const totalH = 8;
+  fc(pdf, [240, 240, 240]);
+  pdf.rect(CONTENT_X, y, CONTENT_W, totalH, 'F');
+  pdf.setFont('times', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, BLACK);
+  pdf.text('TOTAL:', cols[3].right - 2, y + 5, { align: 'right' });
+  const total = items.reduce((s, i) => s + (Number(i.amount) || (Number(i.quantity) || 0) * (Number(i.unit_price) || 0)), 0);
+  pdf.setFont('courier', 'bold');
+  pdf.text(`AED ${fmtMoney(total)}`, cols[4].right - 2, y + 5, { align: 'right' });
+  dc(pdf, BLACK);
+  pdf.setLineWidth(0.3);
+  pdf.rect(CONTENT_X, y, CONTENT_W, totalH);
+  for (let i = 1; i < cols.length; i++) pdf.line(cols[i].x, y, cols[i].x, y + totalH);
+  y += totalH + 2;
+
+  return y;
+}
+
 function drawTitleAndAmount(pdf, a, y) {
   // Title
   pdf.setFont('times', 'bold');
@@ -104,8 +217,9 @@ function drawTitleAndAmount(pdf, a, y) {
   }
   y = ty + 3;
 
-  // Amount box
-  if (a.amount != null) {
+  // Amount box (only when no line items — items table has its own total)
+  const hasItems = (a.line_items || []).some(i => i.description && String(i.description).trim());
+  if (!hasItems && a.amount != null) {
     dc(pdf, LIGHT_GRAY);
     pdf.setLineWidth(0.3);
     pdf.rect(CONTENT_X, y, CONTENT_W, 10);
@@ -249,6 +363,7 @@ export async function downloadAgreementPDF(agreement, settings = {}) {
   y = drawAgreementBanner(pdf, y);
   y = drawPartiesSection(pdf, agreement, y);
   y = drawTitleAndAmount(pdf, agreement, y);
+  y = drawItemsTable(pdf, agreement, y);
   y = drawContentBody(pdf, agreement, s, y);
   drawSignatures(pdf, agreement, y);
 

@@ -100,8 +100,46 @@ export default function AgreementPreview({ form, settings }) {
             </div>
           </div>
 
-          {/* Agreed Amount */}
-          {form.amount != null && (
+          {/* Line Items Table */}
+          {form.line_items && form.line_items.some(i => i.description && i.description.trim()) && (
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5px', tableLayout: 'fixed', margin: '4px 0' }}>
+              <thead>
+                <tr>
+                  {['SL.\nNo', 'DESCRIPTION', 'QTY', 'UNIT\nPRICE', 'AMOUNT'].map((h, i) => (
+                    <th key={i} style={{
+                      background: '#f0f0f0', color: BLACK, fontWeight: 'bold', fontSize: '8px',
+                      textTransform: 'uppercase', padding: '4px 2px', border: '0.5px solid black',
+                      textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'pre-line',
+                      width: ['8%', '52%', '10%', '15%', '15%'][i],
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {form.line_items.filter(i => i.description && i.description.trim()).map((item, idx) => {
+                  const qty = Number(item.quantity) || 0;
+                  const unitPrice = Number(item.unit_price) || 0;
+                  const amount = Number(item.amount ?? (qty * unitPrice));
+                  return (
+                    <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#FAFBFC' }}>
+                      <td style={{ padding: '4px 2px', border: '0.5px solid black', textAlign: 'center', color: BLACK }}>{idx + 1}</td>
+                      <td style={{ padding: '4px 4px', border: '0.5px solid black', textAlign: 'left', color: BLACK, fontWeight: 'bold', lineHeight: 1.4, wordWrap: 'break-word' }}>{esc(item.description || '')}</td>
+                      <td style={{ padding: '4px 2px', border: '0.5px solid black', textAlign: 'center', color: BLACK }}>{qty}</td>
+                      <td style={{ padding: '4px 2px', border: '0.5px solid black', textAlign: 'center', color: BLACK, fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>{fmtMoney(unitPrice)}</td>
+                      <td style={{ padding: '4px 2px', border: '0.5px solid black', textAlign: 'center', color: BLACK, fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>{fmtMoney(amount)}</td>
+                    </tr>
+                  );
+                })}
+                <tr>
+                  <td colSpan={4} style={{ padding: '4px 6px', border: '0.5px solid black', textAlign: 'right', color: BLACK, fontWeight: 'bold', fontSize: '9px' }}>TOTAL:</td>
+                  <td style={{ padding: '4px 2px', border: '0.5px solid black', textAlign: 'center', color: BLACK, fontWeight: 'bold', fontFamily: "'Courier New', monospace", fontSize: '9px' }}>AED {fmtMoney(form.line_items.filter(i => i.description && i.description.trim()).reduce((s, i) => s + (Number(i.amount) || (Number(i.quantity) || 0) * (Number(i.unit_price) || 0)), 0))}</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+
+          {/* Agreed Amount (only when no line items) */}
+          {(!form.line_items || !form.line_items.some(i => i.description && i.description.trim())) && form.amount != null && (
             <div style={{ border: `0.5px solid ${LIGHT_GRAY}`, display: 'flex', justifyContent: 'space-between', padding: '5px 8px', margin: '4px 0' }}>
               <span style={{ fontSize: '9px', fontWeight: 'bold', color: BLACK }}>AGREED AMOUNT:</span>
               <span style={{ fontSize: '10px', fontWeight: 'bold', color: BLACK, fontFamily: "'Courier New', monospace" }}>AED {fmtMoney(form.amount)}</span>

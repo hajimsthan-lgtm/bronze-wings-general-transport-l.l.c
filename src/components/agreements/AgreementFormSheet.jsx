@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FileDown, Loader2 } from 'lucide-react';
+import { FileDown, Loader2, Plus, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
@@ -38,6 +38,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
     start_date: fmtDate(new Date()),
     end_date: '',
     amount: 0,
+    line_items: [{ description: '', quantity: 1, unit_price: 0, amount: 0 }],
     content: '',
     terms_conditions: 'Payment due within 60 days.',
     notes: '',
@@ -53,6 +54,9 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
         ...agreement,
         start_date: fmtDate(agreement.start_date),
         end_date: fmtDate(agreement.end_date),
+        line_items: (agreement.line_items && agreement.line_items.length > 0)
+          ? agreement.line_items
+          : [{ description: '', quantity: 1, unit_price: 0, amount: 0 }],
       });
     } else {
       setForm(f => ({ ...f, agreement_number: `AG-${Date.now().toString().slice(-6)}` }));
@@ -60,6 +64,23 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
   }, [agreement]);
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const updateItem = (idx, k, v) => {
+    setForm(f => {
+      const items = [...f.line_items];
+      items[idx] = { ...items[idx], [k]: v };
+      const qty = Number(items[idx].quantity) || 0;
+      const price = Number(items[idx].unit_price) || 0;
+      items[idx].amount = Number((qty * price).toFixed(2));
+      return { ...f, line_items: items };
+    });
+  };
+
+  const addItem = () => setForm(f => ({ ...f, line_items: [...f.line_items, { description: '', quantity: 1, unit_price: 0, amount: 0 }] }));
+  const removeItem = (idx) => setForm(f => ({ ...f, line_items: f.line_items.filter((_, i) => i !== idx) }));
+
+  const itemsTotal = (form.line_items || []).reduce((s, i) => s + (Number(i.amount) || 0), 0);
+  const hasItems = (form.line_items || []).some(i => i.description && i.description.trim());
 
   const handleSave = async () => {
     if (!form.client_name?.trim()) {
@@ -72,7 +93,11 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
     }
     setSaving(true);
     try {
-      const payload = { ...form, amount: Number(form.amount) || 0 };
+      const payload = {
+        ...form,
+        amount: hasItems ? itemsTotal : (Number(form.amount) || 0),
+        line_items: hasItems ? form.line_items : [],
+      };
       let result;
       if (isEdit) {
         result = await base44.entities.Agreement.update(agreement.id, payload);
@@ -93,7 +118,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
     setDownloading(true);
     try {
       const s = await getCompanySettings();
-      await downloadAgreementPDF(form, s);
+      await downloadAgreementPDF({ ...form, amount: hasItems ? itemsTotal : form.amount }, s);
       toast({ title: 'PDF downloaded' });
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
@@ -159,7 +184,13 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
               </div>
               <div>
                 <Label>Amount (AED)</Label>
-                <Input type="number" value={form.amount || 0} onChange={e => update('amount', Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={hasItems ? itemsTotal.toFixed(2) : (form.amount || 0)}
+                  onChange={e => update('amount', Number(e.target.value))}
+                  disabled={hasItems}
+                  className={hasItems ? 'bg-muted/50' : ''}
+                />
               </div>
               <div>
                 <Label>Start Date</Label>
@@ -169,6 +200,48 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
                 <Label>End Date</Label>
                 <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
               </div>
+            </div>
+
+            {/* Line Items */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-sm font-semibold">Service Items</Label>
+                <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-4 h-4 mr-1" />Add</Button>
+              </div>
+              <div className="space-y-2">
+                {(form.line_items || []).map((item, idx) => (
+                  <div key={idx} className="grid grid-cols-12 gap-1.5 items-end p-2 rounded-lg border border-border bg-muted/30">
+                    <div className="col-span-5">
+                      <Label className="text-[10px]">Description</Label>
+                      <Input value={item.description || ''} onChange={e => updateItem(idx, 'description', e.target.value)} className="h-8 text-xs" />
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-[10px]">Qty</Label>
+                      <Input type="number" value={item.quantity || 0} onChange={e => updateItem(idx, 'quantity', Number(e.target.value))} className="h-8 text-xs" />
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-[10px]">Unit Price</Label>
+                      <Input type="number" value={item.unit_price || 0} onChange={e => updateItem(idx, 'unit_price', Number(e.target.value))} className="h-8 text-xs" />
+                    </div>
+                    <div className="col-span-2">
+                      <Label className="text-[10px]">Amount</Label>
+                      <Input value={Number(item.amount || 0).toFixed(2)} readOnly className="h-8 text-xs bg-muted/50" />
+                    </div>
+                    <div className="col-span-1">
+                      <Button size="icon" variant="ghost" onClick={() => removeItem(idx)} className="h-8 w-8 text-destructive">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {hasItems && (
+                <div className="flex justify-end mt-2">
+                  <div className="text-sm font-bold border-t border-border pt-1">
+                    Total: <span className="font-mono text-primary">AED {itemsTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -210,7 +283,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
               </div>
             </div>
             <div className="h-[calc(100%-36px)]">
-              <AgreementPreview form={form} settings={settings} />
+              <AgreementPreview form={{ ...form, amount: hasItems ? itemsTotal : form.amount }} settings={settings} />
             </div>
           </div>
         </div>
