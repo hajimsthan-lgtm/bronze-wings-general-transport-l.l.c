@@ -4,7 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import {
   Truck, ChartColumn, UsersRound, Search,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
-  FileSignature, FilePlus2, PanelLeftClose, PanelLeftOpen,
+  FileSignature, FilePlus2, PanelLeftClose, PanelLeftOpen, Files,
   ChevronRight } from 'lucide-react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { railVisibility, useRailCollapsed } from '@/lib/railVisibility';
@@ -34,7 +34,11 @@ const navItems = [
     key: 'accounts', label: 'Accounts', icon: Wallet, color: '#6366f1',
     children: [
       { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, color: '#6366f1' },
-      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet, color: '#f59e0b' },
+      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet, color: '#f59e0b' }]
+  },
+  {
+    key: 'documents', label: 'Documents', icon: Files, color: '#06b6d4',
+    children: [
       { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: FilePlus2, color: '#06b6d4' },
       { key: 'invoices', label: 'Invoices', path: '/accounts/invoices', icon: FileText, color: '#22c55e' },
       { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature, color: '#eab308' }]
