@@ -138,7 +138,7 @@ export default function ContentSidebar() {
 
         <div
           className="relative flex-1 overflow-y-auto thin-scroll flex flex-col"
-          style={{ gap: collapsed ? 0 : 12 }}
+          style={{ gap: collapsed ? 10 : 16 }}
           onMouseLeave={() => setHovered(null)}>
 
           {sections.map((section, sIdx) => {
@@ -149,7 +149,7 @@ export default function ContentSidebar() {
               <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 6 : 4 }}>
                 {/* category boundary divider — visible when collapsed */}
                 {collapsed && sIdx > 0 && (
-                  <div className="morph-divider" style={{ margin: '2px 8px 6px', opacity: 0.7 }} />
+                  <div className="morph-divider" style={{ margin: '4px 8px 8px', opacity: 0.7 }} />
                 )}
 
                 {/* collapsible section header */}
