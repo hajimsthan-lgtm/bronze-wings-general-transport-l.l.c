@@ -893,7 +893,7 @@ function drawFooterBanners(pdf) {
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, [0, 0, 0]); // black text
-  pdf.text('We provide all kinds of general and refrigerated transportation and heavy equipment rental services', PAGE_W / 2, by + 4.5, { align: 'center' });
+  pdf.text('We provide comprehensive general and refrigerated transportation services, along with heavy equipment rental solutions', PAGE_W / 2, by + 4.5, { align: 'center' });
 }
 
 // ═══════════════════════════════════════════════════════════
