@@ -9,7 +9,7 @@ import BrandName from '@/components/layout/BrandName';
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 import { useTheme } from '@/lib/theme';
-import { Settings as SettingsIcon, Bot, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
+import { Settings as SettingsIcon, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
 
 export default function DesktopNav() {
   const [logoUrl, setLogoUrl] = useState('');
@@ -79,8 +79,6 @@ export default function DesktopNav() {
             }
             <BrandName variant="desktop" />
           </Link>
-          {/* Global date filter — sits right of the brand name, controls all pages */}
-          <div style={vanishStyle}><GlobalDateFilter /></div>
         </div>
 
         {/* Center cluster — sub-nav tiles */}
@@ -93,22 +91,8 @@ export default function DesktopNav() {
 
         {/* Right controls — dark glass circles, step-forward at the far right corner */}
         <div className="flex items-center gap-2" style={vanishStyle}>
+          <GlobalDateFilter />
           <LiveClock />
-          <Link
-            to="/agents"
-            aria-label="AI Agents"
-            title="AI Agents"
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[12px] font-semibold uppercase tracking-wider transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))',
-              border: '1px solid rgba(16,185,129,0.35)',
-              color: 'hsl(var(--foreground))',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 3px 12px rgba(16,185,129,0.22)'
-            }}>
-            
-            <Bot className="w-3.5 h-3.5" />
-            <span className="hidden lg:inline">AI Agents</span>
-          </Link>
           <AlertBell />
           <button
             onClick={toggleMode}

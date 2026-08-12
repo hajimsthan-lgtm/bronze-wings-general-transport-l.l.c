@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText } from 'lucide-react';
+import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -64,6 +64,19 @@ export default function Settings() {
     { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
     { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
     { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
+    { key: 'agents', label: 'AI Agents', icon: Bot, render: () => (
+      <Link to="/agents" className="block p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/30 hover:bg-emerald-500/[0.06] transition-all">
+        <div className="flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))', border: '1px solid rgba(16,185,129,0.35)' }}>
+            <Bot className="w-5 h-5" style={{ color: 'rgb(var(--panel-accent-rgb))' }} />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-white">AI Agents</h3>
+            <p className="text-sm text-muted-foreground">Manage contracts, transactions, and trip statuses with AI assistants</p>
+          </div>
+        </div>
+      </Link>
+    ) },
     { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
     { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => (
       <div className="space-y-6">
