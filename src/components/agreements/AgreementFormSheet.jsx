@@ -9,6 +9,8 @@ import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
 import { useToast } from '@/components/ui/use-toast';
+import AgreementPreview from '@/components/agreements/AgreementPreview';
+import ClientAutocomplete from '@/components/quotations/ClientAutocomplete';
 
 function fmtDate(d) {
   if (!d) return '';
@@ -22,6 +24,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
   const isEdit = !!agreement;
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [settings, setSettings] = useState({});
   const [form, setForm] = useState({
     agreement_number: '',
     client_name: '',
@@ -39,6 +42,10 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
     terms_conditions: 'Payment due within 60 days.',
     notes: '',
   });
+
+  useEffect(() => {
+    getCompanySettings().then(setSettings).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (agreement) {
@@ -85,8 +92,8 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const settings = await getCompanySettings();
-      await downloadAgreementPDF(form, settings);
+      const s = await getCompanySettings();
+      await downloadAgreementPDF(form, s);
       toast({ title: 'PDF downloaded' });
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
@@ -97,101 +104,114 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto bg-background">
-        <SheetHeader>
+      <SheetContent className="w-full sm:max-w-6xl overflow-hidden bg-background p-0 flex flex-col">
+        <SheetHeader className="px-6 py-4 border-b border-border flex-shrink-0">
           <SheetTitle>{isEdit ? 'Edit Agreement' : 'New Agreement'}</SheetTitle>
-          <SheetDescription>Create an agreement using the invoice letterhead.</SheetDescription>
+          <SheetDescription>Left: fill in details · Right: live PDF preview</SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-4 px-4 pb-8">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
-              <Label>Agreement Number</Label>
-              <Input value={form.agreement_number} onChange={e => update('agreement_number', e.target.value)} />
+        <div className="flex-1 flex overflow-hidden">
+          {/* LEFT: Form */}
+          <div className="w-1/2 overflow-y-auto px-6 py-4 space-y-4 border-r border-border">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <Label>Agreement Number</Label>
+                <Input value={form.agreement_number} onChange={e => update('agreement_number', e.target.value)} />
+              </div>
+              <ClientAutocomplete form={form} update={update} />
+              <div>
+                <Label>Contact Person</Label>
+                <Input value={form.contact_person || ''} onChange={e => update('contact_person', e.target.value)} />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input value={form.client_phone || ''} onChange={e => update('client_phone', e.target.value)} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input value={form.client_email || ''} onChange={e => update('client_email', e.target.value)} />
+              </div>
+              <div>
+                <Label>TRN</Label>
+                <Input value={form.client_trn || ''} onChange={e => update('client_trn', e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <Label>Address</Label>
+                <Input value={form.client_address || ''} onChange={e => update('client_address', e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <Label>Agreement Title *</Label>
+                <Input value={form.title || ''} onChange={e => update('title', e.target.value)} />
+              </div>
+              <div>
+                <Label>Type</Label>
+                <select
+                  value={form.agreement_type || 'service'}
+                  onChange={e => update('agreement_type', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm ring-offset-background"
+                >
+                  <option value="service">Service</option>
+                  <option value="rental">Rental</option>
+                  <option value="transport">Transport</option>
+                  <option value="partnership">Partnership</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <Label>Amount (AED)</Label>
+                <Input type="number" value={form.amount || 0} onChange={e => update('amount', Number(e.target.value))} />
+              </div>
+              <div>
+                <Label>Start Date</Label>
+                <Input type="date" value={form.start_date || ''} onChange={e => update('start_date', e.target.value)} />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
+              </div>
             </div>
-            <div className="col-span-2">
-              <Label>Client Name *</Label>
-              <Input value={form.client_name || ''} onChange={e => update('client_name', e.target.value)} />
+
+            <div>
+              <Label>Agreement Content</Label>
+              <Textarea
+                value={form.content || ''}
+                onChange={e => update('content', e.target.value)}
+                rows={6}
+                placeholder="Enter the full agreement body text..."
+              />
             </div>
             <div>
-              <Label>Contact Person</Label>
-              <Input value={form.contact_person || ''} onChange={e => update('contact_person', e.target.value)} />
+              <Label>Terms & Conditions</Label>
+              <Textarea value={form.terms_conditions || ''} onChange={e => update('terms_conditions', e.target.value)} rows={3} />
             </div>
             <div>
-              <Label>Phone</Label>
-              <Input value={form.client_phone || ''} onChange={e => update('client_phone', e.target.value)} />
+              <Label>Notes</Label>
+              <Textarea value={form.notes || ''} onChange={e => update('notes', e.target.value)} rows={2} />
             </div>
-            <div>
-              <Label>Email</Label>
-              <Input value={form.client_email || ''} onChange={e => update('client_email', e.target.value)} />
-            </div>
-            <div>
-              <Label>TRN</Label>
-              <Input value={form.client_trn || ''} onChange={e => update('client_trn', e.target.value)} />
-            </div>
-            <div className="col-span-2">
-              <Label>Address</Label>
-              <Input value={form.client_address || ''} onChange={e => update('client_address', e.target.value)} />
-            </div>
-            <div className="col-span-2">
-              <Label>Agreement Title *</Label>
-              <Input value={form.title || ''} onChange={e => update('title', e.target.value)} />
-            </div>
-            <div>
-              <Label>Type</Label>
-              <select
-                value={form.agreement_type || 'service'}
-                onChange={e => update('agreement_type', e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-input px-3 py-2 text-sm ring-offset-background"
-              >
-                <option value="service">Service</option>
-                <option value="rental">Rental</option>
-                <option value="transport">Transport</option>
-                <option value="partnership">Partnership</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <Label>Amount (AED)</Label>
-              <Input type="number" value={form.amount || 0} onChange={e => update('amount', Number(e.target.value))} />
-            </div>
-            <div>
-              <Label>Start Date</Label>
-              <Input type="date" value={form.start_date || ''} onChange={e => update('start_date', e.target.value)} />
-            </div>
-            <div>
-              <Label>End Date</Label>
-              <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
+
+            <div className="flex gap-2 pt-2 pb-6">
+              <Button onClick={handleSave} disabled={saving} className="flex-1">
+                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
+              </Button>
+              <Button onClick={handleDownload} disabled={downloading} variant="outline">
+                {downloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
+                PDF
+              </Button>
             </div>
           </div>
 
-          <div>
-            <Label>Agreement Content</Label>
-            <Textarea
-              value={form.content || ''}
-              onChange={e => update('content', e.target.value)}
-              rows={8}
-              placeholder="Enter the full agreement body text..."
-            />
-          </div>
-          <div>
-            <Label>Terms & Conditions</Label>
-            <Textarea value={form.terms_conditions || ''} onChange={e => update('terms_conditions', e.target.value)} rows={3} />
-          </div>
-          <div>
-            <Label>Notes</Label>
-            <Textarea value={form.notes || ''} onChange={e => update('notes', e.target.value)} rows={2} />
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button onClick={handleSave} disabled={saving} className="flex-1">
-              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
-            </Button>
-            <Button onClick={handleDownload} disabled={downloading} variant="outline">
-              {downloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
-              PDF
-            </Button>
+          {/* RIGHT: Live Preview */}
+          <div className="w-1/2 overflow-hidden bg-muted/10">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live Preview
+              </div>
+            </div>
+            <div className="h-[calc(100%-36px)]">
+              <AgreementPreview form={form} settings={settings} />
+            </div>
           </div>
         </div>
       </SheetContent>
