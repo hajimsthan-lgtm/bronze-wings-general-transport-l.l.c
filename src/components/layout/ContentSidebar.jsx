@@ -13,9 +13,9 @@ import { railVisibility, useRailCollapsed } from '@/lib/railVisibility';
    full-width icon+label rows, active row as a neon-bordered pill. */
 const navItems = [
   {
-    key: 'operations', label: 'Operations', icon: Route, color: '#3b82f6',
+    key: 'operations', label: 'Operations', icon: Route, color: '#00f2c3',
     children: [
-      { key: 'trips', label: 'Trips', path: '/trips', icon: Route, color: '#3b82f6' },
+      { key: 'trips', label: 'Trips', path: '/trips', icon: Route, color: '#00f2c3' },
       { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, color: '#f97316' }]
   },
   {
