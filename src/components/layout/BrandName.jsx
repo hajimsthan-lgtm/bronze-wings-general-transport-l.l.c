@@ -7,10 +7,10 @@ export default function BrandName({ variant = 'desktop' }) {
 
   return (
     <div className="leading-tight relative">
-      <span className={`relative inline-block font-extrabold tracking-tight ${nameSize} brand-shine`}>
+      <span className={`relative inline-block font-extrabold tracking-tight hidden ${nameSize} brand-shine`}>
         Bronze Wings
       </span>
-      <span className={`block uppercase ${subTracking} text-white/40 ${subSize}`}>{sub}</span>
-    </div>
-  );
+      <span className={`block uppercase hidden ${subTracking} text-white/40 ${subSize}`}>{sub}</span>
+    </div>);
+
 }
