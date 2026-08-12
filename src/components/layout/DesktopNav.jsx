@@ -28,12 +28,12 @@ export default function DesktopNav() {
     const main = document.querySelector('main');
     if (!main) return;
     const onScroll = () => {
-      if (!scrollingRef.current) { scrollingRef.current = true; setScrolling(true); }
+      if (!scrollingRef.current) {scrollingRef.current = true;setScrolling(true);}
       clearTimeout(scrollTimer.current);
-      scrollTimer.current = setTimeout(() => { scrollingRef.current = false; setScrolling(false); }, 150);
+      scrollTimer.current = setTimeout(() => {scrollingRef.current = false;setScrolling(false);}, 150);
     };
     main.addEventListener('scroll', onScroll, { capture: true, passive: true });
-    return () => { main.removeEventListener('scroll', onScroll, { capture: true }); clearTimeout(scrollTimer.current); };
+    return () => {main.removeEventListener('scroll', onScroll, { capture: true });clearTimeout(scrollTimer.current);};
   }, []);
 
   const vanishStyle = { opacity: scrolling ? 0 : 1, transition: 'opacity 0.15s ease', pointerEvents: scrolling ? 'none' : 'auto' };
@@ -64,7 +64,7 @@ export default function DesktopNav() {
             <div className="relative">
                 <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.28) 0%, transparent 70%)' }} />
                 {logoUrl ?
-              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
+              <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain hidden" style={{
                 border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
                 boxShadow: '-3px -3px 7px rgba(255,255,255,0.05), 4px 4px 10px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 4px rgba(0,0,0,0.25), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)'
               }} /> :
@@ -105,9 +105,9 @@ export default function DesktopNav() {
             style={{
               background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
               border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
-              color: 'hsl(var(--muted-foreground))',
-            }}
-          >
+              color: 'hsl(var(--muted-foreground))'
+            }}>
+            
             {mode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           <Link
