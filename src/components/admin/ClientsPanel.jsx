@@ -15,7 +15,7 @@ import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Plus, Search, Building2, BarChart3, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Building2 } from 'lucide-react';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 
 export default function ClientsPanel() {
@@ -52,13 +52,13 @@ export default function ClientsPanel() {
     <div>
       <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value={mode} onValueChange={setMode}>
-            <SelectTrigger className="w-[150px] h-10 bg-background/60 border-white/10 hover:border-white/20">
-              <SelectValue />
+          <Select value="all" onValueChange={(id) => id === 'all' ? null : navigate(`/admin/clients/${id}`)}>
+            <SelectTrigger className="w-[160px] h-10 bg-background/60 border-white/10 hover:border-white/20">
+              <SelectValue placeholder="Select a client…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="analytics"><span className="inline-flex items-center gap-2"><BarChart3 className="w-3.5 h-3.5" />Analytics</span></SelectItem>
-              <SelectItem value="browse"><span className="inline-flex items-center gap-2"><LayoutGrid className="w-3.5 h-3.5" />Browse</span></SelectItem>
+              <SelectItem value="all">All clients</SelectItem>
+              {items.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
