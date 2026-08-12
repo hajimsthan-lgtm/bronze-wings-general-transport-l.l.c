@@ -92,14 +92,7 @@ export default function Quotations() {
   return (
     <div className="professional-page-bg min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <PageHeader
-          icon={FileText}
-          title="Quotation Generator"
-          description="Create and manage client quotations with invoice letterhead."
-          action={<Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Quotation</Button>}
-        />
-
-        {/* Toolbar: search bar (left) + client dropdown (right) */}
+        {/* Toolbar: search bar (left) + client dropdown (right) + new button */}
         <div className="flex items-center gap-3 mb-5">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -125,6 +118,7 @@ export default function Quotations() {
               </SelectContent>
             </Select>
           </div>
+          <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Quotation</Button>
         </div>
 
         {/* List */}

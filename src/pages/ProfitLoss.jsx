@@ -122,27 +122,6 @@ export default function ProfitLoss() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader icon={PiggyBank} title={t('profit_loss')} description="Financial overview"
-        action={<div className="flex items-center gap-2">
-          <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
-          <ExportButtons
-            data={[
-              { category: 'Trip Revenue', amount: totalRevenue },
-              ...chartData.map(c => ({ category: `Expense: ${c.name}`, amount: -c.value })),
-              { category: 'Fuel (trip-linked)', amount: -totalFuel },
-              { category: 'Trip Costs (tolls, other)', amount: -tripCosts },
-              { category: 'Net Profit', amount: netProfit },
-            ]}
-            filename="profit_loss"
-            columns={[
-              { label: 'Category', key: 'category' },
-              { label: 'Amount (AED)', key: 'amount', numeric: true },
-            ]}
-            title="Profit & Loss"
-            options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
-          />
-        </div>} />
-
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
       </div>

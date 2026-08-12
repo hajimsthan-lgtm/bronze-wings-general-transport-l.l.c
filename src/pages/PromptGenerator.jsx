@@ -174,16 +174,6 @@ export default function PromptGenerator() {
 
   return (
     <div className="space-y-6 pb-28">
-      <div className="flex items-center gap-3">
-        <div className="hud-icon-tile w-12 h-12">
-          <Wand2 className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-white">Prompt Generator</h1>
-          <p className="text-sm text-muted-foreground">Pick a platform & model, describe your idea — get a massive, model-optimized prompt.</p>
-        </div>
-      </div>
-
       {/* Platform */}
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">1 · Target platform</p>

@@ -98,8 +98,6 @@ export default function Soa() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader icon={FileText} title={t('soa')} description="Client account statements" />
-
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} clientName={reportClient === 'all' ? '' : reportClient} dateRange={dateRange} />
       </div>

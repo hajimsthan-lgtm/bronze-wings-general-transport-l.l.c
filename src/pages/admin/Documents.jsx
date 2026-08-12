@@ -31,9 +31,11 @@ export default function Documents() {
 
   return (
     <div>
-      <PageHeader icon={FileText} title={t('documents')} description={`${filtered.length} documents`}
-        action={<div className="flex items-center gap-2"><ExportButtons data={filtered} filename="documents" title="Documents" columns={[{ label: 'Title', key: 'title' }, { label: 'Type', key: 'type' }, { label: 'Related To', key: 'related_entity' }, { label: 'Expiry', key: 'expiry_date' }, { label: 'Status', key: 'status' }]} /><Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button></div>} />
-      <div className="relative mb-5"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input value={search} onChange={e => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" /></div>
+        <ExportButtons data={filtered} filename="documents" title="Documents" columns={[{ label: 'Title', key: 'title' }, { label: 'Type', key: 'type' }, { label: 'Related To', key: 'related_entity' }, { label: 'Expiry', key: 'expiry_date' }, { label: 'Status', key: 'status' }]} />
+        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+      </div>
 
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={FileText} title={t('no_data')} /> : (
         <div className="space-y-2">

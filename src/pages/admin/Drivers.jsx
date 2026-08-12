@@ -71,16 +71,7 @@ function DriversTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="hud-icon-tile w-12 h-12">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Drivers Portal</h1>
-            <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
             <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>

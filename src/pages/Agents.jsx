@@ -98,16 +98,6 @@ export default function Agents() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in-up">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="hud-icon-tile w-12 h-12">
-          <Bot className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">AI Agents</h1>
-          <p className="text-sm text-white/50">Your assistants for contracts, transactions, and trips.</p>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {AGENTS.map((a) => {
           const Icon = a.icon;

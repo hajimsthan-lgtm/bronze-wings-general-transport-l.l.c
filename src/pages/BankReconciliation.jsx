@@ -113,16 +113,7 @@ export default function BankReconciliation() {
     <div className="professional-page-bg min-h-screen pb-28 md:pb-20">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
         {/* header + toggle */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="hud-icon-tile w-12 h-12">
-              <Landmark className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Bank Reconciliation Statement</h1>
-              <p className="text-sm text-muted-foreground">Record deposits & withdrawals — running balance is calculated automatically.</p>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
             <button onClick={() => setView('statement')} className={`sub-tab ${view === 'statement' ? 'sub-tab-active' : ''}`}>Statement</button>
             <button onClick={() => setView('report')} className={`sub-tab ${view === 'report' ? 'sub-tab-active' : ''}`}>Report</button>

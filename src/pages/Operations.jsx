@@ -329,16 +329,6 @@ export default function Operations() {
             onImported={() => { refetchTrips(); refetchInvoices(); }}
           />
         </div>
-        <PageHeader
-          icon={Truck}
-          title={t('trips')}
-          description={mode === 'contract'
-            ? `${contracts.length} ${t('monthly_contract').toLowerCase()}`
-            : mode === 'all'
-              ? `${trips.length} ${t('trips').toLowerCase()} · ${contracts.length} ${t('monthly_contract').toLowerCase()}`
-              : `${trips.length} total trips`}
-        />
-
         {/* All operations controls moved to the sticky sub-head bar (TopBar slot) */}
 
         {loading ? (

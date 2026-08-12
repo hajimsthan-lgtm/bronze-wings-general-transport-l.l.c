@@ -93,14 +93,7 @@ export default function Agreements() {
   return (
     <div className="professional-page-bg min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <PageHeader
-          icon={FileSignature}
-          title="Agreement Generator"
-          description="Create and manage client agreements with invoice letterhead."
-          action={<Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Agreement</Button>}
-        />
-
-        {/* Toolbar: search bar + client dropdown */}
+        {/* Toolbar: search bar + client dropdown + new button */}
         <div className="flex items-center gap-3 mb-5">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -126,6 +119,7 @@ export default function Agreements() {
               </SelectContent>
             </Select>
           </div>
+          <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Agreement</Button>
         </div>
 
         {loading ? (

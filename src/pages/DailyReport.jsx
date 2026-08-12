@@ -106,24 +106,6 @@ export default function DailyReport() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader icon={FileText} title={t('daily_report')} description={`${formatDate(dateFrom)} — ${formatDate(dateTo)}`}
-        action={<div className="flex items-center gap-2">
-          <AllTransactionsExport trips={trips} expenses={expenses} fuelRecords={fuelRecords} dateRange={dateRange} />
-          <ExportButtons
-            data={trips.map(tr => ({ trip_date: tr.trip_date, route: `${tr.from_location} → ${tr.to_location}`, driver_name: tr.driver_name, vehicle_plate: tr.vehicle_plate, revenue: tr.revenue }))}
-            filename="daily_report"
-            columns={[
-              { label: 'Date', key: 'trip_date' },
-              { label: 'Route', key: 'route' },
-              { label: 'Driver', key: 'driver_name' },
-              { label: 'Vehicle', key: 'vehicle_plate' },
-              { label: 'Revenue', key: 'revenue', numeric: true },
-            ]}
-            title="Daily Report"
-            options={{ dateRange: `${formatDate(dateFrom)} - ${formatDate(dateTo)}` }}
-          />
-        </div>} />
-
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <AllTransactionsExport trips={trips} expenses={expenses} fuelRecords={fuelRecords} dateRange={dateRange} />
       </div>
