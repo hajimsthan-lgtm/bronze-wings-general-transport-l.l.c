@@ -661,39 +661,6 @@
 
   .glow-primary { box-shadow: 0 0 0 1px rgba(var(--panel-accent-rgb),0.35), 0 0 12px rgba(var(--panel-accent-rgb),0.22); }
 
-  /* ===== Atmospheric blue gradient page background ===== */
-  .dashboard-deep-bg {
-    position: relative;
-    background:
-      radial-gradient(ellipse 60% 50% at 82% 6%, rgba(45, 106, 79, 0.12), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 78% 12%, rgba(253, 251, 247, 0.5), transparent 50%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-elevated)) 100%);
-    overflow: hidden;
-  }
-  .dashboard-deep-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 22px 22px;
-    pointer-events: none;
-    opacity: 0.4;
-    z-index: 0;
-  }
-  .dashboard-deep-bg > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ===== Solid charcoal card override ===== */
-  .black-card {
-    background: #1a1a1a !important;
-    border: 1px solid #2a2a2a !important;
-    box-shadow: none !important;
-  }
-  .black-card::before {
-    display: none !important;
-  }
 
   /* ========== Glass Panel (larger) ========== */
   .glass-panel {
@@ -876,20 +843,6 @@
   }
   .btn-lightning:active { transform: translateY(0) scale(0.98); }
 
-  /* ========== Hero BG ========== */
-  .transport-hero-bg {
-    background:
-      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(var(--panel-accent-rgb), 0.14), transparent 70%),
-      radial-gradient(ellipse 45% 35% at 85% 10%, rgba(14, 165, 233, 0.10), transparent 70%),
-      hsl(var(--background));
-  }
-
-  /* ========== Dot Grid Overlay ========== */
-  .dot-grid-overlay {
-    background-image: radial-gradient(circle, rgba(var(--panel-accent-rgb), 0.07) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-
   /* ========== Professional Page BG (blue gradient) ========== */
   .professional-page-bg {
     background:
@@ -899,34 +852,7 @@
     min-height: 100vh;
   }
 
-  /* alt page backdrops (re-themed blue) */
-  .kinetic-obsidian-bg {
-    background-color: hsl(var(--background));
-    background-image:
-      linear-gradient(rgba(var(--panel-accent-rgb),0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(var(--panel-accent-rgb),0.06) 1px, transparent 1px);
-    background-size: 46px 46px;
-    background-position: -1px -1px;
-    background-attachment: fixed;
-    background-repeat: repeat;
-  }
-  .bolt-atmosphere-bg {
-    background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(var(--panel-accent-rgb),0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 45% at 50% 100%, rgba(var(--panel-accent-rgb),0.06) 0%, transparent 60%),
-      linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-elevated)) 100%);
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-  }
-
   /* ========== Gradient Text — blue ========== */
-  .gradient-text-bronze {
-    background: linear-gradient(135deg, rgb(var(--panel-accent2-rgb)), rgb(var(--panel-accent-rgb)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
   .text-gradient {
     background: linear-gradient(135deg, rgb(var(--panel-accent2-rgb)) 0%, rgb(var(--panel-accent-rgb)) 50%, rgb(var(--panel-accent-rgb)) 100%);
     -webkit-background-clip: text;
@@ -1491,12 +1417,6 @@
     -webkit-text-fill-color: transparent;
     animation: brand-sheen 4s linear infinite;
   }
-  .animate-twinkle { animation: twinkle 2.2s ease-in-out infinite; }
-  .animate-wave-glow { animation: wave-glow 8s ease-in-out infinite; will-change: transform, opacity; }
-  /* Pulsing blue border glow for the main glass panel */
-  .animate-border-pulse {
-    animation: border-pulse 4.5s ease-in-out infinite;
-  }
   /* Pulsing halo for gradient card icons */
   .animate-halo {
     animation: halo-pulse 2.6s ease-in-out infinite;
@@ -1506,20 +1426,8 @@
     animation: shimmer-sweep 1.6s ease-in-out infinite;
   }
 
-  .animate-lightning { animation: lightning-flash 3.5s ease-in-out infinite; }
-  .animate-thunder { animation: thunder-pulse 2.4s ease-in-out infinite; }
-  .animate-neon-flicker { animation: neon-flicker 4s linear infinite; }
   .animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
-  .animate-spin-slow { animation: spin 8s linear infinite; }
   .animate-float { animation: float 3.5s ease-in-out infinite; will-change: transform; }
-  .animate-truck-drive { animation: truck-drive 9s linear infinite; }
-  .animate-road-stripes { animation: road-stripes 0.8s linear infinite; }
-  .animate-tl-red { animation: tl-red 3s linear infinite; }
-  .animate-tl-yellow { animation: tl-yellow 3s linear infinite; }
-  .animate-tl-green { animation: tl-green 3s linear infinite; }
-  .animate-crane-lift { animation: crane-lift 3.2s ease-in-out infinite; }
-  .animate-crane-swing { animation: crane-swing 3.2s ease-in-out infinite; }
-  .animate-cargo-bob { animation: cargo-bob 2.4s ease-in-out infinite; }
 
   @keyframes stagger-in {
     from { opacity: 0; transform: translateY(12px) scale(0.98); }
@@ -1545,10 +1453,6 @@
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
   }
-  @keyframes border-pulse {
-    0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06), 0 0 40px rgba(var(--panel-accent-rgb),0.05), 0 20px 60px rgba(0,0,0,0.45); }
-    50% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(var(--panel-accent-rgb),0.16), 0 0 70px rgba(var(--panel-accent-rgb),0.12), 0 20px 60px rgba(0,0,0,0.45); }
-  }
   @keyframes halo-pulse {
     0%, 100% { opacity: 0.45; transform: scale(1); }
     50% { opacity: 0.85; transform: scale(1.18); }
@@ -1557,106 +1461,22 @@
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-  @keyframes lightning-flash {
-    0%, 92%, 100% { opacity: 0.9; }
-    93% { opacity: 1; }
-    94% { opacity: 0.6; }
-    95% { opacity: 1; }
-    96% { opacity: 0.8; }
-    97% { opacity: 1; }
-  }
-  @keyframes thunder-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--panel-accent-rgb), 0.3); }
-    50% { box-shadow: 0 0 16px 3px rgba(var(--panel-accent-rgb), 0.4); }
-  }
-  @keyframes neon-flicker {
-    0%, 100% { opacity: 1; }
-    41% { opacity: 1; }
-    42% { opacity: 0.75; }
-    43% { opacity: 1; }
-    45% { opacity: 0.5; }
-    46% { opacity: 1; }
-  }
   @keyframes glow-pulse {
     0%, 100% { filter: drop-shadow(0 0 3px rgba(var(--panel-accent-rgb), 0.3)); }
     50% { filter: drop-shadow(0 0 10px rgba(var(--panel-accent-rgb), 0.5)); }
   }
-  @keyframes live-pulse {
-    0% { box-shadow: 0 0 0 0 hsl(var(--danger) / 0.7); }
-    70% { box-shadow: 0 0 0 8px hsl(var(--danger) / 0); }
-    100% { box-shadow: 0 0 0 0 hsl(var(--danger) / 0); }
-  }
-  @keyframes eq-bounce {
-    0%, 100% { transform: scaleY(0.3); }
-    50% { transform: scaleY(1); }
-  }
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-6px); }
-  }
-  @keyframes truck-drive {
-    0% { transform: translateX(-15%); }
-    100% { transform: translateX(115%); }
-  }
-  @keyframes road-stripes {
-    from { background-position-x: 0; }
-    to { background-position-x: -48px; }
-  }
-  @keyframes tl-red {
-    0%, 30% { opacity: 1; }
-    33%, 97% { opacity: 0.16; }
-    100% { opacity: 1; }
-  }
-  @keyframes tl-yellow {
-    0%, 63% { opacity: 0.16; }
-    66%, 97% { opacity: 1; }
-    100% { opacity: 0.16; }
-  }
-  @keyframes tl-green {
-    0%, 30% { opacity: 0.16; }
-    33%, 63% { opacity: 1; }
-    66%, 100% { opacity: 0.16; }
-  }
-  @keyframes crane-lift {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(16px); }
-  }
-  @keyframes crane-swing {
-    0%, 100% { transform: rotate(0deg); }
-    50% { transform: rotate(8deg); }
-  }
-  @keyframes cargo-bob {
-    0%, 100% { transform: translateY(0) rotate(-2deg); }
-    50% { transform: translateY(-4px) rotate(2deg); }
-  }
-  @keyframes badgePulse {
-    0%, 100% { box-shadow: 0 0 4px currentColor; }
-    50% { box-shadow: 0 0 12px currentColor, 0 0 20px currentColor; }
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes brand-sheen { to { background-position: 220% center; } }
-  @keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.15); }
-  }
-  @keyframes wave-glow {
-    0%   { transform: translate(0,0) scale(1);    opacity: .5; }
-    25%  { transform: translate(6%, 8%) scale(1.15); opacity: .8; }
-    50%  { transform: translate(-5%, 10%) scale(1.05); opacity: .6; }
-    75%  { transform: translate(7%, -6%) scale(1.2);  opacity: .85; }
-    100% { transform: translate(0,0) scale(1);    opacity: .5; }
-  }
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
-  }
-
-  /* Noise texture for ambient background layer */
-  .bg-noise {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
   /* Shimmer skeleton background */
@@ -2164,47 +1984,11 @@
   border-color: rgba(59,130,246,0.15) !important;
   box-shadow: 0 0 20px -6px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
-.theme-light .dashboard-deep-bg {
-  background:
-    radial-gradient(ellipse 60% 50% at 82% 6%, rgba(59,130,246,0.06), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 78% 12%, rgba(96,165,250,0.04), transparent 50%),
-    linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-elevated)) 100%);
-}
-.theme-light .dashboard-deep-bg::before {
-  background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
-  opacity: 0.3;
-}
 .theme-light .professional-page-bg {
   background:
     radial-gradient(ellipse 60% 50% at 82% 4%, rgba(59,130,246,0.05), transparent 55%),
     radial-gradient(ellipse 50% 40% at 18% 8%, rgba(96,165,250,0.03), transparent 50%),
     linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-elevated)) 100%);
-}
-.theme-light .kinetic-obsidian-bg {
-  background-color: hsl(var(--background));
-  background-image:
-    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-}
-.theme-light .bolt-atmosphere-bg {
-  background-color: hsl(var(--background));
-  background-image:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 50% 100%, rgba(59,130,246,0.03) 0%, transparent 60%),
-    linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background-elevated)) 100%);
-}
-.theme-light .transport-hero-bg {
-  background:
-    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(59,130,246,0.08), transparent 70%),
-    radial-gradient(ellipse 45% 35% at 85% 10%, rgba(96,165,250,0.05), transparent 70%),
-    hsl(var(--background));
-}
-.theme-light .dot-grid-overlay {
-  background-image: radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px);
-}
-.theme-light .black-card {
-  background: #ffffff !important;
-  border-color: rgba(0,0,0,0.08) !important;
 }
 .theme-light .skel-block {
   background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);

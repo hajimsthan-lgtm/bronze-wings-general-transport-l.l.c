@@ -112,10 +112,6 @@ module.exports = {
                     '50%': { transform: 'translateY(-20px) scale(1.05)' }
                 },
                 /* ── NEW: Subtle border glow pulse ── */
-                'border-pulse': {
-                    '0%, 100%': { borderColor: 'rgba(214,40,40,0.08)' },
-                    '50%': { borderColor: 'rgba(214,40,40,0.18)' }
-                }
             },
             animation: {
                 'accordion-down': 'accordion-down 0.2s ease-out',
@@ -124,12 +120,7 @@ module.exports = {
                 'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
                 /* ── NEW ── */
                 'fade-in-up': 'fade-in-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-                'float': 'float 8s ease-in-out infinite',
-                'border-pulse': 'border-pulse 4s ease-in-out infinite',
-            },
-            /* ── NEW: Background image utilities ── */
-            backgroundImage: {
-                'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
+                'float': 'float 8s ease-in-out infinite'
             }
         }
     },
