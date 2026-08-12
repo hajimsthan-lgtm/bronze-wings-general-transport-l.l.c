@@ -123,7 +123,7 @@ export default function Expenses() {
       </div>
 
       <PullToRefresh onRefresh={() => refetch()}>
-        <PageHeader title={t('expenses')} description={`${formatCurrency(totalAmount)} total`} />
+        <PageHeader icon={Receipt} title={t('expenses')} description={`${formatCurrency(totalAmount)} total`} />
         <div className="flex justify-end md:hidden mb-4">
           <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-11 px-4">
             <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}

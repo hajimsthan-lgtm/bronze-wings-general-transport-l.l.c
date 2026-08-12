@@ -106,7 +106,7 @@ export default function DailyReport() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader title={t('daily_report')} description={`${formatDate(dateFrom)} — ${formatDate(dateTo)}`}
+      <PageHeader icon={FileText} title={t('daily_report')} description={`${formatDate(dateFrom)} — ${formatDate(dateTo)}`}
         action={<div className="flex items-center gap-2">
           <AllTransactionsExport trips={trips} expenses={expenses} fuelRecords={fuelRecords} dateRange={dateRange} />
           <ExportButtons

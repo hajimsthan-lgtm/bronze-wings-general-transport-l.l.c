@@ -5,6 +5,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/common/PageHeader';
 import {
   Select,
   SelectContent,
@@ -92,15 +93,12 @@ export default function Agreements() {
   return (
     <div className="professional-page-bg min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold font-display text-foreground">Agreement Generator</h1>
-            <p className="text-sm text-muted-foreground mt-1">Create and manage client agreements with invoice letterhead.</p>
-          </div>
-          <Button onClick={handleNew} className="lightning-btn">
-            <Plus className="w-4 h-4 mr-2" /> New Agreement
-          </Button>
-        </div>
+        <PageHeader
+          icon={FileSignature}
+          title="Agreement Generator"
+          description="Create and manage client agreements with invoice letterhead."
+          action={<Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Agreement</Button>}
+        />
 
         {/* Toolbar: search bar + client dropdown */}
         <div className="flex items-center gap-3 mb-5">

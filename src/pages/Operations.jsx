@@ -330,6 +330,7 @@ export default function Operations() {
           />
         </div>
         <PageHeader
+          icon={Truck}
           title={t('trips')}
           description={mode === 'contract'
             ? `${contracts.length} ${t('monthly_contract').toLowerCase()}`

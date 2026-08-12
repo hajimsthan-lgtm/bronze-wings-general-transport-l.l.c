@@ -5,6 +5,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { downloadQuotationPDF } from '@/lib/quotationPdf';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
+import PageHeader from '@/components/common/PageHeader';
 import {
   Select,
   SelectContent,
@@ -91,16 +92,12 @@ export default function Quotations() {
   return (
     <div className="professional-page-bg min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold font-display text-foreground">Quotation Generator</h1>
-            <p className="text-sm text-muted-foreground mt-1">Create and manage client quotations with invoice letterhead.</p>
-          </div>
-          <Button onClick={handleNew} className="lightning-btn">
-            <Plus className="w-4 h-4 mr-2" /> New Quotation
-          </Button>
-        </div>
+        <PageHeader
+          icon={FileText}
+          title="Quotation Generator"
+          description="Create and manage client quotations with invoice letterhead."
+          action={<Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Quotation</Button>}
+        />
 
         {/* Toolbar: search bar (left) + client dropdown (right) */}
         <div className="flex items-center gap-3 mb-5">

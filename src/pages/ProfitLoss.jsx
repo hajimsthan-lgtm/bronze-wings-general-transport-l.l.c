@@ -122,7 +122,7 @@ export default function ProfitLoss() {
     <div className="relative">
       {/* Ambient handled by app layout */}
 
-      <PageHeader title={t('profit_loss')} description="Financial overview"
+      <PageHeader icon={PiggyBank} title={t('profit_loss')} description="Financial overview"
         action={<div className="flex items-center gap-2">
           <AllTransactionsExport trips={fTrips} expenses={fExpenses} fuelRecords={fFuel} dateRange={dateRange} />
           <ExportButtons

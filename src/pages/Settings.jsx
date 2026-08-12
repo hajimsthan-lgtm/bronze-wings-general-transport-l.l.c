@@ -79,9 +79,12 @@ export default function Settings() {
         <Link to="/" className="p-2 -ml-2 rounded-lg hover:bg-white/[0.06] transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
+        <div className="hud-icon-tile w-12 h-12">
+          <Building2 className="w-6 h-6" />
+        </div>
         <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-white/40">Manage your account and organization</p>
+          <h1 className="text-2xl font-display font-semibold tracking-tight text-white">Settings</h1>
+          <p className="text-sm text-muted-foreground">Manage your account and organization</p>
         </div>
       </header>
 

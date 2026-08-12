@@ -72,9 +72,14 @@ function DriversTab() {
   return (
     <div>
       <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Drivers Portal</h1>
-          <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
+        <div className="flex items-center gap-3">
+          <div className="hud-icon-tile w-12 h-12">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Drivers Portal</h1>
+            <p className="text-sm text-muted-foreground">Performance & fleet insights</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">

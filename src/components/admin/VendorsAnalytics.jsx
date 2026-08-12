@@ -43,9 +43,14 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
   return (
     <div>
       <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Vendors Portal</h1>
-          <p className="text-sm text-muted-foreground">Spend analytics & vendor insights</p>
+        <div className="flex items-center gap-3">
+          <div className="hud-icon-tile w-12 h-12">
+            <Store className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Vendors Portal</h1>
+            <p className="text-sm text-muted-foreground">Spend analytics & vendor insights</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <ExportButtons data={vendors.map((v) => ({ name: v.name, category: v.category, contact: v.contact_person, email: v.email, phone: v.phone, trn: v.trn, status: v.status, spend: spendMap[v.name] || 0 }))} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Spend', key: 'spend', numeric: true }]} />
