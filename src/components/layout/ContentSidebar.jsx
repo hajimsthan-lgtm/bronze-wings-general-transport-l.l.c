@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import {
@@ -6,6 +6,7 @@ import {
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
   FileSignature, FilePlus2,
 } from 'lucide-react';
+import { getCompanySettings } from '@/lib/companySettings';
 
 /* Sectioned sidebar model — search at top, grouped sections, full-width
    icon+label rows, active row as a bordered bronze pill. Always visible. */
@@ -52,6 +53,8 @@ export default function ContentSidebar() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [hovered, setHovered] = useState(null);
+  const [company, setCompany] = useState(null);
+  useEffect(() => { getCompanySettings().then(setCompany); }, []);
 
   const isChildActive = (child) =>
     location.pathname === child.path || location.pathname.startsWith(child.path + '/');
@@ -65,7 +68,7 @@ export default function ContentSidebar() {
     .filter((s) => s.children.length > 0), [q, t]);
 
   return (
-    <div className="hidden md:block fixed left-0 top-20 z-[55] h-[calc(100dvh-5rem)]">
+    <div className="hidden md:block fixed left-0 top-0 z-[55] h-[calc(100dvh-42px)]">
       <aside
         className="relative flex flex-col h-full"
         style={{
@@ -81,6 +84,20 @@ export default function ContentSidebar() {
           overflow: 'visible',
         }}
       >
+        {/* company brand */}
+        <div className="flex items-center gap-2.5 px-1 flex-shrink-0">
+          {company?.logo_url ? (
+            <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" style={{ border: '1px solid hsl(var(--sidebar-border))' }} />
+          ) : (
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--sidebar-accent))', border: '1px solid hsl(var(--sidebar-border))' }}>
+              <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--sidebar-primary))' }}>BW</span>
+            </div>
+          )}
+          <span className="text-[12px] font-bold tracking-wide truncate" style={{ color: 'hsl(var(--sidebar-foreground))' }}>
+            {company?.company_name || 'Bronze Wings'}
+          </span>
+        </div>
+
         {/* search */}
         <div className="relative flex items-center" style={{ marginBottom: 4 }}>
           <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />

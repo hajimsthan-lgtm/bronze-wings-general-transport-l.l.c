@@ -37,7 +37,7 @@ export default function AppLayout() {
           shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
       {showHeader && (
-        <div className="sticky top-0 z-50 md:absolute md:inset-x-0 md:top-0">
+        <div className="sticky top-0 z-50 md:absolute md:left-[196px] md:right-0 md:top-0">
           <MobileHeader />
           <DesktopNav />
           <TopBar />
