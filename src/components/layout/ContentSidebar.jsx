@@ -93,7 +93,7 @@ export default function ContentSidebar() {
               <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--sidebar-primary))' }}>BW</span>
             </div>
           )}
-          <span className="text-[12px] font-bold tracking-wide truncate" style={{ color: 'hsl(var(--sidebar-foreground))' }}>
+          <span className="text-[12px] font-bold tracking-wide leading-tight" style={{ color: 'hsl(var(--sidebar-foreground))' }}>
             {company?.company_name || 'Bronze Wings'}
           </span>
         </div>
