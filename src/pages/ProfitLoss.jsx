@@ -31,15 +31,17 @@ export default function ProfitLoss() {
   const [trips, setTrips] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
+  const [serviceRecords, setServiceRecords] = useState([]);
   const reportClient = useReportClient();
 
   const loadData = useCallback(async () => {
-    const [t, e, f] = await safeAll([
+    const [t, e, f, s] = await safeAll([
       () => base44.entities.Trip.list('-trip_date', 500),
       () => base44.entities.Expense.list('-date', 500),
       () => base44.entities.FuelRecord.list('-date', 500),
+      () => base44.entities.ServiceRecord.list('-date', 500),
     ], 1);
-    setTrips(t); setExpenses(e); setFuelRecords(f);
+    setTrips(t); setExpenses(e); setFuelRecords(f); setServiceRecords(s);
   }, []);
 
   useEffect(() => { loadData().finally(() => setLoading(false)); }, [loadData]);
@@ -51,12 +53,14 @@ export default function ProfitLoss() {
   const fTrips = trips.filter(t => (reportClient === 'all' || t.client_name === reportClient) && (!t.trip_date || (t.trip_date >= _f && t.trip_date <= _t)));
   const fExpenses = expenses.filter(e => !e.date || (e.date >= _f && e.date <= _t));
   const fFuel = fuelRecords.filter(f => !f.date || (f.date >= _f && f.date <= _t));
+  const fServices = serviceRecords.filter(s => (!s.date || (s.date >= _f && s.date <= _t)) && s.status !== 'scheduled');
 
   const totalRevenue = fTrips.reduce((s, t) => s + (t.revenue || 0), 0);
   const totalExpenses = fExpenses.reduce((s, e) => s + (e.amount || 0), 0);
   const totalFuel = fFuel.reduce((s, f) => s + (f.total_cost || 0), 0);
+  const totalMaintenance = fServices.reduce((s, s2) => s + (s2.cost || 0), 0);
   const tripCosts = fTrips.reduce((s, t) => s + (t.fuel_cost || 0) + (t.toll_cost || 0) + (t.other_cost || 0), 0);
-  const totalCosts = totalExpenses + totalFuel + tripCosts;
+  const totalCosts = totalExpenses + totalFuel + totalMaintenance + tripCosts;
   const netProfit = totalRevenue - totalCosts;
 
   const categories = {};
@@ -67,12 +71,12 @@ export default function ProfitLoss() {
   const days = [];
   { const _cf = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]; const _ct = dateTo || new Date().toISOString().split('T')[0]; let d = new Date(_cf); const end = new Date(_ct); while (d <= end) { days.push(d.toISOString().split('T')[0]); d.setDate(d.getDate() + 1); } }
   const incomeSeries = days.map(d => fTrips.filter(t => t.trip_date === d).reduce((s, t) => s + (t.revenue || 0), 0));
-  const expenseSeries = days.map(d => fExpenses.filter(e => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) + fFuel.filter(f => f.date === d).reduce((s, f) => s + (f.total_cost || 0), 0));
+  const expenseSeries = days.map(d => fExpenses.filter(e => e.date === d).reduce((s, e) => s + (e.amount || 0), 0) + fFuel.filter(f => f.date === d).reduce((s, f) => s + (f.total_cost || 0), 0) + fServices.filter(s => s.date === d).reduce((s, s2) => s + (s2.cost || 0), 0));
   const netSeries = days.map((_, i) => incomeSeries[i] - expenseSeries[i]);
 
-  // Donut groups
-  const maintVal = categories['maintenance'] || 0;
-  const otherVal = totalExpenses - maintVal;
+  // Donut groups — maintenance from ServiceRecord + Expense category
+  const maintVal = totalMaintenance + (categories['maintenance'] || 0);
+  const otherVal = totalExpenses - (categories['maintenance'] || 0);
   const donutData = [
     { name: 'Maintenance', value: maintVal, color: '#1ED760' },
     { name: 'Fuel', value: totalFuel, color: '#f97316' },
@@ -86,8 +90,9 @@ export default function ProfitLoss() {
     const rT = trips.filter(t => !t.trip_date || (t.trip_date >= start && t.trip_date <= end)).reduce((s, t) => s + (t.revenue || 0), 0);
     const rE = expenses.filter(e => !e.date || (e.date >= start && e.date <= end)).reduce((s, e) => s + (e.amount || 0), 0);
     const rF = fuelRecords.filter(f => !f.date || (f.date >= start && f.date <= end)).reduce((s, f) => s + (f.total_cost || 0), 0);
+    const rS = serviceRecords.filter(s => (!s.date || (s.date >= start && s.date <= end)) && s.status !== 'scheduled').reduce((s, s2) => s + (s2.cost || 0), 0);
     const rC = trips.filter(t => !t.trip_date || (t.trip_date >= start && t.trip_date <= end)).reduce((s, t) => s + (t.fuel_cost || 0) + (t.toll_cost || 0) + (t.other_cost || 0), 0);
-    return rT - (rE + rF + rC);
+    return rT - (rE + rF + rS + rC);
   };
   const cmp = (shift) => { if (!dateFrom || !dateTo) return null; const prev = computeNet(addDays(dateFrom, -shift), addDays(dateTo, -shift)); if (!prev) return null; return ((netProfit - prev) / Math.abs(prev)) * 100; };
   const cmpWeek = cmp(7), cmpMonth = cmp(30), cmpYear = cmp(365);
@@ -143,11 +148,12 @@ export default function ProfitLoss() {
           <TotalRow label="Total Income" amount={totalRevenue} color="#22c55e" positive />
         </ReportSectionCard>
 
-        <ReportSectionCard index={4} color="#ef4444" title={t('expenses')} action={<SectionExportButtons data={[...chartData.map((c) => ({ item: c.name, amount: c.value })), { item: 'Fuel (trip-linked)', amount: totalFuel }, { item: 'Trip Costs (tolls, other)', amount: tripCosts }]} filename="pnl_expenses" columns={[{ label: 'Item', key: 'item' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Expenses" options={{ dateRange }} />}>
+        <ReportSectionCard index={4} color="#ef4444" title={t('expenses')}           action={<SectionExportButtons data={[...chartData.map((c) => ({ item: c.name, amount: c.value })), { item: 'Fuel (trip-linked)', amount: totalFuel }, { item: 'Maintenance', amount: totalMaintenance }, { item: 'Trip Costs (tolls, other)', amount: tripCosts }]} filename="pnl_expenses" columns={[{ label: 'Item', key: 'item' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Expenses" options={{ dateRange }} />}>
           {chartData.map(item => (
             <Row key={item.name} label={item.name.replace(/_/g, ' ')} amount={item.value} positive={false} />
           ))}
           <Row label={`${t('fuel')} (trip-linked)`} amount={totalFuel} positive={false} />
+          <Row label="Maintenance" amount={totalMaintenance} positive={false} />
           <Row label="Trip Costs (tolls, other)" amount={tripCosts} positive={false} />
           <TotalRow label={`Total ${t('expenses')}`} amount={totalCosts} color="#ef4444" positive={false} />
         </ReportSectionCard>
