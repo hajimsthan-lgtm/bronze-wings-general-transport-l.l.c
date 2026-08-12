@@ -1,4 +1,5 @@
-import { useLocation, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
 import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText, Landmark, Wallet } from 'lucide-react';
 
@@ -66,10 +67,31 @@ export function hasSubNavForPath(pathname) {
 
 export default function HeaderSubNav({ className = '' }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useI18n();
+  const [touchStart, setTouchStart] = useState(null);
   const matchedKey = Object.keys(subNavMap).find((k) => location.pathname === k || location.pathname.startsWith(k + '/'));
   const subNav = matchedKey ? subNavMap[matchedKey] : [];
   if (!subNav.length) return null;
+
+  const activeIndex = Math.max(0, subNav.findIndex((item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/')));
+  const activeItem = subNav[activeIndex] || subNav[0];
+  const activeSt = SUBNAV_STYLE[activeItem.key] || SUBNAV_STYLE.trips;
+  const ActiveIcon = SUBNAV_ICON[activeItem.key] || FileText;
+  const activeLabel = activeItem.label || t(activeItem.key);
+
+  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const handleTouchEnd = (e) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (Math.abs(diff) > 40) {
+      const dir = diff > 0 ? 1 : -1;
+      const next = (activeIndex + dir + subNav.length) % subNav.length;
+      navigate(subNav[next].path);
+    }
+    setTouchStart(null);
+  };
 
   return (
     <>
@@ -119,49 +141,37 @@ export default function HeaderSubNav({ className = '' }) {
         })}
       </nav>
 
-      {/* Mobile: horizontally scrollable row of uniform pills */}
-      <nav className={`sm:hidden flex items-center gap-2 overflow-x-auto no-scrollbar ${className}`}>
-        {subNav.map((item, i) => {
-          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-          const Icon = SUBNAV_ICON[item.key] || FileText;
-          const st = SUBNAV_STYLE[item.key] || SUBNAV_STYLE.trips;
-          const label = item.label || t(item.key);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className="group/sub relative flex items-center gap-2 h-9 px-3.5 rounded-full transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0"
-            >
-              <span
-                className="absolute inset-0 rounded-full transition-all duration-300"
-                style={{
-                  background: isActive
-                    ? `linear-gradient(135deg, rgba(${st.glow},0.22), rgba(${st.glow},0.10))`
-                    : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${isActive ? `rgba(${st.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
-                  boxShadow: isActive
-                    ? `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${st.glow},0.22)`
-                    : 'inset 0 1px 0 rgba(255,255,255,0.04)',
-                }}
-              />
-              <Icon className="relative w-3.5 h-3.5 transition-colors duration-300" style={{
-                color: isActive ? `rgb(${st.glow})` : 'hsl(var(--muted-foreground))',
-              }} />
-              <span
-                className="relative text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap transition-colors duration-300"
-                style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
-              >
-                {label}
-              </span>
-              {isActive && (
-                <span
-                  className="relative h-1.5 w-1.5 rounded-full"
-                  style={{ background: `rgb(${st.glow})`, boxShadow: `0 0 6px rgba(${st.glow},0.7)` }}
-                />
-              )}
-            </Link>
-          );
-        })}
+      {/* Mobile: single swipeable pill — slide left/right to switch */}
+      <nav
+        className={`sm:hidden flex items-center justify-center ${className}`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Link
+          to={activeItem.path}
+          className="group/sub relative flex items-center gap-2 h-9 px-5 rounded-full transition-all duration-300 w-full justify-center"
+          style={{ animation: 'subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) both' }}
+        >
+          <span
+            className="absolute inset-0 rounded-full transition-all duration-300"
+            style={{
+              background: `linear-gradient(135deg, rgba(${activeSt.glow},0.22), rgba(${activeSt.glow},0.10))`,
+              border: `1px solid rgba(${activeSt.glow},0.45)`,
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${activeSt.glow},0.22)`,
+            }}
+          />
+          <ActiveIcon className="relative w-3.5 h-3.5 flex-shrink-0" style={{ color: `rgb(${activeSt.glow})` }} />
+          <span
+            className="relative text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap"
+            style={{ color: 'hsl(var(--foreground))' }}
+          >
+            {activeLabel}
+          </span>
+          <span
+            className="relative h-1.5 w-1.5 rounded-full flex-shrink-0"
+            style={{ background: `rgb(${activeSt.glow})`, boxShadow: `0 0 6px rgba(${activeSt.glow},0.7)` }}
+          />
+        </Link>
       </nav>
     </>
   );
