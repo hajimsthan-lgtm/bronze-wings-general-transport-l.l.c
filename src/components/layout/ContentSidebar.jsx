@@ -91,8 +91,13 @@ export default function ContentSidebar() {
           transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), padding 0.35s cubic-bezier(0.16,1,0.3,1)'
         }}>
 
-        {/* company brand */}
-        <div className="flex items-center gap-2.5 px-1 flex-shrink-0" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+        {/* company brand — click to navigate home */}
+        <button
+          onClick={() => navigate('/')}
+          aria-label="Go to dashboard"
+          title="Go to dashboard"
+          className="flex items-center gap-2.5 px-1 flex-shrink-0 transition-all duration-200 hover:opacity-80"
+          style={{ justifyContent: collapsed ? 'center' : 'flex-start', cursor: 'pointer' }}>
           {company?.logo_url ?
           <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" style={{ border: '1px solid hsl(var(--sidebar-border))' }} /> :
 
@@ -103,7 +108,7 @@ export default function ContentSidebar() {
           <span className="text-[12px] font-bold tracking-wide leading-tight" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
             {company?.company_name || 'Bronze Wings'}
           </span>
-        </div>
+        </button>
 
         {/* search */}
         {!collapsed && (
