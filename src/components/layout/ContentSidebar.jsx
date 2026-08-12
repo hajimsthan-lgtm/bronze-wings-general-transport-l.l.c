@@ -15,33 +15,33 @@ const navItems = [
 {
   key: 'operations', label: 'Operations',
   children: [
-  { key: 'trips', label: 'Trips', path: '/trips', icon: Route },
-  { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt }]
+  { key: 'trips', label: 'Trips', path: '/trips', icon: Route, color: '#1ED760' },
+  { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, color: '#f97316' }]
 
 },
 {
   key: 'admin', label: 'Admin',
   children: [
-  { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck },
-  { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound },
-  { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2 }]
+  { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, color: '#3b82f6' },
+  { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, color: '#a855f7' },
+  { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, color: '#14b8a6' }]
 
 },
 {
   key: 'reports', label: 'Reports',
   children: [
-  { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList },
-  { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp },
-  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText }]
+  { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, color: '#fbbf24' },
+  { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, color: '#22c55e' },
+  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, color: '#ec4899' }]
 
 },
 {
   key: 'accounts', label: 'Accounts',
   children: [
-  { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
-  { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
-  { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: FilePlus2 },
-  { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature }]
+  { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, color: '#6366f1' },
+  { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet, color: '#f59e0b' },
+  { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: FilePlus2, color: '#06b6d4' },
+  { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature, color: '#8b5cf6' }]
 
 }];
 
@@ -164,6 +164,7 @@ export default function ContentSidebar() {
               const active = isChildActive(child);
               const lit = active || hovered === child.key;
               const label = child.label || t(child.key);
+              const c = child.color || 'rgb(var(--panel-accent-rgb))';
               return (
                 <button
                   key={child.key}
@@ -172,7 +173,7 @@ export default function ContentSidebar() {
                     setHovered(child.key);
                     if (collapsed) {
                       const rect = e.currentTarget.getBoundingClientRect();
-                      setTooltip({ label, top: rect.top + rect.height / 2 });
+                      setTooltip({ label, top: rect.top + rect.height / 2, color: c });
                     }
                   }}
                   onMouseLeave={() => {
@@ -180,40 +181,47 @@ export default function ContentSidebar() {
                     if (collapsed) setTooltip(null);
                   }}
                   aria-label={label}
-                  className="relative flex items-center rounded-xl transition-all duration-300 select-none"
+                  className="nav-shine relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden"
                   style={{
                     height: 40,
                     padding: collapsed ? 0 : '0 12px',
                     justifyContent: collapsed ? 'center' : 'flex-start',
                     gap: collapsed ? 0 : 12,
                     width: '100%',
-                    background: active ?
-                    'hsl(var(--sidebar-accent))' :
-                    lit ?
-                    'hsl(var(--sidebar-accent))' :
-                    'transparent',
-                    border: `1px solid ${active ? 'hsl(var(--sidebar-border))' : 'transparent'}`,
-                    boxShadow: active ?
-                    'inset 2px 0 0 0 hsl(var(--sidebar-primary))' :
-                    'none',
-                    cursor: 'pointer'
+                    background: active
+                      ? `${c}14`
+                      : lit
+                        ? `${c}0a`
+                        : 'transparent',
+                    border: `1px solid ${active ? `${c}40` : 'transparent'}`,
+                    boxShadow: active
+                      ? `inset 2px 0 0 0 ${c}, 0 0 18px -6px ${c}66`
+                      : lit
+                        ? `inset 0 0 0 1px ${c}1a`
+                        : 'none',
+                    cursor: 'pointer',
+                    ['--nav-shine-color']: c,
                   }}>
+
+                    {/* shine sweep on hover */}
+                    <span className="nav-shine-sweep" />
 
                     <child.icon
                     strokeWidth={2}
-                    fill={active ? 'hsl(var(--sidebar-primary))' : 'currentColor'}
+                    fill={active ? c : 'currentColor'}
                     fillOpacity={active ? 0.15 : 0}
                     style={{
                       width: collapsed ? 20 : 18,
                       height: collapsed ? 20 : 18,
-                      color: active ? 'hsl(var(--sidebar-primary))' : 'hsl(var(--muted-foreground))',
+                      color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
+                      filter: active ? `drop-shadow(0 0 6px ${c}88)` : 'none',
                       transition: 'all 0.25s ease'
                     }} />
 
                     {!collapsed && (
                     <span
                     className="text-[12.5px] font-medium tracking-wide whitespace-nowrap"
-                    style={{ color: active ? 'hsl(var(--sidebar-foreground))' : 'hsl(var(--muted-foreground))' }}>
+                    style={{ color: active ? 'hsl(var(--sidebar-foreground))' : lit ? c : 'hsl(var(--muted-foreground))' }}>
 
                       {label}
                     </span>
@@ -267,8 +275,8 @@ export default function ContentSidebar() {
               style={{
                 background: 'hsl(var(--popover))',
                 color: 'hsl(var(--popover-foreground))',
-                border: '1px solid hsl(var(--border))',
-                boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+                border: `1px solid ${tooltip.color || 'hsl(var(--border))'}`,
+                boxShadow: `0 6px 18px rgba(0,0,0,0.35), 0 0 14px -4px ${tooltip.color || 'transparent'}66`,
               }}
             >
               {tooltip.label}

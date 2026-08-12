@@ -547,6 +547,24 @@
   @property --row-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
   @keyframes row-border-spin { to { --row-angle: 360deg; } }
 
+  /* ===== Sidebar nav shine sweep ===== */
+  .nav-shine { position: relative; }
+  .nav-shine-sweep {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--nav-shine-color, rgb(var(--panel-accent-rgb))), transparent);
+    opacity: 0;
+    transition: left 0.6s ease, opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: overlay;
+  }
+  .nav-shine:hover .nav-shine-sweep {
+    left: 160%;
+    opacity: 0.12;
+  }
+
   /* ===== Lightning nav tile — electric animated edge ===== */
   @keyframes nav-edge-spin { to { --nav-angle: 360deg; } }
   .nav-edge { position: relative; }
