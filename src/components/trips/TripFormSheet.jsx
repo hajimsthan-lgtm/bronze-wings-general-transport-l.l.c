@@ -404,8 +404,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-5xl max-h-[92vh] overflow-y-auto p-6 rounded-2xl shadow-2xl">
-        <DialogHeader className="mb-5 pb-4 border-b border-border/50">
+      <DialogContent className="bg-card/80 backdrop-blur-2xl border border-white/[0.12] max-w-5xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl">
+        <DialogHeader className="px-6 pt-5 pb-4 border-b border-border/50">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="hud-icon-tile w-10 h-10">
@@ -427,7 +427,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
         </DialogHeader>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
+        <div className="px-6 py-5 grid lg:grid-cols-[1fr_320px] gap-6 items-start">
           <div className="space-y-5">
             {mode === 'trip'
               ? <TripModeFields p={tripCtx} />
@@ -487,7 +487,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         )}
 
         {/* Footer */}
-        <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border">
+        <div className="flex items-center gap-3 px-6 py-4 border-t border-border">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2">
             <X className="w-4 h-4" />
             {t('cancel')}
