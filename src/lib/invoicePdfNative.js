@@ -50,35 +50,35 @@ const CELL_BORDER = [187, 187, 187];
 const COLS_MONTHLY = [
   { label: 'SL.No',          w: 8,  align: 'center' },
   { label: 'MONTH',          w: 20, align: 'center' },
-  { label: 'DESCRIPTION',    w: 52, align: 'left'   },
+  { label: 'DESCRIPTION',    w: 52, align: 'center' },
   { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE', w: 24, align: 'center' },
-  { label: 'AMOUNT',  w: 24, align: 'center' },
+  { label: 'UNIT\nPRICE',    w: 24, align: 'center' },
+  { label: 'AMOUNT',         w: 24, align: 'center' },
   { label: 'VAT\n5%',        w: 20, align: 'center' },
-  { label: 'TOTAL',   w: 32, align: 'center' },
+  { label: 'TOTAL',          w: 32, align: 'center' },
 ];
 
 const COLS_TRIP = [
   { label: 'SL.No',          w: 7,  align: 'center' },
   { label: 'TRIP\nDATE',     w: 16, align: 'center' },
-  { label: 'DESCRIPTION',    w: 75, align: 'left'   },
+  { label: 'DESCRIPTION',    w: 75, align: 'center' },
   { label: 'QTY',            w: 10, align: 'center' },
-  { label: 'UNIT PRICE', w: 21, align: 'center' },
-  { label: 'AMOUNT',  w: 22, align: 'center' },
+  { label: 'UNIT\nPRICE',    w: 21, align: 'center' },
+  { label: 'AMOUNT',         w: 22, align: 'center' },
   { label: 'VAT\n5%',        w: 18, align: 'center' },
-  { label: 'TOTAL',   w: 25, align: 'center' },
+  { label: 'TOTAL',          w: 25, align: 'center' },
 ];
 
 const COLS_STANDARD = [
   { label: 'SL.No',              w: 8,  align: 'center' },
   { label: 'SERVICE',           w: 14, align: 'center' },
-  { label: 'DESCRIPTION',       w: 40, align: 'left'   },
+  { label: 'DESCRIPTION',       w: 40, align: 'center' },
   { label: 'QTY',               w: 12, align: 'center' },
   { label: 'UOM',               w: 12, align: 'center' },
   { label: 'UNIT\nPRICE',       w: 20, align: 'center' },
   { label: 'TOTAL',             w: 20, align: 'center' },
   { label: 'VAT\n5%',           w: 18, align: 'center' },
-  { label: 'TOTAL PRICE', w: 50, align: 'center' },
+  { label: 'TOTAL\nPRICE',      w: 50, align: 'center' },
 ];
 
 // ═══════════════════════════════════════════════════════════
