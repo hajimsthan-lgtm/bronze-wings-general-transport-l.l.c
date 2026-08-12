@@ -91,34 +91,34 @@ export default function ContentSidebar() {
         }}>
 
         {/* company brand */}
-        
+        <div className="flex items-center gap-2.5 px-1 flex-shrink-0" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+          {company?.logo_url ?
+          <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" style={{ border: '1px solid hsl(var(--sidebar-border))' }} /> :
 
-
-
-
-
-
-
-
-
-
-        
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--sidebar-accent))', border: '1px solid hsl(var(--sidebar-border))' }}>
+              <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--sidebar-primary))' }}>BW</span>
+            </div>
+          }
+          <span className="text-[12px] font-bold tracking-wide leading-tight" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
+            {company?.company_name || 'Bronze Wings'}
+          </span>
+        </div>
 
         {/* search */}
-        {!collapsed &&
+        {!collapsed && (
         <div className="relative flex items-center" style={{ marginBottom: 4 }}>
           <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />
-          
-
-
-
-
-
-
-
-
-
-          
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search"
+            className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all"
+            style={{
+              background: 'hsl(var(--input))',
+              border: '1px solid hsl(var(--border))',
+              color: 'hsl(var(--foreground))',
+              outline: 'none'
+            }} />
 
           <span
             className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none"
@@ -127,16 +127,16 @@ export default function ContentSidebar() {
             ⌘P
           </span>
         </div>
-        }
-        {collapsed &&
-        <button
-          onClick={() => railVisibility.setCollapsed(false)}
-          aria-label="Search"
-          className="flex items-center justify-center w-full h-9 rounded-xl transition-all"
-          style={{ background: 'hsl(var(--input))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))' }}>
+        )}
+        {collapsed && (
+          <button
+            onClick={() => railVisibility.setCollapsed(false)}
+            aria-label="Search"
+            className="flex items-center justify-center w-full h-9 rounded-xl transition-all"
+            style={{ background: 'hsl(var(--input))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))' }}>
             <Search className="w-4 h-4" />
           </button>
-        }
+        )}
 
         <div
           className="relative flex-1 overflow-y-auto thin-scroll flex flex-col"
@@ -145,14 +145,14 @@ export default function ContentSidebar() {
 
           {sections.map((section) =>
           <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 4 : 6 }}>
-              {!collapsed &&
-            <span
+              {!collapsed && (
+              <span
               className="text-[10px] font-semibold tracking-[0.14em] uppercase px-2 mb-1"
               style={{ color: 'hsl(var(--muted-foreground))' }}>
 
                 {t(section.key) || section.label}
               </span>
-            }
+              )}
 
               {section.children.map((child) => {
               const active = isChildActive(child);
@@ -195,14 +195,14 @@ export default function ContentSidebar() {
                       transition: 'all 0.25s ease'
                     }} />
 
-                    {!collapsed &&
-                  <span
+                    {!collapsed && (
+                    <span
                     className="text-[12.5px] font-medium tracking-wide whitespace-nowrap"
                     style={{ color: active ? 'hsl(var(--sidebar-foreground))' : 'hsl(var(--muted-foreground))' }}>
 
                       {label}
                     </span>
-                  }
+                    )}
                   </button>);
 
             })}
@@ -230,11 +230,11 @@ export default function ContentSidebar() {
             background: 'hsl(var(--sidebar-accent))',
             border: '1px solid hsl(var(--sidebar-border))',
             color: 'hsl(var(--muted-foreground))',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}>
           {collapsed ?
-          <PanelLeftOpen className="w-4 h-4" strokeWidth={2} style={{ color: 'hsl(var(--sidebar-primary))' }} /> :
-          <>
+            <PanelLeftOpen className="w-4 h-4" strokeWidth={2} style={{ color: 'hsl(var(--sidebar-primary))' }} /> :
+            <>
               <PanelLeftClose className="w-4 h-4" strokeWidth={2} style={{ color: 'hsl(var(--sidebar-primary))' }} />
               <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'hsl(var(--sidebar-foreground))' }}>Collapse</span>
             </>
