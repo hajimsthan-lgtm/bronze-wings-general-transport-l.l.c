@@ -23,7 +23,7 @@ const navItems = [
   key: 'admin', label: 'Admin',
   children: [
   { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, color: '#3b82f6' },
-  { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, color: '#a855f7' },
+  { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, color: '#0ea5e9' },
   { key: 'clients', label: 'Clients', path: '/admin/clients', icon: Building2, color: '#14b8a6' }]
 
 },
@@ -32,7 +32,7 @@ const navItems = [
   children: [
   { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: ClipboardList, color: '#fbbf24' },
   { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: TrendingUp, color: '#22c55e' },
-  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, color: '#ec4899' }]
+  { key: 'soa', label: 'SOA', path: '/reports/soa', icon: FileText, color: '#ef4444' }]
 
 },
 {
@@ -41,7 +41,7 @@ const navItems = [
   { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark, color: '#6366f1' },
   { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet, color: '#f59e0b' },
   { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: FilePlus2, color: '#06b6d4' },
-  { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature, color: '#8b5cf6' }]
+  { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature, color: '#eab308' }]
 
 }];
 
