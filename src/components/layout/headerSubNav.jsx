@@ -4,25 +4,25 @@ import { useI18n } from '@/lib/i18n';
 import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText, Landmark, Wallet, FileSignature, FilePlus2 } from 'lucide-react';
 
 const operationsSubNav = [
-  { key: 'trips', path: '/trips' },
-  { key: 'expenses', path: '/expenses' },
-];
+{ key: 'trips', path: '/trips' },
+{ key: 'expenses', path: '/expenses' }];
+
 const adminSubNav = [
-  { key: 'vehicles', path: '/admin/vehicles' },
-  { key: 'drivers', path: '/admin/drivers' },
-  { key: 'clients', path: '/admin/clients' },
-];
+{ key: 'vehicles', path: '/admin/vehicles' },
+{ key: 'drivers', path: '/admin/drivers' },
+{ key: 'clients', path: '/admin/clients' }];
+
 const accountsSubNav = [
-  { key: 'bank_reconciliation', path: '/reports/bank-reconciliation', label: 'Bank Rec' },
-  { key: 'petty_cash', path: '/accounts/petty-cash', label: 'Petty Cash' },
-  { key: 'quotations', path: '/accounts/quotations', label: 'Quotations' },
-  { key: 'agreements', path: '/accounts/agreements', label: 'Agreements' },
-];
+{ key: 'bank_reconciliation', path: '/reports/bank-reconciliation', label: 'Bank Rec' },
+{ key: 'petty_cash', path: '/accounts/petty-cash', label: 'Petty Cash' },
+{ key: 'quotations', path: '/accounts/quotations', label: 'Quotations' },
+{ key: 'agreements', path: '/accounts/agreements', label: 'Agreements' }];
+
 const reportsSubNav = [
-  { key: 'daily_report', path: '/reports/daily', label: 'Daily' },
-  { key: 'profit_loss', path: '/reports/pnl', label: 'P&L' },
-  { key: 'soa', path: '/reports/soa', label: 'SOA' },
-];
+{ key: 'daily_report', path: '/reports/daily', label: 'Daily' },
+{ key: 'profit_loss', path: '/reports/pnl', label: 'P&L' },
+{ key: 'soa', path: '/reports/soa', label: 'SOA' }];
+
 
 export const subNavMap = {
   '/': [],
@@ -41,7 +41,7 @@ export const subNavMap = {
   '/admin/drivers': adminSubNav,
   '/admin/clients': adminSubNav,
   '/admin/vendors': adminSubNav,
-  '/admin/documents': adminSubNav,
+  '/admin/documents': adminSubNav
 };
 
 export const SUBNAV_ICON = {
@@ -49,7 +49,7 @@ export const SUBNAV_ICON = {
   vehicles: Truck, drivers: Users, clients: Building2,
   daily_report: ClipboardList, profit_loss: TrendingUp, soa: FileText,
   bank_reconciliation: Landmark, petty_cash: Wallet,
-  quotations: FilePlus2, agreements: FileSignature,
+  quotations: FilePlus2, agreements: FileSignature
 };
 
 export const SUBNAV_STYLE = {
@@ -64,7 +64,7 @@ export const SUBNAV_STYLE = {
   bank_reconciliation: { from: '#14b8a6', to: '#0f766e', glow: '20,184,166' },
   petty_cash: { from: '#f59e0b', to: '#b45309', glow: '245,158,11' },
   quotations: { from: '#14b8a6', to: '#0f766e', glow: '20,184,166' },
-  agreements: { from: '#0d9488', to: '#0f766e', glow: '13,148,136' },
+  agreements: { from: '#0d9488', to: '#0f766e', glow: '13,148,136' }
 };
 
 export function hasSubNavForPath(pathname) {
@@ -114,37 +114,37 @@ export default function HeaderSubNav({ className = '' }) {
               key={item.path}
               to={item.path}
               style={{ animation: `subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.07}s both` }}
-              className="group/sub relative flex items-center gap-2 h-9 px-3.5 rounded-full transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0"
-            >
+              className="group/sub relative flex items-center gap-2 h-9 px-3.5 rounded-full transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 hidden">
+              
               <span
-                className="absolute inset-0 rounded-full transition-all duration-300"
+                className="absolute inset-0 rounded-full transition-all duration-300 hidden"
                 style={{
-                  background: isActive
-                    ? `linear-gradient(135deg, rgba(${st.glow},0.22), rgba(${st.glow},0.10))`
-                    : 'rgba(255,255,255,0.03)',
+                  background: isActive ?
+                  `linear-gradient(135deg, rgba(${st.glow},0.22), rgba(${st.glow},0.10))` :
+                  'rgba(255,255,255,0.03)',
                   border: `1px solid ${isActive ? `rgba(${st.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
-                  boxShadow: isActive
-                    ? `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${st.glow},0.22)`
-                    : 'inset 0 1px 0 rgba(255,255,255,0.04)',
-                }}
-              />
+                  boxShadow: isActive ?
+                  `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${st.glow},0.22)` :
+                  'inset 0 1px 0 rgba(255,255,255,0.04)'
+                }} />
+              
               <Icon className="relative w-3.5 h-3.5 transition-colors duration-300" style={{
-                color: isActive ? `rgb(${st.glow})` : 'hsl(var(--muted-foreground))',
+                color: isActive ? `rgb(${st.glow})` : 'hsl(var(--muted-foreground))'
               }} />
               <span
                 className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap transition-colors duration-300"
-                style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
-              >
+                style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}>
+                
                 {label}
               </span>
-              {isActive && (
-                <span
-                  className="relative h-1.5 w-1.5 rounded-full"
-                  style={{ background: `rgb(${st.glow})`, boxShadow: `0 0 6px rgba(${st.glow},0.7)` }}
-                />
-              )}
-            </Link>
-          );
+              {isActive &&
+              <span
+                className="relative h-1.5 w-1.5 rounded-full"
+                style={{ background: `rgb(${st.glow})`, boxShadow: `0 0 6px rgba(${st.glow},0.7)` }} />
+
+              }
+            </Link>);
+
         })}
       </nav>
 
@@ -152,34 +152,34 @@ export default function HeaderSubNav({ className = '' }) {
       <nav
         className={`sm:hidden flex items-center justify-center ${className}`}
         onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
+        onTouchEnd={handleTouchEnd}>
+        
         <Link
           to={activeItem.path}
           className="group/sub relative flex items-center gap-2 h-9 px-5 rounded-full transition-all duration-300 w-full justify-center"
-          style={{ animation: 'subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) both' }}
-        >
+          style={{ animation: 'subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
+          
           <span
             className="absolute inset-0 rounded-full transition-all duration-300"
             style={{
               background: `linear-gradient(135deg, rgba(${activeSt.glow},0.22), rgba(${activeSt.glow},0.10))`,
               border: `1px solid rgba(${activeSt.glow},0.45)`,
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${activeSt.glow},0.22)`,
-            }}
-          />
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${activeSt.glow},0.22)`
+            }} />
+          
           <ActiveIcon className="relative w-3.5 h-3.5 flex-shrink-0" style={{ color: `rgb(${activeSt.glow})` }} />
           <span
             className="relative text-[11px] font-semibold tracking-[0.02em] whitespace-nowrap"
-            style={{ color: 'hsl(var(--foreground))' }}
-          >
+            style={{ color: 'hsl(var(--foreground))' }}>
+            
             {activeLabel}
           </span>
           <span
             className="relative h-1.5 w-1.5 rounded-full flex-shrink-0"
-            style={{ background: `rgb(${activeSt.glow})`, boxShadow: `0 0 6px rgba(${activeSt.glow},0.7)` }}
-          />
+            style={{ background: `rgb(${activeSt.glow})`, boxShadow: `0 0 6px rgba(${activeSt.glow},0.7)` }} />
+          
         </Link>
       </nav>
-    </>
-  );
+    </>);
+
 }
