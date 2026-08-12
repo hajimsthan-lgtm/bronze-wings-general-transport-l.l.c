@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText, Landmark, Wallet } from 'lucide-react';
+import { Route, Receipt, Truck, Users, Building2, ClipboardList, TrendingUp, FileText, Landmark, Wallet, FileSignature, FilePlus2 } from 'lucide-react';
 
 const operationsSubNav = [
   { key: 'trips', path: '/trips' },
@@ -15,6 +15,8 @@ const adminSubNav = [
 const accountsSubNav = [
   { key: 'bank_reconciliation', path: '/reports/bank-reconciliation', label: 'Bank Rec' },
   { key: 'petty_cash', path: '/accounts/petty-cash', label: 'Petty Cash' },
+  { key: 'quotations', path: '/accounts/quotations', label: 'Quotations' },
+  { key: 'agreements', path: '/accounts/agreements', label: 'Agreements' },
 ];
 const reportsSubNav = [
   { key: 'daily_report', path: '/reports/daily', label: 'Daily' },
@@ -30,6 +32,8 @@ export const subNavMap = {
   '/reports/soa': reportsSubNav,
   '/reports/bank-reconciliation': accountsSubNav,
   '/accounts/petty-cash': accountsSubNav,
+  '/accounts/quotations': accountsSubNav,
+  '/accounts/agreements': accountsSubNav,
   '/expenses': operationsSubNav,
   '/trips': operationsSubNav,
   '/contracts': operationsSubNav,
@@ -45,6 +49,7 @@ export const SUBNAV_ICON = {
   vehicles: Truck, drivers: Users, clients: Building2,
   daily_report: ClipboardList, profit_loss: TrendingUp, soa: FileText,
   bank_reconciliation: Landmark, petty_cash: Wallet,
+  quotations: FilePlus2, agreements: FileSignature,
 };
 
 export const SUBNAV_STYLE = {
@@ -58,6 +63,8 @@ export const SUBNAV_STYLE = {
   soa: { from: '#f97316', to: '#9a3412', glow: '249,115,22' },
   bank_reconciliation: { from: '#0ea5e9', to: '#0369a1', glow: '14,165,233' },
   petty_cash: { from: '#f59e0b', to: '#b45309', glow: '245,158,11' },
+  quotations: { from: '#8b5cf6', to: '#6d28d9', glow: '139,92,246' },
+  agreements: { from: '#0d9488', to: '#0f766e', glow: '13,148,136' },
 };
 
 export function hasSubNavForPath(pathname) {

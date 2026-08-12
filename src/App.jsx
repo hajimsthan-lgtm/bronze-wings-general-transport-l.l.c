@@ -47,6 +47,8 @@ const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 const Agents = lazy(() => import('@/pages/Agents'));
+const Quotations = lazy(() => import('@/pages/Quotations'));
+const Agreements = lazy(() => import('@/pages/Agreements'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -87,6 +89,8 @@ const AuthenticatedApp = () => {
           <Route path="/reports/soa" element={<Soa />} />
           <Route path="/reports/bank-reconciliation" element={<BankReconciliation />} />
           <Route path="/accounts/petty-cash" element={<PettyCash />} />
+          <Route path="/accounts/quotations" element={<Quotations />} />
+          <Route path="/accounts/agreements" element={<Agreements />} />
           <Route path="/admin/vehicles" element={<Vehicles />} />
           <Route path="/admin/drivers" element={<Drivers />} />
           <Route path="/admin/clients" element={<Clients />} />

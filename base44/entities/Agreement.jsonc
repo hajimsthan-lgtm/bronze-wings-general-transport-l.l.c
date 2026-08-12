@@ -1,0 +1,129 @@
+{
+  "name": "Agreement",
+  "type": "object",
+  "properties": {
+    "agreement_number": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "contact_person": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "client_address": {
+      "type": "string"
+    },
+    "client_trn": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "agreement_type": {
+      "type": "string",
+      "enum": [
+        "service",
+        "rental",
+        "transport",
+        "partnership",
+        "other"
+      ],
+      "default": "service"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "signed",
+        "active",
+        "expired",
+        "terminated"
+      ],
+      "default": "draft"
+    },
+    "content": {
+      "type": "string"
+    },
+    "terms_conditions": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "client_name",
+    "title",
+    "start_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

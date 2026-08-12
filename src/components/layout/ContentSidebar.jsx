@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import {
   Truck, ChartColumn, UsersRound, Search,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
+  FileSignature, FilePlus2,
 } from 'lucide-react';
 
 /* Sectioned sidebar model — search at top, grouped sections, full-width
@@ -37,6 +38,8 @@ const navItems = [
     children: [
       { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: Landmark },
       { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: Wallet },
+      { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: FilePlus2 },
+      { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: FileSignature },
     ],
   },
 ];
