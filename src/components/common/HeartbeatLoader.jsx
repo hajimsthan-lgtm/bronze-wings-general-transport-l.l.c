@@ -50,20 +50,20 @@ function injectStyles() {
         hsl(var(--muted-foreground)) 22px
       );
       opacity: 0.35;
-      animation: lorry-road-move 0.5s linear infinite;
+      animation: lorry-road-move 1.6s linear infinite;
     }
     @keyframes lorry-road-move {
       from { transform: translateX(0); }
       to   { transform: translateX(-22px); }
     }
-    /* ===== Truck body — drives across the scene ===== */
+    /* ===== Truck body — drives across the scene (slow) ===== */
     .lorry-truck {
       position: absolute;
       bottom: 10px;
       left: -140px;
       width: 130px;
       height: 56px;
-      animation: lorry-drive 2.8s linear infinite, lorry-bob 0.35s ease-in-out infinite alternate;
+      animation: lorry-drive 9s linear infinite, lorry-bob 1.1s ease-in-out infinite alternate;
     }
     @keyframes lorry-drive {
       0%   { left: -140px; }
@@ -80,7 +80,7 @@ function injectStyles() {
     }
     /* ===== Wheels ===== */
     .lorry-wheel {
-      animation: lorry-wheel-spin 0.45s linear infinite;
+      animation: lorry-wheel-spin 1.4s linear infinite;
       transform-origin: center;
     }
     @keyframes lorry-wheel-spin {
@@ -96,11 +96,11 @@ function injectStyles() {
       border-radius: 50%;
       background: hsl(var(--muted-foreground));
       opacity: 0;
-      animation: lorry-puff 2.6s ease-out infinite;
+      animation: lorry-puff 8s ease-out infinite;
     }
-    .lorry-smoke:nth-child(1) { animation-delay: 0.3s; }
-    .lorry-smoke:nth-child(2) { animation-delay: 1.1s; }
-    .lorry-smoke:nth-child(3) { animation-delay: 1.9s; }
+    .lorry-smoke:nth-child(1) { animation-delay: 0.5s; }
+    .lorry-smoke:nth-child(2) { animation-delay: 3s; }
+    .lorry-smoke:nth-child(3) { animation-delay: 5.5s; }
     @keyframes lorry-puff {
       0%   { opacity: 0; transform: translate(0, 0) scale(0.3); }
       10%  { opacity: 0.3; }
