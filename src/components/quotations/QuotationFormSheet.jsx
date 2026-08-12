@@ -8,6 +8,7 @@ import { Plus, Trash2, FileDown, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadQuotationPDF } from '@/lib/quotationPdf';
+import { generateNextQuotationNumber } from '@/lib/quotationSequence';
 import { useToast } from '@/components/ui/use-toast';
 
 function fmtDate(d) {
@@ -51,7 +52,9 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
           : [{ description: '', quantity: 1, unit_price: 0, amount: 0 }],
       });
     } else {
-      setForm(f => ({ ...f, quotation_number: `QT-${Date.now().toString().slice(-6)}` }));
+      generateNextQuotationNumber().then(num => {
+        setForm(f => ({ ...f, quotation_number: num }));
+      });
     }
   }, [quotation]);
 
