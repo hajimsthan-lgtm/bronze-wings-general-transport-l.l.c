@@ -11,6 +11,7 @@ import { downloadQuotationPDF } from '@/lib/quotationPdf';
 import { generateNextQuotationNumber } from '@/lib/quotationSequence';
 import { useToast } from '@/components/ui/use-toast';
 import QuotationPreview from '@/components/quotations/QuotationPreview';
+import ClientAutocomplete from '@/components/quotations/ClientAutocomplete';
 
 function fmtDate(d) {
   if (!d) return '';
@@ -152,10 +153,7 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
                 <Label>Quotation Number</Label>
                 <Input value={form.quotation_number} onChange={e => update('quotation_number', e.target.value)} />
               </div>
-              <div className="col-span-2">
-                <Label>Client Name *</Label>
-                <Input value={form.client_name || ''} onChange={e => update('client_name', e.target.value)} />
-              </div>
+              <ClientAutocomplete form={form} update={update} />
               <div>
                 <Label>Contact Person</Label>
                 <Input value={form.contact_person || ''} onChange={e => update('contact_person', e.target.value)} />
