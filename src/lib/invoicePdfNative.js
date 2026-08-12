@@ -48,37 +48,37 @@ const CELL_BORDER = [187, 187, 187];
 // COLUMN DEFINITIONS
 // ═══════════════════════════════════════════════════════════
 const COLS_MONTHLY = [
-  { label: '#',              w: 8,  align: 'center' },
+  { label: 'SL.No',          w: 8,  align: 'center' },
   { label: 'MONTH',          w: 20, align: 'center' },
   { label: 'DESCRIPTION',    w: 52, align: 'left'   },
   { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE', w: 24, align: 'right'  },
-  { label: 'AMOUNT',  w: 24, align: 'right'  },
-  { label: 'VAT\n5%',        w: 20, align: 'right'  },
-  { label: 'TOTAL',   w: 32, align: 'right'  },
+  { label: 'UNIT PRICE', w: 24, align: 'center' },
+  { label: 'AMOUNT',  w: 24, align: 'center' },
+  { label: 'VAT\n5%',        w: 20, align: 'center' },
+  { label: 'TOTAL',   w: 32, align: 'center' },
 ];
 
 const COLS_TRIP = [
-  { label: '#',              w: 7,  align: 'center' },
+  { label: 'SL.No',          w: 7,  align: 'center' },
   { label: 'TRIP\nDATE',     w: 16, align: 'center' },
   { label: 'DESCRIPTION',    w: 75, align: 'left'   },
   { label: 'QTY',            w: 10, align: 'center' },
-  { label: 'UNIT PRICE', w: 21, align: 'right'  },
-  { label: 'AMOUNT',  w: 22, align: 'right'  },
-  { label: 'VAT\n5%',        w: 18, align: 'right'  },
-  { label: 'TOTAL',   w: 25, align: 'right'  },
+  { label: 'UNIT PRICE', w: 21, align: 'center' },
+  { label: 'AMOUNT',  w: 22, align: 'center' },
+  { label: 'VAT\n5%',        w: 18, align: 'center' },
+  { label: 'TOTAL',   w: 25, align: 'center' },
 ];
 
 const COLS_STANDARD = [
-  { label: 'SL\nNO.',           w: 8,  align: 'center' },
+  { label: 'SL.No',              w: 8,  align: 'center' },
   { label: 'SERVICE',           w: 14, align: 'center' },
   { label: 'DESCRIPTION',       w: 40, align: 'left'   },
   { label: 'QTY',               w: 12, align: 'center' },
   { label: 'UOM',               w: 12, align: 'center' },
-  { label: 'UNIT\nPRICE',       w: 20, align: 'right'  },
-  { label: 'TOTAL',             w: 20, align: 'right'  },
-  { label: 'VAT\n5%',           w: 18, align: 'right'  },
-  { label: 'TOTAL PRICE', w: 50, align: 'right'  },
+  { label: 'UNIT\nPRICE',       w: 20, align: 'center' },
+  { label: 'TOTAL',             w: 20, align: 'center' },
+  { label: 'VAT\n5%',           w: 18, align: 'center' },
+  { label: 'TOTAL PRICE', w: 50, align: 'center' },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -177,7 +177,7 @@ function getInvStyle(s) {
     rowText,
     rowAltBg,
     descAlign: s.inv_desc_align || 'left',
-    numAlign: s.inv_num_align || 'right',
+    numAlign: s.inv_num_align || 'center',
     logoUrl,
     logoSize: s.inv_logo_size || 16,
   };

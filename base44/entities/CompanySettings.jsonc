@@ -84,7 +84,7 @@
         "center",
         "right"
       ],
-      "default": "right"
+      "default": "center"
     },
     "inv_logo_source": {
       "type": "string",
