@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
+import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
@@ -89,9 +90,12 @@ export default function DesktopNav() {
           </div>
         </div>
 
-        {/* Right controls — dark glass circles, step-forward at the far right corner */}
-        <div className="flex items-center gap-2" style={vanishStyle}>
-          <GlobalDateFilter />
+        {/* Right controls — page title + dark glass circles */}
+        <div className="flex items-center gap-3">
+          <PageTitleIndicator />
+          <div className="w-px h-7 hidden lg:block" style={{ background: 'hsl(var(--border))' }} />
+          <div className="flex items-center gap-2" style={vanishStyle}>
+            <GlobalDateFilter />
           <LiveClock />
           <AlertBell />
           <button
@@ -133,6 +137,7 @@ export default function DesktopNav() {
             
             <ArrowRight className="w-4 h-4" />
           </button>
+          </div>
         </div>
       </div>
     </nav>);
