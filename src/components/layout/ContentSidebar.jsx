@@ -91,34 +91,34 @@ export default function ContentSidebar() {
         }}>
 
         {/* company brand */}
-        <div className="flex items-center gap-2.5 px-1 flex-shrink-0 hidden" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
-          {company?.logo_url ?
-          <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" style={{ border: '1px solid hsl(var(--sidebar-border))' }} /> :
+        
 
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--sidebar-accent))', border: '1px solid hsl(var(--sidebar-border))' }}>
-              <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--sidebar-primary))' }}>BW</span>
-            </div>
-          }
-          <span className="text-[12px] font-bold tracking-wide leading-tight hidden" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
-            {company?.company_name || 'Bronze Wings'}
-          </span>
-        </div>
+
+
+
+
+
+
+
+
+
+        
 
         {/* search */}
         {!collapsed &&
         <div className="relative flex items-center" style={{ marginBottom: 4 }}>
           <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
-            className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all hidden"
-            style={{
-              background: 'hsl(var(--input))',
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--foreground))',
-              outline: 'none'
-            }} />
+          
+
+
+
+
+
+
+
+
+
+          
 
           <span
             className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none"
