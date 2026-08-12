@@ -56,6 +56,7 @@ export default function ContentSidebar() {
   const [query, setQuery] = useState('');
   const [hovered, setHovered] = useState(null);
   const [company, setCompany] = useState(null);
+  const [tooltip, setTooltip] = useState(null);
   const collapsed = useRailCollapsed();
   useEffect(() => {getCompanySettings().then(setCompany);}, []);
 
@@ -162,9 +163,18 @@ export default function ContentSidebar() {
                 <button
                   key={child.key}
                   onClick={() => navigate(child.path)}
-                  onMouseEnter={() => setHovered(child.key)}
+                  onMouseEnter={(e) => {
+                    setHovered(child.key);
+                    if (collapsed) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setTooltip({ label, top: rect.top + rect.height / 2 });
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    setHovered(null);
+                    if (collapsed) setTooltip(null);
+                  }}
                   aria-label={label}
-                  title={collapsed ? label : undefined}
                   className="relative flex items-center rounded-xl transition-all duration-300 select-none"
                   style={{
                     height: 40,
@@ -240,6 +250,26 @@ export default function ContentSidebar() {
             </>
           }
         </button>
+
+        {/* hover tooltip bubble — shown only when the rail is collapsed */}
+        {tooltip && (
+          <div
+            className="fixed z-[60] pointer-events-none animate-fade-in"
+            style={{ left: width + 10, top: tooltip.top, transform: 'translateY(-50%)' }}
+          >
+            <div
+              className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
+              style={{
+                background: 'hsl(var(--popover))',
+                color: 'hsl(var(--popover-foreground))',
+                border: '1px solid hsl(var(--border))',
+                boxShadow: '0 6px 18px rgba(0,0,0,0.35)',
+              }}
+            >
+              {tooltip.label}
+            </div>
+          </div>
+        )}
       </aside>
     </div>);
 }
