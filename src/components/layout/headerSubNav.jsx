@@ -109,41 +109,41 @@ export default function HeaderSubNav({ className = '' }) {
           const Icon = SUBNAV_ICON[item.key] || FileText;
           const st = SUBNAV_STYLE[item.key] || SUBNAV_STYLE.trips;
           const label = item.label || t(item.key);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              style={{ animation: `subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) ${i * 0.07}s both` }}
-              className="group/sub relative flex items-center gap-2 h-9 px-3.5 rounded-full transition-all duration-300 hover:-translate-y-0.5 flex-shrink-0 hidden">
-              
-              <span
-                className="absolute inset-0 rounded-full transition-all duration-300 hidden"
-                style={{
-                  background: isActive ?
-                  `linear-gradient(135deg, rgba(${st.glow},0.22), rgba(${st.glow},0.10))` :
-                  'rgba(255,255,255,0.03)',
-                  border: `1px solid ${isActive ? `rgba(${st.glow},0.45)` : 'rgba(255,255,255,0.08)'}`,
-                  boxShadow: isActive ?
-                  `inset 0 1px 0 rgba(255,255,255,0.10), 0 3px 10px rgba(${st.glow},0.22)` :
-                  'inset 0 1px 0 rgba(255,255,255,0.04)'
-                }} />
-              
-              <Icon className="relative w-3.5 h-3.5 transition-colors duration-300" style={{
-                color: isActive ? `rgb(${st.glow})` : 'hsl(var(--muted-foreground))'
-              }} />
-              <span
-                className="relative text-[12px] font-semibold tracking-[0.04em] whitespace-nowrap transition-colors duration-300"
-                style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}>
-                
-                {label}
-              </span>
-              {isActive &&
-              <span
-                className="relative h-1.5 w-1.5 rounded-full"
-                style={{ background: `rgb(${st.glow})`, boxShadow: `0 0 6px rgba(${st.glow},0.7)` }} />
+          return null;
 
-              }
-            </Link>);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         })}
       </nav>
