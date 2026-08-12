@@ -530,7 +530,7 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(9);
   setText(MB_RGB);
-  pdf.text('WE PROVIDE ALL KINDS OF GENERAL AND REFRIGERATED TRANSPORTATION AND HEAVY EQUIPMENT RENTAL SERVICES', pageW / 2, footerY + 5, { align: 'center' });
+  pdf.text('We provide comprehensive general and refrigerated transportation services, along with heavy equipment rental solutions', pageW / 2, footerY + 5, { align: 'center' });
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
