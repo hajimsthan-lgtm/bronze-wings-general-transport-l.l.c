@@ -52,10 +52,10 @@ const COLS_MONTHLY = [
   { label: 'MONTH',          w: 20, align: 'center' },
   { label: 'DESCRIPTION',    w: 52, align: 'left'   },
   { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 24, align: 'right'  },
-  { label: 'AMOUNT\n(AED)',  w: 24, align: 'right'  },
+  { label: 'UNIT PRICE', w: 24, align: 'right'  },
+  { label: 'AMOUNT',  w: 24, align: 'right'  },
   { label: 'VAT\n5%',        w: 20, align: 'right'  },
-  { label: 'TOTAL\n(AED)',   w: 32, align: 'right'  },
+  { label: 'TOTAL',   w: 32, align: 'right'  },
 ];
 
 const COLS_TRIP = [
@@ -63,10 +63,10 @@ const COLS_TRIP = [
   { label: 'TRIP\nDATE',     w: 16, align: 'center' },
   { label: 'DESCRIPTION',    w: 75, align: 'left'   },
   { label: 'QTY',            w: 10, align: 'center' },
-  { label: 'UNIT PRICE\n(AED)', w: 21, align: 'right'  },
-  { label: 'AMOUNT\n(AED)',  w: 22, align: 'right'  },
+  { label: 'UNIT PRICE', w: 21, align: 'right'  },
+  { label: 'AMOUNT',  w: 22, align: 'right'  },
   { label: 'VAT\n5%',        w: 18, align: 'right'  },
-  { label: 'TOTAL\n(AED)',   w: 25, align: 'right'  },
+  { label: 'TOTAL',   w: 25, align: 'right'  },
 ];
 
 const COLS_STANDARD = [
@@ -78,7 +78,7 @@ const COLS_STANDARD = [
   { label: 'UNIT\nPRICE',       w: 20, align: 'right'  },
   { label: 'TOTAL',             w: 20, align: 'right'  },
   { label: 'VAT\n5%',           w: 18, align: 'right'  },
-  { label: 'TOTAL PRICE\n(AED)', w: 50, align: 'right'  },
+  { label: 'TOTAL PRICE', w: 50, align: 'right'  },
 ];
 
 // ═══════════════════════════════════════════════════════════
