@@ -74,27 +74,24 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
       <div className="pointer-events-none absolute -top-24 right-0 w-72 h-72 rounded-full opacity-50" style={{ background: `radial-gradient(circle, ${gradient}, transparent 70%)` }} />
 
       <div className="relative p-6 sm:p-8">
-        {/* Row 1 — greeting + live badge */}
+        {/* Row 1 — WeRate-style welcome header: avatar + greeting + name */}
         <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
-          <div className="flex items-center gap-5 min-w-0">
-            {/* gradient-ring icon */}
-            <span className="relative flex items-center justify-center w-16 h-16 rounded-full flex-shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            {/* profile avatar — gradient ring with initial */}
+            <span className="relative flex items-center justify-center w-14 h-14 rounded-full flex-shrink-0">
               <span className="absolute inset-0 rounded-full" style={{ background: 'conic-gradient(from 180deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)), rgb(var(--panel-accent-rgb)))', padding: '2px', WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px))', mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px))', boxShadow: `0 0 24px -4px ${tone}55` }} />
               <span className="relative flex items-center justify-center w-full h-full rounded-full" style={{ background: 'rgba(10,10,15,0.9)' }}>
-                <GreetIcon className="w-6 h-6" style={{ color: tone }} />
+                <span className="text-lg font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>{userName ? userName.charAt(0).toUpperCase() : 'B'}</span>
               </span>
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/40 mb-1.5">Fleet Command Center</p>
-              <h1 className="text-2xl sm:text-3xl font-heading text-white leading-tight truncate">
-                {greet}
+              <p className="text-[11px] text-white/40 mb-0.5">Welcome back</p>
+              <h1 className="text-xl sm:text-2xl font-heading text-white leading-tight truncate">
+                {userName || 'Bronze Wings'}
               </h1>
-              <p className="text-sm text-white/45 font-body mt-1 truncate">
-                {userName ? `${userName} · ${greet}` : 'Welcome back'}
-              </p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <CalendarDays className="w-3.5 h-3.5 text-white/35" />
-                <p className="text-[12px] text-white/45">{dateStr} · {timeStr}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <GreetIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: tone }} />
+                <p className="text-[12px] text-white/45 truncate">{greet} · {dateStr} · {timeStr}</p>
               </div>
             </div>
           </div>
