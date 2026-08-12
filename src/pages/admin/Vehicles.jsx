@@ -86,15 +86,6 @@ function VehiclesTab() {
     <div>
       <div data-tour data-tour-title="Header & Controls" data-tour-en="Welcome to the Vehicles portal. Use Analytics for a fleet overview or Browse to manage individual vehicles. Export your fleet to Excel or PDF, and tap Add New to register a vehicle." data-tour-ur="ویہکل پورٹل میں خوش آمدید۔ فلیٹ کے جائزے کے لیے اینالیٹکس استعمال کریں یا انفرادی گاڑیوں کو منتظم کرنے کے لیے براؤز کریں۔ فلیٹ کو ایکسل یا پی ڈی ایف پر برآمد کریں، اور نئی گاڑی داخل کرنے کے لیے نیا اضافہ کریں۔" data-tour-ml="വാഹന പോർട്ടലിലേക്ക് സ്വാഗതം. ഫ്ലീറ്റ് അവലോകനത്തിന് അനലിറ്റിക്സ് ഉപയോഗിക്കുക അല്ലെങ്കിൽ വാഹനങ്ങൾ കൈകാര്യം ചെയ്യാൻ ബ്രൗസ് ചെയ്യുക. എക്സൽ അല്ലെങ്കിൽ PDF ലേക്ക് എക്സ്പോർട്ട് ചെയ്യുക." className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value="all" onValueChange={(id) => id === 'all' ? null : navigate(`/admin/vehicles/${id}`)}>
-            <SelectTrigger className="w-[160px] h-10 bg-background/60 border-white/10 hover:border-white/20">
-              <SelectValue placeholder="Select a vehicle…" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All vehicles</SelectItem>
-              {items.map((v) => <SelectItem key={v.id} value={v.id}>{v.plate_number}</SelectItem>)}
-            </SelectContent>
-          </Select>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
           <CsvImportButton entityName="Vehicle" filename="vehicles" onImported={load} columns={[

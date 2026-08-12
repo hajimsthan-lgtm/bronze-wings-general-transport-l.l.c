@@ -73,15 +73,6 @@ function DriversTab() {
     <div>
       <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value="all" onValueChange={(id) => id === 'all' ? null : navigate(`/admin/drivers/${id}`)}>
-            <SelectTrigger className="w-[160px] h-10 bg-background/60 border-white/10 hover:border-white/20">
-              <SelectValue placeholder="Select a driver…" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All drivers</SelectItem>
-              {drivers.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
           <CsvImportButton entityName="Driver" filename="drivers" onImported={load} columns={[

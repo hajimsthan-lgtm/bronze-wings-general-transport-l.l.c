@@ -8,6 +8,7 @@ import BrandName from '@/components/layout/BrandName';
 import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
+import GlobalEntitySelector from '@/components/layout/GlobalEntitySelector';
 import { useRailVisible, railVisibility } from '@/lib/railVisibility';
 import { useTheme } from '@/lib/theme';
 import { Settings as SettingsIcon, ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
@@ -84,11 +85,14 @@ export default function DesktopNav() {
           <PageTitleIndicator />
         </div>
 
-        {/* Center cluster — sub-nav tiles */}
-        <div className="flex items-center gap-2" style={vanishStyle}>
-          {/* Page sub-nav tiles — synced with the left rail visibility */}
-          <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <HeaderSubNav />
+        {/* Center cluster — global entity selectors + sub-nav tiles */}
+        <div className="flex items-center gap-3">
+          <GlobalEntitySelector />
+          <div className="flex items-center gap-2" style={vanishStyle}>
+            {/* Page sub-nav tiles — synced with the left rail visibility */}
+            <div className={`hidden md:flex transition-opacity duration-500 ${railVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <HeaderSubNav />
+            </div>
           </div>
         </div>
 

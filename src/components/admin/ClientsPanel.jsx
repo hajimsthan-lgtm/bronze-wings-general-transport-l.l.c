@@ -10,7 +10,6 @@ import ClientCard from '@/components/admin/ClientCard';
 import ClientListRow from '@/components/admin/ClientListRow';
 import ClientForm from '@/components/admin/ClientForm';
 import ViewToggle from '@/components/common/ViewToggle';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
@@ -52,15 +51,6 @@ export default function ClientsPanel() {
     <div>
       <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <Select value="all" onValueChange={(id) => id === 'all' ? null : navigate(`/admin/clients/${id}`)}>
-            <SelectTrigger className="w-[160px] h-10 bg-background/60 border-white/10 hover:border-white/20">
-              <SelectValue placeholder="Select a client…" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All clients</SelectItem>
-              {items.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
           {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
           <ExportButtons data={filtered.map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status, revenue: revenueMap[c.name] || 0 }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Revenue', key: 'revenue', numeric: true }]} />
           <CsvImportButton entityName="Client" filename="clients" onImported={load} columns={[

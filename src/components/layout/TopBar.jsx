@@ -25,9 +25,11 @@ export default function TopBar() {
           {/* mobile sub-nav tiles — desktop tiles live in the main header */}
           <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1" />
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-            {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
-            {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
-            {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
+            <div className="md:hidden flex items-center gap-2">
+              {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
+              {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
+              {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
+            </div>
             {location.pathname.startsWith('/reports/') && <ReportClientDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
               <button
