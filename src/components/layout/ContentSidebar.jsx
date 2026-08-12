@@ -76,59 +76,61 @@ export default function ContentSidebar() {
   return (
     <div className="hidden md:block fixed left-0 top-0 z-[55] h-[calc(100dvh-42px)]">
       <aside
-        className="relative flex flex-col h-full"
+        className="skeuo-sidebar relative flex flex-col h-full"
         style={{
           width,
-          paddingTop: 16,
-          paddingBottom: 12,
+          paddingTop: 18,
+          paddingBottom: 14,
           paddingLeft: collapsed ? 10 : 14,
           paddingRight: collapsed ? 10 : 14,
           gap: collapsed ? 10 : 14,
-          background: 'hsl(var(--sidebar-background))',
-          borderRight: '1px solid hsl(var(--sidebar-border))',
-          boxShadow: '4px 0 24px rgba(0,0,0,0.3)',
           overflow: 'visible',
           transition: 'width 0.35s cubic-bezier(0.16,1,0.3,1), padding 0.35s cubic-bezier(0.16,1,0.3,1)'
         }}>
+
+        {/* beveled right edge highlight */}
+        <span className="skeuo-sidebar-right-edge" />
 
         {/* company brand — click to navigate home */}
         <button
           onClick={() => navigate('/')}
           aria-label="Go to dashboard"
           title="Go to dashboard"
-          className="flex items-center gap-2.5 px-1 flex-shrink-0 transition-all duration-200 hover:opacity-80"
+          className="flex items-center gap-2.5 px-1 flex-shrink-0 transition-all duration-200"
           style={{ justifyContent: collapsed ? 'center' : 'flex-start', cursor: 'pointer' }}>
           {company?.logo_url ?
-          <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain flex-shrink-0" style={{ border: '1px solid hsl(var(--sidebar-border))' }} /> :
+          <div className="skeuo-brand-frame rounded-xl p-0.5 flex-shrink-0">
+            <img src={company.logo_url} alt="" className="w-8 h-8 rounded-lg object-contain" />
+          </div> :
 
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--sidebar-accent))', border: '1px solid hsl(var(--sidebar-border))' }}>
-              <span className="text-[11px] font-bold" style={{ color: 'hsl(var(--sidebar-primary))' }}>BW</span>
+          <div className="skeuo-brand-frame w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-[11px] font-bold tracking-wide" style={{ color: 'hsl(var(--sidebar-primary))', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>BW</span>
             </div>
           }
-          <span className="text-[12px] font-bold tracking-wide leading-tight" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
+          <span className="text-[12.5px] font-bold tracking-wide leading-tight skeuo-emboss" style={{ color: 'hsl(var(--sidebar-foreground))', display: collapsed ? 'none' : 'inline' }}>
             {company?.company_name || 'Bronze Wings'}
           </span>
         </button>
 
         {/* search */}
         {!collapsed && (
-        <div className="relative flex items-center" style={{ marginBottom: 4 }}>
+        <div className="skeuo-search relative flex items-center rounded-xl" style={{ marginBottom: 4 }}>
           <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: 'hsl(var(--muted-foreground))' }} />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search"
-            className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all"
+            className="w-full h-9 rounded-xl text-xs pl-9 pr-12 transition-all bg-transparent"
             style={{
-              background: 'hsl(var(--input))',
-              border: '1px solid hsl(var(--border))',
+              border: 'none',
               color: 'hsl(var(--foreground))',
-              outline: 'none'
+              outline: 'none',
+              boxShadow: 'none'
             }} />
 
           <span
-            className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none"
-            style={{ color: 'hsl(var(--muted-foreground))', background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }}>
+            className="absolute right-2.5 text-[10px] font-mono px-1.5 py-0.5 rounded-md pointer-events-none skeuo-tile"
+            style={{ color: 'hsl(var(--muted-foreground))' }}>
 
             ⌘P
           </span>
@@ -138,22 +140,21 @@ export default function ContentSidebar() {
           <button
             onClick={() => railVisibility.setCollapsed(false)}
             aria-label="Search"
-            className="flex items-center justify-center w-full h-9 rounded-xl transition-all"
-            style={{ background: 'hsl(var(--input))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--muted-foreground))' }}>
-            <Search className="w-4 h-4" />
+            className="skeuo-search flex items-center justify-center w-full h-9 rounded-xl transition-all">
+            <Search className="w-4 h-4" style={{ color: 'hsl(var(--muted-foreground))' }} />
           </button>
         )}
 
         <div
           className="relative flex-1 overflow-y-auto thin-scroll flex flex-col"
-          style={{ gap: collapsed ? 8 : 20 }}
+          style={{ gap: collapsed ? 10 : 22 }}
           onMouseLeave={() => setHovered(null)}>
 
           {sections.map((section) =>
-          <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 4 : 6 }}>
+          <div key={section.key} className="flex flex-col" style={{ gap: collapsed ? 4 : 5 }}>
               {!collapsed && (
               <span
-              className="text-[10px] font-semibold tracking-[0.14em] uppercase px-2 mb-1"
+              className="skeuo-emboss text-[10px] font-semibold tracking-[0.16em] uppercase px-2 mb-1.5"
               style={{ color: 'hsl(var(--muted-foreground))' }}>
 
                 {t(section.key) || section.label}
@@ -181,24 +182,14 @@ export default function ContentSidebar() {
                     if (collapsed) setTooltip(null);
                   }}
                   aria-label={label}
-                  className="nav-shine relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden"
+                  className={`nav-shine skeuo-nav-row relative flex items-center rounded-xl transition-all duration-300 select-none overflow-hidden ${active ? 'skeuo-nav-row-active' : ''}`}
                   style={{
-                    height: 40,
-                    padding: collapsed ? 0 : '0 12px',
+                    height: 42,
+                    padding: collapsed ? 0 : '0 10px',
                     justifyContent: collapsed ? 'center' : 'flex-start',
-                    gap: collapsed ? 0 : 12,
+                    gap: collapsed ? 0 : 11,
                     width: '100%',
-                    background: active
-                      ? `${c}14`
-                      : lit
-                        ? `${c}0a`
-                        : 'transparent',
-                    border: `1px solid ${active ? `${c}40` : 'transparent'}`,
-                    boxShadow: active
-                      ? `inset 2px 0 0 0 ${c}, 0 0 18px -6px ${c}66`
-                      : lit
-                        ? `inset 0 0 0 1px ${c}1a`
-                        : 'none',
+                    border: 'none',
                     cursor: 'pointer',
                     ['--nav-shine-color']: c,
                   }}>
@@ -206,21 +197,41 @@ export default function ContentSidebar() {
                     {/* shine sweep on hover */}
                     <span className="nav-shine-sweep" />
 
-                    <child.icon
-                    strokeWidth={2}
-                    fill={active ? c : 'currentColor'}
-                    fillOpacity={active ? 0.15 : 0}
-                    style={{
-                      width: collapsed ? 20 : 18,
-                      height: collapsed ? 20 : 18,
-                      color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
-                      filter: active ? `drop-shadow(0 0 6px ${c}88)` : 'none',
-                      transition: 'all 0.25s ease'
-                    }} />
+                    {/* active left accent bar — beveled inset */}
+                    {active && (
+                      <span
+                        className="absolute left-0 top-1.5 bottom-1.5 rounded-r-full"
+                        style={{
+                          width: 3,
+                          background: c,
+                          boxShadow: `0 0 8px ${c}, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                        }}
+                      />
+                    )}
+
+                    {/* skeuomorphic icon tile */}
+                    <span
+                      className={`relative flex items-center justify-center rounded-lg flex-shrink-0 ${active ? 'skeuo-tile-pressed' : lit ? 'skeuo-tile-raised' : 'skeuo-tile'}`}
+                      style={{
+                        width: collapsed ? 28 : 26,
+                        height: collapsed ? 28 : 26,
+                      }}>
+                      <child.icon
+                        strokeWidth={2.1}
+                        fill={active ? c : 'currentColor'}
+                        fillOpacity={active ? 0.18 : 0}
+                        style={{
+                          width: collapsed ? 16 : 15,
+                          height: collapsed ? 16 : 15,
+                          color: active ? c : lit ? c : 'hsl(var(--muted-foreground))',
+                          filter: active ? `drop-shadow(0 0 5px ${c}aa)` : lit ? `drop-shadow(0 0 3px ${c}55)` : 'none',
+                          transition: 'all 0.25s ease'
+                        }} />
+                    </span>
 
                     {!collapsed && (
                     <span
-                    className="text-[12.5px] font-medium tracking-wide whitespace-nowrap"
+                    className="text-[12.5px] font-medium tracking-wide whitespace-nowrap skeuo-emboss"
                     style={{ color: active ? 'hsl(var(--sidebar-foreground))' : lit ? c : 'hsl(var(--muted-foreground))' }}>
 
                       {label}
@@ -233,7 +244,7 @@ export default function ContentSidebar() {
           )}
 
           {sections.length === 0 &&
-          <div className="text-center text-xs py-8" style={{ color: 'hsl(var(--muted-foreground))' }}>
+          <div className="text-center text-xs py-8 skeuo-emboss" style={{ color: 'hsl(var(--muted-foreground))' }}>
               No results
             </div>
           }
@@ -244,22 +255,21 @@ export default function ContentSidebar() {
           onClick={() => railVisibility.toggleCollapsed()}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand' : 'Collapse'}
-          className="flex items-center rounded-xl transition-all duration-300 flex-shrink-0"
+          className="skeuo-toggle flex items-center rounded-xl transition-all duration-300 flex-shrink-0"
           style={{
             height: 38,
             justifyContent: 'center',
             gap: 10,
             padding: collapsed ? 0 : '0 12px',
-            background: 'hsl(var(--sidebar-accent))',
-            border: '1px solid hsl(var(--sidebar-border))',
+            border: 'none',
             color: 'hsl(var(--muted-foreground))',
             cursor: 'pointer',
           }}>
           {collapsed ?
-            <PanelLeftOpen className="w-4 h-4" strokeWidth={2} style={{ color: 'hsl(var(--sidebar-primary))' }} /> :
+            <PanelLeftOpen className="w-4 h-4" strokeWidth={2.2} style={{ color: 'hsl(var(--sidebar-primary))' }} /> :
             <>
-              <PanelLeftClose className="w-4 h-4" strokeWidth={2} style={{ color: 'hsl(var(--sidebar-primary))' }} />
-              <span className="text-[11px] font-semibold tracking-wide" style={{ color: 'hsl(var(--sidebar-foreground))' }}>Collapse</span>
+              <PanelLeftClose className="w-4 h-4" strokeWidth={2.2} style={{ color: 'hsl(var(--sidebar-primary))' }} />
+              <span className="text-[11px] font-semibold tracking-wide skeuo-emboss" style={{ color: 'hsl(var(--sidebar-foreground))' }}>Collapse</span>
             </>
           }
         </button>
@@ -271,12 +281,9 @@ export default function ContentSidebar() {
             style={{ left: width + 10, top: tooltip.top, transform: 'translateY(-50%)' }}
           >
             <div
-              className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
+              className="skeuo-brand-frame px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap"
               style={{
-                background: 'hsl(var(--popover))',
                 color: 'hsl(var(--popover-foreground))',
-                border: `1px solid ${tooltip.color || 'hsl(var(--border))'}`,
-                boxShadow: `0 6px 18px rgba(0,0,0,0.35), 0 0 14px -4px ${tooltip.color || 'transparent'}66`,
               }}
             >
               {tooltip.label}
