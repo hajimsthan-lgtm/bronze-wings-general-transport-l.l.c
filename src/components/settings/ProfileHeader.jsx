@@ -83,7 +83,7 @@ export default function ProfileHeader({ user, loading, onUpdated }) {
         <div className="relative group/avatar flex-shrink-0">
           <div
             className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center border border-white/10"
-            style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.10))' }}
+            style={{ background: 'linear-gradient(135deg, rgba(30,215,96,0.25), rgba(37,99,235,0.10))' }}
           >
             {user?.avatar_url ? (
               <img src={user.avatar_url} alt="avatar" className="w-full h-full object-cover" />

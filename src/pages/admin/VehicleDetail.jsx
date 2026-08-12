@@ -96,7 +96,7 @@ export default function VehicleDetail() {
 
   const viewerConfig = {
     trips: {
-      title: 'Trips Timeline', icon: Truck, accent: '#3b82f6', records: fTrips, dateField: 'trip_date',
+      title: 'Trips Timeline', icon: Truck, accent: '#1ED760', records: fTrips, dateField: 'trip_date',
       filename: `vehicle-${vehicle.plate_number}-trips`,
       columns: [
         { label: 'Date', key: 'trip_date' },

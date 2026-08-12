@@ -21,8 +21,8 @@ const statusDot = (status) =>
   status === 'active' ? '#34d399' : status === 'maintenance' ? '#f59e0b' : '#94a3b8';
 
 const CARD_BASE = {
-  ['--row-accent']: '#3b82f6',
-  borderTop: '3px solid #3b82f6',
+  ['--row-accent']: '#1ED760',
+  borderTop: '3px solid #1ED760',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
@@ -30,14 +30,14 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
   const [expanded, setExpanded] = useState(false);
 
   const statsList = [
-    { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#60a5fa' },
+    { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#4ADE80' },
     { label: 'Fuel', value: vehicle.fuel_type, accent: '#f59e0b' },
     { label: 'Trips', value: stats?.trips ?? 0, accent: '#a855f7' },
     { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
   ];
 
   const detailTiles = [
-    { label: 'Registration', value: formatDate(vehicle.registration_expiry), icon: CalendarClock, accent: '#60a5fa', tone: expiryTone(vehicle.registration_expiry) },
+    { label: 'Registration', value: formatDate(vehicle.registration_expiry), icon: CalendarClock, accent: '#4ADE80', tone: expiryTone(vehicle.registration_expiry) },
     { label: 'Insurance', value: formatDate(vehicle.insurance_expiry), icon: ShieldCheck, accent: '#34d399', tone: expiryTone(vehicle.insurance_expiry) },
     { label: 'Last Service', value: formatDate(vehicle.last_service_date), icon: Wrench, accent: '#f59e0b', tone: 'text-foreground' },
     { label: 'Next Service', value: formatDate(vehicle.next_service_date), icon: CalendarDays, accent: '#a855f7', tone: expiryTone(vehicle.next_service_date) },
@@ -46,13 +46,13 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
       {/* header band */}
-      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#3b82f6', 0.10)} 0%, transparent 100%)` }}>
-        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
+      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#1ED760', 0.10)} 0%, transparent 100%)` }}>
+        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#1ED760', 0.5)} 0%, transparent 70%)` }} />
         <div className="relative flex items-center gap-3">
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.40) 0%, transparent 70%)' }} />
-            <div className="relative w-14 h-14 rounded-xl flex items-center justify-center border border-white/10" style={{ background: hexToRgba('#3b82f6', 0.14) }}>
-              <Truck className="w-7 h-7" style={{ color: '#3b82f6' }} />
+            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.40) 0%, transparent 70%)' }} />
+            <div className="relative w-14 h-14 rounded-xl flex items-center justify-center border border-white/10" style={{ background: hexToRgba('#1ED760', 0.14) }}>
+              <Truck className="w-7 h-7" style={{ color: '#1ED760' }} />
             </div>
           </div>
           <div className="flex-1 min-w-0">

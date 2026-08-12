@@ -110,7 +110,7 @@ export default function Invoices() {
             </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
             {STATUSES.map((s) =>
-            <button key={s} onClick={() => setFilter(s)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border ${filter === s ? 'bg-primary/15 text-primary border-primary/25 shadow-[0_0_12px_rgba(59,130,246,0.25)]' : 'bg-white/[0.04] text-muted-foreground border-white/10 hover:bg-white/[0.08] hover:text-foreground'}`}>
+            <button key={s} onClick={() => setFilter(s)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border ${filter === s ? 'bg-primary/15 text-primary border-primary/25 shadow-[0_0_12px_rgba(30,215,96,0.25)]' : 'bg-white/[0.04] text-muted-foreground border-white/10 hover:bg-white/[0.08] hover:text-foreground'}`}>
                 {s === 'all' ? 'All' : t(s)}
               </button>
             )}

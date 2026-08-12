@@ -4,7 +4,7 @@ const MAP = {
   paid: '#22c55e', completed: '#22c55e', approved: '#22c55e', active: '#22c55e',
   pending: '#f97316',
   partially_paid: '#f59e0b', partial: '#f59e0b', in_transit: '#f59e0b',
-  sent: '#3b82f6', scheduled: '#94a3b8',
+  sent: '#1ED760', scheduled: '#94a3b8',
   draft: '#e2e8f0',
   cancelled: '#ef4444', canceled: '#ef4444', rejected: '#ef4444', overdue: '#ef4444',
 };

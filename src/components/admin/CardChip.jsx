@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
  * Dark glassmorphic metadata pill chip used on entity cards.
  * Renders an icon + uppercase label + value, e.g. "TYPE / Truck".
  */
-export default function CardChip({ icon: Icon, label, value, accent = '#3b82f6' }) {
+export default function CardChip({ icon: Icon, label, value, accent = '#1ED760' }) {
   return (
     <div
       className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md flex-shrink-0"

@@ -60,7 +60,7 @@ export default function Fuel() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <ReportStatCard index={0} label={`${t('total')} Cost`} value={totalCost} format={formatCurrency} icon={FuelIcon} color="#14b8a6" />
-        <ReportStatCard index={1} label={`${t('total')} Liters`} value={totalLiters} format={(v) => `${Math.round(v).toLocaleString()} L`} icon={Droplets} color="#3b82f6" />
+        <ReportStatCard index={1} label={`${t('total')} Liters`} value={totalLiters} format={(v) => `${Math.round(v).toLocaleString()} L`} icon={Droplets} color="#1ED760" />
         <ReportStatCard index={2} label="Avg Price / L" value={avgPrice} format={formatCurrency} icon={Gauge} color="#f97316" />
       </div>
 

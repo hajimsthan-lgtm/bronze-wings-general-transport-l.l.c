@@ -21,9 +21,9 @@ export default function ModeToggle({ mode, onChange, t }) {
           style={
             mode === o.key
               ? {
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.25), rgba(37,99,235,0.12))',
-                  border: '1px solid rgba(59,130,246,0.35)',
-                  boxShadow: '0 0 12px rgba(59,130,246,0.18)',
+                  background: 'linear-gradient(135deg, rgba(30,215,96,0.25), rgba(37,99,235,0.12))',
+                  border: '1px solid rgba(30,215,96,0.35)',
+                  boxShadow: '0 0 12px rgba(30,215,96,0.18)',
                 }
               : { border: '1px solid transparent' }
           }

@@ -80,7 +80,7 @@ export default function FleetRouteMap({ from, to, fromTime, toTime }) {
               />
               <MapReady points={coords} />
               {fromCoord && (
-                <CircleMarker center={fromCoord} radius={9} pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.8, weight: 2 }}>
+                <CircleMarker center={fromCoord} radius={9} pathOptions={{ color: '#1ED760', fillColor: '#1ED760', fillOpacity: 0.8, weight: 2 }}>
                   <Tooltip sticky>Start: {from}</Tooltip>
                 </CircleMarker>
               )}
@@ -90,7 +90,7 @@ export default function FleetRouteMap({ from, to, fromTime, toTime }) {
                 </CircleMarker>
               )}
               {fromCoord && toCoord && (
-                <Polyline positions={[fromCoord, toCoord]} pathOptions={{ color: '#60a5fa', weight: 2.5, dashArray: '6 8' }} />
+                <Polyline positions={[fromCoord, toCoord]} pathOptions={{ color: '#4ADE80', weight: 2.5, dashArray: '6 8' }} />
               )}
             </MapContainer>
           ) : (

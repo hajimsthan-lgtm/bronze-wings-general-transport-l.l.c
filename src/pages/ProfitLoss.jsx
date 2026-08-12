@@ -74,7 +74,7 @@ export default function ProfitLoss() {
   const maintVal = categories['maintenance'] || 0;
   const otherVal = totalExpenses - maintVal;
   const donutData = [
-    { name: 'Maintenance', value: maintVal, color: '#3b82f6' },
+    { name: 'Maintenance', value: maintVal, color: '#1ED760' },
     { name: 'Fuel', value: totalFuel, color: '#f97316' },
     { name: 'Trip Costs', value: tripCosts, color: '#a855f7' },
     { name: 'Other', value: otherVal, color: '#22c55e' },
@@ -153,7 +153,7 @@ export default function ProfitLoss() {
           extra={<Sparkline data={incomeSeries} type="bar" color="#22c55e" />} />
         <ReportStatCard index={1} label={t('expenses')} value={totalCosts} format={formatCurrency} icon={Receipt} color="#ef4444"
           extra={<Sparkline data={expenseSeries} type="area" color="#ef4444" />} />
-        <ReportStatCard index={2} label="Net Profit" value={netProfit} format={formatCurrency} icon={PiggyBank} color="#3b82f6"
+        <ReportStatCard index={2} label="Net Profit" value={netProfit} format={formatCurrency} icon={PiggyBank} color="#1ED760"
           extra={<Badge pct={cmpWeek} />} />
       </div>
 
@@ -175,7 +175,7 @@ export default function ProfitLoss() {
       </div>
 
       {/* Net Profit section */}
-      <ReportSectionCard index={5} color="#3b82f6" title="Net Profit / Loss" className="mb-4" action={<SectionExportButtons data={[{ label: 'Net Profit', amount: netProfit }]} filename="pnl_net_profit" columns={[{ label: 'Item', key: 'label' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Net Profit / Loss" options={{ dateRange }} />}>
+      <ReportSectionCard index={5} color="#1ED760" title="Net Profit / Loss" className="mb-4" action={<SectionExportButtons data={[{ label: 'Net Profit', amount: netProfit }]} filename="pnl_net_profit" columns={[{ label: 'Item', key: 'label' }, { label: 'Amount (AED)', key: 'amount', numeric: true }]} title="Net Profit / Loss" options={{ dateRange }} />}>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">Net Profit</p>
@@ -184,7 +184,7 @@ export default function ProfitLoss() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Sparkline data={netSeries} type="line" color="#3b82f6" width={120} height={40} />
+            <Sparkline data={netSeries} type="line" color="#1ED760" width={120} height={40} />
             <Badge pct={cmpWeek} />
           </div>
         </div>
@@ -195,13 +195,13 @@ export default function ProfitLoss() {
         <ReportSectionCard index={7} color="#22c55e" title="Income vs Expenses" className="lg:col-span-2" action={<SectionExportButtons data={trendData} filename="pnl_income_vs_expenses" columns={[{ label: 'Date', key: 'label' }, { label: 'Income', key: 'income', numeric: true }, { label: 'Expenses', key: 'expenses', numeric: true }]} title="Income vs Expenses" options={{ dateRange }} />}>
           <TrendChart data={trendData} series={[{ key: 'income', name: 'Income', color: '#22c55e' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={240} />
         </ReportSectionCard>
-        <ReportSectionCard index={8} color="#3b82f6" title="Profit Margin" action={<SectionExportButtons data={[{ metric: 'Profit Margin %', value: margin.toFixed(2) }]} filename="pnl_profit_margin" columns={[{ label: 'Metric', key: 'metric' }, { label: 'Value', key: 'value', numeric: true }]} title="Profit Margin" options={{ dateRange }} />}>
-          <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#3b82f6" size={170} /></div>
+        <ReportSectionCard index={8} color="#1ED760" title="Profit Margin" action={<SectionExportButtons data={[{ metric: 'Profit Margin %', value: margin.toFixed(2) }]} filename="pnl_profit_margin" columns={[{ label: 'Metric', key: 'metric' }, { label: 'Value', key: 'value', numeric: true }]} title="Profit Margin" options={{ dateRange }} />}>
+          <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#1ED760" size={170} /></div>
         </ReportSectionCard>
       </div>
 
-      <ReportSectionCard index={9} color="#3b82f6" title="Net Profit Trend" className="mb-4" action={<SectionExportButtons data={netTrendData} filename="pnl_net_profit_trend" columns={[{ label: 'Date', key: 'label' }, { label: 'Net Profit', key: 'net', numeric: true }]} title="Net Profit Trend" options={{ dateRange }} />}>
-        <TrendChart data={netTrendData} series={[{ key: 'net', name: 'Net Profit', color: '#3b82f6' }]} type="line" height={220} />
+      <ReportSectionCard index={9} color="#1ED760" title="Net Profit Trend" className="mb-4" action={<SectionExportButtons data={netTrendData} filename="pnl_net_profit_trend" columns={[{ label: 'Date', key: 'label' }, { label: 'Net Profit', key: 'net', numeric: true }]} title="Net Profit Trend" options={{ dateRange }} />}>
+        <TrendChart data={netTrendData} series={[{ key: 'net', name: 'Net Profit', color: '#1ED760' }]} type="line" height={220} />
       </ReportSectionCard>
 
       {/* Expense Breakdown donut + progress */}

@@ -119,7 +119,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       </ReportSectionCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#3b82f6" onClick={onBrowseVehicles} />
+        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#1ED760" onClick={onBrowseVehicles} />
         <ReportStatCard index={2} label="Active Fleet" value={active} icon={Truck} color="#34d399" onClick={onBrowseVehicles} />
         <ReportStatCard index={3} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" onClick={onBrowseVehicles} />
         <ReportStatCard index={4} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" onClick={onBrowseVehicles} />
@@ -127,7 +127,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ReportSectionCard index={6} color="#3b82f6" title="Fleet Status Distribution">
+        <ReportSectionCard index={6} color="#1ED760" title="Fleet Status Distribution">
           <div className="flex items-center gap-6 flex-wrap">
             <DonutChart data={donutData.length ? donutData : [{ name: 'None', value: 1, color: '#334155' }]} total={donutTotal} height={180} />
             <div className="space-y-2 flex-1 min-w-[140px]">
@@ -171,7 +171,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
           <TrendChart data={trendData} series={[{ key: 'fuel', name: 'Fuel', color: '#f97316' }, { key: 'expenses', name: 'Expenses', color: '#ef4444' }]} type="area" height={220} />
         </ReportSectionCard>
 
-        <ReportSectionCard index={9} color="#3b82f6" title="Vehicle Utilization"
+        <ReportSectionCard index={9} color="#1ED760" title="Vehicle Utilization"
           action={<button onClick={() => navigate('/admin/vehicles')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
           {utilization.length === 0 || utilization[0].trips === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No trip data yet.</p> : (
             <div className="space-y-3">
@@ -187,7 +187,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
                       </span>
                       <span className="text-white/80 tabular-nums">{u.trips} trips · {formatCurrency(u.revenue)}</span>
                     </div>
-                    <ProgressBar pct={pct} color="#3b82f6" />
+                    <ProgressBar pct={pct} color="#1ED760" />
                   </div>
                 );
               })}

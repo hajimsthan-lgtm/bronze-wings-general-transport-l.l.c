@@ -119,8 +119,8 @@ function injectStyles() {
     .lorry-loader.lorry-yellow .lorry-body { fill: #f59e0b; }
     .lorry-loader.lorry-yellow .lorry-wheel-ring { stroke: #f59e0b; }
 
-    .lorry-loader.lorry-blue .lorry-body { fill: #3b82f6; }
-    .lorry-loader.lorry-blue .lorry-wheel-ring { stroke: #3b82f6; }
+    .lorry-loader.lorry-blue .lorry-body { fill: #1ED760; }
+    .lorry-loader.lorry-blue .lorry-wheel-ring { stroke: #1ED760; }
 
     .lorry-loader.lorry-bronze .lorry-body { fill: #B8463A; }
     .lorry-loader.lorry-bronze .lorry-wheel-ring { stroke: #B8463A; }

@@ -127,16 +127,16 @@ export default function GuidedTour() {
         <div className="absolute pointer-events-none transition-all duration-300" style={{
           top: rect.top - 6, left: rect.left - 6, width: rect.width + 12, height: rect.height + 12,
           borderRadius: 14,
-          boxShadow: '0 0 0 9999px rgba(0,0,0,0.62), 0 0 0 2px rgba(59,130,246,0.9), 0 0 28px rgba(59,130,246,0.5)',
+          boxShadow: '0 0 0 9999px rgba(0,0,0,0.62), 0 0 0 2px rgba(30,215,96,0.9), 0 0 28px rgba(30,215,96,0.5)',
         }} />
       )}
       <div className="absolute z-[101] w-[min(92vw,380px)] animate-fade-in-up" style={{ top: cardTop, left: cardLeft }}>
-        <div className="glass-card p-4" style={{ borderColor: 'rgba(59,130,246,0.4)' }}>
+        <div className="glass-card p-4" style={{ borderColor: 'rgba(30,215,96,0.4)' }}>
           {/* teacher avatar + numeric identifier */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(145deg, rgba(59,130,246,0.32), rgba(59,130,246,0.12))', border: '1px solid rgba(59,130,246,0.45)' }}>
+            <div className="relative w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(145deg, rgba(30,215,96,0.32), rgba(30,215,96,0.12))', border: '1px solid rgba(30,215,96,0.45)' }}>
               <GraduationCap className="w-6 h-6 text-blue-300 animate-float" />
-              <span className="absolute -bottom-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0f1320]" style={{ boxShadow: '0 0 10px rgba(59,130,246,0.7)' }}>{index + 1}</span>
+              <span className="absolute -bottom-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#0f1320]" style={{ boxShadow: '0 0 10px rgba(30,215,96,0.7)' }}>{index + 1}</span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-[10px] uppercase tracking-wider text-blue-300/70 font-semibold flex items-center gap-2">
@@ -175,7 +175,7 @@ export default function GuidedTour() {
 
           {/* tour controls */}
           <div className="flex items-center gap-2">
-            <button onClick={handleNext} className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold text-white transition-colors" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.4)' }}>
+            <button onClick={handleNext} className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-xl text-xs font-bold text-white transition-colors" style={{ background: 'linear-gradient(135deg, #1ED760, #2563eb)', boxShadow: '0 4px 12px rgba(30,215,96,0.4)' }}>
               <ArrowRight className="w-4 h-4" /> {isLast ? 'Finish' : 'Next'}
             </button>
             <button onClick={stop} title="Skip tour" className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-colors">

@@ -60,7 +60,7 @@ export default function CalculatorModal({ open, onClose }) {
       eq: 'text-white',
       fn: 'bg-[#1e2130] text-[#a0a5b8] hover:bg-[#262a3d]',
     };
-    const opBg = variant === 'op' ? 'linear-gradient(135deg,#3b82f6,#2563eb)' : variant === 'eq' ? 'linear-gradient(135deg,#10b981,#059669)' : null;
+    const opBg = variant === 'op' ? 'linear-gradient(135deg,#1ED760,#2563eb)' : variant === 'eq' ? 'linear-gradient(135deg,#10b981,#059669)' : null;
     return (
       <button
         onClick={onClick}

@@ -3,14 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { Truck, ChevronDown } from 'lucide-react';
 
 const STATUS_BUTTONS = [
-  { key: 'scheduled', label: 'Scheduled', color: '#3b82f6' },
+  { key: 'scheduled', label: 'Scheduled', color: '#1ED760' },
   { key: 'in_transit', label: 'Transit', color: '#a855f7' },
   { key: 'completed', label: 'Complete', color: '#10b981' },
   { key: 'cancelled', label: 'Cancel', color: '#ef4444' },
 ];
 
 const STATUS_BADGE = {
-  scheduled: { label: 'Scheduled', color: '#3b82f6' },
+  scheduled: { label: 'Scheduled', color: '#1ED760' },
   in_transit: { label: 'In Transit', color: '#a855f7' },
   completed: { label: 'Completed', color: '#10b981' },
   cancelled: { label: 'Cancelled', color: '#ef4444' },
@@ -91,11 +91,11 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
         <span
           className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{
-            background: '#3b82f61a',
-            border: '1px solid #3b82f640',
+            background: '#1ED7601a',
+            border: '1px solid #1ED76040',
           }}
         >
-          <Truck className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} />
+          <Truck className="w-3.5 h-3.5" style={{ color: '#1ED760' }} />
         </span>
         <div className="flex-1 text-left min-w-0">
           <p className="text-[11px] font-bold text-white/90 uppercase tracking-wide leading-none truncate">
@@ -123,9 +123,9 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
             <div className="flex flex-col items-center justify-center py-6 px-4">
               <span
                 className="w-9 h-9 rounded-full flex items-center justify-center mb-2"
-                style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}
+                style={{ background: 'rgba(30,215,96,0.1)', border: '1px solid rgba(30,215,96,0.2)' }}
               >
-                <Truck className="w-4 h-4" style={{ color: 'rgba(59,130,246,0.5)' }} />
+                <Truck className="w-4 h-4" style={{ color: 'rgba(30,215,96,0.5)' }} />
               </span>
               <p className="text-[10px] text-white/40">No active trips</p>
             </div>

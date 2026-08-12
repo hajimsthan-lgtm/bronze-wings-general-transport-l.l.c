@@ -33,7 +33,7 @@ export const CATEGORIES = {
     key: 'trips',
     label: 'Trips & Operations',
     icon: 'Truck',
-    color: '#3b82f6',
+    color: '#1ED760',
     glow: '59,130,246',
   },
   maintenance: {
@@ -48,7 +48,7 @@ export const CATEGORIES = {
 const SEVERITY = {
   critical: { color: '#ef4444', glow: '239,68,68' },
   warning: { color: '#f59e0b', glow: '245,158,11' },
-  info: { color: '#3b82f6', glow: '59,130,246' },
+  info: { color: '#1ED760', glow: '59,130,246' },
   success: { color: '#10b981', glow: '16,185,129' },
 };
 

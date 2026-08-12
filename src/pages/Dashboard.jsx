@@ -131,7 +131,7 @@ export default function Dashboard() {
 
   const goals = [
     { label: 'On-Time Delivery', pct: onTimePct, color: '#34d399' },
-    { label: 'Fleet Utilization', pct: fleetUtil, color: '#60a5fa' },
+    { label: 'Fleet Utilization', pct: fleetUtil, color: '#4ADE80' },
     { label: 'Completed Trips', pct: completedPct, color: '#a855f7' },
     { label: 'Invoice Collection', pct: invCollectionPct, color: '#fbbf24' },
   ];
@@ -156,7 +156,7 @@ export default function Dashboard() {
     else expByCat.Other += amt;
   });
   const donutData = [
-    { name: 'Maintenance', value: Math.round(expByCat.Maintenance * 100) / 100, color: '#3b82f6' },
+    { name: 'Maintenance', value: Math.round(expByCat.Maintenance * 100) / 100, color: '#1ED760' },
     { name: 'Fuel', value: Math.round(expByCat.Fuel * 100) / 100, color: '#f97316' },
     { name: 'Trip Costs', value: Math.round(expByCat.Trip * 100) / 100, color: '#ec4899' },
     { name: 'Other', value: Math.round(expByCat.Other * 100) / 100, color: '#6b7280' },
@@ -184,8 +184,8 @@ export default function Dashboard() {
     if (visaDays !== null && visaDays <= ALERT_DAYS) driverDocAlerts.push({ name: d.name, type: 'Visa', days: visaDays });
   });
 
-  const tripStatusColor = (s) => s === 'completed' ? '#10b981' : s === 'in_transit' ? '#3b82f6' : s === 'cancelled' ? '#ef4444' : '#f59e0b';
-  const invStatusColor = (s) => s === 'paid' ? '#10b981' : s === 'sent' ? '#3b82f6' : s === 'overdue' ? '#ef4444' : '#f59e0b';
+  const tripStatusColor = (s) => s === 'completed' ? '#10b981' : s === 'in_transit' ? '#1ED760' : s === 'cancelled' ? '#ef4444' : '#f59e0b';
+  const invStatusColor = (s) => s === 'paid' ? '#10b981' : s === 'sent' ? '#1ED760' : s === 'overdue' ? '#ef4444' : '#f59e0b';
 
   return (
     <>
@@ -327,15 +327,15 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs text-[#3b82f6] font-semibold whitespace-nowrap">{paidRecent}/{recentInvoices.length} paid</span>
+            <span className="text-xs text-[#1ED760] font-semibold whitespace-nowrap">{paidRecent}/{recentInvoices.length} paid</span>
             <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
-              <div className="h-full rounded-full" style={{ width: `${invPct}%`, background: 'linear-gradient(90deg,#3b82f6,#60a5fa)', boxShadow: '0 0 8px rgba(59,130,246,0.3)' }} />
+              <div className="h-full rounded-full" style={{ width: `${invPct}%`, background: 'linear-gradient(90deg,#1ED760,#4ADE80)', boxShadow: '0 0 8px rgba(30,215,96,0.3)' }} />
             </div>
           </div>
           {recentInvoices.length === 0 ? (
             <p className="text-sm text-white/40 py-8 text-center">No invoices yet</p>
           ) : recentInvoices.map((inv) => (
-            <ListRow key={inv.id} to="/admin/clients" icon={FileText} grad={['#3b82f6', '#60a5fa']} glow="rgba(59,130,246,0.25)"
+            <ListRow key={inv.id} to="/admin/clients" icon={FileText} grad={['#1ED760', '#4ADE80']} glow="rgba(30,215,96,0.25)"
               title={`Invoice ${inv.invoice_number || '—'} · ${inv.client_name || '—'}`}
               subtitle={`${(inv.status || '').replace(/_/g, ' ')} · ${formatCurrency(inv.total_amount)}`}
               statusText={(inv.status || '').replace(/_/g, ' ')} statusColor={invStatusColor(inv.status)} />

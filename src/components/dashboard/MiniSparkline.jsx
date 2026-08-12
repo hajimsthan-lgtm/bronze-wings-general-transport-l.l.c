@@ -1,7 +1,7 @@
 /**
  * Tiny inline SVG sparkline with a soft gradient area + glow stroke.
  */
-export default function MiniSparkline({ data = [], color = '#3b82f6', width = 110, height = 26 }) {
+export default function MiniSparkline({ data = [], color = '#1ED760', width = 110, height = 26 }) {
   if (!data || data.length === 0) return null;
   const id = `spark-${color.replace('#', '')}`;
   const max = Math.max(...data, 1);

@@ -4,7 +4,7 @@ import { formatCurrency } from '@/lib/formatters';
 
 const STATUS_COLORS = {
   draft: '#9ca3af',
-  sent: '#3b82f6',
+  sent: '#1ED760',
   paid: '#22c55e',
   overdue: '#ef4444',
   cancelled: '#6b7280',
@@ -55,7 +55,7 @@ export default function DashboardCharts({ invoices, trips }) {
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: '#888' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
             <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={TOOLTIP_STYLE} />
-            <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="revenue" fill="#1ED760" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

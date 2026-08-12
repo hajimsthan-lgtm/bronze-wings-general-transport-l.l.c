@@ -53,7 +53,7 @@ export const SUBNAV_ICON = {
 };
 
 export const SUBNAV_STYLE = {
-  trips: { from: '#3b82f6', to: '#1e3a8a', glow: '59,130,246' },
+  trips: { from: '#1ED760', to: '#1e3a8a', glow: '59,130,246' },
   expenses: { from: '#f59e0b', to: '#b45309', glow: '245,158,11' },
   vehicles: { from: '#6366f1', to: '#3730a3', glow: '99,102,241' },
   drivers: { from: '#10b981', to: '#047857', glow: '16,185,129' },

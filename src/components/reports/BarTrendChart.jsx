@@ -1,7 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { axisTick, axisTickSm, gridStroke, chartTooltipStyle, barCursorStyle } from './chartTheme';
 
-export default function BarTrendChart({ data, dataKey = 'value', xKey = 'label', color = '#3b82f6', height = 220, horizontal = false }) {
+export default function BarTrendChart({ data, dataKey = 'value', xKey = 'label', color = '#1ED760', height = 220, horizontal = false }) {
   const layout = horizontal ? 'vertical' : 'horizontal';
   const gid = `bar-${dataKey}-${color.replace('#', '')}`;
   return (

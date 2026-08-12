@@ -1,6 +1,6 @@
 import { hexToRgba } from './ReportStatCard';
 
-export default function ReportRowCard({ icon: Icon, iconColor = '#3b82f6', title, subtitle, right, onClick, accent, className = '', children }) {
+export default function ReportRowCard({ icon: Icon, iconColor = '#1ED760', title, subtitle, right, onClick, accent, className = '', children }) {
   return (
     <div
       onClick={onClick}

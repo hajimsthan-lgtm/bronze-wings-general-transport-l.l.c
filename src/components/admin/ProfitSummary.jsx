@@ -21,7 +21,7 @@ export default function ProfitSummary({ title, items, netProfit, filenameBase, d
     );
   };
 
-  const profitColor = netProfit >= 0 ? '#3b82f6' : '#ef4444';
+  const profitColor = netProfit >= 0 ? '#1ED760' : '#ef4444';
 
   return null;
 

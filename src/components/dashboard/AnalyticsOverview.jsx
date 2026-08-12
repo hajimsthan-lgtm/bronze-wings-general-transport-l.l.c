@@ -14,7 +14,7 @@ const REVENUE_DATA = [
 ];
 
 const EXPENSE_DATA = [
-  { name: 'Maintenance', value: 1, color: '#3b82f6' },
+  { name: 'Maintenance', value: 1, color: '#1ED760' },
   { name: 'Fuel', value: 0, color: '#f97316' },
   { name: 'Trip Costs', value: 0, color: '#a855f7' },
   { name: 'Other', value: 0, color: '#22c55e' },
@@ -32,7 +32,7 @@ const GLASS = {
 
 const TOOLTIP_STYLE = {
   backgroundColor: 'rgba(12,16,26,0.92)',
-  border: '1px solid rgba(59,130,246,0.25)',
+  border: '1px solid rgba(30,215,96,0.25)',
   borderRadius: 12,
   fontSize: 12,
   color: '#fff',
@@ -49,29 +49,29 @@ export default function AnalyticsOverview() {
     >
       {/* Revenue trend */}
       <div className="rounded-2xl p-5 relative overflow-hidden" style={GLASS}>
-        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent)' }} />
-        <div className="absolute inset-x-0 top-0 h-16 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 60%)' }} />
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(30,215,96,0.3), transparent)' }} />
+        <div className="absolute inset-x-0 top-0 h-16 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(30,215,96,0.06) 0%, transparent 60%)' }} />
         <h2 className="relative text-sm font-semibold text-white/90 mb-4">Revenue Trend</h2>
         <ResponsiveContainer width="100%" height={210}>
           <AreaChart data={REVENUE_DATA} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
             <defs>
               <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="0%" stopColor="#1ED760" stopOpacity={0.45} />
+                <stop offset="100%" stopColor="#1ED760" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.3)' }} axisLine={false} tickLine={false} tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : `${v}`)} />
-            <Tooltip formatter={(v) => [formatCurrency(v), 'Revenue']} contentStyle={TOOLTIP_STYLE} cursor={{ stroke: 'rgba(59,130,246,0.3)' }} />
+            <Tooltip formatter={(v) => [formatCurrency(v), 'Revenue']} contentStyle={TOOLTIP_STYLE} cursor={{ stroke: 'rgba(30,215,96,0.3)' }} />
             <Area
               type="monotone"
               dataKey="revenue"
-              stroke="#60a5fa"
+              stroke="#4ADE80"
               strokeWidth={2}
               fill="url(#revGrad)"
-              dot={{ r: 3, fill: '#fff', stroke: '#3b82f6', strokeWidth: 1.5 }}
-              activeDot={{ r: 5, fill: '#fff', stroke: '#3b82f6', strokeWidth: 2 }}
-              style={{ filter: 'drop-shadow(0 0 6px rgba(96,165,250,0.5))' }}
+              dot={{ r: 3, fill: '#fff', stroke: '#1ED760', strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: '#fff', stroke: '#1ED760', strokeWidth: 2 }}
+              style={{ filter: 'drop-shadow(0 0 6px rgba(110,231,183,0.5))' }}
               isAnimationActive
               animationDuration={1500}
               animationEasing="ease-out"

@@ -11,7 +11,7 @@ function getGreeting(hour) {
   if (hour >= 5 && hour < 12) return { text: 'Good Morning', Icon: Sun, tone: '#fbbf24', gradient: 'rgba(251,191,36,0.10)' };
   if (hour >= 12 && hour < 17) return { text: 'Good Afternoon', Icon: Sun, tone: '#f97316', gradient: 'rgba(249,115,22,0.10)' };
   if (hour >= 17 && hour < 20) return { text: 'Good Evening', Icon: Cloud, tone: '#a78bfa', gradient: 'rgba(167,139,250,0.10)' };
-  return { text: 'Good Night', Icon: Moon, tone: '#60a5fa', gradient: 'rgba(96,165,250,0.10)' };
+  return { text: 'Good Night', Icon: Moon, tone: '#4ADE80', gradient: 'rgba(110,231,183,0.10)' };
 }
 
 export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pendingInvoices = 0 }) {
@@ -55,7 +55,7 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
 
   const stats = [
     { label: 'Active Trips', value: activeTrips, hex: '#34d399', Icon: Activity, sub: 'in progress', path: '/trips' },
-    { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#60a5fa', Icon: Wallet, sub: 'period total', path: '/reports/pnl' },
+    { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#4ADE80', Icon: Wallet, sub: 'period total', path: '/reports/pnl' },
     { label: 'Pending Invoices', value: pendingInvoices, hex: '#fbbf24', Icon: FileWarning, sub: 'awaiting', path: '/reports/soa' },
   ];
 

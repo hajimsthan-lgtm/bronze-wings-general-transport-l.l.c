@@ -4,7 +4,7 @@ import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { Table, FileText, Calendar } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-export default function RecordsViewerSheet({ open, onOpenChange, title, icon: Icon, accent = '#3b82f6', records = [], columns = [], renderRow, dateField = 'date', filename = 'records' }) {
+export default function RecordsViewerSheet({ open, onOpenChange, title, icon: Icon, accent = '#1ED760', records = [], columns = [], renderRow, dateField = 'date', filename = 'records' }) {
   const [from, setFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
   const [to, setTo] = useState(new Date().toISOString().split('T')[0]);
 

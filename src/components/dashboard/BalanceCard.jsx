@@ -16,7 +16,7 @@ export default function BalanceCard({ healthPct, totalRevenue, activeTrips, pend
   const stats = [
     { icon: Truck, label: 'Active Trips', value: activeTrips, color: '#34d399' },
     { icon: FileText, label: 'Pending Inv.', value: pendingInvoices, color: '#fbbf24' },
-    { icon: Wallet, label: 'Avg Trip', value: formatCurrency(avgTripValue), color: '#60a5fa' },
+    { icon: Wallet, label: 'Avg Trip', value: formatCurrency(avgTripValue), color: '#4ADE80' },
   ];
 
   return (

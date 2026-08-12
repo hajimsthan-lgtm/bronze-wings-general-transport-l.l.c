@@ -197,7 +197,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       <SheetContent side="right" className="bg-card/80 backdrop-blur-2xl border border-white/[0.08] p-0 max-h-screen overflow-y-auto w-full sm:max-w-2xl lg:max-w-5xl rounded-l-2xl shadow-2xl">
         {/* Hero header */}
         <div className="relative overflow-hidden px-6 pt-6 pb-5 pl-14 border-b border-white/[0.06]">
-          <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 0% 0%, rgba(59,130,246,0.15), transparent 70%)' }} />
+          <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 0% 0%, rgba(30,215,96,0.15), transparent 70%)' }} />
           <SheetHeader className="relative">
             <div className="flex items-center justify-between pr-12">
               <div>

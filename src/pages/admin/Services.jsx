@@ -17,7 +17,7 @@ import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import MaintenanceAnalytics from '@/components/admin/MaintenanceAnalytics';
 
 const TYPE_TONE = {
-  oil_change: '#f97316', tire: '#3b82f6', brake: '#ef4444', engine: '#a855f7',
+  oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
   electrical: '#eab308', body: '#ec4899', inspection: '#14b8a6', other: '#94a3b8',
 };
 const TYPE_LABEL = (k) => (k || 'other').replace(/_/g, ' ');

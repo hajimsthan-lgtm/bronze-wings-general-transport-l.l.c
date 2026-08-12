@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
-export default function RecentActivityRow({ to, icon: Icon, iconBg, iconClass, title, subtitle, accent = '#3b82f6' }) {
+export default function RecentActivityRow({ to, icon: Icon, iconBg, iconClass, title, subtitle, accent = '#1ED760' }) {
   return (
     <Link to={to} className="group relative flex items-center gap-3 py-2.5 hover:bg-white/[0.02] rounded-lg px-2 -mx-2 transition-colors">
       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-0 group-hover:h-2/3 rounded-full transition-all duration-300" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />

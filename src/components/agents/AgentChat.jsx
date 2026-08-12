@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Send, Paperclip, X, Loader2 } from 'lucide-react';
 import MessageBubble from '@/components/agents/MessageBubble';
 
-export default function AgentChat({ agentName, accent = '#3b82f6', suggestions = [] }) {
+export default function AgentChat({ agentName, accent = '#1ED760', suggestions = [] }) {
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');

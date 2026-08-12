@@ -4,8 +4,8 @@ import { ChevronDown, ChevronRight, Check, Loader2, AlertCircle, Wrench, Papercl
 
 const STATUS_META = {
   pending: { icon: Loader2, spin: true, color: '#f59e0b', label: 'Pending' },
-  running: { icon: Loader2, spin: true, color: '#3b82f6', label: 'Running' },
-  in_progress: { icon: Loader2, spin: true, color: '#3b82f6', label: 'In progress' },
+  running: { icon: Loader2, spin: true, color: '#1ED760', label: 'Running' },
+  in_progress: { icon: Loader2, spin: true, color: '#1ED760', label: 'In progress' },
   completed: { icon: Check, color: '#34d399', label: 'Completed' },
   success: { icon: Check, color: '#34d399', label: 'Done' },
   failed: { icon: AlertCircle, color: '#f43f5e', label: 'Failed' },

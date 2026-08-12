@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-export default function CollapsibleSection({ title, icon: Icon, accent = '#3b82f6', count, actions, defaultOpen = false, children }) {
+export default function CollapsibleSection({ title, icon: Icon, accent = '#1ED760', count, actions, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="glass-card rounded-2xl p-5 animate-fade-in-up relative overflow-hidden" style={{ borderLeft: `4px solid ${accent}` }}>

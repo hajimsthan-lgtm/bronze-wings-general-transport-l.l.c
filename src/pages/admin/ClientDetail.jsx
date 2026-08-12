@@ -345,7 +345,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
           </CollapsibleSection>
 
           {/* Trips */}
-          <CollapsibleSection title={t('trips')} icon={Truck} accent="#3b82f6" count={displayTrips.length}>
+          <CollapsibleSection title={t('trips')} icon={Truck} accent="#1ED760" count={displayTrips.length}>
             {dataLoading ? <LoadingSpinner /> : (
               <ClientTripsList
                 trips={displayTrips}

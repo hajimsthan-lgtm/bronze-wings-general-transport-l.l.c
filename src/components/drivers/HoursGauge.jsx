@@ -35,7 +35,7 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
               <circle cx="70" cy="70" r={r} fill="none" stroke="url(#hg-grad)" strokeWidth="10" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
               <defs>
                 <linearGradient id="hg-grad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#60a5fa" />
+                  <stop offset="0%" stopColor="#4ADE80" />
                   <stop offset="100%" stopColor="#a855f7" />
                 </linearGradient>
               </defs>

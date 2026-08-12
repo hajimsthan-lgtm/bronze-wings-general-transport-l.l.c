@@ -6,7 +6,7 @@ import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { User, Truck as TruckIcon, Building2, Copy, Calendar, ArrowRight, Wallet, Route } from 'lucide-react';
 
 const STATUS = {
-  scheduled:  { short: 'Sched',   color: '#60a5fa', glow: '96,165,250' },
+  scheduled:  { short: 'Sched',   color: '#4ADE80', glow: '96,165,250' },
   in_transit: { short: 'Transit', color: '#fbbf24', glow: '251,191,36' },
   completed:  { short: 'Done',    color: '#34d399', glow: '52,211,153' },
   cancelled:  { short: 'Cancel',  color: '#fb7185', glow: '251,113,133' },
@@ -14,7 +14,7 @@ const STATUS = {
 const STATUS_LIST = ['scheduled', 'in_transit', 'completed', 'cancelled'];
 
 const TYPE_STYLE = {
-  one_way:  { color: '#60a5fa', glow: '96,165,250' },
+  one_way:  { color: '#4ADE80', glow: '96,165,250' },
   hourly:   { color: '#fbbf24', glow: '251,191,36' },
   contract: { color: '#a855f7', glow: '168,85,247' },
   return:   { color: '#34d399', glow: '52,211,153' },

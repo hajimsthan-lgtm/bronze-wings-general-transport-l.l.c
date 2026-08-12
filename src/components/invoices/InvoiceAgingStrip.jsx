@@ -3,7 +3,7 @@ import { formatCurrency } from '@/lib/formatters';
 
 const BUCKETS = [
   { key: 'current', label: 'Current', color: '#34d399', Icon: Calendar, desc: 'Not yet due' },
-  { key: 'd30', label: '1–30', color: '#60a5fa', Icon: Clock, desc: 'Days overdue' },
+  { key: 'd30', label: '1–30', color: '#4ADE80', Icon: Clock, desc: 'Days overdue' },
   { key: 'd60', label: '31–60', color: '#fbbf24', Icon: Hourglass, desc: 'Days overdue' },
   { key: 'd90', label: '61–90', color: '#f97316', Icon: AlertTriangle, desc: 'Days overdue' },
   { key: 'd90p', label: '90+', color: '#f87171', Icon: AlertTriangle, desc: 'Days overdue' },

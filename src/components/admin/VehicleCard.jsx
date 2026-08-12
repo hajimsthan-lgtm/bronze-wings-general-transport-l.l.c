@@ -9,7 +9,7 @@ import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import VehicleCardLight from './VehicleCardLight';
 
-const ACCENT = '#3b82f6';
+const ACCENT = '#1ED760';
 const STATUS_DOT = { active: '#34d399', maintenance: '#f59e0b', inactive: '#94a3b8' };
 
 function yearsLeft(dateStr) {

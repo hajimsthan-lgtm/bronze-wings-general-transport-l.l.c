@@ -6,7 +6,7 @@ import { useI18n } from '@/lib/i18n';
 
 const TONE = {
   eco:  { color: '#34d399', glow: '52,211,153' },
-  cool: { color: '#60a5fa', glow: '96,165,250' },
+  cool: { color: '#4ADE80', glow: '96,165,250' },
   heat: { color: '#f87171', glow: '248,113,113' },
 };
 const STATUS = {

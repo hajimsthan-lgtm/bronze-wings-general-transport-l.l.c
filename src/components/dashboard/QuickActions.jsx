@@ -12,7 +12,7 @@ const CARD = {
 };
 
 const ACTIONS = [
-  { label: '+ New Trip', icon: Plus, grad: ['#3b82f6', '#60a5fa'], glow: 'rgba(59,130,246,0.3)', to: '/trips?new=1' },
+  { label: '+ New Trip', icon: Plus, grad: ['#1ED760', '#4ADE80'], glow: 'rgba(30,215,96,0.3)', to: '/trips?new=1' },
   { label: 'Add Expense', icon: Receipt, grad: ['#f97316', '#fb923c'], glow: 'rgba(249,115,22,0.3)', to: '/expenses?open=expense' },
   { label: 'Add Driver', icon: UserPlus, grad: ['#06b6d4', '#22d3ee'], glow: 'rgba(6,182,212,0.3)', to: '/admin/drivers?new=1' },
   { label: 'Fuel Entry', icon: Fuel, grad: ['#10b981', '#34d399'], glow: 'rgba(16,185,129,0.3)', to: '/admin/vehicles' },

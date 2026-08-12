@@ -86,7 +86,7 @@ export default function DriverProfileCard({ driver, vehicle, stats }) {
         {/* inline stats strip */}
         <div className="grid grid-cols-3 divide-x divide-white/[0.06]">
           {[
-            { label: 'Trips', value: stats?.trips ?? 0, accent: '#3b82f6' },
+            { label: 'Trips', value: stats?.trips ?? 0, accent: '#1ED760' },
             { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
             { label: 'Experience', value: stats?.experience ?? '—', accent: '#a855f7' },
           ].map((s) => (
@@ -122,7 +122,7 @@ export default function DriverProfileCard({ driver, vehicle, stats }) {
 
         {/* assigned vehicle */}
         {vehicle && (
-          <div className="mx-5 mb-5 flex items-center gap-3 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#3b82f6', 0.06) }}>
+          <div className="mx-5 mb-5 flex items-center gap-3 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#1ED760', 0.06) }}>
             <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0"><Car className="w-4 h-4 text-primary" /></div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground truncate">{vehicle.make} {vehicle.model}</p>
@@ -143,7 +143,7 @@ export default function DriverProfileCard({ driver, vehicle, stats }) {
         </div>
 
         <div className="relative space-y-2">
-          <AccordionItem title="License" icon={ShieldCheck} accent="#3b82f6" defaultOpen>
+          <AccordionItem title="License" icon={ShieldCheck} accent="#1ED760" defaultOpen>
             <Row label="License #" value={driver.license_number} />
             <Row label="License Expiry" value={formatDate(driver.license_expiry)} tone={expiryTone(driver.license_expiry)} />
             <Row label="Visa Expiry" value={formatDate(driver.visa_expiry)} tone={expiryTone(driver.visa_expiry)} />

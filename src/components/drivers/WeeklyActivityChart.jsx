@@ -25,12 +25,12 @@ export default function WeeklyActivityChart({ trips = [] }) {
   return (
     <div
       className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
-      style={{ borderLeft: '4px solid #3b82f6' }}
+      style={{ borderLeft: '4px solid #1ED760' }}
     >
-      <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18), transparent 70%)' }} />
+      <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.18), transparent 70%)' }} />
       <div className="flex items-center justify-between mb-4 relative">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#3b82f6', 0.14), border: `1px solid ${hexToRgba('#3b82f6', 0.3)}` }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#1ED760', 0.14), border: `1px solid ${hexToRgba('#1ED760', 0.3)}` }}>
             <BarChart3 className="w-4 h-4 text-primary" />
           </div>
           <div>
@@ -53,8 +53,8 @@ export default function WeeklyActivityChart({ trips = [] }) {
                     className="w-full rounded-t-md transition-all duration-500"
                     style={{
                       height: `${Math.max(c ? 6 : 2, (c / max) * 96)}px`,
-                      background: isPeak ? 'linear-gradient(180deg,#60a5fa,#3b82f6)' : hexToRgba('#3b82f6', 0.22),
-                      boxShadow: isPeak ? '0 0 12px rgba(59,130,246,0.5)' : 'none',
+                      background: isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
+                      boxShadow: isPeak ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
                     }}
                   />
                   <span className={`text-[10px] ${isPeak ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>{DAYS[i]}</span>

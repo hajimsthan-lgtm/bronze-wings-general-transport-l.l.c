@@ -1,6 +1,6 @@
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, ResponsiveContainer } from 'recharts';
 
-export default function Sparkline({ data, type = 'line', color = '#3b82f6', width = 80, height = 32 }) {
+export default function Sparkline({ data, type = 'line', color = '#1ED760', width = 80, height = 32 }) {
   const arr = (data && data.length ? data : [0, 0]).map((v, i) => ({ i, v: Number(v) || 0 }));
   const Comp = type === 'bar' ? BarChart : type === 'area' ? AreaChart : LineChart;
   const gid = `spark-${type}-${color.replace('#', '')}`;

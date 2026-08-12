@@ -24,12 +24,12 @@ const contentCardStyle = {
   boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
 };
 
-const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)';
+const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,215,96,0.04) 0%, transparent 60%)';
 
 const statusMeta = (s) => {
   switch (s) {
     case 'completed': return { color: '#22c55e', text: '#4ade80' };
-    case 'in_transit': return { color: '#3b82f6', text: '#60a5fa' };
+    case 'in_transit': return { color: '#1ED760', text: '#4ADE80' };
     case 'cancelled': return { color: '#ef4444', text: '#f87171' };
     default: return { color: '#f59e0b', text: '#fbbf24' };
   }
@@ -132,7 +132,7 @@ export default function DailyReport() {
         <div className="space-y-6">
           {/* Stat cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <ReportStatCard index={0} label="Revenue" value={revenue} format={formatCurrency} icon={DollarSign} color="#3b82f6" />
+            <ReportStatCard index={0} label="Revenue" value={revenue} format={formatCurrency} icon={DollarSign} color="#1ED760" />
             <ReportStatCard index={1} label={t('trips')} value={trips.length} icon={Truck} color="#a855f7" />
             <ReportStatCard index={2} label={t('expenses')} value={expenseTotal} format={formatCurrency} icon={FileText} color="#f97316" />
             <ReportStatCard index={3} label={t('fuel')} value={fuelTotal} format={formatCurrency} icon={Fuel} color="#14b8a6" />
@@ -140,8 +140,8 @@ export default function DailyReport() {
 
           {/* Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <ReportSectionCard index={4} color="#3b82f6" title="Revenue vs Expenses" className="lg:col-span-2" action={<SectionExportButtons data={trendData} filename="daily_revenue_vs_expenses" columns={[{ label: 'Date', key: 'label' }, { label: 'Revenue', key: 'revenue', numeric: true }, { label: 'Expenses', key: 'expenses', numeric: true }]} title="Revenue vs Expenses" options={{ dateRange }} />}>
-              <TrendChart data={trendData} series={[{ key: 'revenue', name: 'Revenue', color: '#3b82f6' }, { key: 'expenses', name: 'Expenses', color: '#f97316' }]} type="line" height={240} />
+            <ReportSectionCard index={4} color="#1ED760" title="Revenue vs Expenses" className="lg:col-span-2" action={<SectionExportButtons data={trendData} filename="daily_revenue_vs_expenses" columns={[{ label: 'Date', key: 'label' }, { label: 'Revenue', key: 'revenue', numeric: true }, { label: 'Expenses', key: 'expenses', numeric: true }]} title="Revenue vs Expenses" options={{ dateRange }} />}>
+              <TrendChart data={trendData} series={[{ key: 'revenue', name: 'Revenue', color: '#1ED760' }, { key: 'expenses', name: 'Expenses', color: '#f97316' }]} type="line" height={240} />
             </ReportSectionCard>
             <ReportSectionCard index={5} color="#a855f7" title="Profit Margin" action={<SectionExportButtons data={[{ metric: 'Profit Margin %', value: margin.toFixed(2) }]} filename="daily_profit_margin" columns={[{ label: 'Metric', key: 'metric' }, { label: 'Value', key: 'value', numeric: true }]} title="Profit Margin" options={{ dateRange }} />}>
               <div className="flex justify-center py-2"><RadialGauge value={margin} label="Margin" color="#a855f7" size={170} /></div>

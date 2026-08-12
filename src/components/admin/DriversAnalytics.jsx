@@ -70,14 +70,14 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
       </ReportSectionCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#3b82f6" onClick={onBrowseDrivers} />
+        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#1ED760" onClick={onBrowseDrivers} />
         <ReportStatCard index={2} label="Active" value={active} icon={UserCheck} color="#34d399" onClick={onBrowseDrivers} />
         <ReportStatCard index={3} label="On Leave" value={onLeave} icon={CalendarClock} color="#f59e0b" onClick={onBrowseDrivers} />
         <ReportStatCard index={4} label="Total Trips" value={totalTrips} icon={TrendingUp} color="#a855f7" to="/trips" extra={<Sparkline data={tripSeries} type="bar" color="#a855f7" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <ReportSectionCard index={5} color="#3b82f6" title="Top Drivers by Trips"
+        <ReportSectionCard index={5} color="#1ED760" title="Top Drivers by Trips"
           action={<button onClick={() => navigate('/admin/drivers')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
           {topDrivers.length === 0 || topDrivers[0].trips === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No trip data yet.</p> : (
             <div className="space-y-3">
@@ -89,7 +89,7 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
                       <span className="text-white/70 truncate">{d.name}</span>
                       <span className="text-white/80 tabular-nums">{d.trips} trips · {pct.toFixed(0)}%</span>
                     </div>
-                    <ProgressBar pct={pct} color="#3b82f6" />
+                    <ProgressBar pct={pct} color="#1ED760" />
                   </div>
                 );
               })}

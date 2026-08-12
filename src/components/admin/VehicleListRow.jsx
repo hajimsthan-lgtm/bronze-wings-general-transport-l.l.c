@@ -14,7 +14,7 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
       <div
         className={`row-card row-edge-glow flex items-center gap-3 cursor-pointer group ${selected ? 'ring-1 ring-primary/50' : ''}`}
         onClick={() => onOpen?.(v)}
-        style={{ ['--row-accent']: '#3b82f6' }}
+        style={{ ['--row-accent']: '#1ED760' }}
       >
         <button
           type="button"

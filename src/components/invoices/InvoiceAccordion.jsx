@@ -120,7 +120,7 @@ export default function InvoiceAccordion({ invoices, onEdit, onDelete, onDownloa
             >
               <span
                 className="w-1.5 flex-shrink-0 self-stretch rounded-full"
-                style={{ background: 'linear-gradient(180deg, rgba(59,130,246,0.9) 0%, rgba(45,212,191,0.7) 100%)' }}
+                style={{ background: 'linear-gradient(180deg, rgba(30,215,96,0.9) 0%, rgba(45,212,191,0.7) 100%)' }}
               />
               <p className="text-sm font-semibold text-white uppercase tracking-wider truncate font-display flex-1 text-left">
                 {clientName}

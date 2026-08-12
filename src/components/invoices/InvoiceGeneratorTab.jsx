@@ -33,17 +33,17 @@ const flagInfo = (inv, clientAdvance) => {
   if (clientAdvance > 0) return { rank: 2, key: 'advance', label: 'Advance', color: '#22d3ee', bg: 'rgba(34,211,238,0.14)', border: 'rgba(34,211,238,0.4)', Icon: Wallet, sent: isSent };
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const due = inv.due_date ? new Date(inv.due_date) : null;
-  if (!due) return { rank: 3, key: 'open', label: 'Unpaid', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.35)', Icon: Clock, sent: isSent };
+  if (!due) return { rank: 3, key: 'open', label: 'Unpaid', color: '#4ADE80', bg: 'rgba(110,231,183,0.12)', border: 'rgba(110,231,183,0.35)', Icon: Clock, sent: isSent };
   const days = Math.ceil((due - today) / 86400000);
   if (days < 0) return { rank: 0, key: 'overdue', label: `Overdue · ${Math.abs(days)}d`, color: '#f87171', bg: 'rgba(248,113,113,0.16)', border: 'rgba(248,113,113,0.45)', Icon: AlertTriangle, pulse: true, sent: isSent };
   if (days <= 3) return { rank: 1, key: 'soon', label: days === 0 ? 'Due today' : `Due in ${days}d`, color: '#fbbf24', bg: 'rgba(251,191,36,0.16)', border: 'rgba(251,191,36,0.45)', Icon: Clock, sent: isSent };
-  return { rank: 3, key: 'open', label: isSent ? 'Sent' : 'Unpaid', color: isSent ? '#818cf8' : '#60a5fa', bg: isSent ? 'rgba(129,140,248,0.14)' : 'rgba(96,165,250,0.12)', border: isSent ? 'rgba(129,140,248,0.4)' : 'rgba(96,165,250,0.35)', Icon: isSent ? MailCheck : Calendar, sent: isSent };
+  return { rank: 3, key: 'open', label: isSent ? 'Sent' : 'Unpaid', color: isSent ? '#818cf8' : '#4ADE80', bg: isSent ? 'rgba(129,140,248,0.14)' : 'rgba(110,231,183,0.12)', border: isSent ? 'rgba(129,140,248,0.4)' : 'rgba(110,231,183,0.35)', Icon: isSent ? MailCheck : Calendar, sent: isSent };
 };
 
 const FILTER_PILLS = [
   { key: 'all', label: 'All', color: '#818cf8' },
   { key: 'paid', label: 'Paid', color: '#34d399' },
-  { key: 'unpaid', label: 'Unpaid', color: '#60a5fa' },
+  { key: 'unpaid', label: 'Unpaid', color: '#4ADE80' },
   { key: 'split', label: 'Split', color: '#fbbf24' },
   { key: 'overdue', label: 'Overdue', color: '#f87171' },
 ];

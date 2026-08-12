@@ -51,9 +51,9 @@ export default function DesktopNav() {
       {/* top specular highlight */}
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.16) 50%, transparent 100%)' }} />
       {/* gradient bottom hairline */}
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.30) 50%, transparent 100%)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(30,215,96,0.30) 50%, transparent 100%)' }} />
       {/* centered ambient blue light-leak */}
-      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(59,130,246,0.06), transparent 70%)' }} />
+      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-0 h-16 w-2/3" style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(30,215,96,0.06), transparent 70%)' }} />
 
       <div className="relative w-full px-4 md:px-6 h-20 flex items-center justify-between">
         {/* Brand at the left corner */}
@@ -61,7 +61,7 @@ export default function DesktopNav() {
           <Link to="/" className="flex items-center gap-3 group/brand">
             {isDashboard &&
             <div className="relative">
-                <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%)' }} />
+                <div className="absolute inset-0 rounded-xl blur-md opacity-60" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.28) 0%, transparent 70%)' }} />
                 {logoUrl ?
               <img src={logoUrl} alt="Bronze Wings" className="relative w-9 h-9 rounded-xl object-contain" style={{
                 border: '1px solid rgba(var(--panel-accent-rgb),0.30)',

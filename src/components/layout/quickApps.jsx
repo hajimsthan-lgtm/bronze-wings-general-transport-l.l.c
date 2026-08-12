@@ -22,7 +22,7 @@ export const QUICK_APPS = [
   { key: 'whatsapp', label: 'WhatsApp', hex: '#25D366', icon: WhatsAppIcon, action: () => window.open('https://wa.me/', '_blank') },
   { key: 'gmail', label: 'Gmail', hex: '#EA4335', icon: GmailIcon, action: () => { window.location.href = 'mailto:?subject=Transport%20Update'; } },
   { key: 'call', label: 'Call', hex: '#10b981', icon: Phone, action: () => { window.location.href = 'tel:'; } },
-  { key: 'maps', label: 'Maps', hex: '#3b82f6', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
+  { key: 'maps', label: 'Maps', hex: '#1ED760', icon: MapPin, action: () => window.open('https://maps.google.com', '_blank') },
   { key: 'calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
   { key: 'message', label: 'Message', hex: '#0088cc', icon: MessageCircle, action: () => window.open('https://web.telegram.org', '_blank') },
   { key: 'calendar', label: 'Calendar', hex: '#4285f4', icon: Calendar, action: () => window.open('https://calendar.google.com', '_blank') },
@@ -34,7 +34,7 @@ export const QUICK_APPS = [
 /* In-app tools — rendered as the horizontal fan row. Every entry stays inside the app. */
 export const QUICK_APPS_TOOLS = [
   { key: 'tool-calc', label: 'Calculator', hex: '#64748b', icon: CalcIcon, action: 'calc' },
-  { key: 'tool-contracts', label: 'Contracts', hex: '#3b82f6', icon: FileText, to: '/contracts' },
+  { key: 'tool-contracts', label: 'Contracts', hex: '#1ED760', icon: FileText, to: '/contracts' },
   { key: 'tool-daily', label: 'Daily Report', hex: '#06b6d4', icon: ClipboardList, to: '/reports/daily' },
   { key: 'tool-settings', label: 'Settings', hex: '#8b5cf6', icon: Settings, to: '/settings' },
   { key: 'tool-prompts', label: 'Prompts', hex: '#f59e0b', icon: Sparkles, to: '/prompt-generator' },
@@ -43,7 +43,7 @@ export const QUICK_APPS_TOOLS = [
 /* In-app module shortcuts — rendered as the vertical fan column. */
 export const QUICK_APPS_NAV = [
   { key: 'nav-dashboard', label: 'Dashboard', hex: '#6366f1', icon: LayoutDashboard, to: '/' },
-  { key: 'nav-trips', label: 'Trips', hex: '#3b82f6', icon: Route, to: '/trips' },
+  { key: 'nav-trips', label: 'Trips', hex: '#1ED760', icon: Route, to: '/trips' },
   { key: 'nav-expenses', label: 'Expenses', hex: '#f59e0b', icon: Receipt, to: '/expenses' },
   { key: 'nav-vehicles', label: 'Vehicles', hex: '#6366f1', icon: Truck, to: '/admin/vehicles' },
   { key: 'nav-clients', label: 'Clients', hex: '#f43f5e', icon: Building2, to: '/admin/clients' },

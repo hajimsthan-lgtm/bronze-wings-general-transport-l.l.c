@@ -27,7 +27,7 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_HEX = {
-  scheduled: '#60a5fa',
+  scheduled: '#4ADE80',
   in_transit: '#fbbf24',
   completed: '#34d399',
   cancelled: '#f87171',

@@ -4,7 +4,7 @@ import CountUp from '@/components/common/CountUp';
 
 const METRICS = [
   { label: 'On-Time Delivery', value: 100, suffix: '%', decimals: 0, sub: 'All trips on schedule', icon: CheckCircle2, color: '#22c55e' },
-  { label: 'Avg. Trip Value', value: 624.2, prefix: 'AED ', decimals: 2, sub: 'Per trip average', icon: BarChart3, color: '#3b82f6' },
+  { label: 'Avg. Trip Value', value: 624.2, prefix: 'AED ', decimals: 2, sub: 'Per trip average', icon: BarChart3, color: '#1ED760' },
   { label: 'Fleet Utilization', value: 0, suffix: '%', decimals: 0, sub: 'Vehicle usage rate', icon: Gauge, color: '#f59e0b' },
 ];
 

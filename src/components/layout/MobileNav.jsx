@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { LayoutDashboard, Truck, BarChart3, Shield, Bot, Wallet } from 'lucide-react';
 
 const navItems = [
-  { key: 'dashboard', icon: LayoutDashboard, color: '#60a5fa' },
+  { key: 'dashboard', icon: LayoutDashboard, color: '#4ADE80' },
   { key: 'operations', icon: Truck, color: '#fb923c' },
   { key: 'accounts', icon: Wallet, color: '#fbbf24' },
   { key: 'reports', icon: BarChart3, color: '#34d399' },

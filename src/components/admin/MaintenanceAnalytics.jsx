@@ -11,7 +11,7 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 const TYPE_COLORS = {
   oil_change: '#f97316',
-  tire: '#3b82f6',
+  tire: '#1ED760',
   brake: '#ef4444',
   engine: '#a855f7',
   electrical: '#eab308',
@@ -44,7 +44,7 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
   const statusData = [
     { name: 'Completed', value: completed, color: '#34d399' },
     { name: 'In Progress', value: inProgress, color: '#f59e0b' },
-    { name: 'Scheduled', value: scheduled, color: '#3b82f6' },
+    { name: 'Scheduled', value: scheduled, color: '#1ED760' },
   ].filter((d) => d.value > 0);
   const statusTotal = completed + inProgress + scheduled;
 
@@ -79,9 +79,9 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Records" value={records.length} icon={Wrench} color="#3b82f6" onClick={onBrowse} />
+        <ReportStatCard index={1} label="Total Records" value={records.length} icon={Wrench} color="#1ED760" onClick={onBrowse} />
         <ReportStatCard index={2} label="Total Cost" value={totalCost} format={formatCurrency} icon={Wallet} color="#ef4444" onClick={onBrowse} />
-        <ReportStatCard index={3} label="Scheduled" value={scheduled} icon={CalendarClock} color="#3b82f6" onClick={onBrowse} />
+        <ReportStatCard index={3} label="Scheduled" value={scheduled} icon={CalendarClock} color="#1ED760" onClick={onBrowse} />
         <ReportStatCard index={4} label="In Progress" value={inProgress} icon={Clock} color="#f59e0b" onClick={onBrowse} />
         <ReportStatCard index={5} label="Completed" value={completed} icon={CheckCircle2} color="#34d399" onClick={onBrowse} />
       </div>
@@ -104,7 +104,7 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
           )}
         </ReportSectionCard>
 
-        <ReportSectionCard index={7} color="#3b82f6" title="Service Status Distribution">
+        <ReportSectionCard index={7} color="#1ED760" title="Service Status Distribution">
           {statusData.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No data yet.</p> : (
             <div className="flex items-center gap-6 flex-wrap">
               <DonutChart data={statusData} total={statusTotal} height={180} />
@@ -127,7 +127,7 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
           <TrendChart data={trendData} series={[{ key: 'cost', name: 'Cost', color: '#f97316' }]} type="area" height={220} />
         </ReportSectionCard>
 
-        <ReportSectionCard index={9} color="#3b82f6" title="Top Vehicles by Maintenance Cost"
+        <ReportSectionCard index={9} color="#1ED760" title="Top Vehicles by Maintenance Cost"
           action={<button onClick={onBrowse} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
           {topVehicles.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No data yet.</p> : (
             <div className="space-y-3">
@@ -139,7 +139,7 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
                       <span className="text-white/70 truncate flex items-center gap-1.5"><Truck className="w-3 h-3 text-white/40" />{v.name}</span>
                       <span className="text-white/80 tabular-nums">{formatCurrency(v.cost)} · {v.count} svc</span>
                     </div>
-                    <ProgressBar pct={pct} color="#3b82f6" />
+                    <ProgressBar pct={pct} color="#1ED760" />
                   </div>
                 );
               })}

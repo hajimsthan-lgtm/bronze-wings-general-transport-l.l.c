@@ -4,7 +4,7 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 
-export default function RecordSectionCard({ title, icon: Icon, accent = '#3b82f6', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', collapsible = false, defaultOpen = true, children }) {
+export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', collapsible = false, defaultOpen = true, children }) {
   const [open, setOpen] = useState(defaultOpen);
   const isOpen = !collapsible || open;
 

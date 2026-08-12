@@ -8,7 +8,7 @@ export const categoryIcons = {
 };
 
 export const categoryColors = {
-  fuel: '#f97316', maintenance: '#3b82f6', toll: '#a855f7', salary: '#22c55e',
+  fuel: '#f97316', maintenance: '#1ED760', toll: '#a855f7', salary: '#22c55e',
   insurance: '#ec4899', registration: '#14b8a6', office: '#f59e0b', other: '#94a3b8',
 };
 

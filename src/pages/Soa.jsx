@@ -20,7 +20,7 @@ import DonutChart from '@/components/reports/DonutChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
 import Sparkline from '@/components/reports/Sparkline';
 
-const STATUS_COLOR = { paid: '#22c55e', partially_paid: '#f59e0b', partial: '#f59e0b', sent: '#3b82f6', draft: '#94a3b8', pending: '#f97316' };
+const STATUS_COLOR = { paid: '#22c55e', partially_paid: '#f59e0b', partial: '#f59e0b', sent: '#1ED760', draft: '#94a3b8', pending: '#f97316' };
 
 export default function Soa() {
   const { t } = useI18n();
@@ -105,7 +105,7 @@ export default function Soa() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <ReportStatCard index={0} label={t('total')} value={totalAmount} format={formatCurrency} icon={FileText} color="#3b82f6" />
+        <ReportStatCard index={0} label={t('total')} value={totalAmount} format={formatCurrency} icon={FileText} color="#1ED760" />
         <ReportStatCard index={1} label={t('paid')} value={paidAmount} format={formatCurrency} icon={FileText} color="#22c55e" />
         <ReportStatCard index={2} label="Balance" value={balance} format={formatCurrency} icon={FileText} color="#f97316"
           extra={<Sparkline data={outSeries.length ? outSeries : [0, 0]} type="area" color="#f97316" width={90} height={32} />} />

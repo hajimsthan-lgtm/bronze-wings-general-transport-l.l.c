@@ -6,8 +6,8 @@ const initialsOf = (name = '') =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
 
 const CARD_BASE = {
-  ['--row-accent']: '#3b82f6',
-  borderTop: '3px solid #3b82f6',
+  ['--row-accent']: '#1ED760',
+  borderTop: '3px solid #1ED760',
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
@@ -16,7 +16,7 @@ export default function ClientProfileCard({ client, stats }) {
   const dotColor = isActive ? '#34d399' : '#94a3b8';
 
   const statsList = [
-    { label: 'Trips', value: stats?.trips ?? 0, accent: '#3b82f6' },
+    { label: 'Trips', value: stats?.trips ?? 0, accent: '#1ED760' },
     { label: 'Invoices', value: stats?.invoices ?? 0, accent: '#a855f7' },
     { label: 'Outstanding', value: stats?.outstanding ?? 0, accent: '#f43f5e' },
     { label: 'Paid', value: stats?.paid ?? 0, accent: '#34d399' },
@@ -25,11 +25,11 @@ export default function ClientProfileCard({ client, stats }) {
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
       {/* header band */}
-      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#3b82f6', 0.10)} 0%, transparent 100%)` }}>
-        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#3b82f6', 0.5)} 0%, transparent 70%)` }} />
+      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#1ED760', 0.10)} 0%, transparent 100%)` }}>
+        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#1ED760', 0.5)} 0%, transparent 70%)` }} />
         <div className="relative flex items-center gap-3">
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.40) 0%, transparent 70%)' }} />
+            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.40) 0%, transparent 70%)' }} />
             <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
               {client.image_url
                 ? <img src={client.image_url} alt="" className="w-full h-full object-cover" />

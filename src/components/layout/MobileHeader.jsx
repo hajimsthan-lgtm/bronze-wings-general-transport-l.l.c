@@ -36,7 +36,7 @@ export default function MobileHeader() {
         }}
       />
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)' }} />
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.30) 50%, transparent)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(30,215,96,0.30) 50%, transparent)' }} />
       <div
         className="relative h-14 px-4 flex items-center justify-between"
       >
@@ -44,7 +44,7 @@ export default function MobileHeader() {
           <div className="relative">
             <div
               className="absolute inset-0 rounded-lg blur-md opacity-60"
-              style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.35) 0%, transparent 70%)' }}
+              style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.35) 0%, transparent 70%)' }}
             />
             {logoUrl ? (
               <img
@@ -53,7 +53,7 @@ export default function MobileHeader() {
                 className="relative w-8 h-8 rounded-lg object-contain ring-1 ring-white/10"
               />
             ) : (
-              <div className="relative w-8 h-8 rounded-lg border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+              <div className="relative w-8 h-8 rounded-lg border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(30,215,96,0.2)]">
                 <span className="text-xs font-bold text-blue-400">BW</span>
               </div>
             )}

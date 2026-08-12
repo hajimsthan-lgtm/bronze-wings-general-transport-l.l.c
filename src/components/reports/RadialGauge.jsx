@@ -1,6 +1,6 @@
 import { useEffect, useState, useId } from 'react';
 
-export default function RadialGauge({ value, label, color = '#3b82f6', size = 170, suffix = '%' }) {
+export default function RadialGauge({ value, label, color = '#1ED760', size = 170, suffix = '%' }) {
   const pct = Math.max(0, Math.min(100, value || 0));
   const stroke = 12;
   const r = size / 2 - stroke;

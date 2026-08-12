@@ -9,7 +9,7 @@ const AGENTS = [
     title: 'Contract Manager',
     desc: 'Manage your monthly contracts and upload required document files.',
     icon: FileText,
-    accent: '#3b82f6',
+    accent: '#1ED760',
     suggestions: [
       'Show my active monthly contracts',
       'Update the monthly rate for my contract',
