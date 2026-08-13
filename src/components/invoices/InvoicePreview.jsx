@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useLayoutEffect } from 'react';
-import { buildInvoiceHTML } from '@/lib/invoiceHtml';
+import { buildPerTripInvoiceHTML } from '@/lib/invoiceHtml';
 
 const PAGE_W = 794;   // A4 @ 96dpi
 const PAGE_H = 1123;
@@ -8,7 +8,7 @@ export default function InvoicePreview({ form, settings }) {
   const items = form.line_items || [];
   const hasContent = items.length > 0 || form.client_name;
   const html = useMemo(() => {
-    return buildInvoiceHTML(form, form.client_name, settings || {});
+    return buildPerTripInvoiceHTML(form, form.client_name, settings || {});
   }, [form, settings]);
 
   const wrapRef = useRef(null);
