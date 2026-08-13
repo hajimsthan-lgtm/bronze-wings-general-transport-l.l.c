@@ -1838,6 +1838,23 @@
   }
   .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary-light)); }
   .trips-scroll { scrollbar-width: auto; scrollbar-color: hsl(var(--primary)) hsl(var(--muted) / 0.5); -ms-overflow-style: auto; }
+
+  /* ===== Excel-like subtle grid lines for TripsTable ===== */
+  .trips-grid-table { border-collapse: collapse; }
+  .trips-grid-table tr { border-bottom: 1px solid hsl(var(--border) / 0.35); }
+  .trips-grid-th,
+  .trips-grid-td {
+    border-right: 1px solid hsl(var(--border) / 0.25);
+    border-bottom: 1px solid hsl(var(--border) / 0.25);
+  }
+  .trips-grid-th:last-child,
+  .trips-grid-td:last-child { border-right: none; }
+  .theme-light .trips-grid-table tr { border-bottom-color: rgba(0,0,0,0.06); }
+  .theme-light .trips-grid-th,
+  .theme-light .trips-grid-td {
+    border-right-color: rgba(0,0,0,0.05);
+    border-bottom-color: rgba(0,0,0,0.05);
+  }
 }
 
 /* ===== Collapsible section shine sweep (when collapsed) ===== */

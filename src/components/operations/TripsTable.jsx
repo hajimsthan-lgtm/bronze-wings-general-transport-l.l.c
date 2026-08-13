@@ -26,12 +26,6 @@ const STATUS_LABELS = {
   cancelled: 'Cancelled'
 };
 
-const PAYMENT_LABEL = {
-  corporate_credit: 'Corp',
-  cash_received: 'Cash',
-  bank_received: 'Bank'
-};
-
 export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -42,15 +36,14 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   // Column widths (resizable) — all columns always visible, text wraps
   const [widths, setWidths] = useState({
     0: 44, // checkbox
-    1: 130, // trip #
-    2: 100, // date
-    3: 180, // client
-    4: 140, // vehicle
-    5: 220, // route
-    6: 110, // revenue
-    7: 130, // status
-    8: 90, // payment
-    9: 100 // actions
+    1: 120, // trip #
+    2: 90, // date
+    3: 220, // client (enlarged)
+    4: 130, // vehicle
+    5: 260, // route (enlarged)
+    6: 100, // revenue
+    7: 120, // status
+    8: 100 // actions
   });
   const [resizing, setResizing] = useState(null);
 
@@ -112,13 +105,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
 
   return (
     <div
-      className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll"
+      className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid"
       style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.5) transparent' }}
     >
-      <Table className="table-fixed" style={{ minWidth: totalWidth }}>
+      <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
           <TableRow className="bg-muted/60 sticky top-0 z-10 hover:bg-muted/60">
-            <TableHead className="relative pl-3" style={thStyle(0)}>
+            <TableHead className="relative pl-3 trips-grid-th" style={thStyle(0)}>
               <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-border/60" />
               {resizeHandle(0)}
             </TableHead>
@@ -130,12 +123,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             ['ROUTE', 'text-left'],
             ['TRIP FARE', 'text-left'],
             ['STATUS', 'text-left'],
-            ['PAYMENT', 'text-left'],
             ['', 'text-center']].
             map(([label, align], i) => {
               const index = i + 1;
               return (
-                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75', align)} style={thStyle(index)}>
+                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th', align)} style={thStyle(index)}>
                   {label}
                   {resizeHandle(index)}
                 </TableHead>);
@@ -156,66 +148,66 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   trip.status === 'cancelled' && 'opacity-60 border-l-2 border-l-red-500/50'
                 )}>
                 
-                <TableCell className="pl-3" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="pl-3 trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
                 </TableCell>
-                <TableCell className="text-xs font-mono align-top">
-                  <div className="flex items-center gap-1.5">
+                <TableCell className="text-xs font-mono align-top trips-grid-td">
+                  <div className="flex items-center gap-1.5 overflow-hidden">
                     <button
                       onClick={(e) => {e.stopPropagation();copyRef(trip);}}
-                      className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group"
+                      className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 truncate"
                       title="Click to copy trip number">
-                      {ref}
+                      <span className="truncate">{ref}</span>
                       {copiedId === trip.id ?
                       <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
                       <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-black align-top whitespace-nowrap">
+                <TableCell className="text-xs font-mono text-black align-top whitespace-nowrap trips-grid-td">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
                   <span className="block text-[10px] text-black/70">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
-                <TableCell className="align-top">
+                <TableCell className="align-top trips-grid-td">
                   <button
                     onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-xs font-medium text-left text-black hover:text-primary transition-colors block break-words leading-tight"
+                    className="text-xs font-medium text-left text-black hover:text-primary transition-colors block truncate leading-tight"
                     title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-[10px] text-black/70 break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-black/70 truncate leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
-                <TableCell className="text-xs font-mono align-top">
+                <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
                     onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="text-black hover:text-primary transition-colors tabular-nums block text-left break-words leading-tight"
+                    className="text-black hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
                     title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
                   <button
                     onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-black/70 hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
+                    className="text-[10px] text-black/70 hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5"
                     title="View driver">
                     {trip.driver_name || ''}
                   </button>
                 </TableCell>
-                <TableCell className="text-xs align-top">
-                  <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1.5 break-words leading-tight">
-                      <span className="text-black break-words font-medium">{trip.from_location || '—'}</span>
+                <TableCell className="text-xs align-top trips-grid-td">
+                  <div className="flex flex-col gap-0.5 overflow-hidden">
+                    <div className="flex items-center gap-1.5 leading-tight min-w-0">
+                      <span className="text-black truncate font-medium flex-1 min-w-0">{trip.from_location || '—'}</span>
                       <ArrowRight className="w-3 h-3 text-black/40 flex-shrink-0" />
-                      <span className="text-black break-words font-medium">{trip.to_location || '—'}</span>
+                      <span className="text-black truncate font-medium flex-1 min-w-0">{trip.to_location || '—'}</span>
                     </div>
-                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider break-words">{trip.hours}h</div> : null}
+                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider truncate">{trip.hours}h</div> : null}
                   </div>
                 </TableCell>
-                <TableCell className="text-left align-top">
-                  <div className="text-xs font-semibold font-mono tabular-nums text-black">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                <TableCell className="text-left align-top trips-grid-td">
+                  <div className="text-xs font-semibold font-mono tabular-nums text-black truncate">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                 </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
-                  <TableCell onClick={(e) => e.stopPropagation()} className="align-top">
+                  <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
@@ -251,10 +243,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell className="align-top">
-                  <Badge variant="secondary" className="text-[10px] whitespace-nowrap text-black">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
-                </TableCell>
-                <TableCell className="align-top">
+                <TableCell className="align-top trips-grid-td">
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onOpenDetail?.(trip)}
