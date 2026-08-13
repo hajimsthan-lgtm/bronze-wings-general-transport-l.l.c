@@ -22,13 +22,13 @@ const DEFAULT_FORM = {
   trip_date: new Date().toISOString().split('T')[0],
   load_datetime: '', offload_datetime: '', trip_number: '',
   status: 'scheduled', revenue: '', distance_km: '', notes: '', contact_person: '',
-  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: '', overtime_rate: '',
+  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: '', overtime_rate: ''
 };
 
 const DEFAULT_CONTRACT = {
   company_name: '', start_date: '', end_date: '', auto_renewal: false,
   monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
-  usage_date: '', usage_hours: '', usage_days: '', per_hour_rate: '', per_day_rate: '',
+  usage_date: '', usage_hours: '', usage_days: '', per_hour_rate: '', per_day_rate: ''
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -63,11 +63,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   useEffect(() => {
     if (open) {
       Promise.all([
-        base44.entities.Trip.list('-created_date', 200).catch(() => []),
-        base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
-        base44.entities.Driver.list('-created_date', 200).catch(() => []),
-        base44.entities.Client.list('-created_date', 200).catch(() => []),
-      ]).then(([trips, vehs, drvs, clnts]) => {
+      base44.entities.Trip.list('-created_date', 200).catch(() => []),
+      base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
+      base44.entities.Driver.list('-created_date', 200).catch(() => []),
+      base44.entities.Client.list('-created_date', 200).catch(() => [])]
+      ).then(([trips, vehs, drvs, clnts]) => {
         setTripsList(trips || []);
         setVehicles(vehs || []);
         setDrivers(drvs || []);
@@ -96,12 +96,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           usage_hours: editContract.usage_hours || '',
           usage_days: editContract.usage_days || '',
           per_hour_rate: editContract.per_hour_rate || '',
-          per_day_rate: editContract.per_day_rate || '',
+          per_day_rate: editContract.per_day_rate || ''
         });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
-        base44.entities.ContractExpense.filter({ contract_id: editContract.id })
-          .then((rows) => setExpenses((rows || []).map((r) => ({ ...r, id: r.id }))))
-          .catch(() => setExpenses([]));
+        base44.entities.ContractExpense.filter({ contract_id: editContract.id }).
+        then((rows) => setExpenses((rows || []).map((r) => ({ ...r, id: r.id })))).
+        catch(() => setExpenses([]));
       } else if (editTrip) {
         setMode('trip');
         setForm({
@@ -116,7 +116,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           max_allowed_duration: editTrip.max_allowed_duration || '',
           overtime_rate: editTrip.overtime_rate || '',
           duration_unit: editTrip.duration_unit || 'hours',
-          calculated_duration: editTrip.calculated_duration || '',
+          calculated_duration: editTrip.calculated_duration || ''
         });
       } else {
         setMode(initialMode || 'trip');
@@ -157,19 +157,19 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   useEffect(() => {
     if (form.client_name) {
-      base44.entities.FixedCharge.filter({ client_name: form.client_name, status: 'active' })
-        .then((charges) => setFixedCharges(charges || []))
-        .catch(() => setFixedCharges([]));
-    } else { setFixedCharges([]); }
+      base44.entities.FixedCharge.filter({ client_name: form.client_name, status: 'active' }).
+      then((charges) => setFixedCharges(charges || [])).
+      catch(() => setFixedCharges([]));
+    } else {setFixedCharges([]);}
   }, [form.client_name]);
 
   useEffect(() => {
     if (form.client_name && form.from_location && form.to_location && fixedCharges.length > 0) {
       const routeDesc = `${form.from_location} → ${form.to_location}`;
       const match = fixedCharges.find((c) => c.description === routeDesc);
-      if (match) { update('base_fare', match.amount); setAutoFilled(true); }
-      else { setAutoFilled(false); }
-    } else { setAutoFilled(false); }
+      if (match) {update('base_fare', match.amount);setAutoFilled(true);} else
+      {setAutoFilled(false);}
+    } else {setAutoFilled(false);}
   }, [form.from_location, form.to_location, fixedCharges]);
 
   useEffect(() => {
@@ -216,11 +216,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       update('delivery_note_url', file_url);
-    } catch (err) {} finally { setUploading(false); }
+    } catch (err) {} finally {setUploading(false);}
   };
 
   const generateTripNumber = () => {
-    const dateSource = form.load_datetime || (form.trip_date + 'T00:00');
+    const dateSource = form.load_datetime || form.trip_date + 'T00:00';
     const date = new Date(dateSource);
     const dd = String(date.getDate()).padStart(2, '0');
     const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -235,22 +235,22 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     return `${prefix}${String(maxSeq + 1).padStart(2, '0')}`;
   };
 
-  const autoTripNumber = editTrip ? (editTrip.trip_number || '') : generateTripNumber();
+  const autoTripNumber = editTrip ? editTrip.trip_number || '' : generateTripNumber();
 
   const buildData = (isDraft = false) => ({
     ...form,
     is_draft: isDraft,
     trip_number: form.trip_number || autoTripNumber,
-    trip_date: form.load_datetime
-      ? form.load_datetime.split('T')[0]
-      : (form.offload_datetime ? form.offload_datetime.split('T')[0] : todayStr()),
-    hours: form.trip_type === 'hourly' ? (Number(form.hours) || 0) : 0,
+    trip_date: form.load_datetime ?
+    form.load_datetime.split('T')[0] :
+    form.offload_datetime ? form.offload_datetime.split('T')[0] : todayStr(),
+    hours: form.trip_type === 'hourly' ? Number(form.hours) || 0 : 0,
     revenue: Number(form.revenue) || 0,
     distance_km: Number(form.distance_km) || 0,
     base_fare: Number(form.base_fare) || 0,
     max_allowed_duration: Number(form.max_allowed_duration) || 0,
     overtime_rate: Number(form.overtime_rate) || 0,
-    calculated_duration: Number(form.calculated_duration) || 0,
+    calculated_duration: Number(form.calculated_duration) || 0
   });
 
   const createEntity = async (type, payload, flagKey, isContract = false) => {
@@ -264,7 +264,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       if (type === 'Vehicle') setVehicles(updated || []);
       if (type === 'Driver') setDrivers(updated || []);
       flagSetter((prev) => ({ ...prev, [flagKey]: true }));
-    } catch (e) {} finally { setter(null); }
+    } catch (e) {} finally {setter(null);}
   };
 
   // Expense tracker
@@ -272,17 +272,17 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     const amt = Number(expenseForm.amount) || 0;
     if (!amt && !expenseForm.description) return;
     setExpenses((prev) => [
-      ...prev,
-      {
-        id: `local-${Date.now()}`,
-        category: activeCat,
-        date: expenseForm.date || todayStr(),
-        amount: amt,
-        description: expenseForm.description,
-        liters: activeCat === 'fuel' ? (Number(expenseForm.liters) || 0) : 0,
-        price_per_liter: activeCat === 'fuel' ? (Number(expenseForm.price_per_liter) || 0) : 0,
-      },
-    ]);
+    ...prev,
+    {
+      id: `local-${Date.now()}`,
+      category: activeCat,
+      date: expenseForm.date || todayStr(),
+      amount: amt,
+      description: expenseForm.description,
+      liters: activeCat === 'fuel' ? Number(expenseForm.liters) || 0 : 0,
+      price_per_liter: activeCat === 'fuel' ? Number(expenseForm.price_per_liter) || 0 : 0
+    }]
+    );
     setExpenseForm({ date: todayStr(), amount: '', description: '', liters: '', price_per_liter: '' });
   };
   const removeExpense = (id) => setExpenses((prev) => prev.filter((e) => e.id !== id));
@@ -290,7 +290,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const catTotals = CONTRACT_CATS.map((c) => ({
     ...c,
     label: t(c.labelKey),
-    amount: expenses.filter((e) => e.category === c.key).reduce((s, e) => s + (Number(e.amount) || 0), 0),
+    amount: expenses.filter((e) => e.category === c.key).reduce((s, e) => s + (Number(e.amount) || 0), 0)
   }));
   const totalExpenses = catTotals.reduce((s, c) => s + c.amount, 0);
   const monthlyRate = Number(contract.monthly_rate) || 0;
@@ -301,8 +301,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     try {
       if (mode === 'trip') {
         const data = buildData(false);
-        if (editTrip) await updateTrip.mutateAsync({ id: editTrip.id, data });
-        else await createTrip.mutateAsync(data);
+        if (editTrip) await updateTrip.mutateAsync({ id: editTrip.id, data });else
+        await createTrip.mutateAsync(data);
         if (form.client_name && form.from_location && form.to_location && (Number(form.revenue) || 0) > 0) {
           const routeDesc = `${form.from_location} → ${form.to_location}`;
           if (!fixedCharges.find((c) => c.description === routeDesc)) {
@@ -324,7 +324,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           usage_hours: Number(contract.usage_hours) || 0,
           usage_days: Number(contract.usage_days) || 0,
           per_hour_rate: Number(contract.per_hour_rate) || 0,
-          per_day_rate: Number(contract.per_day_rate) || 0,
+          per_day_rate: Number(contract.per_day_rate) || 0
         };
         let recordId;
         if (editContract) {
@@ -343,7 +343,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       }
       onOpenChange(false);
       onSaved?.();
-    } finally { setSaving(false); }
+    } finally {setSaving(false);}
   };
 
   const fromSuggestions = [...new Set(tripsList.map((tr) => tr.from_location).filter(Boolean))];
@@ -352,11 +352,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const driverSuggestions = drivers.map((d) => d.name).filter(Boolean);
   const clientSuggestions = clients.map((c) => c.name).filter(Boolean);
   const selectedClientData = clients.find((c) => c.name?.toLowerCase() === form.client_name?.toLowerCase());
-  const availableContacts = selectedClientData
-    ? (selectedClientData.contact_persons?.length
-        ? selectedClientData.contact_persons
-        : (selectedClientData.contact_person ? [{ name: selectedClientData.contact_person }] : []))
-    : [];
+  const availableContacts = selectedClientData ?
+  selectedClientData.contact_persons?.length ?
+  selectedClientData.contact_persons :
+  selectedClientData.contact_person ? [{ name: selectedClientData.contact_person }] : [] :
+  [];
 
   const isNewClient = form.client_name && !clientSuggestions.some((c) => c.toLowerCase() === form.client_name.toLowerCase());
   const isNewVehicle = form.vehicle_plate && !vehicleSuggestions.some((v) => v.toLowerCase() === form.vehicle_plate.toLowerCase());
@@ -376,9 +376,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const tripNumberOverridden = !!form.trip_number && form.trip_number !== autoTripNumber;
   const revenueOverridden = revenueOverride && Number(form.revenue) !== autoRevenue;
 
-  const title = mode === 'trip'
-    ? (editTrip ? t('edit') : t('new_trip'))
-    : (editContract ? t('edit_contract') : t('new_contract'));
+  const title = mode === 'trip' ?
+  editTrip ? t('edit') : t('new_trip') :
+  editContract ? t('edit_contract') : t('new_contract');
 
   const tripCtx = {
     form, update, setRevenueOverride, t, inputCls,
@@ -390,7 +390,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     autoTripNumber, tripNumberOverridden,
     fileInputRef, handleFileUpload, uploading,
     isOvertime, overtimeMetric, extraCharges,
-    revenueOverridden, autoRevenue,
+    revenueOverridden, autoRevenue
   };
 
   const contractCtx = {
@@ -399,7 +399,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     isNewClient: cIsNewClient, isNewVehicle: cIsNewVehicle, isNewDriver: cIsNewDriver,
     cCreatedFlags, cCreating, createContractEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, true),
     expenses, expenseForm, setExpenseForm, addExpense, removeExpense,
-    activeCat, setActiveCat, catTotals,
+    activeCat, setActiveCat, catTotals
   };
 
   return (
@@ -420,7 +420,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div className="flex items-center gap-3">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:text-foreground hidden">
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -429,48 +429,48 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         <div className="px-5 py-4 grid lg:grid-cols-[1fr_260px] gap-5 items-start">
           <div className="space-y-5">
-            {mode === 'trip'
-              ? <TripModeFields p={tripCtx} />
-              : <ContractModeFields p={contractCtx} />}
+            {mode === 'trip' ?
+            <TripModeFields p={tripCtx} /> :
+            <ContractModeFields p={contractCtx} />}
           </div>
 
           <div className="space-y-5">
-            {mode === 'trip' && (
-              <TripMapPanel
-                from={form.from_location}
-                to={form.to_location}
-                onSelectFrom={(v) => update('from_location', v)}
-                onSelectTo={(v) => update('to_location', v)}
-              />
-            )}
+            {mode === 'trip' &&
+            <TripMapPanel
+              from={form.from_location}
+              to={form.to_location}
+              onSelectFrom={(v) => update('from_location', v)}
+              onSelectTo={(v) => update('to_location', v)} />
+
+            }
             {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
-            {mode === 'trip'
-              ? <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
-              : <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
+            {mode === 'trip' ?
+            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} /> :
+            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
           </div>
         </div>
 
         {/* Mobile condensed bar */}
-        {mode === 'trip' ? (
-          <div className="lg:hidden glass-card p-4 space-y-2 mb-4">
+        {mode === 'trip' ?
+        <div className="lg:hidden glass-card p-4 space-y-2 mb-4">
             <p className="eyebrow">Live Calculation</p>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Base Fare</span>
               <span className="font-medium tabular-nums">{formatCurrency(Number(form.base_fare) || 0)}</span>
             </div>
-            {isOvertime && (
-              <div className="flex justify-between text-sm">
+            {isOvertime &&
+          <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Overtime</span>
                 <span className="font-medium tabular-nums text-rose-300">+{formatCurrency(extraCharges)}</span>
               </div>
-            )}
+          }
             <div className="border-t border-white/10 pt-2 flex justify-between items-baseline">
               <span className="text-sm font-semibold text-foreground">Revenue</span>
               <span className={`text-lg font-bold tabular-nums font-display ${revenueOverridden ? 'text-red-400' : 'text-primary'}`}>{formatCurrency(Number(form.revenue) || 0)}</span>
             </div>
-          </div>
-        ) : (
-          <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-3 gap-3 text-center">
+          </div> :
+
+        <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-3 gap-3 text-center">
             <div>
               <p className="eyebrow mb-1">{t('monthly_rental')}</p>
               <p className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(monthlyRate)}</p>
@@ -484,7 +484,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               <p className={`text-sm font-bold tabular-nums ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
             </div>
           </div>
-        )}
+        }
 
         {/* Footer */}
         <div className="flex items-center gap-3 px-5 py-3 border-t border-border">
@@ -499,6 +499,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>);
+
 }
