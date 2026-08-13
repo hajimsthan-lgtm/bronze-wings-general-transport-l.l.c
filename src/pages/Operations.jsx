@@ -76,7 +76,7 @@ export default function Operations() {
 
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
-  const [viewMode, setViewMode] = useState('card');
+  const [viewMode, setViewMode] = useState('table');
   const [search, setSearch] = useState('');
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');

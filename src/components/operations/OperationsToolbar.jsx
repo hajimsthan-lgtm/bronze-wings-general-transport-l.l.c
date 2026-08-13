@@ -1,8 +1,7 @@
-import { Search, X, LayoutGrid, List, Table as TableIcon } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
-import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import { normalizeDate } from '@/lib/formatters';
@@ -46,9 +45,9 @@ export default function OperationsToolbar({
       </div>
 
       <Select value={mode} onValueChange={onModeChange}>
-        
-
-        
+        <SelectTrigger className="h-9 w-full sm:w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground hidden">
+          <SelectValue />
+        </SelectTrigger>
         <SelectContent>
           {MODE_OPTIONS.map((m) =>
           <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
@@ -58,16 +57,6 @@ export default function OperationsToolbar({
 
       <div className="flex-1 min-w-0" />
 
-      <SegmentedToggle
-        compact
-        value={viewMode}
-        onChange={setViewMode}
-        options={[
-        { value: 'card', label: t('cards_view'), icon: LayoutGrid },
-        { value: 'list', label: t('list_view'), icon: List },
-        { value: 'table', label: 'Table', icon: TableIcon }]
-        } />
-      
       <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />
       {mode !== 'contract' &&
       <CsvImportButton entityName="Trip" filename="trips" onImported={onImported} label="Import" className="h-9" enrichRows={enrichTripsWithNumbers} columns={[
