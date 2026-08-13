@@ -234,7 +234,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                           trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10',
                         )}
                       >
-                        {trip.status === 'completed' ? '✓ Done' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
+                        {trip.status === 'completed' ? '✓ Complete' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
                         <ChevronDown className="w-3 h-3 opacity-60" />
                       </button>
                     </DropdownMenuTrigger>
