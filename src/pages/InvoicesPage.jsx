@@ -25,6 +25,7 @@ import {
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import InvoiceCard, { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
 import PaymentModal from '@/components/invoices/PaymentModal';
+import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
@@ -46,6 +47,7 @@ export default function InvoicesPage() {
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
   const [paymentModal, setPaymentModal] = useState(null); // { inv, mode }
+  const [bulkPaymentModal, setBulkPaymentModal] = useState(false);
   const [cancelModal, setCancelModal] = useState(null); // inv
   const { dateFrom, dateTo } = useGlobalDate();
 
@@ -120,6 +122,20 @@ export default function InvoicesPage() {
   };
 
   const handleCancelConfirm = async (reason) => {
+    if (cancelModal?.bulk) {
+      try {
+        const updates = Array.from(selected).map(id => ({ id, status: 'cancelled', voided: true, void_reason: reason }));
+        await base44.entities.Invoice.bulkUpdate(updates);
+        toast({ title: `${selected.size} invoices cancelled` });
+        setSelected(new Set());
+        setBulkStatus('');
+        setCancelModal(null);
+        refetch();
+      } catch (e) {
+        toast({ variant: 'destructive', title: 'Error', description: e.message });
+      }
+      return;
+    }
     const inv = cancelModal;
     if (!inv) return;
     await doStatusUpdate(inv, 'cancelled', { voided: true, void_reason: reason });
@@ -172,12 +188,65 @@ export default function InvoicesPage() {
 
   const handleBulkStatusChange = async () => {
     if (selected.size === 0 || !bulkStatus) return;
+    // Intercept payment / cancel to use modals with auto functions
+    if (bulkStatus === 'paid' || bulkStatus === 'partially_paid') {
+      setBulkPaymentModal(true);
+      return;
+    }
+    if (bulkStatus === 'cancelled') {
+      setCancelModal({ bulk: true });
+      return;
+    }
     try {
       const updates = Array.from(selected).map(id => ({ id, status: bulkStatus }));
       await base44.entities.Invoice.bulkUpdate(updates);
       toast({ title: `${selected.size} invoices updated` });
       setSelected(new Set());
       setBulkStatus('');
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
+    }
+  };
+
+  const handleBulkPaymentConfirm = async (payData) => {
+    const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+    if (selectedInvoices.length === 0) return;
+    try {
+      // Create a single ClientPayment with FIFO allocations
+      await base44.entities.ClientPayment.create({
+        reference_number: payData.reference,
+        client_name: selectedInvoices[0]?.client_name || '',
+        amount: payData.amount,
+        payment_date: payData.date,
+        payment_mode: payData.mode,
+        allocated_invoices: payData.allocations.map(a => ({
+          invoice_id: a.invoice_id,
+          invoice_number: a.invoice_number,
+          invoice_total: a.invoice_total,
+          allocated_amount: a.allocated_amount,
+          is_selected: true,
+        })),
+        unapplied_balance: payData.amount - payData.allocations.reduce((s, a) => s + a.allocated_amount, 0),
+        status: 'completed',
+        notes: payData.notes,
+      });
+      // Update each invoice's paid_amount and status
+      await base44.entities.Invoice.bulkUpdate(
+        payData.allocations.map(a => {
+          const inv = selectedInvoices.find(i => i.id === a.invoice_id);
+          const newPaid = (Number(inv?.paid_amount) || 0) + a.allocated_amount;
+          const newStatus = newPaid >= (Number(a.invoice_total) || 0) - 0.01 ? 'paid' : 'partially_paid';
+          return { id: a.invoice_id, paid_amount: newPaid, status: newStatus };
+        })
+      );
+      toast({
+        title: 'Bulk Payment Recorded',
+        description: `${payData.allocations.length} invoices — AED ${payData.amount.toFixed(2)} allocated (FIFO)`,
+      });
+      setSelected(new Set());
+      setBulkStatus('');
+      setBulkPaymentModal(false);
       refetch();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
@@ -360,6 +429,13 @@ export default function InvoicesPage() {
         open={!!paymentModal}
         onOpenChange={(open) => { if (!open) setPaymentModal(null); }}
         onConfirm={handlePaymentConfirm}
+      />
+
+      <BulkPaymentModal
+        invoices={allInvoices.filter(inv => selected.has(inv.id))}
+        open={bulkPaymentModal}
+        onOpenChange={setBulkPaymentModal}
+        onConfirm={handleBulkPaymentConfirm}
       />
 
       <CancelReasonModal
