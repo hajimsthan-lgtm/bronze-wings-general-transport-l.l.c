@@ -298,13 +298,13 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --background: 220 20% 97%;
+    --background: 0 0% 93%;                /* #EEEEEE neutral grey */
     --background-elevated: 0 0% 100%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --foreground: 222 47% 11%;
+    --card-foreground: 0 0% 13%;
+    --foreground: 0 0% 13%;                /* #212121 dark grey, not black */
     --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted-foreground: 0 0% 46%;          /* #757575 medium grey */
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 217 91% 50%;
@@ -348,17 +348,30 @@
     --clay-shadow-dark: 220 14% 80%;
     --clay-shadow-light: 0 0% 100%;
 
-    --app-bg: #f0fdf4;
+    --app-bg: #EEEEEE;
     --panel-bg: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%);
-    --panel-border-color: rgba(59,130,246,0.12);
+    --panel-border-color: rgba(41,98,255,0.12);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.8);
     --panel-drop-shadow: 0 12px 40px rgba(0,0,0,0.08);
     --panel-blur: blur(12px) saturate(1.1);
     --header-tint-1: rgba(255,255,255,0.75);
     --header-tint-2: rgba(248,250,252,0.55);
-    --nav-inactive: rgba(100,116,139,0.5);
+    --nav-inactive: rgba(117,117,117,0.5);
     --surf-1: rgba(255,255,255,0.85);
-    --surf-2: rgba(248,250,252,0.95);
+    --surf-2: rgba(238,238,238,0.95);
+  }
+
+  /* ===== Light theme: recolor green status badges to blue (no green touch) ===== */
+  .theme-light .bg-\[\#01B574\]\/15,
+  .theme-light .bg-\[\#01B574\]\/10 {
+    background-color: rgba(41, 98, 255, 0.12) !important;
+  }
+  .theme-light .text-\[\#01B574\] {
+    color: #2962FF !important;
+  }
+  .theme-light .border-\[\#01B574\]\/30,
+  .theme-light .border-\[\#01B574\]\/20 {
+    border-color: rgba(41, 98, 255, 0.3) !important;
   }
 }
 
