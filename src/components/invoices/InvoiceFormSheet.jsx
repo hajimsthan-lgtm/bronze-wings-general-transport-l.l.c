@@ -53,6 +53,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [tripsOpen, setTripsOpen] = useState(false);
   const [contractsOpen, setContractsOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState('trip'); // 'trip' | 'monthly'
+  const [mobileView, setMobileView] = useState('form'); // 'form' | 'preview' — mobile only
   const [receivePayment, setReceivePayment] = useState(false);
   const [payment, setPayment] = useState({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
   const [form, setForm] = useState({
@@ -325,9 +326,15 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           <SheetDescription>Left: fill in details · Right: live PDF preview</SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 flex overflow-hidden">
+        {/* Mobile tab toggle — switch between form and live preview on small screens */}
+        <div className="sm:hidden flex items-center gap-1 px-4 py-2 border-b border-border bg-muted/30 flex-shrink-0">
+          <button type="button" onClick={() => setMobileView('form')} className={cn('flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors', mobileView === 'form' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>Edit Form</button>
+          <button type="button" onClick={() => setMobileView('preview')} className={cn('flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors', mobileView === 'preview' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground')}>Live Preview</button>
+        </div>
+
+        <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
           {/* LEFT: Form */}
-          <div className="w-1/2 overflow-y-auto px-5 py-5 space-y-4 border-r border-border">
+          <div className={cn('w-full sm:w-1/2 overflow-y-auto px-5 py-5 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
             {/* Invoice Mode Toggle */}
             <div className="flex items-center gap-2 p-1 rounded-xl bg-muted/40 border border-border">
               <button
@@ -615,7 +622,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           </div>
 
           {/* RIGHT: Live Preview */}
-          <div className="w-1/2 overflow-hidden bg-muted/10">
+          <div className={cn('w-full sm:w-1/2 overflow-hidden bg-muted/10', mobileView === 'preview' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
             <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-2">
               <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
