@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import App from '@/App.jsx'
 import '@/index.css'
 import '@/mobile-theme.css'
+import '@/lib/lightThemeFixes.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>

@@ -1,0 +1,212 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME CONTRAST FIXES
+   Targets elements that use hardcoded dark-only colors (CSS classes,
+   Tailwind color utilities, leaflet controls) that become invisible
+   on light backgrounds. Does NOT affect dark theme.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Trip type selector cards (CSS class, not Tailwind) ── */
+.theme-light .trip-type-card {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+.theme-light .trip-type-card:hover {
+  border-color: rgba(59, 130, 246, 0.4) !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+  background: rgba(59, 130, 246, 0.06) !important;
+}
+.theme-light .trip-type-card-active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.08)) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  color: rgba(0, 0, 0, 0.9) !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2), 0 0 12px -4px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* ── Trip section (CSS class) ── */
+.theme-light .trip-section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(248, 250, 252, 0.7) 100%) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  border-left-color: rgb(var(--section-accent)) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+.theme-light .trip-section:hover {
+  border-color: rgba(var(--section-accent), 0.3) !important;
+  box-shadow: 0 0 0 1px rgba(var(--section-accent), 0.12), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+.theme-light .trip-section-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* ── Leaflet map controls — default is white bg / dark text which
+   works on light, but ensure visibility ── */
+.theme-light .leaflet-control-zoom a,
+.theme-light .leaflet-control-zoom a:hover {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #333 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+.theme-light .leaflet-control-zoom a:hover {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+  color: #1d4ed8 !important;
+}
+.theme-light .leaflet-bar {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+.theme-light .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #666 !important;
+}
+.theme-light .leaflet-control-attribution a {
+  color: #1d4ed8 !important;
+}
+
+/* ── Hardcoded Tailwind color utilities that vanish on white ── */
+
+/* emerald-300/400 — used for "active" green text in map panel etc. */
+.theme-light .text-emerald-300 { color: #059669 !important; }
+.theme-light .text-emerald-400 { color: #059669 !important; }
+.theme-light .hover\:text-emerald-300:hover { color: #059669 !important; }
+
+/* blue-300/400 */
+.theme-light .text-blue-300 { color: #2563eb !important; }
+.theme-light .text-blue-400 { color: #2563eb !important; }
+
+/* cyan-300/400 */
+.theme-light .text-cyan-300 { color: #0891b2 !important; }
+.theme-light .text-cyan-400 { color: #0891b2 !important; }
+
+/* red-300/400 */
+.theme-light .text-red-300 { color: #dc2626 !important; }
+.theme-light .text-red-400 { color: #dc2626 !important; }
+
+/* amber-300/400 */
+.theme-light .text-amber-300 { color: #d97706 !important; }
+.theme-light .text-amber-400 { color: #d97706 !important; }
+
+/* purple-300/400 */
+.theme-light .text-purple-300 { color: #7c3aed !important; }
+.theme-light .text-purple-400 { color: #7c3aed !important; }
+
+/* rose-300/400 */
+.theme-light .text-rose-300 { color: #e11d48 !important; }
+.theme-light .text-rose-400 { color: #e11d48 !important; }
+
+/* indigo-300/400 */
+.theme-light .text-indigo-300 { color: #4f46e5 !important; }
+.theme-light .text-indigo-400 { color: #4f46e5 !important; }
+
+/* teal-300/400 */
+.theme-light .text-teal-300 { color: #0d9488 !important; }
+.theme-light .text-teal-400 { color: #0d9488 !important; }
+
+/* sky-300/400 */
+.theme-light .text-sky-300 { color: #0284c7 !important; }
+.theme-light .text-sky-400 { color: #0284c7 !important; }
+
+/* ── Muted-foreground at very low opacity — too faint on white ── */
+.theme-light .text-muted-foreground\/50 { color: hsl(var(--muted-foreground)) !important; opacity: 0.7; }
+.theme-light .text-muted-foreground\/40 { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+.theme-light .text-muted-foreground\/30 { color: hsl(var(--muted-foreground)) !important; opacity: 0.5; }
+.theme-light .placeholder\:text-muted-foreground\/50::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+
+/* ── Primary at low opacity — faded on white ── */
+.theme-light .text-primary\/50 { color: hsl(var(--primary)) !important; opacity: 0.7; }
+.theme-light .text-primary\/40 { color: hsl(var(--primary)) !important; opacity: 0.6; }
+
+/* ── Foreground at low opacity ── */
+.theme-light .text-foreground\/50 { color: hsl(var(--foreground)) !important; opacity: 0.6; }
+.theme-light .text-foreground\/40 { color: hsl(var(--foreground)) !important; opacity: 0.5; }
+.theme-light .text-foreground\/30 { color: hsl(var(--foreground)) !important; opacity: 0.4; }
+
+/* ── Emerald/red status text used in badges ── */
+.theme-light .text-emerald-500 { color: #059669 !important; }
+.theme-light .text-red-500 { color: #dc2626 !important; }
+.theme-light .text-amber-500 { color: #d97706 !important; }
+.theme-light .text-blue-500 { color: #2563eb !important; }
+
+/* ── bg-emerald-500/10 etc. — status badge backgrounds ── */
+.theme-light .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.1) !important; }
+.theme-light .bg-emerald-500\/15 { background-color: rgba(5, 150, 105, 0.12) !important; }
+.theme-light .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.15) !important; }
+.theme-light .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.1) !important; }
+.theme-light .bg-red-500\/15 { background-color: rgba(220, 38, 38, 0.12) !important; }
+.theme-light .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.1) !important; }
+.theme-light .bg-amber-500\/15 { background-color: rgba(217, 119, 6, 0.12) !important; }
+.theme-light .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.1) !important; }
+.theme-light .bg-blue-500\/15 { background-color: rgba(37, 99, 235, 0.12) !important; }
+
+/* ── border-emerald-500/20 etc. ── */
+.theme-light .border-emerald-500\/20 { border-color: rgba(5, 150, 105, 0.25) !important; }
+.theme-light .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.3) !important; }
+.theme-light .border-red-500\/20 { border-color: rgba(220, 38, 38, 0.25) !important; }
+.theme-light .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.3) !important; }
+.theme-light .border-amber-500\/20 { border-color: rgba(217, 119, 6, 0.25) !important; }
+.theme-light .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.3) !important; }
+.theme-light .border-blue-500\/20 { border-color: rgba(37, 99, 235, 0.25) !important; }
+.theme-light .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.3) !important; }
+
+/* ── emerald-500/20 border for "To" button in map ── */
+.theme-light .border-emerald-500\/50 { border-color: rgba(5, 150, 105, 0.45) !important; }
+.theme-light .border-primary\/50 { border-color: rgba(59, 130, 246, 0.45) !important; }
+
+/* ── Segmented toggle inactive text ── */
+.theme-light .text-muted-foreground { color: hsl(var(--muted-foreground)) !important; }
+
+/* ── "Per Trip" / "Monthly Contract" toggle inactive ── */
+.theme-light .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03) !important; }
+.theme-light .hover\:bg-white\/5:hover { background-color: rgba(0, 0, 0, 0.05) !important; }
+
+/* ── Ring/focus with white — invisible on white ── */
+.theme-light .ring-white\/10 { --tw-ring-color: rgba(0, 0, 0, 0.1) !important; }
+.theme-light .ring-white\/20 { --tw-ring-color: rgba(0, 0, 0, 0.15) !important; }
+
+/* ── from-white via-white to-white gradient stops ── */
+.theme-light .from-white { --tw-gradient-from: rgba(248, 250, 252, 1) var(--tw-gradient-from-position) !important; }
+.theme-light .via-white { --tw-gradient-via: rgba(248, 250, 252, 1) var(--tw-gradient-via-position) !important; }
+.theme-light .to-white { --tw-gradient-to: rgba(248, 250, 252, 1) var(--tw-gradient-to-position) !important; }
+
+/* ── Specific: text-white used directly in components (not opacity) ── */
+/* Already covered by global rule, but reinforce for key components */
+.theme-light .text-white { color: hsl(var(--foreground)) !important; }
+
+/* ── Placeholder color for raw inputs ── */
+.theme-light input::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+.theme-light textarea::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+
+/* ── Disabled state — needs to be visible but muted ── */
+.theme-light .disabled\:opacity-50:disabled { opacity: 0.5; }
+.theme-light .disabled\:text-muted-foreground:disabled { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .disabled\:text-white\/50:disabled { color: hsl(var(--muted-foreground)) !important; opacity: 0.5; }
+.theme-light .disabled\:text-white\/30:disabled { color: hsl(var(--muted-foreground)) !important; opacity: 0.4; }
+
+/* ── Sub-tab inactive (CSS class) — reinforce ── */
+.theme-light .sub-tab { color: rgba(0, 0, 0, 0.4) !important; }
+.theme-light .sub-tab:hover { color: rgba(0, 0, 0, 0.6) !important; background: rgba(0, 0, 0, 0.03) !important; }
+
+/* ── Glass card hover border (already has override but reinforce) ── */
+.theme-light .glass-card-hover { border-color: rgba(0, 0, 0, 0.06) !important; }
+
+/* ── Specific component fixes: SegmentedToggle inactive ── */
+.theme-light [class*="bg-white/"][class*="border-white/"] {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Map panel "To" button green text ── */
+.theme-light .text-emerald-300.font-semibold { color: #059669 !important; }
+
+/* ── Calc panel glow ── */
+.theme-light .calc-total-glow {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(5, 150, 105, 0.05)) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+.theme-light .calc-total-glow::after { opacity: 0.3 !important; }
+
+/* ── Live pulse dot ── */
+.theme-light .live-pulse-dot { background: #059669 !important; }
+
+/* ── Trip section title text-white/70 — reinforce ── */
+.theme-light .trip-section .text-white\/70 { color: hsl(var(--foreground)) !important; opacity: 0.75; }
