@@ -84,7 +84,11 @@ function VehiclesTab() {
 
   return (
     <div>
-      <div data-tour data-tour-title="Header & Controls" data-tour-en="Welcome to the Vehicles portal. Use Analytics for a fleet overview or Browse to manage individual vehicles. Export your fleet to Excel or PDF, and tap Add New to register a vehicle." data-tour-ur="ویہکل پورٹل میں خوش آمدید۔ فلیٹ کے جائزے کے لیے اینالیٹکس استعمال کریں یا انفرادی گاڑیوں کو منتظم کرنے کے لیے براؤز کریں۔ فلیٹ کو ایکسل یا پی ڈی ایف پر برآمد کریں، اور نئی گاڑی داخل کرنے کے لیے نیا اضافہ کریں۔" data-tour-ml="വാഹന പോർട്ടലിലേക്ക് സ്വാഗതം. ഫ്ലീറ്റ് അവലോകനത്തിന് അനലിറ്റിക്സ് ഉപയോഗിക്കുക അല്ലെങ്കിൽ വാഹനങ്ങൾ കൈകാര്യം ചെയ്യാൻ ബ്രൗസ് ചെയ്യുക. എക്സൽ അല്ലെങ്കിൽ PDF ലേക്ക് എക്സ്പോർട്ട് ചെയ്യുക." className="flex items-center justify-end gap-3 mb-5 flex-wrap">
+      <div data-tour data-tour-title="Header & Controls" data-tour-en="Welcome to the Vehicles portal. Use Analytics for a fleet overview or Browse to manage individual vehicles. Export your fleet to Excel or PDF, and tap Add New to register a vehicle." data-tour-ur="ویہکل پورٹل میں خوش آمدید۔ فلیٹ کے جائزے کے لیے اینالیٹکس استعمال کریں یا انفرادی گاڑیوں کو منتظم کرنے کے لیے براؤز کریں۔ فلیٹ کو ایکسل یا پی ڈی ایف پر برآمد کریں، اور نئی گاڑی داخل کرنے کے لیے نیا اضافہ کریں۔" data-tour-ml="വാഹന പോർട്ടലിലേക്ക് സ്വാഗതം. ഫ്ലീറ്റ് അവലോകനത്തിന് അനലിറ്റിക്സ് ഉപയോഗിക്കുക അല്ലെങ്കിൽ വാഹനങ്ങൾ കൈകാര്യം ചെയ്യാൻ ബ്രൗസ് ചെയ്യുക. എക്സൽ അല്ലെങ്കിൽ PDF ലേക്ക് എക്സ്പോർട്ട് ചെയ്യുക." className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-display">Vehicles</h1>
+          <p className="text-sm text-muted-foreground">Fleet management & registration</p>
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
             <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>

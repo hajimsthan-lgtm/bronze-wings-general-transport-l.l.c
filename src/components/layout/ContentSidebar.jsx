@@ -5,7 +5,7 @@ import {
   Truck, ChartColumn, UsersRound, Search,
   Route, Receipt, ClipboardList, TrendingUp, FileText, Landmark, Building2, Wallet,
   FileSignature, FilePlus2, PanelLeftClose, PanelLeftOpen, Files,
-  ChevronRight } from 'lucide-react';
+  ChevronRight, Shield } from 'lucide-react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { railVisibility, useRailCollapsed } from '@/lib/railVisibility';
 
@@ -17,7 +17,7 @@ const navItems = [
       { key: 'expenses', label: 'Expenses', path: '/expenses', icon: Receipt, color: '#f97316' }]
   },
   {
-    key: 'admin', label: 'Admin', icon: Building2, color: '#3b82f6',
+    key: 'admin', label: 'Admin', icon: Shield, color: '#3b82f6',
     children: [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: Truck, color: '#3b82f6' },
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: UsersRound, color: '#0ea5e9' },

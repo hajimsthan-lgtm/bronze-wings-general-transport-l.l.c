@@ -71,13 +71,13 @@ function DriversTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-display">Drivers</h1>
+          <p className="text-sm text-muted-foreground">Driver management & payroll</p>
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
-          {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
+...
           <ExportButtons data={filtered.map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
           <CsvImportButton entityName="Driver" filename="drivers" onImported={load} columns={[
             { key: 'name', label: 'Name', sample: 'Ahmed Ali' },

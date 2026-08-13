@@ -49,13 +49,13 @@ export default function ClientsPanel() {
 
   return (
     <div>
-      <div className="flex items-center justify-end gap-3 mb-5 flex-wrap">
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground font-display">Clients</h1>
+          <p className="text-sm text-muted-foreground">Customer & vendor management</p>
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
-          {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
+...
           <ExportButtons data={filtered.map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status, revenue: revenueMap[c.name] || 0 }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Revenue', key: 'revenue', numeric: true }]} />
           <CsvImportButton entityName="Client" filename="clients" onImported={load} columns={[
             { key: 'name', label: 'Name', sample: 'ABC Transport LLC' },
