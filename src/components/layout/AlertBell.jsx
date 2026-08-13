@@ -9,6 +9,7 @@ import {
   FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
   CalendarClock, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
+import './alertBellTheme.css';
 
 const ICONS = { FileWarning, Receipt, Truck, Wrench, IdCard, FileText, CalendarClock, CheckCircle2 };
 const AUTO_CLOSE_MS = 8000;
@@ -149,7 +150,7 @@ export default function AlertBell() {
         aria-label="Alerts"
         title="Alerts"
         onClick={() => (showNotif ? handleClose() : handleOpen())}
-        className="relative flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-[rgb(var(--panel-accent-rgb))]/30 hover:bg-white/10 hover:text-white"
+        className="alert-bell-btn relative flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-[rgb(var(--panel-accent-rgb))]/30 hover:bg-white/10 hover:text-white"
       >
         <Bell className="w-4 h-4 bell-gold-swing" style={{ color: '#f5c542', filter: 'drop-shadow(0 0 4px rgba(245,197,66,0.5))' }} />
         {count > 0 && (
@@ -178,6 +179,7 @@ export default function AlertBell() {
           onMouseLeave={handleMouseLeave}
         >
           <div
+            className="alert-bell-panel"
             style={{
               background: 'linear-gradient(165deg, rgba(20,22,30,0.96) 0%, rgba(14,16,24,0.96) 100%)',
               backdropFilter: 'blur(24px) saturate(1.4)',
