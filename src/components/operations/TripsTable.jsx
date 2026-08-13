@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown } from 'lucide-react';
-import { formatCurrency } from '@/lib/formatters';
+
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -125,7 +125,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             ['CLIENT', 'text-left'],
             ['VEHICLE', 'text-left'],
             ['ROUTE', 'text-left'],
-            ['REVENUE', 'text-right'],
+            ['TRIP FARE', 'text-left'],
             ['STATUS', 'text-left'],
             ['PAYMENT', 'text-left'],
             ['', 'text-center']].
@@ -208,9 +208,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider break-words">{trip.hours}h</div> : null}
                   </div>
                 </TableCell>
-                <TableCell className="text-right align-top">
-                  <div className="text-sm font-semibold font-mono whitespace-nowrap">{formatCurrency(trip.revenue)}</div>
-                  </TableCell>
+                <TableCell className="text-left align-top">
+                  <div className="text-sm font-semibold font-mono tabular-nums">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top">
                   <DropdownMenu>
