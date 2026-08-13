@@ -212,14 +212,14 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="text-sm font-semibold font-mono">{formatCurrency(trip.revenue)}</div>
-                  <span className={cn(
-                    "text-[9px] font-bold px-1.5 py-0.5 rounded-full border inline-block mt-0.5 hidden",
-                    trip.payment_status === 'cash_received' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-                    trip.payment_status === 'bank_received' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-                    trip.payment_status === 'corporate_credit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10'
-                  )}>
-                    {trip.payment_status === 'cash_received' ? '✓ Cash' : trip.payment_status === 'bank_received' ? '✓ Bank' : '⏳ Credit'}
-                  </span>
+                  
+
+
+
+
+
+
+                  
                 </TableCell>
                 {/* STATUS — inline dropdown for direct change */}
                 <TableCell onClick={(e) => e.stopPropagation()}>
