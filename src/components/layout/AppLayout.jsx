@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import DesktopNav from '@/components/layout/DesktopNav';
 import MobileNav from '@/components/layout/MobileNav';
 import TopBar from '@/components/layout/TopBar';
@@ -11,7 +12,6 @@ import { useRailCollapsed } from '@/lib/railVisibility';
 
 export default function AppLayout() {
   const location = useLocation();
-  const showHeader = true;
   const isMobile = useIsMobile();
   const railCollapsed = useRailCollapsed();
   // match the real sidebar width (72 collapsed / 236 expanded) + a small gap
@@ -20,39 +20,59 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
-      {/* Background is a single clean solid — no floating layers */}
+      {/* ═══════════════════════════════════════════════════════
+          AMBIENT GLOW — subtle theme-tinted blobs behind everything
+          ═══════════════════════════════════════════════════════ */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+        <div
+          className="absolute -top-24 -left-16 w-72 h-72 rounded-full blur-[130px]"
+          style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', animation: 'float 20s ease-in-out infinite' }}
+        />
+        <div
+          className="absolute top-1/3 -right-20 w-80 h-80 rounded-full blur-[130px]"
+          style={{ background: 'rgba(var(--panel-accent2-rgb),0.07)', animation: 'float 24s ease-in-out infinite', animationDelay: '7s' }}
+        />
+        <div
+          className="absolute bottom-10 left-1/3 w-64 h-64 rounded-full blur-[130px]"
+          style={{ background: 'rgba(var(--panel-accent-rgb),0.05)', animation: 'float 22s ease-in-out infinite', animationDelay: '3s' }}
+        />
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           NAVIGATION — overlays content on desktop so scrolling data
           shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
-      {showHeader && (
-        <div className="sticky top-0 z-50 md:absolute md:right-0 md:top-0" style={{ left: headerLeft, transition: 'left 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
-          <MobileHeader />
-          <DesktopNav />
-          <TopBar />
-        </div>
-      )}
+      <div
+        className="sticky top-0 z-50 md:absolute md:right-0 md:top-0"
+        style={{ left: headerLeft, transition: 'left 0.35s cubic-bezier(0.16,1,0.3,1)' }}
+      >
+        <MobileHeader />
+        <DesktopNav />
+        <TopBar />
+      </div>
 
       {/* ═══════════════════════════════════════════════════════
           MAIN CONTENT — fixed-height panel; body scrolls internally
-          beneath the transparent header
+          beneath the transparent header, with framer-motion route transitions
           ═══════════════════════════════════════════════════════ */}
       <main className="flex-1 min-h-0 flex flex-col w-full relative z-10">
-        {/* Scrollable body — content sits directly on the app background */}
-        <div
-          key={location.pathname}
-          className="animate-fade-in-up md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll"
-        >
-          <div
-            className={`p-4 pb-36 md:p-5 md:pb-28 md:pr-8 ${showHeader ? 'md:pt-36' : 'md:pt-6'}`}
-            style={{
-              paddingLeft: isMobile ? undefined : `${railWidth}px`,
-              transition: 'padding-left 0.35s cubic-bezier(0.16,1,0.3,1)',
-            }}
-          >
-            <Outlet />
-          </div>
+        <div className="md:flex-1 md:min-h-0 md:overflow-y-auto thin-scroll">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className={`p-4 pb-36 md:p-5 md:pb-28 md:pr-8 md:pt-36`}
+              style={{
+                paddingLeft: isMobile ? undefined : `${railWidth}px`,
+                transition: 'padding-left 0.35s cubic-bezier(0.16,1,0.3,1)',
+              }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
 
