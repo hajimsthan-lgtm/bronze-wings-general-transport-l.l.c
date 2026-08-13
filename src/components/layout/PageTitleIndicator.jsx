@@ -1,35 +1,35 @@
 import { useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Route, Receipt, ClipboardList, TrendingUp, FileText,
-  Landmark, Wallet, FilePlus2, FileSignature, Truck, UsersRound, Building2,
-  Files, Settings, Bot, Sparkles,
+  LayoutDashboard, Route, Receipt, BarChart3, Landmark, Shield,
+  Settings, Bot, Sparkles,
 } from 'lucide-react';
 
 /**
- * Compact page title (icon + title + description) shown in the top header bar.
- * Maps the current route to its page icon, title, and description so every
- * page displays its header on the top bar.
+ * Compact page title (section icon + section title + page subtitle) shown in
+ * the top header bar. Every route is grouped under its section
+ * (Operations, Admin, Reports, Accounts …) with a dedicated section icon.
  */
 const routeMap = [
   { path: '/', icon: LayoutDashboard, title: 'Dashboard', description: 'Overview & analytics', exact: true },
-  { path: '/trips', icon: Route, title: 'Trips', description: 'Operations & logistics' },
+  { path: '/trips', icon: Route, title: 'Operations', description: 'Trips & logistics' },
   { path: '/contracts', icon: Route, title: 'Operations', description: 'Trips & contracts' },
   { path: '/expenses', icon: Receipt, title: 'Expenses', description: 'Expense tracking' },
-  { path: '/reports/daily', icon: ClipboardList, title: 'Daily Report', description: 'Daily operations summary' },
-  { path: '/reports/pnl', icon: TrendingUp, title: 'Profit & Loss', description: 'Financial overview' },
-  { path: '/reports/soa', icon: FileText, title: 'Statement of Account', description: 'Client account statements' },
-  { path: '/reports/bank-reconciliation', icon: Landmark, title: 'Bank Reconciliation', description: 'Deposits & withdrawals' },
-  { path: '/accounts/petty-cash', icon: Wallet, title: 'Petty Cash', description: 'Cash inflows & outflows' },
-  { path: '/accounts/quotations', icon: FilePlus2, title: 'Quotations', description: 'Client quotation generator' },
-  { path: '/accounts/agreements', icon: FileSignature, title: 'Agreements', description: 'Client agreement generator' },
-  { path: '/admin/vehicles', icon: Truck, title: 'Vehicles', description: 'Fleet insights' },
-  { path: '/admin/drivers', icon: UsersRound, title: 'Drivers', description: 'Performance & insights' },
-  { path: '/admin/clients', icon: Building2, title: 'Clients', description: 'Client insights' },
-  { path: '/admin/vendors', icon: Building2, title: 'Vendors', description: 'Vendor management' },
-  { path: '/admin/documents', icon: Files, title: 'Documents', description: 'Document management' },
+  { path: '/reports/daily', icon: BarChart3, title: 'Reports', description: 'Daily operations summary' },
+  { path: '/reports/pnl', icon: BarChart3, title: 'Reports', description: 'Profit & loss overview' },
+  { path: '/reports/soa', icon: BarChart3, title: 'Reports', description: 'Statement of account' },
+  { path: '/reports/bank-reconciliation', icon: BarChart3, title: 'Reports', description: 'Bank reconciliation' },
+  { path: '/accounts/petty-cash', icon: Landmark, title: 'Accounts', description: 'Petty cash' },
+  { path: '/accounts/quotations', icon: Landmark, title: 'Accounts', description: 'Quotations' },
+  { path: '/accounts/agreements', icon: Landmark, title: 'Accounts', description: 'Agreements' },
+  { path: '/accounts/invoices', icon: Landmark, title: 'Accounts', description: 'Invoices' },
+  { path: '/admin/vehicles', icon: Shield, title: 'Admin', description: 'Vehicles' },
+  { path: '/admin/drivers', icon: Shield, title: 'Admin', description: 'Drivers' },
+  { path: '/admin/clients', icon: Shield, title: 'Admin', description: 'Clients' },
+  { path: '/admin/vendors', icon: Shield, title: 'Admin', description: 'Vendors' },
+  { path: '/admin/documents', icon: Shield, title: 'Admin', description: 'Documents' },
   { path: '/settings', icon: Settings, title: 'Settings', description: 'Application settings' },
-  { path: '/prompt-generator', icon: Sparkles, title: 'Prompt Generator', description: 'AI prompt engineering' },
-  { path: '/agents', icon: Bot, title: 'AI Agents', description: 'Your AI assistants' },
+  { path: '/prompt-generator', icon: Sparkles, title: 'AI Tools', description: 'Prompt generator' },
+  { path: '/agents', icon: Bot, title: 'AI Tools', description: 'AI assistants' },
 ];
 
 export default function PageTitleIndicator() {
