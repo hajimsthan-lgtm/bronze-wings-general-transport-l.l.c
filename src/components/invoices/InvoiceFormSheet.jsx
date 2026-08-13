@@ -49,7 +49,9 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [clients, setClients] = useState([]);
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [monthlyContracts, setMonthlyContracts] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
+  const [contractsOpen, setContractsOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState('trip'); // 'trip' | 'monthly'
   const [receivePayment, setReceivePayment] = useState(false);
   const [payment, setPayment] = useState({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
@@ -107,6 +109,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       });
       base44.entities.Trip.list('-created_date', 200).catch(() => []).then(setTrips);
       base44.entities.Invoice.list('-created_date', 500).catch(() => []).then(setInvoices);
+      base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []).then(setMonthlyContracts);
     }
   }, [open, defaultClientName, editInvoice]);
 
@@ -127,6 +130,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       return base;
     });
     setTripsOpen(false);
+    setContractsOpen(false);
   };
 
   const invoicedTripNumbers = useMemo(() => {
@@ -163,6 +167,48 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     });
   };
 
+  // Monthly contracts not yet invoiced for the issue-date month
+  const invoicedContractKeys = useMemo(() => {
+    const set = new Set();
+    const issue = form.issue_date ? new Date(form.issue_date) : null;
+    if (!issue) return set;
+    (invoices || []).forEach(inv => {
+      if (!inv.client_name || !inv.issue_date) return;
+      const d = new Date(inv.issue_date);
+      if (d.getFullYear() === issue.getFullYear() && d.getMonth() === issue.getMonth()) {
+        set.add(inv.client_name);
+      }
+    });
+    return set;
+  }, [invoices, form.issue_date]);
+
+  const availableContracts = (monthlyContracts || []).filter(c =>
+    c.status === 'active' &&
+    (!form.client_name || c.company_name === form.client_name) &&
+    !invoicedContractKeys.has(c.company_name)
+  );
+  const selectedContractIds = form.line_items.map(i => i._contract_id).filter(Boolean);
+
+  const toggleContract = (contract) => {
+    setForm(prev => {
+      const items = [...prev.line_items];
+      const idx = items.findIndex(i => i._contract_id === contract.id);
+      if (idx >= 0) {
+        items.splice(idx, 1);
+      } else {
+        items.push({
+          _contract_id: contract.id,
+          description: `Monthly Rental — ${contract.vehicle_plate || contract.company_name}`,
+          date: contract.start_date || prev.issue_date,
+          quantity: 1,
+          unit_price: Number(contract.monthly_rate || 0),
+          amount: Number(contract.monthly_rate || 0),
+        });
+      }
+      return { ...prev, line_items: items };
+    });
+  };
+
   const updateItem = (index, field, value) => {
     const items = [...form.line_items];
     items[index] = { ...items[index], [field]: value };
@@ -175,7 +221,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const addItem = () => setForm(prev => ({ ...prev, line_items: [...prev.line_items, { ...emptyItem }] }));
   const removeItem = (i) => setForm(prev => ({ ...prev, line_items: prev.line_items.filter((_, idx) => idx !== i) }));
   // Only send non-empty items to the preview so the live view starts clean
-  const previewItems = form.line_items.filter(i => i.description?.trim() || Number(i.unit_price) > 0 || Number(i.amount) > 0 || i._trip_number);
+  const previewItems = form.line_items.filter(i => i.description?.trim() || Number(i.unit_price) > 0 || Number(i.amount) > 0 || i._trip_number || i._contract_id);
 
   const subtotal = form.line_items.reduce((s, item) => s + (Number(item.amount) || 0), 0);
   const vatAmount = subtotal * (Number(form.vat_rate) / 100);
@@ -195,7 +241,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       const tripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
       const data = {
         ...form,
-        line_items: form.line_items.map(({ _trip_number, ...rest }) => rest),
+        line_items: form.line_items.map(({ _trip_number, _contract_id, ...rest }) => rest),
         trip_id: tripNumbers.length > 0 ? tripNumbers.join(',') : form.trip_id,
         subtotal, vat_amount: vatAmount, total_amount: total,
         vat_rate: Number(form.vat_rate),
@@ -259,7 +305,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     setDownloading(true);
     try {
       const s = await getCompanySettings();
-      const payload = { ...form, line_items: form.line_items.map(({ _trip_number, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
+      const payload = { ...form, line_items: form.line_items.map(({ _trip_number, _contract_id, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
       if (invoiceMode === 'monthly') {
         await downloadMonthlyInvoicePDF(payload, form.client_name, s, undefined, true);
       } else {
@@ -319,7 +365,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 <Input list="invoice-clients" value={form.client_name} onChange={e => handleClientChange(e.target.value)} className={inputCls} placeholder="Select or type client name" />
                 <datalist id="invoice-clients">{clients.map(c => <option key={c.id} value={c.name} />)}</datalist>
               </div>
-              {form.client_name && (
+              {form.client_name && invoiceMode === 'trip' && (
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Completed Trips — multi-select (auto-fills items)</Label>
                   <div className="relative">
@@ -344,6 +390,41 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                                 <span className="flex-1 min-w-0">
                                   <span className="block text-sm font-medium truncate">{tr.trip_number} · {route || 'Trip'}</span>
                                   <span className="block text-[11px] text-muted-foreground">{tr.trip_date ? new Date(tr.trip_date).toLocaleDateString() : '—'} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {form.client_name && invoiceMode === 'monthly' && (
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1.5">Monthly Contracts — non-invoiced (auto-fills items)</Label>
+                  <div className="relative">
+                    <button type="button" onClick={() => setContractsOpen(v => !v)} className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
+                      <span className="text-sm font-medium truncate">{selectedContractIds.length} contract(s) selected — click to {contractsOpen ? 'close' : 'select'}</span>
+                      <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', contractsOpen && 'rotate-180')} />
+                    </button>
+                    {contractsOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setContractsOpen(false)} />
+                        <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
+                          {availableContracts.length === 0 ? (
+                            <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced active monthly contracts for this client.</p>
+                          ) : availableContracts.map(c => {
+                            const checked = selectedContractIds.includes(c.id);
+                            return (
+                              <button key={c.id} type="button" onClick={() => toggleContract(c)} className={cn('w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors', checked ? 'bg-primary/15 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]')}>
+                                <span className={cn('mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0', checked ? 'bg-primary border-primary' : 'border-border')}>
+                                  {checked && <Check className="w-3 h-3 text-primary-foreground" />}
+                                </span>
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-sm font-medium truncate">{c.company_name}{c.vehicle_plate ? ` · ${c.vehicle_plate}` : ''}</span>
+                                  <span className="block text-[11px] text-muted-foreground">{c.start_date ? new Date(c.start_date).toLocaleDateString() : '—'} → {c.end_date ? new Date(c.end_date).toLocaleDateString() : '—'} · AED {Number(c.monthly_rate || 0).toFixed(2)}/mo</span>
                                 </span>
                               </button>
                             );
