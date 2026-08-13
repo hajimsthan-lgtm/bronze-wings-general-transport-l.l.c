@@ -5,7 +5,9 @@ const PAGE_W = 794;   // A4 @ 96dpi
 const PAGE_H = 1123;
 
 export default function InvoicePreview({ form, settings }) {
-  const hasTripDates = (form.line_items || []).some(i => i.date);
+  const items = form.line_items || [];
+  const hasTripDates = items.some(i => i.date);
+  const hasContent = items.length > 0 || form.client_name;
   const html = useMemo(() => {
     const fn = hasTripDates ? buildPerTripInvoiceHTML : buildInvoiceHTML;
     return fn(form, form.client_name, settings || {});
@@ -42,6 +44,17 @@ export default function InvoicePreview({ form, settings }) {
   }, [html]);
 
   const pageCount = Math.max(1, Math.ceil(contentH / PAGE_H));
+
+  if (!hasContent) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
+        <div className="w-14 h-14 rounded-2xl bg-muted/40 flex items-center justify-center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <p className="text-sm font-medium">Select a client to preview the invoice</p>
+      </div>
+    );
+  }
 
   return (
     <div

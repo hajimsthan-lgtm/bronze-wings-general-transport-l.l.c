@@ -56,10 +56,9 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     client_name: '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
     invoice_number: '', issue_date: new Date().toISOString().split('T')[0],
     due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
-    trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
-  });
-
-  const isEdit = !!editInvoice;
+    trip_id: '', lpo_ref: '', line_items: [],
+    });
+    const isEdit = !!editInvoice;
 
   useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
 
@@ -77,7 +76,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         client_name: defaultClientName || '', client_email: '', client_phone: '', client_address: '', client_trn: '', contact_person: '',
         invoice_number: '', issue_date: new Date().toISOString().split('T')[0],
         due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
-        trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
+        trip_id: '', lpo_ref: '', line_items: [],
       });
       setReceivePayment(false);
       Promise.all([generateInvoiceNumber(), getCompanySettings()]).then(([num, s]) => {
@@ -174,6 +173,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
   const addItem = () => setForm(prev => ({ ...prev, line_items: [...prev.line_items, { ...emptyItem }] }));
   const removeItem = (i) => setForm(prev => ({ ...prev, line_items: prev.line_items.filter((_, idx) => idx !== i) }));
+  // Only send non-empty items to the preview so the live view starts clean
+  const previewItems = form.line_items.filter(i => i.description?.trim() || Number(i.unit_price) > 0 || Number(i.amount) > 0 || i._trip_number);
 
   const subtotal = form.line_items.reduce((s, item) => s + (Number(item.amount) || 0), 0);
   const vatAmount = subtotal * (Number(form.vat_rate) / 100);
@@ -511,7 +512,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </div>
             </div>
             <div className="h-[calc(100%-36px)]">
-              <InvoicePreview form={{ ...form, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} />
+              <InvoicePreview form={{ ...form, line_items: previewItems, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} />
             </div>
           </div>
         </div>
