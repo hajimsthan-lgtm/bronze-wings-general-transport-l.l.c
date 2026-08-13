@@ -34,9 +34,11 @@ export default function TopBar() {
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
-                className="btn-new-trip inline-flex items-center gap-1.5 h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white transition-all whitespace-nowrap"
+                aria-label={t('new_trip')}
+                title={t('new_trip')}
+                className="btn-new-trip flex items-center justify-center w-8 h-8 rounded-full text-white transition-all flex-shrink-0"
               >
-                <Plus className="w-3.5 h-3.5" /> {t('new_trip')}
+                <Plus className="w-4 h-4" />
               </button>
             )}
             {location.pathname === '/expenses' && (
