@@ -57,18 +57,25 @@ export default function OperationsToolbar({
         </SelectContent>
       </Select>
 
-      <Select value={statusValue} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[110px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {statusOptions.map((s) => (
-            <SelectItem key={s} value={s}>
-              {s === 'all' ? t('all') : t(s)}{s !== 'all' && statusCounts?.[s] != null ? ` · ${statusCounts[s]}` : ''}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {statusOptions.map((s) => {
+          const active = statusValue === s;
+          const count = s === 'all' ? null : statusCounts?.[s];
+          return (
+            <button
+              key={s}
+              onClick={() => onStatusChange(s)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap ${
+                active
+                  ? 'border-primary text-primary bg-primary/10'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+              }`}
+            >
+              {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
+            </button>
+          );
+        })}
+      </div>
 
       <div className="flex-1 min-w-0" />
 
