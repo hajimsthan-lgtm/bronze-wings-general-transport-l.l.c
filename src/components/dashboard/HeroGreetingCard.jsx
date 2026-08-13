@@ -26,15 +26,15 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
     const rect = panelRef.current?.getBoundingClientRect();
     if (!rect) return;
     setMouse({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
+      x: (e.clientX - rect.left) / rect.width * 100,
+      y: (e.clientY - rect.top) / rect.height * 100
     });
   };
 
   const handleCardMove = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-    e.currentTarget.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+    e.currentTarget.style.setProperty('--mx', `${(e.clientX - r.left) / r.width * 100}%`);
+    e.currentTarget.style.setProperty('--my', `${(e.clientY - r.top) / r.height * 100}%`);
   };
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
 
   useEffect(() => {
     import('@/api/base44Client').then(({ base44 }) =>
-      base44.auth.me().then(u => setUserName(u?.full_name || '')).catch(() => {})
+    base44.auth.me().then((u) => setUserName(u?.full_name || '')).catch(() => {})
     );
   }, []);
 
@@ -54,26 +54,26 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   const stats = [
-    { label: 'Active Trips', value: activeTrips, hex: '#34d399', Icon: Activity, sub: 'in progress', path: '/trips' },
-    { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#4ADE80', Icon: Wallet, sub: 'period total', path: '/reports/pnl' },
-    { label: 'Pending Invoices', value: pendingInvoices, hex: '#fbbf24', Icon: FileWarning, sub: 'awaiting', path: '/reports/soa' },
-  ];
+  { label: 'Active Trips', value: activeTrips, hex: '#34d399', Icon: Activity, sub: 'in progress', path: '/trips' },
+  { label: 'Revenue', value: formatCurrency(totalRevenue), hex: '#4ADE80', Icon: Wallet, sub: 'period total', path: '/reports/pnl' },
+  { label: 'Pending Invoices', value: pendingInvoices, hex: '#fbbf24', Icon: FileWarning, sub: 'awaiting', path: '/reports/soa' }];
+
 
   return (
     <div ref={panelRef} onMouseMove={handlePanelMove} className="relative overflow-hidden rounded-3xl animate-fade-in-up"
-      style={{
-        background: 'var(--panel-bg)',
-        border: '1px solid var(--panel-border-color)',
-        boxShadow: 'var(--panel-inner-highlight), 0 24px 70px rgba(0,0,0,0.45)',
-        backdropFilter: 'var(--panel-blur)',
-        WebkitBackdropFilter: 'var(--panel-blur)',
-      }}>
+    style={{
+      background: 'var(--panel-bg)',
+      border: '1px solid var(--panel-border-color)',
+      boxShadow: 'var(--panel-inner-highlight), 0 24px 70px rgba(0,0,0,0.45)',
+      backdropFilter: 'var(--panel-blur)',
+      WebkitBackdropFilter: 'var(--panel-blur)'
+    }}>
       {/* cursor-following spotlight */}
       <div className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500" style={{ background: `radial-gradient(500px circle at ${mouse.x}% ${mouse.y}%, rgba(var(--panel-accent-rgb),0.10), transparent 65%)` }} />
       {/* ambient mesh */}
       <div className="pointer-events-none absolute -top-24 right-0 w-72 h-72 rounded-full opacity-50" style={{ background: `radial-gradient(circle, ${gradient}, transparent 70%)` }} />
 
-      <div className="relative p-6 sm:p-8">
+      <div className="relative p-6 sm:p-8 hidden">
         {/* Row 1 — WeRate-style welcome header: avatar + greeting + name */}
         <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
           <div className="flex items-center gap-4 min-w-0">
@@ -117,21 +117,21 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
 
         {/* Row 3 — clickable stat cards with cursor spotlight + WhatsApp share */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
-           {stats.map((s, i) => (
-             <div
-               key={s.label}
-               onClick={() => navigate(s.path)}
-               onMouseMove={handleCardMove}
-               role="button"
-               tabIndex={0}
-               onKeyDown={(e) => { if (e.key === 'Enter') navigate(s.path); }}
-               className="group relative rounded-2xl px-4 py-3 sm:py-4 overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up cursor-pointer flex items-center gap-3 sm:block"
-               style={{
-                 animationDelay: `${0.1 + i * 0.06}s`,
-                 background: `linear-gradient(165deg, ${s.hex}0d 0%, rgba(255,255,255,0.025) 100%)`,
-                 border: '1px solid rgba(255,255,255,0.08)',
-               }}
-             >
+           {stats.map((s, i) =>
+          <div
+            key={s.label}
+            onClick={() => navigate(s.path)}
+            onMouseMove={handleCardMove}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {if (e.key === 'Enter') navigate(s.path);}}
+            className="group relative rounded-2xl px-4 py-3 sm:py-4 overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] animate-fade-in-up cursor-pointer flex items-center gap-3 sm:block"
+            style={{
+              animationDelay: `${0.1 + i * 0.06}s`,
+              background: `linear-gradient(165deg, ${s.hex}0d 0%, rgba(255,255,255,0.025) 100%)`,
+              border: '1px solid rgba(255,255,255,0.08)'
+            }}>
+            
                {/* per-card cursor spotlight */}
                <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: `radial-gradient(200px circle at var(--mx,50%) var(--my,50%), ${s.hex}22, transparent 70%)` }} />
                {/* top accent line on hover */}
@@ -148,22 +148,22 @@ export default function HeroGreetingCard({ activeTrips = 0, totalRevenue = 0, pe
                  <div className="relative flex items-center justify-between mt-0.5">
                    <p className="text-[10px] text-white/35 truncate">({s.sub})</p>
                    <a
-                     href={whatsappUrl('', `${s.label}: ${s.value} (${s.sub}) — Bronze Wings Fleet Dashboard`)}
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     onClick={(e) => e.stopPropagation()}
-                     className="flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0 transition-all duration-300 hover:scale-110"
-                     style={{ background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.25)', color: '#25d366' }}
-                     aria-label={`Share ${s.label} via WhatsApp`}
-                   >
+                  href={whatsappUrl('', `${s.label}: ${s.value} (${s.sub}) — Bronze Wings Fleet Dashboard`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0 transition-all duration-300 hover:scale-110"
+                  style={{ background: 'rgba(37,211,102,0.10)', border: '1px solid rgba(37,211,102,0.25)', color: '#25d366' }}
+                  aria-label={`Share ${s.label} via WhatsApp`}>
+                  
                      <WhatsAppIcon size={12} />
                    </a>
                  </div>
                </div>
              </div>
-           ))}
+          )}
          </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
