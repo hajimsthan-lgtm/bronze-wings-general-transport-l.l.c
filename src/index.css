@@ -1827,20 +1827,35 @@
   ::-webkit-scrollbar { display: none; }
   * { scrollbar-width: none; -ms-overflow-style: none; }
 
-  /* Visible scrollbar — TripsTable container */
-  .trips-scroll::-webkit-scrollbar { display: block; width: 14px; height: 14px; }
-  .trips-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.5); border-radius: 10px; }
+  /* Visible scrollbar — TripsTable container (large, user-friendly) */
+  .trips-scroll::-webkit-scrollbar { display: block; width: 16px; height: 16px; }
+  .trips-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.4); border-radius: 10px; }
   .trips-scroll::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.7);
     border-radius: 9999px;
     border: 3px solid hsl(var(--background));
-    min-height: 60px;
+    min-height: 80px;
+    min-width: 80px;
   }
-  .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary-light)); }
-  .trips-scroll { scrollbar-width: auto; scrollbar-color: hsl(var(--primary)) hsl(var(--muted) / 0.5); -ms-overflow-style: auto; }
+  .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary)); }
+  .trips-scroll { scrollbar-width: auto; scrollbar-color: hsl(var(--primary)) hsl(var(--muted) / 0.4); -ms-overflow-style: auto; }
+
+  /* Top scrollbar — TripsTable (horizontal only, stays fixed at top) */
+  .trips-scroll-top::-webkit-scrollbar { display: block; height: 14px; }
+  .trips-scroll-top::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.3); border-radius: 10px; }
+  .trips-scroll-top::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.7);
+    border-radius: 9999px;
+    border: 3px solid hsl(var(--background));
+    min-width: 100px;
+  }
+  .trips-scroll-top::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary)); }
+  .trips-scroll-top { scrollbar-width: auto; scrollbar-color: hsl(var(--primary)) hsl(var(--muted) / 0.3); -ms-overflow-style: auto; }
 
   /* ===== Excel-like subtle grid lines for TripsTable ===== */
-  .trips-grid-table { border-collapse: collapse; }
+  .trips-grid-table { border-collapse: separate; border-spacing: 0; }
+  /* Override shadcn Table wrapper overflow — enables sticky header + horizontal scroll sync */
+  .trips-grid > div { overflow: visible !important; }
   .trips-grid-table tr { border-bottom: 1px solid hsl(var(--border) / 0.35); }
   .trips-grid-th,
   .trips-grid-td {

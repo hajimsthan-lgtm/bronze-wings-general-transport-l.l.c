@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown } from 'lucide-react';
+import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown, Save } from 'lucide-react';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -26,6 +26,11 @@ const STATUS_LABELS = {
   cancelled: 'Cancelled'
 };
 
+const DEFAULT_WIDTHS = {
+  0: 44, 1: 120, 2: 90, 3: 220, 4: 130, 5: 260, 6: 100, 7: 120, 8: 100
+};
+const LAYOUT_KEY = 'trips-table-layout-v1';
+
 export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -34,18 +39,29 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const [selected, setSelected] = useState(new Set());
 
   // Column widths (resizable) — all columns always visible, text wraps
-  const [widths, setWidths] = useState({
-    0: 44, // checkbox
-    1: 120, // trip #
-    2: 90, // date
-    3: 220, // client (enlarged)
-    4: 130, // vehicle
-    5: 260, // route (enlarged)
-    6: 100, // revenue
-    7: 120, // status
-    8: 100 // actions
+  const [widths, setWidths] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LAYOUT_KEY);
+      if (saved) return { ...DEFAULT_WIDTHS, ...JSON.parse(saved) };
+    } catch {}
+    return DEFAULT_WIDTHS;
   });
   const [resizing, setResizing] = useState(null);
+
+  // Save column layout to localStorage
+  const saveLayout = () => {
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(widths));
+    toast({ title: 'Layout Saved', description: 'Column widths saved for future sessions' });
+  };
+
+  // Scroll sync — top scrollbar ↔ table container
+  const topScrollRef = useRef(null);
+  const tableScrollRef = useRef(null);
+  const syncScroll = (source, target) => {
+    if (!target) return;
+    if (Math.abs(target.scrollLeft - source.scrollLeft) < 1) return;
+    target.scrollLeft = source.scrollLeft;
+  };
 
   const totalWidth = useMemo(() => Object.values(widths).reduce((a, b) => a + b, 0), [widths]);
 
@@ -104,14 +120,30 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   };
 
   return (
-    <div
-      className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid"
-      style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.5) transparent' }}
-    >
+    <div className="relative">
+      {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
+      <div className="flex items-center gap-2 mb-1.5">
+        <div
+          ref={topScrollRef}
+          onScroll={() => syncScroll(topScrollRef.current, tableScrollRef.current)}
+          className="flex-1 overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md"
+        >
+          <div style={{ width: totalWidth, height: '1px' }} />
+        </div>
+        <Button variant="outline" size="sm" onClick={saveLayout} className="shrink-0 h-7 text-xs gap-1">
+          <Save className="w-3.5 h-3.5" /> Save Layout
+        </Button>
+      </div>
+      {/* Main scrollable table */}
+      <div
+        ref={tableScrollRef}
+        onScroll={() => syncScroll(tableScrollRef.current, topScrollRef.current)}
+        className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid"
+      >
       <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
-          <TableRow className="bg-muted/60 sticky top-0 z-10 hover:bg-muted/60">
-            <TableHead className="relative pl-3 trips-grid-th" style={thStyle(0)}>
+          <TableRow className="bg-muted hover:bg-muted">
+            <TableHead className="relative pl-3 trips-grid-th sticky top-0 z-10 bg-muted" style={thStyle(0)}>
               <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-border/60" />
               {resizeHandle(0)}
             </TableHead>
@@ -127,7 +159,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             map(([label, align], i) => {
               const index = i + 1;
               return (
-                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th', align)} style={thStyle(index)}>
+                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th sticky top-0 z-10 bg-muted', align)} style={thStyle(index)}>
                   {label}
                   {resizeHandle(index)}
                 </TableHead>);
@@ -285,6 +317,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
           })}
         </TableBody>
       </Table>
+      </div>
     </div>);
 
 }
