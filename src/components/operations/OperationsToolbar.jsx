@@ -46,9 +46,9 @@ export default function OperationsToolbar({
       </div>
 
       <Select value={mode} onValueChange={onModeChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground hidden">
-          <SelectValue />
-        </SelectTrigger>
+        
+
+        
         <SelectContent>
           {MODE_OPTIONS.map((m) =>
           <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
