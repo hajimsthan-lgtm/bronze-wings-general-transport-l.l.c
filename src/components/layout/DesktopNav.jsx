@@ -123,23 +123,23 @@ export default function DesktopNav() {
             <SettingsIcon className="w-4 h-4" style={{ color: 'hsl(var(--muted-foreground))' }} />
           </Link>
           {/* Step-back button — moved to right side, before forward */}
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            title="Go back"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white hidden">
-            
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+          
+
+
+
+
+
+
+          
           {/* Step-forward button — right corner */}
-          <button
-            onClick={() => navigate(1)}
-            aria-label="Go forward"
-            title="Go forward"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/5 border border-white/10 text-white/70 transition-all hover:border-blue-500/30 hover:bg-white/10 hover:text-white hidden">
-            
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          
+
+
+
+
+
+
+          
         </div>
       </div>
     </nav>);

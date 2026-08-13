@@ -420,9 +420,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div className="flex items-center gap-3">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:text-foreground hidden">
-                <X className="w-4 h-4" />
-              </Button>
+              
+
+              
             </div>
           </div>
         </DialogHeader>
