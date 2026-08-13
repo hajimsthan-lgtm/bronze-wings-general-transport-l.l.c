@@ -174,7 +174,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 </TableCell>
                 <TableCell className="text-xs font-mono text-foreground/70 align-top whitespace-nowrap">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] text-foreground/45">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                  <span className="block text-[10px] text-foreground/60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top">
