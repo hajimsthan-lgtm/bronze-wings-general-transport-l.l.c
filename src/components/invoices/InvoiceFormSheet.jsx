@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, MapPin } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF } from '@/lib/invoiceHtml';
@@ -48,6 +48,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [settings, setSettings] = useState({});
   const [clients, setClients] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
   const [receivePayment, setReceivePayment] = useState(false);
   const [payment, setPayment] = useState({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
@@ -105,6 +106,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         }
       });
       base44.entities.Trip.list('-created_date', 200).catch(() => []).then(setTrips);
+      base44.entities.Invoice.list('-created_date', 500).catch(() => []).then(setInvoices);
     }
   }, [open, defaultClientName, editInvoice]);
 
@@ -127,12 +129,15 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     setTripsOpen(false);
   };
 
-  const handleTripChange = (value) => {
-    const trip = trips.find(t => t.trip_number === value);
-    setForm(prev => ({ ...prev, trip_id: value, issue_date: trip?.trip_date || prev.issue_date, contact_person: trip?.contact_person || prev.contact_person }));
-  };
+  const invoicedTripNumbers = useMemo(() => {
+    const set = new Set();
+    (invoices || []).forEach(inv => {
+      if (inv.trip_id) String(inv.trip_id).split(',').forEach(t => { const v = t.trim(); if (v) set.add(v); });
+    });
+    return set;
+  }, [invoices]);
 
-  const clientCompletedTrips = (trips || []).filter(tr => tr.client_name === form.client_name && tr.status === 'completed');
+  const clientCompletedTrips = (trips || []).filter(tr => tr.client_name === form.client_name && tr.status === 'completed' && !invoicedTripNumbers.has(tr.trip_number));
   const selectedTripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
 
   const toggleTrip = (trip) => {
@@ -185,9 +190,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     }
     setSaving(true);
     try {
+      const tripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
       const data = {
         ...form,
         line_items: form.line_items.map(({ _trip_number, ...rest }) => rest),
+        trip_id: tripNumbers.length > 0 ? tripNumbers.join(',') : form.trip_id,
         subtotal, vat_amount: vatAmount, total_amount: total,
         vat_rate: Number(form.vat_rate),
         status: resultingStatus,
@@ -281,16 +288,44 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 <Input list="invoice-clients" value={form.client_name} onChange={e => handleClientChange(e.target.value)} className={inputCls} placeholder="Select or type client name" />
                 <datalist id="invoice-clients">{clients.map(c => <option key={c.id} value={c.name} />)}</datalist>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              {form.client_name && (
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5">Trip # (link trip)</Label>
-                  <Input list="invoice-trips" value={form.trip_id} onChange={e => handleTripChange(e.target.value)} placeholder="Auto-fills date" className={inputCls} />
-                  <datalist id="invoice-trips">{trips.map(tr => <option key={tr.id} value={tr.trip_number} />)}</datalist>
+                  <Label className="text-xs text-muted-foreground mb-1.5">Completed Trips — multi-select (auto-fills items)</Label>
+                  <div className="relative">
+                    <button type="button" onClick={() => setTripsOpen(v => !v)} className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
+                      <span className="text-sm font-medium truncate">{selectedTripNumbers.length} trip(s) selected — click to {tripsOpen ? 'close' : 'select'}</span>
+                      <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', tripsOpen && 'rotate-180')} />
+                    </button>
+                    {tripsOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setTripsOpen(false)} />
+                        <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
+                          {clientCompletedTrips.length === 0 ? (
+                            <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced completed trips for this client.</p>
+                          ) : clientCompletedTrips.map(tr => {
+                            const checked = selectedTripNumbers.includes(tr.trip_number);
+                            const route = [tr.from_location, tr.to_location].filter(Boolean).join(' To ');
+                            return (
+                              <button key={tr.id} type="button" onClick={() => toggleTrip(tr)} className={cn('w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors', checked ? 'bg-primary/15 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]')}>
+                                <span className={cn('mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0', checked ? 'bg-primary border-primary' : 'border-border')}>
+                                  {checked && <Check className="w-3 h-3 text-primary-foreground" />}
+                                </span>
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-sm font-medium truncate">{tr.trip_number} · {route || 'Trip'}</span>
+                                  <span className="block text-[11px] text-muted-foreground">{tr.trip_date ? new Date(tr.trip_date).toLocaleDateString() : '—'} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label>
-                  <Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className={inputCls} />
-                </div>
+              )}
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label>
+                <Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className={inputCls} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -313,50 +348,6 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
               </div>
             </Section>
-
-            {/* Completed Trips — bulk multi-select */}
-            {form.client_name && clientCompletedTrips.length > 0 && (
-              <Section title="Completed Trips" icon={MapPin}>
-                <p className="text-xs text-muted-foreground">Select completed trips to bulk-add as line items. Each trip becomes one row with its date and fare — combine multiple trips into a single invoice.</p>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setTripsOpen(v => !v)}
-                    className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors"
-                  >
-                    <span className="text-sm font-medium">{selectedTripNumbers.length} trip(s) selected — click to {tripsOpen ? 'close' : 'select'}</span>
-                    <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', tripsOpen && 'rotate-180')} />
-                  </button>
-                  {tripsOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setTripsOpen(false)} />
-                      <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
-                        {clientCompletedTrips.map(tr => {
-                          const checked = selectedTripNumbers.includes(tr.trip_number);
-                          const route = [tr.from_location, tr.to_location].filter(Boolean).join(' To ');
-                          return (
-                            <button
-                              key={tr.id}
-                              type="button"
-                              onClick={() => toggleTrip(tr)}
-                              className={cn('w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors', checked ? 'bg-primary/15 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]')}
-                            >
-                              <span className={cn('mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0', checked ? 'bg-primary border-primary' : 'border-border')}>
-                                {checked && <Check className="w-3 h-3 text-primary-foreground" />}
-                              </span>
-                              <span className="flex-1 min-w-0">
-                                <span className="block text-sm font-medium truncate">{tr.trip_number} · {route || 'Trip'}</span>
-                                <span className="block text-[11px] text-muted-foreground">{tr.trip_date ? new Date(tr.trip_date).toLocaleDateString() : '—'} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Section>
-            )}
 
             {/* Invoice Details */}
             <Section title="Invoice Details" icon={FileText}>
