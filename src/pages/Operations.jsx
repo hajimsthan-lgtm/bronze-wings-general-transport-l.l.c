@@ -233,6 +233,15 @@ export default function Operations() {
     await deleteTrip.mutateAsync(trip.id);
     closeDetailTrip();
   };
+  const handleTripStatusChange = async (trip, newStatus) => {
+    try {
+      await base44.entities.Trip.update(trip.id, { status: newStatus });
+      toast({ title: 'Status updated', description: `${trip.trip_number || 'Trip'} → ${newStatus.replace('_', ' ')}` });
+      refetchTrips();
+    } catch {
+      toast({ title: 'Could not update status', variant: 'destructive' });
+    }
+  };
   const deleteContractById = async (c) => {
     try {
       await base44.entities.ContractExpense.deleteMany({ contract_id: c.id }).catch(() => {});
@@ -358,7 +367,7 @@ export default function Operations() {
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
                   : viewMode === 'table'
-                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
+                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusChange={handleTripStatusChange} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
                   : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
               </CollapsibleSection>
             )}

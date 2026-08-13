@@ -4,9 +4,9 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown } from 'lucide-react';
-import { formatCurrency, normalizeDate } from '@/lib/formatters';
+import { formatCurrency } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -19,20 +19,27 @@ const STATUS_HEX = {
   cancelled: '#f87171',
 };
 
+const STATUS_LABELS = {
+  scheduled: 'Scheduled',
+  in_transit: 'In Transit',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
+
 const PAYMENT_LABEL = {
   corporate_credit: 'Corp',
   cash_received: 'Cash',
   bank_received: 'Bank',
 };
 
-export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
+export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
 
-  // Column widths (resizable)
+  // Column widths (resizable) — costs & profit removed
   const [widths, setWidths] = useState({
     0: 44,   // checkbox
     1: 150,  // trip #
@@ -40,12 +47,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
     3: 180,  // client
     4: 130,  // vehicle
     5: 200,  // route
-    6: 110,  // revenue
-    7: 120,  // costs
-    8: 100,  // profit
-    9: 110,  // status
-    10: 90,  // mode
-    11: 130, // actions
+    6: 120,  // revenue
+    7: 140,  // status (wider for dropdown)
+    8: 110,  // payment
+    9: 110,  // actions
   });
   const [resizing, setResizing] = useState(null);
 
@@ -86,7 +91,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const handleLink = (e, map, name, path) => {
+  const goTo = (e, map, name, path) => {
     e.stopPropagation();
     const id = map?.[name];
     if (id) navigate(`${path}/${id}`);
@@ -99,6 +104,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
     setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map(t => t.id)));
   };
   const allSelected = trips.length > 0 && selected.size === trips.length;
+
+  const handleStatusChange = async (trip, newStatus) => {
+    if (newStatus === trip.status) return;
+    onStatusChange?.(trip, newStatus);
+  };
 
   return (
     <div className="overflow-x-auto overflow-y-auto max-h-[70vh] rounded-xl border border-border shadow-sm bg-background/40">
@@ -116,8 +126,6 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
               ['VEHICLE', 'text-left hidden md:table-cell'],
               ['ROUTE', 'text-left hidden lg:table-cell'],
               ['REVENUE', 'text-right'],
-              ['COSTS', 'text-right hidden sm:table-cell'],
-              ['PROFIT', 'text-right hidden sm:table-cell'],
               ['STATUS', 'text-left'],
               ['PAYMENT', 'text-left hidden md:table-cell'],
               ['', 'text-center'],
@@ -134,17 +142,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
         </TableHeader>
         <TableBody>
           {trips.map((trip) => {
-            const color = STATUS_HEX[trip.status] || '#94a3b8';
-            const profit = (Number(trip.revenue) || 0) - (Number(trip.fuel_cost) || 0) - (Number(trip.toll_cost) || 0) - (Number(trip.other_cost) || 0);
-            const totalCost = (Number(trip.fuel_cost) || 0) + (Number(trip.toll_cost) || 0) + (Number(trip.other_cost) || 0);
             const isSelected = selected.has(trip.id);
             const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
             return (
               <TableRow
                 key={trip.id}
-                onClick={() => onOpenDetail?.(trip)}
                 className={cn(
-                  'cursor-pointer transition-all duration-150 group',
+                  'transition-all duration-150 group',
                   isSelected ? 'bg-primary/[0.07]' : 'hover:bg-primary/5',
                   trip.status === 'cancelled' && 'opacity-60 border-l-2 border-l-red-500/50'
                 )}
@@ -170,18 +174,33 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
                   <span className="block text-[10px] opacity-60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
+                {/* CLIENT — hyperlink to client detail */}
                 <TableCell>
-                  <div className="text-sm font-medium truncate max-w-[160px]">{trip.client_name?.toUpperCase() || '—'}</div>
-                  <div className="text-xs text-muted-foreground truncate max-w-[160px]">{trip.contact_person || trip.driver_name || ''}</div>
+                  <button
+                    onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
+                    className="text-sm font-medium truncate max-w-[160px] text-left hover:text-primary transition-colors block"
+                    title={trip.client_name}
+                  >
+                    {trip.client_name?.toUpperCase() || '—'}
+                  </button>
+                  <div className="text-xs text-muted-foreground truncate max-w-[160px]">{trip.contact_person || ''}</div>
                 </TableCell>
+                {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono hidden md:table-cell">
                   <button
-                    onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="hover:text-primary transition-colors tabular-nums"
+                    onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
+                    className="hover:text-primary transition-colors tabular-nums block text-left"
+                    title="View vehicle"
                   >
                     {trip.vehicle_plate || '—'}
                   </button>
-                  <div className="text-[10px] text-muted-foreground truncate max-w-[110px]">{trip.driver_name || ''}</div>
+                  <button
+                    onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
+                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors truncate max-w-[110px] block text-left"
+                    title="View driver"
+                  >
+                    {trip.driver_name || ''}
+                  </button>
                 </TableCell>
                 <TableCell className="text-xs hidden lg:table-cell">
                   <div className="flex items-center gap-1 max-w-[180px]">
@@ -202,23 +221,42 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
                     {trip.payment_status === 'cash_received' ? '✓ Cash' : trip.payment_status === 'bank_received' ? '✓ Bank' : '⏳ Credit'}
                   </span>
                 </TableCell>
-                <TableCell className="text-right hidden sm:table-cell">
-                  <div className={cn('text-xs font-mono font-semibold', totalCost > 0 ? 'text-red-500' : 'text-muted-foreground')}>{totalCost.toFixed(2)}</div>
-                  <div className="text-[10px] text-muted-foreground">{totalCost > 0 ? 'Fuel+Toll+Other' : '—'}</div>
-                </TableCell>
-                <TableCell className="text-right text-sm font-semibold font-mono hidden sm:table-cell">
-                  <span className={profit >= 0 ? 'text-emerald-400' : 'text-red-400'}>{formatCurrency(profit)}</span>
-                </TableCell>
-                <TableCell>
-                  <span className={cn(
-                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full border inline-block',
-                    trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-                    trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-                    trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-                    trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10',
-                  )}>
-                    {trip.status === 'completed' ? '✓ Done' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
-                  </span>
+                {/* STATUS — inline dropdown for direct change */}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className={cn(
+                          'text-[10px] font-bold px-2 py-1 rounded-full border inline-flex items-center gap-1 transition-colors hover:brightness-125',
+                          trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+                          trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                          trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+                          trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10',
+                        )}
+                      >
+                        {trip.status === 'completed' ? '✓ Done' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
+                        <ChevronDown className="w-3 h-3 opacity-60" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Set Status</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {['scheduled', 'in_transit', 'completed', 'cancelled'].map((st) => (
+                        <DropdownMenuItem
+                          key={st}
+                          onClick={() => handleStatusChange(trip, st)}
+                          className={cn(
+                            'gap-2 text-xs',
+                            trip.status === st && 'bg-primary/10 font-semibold',
+                          )}
+                        >
+                          <span className="w-2 h-2 rounded-full" style={{ background: STATUS_HEX[st] }} />
+                          {STATUS_LABELS[st]}
+                          {trip.status === st && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <Badge variant="secondary" className="text-[10px]">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
@@ -238,13 +276,6 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
                       title="View Details"
                     >
                       <Printer className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')}
-                      className="rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 p-1.5 transition-colors"
-                      title="View Client"
-                    >
-                      <User className="w-3.5 h-3.5" />
                     </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
