@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, MapPin } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
-import { downloadInvoicePDF } from '@/lib/invoiceHtml';
+import { downloadInvoicePDF, downloadPerTripInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
+import { cn } from '@/lib/utils';
 
 const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0 };
 
@@ -47,6 +48,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [settings, setSettings] = useState({});
   const [clients, setClients] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [tripsOpen, setTripsOpen] = useState(false);
   const [receivePayment, setReceivePayment] = useState(false);
   const [payment, setPayment] = useState({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
   const [form, setForm] = useState({
@@ -111,14 +113,49 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
   const handleClientChange = (value) => {
     const client = clients.find(c => c.name === value);
-    if (client) {
-      setForm(prev => ({ ...prev, client_name: value, client_email: client.email || '', client_phone: client.phone || '', client_address: client.address || '', client_trn: client.trn || '', contact_person: client.contact_person || '' }));
-    } else { update('client_name', value); }
+    setForm(prev => {
+      const base = { ...prev, client_name: value, line_items: prev.line_items.filter(i => !i._trip_number) };
+      if (client) {
+        base.client_email = client.email || '';
+        base.client_phone = client.phone || '';
+        base.client_address = client.address || '';
+        base.client_trn = client.trn || '';
+        base.contact_person = client.contact_person || '';
+      }
+      return base;
+    });
+    setTripsOpen(false);
   };
 
   const handleTripChange = (value) => {
     const trip = trips.find(t => t.trip_number === value);
     setForm(prev => ({ ...prev, trip_id: value, issue_date: trip?.trip_date || prev.issue_date, contact_person: trip?.contact_person || prev.contact_person }));
+  };
+
+  const clientCompletedTrips = (trips || []).filter(tr => tr.client_name === form.client_name && tr.status === 'completed');
+  const selectedTripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
+
+  const toggleTrip = (trip) => {
+    setForm(prev => {
+      const items = [...prev.line_items];
+      const idx = items.findIndex(i => i._trip_number === trip.trip_number);
+      if (idx >= 0) {
+        items.splice(idx, 1);
+      } else {
+        const route = [trip.from_location, trip.to_location].filter(Boolean).join(' To ');
+        items.push({
+          _trip_number: trip.trip_number,
+          description: route || trip.trip_number,
+          date: trip.trip_date,
+          quantity: 1,
+          unit_price: Number(trip.revenue || trip.base_fare || 0),
+          amount: Number(trip.revenue || trip.base_fare || 0),
+          service: 'TRIP',
+          uom: 'TRIP',
+        });
+      }
+      return { ...prev, line_items: items };
+    });
   };
 
   const updateItem = (index, field, value) => {
@@ -150,6 +187,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     try {
       const data = {
         ...form,
+        line_items: form.line_items.map(({ _trip_number, ...rest }) => rest),
         subtotal, vat_amount: vatAmount, total_amount: total,
         vat_rate: Number(form.vat_rate),
         status: resultingStatus,
@@ -212,8 +250,13 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     setDownloading(true);
     try {
       const s = await getCompanySettings();
-      const payload = { ...form, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
-      await downloadInvoicePDF(payload, form.client_name, s);
+      const payload = { ...form, line_items: form.line_items.map(({ _trip_number, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
+      const hasTripDates = form.line_items.some(i => i.date);
+      if (hasTripDates) {
+        await downloadPerTripInvoicePDF(payload, form.client_name, s);
+      } else {
+        await downloadInvoicePDF(payload, form.client_name, s);
+      }
       toast({ title: 'PDF downloaded' });
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
@@ -270,6 +313,50 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
               </div>
             </Section>
+
+            {/* Completed Trips — bulk multi-select */}
+            {form.client_name && clientCompletedTrips.length > 0 && (
+              <Section title="Completed Trips" icon={MapPin}>
+                <p className="text-xs text-muted-foreground">Select completed trips to bulk-add as line items. Each trip becomes one row with its date and fare — combine multiple trips into a single invoice.</p>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setTripsOpen(v => !v)}
+                    className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors"
+                  >
+                    <span className="text-sm font-medium">{selectedTripNumbers.length} trip(s) selected — click to {tripsOpen ? 'close' : 'select'}</span>
+                    <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', tripsOpen && 'rotate-180')} />
+                  </button>
+                  {tripsOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setTripsOpen(false)} />
+                      <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
+                        {clientCompletedTrips.map(tr => {
+                          const checked = selectedTripNumbers.includes(tr.trip_number);
+                          const route = [tr.from_location, tr.to_location].filter(Boolean).join(' To ');
+                          return (
+                            <button
+                              key={tr.id}
+                              type="button"
+                              onClick={() => toggleTrip(tr)}
+                              className={cn('w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors', checked ? 'bg-primary/15 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04]')}
+                            >
+                              <span className={cn('mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0', checked ? 'bg-primary border-primary' : 'border-border')}>
+                                {checked && <Check className="w-3 h-3 text-primary-foreground" />}
+                              </span>
+                              <span className="flex-1 min-w-0">
+                                <span className="block text-sm font-medium truncate">{tr.trip_number} · {route || 'Trip'}</span>
+                                <span className="block text-[11px] text-muted-foreground">{tr.trip_date ? new Date(tr.trip_date).toLocaleDateString() : '—'} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </Section>
+            )}
 
             {/* Invoice Details */}
             <Section title="Invoice Details" icon={FileText}>
