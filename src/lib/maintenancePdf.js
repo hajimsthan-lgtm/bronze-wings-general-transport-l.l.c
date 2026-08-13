@@ -240,176 +240,207 @@ export async function downloadMaintenancePDF(record, settings = {}) {
 // ═══════════════════════════════════════════════════════════
 // TABLE FORMAT — multiple records under letterhead
 // ═══════════════════════════════════════════════════════════
+
+// CONTENT_W = 194mm  — columns must sum to exactly this
+// REF(18) + DATE(20) + TYPE(22) + DESC(42) + VENDOR(34) + ODO(16) + NEXT(20) + STATUS(20) + COST(22) = 214  too wide
+// Scale down: REF(16)+DATE(18)+TYPE(20)+DESC(38)+VENDOR(30)+ODO(14)+NEXT(18)+STATUS(18)+COST(22)=194 ✓
+const TABLE_COLS = [
+  { header: 'REF #',      key: 'maint_ref',          w: 16,             pad: 1.5 },
+  { header: 'DATE',       key: 'date',               w: 18, fmt: 'date', pad: 1.5 },
+  { header: 'TYPE',       key: 'service_type',       w: 20, fmt: 'title',pad: 1.5 },
+  { header: 'DESCRIPTION',key: 'description',        w: 38,             pad: 1.5 },
+  { header: 'VENDOR',     key: 'vendor_name',        w: 30,             pad: 1.5 },
+  { header: 'ODO (km)',   key: 'odometer_reading',   w: 14, align:'right',pad:1.5 },
+  { header: 'NEXT SVC',  key: 'next_service_date',   w: 18, fmt: 'date', pad:1.5, align:'right' },
+  { header: 'STATUS',     key: 'status',             w: 18, fmt: 'title',pad: 1.5 },
+  { header: 'COST (AED)', key: 'cost',               w: 22, align:'right', fmt:'money', pad:1.5 },
+];
+// Verify: 16+18+20+38+30+14+18+18+22 = 194 ✓
+
 function drawTableBanner(pdf, vehiclePlate, y) {
+  // Thin separator line above title
+  dc(pdf, LIGHT_GRAY);
+  pdf.setLineWidth(0.2);
+  pdf.line(CONTENT_X, y, CONTENT_RIGHT, y);
+  y += 4;
+
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(14);
+  pdf.setFontSize(13);
   tc(pdf, DARK_BLUE);
-  pdf.text('MAINTENANCE RECORDS', PAGE_W / 2, y + 5.5, { align: 'center' });
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
-  tc(pdf, GRAY);
-  if (vehiclePlate) pdf.text(`Vehicle: ${vehiclePlate}`, PAGE_W / 2, y + 10, { align: 'center' });
-  return y + 13;
+  pdf.text('MAINTENANCE RECORDS', PAGE_W / 2, y + 5, { align: 'center' });
+  y += 8;
+
+  if (vehiclePlate) {
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(9);
+    tc(pdf, GRAY);
+    pdf.text(`Vehicle: ${vehiclePlate}`, PAGE_W / 2, y + 1, { align: 'center' });
+    y += 5;
+  }
+
+  return y + 3; // gap before table
+}
+
+function drawTableHeader(pdf, y) {
+  const tableW = CONTENT_W; // exact fit
+  const headerH = 7;
+  fc(pdf, MAROON);
+  dc(pdf, MAROON);
+  pdf.setLineWidth(0.3);
+  pdf.rect(CONTENT_X, y, tableW, headerH, 'FD');
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(7);
+  tc(pdf, WHITE);
+  let cx = CONTENT_X;
+  for (const c of TABLE_COLS) {
+    const isRight = c.align === 'right';
+    const tx = isRight ? cx + c.w - c.pad : cx + c.pad;
+    pdf.text(c.header, tx, y + 4.6, { align: isRight ? 'right' : 'left' });
+    cx += c.w;
+  }
+  return y + headerH;
 }
 
 function drawMaintenanceTable(pdf, records, s, y) {
-  const cols = [
-    { header: 'REF #', key: 'maint_ref', w: 20 },
-    { header: 'DATE', key: 'date', w: 18, fmt: 'date' },
-    { header: 'TYPE', key: 'service_type', w: 20, fmt: 'title' },
-    { header: 'DESCRIPTION', key: 'description', w: 38 },
-    { header: 'VENDOR', key: 'vendor_name', w: 28 },
-    { header: 'ODO (km)', key: 'odometer_reading', w: 16, align: 'right' },
-    { header: 'NEXT SVC', key: 'next_service_date', w: 18, fmt: 'date' },
-    { header: 'STATUS', key: 'status', w: 18, fmt: 'title' },
-    { header: 'COST (AED)', key: 'cost', w: 24, align: 'right', fmt: 'money' },
-  ];
-
+  const tableW = CONTENT_W;
   const headerH = 7;
-  const rowH = 6;
-  const tableW = cols.reduce((a, c) => a + c.w, 0);
-  let cx = CONTENT_X;
+  const rowH = 7; // taller rows = less truncation
+  const tableStartY = y;
 
-  // Header row
-  fc(pdf, MAROON);
-  pdf.rect(CONTENT_X, y, tableW, headerH, 'F');
-  dc(pdf, MAROON);
-  pdf.setLineWidth(0.3);
-  pdf.rect(CONTENT_X, y, tableW, headerH);
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(7.5);
-  tc(pdf, WHITE);
-  for (const c of cols) {
-    const align = c.align === 'right' ? 'right' : 'left';
-    const tx = c.align === 'right' ? cx + c.w - 1.5 : cx + 1.5;
-    pdf.text(c.header, tx, y + 4.5, { align });
-    cx += c.w;
-  }
-  y += headerH;
+  y = drawTableHeader(pdf, y);
 
-  // Data rows
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(7.5);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(7);
   let totalCost = 0;
+  let rowCount = 0;
+
   for (let i = 0; i < records.length; i++) {
     const r = records[i];
-    // page break
-    if (y + rowH > FOOTER_TOP - 12) {
+
+    // page break — leave 30mm for signatures
+    if (y + rowH > FOOTER_TOP - 32) {
+      // close current table border
+      dc(pdf, LIGHT_GRAY);
+      pdf.setLineWidth(0.3);
+      pdf.rect(CONTENT_X, tableStartY, tableW, y - tableStartY);
+
       pdf.addPage();
       drawPageBorder(pdf);
-      y = drawLetterhead(pdf, s, MARGIN);
-      y = drawTableBanner(pdf, null, y);
-      // redraw header
-      fc(pdf, MAROON);
-      pdf.rect(CONTENT_X, y, tableW, headerH, 'F');
-      dc(pdf, MAROON);
-      pdf.setLineWidth(0.3);
-      pdf.rect(CONTENT_X, y, tableW, headerH);
-      pdf.setFont('times', 'bold');
-      pdf.setFontSize(7.5);
-      tc(pdf, WHITE);
-      cx = CONTENT_X;
-      for (const c of cols) {
-        const align = c.align === 'right' ? 'right' : 'left';
-        const tx = c.align === 'right' ? cx + c.w - 1.5 : cx + 1.5;
-        pdf.text(c.header, tx, y + 4.5, { align });
-        cx += c.w;
-      }
-      y += headerH;
-      pdf.setFont('times', 'normal');
-      pdf.setFontSize(7.5);
+      const newLetterY = drawLetterhead(pdf, s, MARGIN);
+      y = drawTableBanner(pdf, null, newLetterY);
+      y = drawTableHeader(pdf, y);
+      rowCount = 0;
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7);
     }
 
-    // alternating row bg
+    // alternating row background
     if (i % 2 === 1) {
       fc(pdf, ROW_ALT);
+      dc(pdf, ROW_ALT);
       pdf.rect(CONTENT_X, y, tableW, rowH, 'F');
     }
 
-    cx = CONTENT_X;
-    for (const c of cols) {
+    // cell values
+    let cx = CONTENT_X;
+    for (const c of TABLE_COLS) {
       let val = r[c.key];
       if (c.fmt === 'date') val = fmtDate(val);
-      else if (c.fmt === 'money') val = fmtMoney(val);
+      else if (c.fmt === 'money') { totalCost += Number(r[c.key] || 0); val = fmtMoney(val); }
       else if (c.fmt === 'title') val = str(val || '').replace(/_/g, ' ');
-      else val = str(val ?? '');
-      if (c.key === 'cost') totalCost += Number(r[c.key] || 0);
+      else val = str(val ?? '—');
+      if (!val || val === 'undefined') val = '—';
 
-      // truncate to fit column width
-      const maxChars = Math.floor(c.w / 1.3);
-      if (val.length > maxChars) val = val.slice(0, maxChars - 1) + '…';
+      // safe truncation using jsPDF width check
+      const availW = c.w - c.pad * 2;
+      const truncated = pdf.splitTextToSize(val, availW)[0] || val;
 
-      const align = c.align === 'right' ? 'right' : 'left';
-      const tx = c.align === 'right' ? cx + c.w - 1.5 : cx + 1.5;
+      const isRight = c.align === 'right';
+      const tx = isRight ? cx + c.w - c.pad : cx + c.pad;
       tc(pdf, BLACK);
-      pdf.text(val, tx, y + 4, { align });
+      pdf.text(truncated, tx, y + 4.6, { align: isRight ? 'right' : 'left' });
       cx += c.w;
     }
 
-    // row border
+    // bottom row divider
     dc(pdf, LIGHT_GRAY);
-    pdf.setLineWidth(0.2);
+    pdf.setLineWidth(0.15);
     pdf.line(CONTENT_X, y + rowH, CONTENT_X + tableW, y + rowH);
 
     y += rowH;
+    rowCount++;
   }
 
-  // outer border
-  dc(pdf, BLACK);
+  // outer border around entire table (header + rows)
+  dc(pdf, [180, 180, 180]);
   pdf.setLineWidth(0.3);
-  pdf.rect(CONTENT_X, y - records.length * rowH - headerH, tableW, records.length * rowH + headerH);
+  pdf.rect(CONTENT_X, tableStartY, tableW, y - tableStartY);
 
-  // total row
-  const totalW = cols.slice(0, -1).reduce((a, c) => a + c.w, 0);
-  fc(pdf, [240, 240, 240]);
-  pdf.rect(CONTENT_X, y, tableW, headerH, 'F');
-  dc(pdf, BLACK);
+  // vertical column dividers (light)
+  dc(pdf, [210, 210, 210]);
+  pdf.setLineWidth(0.15);
+  let cx2 = CONTENT_X;
+  for (let ci = 0; ci < TABLE_COLS.length - 1; ci++) {
+    cx2 += TABLE_COLS[ci].w;
+    pdf.line(cx2, tableStartY, cx2, y);
+  }
+
+  // TOTAL row
+  const totalRowH = 8;
+  fc(pdf, [245, 245, 245]);
+  dc(pdf, [180, 180, 180]);
   pdf.setLineWidth(0.3);
-  pdf.rect(CONTENT_X, y, tableW, headerH);
+  pdf.rect(CONTENT_X, y, tableW, totalRowH, 'FD');
+
+  // "TOTAL" label centred across all cols except last
+  const labelW = tableW - TABLE_COLS[TABLE_COLS.length - 1].w;
   pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
   tc(pdf, MAROON);
-  pdf.text('TOTAL', CONTENT_X + totalW / 2, y + 4.5, { align: 'center' });
-  pdf.setFont('courier', 'bold');
-  pdf.setFontSize(10);
-  pdf.text(`AED ${fmtMoney(totalCost)}`, CONTENT_X + tableW - 1.5, y + 4.5, { align: 'right' });
+  pdf.text('TOTAL', CONTENT_X + labelW / 2, y + 5.2, { align: 'center' });
 
-  return y + headerH + 4;
+  // cost value right-aligned in last col
+  pdf.setFont('courier', 'bold');
+  pdf.setFontSize(9);
+  tc(pdf, DARK_BLUE);
+  pdf.text(`AED ${fmtMoney(totalCost)}`, CONTENT_RIGHT - 1.5, y + 5.2, { align: 'right' });
+
+  return y + totalRowH + 4;
 }
 
-function drawTableSignatures(pdf, y) {
-  const sigW = CONTENT_W / 2;
-  const leftX = CONTENT_X;
-  const rightX = CONTENT_X + sigW;
-  const sigY = Math.max(y + 6, FOOTER_TOP - 28);
-  const lineY = sigY + 16;
+function drawTableSignatures(pdf, contentEndY) {
+  // Place signatures in fixed zone: 32mm above FOOTER_TOP (which is 279)
+  // So signature block occupies y = 247 → 277, safely above footer at 279
+  const SIGN_BLOCK_H = 28;
+  const sigY = Math.min(contentEndY + 8, FOOTER_TOP - SIGN_BLOCK_H - 2);
+
+  const half = CONTENT_W / 2;
+  const leftMid = CONTENT_X + half / 2;
+  const rightMid = CONTENT_X + half + half / 2;
 
   pdf.setFont('times', 'bold');
   pdf.setFontSize(9);
-  tc(pdf, [51, 51, 51]);
-  pdf.text('PREPARED BY', leftX + sigW / 2, sigY + 4, { align: 'center' });
-  dc(pdf, [51, 51, 51]);
-  pdf.setLineWidth(0.3);
-  pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
+  tc(pdf, [60, 60, 60]);
+  pdf.text('PREPARED BY', leftMid, sigY, { align: 'center' });
+  pdf.text('VERIFIED BY', rightMid, sigY, { align: 'center' });
+
+  const lineY = sigY + SIGN_BLOCK_H - 12;
+  dc(pdf, [80, 80, 80]);
+  pdf.setLineWidth(0.4);
+  pdf.line(CONTENT_X + 8, lineY, CONTENT_X + half - 8, lineY);
+  pdf.line(CONTENT_X + half + 8, lineY, CONTENT_RIGHT - 8, lineY);
+
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, GRAY);
-  pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.text('Authorized Signature', leftMid, lineY + 4, { align: 'center' });
+  pdf.text('Manager Signature / Stamp', rightMid, lineY + 4, { align: 'center' });
+
   pdf.setFont('times', 'bold');
+  pdf.setFontSize(8);
   tc(pdf, BLACK);
-  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 8, { align: 'center' });
-
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
-  tc(pdf, [51, 51, 51]);
-  pdf.text('VERIFIED BY', rightX + sigW / 2, sigY + 4, { align: 'center' });
-  dc(pdf, [51, 51, 51]);
-  pdf.setLineWidth(0.3);
-  pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
-  tc(pdf, GRAY);
-  pdf.text('Manager Signature / Stamp', rightX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftMid, lineY + 9, { align: 'center' });
 }
 
 export async function downloadMaintenanceTablePDF(records, vehiclePlate, settings = {}) {
