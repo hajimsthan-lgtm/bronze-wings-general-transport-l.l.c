@@ -47,7 +47,6 @@ const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 const Agents = lazy(() => import('@/pages/Agents'));
-const FinTrackPro = lazy(() => import('@/pages/FinTrackPro'));
 const Quotations = lazy(() => import('@/pages/Quotations'));
 const Agreements = lazy(() => import('@/pages/Agreements'));
 const InvoicesPage = lazy(() => import('@/pages/InvoicesPage'));
@@ -107,7 +106,6 @@ const AuthenticatedApp = () => {
           <Route path="/prompt-generator" element={<PromptGenerator />} />
           <Route path="/agents" element={<Agents />} />
         </Route>
-        <Route path="/fintrack" element={<FinTrackPro />} />
       </Route>
 
       <Route path="*" element={<PageNotFound />} />
