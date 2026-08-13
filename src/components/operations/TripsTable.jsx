@@ -199,12 +199,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </button>
                 </TableCell>
                 <TableCell className="text-xs align-top">
-                  <div className="flex items-start gap-1 break-words leading-tight">
+                  <div className="flex items-center gap-1.5 break-words leading-tight">
                     <span className="text-foreground break-words">{trip.from_location || '—'}</span>
-                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
                     <span className="text-foreground break-words">{trip.to_location || '—'}</span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 break-words">{t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}</div>
+                  {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 break-words">{trip.hours}h</div> : null}
                 </TableCell>
                 <TableCell className="text-right align-top">
                   <div className="text-sm font-semibold font-mono whitespace-nowrap">{formatCurrency(trip.revenue)}</div>
