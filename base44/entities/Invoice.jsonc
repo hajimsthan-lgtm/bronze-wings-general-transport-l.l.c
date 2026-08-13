@@ -127,6 +127,13 @@
     },
     "void_reason": {
       "type": "string"
+    },
+    "signed_invoice_url": {
+      "type": "string"
+    },
+    "signed_date": {
+      "type": "string",
+      "format": "date"
     }
   },
   "required": [
