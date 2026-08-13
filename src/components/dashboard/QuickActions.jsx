@@ -6,9 +6,9 @@ import { base44 } from '@/api/base44Client';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 const CARD = {
-  background: '#232636',
-  border: '1px solid rgba(255,255,255,0.06)',
-  boxShadow: '-6px -6px 12px rgba(255,255,255,0.04), 6px 6px 18px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03)',
+  background: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border))',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
 };
 
 const ACTIONS = [
@@ -52,7 +52,7 @@ export default function QuickActions() {
             style={CARD}
           >
             <IconBox a={a} />
-            <span className="relative flex-1 min-w-0 truncate text-[13px] sm:text-sm font-semibold text-white">{a.label}</span>
+            <span className="relative flex-1 min-w-0 truncate text-[13px] sm:text-sm font-semibold text-foreground">{a.label}</span>
           </motion.button>
         ))}
 
@@ -70,9 +70,9 @@ export default function QuickActions() {
                 style={CARD}
               >
                 <IconBox a={INVOICE} />
-                <span className="relative flex-1 min-w-0 flex items-center gap-1 text-[13px] sm:text-sm font-semibold text-white">
+                <span className="relative flex-1 min-w-0 flex items-center gap-1 text-[13px] sm:text-sm font-semibold text-foreground">
                   <span className="truncate">{INVOICE.label}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-white/50 flex-shrink-0" />
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                 </span>
               </button>
             </DropdownMenuTrigger>
