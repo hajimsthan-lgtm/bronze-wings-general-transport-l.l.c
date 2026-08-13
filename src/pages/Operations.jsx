@@ -23,6 +23,7 @@ import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
+import { setOpsFilter, clearOpsFilter } from '@/lib/operationsFilterStore';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -290,6 +291,13 @@ export default function Operations() {
   const onStatusChange = mode === 'contract' ? setContractFilter : setTripFilter;
   const statusCounts = mode === 'contract' ? contractCounts : tripCounts;
 
+  // Publish status-filter state to the shared store so the TopBar can render
+  // the filter pills on the left edge of the sub-nav.
+  useEffect(() => {
+    setOpsFilter({ active: true, options: statusOptions, value: statusValue, onChange: onStatusChange, counts: statusCounts });
+    return () => clearOpsFilter();
+  }, [statusOptions, statusValue, onStatusChange, statusCounts]);
+
   const loading = tripsLoading || contractsLoading;
   const showTrips = mode === 'all' || mode === 'trip';
   const showContracts = mode === 'all' || mode === 'contract';
@@ -326,10 +334,6 @@ export default function Operations() {
             setDateFrom={setDateFrom}
             dateTo={dateTo}
             setDateTo={setDateTo}
-            statusOptions={statusOptions}
-            statusValue={statusValue}
-            onStatusChange={onStatusChange}
-            statusCounts={statusCounts}
             viewMode={viewMode}
             setViewMode={setViewMode}
             onNewTrip={openNewTrip}

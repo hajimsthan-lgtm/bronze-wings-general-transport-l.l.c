@@ -11,7 +11,6 @@ import { enrichTripsWithNumbers } from '@/lib/tripSequence';
 export default function OperationsToolbar({
   search, setSearch,
   dateFrom, setDateFrom, dateTo, setDateTo,
-  statusOptions, statusValue, onStatusChange, statusCounts,
   mode, onModeChange,
   viewMode, setViewMode,
   exportData, exportFilename, exportTitle, exportColumns,
@@ -56,26 +55,6 @@ export default function OperationsToolbar({
           ))}
         </SelectContent>
       </Select>
-
-      <div className="flex items-center gap-1.5 flex-wrap">
-        {statusOptions.map((s) => {
-          const active = statusValue === s;
-          const count = s === 'all' ? null : statusCounts?.[s];
-          return (
-            <button
-              key={s}
-              onClick={() => onStatusChange(s)}
-              className={`px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap ${
-                active
-                  ? 'border-primary text-primary bg-primary/10'
-                  : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
-              }`}
-            >
-              {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
-            </button>
-          );
-        })}
-      </div>
 
       <div className="flex-1 min-w-0" />
 
