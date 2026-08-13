@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -319,12 +319,12 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-6xl overflow-hidden bg-background p-0 flex flex-col">
-        <SheetHeader className="px-6 py-4 border-b border-border flex-shrink-0">
-          <SheetTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</SheetTitle>
-          <SheetDescription>Left: fill in details · Right: live PDF preview</SheetDescription>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
+        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1">
+          <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>
+          <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
+        </DialogHeader>
 
         {/* Mobile tab toggle — switch between form and live preview on small screens */}
         <div className="sm:hidden flex items-center gap-1 px-4 py-2 border-b border-border bg-muted/30 flex-shrink-0">
@@ -634,8 +634,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </div>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 
