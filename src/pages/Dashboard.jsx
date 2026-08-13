@@ -191,6 +191,8 @@ export default function Dashboard() {
     <>
     <PullToRefresh onRefresh={loadData}>
     <div className="space-y-6">
+      <QuickActions />
+
       <HeroGreetingCard activeTrips={activeTrips} totalRevenue={totalRevenue} pendingInvoices={pendingInvoices} dateFrom={dateFrom} dateTo={dateTo} />
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -203,8 +205,6 @@ export default function Dashboard() {
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}>
         <BalanceCard healthPct={healthPct} totalRevenue={totalRevenue} activeTrips={activeTrips} pendingInvoices={pendingInvoices} avgTripValue={avgTripValue} revData={revData} />
       </motion.div>
-
-      <QuickActions />
 
       {/* Charts: revenue trend + expense donut */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5">
