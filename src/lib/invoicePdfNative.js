@@ -71,14 +71,12 @@ const COLS_TRIP = [
 
 const COLS_STANDARD = [
   { label: 'SL.\nNo',            w: 8,  align: 'center' },
-  { label: 'SERVICE',           w: 14, align: 'center' },
-  { label: 'DESCRIPTION',       w: 40, align: 'center' },
-  { label: 'QTY',               w: 12, align: 'center' },
-  { label: 'UOM',               w: 12, align: 'center' },
-  { label: 'UNIT\nPRICE',       w: 20, align: 'center' },
-  { label: 'TOTAL',             w: 20, align: 'center' },
+  { label: 'DESCRIPTION',       w: 80, align: 'center' },
+  { label: 'QTY',               w: 10, align: 'center' },
+  { label: 'UNIT\nPRICE',       w: 22, align: 'center' },
+  { label: 'TOTAL',             w: 14, align: 'center' },
   { label: 'VAT\n5%',           w: 18, align: 'center' },
-  { label: 'TOTAL\nPRICE',      w: 50, align: 'center' },
+  { label: 'TOTAL\nPRICE',      w: 42, align: 'center' },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -484,14 +482,6 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
 
   let ci = 1;
 
-  // SERVICE column (standard only)
-  if (invoiceType === 'standard') {
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
-    pdf.text(String(item.service || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
-    ci++;
-  }
-
   // TRIP DATE column (trip only)
   if (invoiceType === 'trip') {
     pdf.setFont('times', 'normal');
@@ -522,13 +512,11 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   }
   ci++;
 
-  // QTY and UOM columns (standard only — center-aligned text)
+  // QTY column (standard only — center-aligned text)
   if (invoiceType === 'standard') {
     pdf.setFont('times', 'normal');
     pdf.setFontSize(9);
     pdf.text(String(qty), cols[ci].center, vCenter, { align: 'center' });
-    ci++;
-    pdf.text(String(item.uom || 'TRIP'), cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
