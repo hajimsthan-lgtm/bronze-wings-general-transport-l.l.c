@@ -51,6 +51,12 @@
     },
     "notes": {
       "type": "string"
+    },
+    "maint_ref": {
+      "type": "string"
+    },
+    "attachment_url": {
+      "type": "string"
     }
   },
   "required": [

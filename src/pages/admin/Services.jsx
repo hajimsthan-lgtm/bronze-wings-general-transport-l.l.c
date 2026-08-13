@@ -13,8 +13,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wrench, Search, BarChart3, LayoutGrid, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
+import ImageUpload from '@/components/common/ImageUpload';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import MaintenanceAnalytics from '@/components/admin/MaintenanceAnalytics';
+import { downloadMaintenancePDF } from '@/lib/maintenancePdf';
+import { getCompanySettings } from '@/lib/companySettings';
+import { Download } from 'lucide-react';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -73,7 +77,7 @@ export default function Services() {
           {loading ? <LoadingSpinner /> : searched.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
             <div className="space-y-2">
               {searched.map(r => (
-                <ServiceRow key={r.id} r={r} onEdit={() => { setEditItem(r); setFormOpen(true); }} onDelete={async () => { await base44.entities.ServiceRecord.delete(r.id); load(); }} />
+                <ServiceRow key={r.id} r={r} onEdit={() => { setEditItem(r); setFormOpen(true); }} onDelete={async () => { await base44.entities.ServiceRecord.delete(r.id); load(); }} onPdf={async () => { const s = await getCompanySettings(); await downloadMaintenancePDF(r, s); }} />
               ))}
             </div>
           )}
@@ -90,7 +94,7 @@ export default function Services() {
   );
 }
 
-function ServiceRow({ r, onEdit, onDelete }) {
+function ServiceRow({ r, onEdit, onDelete, onPdf }) {
   const [confirmDel, setConfirmDel] = useState(false);
   const tone = TYPE_TONE[r.service_type] || '#94a3b8';
   return (
@@ -103,6 +107,7 @@ function ServiceRow({ r, onEdit, onDelete }) {
         </div>
         <div className="text-right flex-shrink-0"><p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(r.cost)}</p><StatusBadge status={r.status} /></div>
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <button type="button" onClick={onPdf} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100" title="Download PDF"><Download className="w-3.5 h-3.5" /></button>
           <button type="button" onClick={onEdit} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100"><Pencil className="w-3.5 h-3.5" /></button>
           <button type="button" onClick={() => setConfirmDel(true)} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100"><Trash2 className="w-3.5 h-3.5" /></button>
           <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
@@ -126,14 +131,15 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {}); }, []);
-  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '' }); }, [editItem, presetPlate]);
+  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
+  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' }); }, [editItem, presetPlate]);
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
   const handle = async () => { setSaving(true); await onSave({ ...form, cost: Number(form.cost) || 0 }); setSaving(false); };
 
   return (
     <div className="space-y-4">
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input list="svc-vehicles" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" /><datalist id="svc-vehicles">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Maint. Ref #</Label><Input value={form.maint_ref} onChange={e => update('maint_ref', e.target.value)} placeholder="Enter reference number" className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Type</Label><Select value={form.service_type} onValueChange={v => update('service_type', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['oil_change','tire','brake','engine','electrical','body','inspection','other'].map(t => <SelectItem key={t} value={t}>{t.replace(/_/g, ' ')}</SelectItem>)}</SelectContent></Select></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['scheduled','in_progress','completed'].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
@@ -144,6 +150,7 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">Cost</Label><Input type="number" value={form.cost} onChange={e => update('cost', e.target.value)} className="bg-background border-border" /></div>
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} className="bg-background border-border" /></div>
+      <ImageUpload value={form.attachment_url} onChange={v => update('attachment_url', v)} label="Vendor Receipt Attachment" />
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
   );
