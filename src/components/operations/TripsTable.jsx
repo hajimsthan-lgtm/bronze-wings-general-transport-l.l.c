@@ -177,11 +177,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="align-top">
                   <button
                     onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-sm font-medium text-left hover:text-primary transition-colors block break-words leading-tight"
+                    className="text-xs font-medium text-left hover:text-primary transition-colors block break-words leading-tight"
                     title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-xs text-muted-foreground break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-muted-foreground break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top">
@@ -209,7 +209,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </div>
                 </TableCell>
                 <TableCell className="text-left align-top">
-                  <div className="text-sm font-semibold font-mono tabular-nums">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                  <div className="text-xs font-semibold font-mono tabular-nums">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                 </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top">
