@@ -172,31 +172,31 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-foreground/70 align-top whitespace-nowrap">
+                <TableCell className="text-xs font-mono text-black align-top whitespace-nowrap">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] text-foreground/60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                  <span className="block text-[10px] text-black/70">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top">
                   <button
                     onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-xs font-medium text-left hover:text-primary transition-colors block break-words leading-tight"
+                    className="text-xs font-medium text-left text-black hover:text-primary transition-colors block break-words leading-tight"
                     title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-[10px] text-foreground/55 break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-black/70 break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top">
                   <button
                     onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="hover:text-primary transition-colors tabular-nums block text-left break-words leading-tight"
+                    className="text-black hover:text-primary transition-colors tabular-nums block text-left break-words leading-tight"
                     title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
                   <button
                     onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-foreground/55 hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
+                    className="text-[10px] text-black/70 hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
                     title="View driver">
                     {trip.driver_name || ''}
                   </button>
@@ -204,15 +204,15 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="text-xs align-top">
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 break-words leading-tight">
-                      <span className="text-foreground break-words font-medium">{trip.from_location || '—'}</span>
-                      <ArrowRight className="w-3 h-3 text-foreground/40 flex-shrink-0" />
-                      <span className="text-foreground break-words font-medium">{trip.to_location || '—'}</span>
+                      <span className="text-black break-words font-medium">{trip.from_location || '—'}</span>
+                      <ArrowRight className="w-3 h-3 text-black/40 flex-shrink-0" />
+                      <span className="text-black break-words font-medium">{trip.to_location || '—'}</span>
                     </div>
-                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-foreground/55 uppercase tracking-wider break-words">{trip.hours}h</div> : null}
+                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider break-words">{trip.hours}h</div> : null}
                   </div>
                 </TableCell>
                 <TableCell className="text-left align-top">
-                  <div className="text-xs font-semibold font-mono tabular-nums">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                  <div className="text-xs font-semibold font-mono tabular-nums text-black">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                 </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top">
@@ -252,7 +252,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </DropdownMenu>
                 </TableCell>
                 <TableCell className="align-top">
-                  <Badge variant="secondary" className="text-[10px] whitespace-nowrap">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
+                  <Badge variant="secondary" className="text-[10px] whitespace-nowrap text-black">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
                 </TableCell>
                 <TableCell className="align-top">
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>

@@ -1828,15 +1828,16 @@
   * { scrollbar-width: none; -ms-overflow-style: none; }
 
   /* Visible scrollbar — TripsTable container */
-  .trips-scroll::-webkit-scrollbar { display: block; width: 10px; height: 10px; }
-  .trips-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.4); border-radius: 8px; }
+  .trips-scroll::-webkit-scrollbar { display: block; width: 14px; height: 14px; }
+  .trips-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.5); border-radius: 10px; }
   .trips-scroll::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.45);
-    border-radius: 8px;
-    border: 2px solid hsl(var(--background));
+    background: hsl(var(--primary));
+    border-radius: 9999px;
+    border: 3px solid hsl(var(--background));
+    min-height: 60px;
   }
-  .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.7); }
-  .trips-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / 0.5) transparent; -ms-overflow-style: auto; }
+  .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary-light)); }
+  .trips-scroll { scrollbar-width: auto; scrollbar-color: hsl(var(--primary)) hsl(var(--muted) / 0.5); -ms-overflow-style: auto; }
 }
 
 /* ===== Collapsible section shine sweep (when collapsed) ===== */
