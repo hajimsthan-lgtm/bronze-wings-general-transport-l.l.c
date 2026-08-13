@@ -196,9 +196,9 @@ export default function Dashboard() {
       <HeroGreetingCard activeTrips={activeTrips} totalRevenue={totalRevenue} pendingInvoices={pendingInvoices} dateFrom={dateFrom} dateTo={dateTo} />
 
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className="text-xs text-muted-foreground hidden">
-          Showing data for <span className="text-foreground font-medium">{formatDate(dateFrom)}</span> — <span className="text-foreground font-medium">{formatDate(dateTo)}</span>
-        </p>
+        
+
+            
       </div>
 
       {/* Balance card — circular gauge + revenue + mini stats */}
