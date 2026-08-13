@@ -41,12 +41,12 @@ export default function MobileNav() {
               {active && (
                 <span
                   className="absolute inset-0 rounded-full"
-                  style={{ background: 'rgba(33,150,243,0.18)', border: '1px solid rgba(33,150,243,0.40)', boxShadow: '0 0 14px -2px rgba(33,150,243,0.40)' }}
+                  style={{ background: '#2196f3' }}
                 />
               )}
               <Icon
                 className="relative w-5 h-5 transition-colors duration-200"
-                style={{ color: active ? '#2196f3' : 'var(--nav-inactive)' }}
+                style={{ color: active ? '#ffffff' : 'var(--nav-inactive)' }}
               />
             </button>
           );

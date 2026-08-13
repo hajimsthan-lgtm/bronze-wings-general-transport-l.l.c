@@ -1,15 +1,16 @@
 /* ═══════════════════════════════════════════════════════
-   MOBILE THEME OVERRIDE — Reference app flat dark + blue
-   Applies only on mobile (<768px); desktop themes untouched
+   MOBILE THEME — Reference app flat design (light + dark)
+   Mobile only (<768px); desktop themes completely untouched
    ═══════════════════════════════════════════════════════ */
+
+/* ── Dark mobile theme variables ── */
 @media (max-width: 767px) {
   :root,
   .theme-navy,
   .theme-emerald,
-  .theme-amethyst,
-  .theme-light {
-    --background: 0 0% 5%;
-    --background-elevated: 0 0% 9%;
+  .theme-amethyst {
+    --background: 0 0% 0%;
+    --background-elevated: 0 0% 10%;
     --card: 0 0% 10%;
     --card-foreground: 0 0% 100%;
     --foreground: 0 0% 100%;
@@ -33,26 +34,72 @@
     --warning: 38 92% 50%;
     --danger: 0 72% 51%;
     --border: 0 0% 16%;
-    --input: 0 0% 10%;
+    --input: 0 0% 8%;
     --ring: 210 94% 54%;
     --panel-accent-rgb: 33, 150, 243;
     --panel-accent2-rgb: 100, 181, 246;
     --surf-1-rgb: 26, 26, 26;
-    --surf-2-rgb: 12, 12, 12;
+    --surf-2-rgb: 0, 0, 0;
     --sidebar-primary: 210 94% 54%;
     --sidebar-ring: 210 94% 54%;
-    --app-bg: #0c0c0c;
+    --app-bg: #000000;
     --nav-inactive: rgba(160,160,160,0.5);
     --surf-1: rgba(26,26,26,0.98);
-    --surf-2: rgba(12,12,12,1);
+    --surf-2: rgba(0,0,0,1);
     --panel-bg: #1a1a1a;
     --panel-border-color: rgba(255,255,255,0.06);
     --panel-blur: none;
     --header-tint-1: rgba(26,26,26,0.95);
-    --header-tint-2: rgba(12,12,12,0.98);
+    --header-tint-2: rgba(0,0,0,0.98);
   }
 
-  /* Flat card surfaces — solid dark, no glassmorphism blur */
+  /* ── Light mobile theme variables ── */
+  .theme-light {
+    --background: 0 0% 93%;
+    --background-elevated: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 210 94% 54%;
+    --primary-light: 210 94% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --accent: 210 94% 54%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --neon: 210 94% 54%;
+    --magenta: 210 94% 54%;
+    --success: 142 71% 45%;
+    --success-light: 142 71% 52%;
+    --warning: 38 92% 50%;
+    --danger: 0 72% 51%;
+    --border: 0 0% 87%;
+    --input: 0 0% 100%;
+    --ring: 210 94% 54%;
+    --panel-accent-rgb: 33, 150, 243;
+    --panel-accent2-rgb: 100, 181, 246;
+    --surf-1-rgb: 255, 255, 255;
+    --surf-2-rgb: 238, 238, 238;
+    --sidebar-primary: 210 94% 54%;
+    --sidebar-ring: 210 94% 54%;
+    --app-bg: #eeeeee;
+    --nav-inactive: rgba(100,100,100,0.5);
+    --surf-1: rgba(255,255,255,0.98);
+    --surf-2: rgba(238,238,238,1);
+    --panel-bg: #ffffff;
+    --panel-border-color: rgba(0,0,0,0.08);
+    --panel-blur: none;
+    --header-tint-1: rgba(255,255,255,0.95);
+    --header-tint-2: rgba(238,238,238,0.98);
+  }
+
+  /* ── Flat card surfaces (both modes) ── */
   .glass-card,
   .clay-card,
   .entity-card,
@@ -64,10 +111,12 @@
   .glass-sm,
   .glass-panel,
   .detail-header-card {
-    background: #1a1a1a !important;
+    background: hsl(var(--card)) !important;
+    background-color: hsl(var(--card)) !important;
+    background-image: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
+    border: 1px solid hsl(var(--border)) !important;
     box-shadow: none !important;
   }
   .glass-card::before,
@@ -84,35 +133,68 @@
   .glass-card-hover:hover,
   .kpi-card:hover,
   .stat-tile:hover {
-    background: #222 !important;
-    border-color: rgba(33,150,243,0.30) !important;
+    background: hsl(var(--card)) !important;
+    background-color: hsl(var(--card)) !important;
+    border-color: rgba(33,150,243,0.40) !important;
     transform: none !important;
-    box-shadow: 0 0 0 1px rgba(33,150,243,0.10) !important;
+    box-shadow: 0 0 0 1px rgba(33,150,243,0.12) !important;
   }
 
-  /* Page bg — flat dark */
+  /* Light mode cards get subtle shadow */
+  .theme-light .glass-card,
+  .theme-light .clay-card,
+  .theme-light .entity-card,
+  .theme-light .row-card,
+  .theme-light .glass-card-hover,
+  .theme-light .kpi-card,
+  .theme-light .stat-tile,
+  .theme-light .glass,
+  .theme-light .glass-sm,
+  .theme-light .glass-panel,
+  .theme-light .detail-header-card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  }
+  .theme-light .glass-card:hover,
+  .theme-light .clay-card:hover,
+  .theme-light .entity-card:hover,
+  .theme-light .row-card:hover,
+  .theme-light .glass-card-hover:hover,
+  .theme-light .kpi-card:hover,
+  .theme-light .stat-tile:hover {
+    background: #ffffff !important;
+    border-color: rgba(33,150,243,0.40) !important;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.12) !important;
+  }
+
+  /* ── Page + body background ── */
   .professional-page-bg {
-    background: #0c0c0c !important;
+    background: hsl(var(--background)) !important;
+  }
+  body {
+    background: hsl(var(--background)) !important;
   }
 
-  /* Sub-tabs — blue active */
+  /* ── Sub-tabs / Radix tabs — blue active ── */
   .sub-tab-active {
-    background: rgba(33,150,243,0.18) !important;
+    background: rgba(33,150,243,0.15) !important;
     border-color: rgba(33,150,243,0.35) !important;
-    color: #64b5f6 !important;
-    box-shadow: 0 0 12px rgba(33,150,243,0.12) !important;
+    color: #2196f3 !important;
+    box-shadow: none !important;
   }
   [role="tab"][data-state="active"] {
-    background: rgba(33,150,243,0.18) !important;
+    background: rgba(33,150,243,0.15) !important;
     border: 1px solid rgba(33,150,243,0.35) !important;
-    box-shadow: 0 0 12px rgba(33,150,243,0.12) !important;
+    box-shadow: none !important;
   }
 
-  /* Filter chips — blue */
+  /* ── Filter chips ── */
   .filter-chip {
-    background: rgba(33,150,243,0.12) !important;
-    border-color: rgba(33,150,243,0.35) !important;
-    color: #64b5f6 !important;
+    background: transparent !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--muted-foreground)) !important;
   }
   .filter-chip-active {
     background: #2196f3 !important;
@@ -120,7 +202,7 @@
     color: #fff !important;
   }
 
-  /* Primary buttons — blue */
+  /* ── Primary buttons — solid blue ── */
   .lightning-btn,
   .clay-btn,
   .btn-new-trip {
@@ -136,35 +218,36 @@
   .lightning-btn::after,
   .clay-btn::after { display: none !important; }
 
-  /* Nav rail / sidebar — flat dark */
+  /* ── Sidebar / nav rail — flat ── */
   .morph-sidebar,
   .skeuo-sidebar {
-    background: #0c0c0c !important;
+    background: hsl(var(--background)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    border-right: 1px solid hsl(var(--border)) !important;
     box-shadow: none !important;
   }
 
-  /* Header — flat dark */
+  /* ── Header bars — flat ── */
   .obsidian-header,
   .obsidian-header-row,
   .obsidian-subnav-row {
-    background: #1a1a1a !important;
+    background: hsl(var(--card)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border-color: rgba(255,255,255,0.06) !important;
+    border-color: hsl(var(--border)) !important;
     box-shadow: none !important;
   }
 
-  /* Inputs — flat dark */
+  /* ── Inputs — flat ── */
   .clay-input,
   input.bg-input,
   input[class*="bg-input"],
   .search-2026 {
-    background: #141414 !important;
-    border-color: rgba(255,255,255,0.08) !important;
+    background: hsl(var(--input)) !important;
+    border-color: hsl(var(--border)) !important;
     box-shadow: none !important;
+    color: hsl(var(--foreground)) !important;
   }
   .clay-input:focus,
   input.bg-input:focus,
@@ -174,7 +257,7 @@
     box-shadow: 0 0 0 2px rgba(33,150,243,0.15) !important;
   }
 
-  /* Text gradient — blue */
+  /* ── Text gradient — blue ── */
   .text-gradient {
     background: linear-gradient(135deg, #64b5f6 0%, #2196f3 100%) !important;
     -webkit-background-clip: text !important;
@@ -182,13 +265,13 @@
     -webkit-text-fill-color: transparent !important;
   }
 
-  /* Brand shine — blue tint */
+  /* ── Brand shine — blue tint ── */
   .brand-shine {
     background: linear-gradient(90deg, #ffffff 0%, #64b5f6 30%, #ffffff 50%, #2196f3 70%, #ffffff 100%) !important;
     background-size: 220% auto !important;
   }
 
-  /* Skeuo tiles — flat */
+  /* ── Skeuo / morph tiles — remove blur ── */
   .skeuo-tile,
   .morph-tile,
   .skeuo-nav-row,
@@ -200,18 +283,42 @@
     -webkit-backdrop-filter: none !important;
   }
 
-  /* Empty orb — blue */
+  /* ── Empty orb — blue ── */
   .empty-orb {
-    background: radial-gradient(circle, rgba(33,150,243,0.15) 0%, rgba(26,26,26,0.8) 70%) !important;
+    background: radial-gradient(circle, rgba(33,150,243,0.15) 0%, hsl(var(--card)) 70%) !important;
     border-color: rgba(33,150,243,0.20) !important;
   }
 
-  /* Trip section cards — flat dark */
+  /* ── Trip section cards — flat ── */
   .trip-section {
-    background: #1a1a1a !important;
-    border-color: rgba(255,255,255,0.06) !important;
+    background: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
+  }
+
+  /* ── Light mode: white text overrides for dark-on-light ── */
+  .theme-light [class*="text-white/20"],
+  .theme-light [class*="text-white/25"],
+  .theme-light [class*="text-white/30"],
+  .theme-light [class*="text-white/35"],
+  .theme-light [class*="text-white/40"],
+  .theme-light [class*="text-white/45"],
+  .theme-light [class*="text-white/50"] {
+    color: #666666 !important;
+  }
+  .theme-light [class*="text-white/55"],
+  .theme-light [class*="text-white/60"],
+  .theme-light [class*="text-white/65"],
+  .theme-light [class*="text-white/70"],
+  .theme-light [class*="text-white/75"],
+  .theme-light [class*="text-white/80"],
+  .theme-light [class*="text-white"],
+  .theme-light [class*="text-white/85"],
+  .theme-light [class*="text-white/90"],
+  .theme-light [class*="text-white/95"],
+  .theme-light [class*="text-white/100"] {
+    color: #000000 !important;
   }
 }
