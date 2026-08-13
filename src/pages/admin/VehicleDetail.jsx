@@ -19,6 +19,8 @@ import ExportButtons from '@/components/common/ExportButtons';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
 import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
 import { exportToPDF } from '@/lib/exportUtils';
+import { downloadMaintenanceTablePDF } from '@/lib/maintenancePdf';
+import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function VehicleDetail() {
@@ -136,16 +138,47 @@ export default function VehicleDetail() {
         { label: 'Vendor', key: 'vendor_name' },
         { label: 'Cost', key: 'cost', numeric: true },
       ],
+      onPdfExport: async (recs) => {
+        try {
+          const settings = await getCompanySettings();
+          await downloadMaintenanceTablePDF(recs, vehicle.plate_number, settings);
+        } catch {
+          exportToPDF(
+            recs.map((r) => { const o = {}; ['date', 'service_type', 'vendor_name', 'cost'].forEach((k) => { o[k] = r[k]; }); return o; }),
+            `vehicle-${vehicle.plate_number}-maintenance`,
+            viewerConfig.services.columns,
+            'Maintenance Records',
+            { dateRange: `${dateFrom} to ${dateTo}` }
+          );
+        }
+      },
     },
   };
 
-  const pdfExport = (key, records) => exportToPDF(
-    records.map((r) => { const o = {}; viewerConfig[key].columns.forEach((c) => { o[c.key] = r[c.key]; }); return o; }),
-    viewerConfig[key].filename,
-    viewerConfig[key].columns,
-    viewerConfig[key].title,
-    { dateRange: `${dateFrom} to ${dateTo}` }
-  );
+  const pdfExport = async (key, records) => {
+    if (key === 'services') {
+      try {
+        const settings = await getCompanySettings();
+        await downloadMaintenanceTablePDF(records, vehicle.plate_number, settings);
+      } catch {
+        exportToPDF(
+          records.map((r) => { const o = {}; viewerConfig[key].columns.forEach((c) => { o[c.key] = r[c.key]; }); return o; }),
+          viewerConfig[key].filename,
+          viewerConfig[key].columns,
+          viewerConfig[key].title,
+          { dateRange: `${dateFrom} to ${dateTo}` }
+        );
+      }
+      return;
+    }
+    exportToPDF(
+      records.map((r) => { const o = {}; viewerConfig[key].columns.forEach((c) => { o[c.key] = r[c.key]; }); return o; }),
+      viewerConfig[key].filename,
+      viewerConfig[key].columns,
+      viewerConfig[key].title,
+      { dateRange: `${dateFrom} to ${dateTo}` }
+    );
+  };
 
   return (
     <div className="detail-page space-y-4">
