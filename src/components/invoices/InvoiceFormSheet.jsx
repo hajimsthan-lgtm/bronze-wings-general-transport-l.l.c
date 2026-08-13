@@ -12,7 +12,7 @@ import { formatCurrency } from '@/lib/formatters';
 import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
-import { downloadInvoicePDF, downloadPerTripInvoicePDF } from '@/lib/invoiceHtml';
+import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { cn } from '@/lib/utils';
@@ -50,6 +50,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
+  const [invoiceMode, setInvoiceMode] = useState('trip'); // 'trip' | 'monthly'
   const [receivePayment, setReceivePayment] = useState(false);
   const [payment, setPayment] = useState({ amount: '', mode: 'cash', date: new Date().toISOString().split('T')[0], reference: '', notes: '' });
   const [form, setForm] = useState({
@@ -259,11 +260,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     try {
       const s = await getCompanySettings();
       const payload = { ...form, line_items: form.line_items.map(({ _trip_number, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
-      const hasTripDates = form.line_items.some(i => i.date);
-      if (hasTripDates) {
-        await downloadPerTripInvoicePDF(payload, form.client_name, s, undefined, true);
+      if (invoiceMode === 'monthly') {
+        await downloadMonthlyInvoicePDF(payload, form.client_name, s, undefined, true);
       } else {
-        await downloadInvoicePDF(payload, form.client_name, s, undefined, true);
+        await downloadPerTripInvoicePDF(payload, form.client_name, s, undefined, true);
       }
       toast({ title: 'Draft PDF downloaded' });
     } catch (e) {
@@ -282,6 +282,36 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         <div className="flex-1 flex overflow-hidden">
           {/* LEFT: Form */}
           <div className="w-1/2 overflow-y-auto px-5 py-5 space-y-4 border-r border-border">
+            {/* Invoice Mode Toggle */}
+            <div className="flex items-center gap-2 p-1 rounded-xl bg-muted/40 border border-border">
+              <button
+                type="button"
+                onClick={() => setInvoiceMode('trip')}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all',
+                  invoiceMode === 'trip'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Per-Trip Invoice
+              </button>
+              <button
+                type="button"
+                onClick={() => setInvoiceMode('monthly')}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all',
+                  invoiceMode === 'monthly'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Monthly Contract
+              </button>
+            </div>
+
             {/* Client */}
             <Section title="Client" icon={User}>
               <div>
@@ -512,7 +542,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </div>
             </div>
             <div className="h-[calc(100%-36px)]">
-              <InvoicePreview form={{ ...form, line_items: previewItems, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} />
+              <InvoicePreview form={{ ...form, line_items: previewItems, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} mode={invoiceMode} />
             </div>
           </div>
         </div>
