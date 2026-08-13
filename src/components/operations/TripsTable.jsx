@@ -39,18 +39,18 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const [copiedId, setCopiedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
 
-  // Column widths (resizable) — costs & profit removed
+  // Column widths (resizable) — all columns always visible, text wraps
   const [widths, setWidths] = useState({
     0: 44, // checkbox
-    1: 150, // trip #
-    2: 110, // date
+    1: 130, // trip #
+    2: 100, // date
     3: 180, // client
-    4: 130, // vehicle
-    5: 200, // route
-    6: 120, // revenue
-    7: 140, // status (wider for dropdown)
-    8: 110, // payment
-    9: 110 // actions
+    4: 140, // vehicle
+    5: 220, // route
+    6: 110, // revenue
+    7: 130, // status
+    8: 90, // payment
+    9: 100 // actions
   });
   const [resizing, setResizing] = useState(null);
 
@@ -123,11 +123,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             ['TRIP #', 'text-left'],
             ['DATE', 'text-left'],
             ['CLIENT', 'text-left'],
-            ['VEHICLE', 'text-left hidden md:table-cell'],
-            ['ROUTE', 'text-left hidden lg:table-cell'],
+            ['VEHICLE', 'text-left'],
+            ['ROUTE', 'text-left'],
             ['REVENUE', 'text-right'],
             ['STATUS', 'text-left'],
-            ['PAYMENT', 'text-left hidden md:table-cell'],
+            ['PAYMENT', 'text-left'],
             ['', 'text-center']].
             map(([label, align], i) => {
               const index = i + 1;
@@ -156,13 +156,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="pl-3" onClick={(e) => e.stopPropagation()}>
                   <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
                 </TableCell>
-                <TableCell className="text-xs font-mono">
+                <TableCell className="text-xs font-mono align-top">
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={(e) => {e.stopPropagation();copyRef(trip);}}
                       className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group"
                       title="Click to copy trip number">
-                      
                       {ref}
                       {copiedId === trip.id ?
                       <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
@@ -170,59 +169,48 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-muted-foreground">
+                <TableCell className="text-xs font-mono text-muted-foreground align-top whitespace-nowrap">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
                   <span className="block text-[10px] opacity-60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
-                <TableCell>
+                <TableCell className="align-top">
                   <button
                     onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-sm font-medium truncate max-w-[160px] text-left hover:text-primary transition-colors block"
+                    className="text-sm font-medium text-left hover:text-primary transition-colors block break-words leading-tight"
                     title={trip.client_name}>
-                    
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-xs text-muted-foreground truncate max-w-[160px]">{trip.contact_person || ''}</div>
+                  <div className="text-xs text-muted-foreground break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
-                <TableCell className="text-xs font-mono hidden md:table-cell">
+                <TableCell className="text-xs font-mono align-top">
                   <button
                     onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="hover:text-primary transition-colors tabular-nums block text-left"
+                    className="hover:text-primary transition-colors tabular-nums block text-left break-words leading-tight"
                     title="View vehicle">
-                    
                     {trip.vehicle_plate || '—'}
                   </button>
                   <button
                     onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors truncate max-w-[110px] block text-left"
+                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
                     title="View driver">
-                    
                     {trip.driver_name || ''}
                   </button>
                 </TableCell>
-                <TableCell className="text-xs hidden lg:table-cell">
-                  <div className="flex items-center gap-1 max-w-[180px]">
-                    <span className="truncate text-foreground">{trip.from_location || '—'}</span>
-                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
-                    <span className="truncate text-foreground">{trip.to_location || '—'}</span>
+                <TableCell className="text-xs align-top">
+                  <div className="flex items-start gap-1 break-words leading-tight">
+                    <span className="text-foreground break-words">{trip.from_location || '—'}</span>
+                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+                    <span className="text-foreground break-words">{trip.to_location || '—'}</span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}</div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 break-words">{t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}</div>
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="text-sm font-semibold font-mono">{formatCurrency(trip.revenue)}</div>
-                  
-
-
-
-
-
-
-                  
-                </TableCell>
-                {/* STATUS — inline dropdown for direct change */}
-                <TableCell onClick={(e) => e.stopPropagation()}>
+                <TableCell className="text-right align-top">
+                  <div className="text-sm font-semibold font-mono whitespace-nowrap">{formatCurrency(trip.revenue)}</div>
+                  </TableCell>
+                  {/* STATUS — inline dropdown for direct change */}
+                  <TableCell onClick={(e) => e.stopPropagation()} className="align-top">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
@@ -258,10 +246,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <Badge variant="secondary" className="text-[10px]">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
+                <TableCell className="align-top">
+                  <Badge variant="secondary" className="text-[10px] whitespace-nowrap">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="align-top">
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => onOpenDetail?.(trip)}
