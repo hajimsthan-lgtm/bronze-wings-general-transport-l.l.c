@@ -872,14 +872,14 @@ async function renderToPDF(html, invoice) {
   }
 }
 
-export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  await renderInvoicePDF(invoice, clientName, settings, 'standard', seqNo);
+export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
+  await renderInvoicePDF(invoice, clientName, settings, 'standard', seqNo, draft);
 }
 
-export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  await renderInvoicePDF(invoice, clientName, settings, 'monthly', seqNo);
+export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
+  await renderInvoicePDF(invoice, clientName, settings, 'monthly', seqNo, draft);
 }
 
-export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo) {
-  await renderInvoicePDF(invoice, clientName, settings, 'trip', seqNo);
+export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
+  await renderInvoicePDF(invoice, clientName, settings, 'trip', seqNo, draft);
 }

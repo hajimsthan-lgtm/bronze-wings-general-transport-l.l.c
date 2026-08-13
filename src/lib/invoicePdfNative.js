@@ -1003,7 +1003,7 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
 // ═══════════════════════════════════════════════════════════
 // MAIN: RENDER INVOICE PDF
 // ═══════════════════════════════════════════════════════════
-export async function renderInvoicePDF(invoice, clientName, settings, invoiceType = 'monthly', seqNo) {
+export async function renderInvoicePDF(invoice, clientName, settings, invoiceType = 'monthly', seqNo, draft = false) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
   // Fetch logo as data URL for embedding
@@ -1055,6 +1055,15 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   const pageCount = pdf.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     pdf.setPage(i);
+    // DRAFT watermark — big diagonal, semi-transparent, on every page
+    if (draft) {
+      pdf.setGState(new pdf.GState({ opacity: 0.14 }));
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(110);
+      tc(pdf, MAROON);
+      pdf.text('DRAFT', PAGE_W / 2, PAGE_H / 2, { align: 'center', angle: 32 });
+      pdf.setGState(new pdf.GState({ opacity: 1 }));
+    }
     // Footer banner — "WE PROVIDE ALL KINDS..." on every page
     drawFooterBanners(pdf);
     // Page number

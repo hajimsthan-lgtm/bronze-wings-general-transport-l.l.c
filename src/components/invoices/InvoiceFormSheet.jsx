@@ -260,11 +260,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       const payload = { ...form, line_items: form.line_items.map(({ _trip_number, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
       const hasTripDates = form.line_items.some(i => i.date);
       if (hasTripDates) {
-        await downloadPerTripInvoicePDF(payload, form.client_name, s);
+        await downloadPerTripInvoicePDF(payload, form.client_name, s, undefined, true);
       } else {
-        await downloadInvoicePDF(payload, form.client_name, s);
+        await downloadInvoicePDF(payload, form.client_name, s, undefined, true);
       }
-      toast({ title: 'PDF downloaded' });
+      toast({ title: 'Draft PDF downloaded' });
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
     } finally { setDownloading(false); }
@@ -497,7 +497,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </Button>
               <Button onClick={handleDownload} disabled={downloading} variant="outline">
                 {downloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
-                PDF
+                Draft PDF
               </Button>
             </div>
           </div>
