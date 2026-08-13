@@ -119,12 +119,12 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo }) {
   return (
     <div className="glass-card overflow-hidden">
       <div className="p-3 border-b border-white/10 space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <Navigation className="w-4 h-4 text-primary" />
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Location Picker</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setActive('from')}
               className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${

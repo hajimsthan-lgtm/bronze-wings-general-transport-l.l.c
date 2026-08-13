@@ -160,11 +160,11 @@ export default function ContractModeFields({ p }) {
                 key={c.key}
                 type="button"
                 onClick={() => setActiveCat(c.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60 bg-white/[0.03] border-white/[0.06]'}`}
                 style={isActive
-                  ? { background: `${c.color}22`, border: `1px solid ${c.color}55`, boxShadow: `0 0 10px ${c.color}22` }
-                  : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-              >
+                  ? { background: `${c.color}22`, borderColor: `${c.color}55`, boxShadow: `0 0 10px ${c.color}22` }
+                  : undefined
+                }>
                 <c.icon className="w-3.5 h-3.5" style={{ color: c.color }} />
                 {t(c.labelKey)}
                 {total > 0 && <span className="opacity-70">{formatCurrency(total)}</span>}

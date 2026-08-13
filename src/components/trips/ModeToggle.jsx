@@ -6,10 +6,7 @@ export default function ModeToggle({ mode, onChange, t }) {
     { key: 'contract', label: t('monthly_contract'), icon: null },
   ];
   return (
-    <div
-      className="inline-flex items-center gap-1 p-1 rounded-full"
-      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-    >
+    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-white/5 border border-white/10">
       {options.map((o) => (
         <button
           key={o.key}

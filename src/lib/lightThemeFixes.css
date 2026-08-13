@@ -106,9 +106,13 @@
 .theme-light .text-sky-400 { color: #0284c7 !important; }
 
 /* ── Muted-foreground at very low opacity — too faint on white ── */
+.theme-light .text-muted-foreground\/70 { color: hsl(var(--muted-foreground)) !important; opacity: 0.85; }
+.theme-light .text-muted-foreground\/60 { color: hsl(var(--muted-foreground)) !important; opacity: 0.8; }
 .theme-light .text-muted-foreground\/50 { color: hsl(var(--muted-foreground)) !important; opacity: 0.7; }
 .theme-light .text-muted-foreground\/40 { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
 .theme-light .text-muted-foreground\/30 { color: hsl(var(--muted-foreground)) !important; opacity: 0.5; }
+.theme-light .placeholder\:text-muted-foreground\/70::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.7; }
+.theme-light .placeholder\:text-muted-foreground\/60::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.65; }
 .theme-light .placeholder\:text-muted-foreground\/50::placeholder { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
 
 /* ── Primary at low opacity — faded on white ── */
@@ -210,3 +214,114 @@
 
 /* ── Trip section title text-white/70 — reinforce ── */
 .theme-light .trip-section .text-white\/70 { color: hsl(var(--foreground)) !important; opacity: 0.75; }
+
+/* ═════════════════════════════════════════════════════════════════
+   ADDITIONAL LIGHT THEME OVERRIDES — colors not covered above
+   ═════════════════════════════════════════════════════════════════ */
+
+/* ── Green text (used in CreateNewCard success state) ── */
+.theme-light .text-green-300 { color: #059669 !important; }
+.theme-light .text-green-400 { color: #059669 !important; }
+.theme-light .text-green-500 { color: #047857 !important; }
+
+/* ── Green backgrounds/borders ── */
+.theme-light .bg-green-500\/10 { background-color: rgba(5, 150, 105, 0.1) !important; }
+.theme-light .bg-green-500\/15 { background-color: rgba(5, 150, 105, 0.12) !important; }
+.theme-light .bg-green-500\/20 { background-color: rgba(5, 150, 105, 0.15) !important; }
+.theme-light .border-green-500\/20 { border-color: rgba(5, 150, 105, 0.25) !important; }
+.theme-light .border-green-500\/30 { border-color: rgba(5, 150, 105, 0.3) !important; }
+
+/* ── Lime/yellow text (bright variants vanish on white) ── */
+.theme-light .text-lime-300 { color: #65a30d !important; }
+.theme-light .text-lime-400 { color: #65a30d !important; }
+.theme-light .text-yellow-300 { color: #ca8a04 !important; }
+.theme-light .text-yellow-400 { color: #ca8a04 !important; }
+
+/* ── Orange text ── */
+.theme-light .text-orange-300 { color: #ea580c !important; }
+.theme-light .text-orange-400 { color: #ea580c !important; }
+.theme-light .text-orange-500 { color: #c2410c !important; }
+
+/* ── Fuchsia/pink ── */
+.theme-light .text-fuchsia-300 { color: #c026d3 !important; }
+.theme-light .text-fuchsia-400 { color: #c026d3 !important; }
+.theme-light .text-pink-300 { color: #db2777 !important; }
+.theme-light .text-pink-400 { color: #db2777 !important; }
+
+/* ── Zinc/slate/neutral very-light variants (vanish on white) ── */
+.theme-light .text-zinc-300 { color: #52525b !important; }
+.theme-light .text-zinc-400 { color: #52525b !important; }
+.theme-light .text-slate-300 { color: #64748b !important; }
+.theme-light .text-slate-400 { color: #64748b !important; }
+.theme-light .text-neutral-300 { color: #525252 !important; }
+.theme-light .text-neutral-400 { color: #525252 !important; }
+.theme-light .text-gray-300 { color: #6b7280 !important; }
+.theme-light .text-gray-400 { color: #6b7280 !important; }
+.theme-light .text-gray-500 { color: #4b5563 !important; }
+
+/* ── text-white/90 — nearly full white, needs darkening ── */
+.theme-light .text-white\/90 { color: hsl(var(--foreground)) !important; opacity: 0.95; }
+.theme-light .text-white\/85 { color: hsl(var(--foreground)) !important; opacity: 0.92; }
+
+/* ── bg-black/ variants — invisible on dark, need visible bg on light ── */
+.theme-light .bg-black\/20 { background-color: rgba(0, 0, 0, 0.06) !important; }
+.theme-light .bg-black\/30 { background-color: rgba(0, 0, 0, 0.08) !important; }
+.theme-light .bg-black\/40 { background-color: rgba(0, 0, 0, 0.10) !important; }
+.theme-light .bg-black\/50 { background-color: rgba(0, 0, 0, 0.12) !important; }
+
+/* ── border-black/ variants ── */
+.theme-light .border-black\/10 { border-color: rgba(0, 0, 0, 0.08) !important; }
+.theme-light .border-black\/20 { border-color: rgba(0, 0, 0, 0.12) !important; }
+.theme-light .border-black\/30 { border-color: rgba(0, 0, 0, 0.15) !important; }
+
+/* ── Hardcoded hex text colors that vanish on white ── */
+.theme-light .text-\[\#a0a0a0\] { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .text-\[\#888888\] { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .text-\[\#999999\] { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .text-\[\#ccc\] { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .text-\[\#cccccc\] { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .text-\[\#6b7280\] { color: hsl(var(--muted-foreground)) !important; }
+
+/* ── bg-white at full opacity (solid white on white = invisible border) ── */
+.theme-light .bg-white { background-color: hsl(var(--card)) !important; }
+
+/* ── ModeToggle container fix (now uses classes, reinforce) ── */
+.theme-light .bg-white\/5 { background-color: rgba(0, 0, 0, 0.04) !important; }
+.theme-light .border-white\/10 { border-color: rgba(0, 0, 0, 0.08) !important; }
+
+/* ── Contract expense category inactive (now uses classes) ── */
+.theme-light .bg-white\/\[0\.03\] { background-color: rgba(0, 0, 0, 0.03) !important; }
+.theme-light .border-white\/\[0\.06\] { border-color: rgba(0, 0, 0, 0.06) !important; }
+
+/* ── Document vault buttons (ContractModeFields) ── */
+.theme-light .border-white\/15 { border-color: rgba(0, 0, 0, 0.10) !important; }
+.theme-light .bg-white\/\[0\.02\] { background-color: rgba(0, 0, 0, 0.02) !important; }
+
+/* ── Calc panel border-white/10 (TripCalcPanel, ContractProfitPanel) ── */
+.theme-light .border-white\/10 { border-color: rgba(0, 0, 0, 0.08) !important; }
+
+/* ── bg-white/5 progress bar track (ContractProfitPanel) ── */
+.theme-light .bg-white\/5 { background-color: rgba(0, 0, 0, 0.06) !important; }
+
+/* ── hover:bg-white/ variants ── */
+.theme-light .hover\:bg-white\/\[0\.06\]:hover { background-color: rgba(0, 0, 0, 0.04) !important; }
+.theme-light .hover\:bg-white\/\[0\.04\]:hover { background-color: rgba(0, 0, 0, 0.03) !important; }
+
+/* ── divide-white/ ── */
+.theme-light .divide-white\/10 > * + * { border-color: rgba(0, 0, 0, 0.06) !important; }
+.theme-light .divide-white\/15 > * + * { border-color: rgba(0, 0, 0, 0.08) !important; }
+
+/* ── Input placeholder for all inputs (reinforce) ── */
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.55;
+}
+
+/* ── Select trigger placeholder ── */
+.theme-light [data-placeholder] { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+
+/* ── Disabled/inactive tab text — ensure legible gray (full opacity for contrast) ── */
+.theme-light .text-white\/40 { color: hsl(var(--muted-foreground)) !important; opacity: 1; }
+.theme-light .text-white\/30 { color: hsl(var(--muted-foreground)) !important; opacity: 0.8; }
+.theme-light .text-white\/20 { color: hsl(var(--muted-foreground)) !important; opacity: 0.7; }
