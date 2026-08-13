@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -8,9 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, Receipt, User, FileText, Sparkles, Wallet, X } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
+import { downloadInvoicePDF } from '@/lib/invoiceHtml';
+import { useToast } from '@/components/ui/use-toast';
+import InvoicePreview from '@/components/invoices/InvoicePreview';
 
 const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0 };
 
@@ -34,10 +38,13 @@ function StatusPill({ status }) {
 
 export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSaved, defaultClientName }) {
   const { t } = useI18n();
+  const { toast } = useToast();
   const createInvoice = useInvoiceCreate();
   const updateInvoice = useInvoiceUpdate();
   const createPayment = useClientPaymentCreate();
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [settings, setSettings] = useState({});
   const [clients, setClients] = useState([]);
   const [trips, setTrips] = useState([]);
   const [receivePayment, setReceivePayment] = useState(false);
@@ -48,6 +55,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     due_date: '', status: 'draft', vat_rate: 5, notes: '', payment_terms: 'Net 30',
     trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
   });
+
+  const isEdit = !!editInvoice;
+
+  useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
 
   useEffect(() => {
     if (editInvoice) {
@@ -66,8 +77,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         trip_id: '', lpo_ref: '', line_items: [{ ...emptyItem }],
       });
       setReceivePayment(false);
-      Promise.all([generateInvoiceNumber(), getCompanySettings()]).then(([num, settings]) => {
-        setForm(prev => ({ ...prev, invoice_number: num, vat_rate: settings.default_vat_rate ?? 5 }));
+      Promise.all([generateInvoiceNumber(), getCompanySettings()]).then(([num, s]) => {
+        setForm(prev => ({ ...prev, invoice_number: num, vat_rate: s.default_vat_rate ?? 5 }));
       });
     }
   }, [editInvoice, open, defaultClientName]);
@@ -131,6 +142,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const inputCls = "bg-background/50 border-border backdrop-blur-sm";
 
   const handleSave = async () => {
+    if (!form.client_name?.trim()) {
+      toast({ variant: 'destructive', title: 'Client name is required' });
+      return;
+    }
     setSaving(true);
     try {
       const data = {
@@ -185,39 +200,38 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         });
       }
 
+      toast({ title: isEdit ? 'Invoice updated' : 'Invoice created' });
       onSaved?.();
       onOpenChange(false);
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
     } finally { setSaving(false); }
   };
 
-  if (!open) return null;
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const s = await getCompanySettings();
+      const payload = { ...form, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
+      await downloadInvoicePDF(payload, form.client_name, s);
+      toast({ title: 'PDF downloaded' });
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'PDF error', description: e.message });
+    } finally { setDownloading(false); }
+  };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/96 backdrop-blur-2xl overflow-y-auto animate-fade-in">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        {/* Hero header */}
-        <div className="relative overflow-hidden px-5 sm:px-6 pt-5 pb-5 border-b border-white/[0.06] glass-card rounded-2xl mb-5">
-          <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 80% at 0% 0%, rgba(30,215,96,0.15), transparent 70%)' }} />
-          <div className="relative flex items-center justify-between">
-            <div>
-              <h2 className="font-display text-foreground text-lg flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-primary" />
-                {editInvoice ? 'Edit Invoice' : t('new_invoice')}
-              </h2>
-              <p className="text-[11px] text-muted-foreground mt-1 font-mono">{form.invoice_number || '—'}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <StatusPill status={resultingStatus} />
-              <button onClick={() => onOpenChange(false)} className="w-9 h-9 rounded-full glass-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-6xl overflow-hidden bg-background p-0 flex flex-col">
+        <SheetHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+          <SheetTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</SheetTitle>
+          <SheetDescription>Left: fill in details · Right: live PDF preview</SheetDescription>
+        </SheetHeader>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
-          {/* Left: form */}
-          <div className="space-y-5">
+        <div className="flex-1 flex overflow-hidden">
+          {/* LEFT: Form */}
+          <div className="w-1/2 overflow-y-auto px-5 py-5 space-y-4 border-r border-border">
+            {/* Client */}
             <Section title="Client" icon={User}>
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">{t('client')}</Label>
@@ -257,6 +271,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </div>
             </Section>
 
+            {/* Invoice Details */}
             <Section title="Invoice Details" icon={FileText}>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -297,6 +312,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </div>
             </Section>
 
+            {/* Line Items */}
             <Section title="Line Items" icon={Sparkles}>
               <div className="space-y-2.5">
                 {form.line_items.map((item, i) => (
@@ -330,13 +346,23 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               <Button variant="outline" onClick={addItem} className="w-full border-dashed border-border">
                 <Plus className="w-4 h-4 mr-1.5" /> {t('add_item')}
               </Button>
+
+              {/* Totals */}
+              <div className="flex justify-end">
+                <div className="w-52 space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t('subtotal')}</span><span className="font-mono tabular-nums">{formatCurrency(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">{t('vat')} ({form.vat_rate}%)</span><span className="font-mono tabular-nums">{formatCurrency(vatAmount)}</span></div>
+                  <div className="flex justify-between font-bold border-t border-border pt-1"><span>{t('total')}</span><span className="font-mono tabular-nums text-primary">{formatCurrency(total)}</span></div>
+                </div>
+              </div>
+
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">{t('notes')}</Label>
                 <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} className={inputCls} />
               </div>
             </Section>
 
-            {/* Payment capture */}
+            {/* Payment */}
             <Section title="Payment" icon={CreditCard}>
               <div className="glass-card p-3 flex items-center justify-between">
                 <div>
@@ -347,6 +373,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               </div>
               {receivePayment && (
                 <div className="space-y-3 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <StatusPill status={resultingStatus} />
+                    <span className="text-xs text-muted-foreground">Balance: <span className={`font-bold tabular-nums ${balanceDue > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{formatCurrency(balanceDue)}</span></span>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-xs text-muted-foreground mb-1.5">Amount Received</Label>
@@ -380,97 +410,35 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
               )}
             </Section>
-          </div>
 
-          {/* Right: live summary + payment breakdown */}
-          <div className="hidden lg:block">
-            <div className="sticky top-4 space-y-3">
-              <div className="glass-card p-4 space-y-3">
-                <p className="eyebrow">Live Calculation</p>
-                <div className="space-y-2 max-h-[180px] overflow-y-auto thin-scroll">
-                  {form.line_items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span className="text-muted-foreground truncate pr-2">{item.description || `Item ${i + 1}`}</span>
-                      <span className="text-foreground tabular-nums flex-shrink-0">{formatCurrency(item.amount)}</span>
-                    </div>
-                  ))}
-                  {form.line_items.length === 0 && <p className="text-xs text-muted-foreground italic">No items yet</p>}
-                </div>
-                <div className="border-t border-white/10 pt-3 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('subtotal')}</span>
-                    <span className="text-foreground font-medium tabular-nums">{formatCurrency(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('vat')} ({form.vat_rate}%)</span>
-                    <span className="text-foreground font-medium tabular-nums">{formatCurrency(vatAmount)}</span>
-                  </div>
-                </div>
-                <div className="border-t border-white/10 pt-3">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-semibold text-foreground">{t('total')}</span>
-                    <span className="text-xl font-bold text-primary tabular-nums font-display">{formatCurrency(total)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {receivePayment && payAmount > 0 && (
-                <div className="glass-card p-4 space-y-3 animate-fade-in">
-                  <div className="flex items-center justify-between">
-                    <p className="eyebrow flex items-center gap-1.5"><Wallet className="w-3 h-3" /> Payment Breakdown</p>
-                    <StatusPill status={resultingStatus} />
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Invoice Total</span>
-                    <span className="text-foreground font-medium tabular-nums">{formatCurrency(total)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Amount Received</span>
-                    <span className="text-emerald-400 font-medium tabular-nums">{formatCurrency(payAmount)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-white/10 pt-2.5">
-                    <span className="text-muted-foreground">Balance Due</span>
-                    <span className={`font-bold tabular-nums ${balanceDue > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{formatCurrency(balanceDue)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                    <span className="px-2 py-0.5 rounded-full bg-white/[0.06] capitalize">{payment.mode.replace(/_/g, ' ')}</span>
-                    <span>·</span>
-                    <span>{payment.date}</span>
-                  </div>
-                </div>
-              )}
+            {/* Actions */}
+            <div className="flex gap-2 pt-1 pb-6">
+              <Button onClick={handleSave} disabled={saving} className="flex-1">
+                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
+              </Button>
+              <Button onClick={handleDownload} disabled={downloading} variant="outline">
+                {downloading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}
+                PDF
+              </Button>
             </div>
           </div>
 
-          {/* Mobile live calc */}
-          <div className="lg:hidden glass-card p-4 space-y-2">
-            <p className="eyebrow">Live Calculation</p>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('subtotal')}</span><span className="text-foreground tabular-nums">{formatCurrency(subtotal)}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('vat')} ({form.vat_rate}%)</span><span className="text-foreground tabular-nums">{formatCurrency(vatAmount)}</span></div>
-            <div className="border-t border-white/10 pt-2 flex justify-between items-baseline">
-              <span className="text-sm font-semibold text-foreground">{t('total')}</span>
-              <span className="text-lg font-bold text-primary tabular-nums font-display">{formatCurrency(total)}</span>
-            </div>
-            {receivePayment && payAmount > 0 && (
-              <div className="border-t border-white/10 pt-2 flex justify-between items-baseline">
-                <span className="text-sm font-semibold text-foreground">Balance Due</span>
-                <span className={`text-base font-bold tabular-nums ${balanceDue > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>{formatCurrency(balanceDue)}</span>
+          {/* RIGHT: Live Preview */}
+          <div className="w-1/2 overflow-hidden bg-muted/10">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border px-4 py-2">
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live Preview
               </div>
-            )}
+            </div>
+            <div className="h-[calc(100%-36px)]">
+              <InvoicePreview form={{ ...form, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} />
+            </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="flex items-center gap-3 mt-6 px-6 py-4 border-t border-border/50 sticky bottom-0 bg-card/80 backdrop-blur-xl rounded-2xl">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border">{t('cancel')}</Button>
-          <div className="flex-1" />
-          <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 min-w-[160px] btn-lightning">
-            {saving ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Check className="w-4 h-4 mr-1.5" />}
-            {saving ? t('loading') : (editInvoice ? 'Save Invoice' : 'Create Invoice')}
-          </Button>
-        </div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
