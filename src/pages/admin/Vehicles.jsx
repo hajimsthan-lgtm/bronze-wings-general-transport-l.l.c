@@ -214,7 +214,7 @@ function VehicleForm({ editItem, onSave, onCancel }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Type</Label>
-          <Select value={form.type} onValueChange={(v) => update('type', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['truck', 'trailer', 'tanker', 'pickup', 'other'].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
+          <Select value={form.type} onValueChange={(v) => update('type', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['truck', 'trailer', 'tanker','crane', 'pickup','chillervan','freezervan','othermachines', 'other'].map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent></Select></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>
           <Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['active', 'maintenance', 'inactive'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
       </div>
