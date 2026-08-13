@@ -41,12 +41,12 @@ export default function MobileNav() {
               {active && (
                 <span
                   className="absolute inset-0 rounded-full"
-                  style={{ background: '#2196f3' }}
+                  style={{ background: 'hsl(var(--accent))' }}
                 />
               )}
               <Icon
                 className="relative w-5 h-5 transition-colors duration-200"
-                style={{ color: active ? '#ffffff' : 'var(--nav-inactive)' }}
+                style={{ color: active ? 'hsl(var(--accent-foreground))' : 'var(--nav-inactive)' }}
               />
             </button>
           );
