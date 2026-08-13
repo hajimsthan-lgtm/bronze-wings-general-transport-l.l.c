@@ -21,7 +21,7 @@ export const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-export default function InvoiceCard({ inv, selected, onSelect, onStatusChange, onAttachSigned, onDownload, onEdit, onDelete, downloadingId, uploadingId }) {
+export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeRequest, onAttachSigned, onDownload, onEdit, onDelete, downloadingId, uploadingId }) {
   const fileRef = useRef(null);
   const total = Number(inv.total_amount || 0);
   const isSigned = !!inv.signed_invoice_url;
@@ -50,7 +50,7 @@ export default function InvoiceCard({ inv, selected, onSelect, onStatusChange, o
             <div className="text-sm font-semibold text-foreground mt-0.5">{inv.client_name || '—'}</div>
           </div>
         </div>
-        <Select value={inv.status} onValueChange={(v) => onStatusChange(inv, v)}>
+        <Select value={inv.status} onValueChange={(v) => onStatusChangeRequest(inv, v)}>
           <SelectTrigger className={`h-6 w-auto px-2 py-0 text-[10px] rounded-full font-semibold uppercase border-none shadow-none ${STATUS_COLORS[inv.status] || STATUS_COLORS.draft}`}>
             <SelectValue />
           </SelectTrigger>

@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import InvoiceCard, { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
+import PaymentModal from '@/components/invoices/PaymentModal';
+import CancelReasonModal from '@/components/invoices/CancelReasonModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -43,6 +45,8 @@ export default function InvoicesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
+  const [paymentModal, setPaymentModal] = useState(null); // { inv, mode }
+  const [cancelModal, setCancelModal] = useState(null); // inv
   const { dateFrom, dateTo } = useGlobalDate();
 
   useEffect(() => {
@@ -52,15 +56,91 @@ export default function InvoicesPage() {
   const handleNew = () => { setEditing(null); setSheetOpen(true); };
   const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); };
 
-  const handleStatusChange = async (inv, newStatus) => {
+  // Intercept status changes: paid/partially_paid → payment modal, cancelled → reason modal
+  const handleStatusChangeRequest = (inv, newStatus) => {
+    if (newStatus === 'paid' || newStatus === 'partially_paid') {
+      setPaymentModal({ inv, mode: newStatus });
+    } else if (newStatus === 'cancelled') {
+      setCancelModal(inv);
+    } else {
+      doStatusUpdate(inv, newStatus);
+    }
+  };
+
+  const doStatusUpdate = async (inv, newStatus, extraData = {}) => {
     try {
-      await base44.entities.Invoice.update(inv.id, { status: newStatus });
+      await base44.entities.Invoice.update(inv.id, { status: newStatus, ...extraData });
       toast({ title: 'Status updated', description: `${inv.invoice_number} → ${newStatus.replace(/_/g, ' ')}` });
       refetch();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
     }
   };
+
+  const handlePaymentConfirm = async (payData) => {
+    const inv = paymentModal?.inv;
+    const requestedMode = paymentModal?.mode;
+    if (!inv) return;
+    const total = Number(inv.total_amount || 0);
+    const alreadyPaid = Number(inv.paid_amount || 0);
+    const newPaidAmount = alreadyPaid + payData.amount;
+    // Determine actual status based on amount
+    const actualStatus = newPaidAmount >= total ? 'paid' : 'partially_paid';
+    try {
+      await base44.entities.Invoice.update(inv.id, {
+        status: actualStatus,
+        paid_amount: newPaidAmount,
+      });
+      // Create ClientPayment record so it flows to client section, Soa, and P&L
+      await base44.entities.ClientPayment.create({
+        reference_number: payData.reference,
+        client_name: inv.client_name,
+        amount: payData.amount,
+        payment_date: payData.date,
+        payment_mode: payData.mode,
+        allocated_invoices: [{
+          invoice_id: inv.id,
+          invoice_number: inv.invoice_number,
+          invoice_total: total,
+          allocated_amount: payData.amount,
+          is_selected: true,
+        }],
+        unapplied_balance: 0,
+        status: 'completed',
+        notes: payData.notes,
+      });
+      toast({
+        title: actualStatus === 'paid' ? 'Invoice Paid' : 'Partial Payment Recorded',
+        description: `${inv.invoice_number} — AED ${payData.amount.toFixed(2)} received`,
+      });
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
+    }
+  };
+
+  const handleCancelConfirm = async (reason) => {
+    const inv = cancelModal;
+    if (!inv) return;
+    await doStatusUpdate(inv, 'cancelled', { voided: true, void_reason: reason });
+  };
+
+  // Auto-overdue: mark invoices as overdue if due_date has passed
+  useEffect(() => {
+    if (!allInvoices.length) return;
+    const today = new Date().toISOString().split('T')[0];
+    const toUpdate = allInvoices.filter(inv =>
+      inv.due_date &&
+      inv.due_date < today &&
+      (inv.status === 'draft' || inv.status === 'sent' || inv.status === 'partially_paid') &&
+      !inv.voided
+    );
+    if (toUpdate.length === 0) return;
+    base44.entities.Invoice.bulkUpdate(
+      toUpdate.map(inv => ({ id: inv.id, status: 'overdue' }))
+    ).then(() => refetch()).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allInvoices.length]);
 
   const handleAttachSigned = async (inv, file) => {
     setUploadingId(inv.id);
@@ -258,7 +338,7 @@ export default function InvoicesPage() {
                   inv={inv}
                   selected={selected.has(inv.id)}
                   onSelect={toggleSelect}
-                  onStatusChange={handleStatusChange}
+                  onStatusChangeRequest={handleStatusChangeRequest}
                   onAttachSigned={handleAttachSigned}
                   onDownload={handleDownload}
                   onEdit={handleEdit}
@@ -273,6 +353,21 @@ export default function InvoicesPage() {
       </div>
 
       <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} />
+
+      <PaymentModal
+        invoice={paymentModal?.inv}
+        mode={paymentModal?.mode}
+        open={!!paymentModal}
+        onOpenChange={(open) => { if (!open) setPaymentModal(null); }}
+        onConfirm={handlePaymentConfirm}
+      />
+
+      <CancelReasonModal
+        invoice={cancelModal}
+        open={!!cancelModal}
+        onOpenChange={(open) => { if (!open) setCancelModal(null); }}
+        onConfirm={handleCancelConfirm}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>
