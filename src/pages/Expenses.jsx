@@ -166,45 +166,54 @@ export default function Expenses() {
             ))}
           </div>
         ) : (
-          <div>
-            {filtered.map(exp => {
-              const Icon = categoryIcons[exp.category] || categoryIcons.other;
-              const color = categoryColors[exp.category] || '#94a3b8';
-              return (
-                <ReportRowCard
-                  key={exp.id}
-                  icon={Icon}
-                  iconColor={color}
-                  title={exp.description || exp.category}
-                  subtitle={`${exp.vendor_name || '—'} · ${formatDate(exp.date)}`}
-                  onClick={() => { setEditItem(exp); setFormOpen(true); }}
-                  accent={color}
-                  right={
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-white/90 tabular-nums">{formatCurrency(exp.amount)}</p>
-                        <div className="flex justify-end mt-0.5"><ReportStatusBadge status={exp.status} /></div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button onClick={e => e.stopPropagation()} className="text-white/40 hover:text-white p-1.5 flex-shrink-0">
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setEditItem(exp); setFormOpen(true); }} className="text-xs cursor-pointer">
-                            <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setDeleteTarget(exp)} className="text-xs cursor-pointer text-red-400">
-                            <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  }
-                />
-              );
-            })}
+          <div className="rounded-xl border border-border overflow-hidden bg-background/40">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-primary/5 text-left text-muted-foreground">
+                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Description</th>
+                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Category</th>
+                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Date</th>
+                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider text-right">Amount</th>
+                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((exp) => {
+                    const Icon = categoryIcons[exp.category] || categoryIcons.other;
+                    const color = categoryColors[exp.category] || '#94a3b8';
+                    return (
+                      <tr key={exp.id} className="border-t border-border group hover:bg-primary/5 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0" style={{ background: hexToRgba(color, 0.14), border: `1px solid ${hexToRgba(color, 0.3)}`, color }}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{exp.description || exp.category}</p>
+                              {exp.vendor_name && <p className="text-xs text-muted-foreground truncate">{exp.vendor_name}</p>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 capitalize text-muted-foreground">{exp.category?.replace(/_/g, ' ')}</td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDate(exp.date)}</td>
+                        <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap" style={{ color: '#f97316' }}>- {formatCurrency(exp.amount).replace(/^AED\s*/, '')}</td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setEditItem(exp); setFormOpen(true); }} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg transition-colors" title="Edit">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setDeleteTarget(exp)} className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg transition-colors" title="Delete">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </PullToRefresh>
