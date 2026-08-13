@@ -1,4 +1,4 @@
-import { Search, X, LayoutGrid, List } from 'lucide-react';
+import { Search, X, LayoutGrid, List, Table as TableIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
@@ -79,6 +79,7 @@ export default function OperationsToolbar({
         options={[
           { value: 'card', label: t('cards_view'), icon: LayoutGrid },
           { value: 'list', label: t('list_view'), icon: List },
+          { value: 'table', label: 'Table', icon: TableIcon },
         ]}
       />
       <ExportButtons data={exportData} filename={exportFilename} title={exportTitle} columns={exportColumns} />

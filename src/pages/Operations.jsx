@@ -11,6 +11,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import TripCard from '@/components/trips/TripCard';
 import ContractCard from '@/components/contracts/ContractCard';
 import TripsList from '@/components/operations/TripsList';
+import TripsTable from '@/components/operations/TripsTable';
 import ContractsList from '@/components/operations/ContractsList';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
@@ -349,6 +350,8 @@ export default function Operations() {
                 <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
+                  : viewMode === 'table'
+                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
                   : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
               </div>
             )}

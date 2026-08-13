@@ -1,41 +1,89 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown } from 'lucide-react';
+import { formatCurrency, normalizeDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
-import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Eye, Pencil, Trash2, MoreVertical, ChevronDown, Check, Send, Undo2 } from 'lucide-react';
-import { setTripInvoiceSent } from '@/lib/tripInvoice';
-import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
+import { cn } from '@/lib/utils';
+import moment from 'moment';
 
-const STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
-  { value: 'in_transit', label: 'In Transit', dot: 'bg-amber-400' },
-  { value: 'completed', label: 'Completed', dot: 'bg-emerald-400' },
-  { value: 'cancelled', label: 'Canceled', dot: 'bg-red-400' },
-];
+const STATUS_HEX = {
+  scheduled: '#60a5fa',
+  in_transit: '#fbbf24',
+  completed: '#34d399',
+  cancelled: '#f87171',
+};
+
+const PAYMENT_LABEL = {
+  corporate_credit: 'Corp',
+  cash_received: 'Cash',
+  bank_received: 'Bank',
+};
 
 export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
   const navigate = useNavigate();
   const { t } = useI18n();
-  const updateTrip = useTripUpdate();
   const { toast } = useToast();
-  const [busy, setBusy] = useState({});
+  const [copiedId, setCopiedId] = useState(null);
+  const [selected, setSelected] = useState(new Set());
 
-  const handleInvoiceSent = async (e, trip, sent) => {
+  // Column widths (resizable)
+  const [widths, setWidths] = useState({
+    0: 44,   // checkbox
+    1: 150,  // trip #
+    2: 110,  // date
+    3: 180,  // client
+    4: 130,  // vehicle
+    5: 200,  // route
+    6: 110,  // revenue
+    7: 120,  // costs
+    8: 100,  // profit
+    9: 110,  // status
+    10: 90,  // mode
+    11: 130, // actions
+  });
+  const [resizing, setResizing] = useState(null);
+
+  const totalWidth = useMemo(() => Object.values(widths).reduce((a, b) => a + b, 0), [widths]);
+
+  const startResize = (index, e) => {
+    e.preventDefault();
     e.stopPropagation();
-    if (busy[trip.id]) return;
-    setBusy((b) => ({ ...b, [trip.id]: true }));
-    try {
-      await setTripInvoiceSent(trip, sent);
-      toast({ title: sent ? 'Invoice marked as sent' : 'Invoice reverted to not sent' });
-      onInvoicesChanged?.();
-    } catch {
-      toast({ title: 'Could not update invoice', variant: 'destructive' });
-    } finally {
-      setBusy((b) => ({ ...b, [trip.id]: false }));
-    }
+    setResizing({ index, startX: e.clientX, startW: widths[index] });
+  };
+
+  useEffect(() => {
+    if (!resizing) return;
+    const onMove = (e) => {
+      const delta = e.clientX - resizing.startX;
+      setWidths((w) => ({ ...w, [resizing.index]: Math.max(60, resizing.startW + delta) }));
+    };
+    const onUp = () => setResizing(null);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [resizing]);
+
+  const thStyle = (i) => ({ width: widths[i], minWidth: widths[i] });
+
+  const resizeHandle = (i) => (
+    <span
+      onMouseDown={(e) => startResize(i, e)}
+      className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-primary/40 transition-colors z-20"
+    />
+  );
+
+  const copyRef = (trip) => {
+    const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
+    navigator.clipboard?.writeText(ref);
+    setCopiedId(trip.id);
+    toast({ title: 'Copied', description: ref });
+    setTimeout(() => setCopiedId(null), 1500);
   };
 
   const handleLink = (e, map, name, path) => {
@@ -44,108 +92,186 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, driv
     if (id) navigate(`${path}/${id}`);
   };
 
-  const handleStatusChange = (e, trip, newStatus) => {
-    e.stopPropagation();
-    updateTrip.mutate({ id: trip.id, data: { status: newStatus } });
+  const toggleOne = (id) => {
+    setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
+  const toggleAll = () => {
+    setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map(t => t.id)));
+  };
+  const allSelected = trips.length > 0 && selected.size === trips.length;
 
   return (
-    <div className="rounded-xl border border-border bg-card/60 backdrop-blur-md overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('record_id')} / {t('date')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('route')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap hidden md:table-cell">{t('client')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap hidden lg:table-cell">{t('driver')} / {t('vehicle')}</th>
-            <th className="text-right text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('amount')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('status')} / {t('billing')}</th>
-            <th className="text-right text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="overflow-x-auto overflow-y-auto max-h-[70vh] rounded-xl border border-border shadow-sm bg-background/40">
+      <Table className="table-fixed" style={{ minWidth: totalWidth }}>
+        <TableHeader>
+          <TableRow className="bg-muted/60 sticky top-0 z-10 hover:bg-muted/60">
+            <TableHead className="relative pl-3" style={thStyle(0)}>
+              <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-border/60" />
+              {resizeHandle(0)}
+            </TableHead>
+            {[
+              ['TRIP #', 'text-left'],
+              ['DATE', 'text-left'],
+              ['CLIENT', 'text-left'],
+              ['VEHICLE', 'text-left hidden md:table-cell'],
+              ['ROUTE', 'text-left hidden lg:table-cell'],
+              ['REVENUE', 'text-right'],
+              ['COSTS', 'text-right hidden sm:table-cell'],
+              ['PROFIT', 'text-right hidden sm:table-cell'],
+              ['STATUS', 'text-left'],
+              ['PAYMENT', 'text-left hidden md:table-cell'],
+              ['', 'text-center'],
+            ].map(([label, align], i) => {
+              const index = i + 1;
+              return (
+                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-muted-foreground', align)} style={thStyle(index)}>
+                  {label}
+                  {resizeHandle(index)}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {trips.map((trip) => {
-            const invoice = invoiceMap?.[trip.id];
-            const isSent = invoice?.status === 'sent';
-            const statusOpt = STATUS_OPTIONS.find((s) => s.value === trip.status) || STATUS_OPTIONS[0];
+            const color = STATUS_HEX[trip.status] || '#94a3b8';
+            const profit = (Number(trip.revenue) || 0) - (Number(trip.fuel_cost) || 0) - (Number(trip.toll_cost) || 0) - (Number(trip.other_cost) || 0);
+            const totalCost = (Number(trip.fuel_cost) || 0) + (Number(trip.toll_cost) || 0) + (Number(trip.other_cost) || 0);
+            const isSelected = selected.has(trip.id);
+            const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
             return (
-              <tr
+              <TableRow
                 key={trip.id}
                 onClick={() => onOpenDetail?.(trip)}
-                className="border-b border-border/60 hover:bg-primary/5 transition-colors cursor-pointer"
+                className={cn(
+                  'cursor-pointer transition-all duration-150 group',
+                  isSelected ? 'bg-primary/[0.07]' : 'hover:bg-primary/5',
+                  trip.status === 'cancelled' && 'opacity-60 border-l-2 border-l-red-500/50'
+                )}
               >
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <p className="font-mono text-xs text-foreground">{trip.trip_number || `#${trip.id?.slice(-6)}`}</p>
-                  <p className="text-xs text-muted-foreground tabular-nums">{formatDate(trip.trip_date)}</p>
-                </td>
-                <td className="px-4 py-3">
-                  <p className="text-foreground font-medium truncate max-w-[220px]">{trip.from_location || '—'} → {trip.to_location || '—'}</p>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}</span>
-                </td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  <button onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')} className="text-foreground hover:text-primary transition-colors truncate max-w-[140px] block">
-                    {trip.client_name || '—'}
+                <TableCell className="pl-3" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
+                </TableCell>
+                <TableCell className="text-xs font-mono">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); copyRef(trip); }}
+                      className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group"
+                      title="Click to copy trip number"
+                    >
+                      {ref}
+                      {copiedId === trip.id
+                        ? <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                        : <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
+                    </button>
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs font-mono text-muted-foreground">
+                  {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
+                  <span className="block text-[10px] opacity-60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm font-medium truncate max-w-[160px]">{trip.client_name?.toUpperCase() || '—'}</div>
+                  <div className="text-xs text-muted-foreground truncate max-w-[160px]">{trip.contact_person || trip.driver_name || ''}</div>
+                </TableCell>
+                <TableCell className="text-xs font-mono hidden md:table-cell">
+                  <button
+                    onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
+                    className="hover:text-primary transition-colors tabular-nums"
+                  >
+                    {trip.vehicle_plate || '—'}
                   </button>
-                </td>
-                <td className="px-4 py-3 hidden lg:table-cell">
-                  <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="text-foreground hover:text-primary transition-colors block truncate max-w-[140px]">{trip.driver_name || '—'}</button>
-                  <button onClick={(e) => handleLink(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')} className="text-xs text-muted-foreground hover:text-primary transition-colors tabular-nums">{trip.vehicle_plate || ''}</button>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <span className="font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="text-[10px] text-muted-foreground truncate max-w-[110px]">{trip.driver_name || ''}</div>
+                </TableCell>
+                <TableCell className="text-xs hidden lg:table-cell">
+                  <div className="flex items-center gap-1 max-w-[180px]">
+                    <span className="truncate text-foreground">{trip.from_location || '—'}</span>
+                    <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
+                    <span className="truncate text-foreground">{trip.to_location || '—'}</span>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{t(trip.trip_type || 'one_way')}{trip.trip_type === 'hourly' && trip.hours ? ` · ${trip.hours}h` : ''}</div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="text-sm font-semibold font-mono">{formatCurrency(trip.revenue)}</div>
+                  <span className={cn(
+                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full border inline-block mt-0.5',
+                    trip.payment_status === 'cash_received' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+                    trip.payment_status === 'bank_received' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+                    trip.payment_status === 'corporate_credit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                  )}>
+                    {trip.payment_status === 'cash_received' ? '✓ Cash' : trip.payment_status === 'bank_received' ? '✓ Bank' : '⏳ Credit'}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right hidden sm:table-cell">
+                  <div className={cn('text-xs font-mono font-semibold', totalCost > 0 ? 'text-red-500' : 'text-muted-foreground')}>{totalCost.toFixed(2)}</div>
+                  <div className="text-[10px] text-muted-foreground">{totalCost > 0 ? 'Fuel+Toll+Other' : '—'}</div>
+                </TableCell>
+                <TableCell className="text-right text-sm font-semibold font-mono hidden sm:table-cell">
+                  <span className={profit >= 0 ? 'text-emerald-400' : 'text-red-400'}>{formatCurrency(profit)}</span>
+                </TableCell>
+                <TableCell>
+                  <span className={cn(
+                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full border inline-block',
+                    trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+                    trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                    trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+                    trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10',
+                  )}>
+                    {trip.status === 'completed' ? '✓ Done' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
+                  </span>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <Badge variant="secondary" className="text-[10px]">{PAYMENT_LABEL[trip.payment_status] || trip.payment_status}</Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => onOpenDetail?.(trip)}
+                      className="rounded-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 p-1.5 transition-colors"
+                      title="WhatsApp"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onOpenDetail?.(trip)}
+                      className="rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
+                      title="View Details"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => handleLink(e, clientMap, trip.client_name, '/admin/clients')}
+                      className="rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 p-1.5 transition-colors"
+                      title="View Client"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                    </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                          <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}</StatusPill>
-                        </button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7">
+                          <MoreHorizontal className="w-3.5 h-3.5" />
+                        </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                            {opt.label}
-                            {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                          </DropdownMenuItem>
-                        ))}
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onEdit?.(trip)}>
+                          <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onOpenDetail?.(trip)}>
+                          <User className="w-3.5 h-3.5 mr-2" /> View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onDelete?.(trip)} className="text-destructive">
+                          <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    {trip.status === 'completed' && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button onClick={(e) => e.stopPropagation()} disabled={busy[trip.id]} className="cursor-pointer">
-                            <StatusPill as="span" variant={isSent ? 'green' : 'neutral'}>{isSent ? t('sent') : 'Not Sent'}</StatusPill>
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, true)} className="text-xs cursor-pointer flex items-center gap-2"><Send className="w-3 h-3" /> Mark Sent</DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => handleInvoiceSent(e, trip, false)} className="text-xs cursor-pointer flex items-center gap-2"><Undo2 className="w-3 h-3" /> Revert</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
                   </div>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button onClick={(e) => e.stopPropagation()} className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); }} className="cursor-pointer flex items-center gap-2"><Eye className="w-3.5 h-3.5" /> {t('details')}</DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit?.(trip); }} className="cursor-pointer flex items-center gap-2"><Pencil className="w-3.5 h-3.5" /> {t('edit')}</DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete?.(trip); }} className="cursor-pointer flex items-center gap-2 text-red-400"><Trash2 className="w-3.5 h-3.5" /> {t('delete')}</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
