@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BarChart3, LayoutGrid, Search, Store } from 'lucide-react';
 import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
+import VendorCard from '@/components/admin/VendorCard';
+import VendorDetailSheet from '@/components/admin/VendorDetailSheet';
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -15,6 +18,9 @@ export default function VendorsPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [detailItem, setDetailItem] = useState(null);
+  const [mode, setMode] = useState('analytics');
+  const [search, setSearch] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -25,9 +31,46 @@ export default function VendorsPanel() {
   };
   useEffect(() => { load(); }, []);
 
+  const spendMap = {};
+  expenses.forEach((e) => { if (e.vendor_name) spendMap[e.vendor_name] = (spendMap[e.vendor_name] || 0) + (Number(e.amount) || 0); });
+
+  const searched = items.filter((v) => !search || v.name?.toLowerCase().includes(search.toLowerCase()) || (v.category || '').includes(search.toLowerCase()));
+
+  const handleEdit = (v) => { setEditItem(v || null); setDetailItem(null); setFormOpen(true); };
+
   return (
     <div>
-      <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} />
+      <div className="flex items-center justify-end gap-2 mb-4 flex-wrap">
+        <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+          <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+          <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+        </div>
+      </div>
+
+      {mode === 'analytics' ? (
+        <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} />
+      ) : (
+        <>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendors..." className="pl-9 search-2026 h-10" />
+          </div>
+          {loading ? (
+            <div className="h-32 flex items-center justify-center"><div className="w-8 h-8 border-[3px] border-muted border-t-primary rounded-full animate-spin" /></div>
+          ) : searched.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mx-auto mb-4"><Store className="w-7 h-7 text-muted-foreground" /></div>
+              <p className="text-sm text-muted-foreground">No vendors found</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {searched.map((v) => (
+                <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} onOpen={setDetailItem} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
 
       <Sheet open={formOpen} onOpenChange={setFormOpen}>
         <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
@@ -35,6 +78,8 @@ export default function VendorsPanel() {
           <VendorForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vendor.update(editItem.id, data); else await base44.entities.Vendor.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
+
+      <VendorDetailSheet open={!!detailItem} onOpenChange={(o) => !o && setDetailItem(null)} vendor={detailItem} onEdit={handleEdit} />
     </div>
   );
 }
@@ -60,6 +105,8 @@ function VendorForm({ editItem, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={(e) => update('email', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={(e) => update('phone', e.target.value)} className="bg-background border-border" /></div>
       </div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Input value={form.address} onChange={(e) => update('address', e.target.value)} className="bg-background border-border" /></div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={(e) => update('trn', e.target.value)} className="bg-background border-border" /></div>
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
   );

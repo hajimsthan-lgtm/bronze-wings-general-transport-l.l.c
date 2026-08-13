@@ -130,7 +130,8 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
-  useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {}); }, []);
+  const [vendors, setVendors] = useState([]);
+  useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {}); base44.entities.Vendor.list('-created_date', 200).then(setVendors).catch(() => {}); }, []);
   const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
   useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' }); }, [editItem, presetPlate]);
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
@@ -149,7 +150,7 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Cost</Label><Input type="number" value={form.cost} onChange={e => update('cost', e.target.value)} className="bg-background border-border" /></div>
       </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} className="bg-background border-border" /></div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input list="svc-vendors" value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} placeholder="Select or type vendor name" className="bg-background border-border" /><datalist id="svc-vendors">{vendors.map(v => <option key={v.id} value={v.name}>{v.category}</option>)}</datalist></div>
       <ImageUpload value={form.attachment_url} onChange={v => update('attachment_url', v)} label="Vendor Receipt Attachment" />
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
