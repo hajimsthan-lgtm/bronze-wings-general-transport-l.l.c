@@ -111,7 +111,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   };
 
   return (
-    <div className="overflow-x-auto overflow-y-auto max-h-[70vh] rounded-xl border border-border shadow-sm bg-background/40">
+    <div
+      className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll"
+      style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.5) transparent' }}
+    >
       <Table className="table-fixed" style={{ minWidth: totalWidth }}>
         <TableHeader>
           <TableRow className="bg-muted/60 sticky top-0 z-10 hover:bg-muted/60">
@@ -132,7 +135,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             map(([label, align], i) => {
               const index = i + 1;
               return (
-                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-muted-foreground', align)} style={thStyle(index)}>
+                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75', align)} style={thStyle(index)}>
                   {label}
                   {resizeHandle(index)}
                 </TableHead>);
@@ -169,9 +172,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-muted-foreground align-top whitespace-nowrap">
+                <TableCell className="text-xs font-mono text-foreground/70 align-top whitespace-nowrap">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] opacity-60">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                  <span className="block text-[10px] text-foreground/45">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top">
@@ -181,7 +184,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-[10px] text-muted-foreground break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-foreground/55 break-words leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top">
@@ -193,7 +196,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </button>
                   <button
                     onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
+                    className="text-[10px] text-foreground/55 hover:text-primary transition-colors block text-left break-words leading-tight mt-0.5"
                     title="View driver">
                     {trip.driver_name || ''}
                   </button>
@@ -202,10 +205,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 break-words leading-tight">
                       <span className="text-foreground break-words font-medium">{trip.from_location || '—'}</span>
-                      <ArrowRight className="w-3 h-3 text-muted-foreground/50 flex-shrink-0" />
+                      <ArrowRight className="w-3 h-3 text-foreground/40 flex-shrink-0" />
                       <span className="text-foreground break-words font-medium">{trip.to_location || '—'}</span>
                     </div>
-                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider break-words">{trip.hours}h</div> : null}
+                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-foreground/55 uppercase tracking-wider break-words">{trip.hours}h</div> : null}
                   </div>
                 </TableCell>
                 <TableCell className="text-left align-top">

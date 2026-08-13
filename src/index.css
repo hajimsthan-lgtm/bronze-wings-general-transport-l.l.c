@@ -1813,6 +1813,17 @@
   /* Scrollbar — globally hidden */
   ::-webkit-scrollbar { display: none; }
   * { scrollbar-width: none; -ms-overflow-style: none; }
+
+  /* Visible scrollbar — TripsTable container */
+  .trips-scroll::-webkit-scrollbar { display: block; width: 10px; height: 10px; }
+  .trips-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.4); border-radius: 8px; }
+  .trips-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.45);
+    border-radius: 8px;
+    border: 2px solid hsl(var(--background));
+  }
+  .trips-scroll::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.7); }
+  .trips-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / 0.5) transparent; -ms-overflow-style: auto; }
 }
 
 /* ===== Collapsible section shine sweep (when collapsed) ===== */
