@@ -75,7 +75,7 @@ export default function Operations() {
 
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
-  const [viewMode, setViewMode] = useState('table');
+  const [viewMode, setViewMode] = useState('card');
   const [search, setSearch] = useState('');
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
@@ -297,7 +297,7 @@ export default function Operations() {
   const tripGrid = (list) => (
     <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {list.map((trip) => (
-        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
+        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
       ))}
     </div>
   );
