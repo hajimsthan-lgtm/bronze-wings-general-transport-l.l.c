@@ -21,24 +21,6 @@ export default function AppLayout() {
   return (
     <div className="min-h-[100dvh] md:h-[100dvh] flex flex-col relative md:overflow-hidden" style={{ background: 'var(--app-bg)' }}>
       {/* ═══════════════════════════════════════════════════════
-          AMBIENT GLOW — subtle theme-tinted blobs behind everything
-          ═══════════════════════════════════════════════════════ */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div
-          className="absolute -top-24 -left-16 w-72 h-72 rounded-full blur-[130px]"
-          style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', animation: 'float 20s ease-in-out infinite' }}
-        />
-        <div
-          className="absolute top-1/3 -right-20 w-80 h-80 rounded-full blur-[130px]"
-          style={{ background: 'rgba(var(--panel-accent2-rgb),0.07)', animation: 'float 24s ease-in-out infinite', animationDelay: '7s' }}
-        />
-        <div
-          className="absolute bottom-10 left-1/3 w-64 h-64 rounded-full blur-[130px]"
-          style={{ background: 'rgba(var(--panel-accent-rgb),0.05)', animation: 'float 22s ease-in-out infinite', animationDelay: '3s' }}
-        />
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════
           NAVIGATION — overlays content on desktop so scrolling data
           shows through the transparent glass header; in-flow on mobile
           ═══════════════════════════════════════════════════════ */}
