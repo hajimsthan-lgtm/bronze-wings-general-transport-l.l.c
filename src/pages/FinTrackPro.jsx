@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import {
   Home, Route, FileText, Receipt, Truck, Plus, Trash2,
-  Bell, Sun, Moon, User, TrendingUp, ChevronRight,
+  Bell, Sun, Moon, User, TrendingUp,
 } from 'lucide-react';
 
 const FILTERS = ['All', 'Scheduled', 'In Progress', 'Completed', 'Cancelled'];
@@ -35,8 +35,8 @@ function formatDate(dateStr) {
 
 function StatusBadge({ status }) {
   const styles = {
-    completed: 'bg-green-500/10 text-green-500 border-green-500/20',
-    in_transit: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    completed: 'bg-[#01B574]/10 text-[#01B574] border-[#01B574]/20',
+    in_transit: 'bg-[#3b82f6]/10 text-[#3b82f6] border-[#3b82f6]/20',
     scheduled: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
     cancelled: 'bg-red-500/10 text-red-500 border-red-500/20',
   };
@@ -60,13 +60,24 @@ function StatusBadge({ status }) {
 
 function SummaryCard({ label, value, sub, icon: Icon }) {
   return (
-    <div className="bg-gradient-to-br from-[#2563eb] to-[#1e40af] text-white rounded-2xl p-4 lg:p-5 shadow-lg shadow-[#2563eb]/30">
-      <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center mb-3">
-        <Icon className="w-5 h-5" />
+    <div className="kpi-card rounded-2xl p-4 lg:p-5 relative overflow-hidden">
+      <div
+        className="kpi-dots absolute inset-0 opacity-30 pointer-events-none"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle, rgba(var(--panel-accent-rgb), 0.15) 1px, transparent 1px)',
+        }}
+      />
+      <div className="relative z-10">
+        <div className="w-10 h-10 rounded-full bg-[rgba(var(--panel-accent-rgb),0.15)] border border-[rgba(var(--panel-accent-rgb),0.25)] flex items-center justify-center mb-3">
+          <Icon className="w-5 h-5 text-[rgb(var(--panel-accent-rgb))]" />
+        </div>
+        <div className="text-xl lg:text-2xl font-bold tracking-tight text-foreground">
+          {value}
+        </div>
+        <div className="text-sm text-muted-foreground mt-1">{label}</div>
+        <div className="text-xs text-muted-foreground/60 mt-0.5">{sub}</div>
       </div>
-      <div className="text-xl lg:text-2xl font-bold tracking-tight">{value}</div>
-      <div className="text-sm text-white/70 mt-1">{label}</div>
-      <div className="text-xs text-white/50 mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -103,19 +114,19 @@ export default function FinTrackPro() {
   const completedTrips = trips.filter((t) => t.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen professional-page-bg">
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border/60 flex-col p-5">
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563eb] to-[#1d4ed8] flex items-center justify-center shadow-lg shadow-[#2563eb]/30">
-            <Truck className="w-5 h-5 text-white" />
+      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 morph-sidebar flex-col p-5 z-50">
+        <div className="flex items-center gap-3 mb-8 px-1">
+          <div className="w-10 h-10 rounded-xl skeuo-brand-frame flex items-center justify-center">
+            <Truck className="w-5 h-5 text-[rgb(var(--panel-accent-rgb))]" />
           </div>
           <div>
-            <div className="font-bold text-foreground">FinTrack Pro</div>
+            <div className="font-bold text-gradient">FinTrack Pro</div>
             <div className="text-xs text-muted-foreground">Fleet Management</div>
           </div>
         </div>
-        <nav className="space-y-1 flex-1">
+        <nav className="space-y-1.5 flex-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeNav === item.key;
@@ -123,21 +134,27 @@ export default function FinTrackPro() {
               <button
                 key={item.key}
                 onClick={() => setActiveNav(item.key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? 'bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] text-white shadow-lg shadow-[#2563eb]/30'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all skeuo-nav-row ${
+                  active ? 'skeuo-nav-row-active' : ''
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                {item.label}
+                <Icon
+                  className={`w-5 h-5 ${
+                    active
+                      ? 'text-[rgb(var(--panel-accent-rgb))]'
+                      : 'text-muted-foreground'
+                  }`}
+                />
+                <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
+                  {item.label}
+                </span>
               </button>
             );
           })}
         </nav>
-        <div className="flex items-center gap-3 p-3 rounded-xl border border-border/60">
-          <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-            <User className="w-4 h-4 text-muted-foreground" />
+        <div className="flex items-center gap-3 p-3 rounded-xl morph-row">
+          <div className="w-9 h-9 rounded-full bg-[rgba(var(--panel-accent-rgb),0.15)] flex items-center justify-center">
+            <User className="w-4 h-4 text-[rgb(var(--panel-accent-rgb))]" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium text-foreground truncate">
@@ -153,14 +170,14 @@ export default function FinTrackPro() {
       {/* ── Main content ── */}
       <div className="lg:ml-64">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-xl border-b border-border/60">
+        <header className="sticky top-0 z-40 glass border-b border-[rgba(var(--panel-accent-rgb),0.12)]">
           <div className="flex items-center justify-between px-5 lg:px-10 py-4">
             <div className="flex items-center gap-3">
-              <div className="lg:hidden w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                <User className="w-4 h-4 text-muted-foreground" />
+              <div className="lg:hidden w-9 h-9 rounded-full bg-[rgba(var(--panel-accent-rgb),0.15)] flex items-center justify-center">
+                <User className="w-4 h-4 text-[rgb(var(--panel-accent-rgb))]" />
               </div>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+                <h1 className="text-xl lg:text-2xl font-bold text-gradient">
                   Trips
                 </h1>
                 <p className="text-xs lg:text-sm text-muted-foreground hidden sm:block">
@@ -169,15 +186,15 @@ export default function FinTrackPro() {
               </div>
             </div>
             <div className="flex items-center gap-2 lg:gap-3">
-              <button className="relative w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:bg-muted/50 transition-colors">
+              <button className="relative w-9 h-9 rounded-full skeuo-toggle flex items-center justify-center">
                 <Bell className="w-4 h-4 text-muted-foreground" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#2563eb] text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[rgb(var(--panel-accent-rgb))] text-white text-[10px] font-bold flex items-center justify-center">
                   9+
                 </span>
               </button>
               <button
                 onClick={() => setDark(!dark)}
-                className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:bg-muted/50 transition-colors"
+                className="w-9 h-9 rounded-full skeuo-toggle flex items-center justify-center"
               >
                 {dark ? (
                   <Sun className="w-4 h-4 text-muted-foreground" />
@@ -185,7 +202,7 @@ export default function FinTrackPro() {
                   <Moon className="w-4 h-4 text-muted-foreground" />
                 )}
               </button>
-              <button className="w-9 h-9 rounded-full border border-border/60 flex items-center justify-center hover:bg-muted/50 transition-colors">
+              <button className="w-9 h-9 rounded-full skeuo-toggle flex items-center justify-center">
                 <User className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
@@ -229,17 +246,13 @@ export default function FinTrackPro() {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                    filter === f
-                      ? 'border-[#2563eb] text-[#2563eb] bg-[#2563eb]/5'
-                      : 'border-border/60 text-muted-foreground hover:text-foreground hover:border-border'
-                  }`}
+                  className={`filter-chip ${filter === f ? 'filter-chip-active' : ''}`}
                 >
                   {f}
                 </button>
               ))}
             </div>
-            <button className="flex-shrink-0 w-10 h-10 rounded-full bg-[#2563eb] text-white flex items-center justify-center shadow-lg shadow-[#2563eb]/30 hover:bg-[#1d4ed8] transition-colors">
+            <button className="flex-shrink-0 w-10 h-10 rounded-full clay-btn flex items-center justify-center !p-0 !px-0">
               <Plus className="w-5 h-5" />
             </button>
           </div>
@@ -247,7 +260,7 @@ export default function FinTrackPro() {
           {/* Loading state */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-8 h-8 border-4 border-muted border-t-[#2563eb] rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-muted border-t-[rgb(var(--panel-accent-rgb))] rounded-full animate-spin" />
               <p className="text-sm text-muted-foreground mt-4">
                 Loading trips...
               </p>
@@ -255,8 +268,8 @@ export default function FinTrackPro() {
           ) : filtered.length === 0 ? (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                <Route className="w-8 h-8 text-muted-foreground" />
+              <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
+                <Route className="w-8 h-8 text-[rgb(var(--panel-accent-rgb))]" />
               </div>
               <p className="text-muted-foreground">No trips found.</p>
             </div>
@@ -265,14 +278,11 @@ export default function FinTrackPro() {
               {/* Mobile list */}
               <div className="lg:hidden space-y-3">
                 {filtered.map((trip) => (
-                  <div
-                    key={trip.id}
-                    className="bg-card rounded-2xl border border-border/60 p-4 hover:border-[#2563eb]/40 transition-colors"
-                  >
+                  <div key={trip.id} className="row-card">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <Truck className="w-5 h-5 text-muted-foreground" />
+                        <div className="w-10 h-10 rounded-full bg-[rgba(var(--panel-accent-rgb),0.12)] flex items-center justify-center flex-shrink-0">
+                          <Truck className="w-5 h-5 text-[rgb(var(--panel-accent-rgb))]" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-foreground text-sm truncate">
@@ -288,7 +298,7 @@ export default function FinTrackPro() {
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="font-bold text-[#2563eb] text-sm">
+                        <div className="font-bold text-[rgb(var(--panel-accent-rgb))] text-sm">
                           AED {formatCurrency(trip.revenue || trip.base_fare)}
                         </div>
                         <div className="mt-1.5">
@@ -311,10 +321,10 @@ export default function FinTrackPro() {
               </div>
 
               {/* Desktop table */}
-              <div className="hidden lg:block bg-card rounded-2xl border border-border/60 overflow-hidden">
+              <div className="hidden lg:block glass-panel rounded-2xl overflow-hidden">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#2563eb]/5">
+                    <tr className="bg-[rgba(var(--panel-accent-rgb),0.06)]">
                       <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Trip
                       </th>
@@ -340,12 +350,12 @@ export default function FinTrackPro() {
                     {filtered.map((trip) => (
                       <tr
                         key={trip.id}
-                        className="border-t border-border/40 hover:bg-[#2563eb]/5 transition-colors"
+                        className="border-t border-border/40 hover:bg-[rgba(var(--panel-accent-rgb),0.05)] transition-colors"
                       >
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
-                              <Truck className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-9 h-9 rounded-full bg-[rgba(var(--panel-accent-rgb),0.12)] flex items-center justify-center">
+                              <Truck className="w-4 h-4 text-[rgb(var(--panel-accent-rgb))]" />
                             </div>
                             <span className="font-medium text-foreground text-sm">
                               {trip.trip_number || `TRP-${trip.id?.slice(-5)}`}
@@ -364,7 +374,7 @@ export default function FinTrackPro() {
                         <td className="px-5 py-4">
                           <StatusBadge status={trip.status} />
                         </td>
-                        <td className="px-5 py-4 text-right font-bold text-[#2563eb] text-sm">
+                        <td className="px-5 py-4 text-right font-bold text-[rgb(var(--panel-accent-rgb))] text-sm">
                           AED {formatCurrency(trip.revenue || trip.base_fare)}
                         </td>
                         <td className="px-5 py-4 text-right">
@@ -384,7 +394,7 @@ export default function FinTrackPro() {
 
       {/* ── Mobile bottom nav ── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-4">
-        <div className="bg-card/90 backdrop-blur-xl border border-border/60 rounded-full shadow-lg flex items-center justify-around py-2 px-2">
+        <div className="glass border border-[rgba(var(--panel-accent-rgb),0.12)] rounded-full shadow-lg flex items-center justify-around py-2 px-2">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = activeNav === item.key;
@@ -394,7 +404,7 @@ export default function FinTrackPro() {
                 onClick={() => setActiveNav(item.key)}
                 className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-full transition-all ${
                   active
-                    ? 'bg-[#2563eb] text-white'
+                    ? 'bg-[rgb(var(--panel-accent-rgb))] text-white'
                     : 'text-muted-foreground'
                 }`}
               >
