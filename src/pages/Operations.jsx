@@ -13,6 +13,8 @@ import ContractCard from '@/components/contracts/ContractCard';
 import TripsList from '@/components/operations/TripsList';
 import TripsTable from '@/components/operations/TripsTable';
 import ContractsList from '@/components/operations/ContractsList';
+import ContractsTable from '@/components/operations/ContractsTable';
+import CollapsibleSection from '@/components/operations/CollapsibleSection';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
@@ -20,7 +22,7 @@ import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -73,7 +75,7 @@ export default function Operations() {
 
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
-  const [viewMode, setViewMode] = useState('list');
+  const [viewMode, setViewMode] = useState('table');
   const [search, setSearch] = useState('');
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
@@ -344,24 +346,36 @@ export default function Operations() {
               : <button onClick={openNewTrip} className="clay-btn-ghost text-sm">{t('new_trip')}</button>}
           />
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-4">
             {showTrips && filteredTrips.length > 0 && (
-              <div>
-                <SectionLabel count={filteredTrips.length}>{t('trips_section')}</SectionLabel>
+              <CollapsibleSection
+                icon={Landmark}
+                label={t('trips_section')}
+                count={filteredTrips.length}
+                accent="blue"
+                defaultCollapsed={true}
+              >
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
                   : viewMode === 'table'
                   ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
                   : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />}
-              </div>
+              </CollapsibleSection>
             )}
             {showContracts && filteredContracts.length > 0 && (
-              <div>
-                <SectionLabel count={filteredContracts.length}>{t('contracts_section')}</SectionLabel>
+              <CollapsibleSection
+                icon={Building2}
+                label={t('contracts_section')}
+                count={filteredContracts.length}
+                accent="violet"
+                defaultCollapsed={true}
+              >
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
+                  : viewMode === 'table'
+                  ? <ContractsTable contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} />
                   : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} driverMap={driverMap} vehicleMap={vehicleMap} />}
-              </div>
+              </CollapsibleSection>
             )}
           </div>
         )}

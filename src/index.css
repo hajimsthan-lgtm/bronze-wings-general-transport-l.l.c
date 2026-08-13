@@ -1815,6 +1815,15 @@
   * { scrollbar-width: none; -ms-overflow-style: none; }
 }
 
+/* ===== Collapsible section shine sweep (when collapsed) ===== */
+@keyframes collapse-shine {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="collapse-shine"] { animation: none !important; }
+}
+
 /* ===== Bell gold swing animation ===== */
 @keyframes bell-swing {
   0%, 100% { transform: rotate(0deg); }
