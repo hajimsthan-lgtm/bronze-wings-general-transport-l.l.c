@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { FileDown, Pencil, Trash2, Loader2, Paperclip, CheckCircle2, Eye, RefreshCw } from 'lucide-react';
+import { FileDown, Pencil, Trash2, Loader2, Paperclip, CheckCircle2, Eye, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -21,9 +21,13 @@ export const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeRequest, onAttachSigned, onDownload, onEdit, onDelete, downloadingId, uploadingId }) {
+export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeRequest, onAttachSigned, onDownload, onEdit, onDelete, downloadingId, uploadingId, onClientClick }) {
   const fileRef = useRef(null);
   const total = Number(inv.total_amount || 0);
+  const paid = Number(inv.paid_amount || 0);
+  const balance = Math.max(0, total - paid);
+  const pct = total > 0 ? Math.min(100, (paid / total) * 100) : 0;
+  const showBreakdown = paid > 0 || inv.status === 'paid' || inv.status === 'partially_paid';
   const isSigned = !!inv.signed_invoice_url;
   const isUploading = uploadingId === inv.id;
   const showAttachButton = inv.status === 'sent' || isSigned;
@@ -47,7 +51,14 @@ export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeReq
           />
           <div>
             <div className="text-xs text-muted-foreground font-mono">{inv.invoice_number || '—'}</div>
-            <div className="text-sm font-semibold text-foreground mt-0.5">{inv.client_name || '—'}</div>
+            <button
+              type="button"
+              onClick={() => onClientClick?.(inv.client_name)}
+              className="text-sm font-semibold text-foreground mt-0.5 hover:text-primary hover:underline inline-flex items-center gap-1 transition-colors text-left"
+            >
+              {inv.client_name || '—'}
+              <ExternalLink className="w-3 h-3 opacity-50" />
+            </button>
           </div>
         </div>
         <Select value={inv.status} onValueChange={(v) => onStatusChangeRequest(inv, v)}>
@@ -68,6 +79,18 @@ export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeReq
         </div>
         <div className="text-sm font-bold font-mono text-primary">AED {total.toFixed(2)}</div>
       </div>
+
+      {showBreakdown && (
+        <div className="mb-3">
+          <div className="flex items-center justify-between text-[10px] mb-1">
+            <span className="text-muted-foreground">Paid <span className="font-mono text-emerald-400 ml-1">AED {paid.toFixed(2)}</span></span>
+            <span className="text-muted-foreground">Bal <span className="font-mono text-foreground ml-1">{balance > 0 ? `AED ${balance.toFixed(2)}` : 'Settled'}</span></span>
+          </div>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="h-full bg-emerald-500/70 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
 
       {isSigned ? (
         <div className="flex items-center gap-2 mb-3 flex-wrap">

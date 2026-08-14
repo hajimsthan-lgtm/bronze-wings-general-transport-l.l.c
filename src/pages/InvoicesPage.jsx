@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Loader2, FileText, Search, Building2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF } from '@/lib/invoiceHtml';
@@ -50,10 +51,25 @@ export default function InvoicesPage() {
   const [bulkPaymentModal, setBulkPaymentModal] = useState(false);
   const [cancelModal, setCancelModal] = useState(null); // inv
   const { dateFrom, dateTo } = useGlobalDate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then(setClients);
   }, []);
+
+  const handleClientClick = (clientName) => {
+    const client = clients.find(c => c.name === clientName);
+    if (client) navigate(`/admin/clients/${client.id}`);
+  };
+
+  // Delete ClientPayment records linked to an invoice (used when reverting paid/partially_paid → draft/sent)
+  const deletePaymentsForInvoice = async (inv) => {
+    const payments = await base44.entities.ClientPayment.filter({ client_name: inv.client_name }, '-created_date', 200).catch(() => []);
+    const linked = (payments || []).filter(p => (p.allocated_invoices || []).some(a => a.invoice_id === inv.id));
+    if (linked.length === 0) return 0;
+    await Promise.all(linked.map(p => base44.entities.ClientPayment.delete(p.id)));
+    return linked.length;
+  };
 
   const handleNew = () => { setEditing(null); setSheetOpen(true); };
   const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); };
@@ -71,7 +87,17 @@ export default function InvoicesPage() {
 
   const doStatusUpdate = async (inv, newStatus, extraData = {}) => {
     try {
-      await base44.entities.Invoice.update(inv.id, { status: newStatus, ...extraData });
+      const wasPaid = inv.status === 'paid' || inv.status === 'partially_paid';
+      const reverting = wasPaid && (newStatus === 'draft' || newStatus === 'sent');
+      const patch = { status: newStatus, ...extraData };
+      if (reverting) {
+        const deletedCount = await deletePaymentsForInvoice(inv);
+        patch.paid_amount = 0;
+        if (deletedCount > 0) {
+          toast({ title: 'Payment records removed', description: `${deletedCount} payment(s) deleted for ${inv.invoice_number}` });
+        }
+      }
+      await base44.entities.Invoice.update(inv.id, patch);
       toast({ title: 'Status updated', description: `${inv.invoice_number} → ${newStatus.replace(/_/g, ' ')}` });
       refetch();
     } catch (e) {
@@ -198,7 +224,21 @@ export default function InvoicesPage() {
       return;
     }
     try {
-      const updates = Array.from(selected).map(id => ({ id, status: bulkStatus }));
+      const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+      const revertingTo = bulkStatus === 'draft' || bulkStatus === 'sent';
+      if (revertingTo) {
+        const paidOnes = selectedInvoices.filter(inv => inv.status === 'paid' || inv.status === 'partially_paid');
+        if (paidOnes.length > 0) {
+          await Promise.all(paidOnes.map(inv => deletePaymentsForInvoice(inv)));
+        }
+      }
+      const updates = selectedInvoices.map(inv => {
+        const patch = { id: inv.id, status: bulkStatus };
+        if (revertingTo && (inv.status === 'paid' || inv.status === 'partially_paid')) {
+          patch.paid_amount = 0;
+        }
+        return patch;
+      });
       await base44.entities.Invoice.bulkUpdate(updates);
       toast({ title: `${selected.size} invoices updated` });
       setSelected(new Set());
@@ -414,6 +454,7 @@ export default function InvoicesPage() {
                   onDelete={setDeleteTarget}
                   downloadingId={downloadingId}
                   uploadingId={uploadingId}
+                  onClientClick={handleClientClick}
                 />
               ))}
             </div>
