@@ -22,6 +22,7 @@ import { exportToPDF } from '@/lib/exportUtils';
 import { downloadMaintenanceTablePDF } from '@/lib/maintenancePdf';
 import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { safeAll } from '@/lib/safeRequest';
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -49,13 +50,15 @@ export default function VehicleDetail() {
       const plate = v.plate_number;
       setDataLoading(true);
       try {
-        const [tR, fR, eR, sR, dR] = await Promise.all([
-          base44.entities.Trip.filter({ vehicle_plate: plate }).catch(() => []),
-          base44.entities.FuelRecord.filter({ vehicle_plate: plate }).catch(() => []),
-          base44.entities.Expense.filter({ vehicle_plate: plate }).catch(() => []),
-          base44.entities.ServiceRecord.filter({ vehicle_plate: plate }).catch(() => []),
-          v.assigned_driver ? base44.entities.Driver.filter({ name: v.assigned_driver }).catch(() => []) : Promise.resolve([]),
-        ]);
+        // Stagger calls with limited concurrency + retry to avoid API rate-limit bursts
+        const tasks = [
+          () => base44.entities.Trip.filter({ vehicle_plate: plate }).catch(() => []),
+          () => base44.entities.FuelRecord.filter({ vehicle_plate: plate }).catch(() => []),
+          () => base44.entities.Expense.filter({ vehicle_plate: plate }).catch(() => []),
+          () => base44.entities.ServiceRecord.filter({ vehicle_plate: plate }).catch(() => []),
+          () => v.assigned_driver ? base44.entities.Driver.filter({ name: v.assigned_driver }).catch(() => []) : Promise.resolve([]),
+        ];
+        const [tR, fR, eR, sR, dR] = await safeAll(tasks, 2);
         if (cancelled) return;
         setTrips(tR || []);
         setFuelRecords(fR || []);

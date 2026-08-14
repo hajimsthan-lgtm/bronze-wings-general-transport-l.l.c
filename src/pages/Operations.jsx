@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { safeAll } from '@/lib/safeRequest';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
@@ -118,10 +119,10 @@ export default function Operations() {
   const loadContracts = useCallback(async () => {
     setContractsLoading(true);
     try {
-      const [list, exp] = await Promise.all([
-        base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []),
-        base44.entities.ContractExpense.list('-created_date', 500).catch(() => []),
-      ]);
+      const [list, exp] = await safeAll([
+        () => base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []),
+        () => base44.entities.ContractExpense.list('-created_date', 500).catch(() => []),
+      ], 2);
       setContracts(list || []);
       setAllExpenses(exp || []);
     } finally {
@@ -131,11 +132,11 @@ export default function Operations() {
 
   const loadMaps = useCallback(async () => {
     try {
-      const [drivers, vehicles, clients] = await Promise.all([
-        base44.entities.Driver.list('-created_date', 200).catch(() => []),
-        base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
-        base44.entities.Client.list('-created_date', 200).catch(() => []),
-      ]);
+      const [drivers, vehicles, clients] = await safeAll([
+        () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Client.list('-created_date', 200).catch(() => []),
+      ], 2);
       setDriverMap(Object.fromEntries((drivers || []).map((d) => [d.name, d.id])));
       setVehicleMap(Object.fromEntries((vehicles || []).map((v) => [v.plate_number, v.id])));
       setClientMap(Object.fromEntries((clients || []).map((c) => [c.name, c.id])));
@@ -143,7 +144,7 @@ export default function Operations() {
     } catch {}
   }, []);
 
-  useEffect(() => { loadContracts(); loadMaps(); }, [loadContracts, loadMaps]);
+  useEffect(() => { (async () => { await loadContracts(); await loadMaps(); })(); }, [loadContracts, loadMaps]);
 
   const expensesByContract = useMemo(() => {
     const map = {};

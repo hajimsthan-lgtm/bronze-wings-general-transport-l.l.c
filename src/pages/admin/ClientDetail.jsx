@@ -28,6 +28,7 @@ import ClientTripsList from '@/components/clients/ClientTripsList';
 import ContractsSection from '@/components/contracts/ContractsSection';
 import InvoiceGeneratorTab from '@/components/invoices/InvoiceGeneratorTab';
 import CollapsibleSection from '@/components/common/CollapsibleSection';
+import { safeAll } from '@/lib/safeRequest';
 
 export default function ClientDetail({ id: propId, inline = false }) {
   const params = useParams();
@@ -62,13 +63,13 @@ export default function ClientDetail({ id: propId, inline = false }) {
       setLoading(false);
       setDataLoading(true);
       try {
-        const [tR, iR, fR, pR, sR] = await Promise.all([
-          base44.entities.Trip.filter({ client_name: c.name }).catch(() => []),
-          base44.entities.Invoice.filter({ client_name: c.name }).catch(() => []),
-          base44.entities.FixedCharge.filter({ client_name: c.name }).catch(() => []),
-          base44.entities.ClientPayment.filter({ client_name: c.name }).catch(() => []),
-          getCompanySettings(),
-        ]);
+        const [tR, iR, fR, pR, sR] = await safeAll([
+          () => base44.entities.Trip.filter({ client_name: c.name }).catch(() => []),
+          () => base44.entities.Invoice.filter({ client_name: c.name }).catch(() => []),
+          () => base44.entities.FixedCharge.filter({ client_name: c.name }).catch(() => []),
+          () => base44.entities.ClientPayment.filter({ client_name: c.name }).catch(() => []),
+          () => getCompanySettings(),
+        ], 2);
         if (cancelled) return;
         setTrips(tR || []);
         setInvoices(iR || []);

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Receipt, Wrench, Store } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { safeAll } from '@/lib/safeRequest';
 
 export default function VendorDetail({ id: propId, inline = false }) {
   const params = useParams();
@@ -33,10 +34,10 @@ export default function VendorDetail({ id: propId, inline = false }) {
       setLoading(false);
       setDataLoading(true);
       try {
-        const [eR, sR] = await Promise.all([
-          base44.entities.Expense.filter({ vendor_name: v.name }).catch(() => []),
-          base44.entities.ServiceRecord.filter({ vendor_name: v.name }).catch(() => []),
-        ]);
+        const [eR, sR] = await safeAll([
+          () => base44.entities.Expense.filter({ vendor_name: v.name }).catch(() => []),
+          () => base44.entities.ServiceRecord.filter({ vendor_name: v.name }).catch(() => []),
+        ], 2);
         if (cancelled) return;
         setExpenses(eR || []);
         setServices(sR || []);

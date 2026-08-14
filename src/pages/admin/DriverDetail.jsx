@@ -19,6 +19,7 @@ import { exportToPDF } from '@/lib/exportUtils';
 import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { safeAll } from '@/lib/safeRequest';
 import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
@@ -59,14 +60,12 @@ export default function DriverDetail() {
       setLoading(false);
       setDataLoading(true);
       try {
-        const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-        const tR = await base44.entities.Trip.filter({ driver_name: d.name }).catch(() => []);
-        await delay(300);
-        const sR = await base44.entities.SalaryRecord.filter({ driver_name: d.name }).catch(() => []);
-        await delay(300);
-        const eR = await base44.entities.Expense.filter({ driver_name: d.name }).catch(() => []);
-        await delay(300);
-        const vR = d.assigned_vehicle ? await base44.entities.Vehicle.filter({ plate_number: d.assigned_vehicle }).catch(() => []) : [];
+        const [tR, sR, eR, vR] = await safeAll([
+          () => base44.entities.Trip.filter({ driver_name: d.name }).catch(() => []),
+          () => base44.entities.SalaryRecord.filter({ driver_name: d.name }).catch(() => []),
+          () => base44.entities.Expense.filter({ driver_name: d.name }).catch(() => []),
+          () => d.assigned_vehicle ? base44.entities.Vehicle.filter({ plate_number: d.assigned_vehicle }).catch(() => []) : Promise.resolve([]),
+        ], 2);
         if (cancelled) return;
         setTrips(tR || []);
         setSalaries(sR || []);
