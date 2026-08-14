@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
@@ -330,10 +330,21 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
-        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1">
-          <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>
-          <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
+        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-4">
+          <div className="space-y-1">
+            <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>
+            <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
+          </div>
+          <DialogClose
+            aria-label="Close"
+            className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all flex-shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </DialogClose>
         </DialogHeader>
 
         {/* Mobile tab toggle — switch between form and live preview on small screens */}

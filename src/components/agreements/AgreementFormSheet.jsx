@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FileDown, Loader2, Plus, Trash2, Building2, FileSignature, ScrollText } from 'lucide-react';
+import { FileDown, Loader2, Plus, Trash2, Building2, FileSignature, ScrollText, X } from 'lucide-react';
 import Section from '@/components/trips/Section';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
@@ -132,10 +132,21 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
-        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1">
-          <DialogTitle>{isEdit ? 'Edit Agreement' : 'New Agreement'}</DialogTitle>
-          <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
+        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-4">
+          <div className="space-y-1">
+            <DialogTitle>{isEdit ? 'Edit Agreement' : 'New Agreement'}</DialogTitle>
+            <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
+          </div>
+          <DialogClose
+            aria-label="Close"
+            className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all flex-shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </DialogClose>
         </DialogHeader>
 
         <div className="sm:hidden flex items-center gap-1 px-4 py-2 border-b border-border bg-muted/30 flex-shrink-0">
