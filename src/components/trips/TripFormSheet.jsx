@@ -294,7 +294,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   }));
   const totalExpenses = catTotals.reduce((s, c) => s + c.amount, 0);
   const monthlyRate = Number(contract.monthly_rate) || 0;
-  const netProfit = monthlyRate - totalExpenses;
+  const totalBillable = monthlyRate + totalExpenses;
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -446,7 +446,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
             {mode === 'trip' ?
             <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} /> :
-            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} endDate={contract.end_date} t={t} />}
+            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />}
           </div>
         </div>
 
@@ -480,8 +480,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               <p className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalExpenses)}</p>
             </div>
             <div>
-              <p className="eyebrow mb-1">{t('net_profit')}</p>
-              <p className={`text-sm font-bold tabular-nums ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
+              <p className="eyebrow mb-1">{t('total')}</p>
+              <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(totalBillable)}</p>
             </div>
           </div>
         }

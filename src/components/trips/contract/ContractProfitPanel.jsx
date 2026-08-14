@@ -1,10 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import { CONTRACT_CATS } from './contractCats';
 
-export default function ContractProfitPanel({ monthlyRate, totalExpenses, catTotals, endDate, t }) {
-  const netProfit = monthlyRate - totalExpenses;
-  const margin = monthlyRate > 0 ? (netProfit / monthlyRate) * 100 : 0;
-  const marginColor = margin >= 30 ? '#22c55e' : margin >= 15 ? '#f59e0b' : '#ef4444';
+export default function ContractProfitPanel({ monthlyRate, totalExpenses, catTotals, expenses = [], endDate, t }) {
+  const total = monthlyRate + totalExpenses;
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const daysLeft = endDate ? Math.ceil((new Date(endDate) - today) / 86400000) : null;
@@ -21,39 +20,25 @@ export default function ContractProfitPanel({ monthlyRate, totalExpenses, catTot
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">{t('total_expenses')}</span>
-            <span className="font-medium tabular-nums text-foreground">{formatCurrency(totalExpenses)}</span>
+            <span className="font-medium tabular-nums text-foreground">+{formatCurrency(totalExpenses)}</span>
           </div>
           <div className="border-t border-white/10 pt-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{t('net_profit')}</p>
-            <p className={`text-2xl font-bold tabular-nums font-display ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-              {formatCurrency(netProfit)}
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{t('total')}</p>
+            <p className="text-2xl font-bold tabular-nums font-display text-emerald-400">
+              {formatCurrency(total)}
             </p>
           </div>
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[11px] text-muted-foreground">{t('profit_margin')}</span>
-              <span className="text-xs font-semibold tabular-nums" style={{ color: marginColor }}>{Math.round(margin)}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.max(0, Math.min(100, margin))}%`, background: marginColor }} />
-            </div>
-          </div>
 
-          {catTotals.filter((c) => c.amount > 0).length > 0 && (
-            <div className="border-t border-white/10 pt-3 space-y-2.5">
+          {expenses.length > 0 && (
+            <div className="border-t border-white/10 pt-3 space-y-2">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t('total_expenses')}</p>
-              {catTotals.filter((c) => c.amount > 0).map((c) => {
-                const pct = totalExpenses > 0 ? (c.amount / totalExpenses) * 100 : 0;
+              {expenses.map((e) => {
+                const meta = CONTRACT_CATS.find((c) => c.key === e.category) || CONTRACT_CATS[0];
                 return (
-                  <div key={c.key}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <c.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: c.color }} />
-                      <span className="text-xs text-muted-foreground flex-1 truncate">{c.label}</span>
-                      <span className="text-xs font-medium tabular-nums text-foreground">{formatCurrency(c.amount)}</span>
-                    </div>
-                    <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: c.color }} />
-                    </div>
+                  <div key={e.id} className="flex items-center gap-2">
+                    <meta.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: meta.color }} />
+                    <span className="text-xs text-muted-foreground flex-1 truncate">{e.description || t(meta.labelKey)}</span>
+                    <span className="text-xs font-medium tabular-nums text-foreground">{formatCurrency(Number(e.amount) || 0)}</span>
                   </div>
                 );
               })}
