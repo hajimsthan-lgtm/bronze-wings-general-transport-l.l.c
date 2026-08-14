@@ -89,7 +89,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 
     return `<tr style="background:${rowBg};">
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;">${idx + 1}</td>
-      <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${getMonthYearFull(item.date || invoice.issue_date)}</td>
+      <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${fmtDate(item.date || invoice.issue_date)}</td>
       <td style="padding:6px 8px;border:1px solid #000;font-size:11pt;color:#333;line-height:1.4;min-width:180px;word-wrap:break-word;overflow-wrap:break-word;">${desc}</td>
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${qty}</td>
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${fmtMoney(unitPrice)}</td>
@@ -183,7 +183,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <thead>
       <tr>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">SL.<br>No</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:12%;">Month</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:12%;">Trip<br>Date</th>
         <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:33%;">Description</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">Qty</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:11%;">Unit<br>Price</th>

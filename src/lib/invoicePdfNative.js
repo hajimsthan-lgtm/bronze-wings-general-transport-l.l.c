@@ -71,7 +71,7 @@ const COLS_TRIP = [
 
 const COLS_STANDARD = [
   { label: 'SL.\nNo',            w: 8,  align: 'center' },
-  { label: 'MONTH',              w: 22, align: 'center' },
+  { label: 'TRIP\nDATE',         w: 22, align: 'center' },
   { label: 'DESCRIPTION',       w: 60, align: 'center' },
   { label: 'QTY',               w: 10, align: 'center' },
   { label: 'UNIT\nPRICE',       w: 22, align: 'center' },
@@ -499,14 +499,14 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
     ci++;
   }
 
-  // MONTH column (monthly + standard)
+  // DATE column (monthly + standard)
   if (invoiceType === 'monthly' || invoiceType === 'standard') {
     pdf.setFont('times', 'bold');
-    pdf.setFontSize(invoiceType === 'monthly' ? fSize : 8);
-    const monthStr = invoiceType === 'monthly'
+    pdf.setFontSize(fSize);
+    const dateStr = invoiceType === 'monthly'
       ? getMonthYear(item.date || invoice.issue_date)
-      : getMonthYearFull(item.date || invoice.issue_date);
-    pdf.text(monthStr, cols[ci].center, vCenter, { align: 'center' });
+      : fmtDate(item.date || invoice.issue_date);
+    pdf.text(dateStr, cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 
