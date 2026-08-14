@@ -47,30 +47,34 @@ export default function VehicleDetail() {
       if (cancelled) return;
       setVehicle(v);
       setLoading(false);
-      const plate = v.plate_number;
-      setDataLoading(true);
-      try {
-        // Stagger calls with limited concurrency + retry to avoid API rate-limit bursts
-        const tasks = [
-          () => base44.entities.Trip.filter({ vehicle_plate: plate }).catch(() => []),
-          () => base44.entities.FuelRecord.filter({ vehicle_plate: plate }).catch(() => []),
-          () => base44.entities.Expense.filter({ vehicle_plate: plate }).catch(() => []),
-          () => base44.entities.ServiceRecord.filter({ vehicle_plate: plate }).catch(() => []),
-          () => v.assigned_driver ? base44.entities.Driver.filter({ name: v.assigned_driver }).catch(() => []) : Promise.resolve([]),
-        ];
-        const [tR, fR, eR, sR, dR] = await safeAll(tasks, 2);
-        if (cancelled) return;
-        setTrips(tR || []);
-        setFuelRecords(fR || []);
-        setExpenses(eR || []);
-        setServices(sR || []);
-        setDriver((dR && dR[0]) || null);
-      } finally {
-        if (!cancelled) setDataLoading(false);
-      }
+      await loadRelated(v, cancelled);
     }).catch(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [id]);
+
+  const loadRelated = async (v, cancelled = false) => {
+    const plate = v.plate_number;
+    setDataLoading(true);
+    try {
+      // Stagger calls with limited concurrency + retry to avoid API rate-limit bursts
+      const tasks = [
+        () => base44.entities.Trip.filter({ vehicle_plate: plate }).catch(() => []),
+        () => base44.entities.FuelRecord.filter({ vehicle_plate: plate }).catch(() => []),
+        () => base44.entities.Expense.filter({ vehicle_plate: plate }).catch(() => []),
+        () => base44.entities.ServiceRecord.filter({ vehicle_plate: plate }).catch(() => []),
+        () => v.assigned_driver ? base44.entities.Driver.filter({ name: v.assigned_driver }).catch(() => []) : Promise.resolve([]),
+      ];
+      const [tR, fR, eR, sR, dR] = await safeAll(tasks, 2);
+      if (cancelled) return;
+      setTrips(tR || []);
+      setFuelRecords(fR || []);
+      setExpenses(eR || []);
+      setServices(sR || []);
+      setDriver((dR && dR[0]) || null);
+    } finally {
+      if (!cancelled) setDataLoading(false);
+    }
+  };
 
   if (loading) return <DetailSkeleton />;
   if (!vehicle) return <EmptyState title="Vehicle not found" />;
@@ -89,6 +93,17 @@ export default function VehicleDetail() {
     try {
       await base44.entities.Vehicle.update(vehicle.id, { ownership_front_url: front, ownership_back_url: back });
       setVehicle((prev) => ({ ...prev, ownership_front_url: front, ownership_back_url: back }));
+    } catch {}
+  };
+
+  const saveVehicle = async (data) => {
+    try {
+      await base44.entities.Vehicle.update(vehicle.id, data);
+      const updated = { ...vehicle, ...data };
+      setVehicle(updated);
+      if (data.plate_number && data.plate_number !== vehicle.plate_number) {
+        await loadRelated(updated);
+      }
     } catch {}
   };
 
@@ -206,7 +221,7 @@ export default function VehicleDetail() {
 
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
-        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} />
+        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSave={saveVehicle} />
         <div className="space-y-4">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown } from 'lucide-react';
+import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown, Pencil } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
+import VehicleEditDialog from '@/components/admin/VehicleEditDialog';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -26,8 +27,9 @@ const CARD_BASE = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
-export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership }) {
+export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership, onSave }) {
   const [expanded, setExpanded] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const statsList = [
     { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#4ADE80' },
@@ -67,7 +69,15 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
               <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle</span>
             </div>
           </div>
-          <StatusBadge status={vehicle.status} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" /> Edit
+            </button>
+            <StatusBadge status={vehicle.status} />
+          </div>
         </div>
       </div>
 
@@ -144,6 +154,8 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
           )}
         </div>
       )}
+
+      <VehicleEditDialog open={editOpen} onOpenChange={setEditOpen} vehicle={vehicle} onSave={onSave} />
     </div>
   );
 }
