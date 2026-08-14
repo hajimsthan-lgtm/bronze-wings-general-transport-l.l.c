@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Store, MoreVertical, Pencil, Trash2, Mail, Phone, ChevronRight } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { formatCurrency } from '@/lib/formatters';
@@ -6,7 +7,8 @@ import { formatCurrency } from '@/lib/formatters';
 const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', other: '#94a3b8' };
 const STATUS_COLOR = { active: '#22C55E', inactive: '#94A3B8' };
 
-export default function VendorCard({ v, spend = 0, onOpen, onEdit, onDelete }) {
+export default function VendorCard({ v, spend = 0, onEdit, onDelete }) {
+  const navigate = useNavigate();
   const [confirmDel, setConfirmDel] = useState(false);
   const tone = CAT_COLORS[v.category] || '#94a3b8';
   const statusColor = STATUS_COLOR[v.status] || '#94A3B8';
@@ -15,7 +17,7 @@ export default function VendorCard({ v, spend = 0, onOpen, onEdit, onDelete }) {
     <>
       <div
         className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group"
-        onClick={() => onOpen?.(v)}
+        onClick={() => navigate(`/admin/vendors/${v.id}`)}
         style={{ ['--row-accent']: tone }}
       >
         <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}>

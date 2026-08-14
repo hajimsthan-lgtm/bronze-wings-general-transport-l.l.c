@@ -1,4 +1,5 @@
 import { Store, Layers, TrendingDown, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ProgressBar from '@/components/reports/ProgressBar';
@@ -12,7 +13,7 @@ import { formatCurrency } from '@/lib/formatters';
 
 const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', other: '#94a3b8' };
 
-export default function VendorsAnalytics({ vendors = [], expenses = [], loading, onAdd }) {
+export default function VendorsAnalytics({ vendors = [], expenses = [], loading, onAdd, onBrowse }) {
   if (loading && vendors.length === 0) return <LoadingSpinner />;
 
   const spendMap = {};
@@ -26,7 +27,7 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
   const spendSeries = months.map((m) => expenses.filter((e) => e.date && e.date.startsWith(m.key)).reduce((s, e) => s + (Number(e.amount) || 0), 0));
   const trendData = months.map((m, i) => ({ label: m.label, spend: spendSeries[i] }));
 
-  const topVendors = vendors.map((v) => ({ name: v.name, spend: spendMap[v.name] || 0 })).sort((a, b) => b.spend - a.spend).slice(0, 6);
+  const topVendors = vendors.map((v) => ({ id: v.id, name: v.name, spend: spendMap[v.name] || 0 })).sort((a, b) => b.spend - a.spend).slice(0, 6);
 
   const catSpend = {};
   vendors.forEach((v) => { const cat = v.category || 'other'; catSpend[cat] = (catSpend[cat] || 0) + (spendMap[v.name] || 0); });
@@ -34,10 +35,10 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
   const donutTotal = donutData.reduce((s, d) => s + d.value, 0);
 
   const kpis = [
-    { label: 'Total Vendors', value: vendors.length, icon: Store, color: '#f59e0b' },
-    { label: 'Active', value: active, icon: Store, color: '#34d399' },
-    { label: 'Total Spend', value: totalSpend, format: formatCurrency, icon: TrendingDown, color: '#ef4444', extra: <Sparkline data={spendSeries} type="bar" color="#ef4444" /> },
-    { label: 'Categories', value: donutData.length, icon: Layers, color: '#a855f7' },
+    { label: 'Total Vendors', value: vendors.length, icon: Store, color: '#f59e0b', onClick: onBrowse },
+    { label: 'Active', value: active, icon: Store, color: '#34d399', onClick: onBrowse },
+    { label: 'Total Spend', value: totalSpend, format: formatCurrency, icon: TrendingDown, color: '#ef4444', extra: <Sparkline data={spendSeries} type="bar" color="#ef4444" />, onClick: onBrowse },
+    { label: 'Categories', value: donutData.length, icon: Layers, color: '#a855f7', onClick: onBrowse },
   ];
 
   return (
@@ -59,7 +60,7 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {kpis.map((k, i) => <ReportStatCard key={k.label} index={i} label={k.label} value={k.value} format={k.format} icon={k.icon} color={k.color} extra={k.extra} />)}
+        {kpis.map((k, i) => <ReportStatCard key={k.label} index={i} label={k.label} value={k.value} format={k.format} icon={k.icon} color={k.color} extra={k.extra} onClick={k.onClick} />)}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -69,13 +70,13 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
               {topVendors.map((v) => {
                 const pct = totalSpend > 0 ? (v.spend / totalSpend) * 100 : 0;
                 return (
-                  <div key={v.name}>
+                  <Link key={v.id} to={`/admin/vendors/${v.id}`} className="block group/link hover:opacity-80 transition-opacity">
                     <div className="flex justify-between text-xs mb-1.5">
-                      <span className="text-white/70 truncate">{v.name}</span>
+                      <span className="text-white/70 truncate group-hover/link:text-white">{v.name}</span>
                       <span className="text-white/80 tabular-nums">{formatCurrency(v.spend)} · {pct.toFixed(0)}%</span>
                     </div>
                     <ProgressBar pct={pct} color="#f59e0b" />
-                  </div>
+                  </Link>
                 );
               })}
             </div>

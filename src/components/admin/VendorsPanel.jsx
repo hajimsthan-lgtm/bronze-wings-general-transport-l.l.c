@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BarChart3, LayoutGrid, Search, Store } from 'lucide-react';
 import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
 import VendorCard from '@/components/admin/VendorCard';
-import VendorDetailSheet from '@/components/admin/VendorDetailSheet';
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -18,7 +17,6 @@ export default function VendorsPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [detailItem, setDetailItem] = useState(null);
   const [mode, setMode] = useState('analytics');
   const [search, setSearch] = useState('');
 
@@ -36,7 +34,7 @@ export default function VendorsPanel() {
 
   const searched = items.filter((v) => !search || v.name?.toLowerCase().includes(search.toLowerCase()) || (v.category || '').includes(search.toLowerCase()));
 
-  const handleEdit = (v) => { setEditItem(v || null); setDetailItem(null); setFormOpen(true); };
+  const handleEdit = (v) => { setEditItem(v || null); setFormOpen(true); };
 
   return (
     <div>
@@ -48,7 +46,7 @@ export default function VendorsPanel() {
       </div>
 
       {mode === 'analytics' ? (
-        <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} />
+        <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} onBrowse={() => setMode('browse')} />
       ) : (
         <>
           <div className="relative mb-4">
@@ -65,7 +63,7 @@ export default function VendorsPanel() {
           ) : (
             <div className="space-y-2">
               {searched.map((v) => (
-                <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} onOpen={setDetailItem} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
+                <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
               ))}
             </div>
           )}
@@ -78,8 +76,6 @@ export default function VendorsPanel() {
           <VendorForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vendor.update(editItem.id, data); else await base44.entities.Vendor.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
-
-      <VendorDetailSheet open={!!detailItem} onOpenChange={(o) => !o && setDetailItem(null)} vendor={detailItem} onEdit={handleEdit} />
     </div>
   );
 }
