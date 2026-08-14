@@ -328,7 +328,7 @@ export default function InvoicesPage() {
     setDownloadingId(inv.id);
     try {
       const settings = await getCompanySettings();
-      const isMonthly = /^Monthly\s+(Contract|Rental)/i.test(inv.line_items?.[0]?.description || '');
+      const isMonthly = /Rental|Contract/i.test(inv.line_items?.[0]?.description || '');
       const downloader = isMonthly ? downloadMonthlyInvoicePDF : downloadInvoicePDF;
       await downloader(inv, inv.client_name, settings);
     } catch (e) {

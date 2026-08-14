@@ -51,6 +51,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [monthlyContracts, setMonthlyContracts] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
   const [contractsOpen, setContractsOpen] = useState(false);
   const [invoiceMode, setInvoiceMode] = useState('trip'); // 'trip' | 'monthly'
@@ -112,6 +113,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       base44.entities.Trip.list('-created_date', 200).catch(() => []).then(setTrips);
       base44.entities.Invoice.list('-created_date', 500).catch(() => []).then(setInvoices);
       base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []).then(setMonthlyContracts);
+      base44.entities.Vehicle.list('-created_date', 500).catch(() => []).then(setVehicles);
     }
   }, [open, defaultClientName, editInvoice]);
 
@@ -193,6 +195,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const selectedContractIds = form.line_items.map(i => i._contract_id).filter(Boolean);
 
   const toggleContract = (contract) => {
+    const vType = vehicles.find(v => v.plate_number === contract.vehicle_plate)?.type;
+    const vTypeLabel = vType && vType !== 'other' ? vType.charAt(0).toUpperCase() + vType.slice(1) : 'Vehicle';
+    const driver = (contract.driver_name || '').trim();
+    const plate = contract.vehicle_plate || contract.company_name;
+    const desc = `${vTypeLabel} Rental${driver ? ` — ${driver}` : ''} — ${plate}`;
     setForm(prev => {
       const items = [...prev.line_items];
       const idx = items.findIndex(i => i._contract_id === contract.id);
@@ -201,7 +208,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       } else {
         items.push({
           _contract_id: contract.id,
-          description: `Monthly Rental — ${contract.vehicle_plate || contract.company_name}`,
+          description: desc,
           date: contract.start_date || prev.issue_date,
           quantity: 1,
           unit_price: Number(contract.monthly_rate || 0),

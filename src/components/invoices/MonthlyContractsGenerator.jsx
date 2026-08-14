@@ -40,6 +40,15 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         const clients = await base44.entities.Client.filter({ name: contract.company_name });
         clientData = clients?.[0] || {};
       } catch (e) {}
+      let vehicleType = '';
+      try {
+        const vehicles = await base44.entities.Vehicle.filter({ plate_number: contract.vehicle_plate });
+        vehicleType = vehicles?.[0]?.type || '';
+      } catch (e) {}
+      const vTypeLabel = vehicleType && vehicleType !== 'other' ? vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1) : 'Vehicle';
+      const driver = (contract.driver_name || '').trim();
+      const plate = contract.vehicle_plate || '—';
+      const desc = `${vTypeLabel} Rental${driver ? ` — ${driver}` : ''} — ${plate}`;
       await base44.entities.Invoice.create({
         invoice_number: invNo,
         client_name: contract.company_name,
@@ -50,7 +59,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         reg_no: contract.vehicle_plate || '',
         issue_date: now.toISOString().split('T')[0],
         due_date: due.toISOString().split('T')[0],
-        line_items: [{ description: `Monthly Contract - ${contract.company_name}\nDriver: ${contract.driver_name || '—'} | Vehicle: ${contract.vehicle_plate || '—'}`, quantity: 1, unit_price: subtotal, amount: subtotal }],
+        line_items: [{ description: desc, quantity: 1, unit_price: subtotal, amount: subtotal }],
         subtotal, vat_rate: 5, vat_amount: vatAmount, total_amount: total, paid_amount: 0, status: 'draft',
       });
       toast({ title: t('invoice_created') || 'Invoice created' });
