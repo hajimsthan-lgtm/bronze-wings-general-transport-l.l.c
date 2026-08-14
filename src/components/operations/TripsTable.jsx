@@ -199,48 +199,48 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-black align-top whitespace-nowrap trips-grid-td">
+                <TableCell className="text-xs font-mono text-foreground align-top whitespace-nowrap trips-grid-td">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] text-black/70">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                  <span className="block text-[10px] text-muted-foreground">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top trips-grid-td">
                   <button
                     onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-xs font-medium text-left text-black hover:text-primary transition-colors block truncate leading-tight"
+                    className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block truncate leading-tight"
                     title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-[10px] text-black/70 truncate leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
                     onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="text-black hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
+                    className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
                     title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
                   <button
                     onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-black/70 hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5"
+                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5"
                     title="View driver">
                     {trip.driver_name || ''}
                   </button>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                  <div className="text-black truncate font-medium leading-tight" title={trip.from_location || ''}>
+                  <div className="text-foreground truncate font-medium leading-tight" title={trip.from_location || ''}>
                     {trip.from_location || '—'}
                   </div>
-                  {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider truncate mt-0.5">{trip.hours}h</div> : null}
+                  {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider truncate mt-0.5">{trip.hours}h</div> : null}
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                  <div className="text-black truncate font-medium leading-tight" title={trip.to_location || ''}>
+                  <div className="text-foreground truncate font-medium leading-tight" title={trip.to_location || ''}>
                     {trip.to_location || '—'}
                   </div>
                 </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
-                  <div className="text-xs font-semibold font-mono tabular-nums text-black truncate">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                  <div className="text-xs font-semibold font-mono tabular-nums text-foreground truncate">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                 </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
