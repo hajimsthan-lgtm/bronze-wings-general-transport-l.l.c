@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Truck, FileText, X, Check, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
@@ -411,7 +411,10 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-3xl max-h-[82vh] overflow-y-auto rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%]">
+      <DialogContent
+        onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-3xl max-h-[82vh] overflow-y-auto rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%]">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-border/50">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -427,9 +430,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div className="flex items-center gap-3">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
-              
-
-              
+              <DialogClose
+                aria-label="Close"
+                className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
+              >
+                <X className="w-4 h-4" />
+              </DialogClose>
             </div>
           </div>
         </DialogHeader>
