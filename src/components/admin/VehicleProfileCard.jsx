@@ -47,6 +47,14 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
 
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
+      {/* edit pencil — top corner */}
+      <button
+        onClick={() => setEditOpen(true)}
+        aria-label="Edit vehicle"
+        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+      >
+        <Pencil className="w-3.5 h-3.5" />
+      </button>
       {/* header band */}
       <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#1ED760', 0.10)} 0%, transparent 100%)` }}>
         <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#1ED760', 0.5)} 0%, transparent 70%)` }} />
@@ -69,15 +77,8 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
               <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setEditOpen(true)}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" /> Edit
-            </button>
-            <StatusBadge status={vehicle.status} />
-          </div>
+          <StatusBadge status={vehicle.status} />
+
         </div>
       </div>
 
