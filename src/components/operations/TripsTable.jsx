@@ -243,7 +243,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </button>
                   <button
                       onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                      className="hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5 text-[#000000] text-xs"
+                      className="hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5 text-[#000000] text-sm"
                       title="View driver">
                     {trip.driver_name || ''}
                   </button>
