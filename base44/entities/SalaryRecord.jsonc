@@ -55,6 +55,24 @@
     },
     "notes": {
       "type": "string"
+    },
+    "applied_deductions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      }
     }
   },
   "required": [

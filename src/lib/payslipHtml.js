@@ -46,6 +46,21 @@ export function buildPayslipHTML(rec, driver = {}, settings = {}) {
     </tr>`;
   }).join('');
 
+  const applied = Array.isArray(rec.applied_deductions) ? rec.applied_deductions : [];
+  const deductionRows = applied.length
+    ? applied.map((d, i, arr) => {
+        const isLast = i === arr.length - 1;
+        const border = isLast ? '2px solid #1F2937' : '1px solid #E5E7EB';
+        return `<tr>
+          <td style="padding:10px 12px;border-bottom:${border};font-size:9.5pt;color:#1F2937;font-weight:600;">${esc(d.description || d.type)}</td>
+          <td style="padding:10px 12px;border-bottom:${border};text-align:right;font-size:9.5pt;color:#1F2937;font-weight:600;">${fmtMoney(d.amount)}</td>
+        </tr>`;
+      }).join('')
+    : `<tr>
+      <td style="padding:10px 12px;border-bottom:2px solid #1F2937;font-size:9.5pt;color:#1F2937;font-weight:600;">Total Deductions</td>
+      <td style="padding:10px 12px;border-bottom:2px solid #1F2937;text-align:right;font-size:9.5pt;color:#1F2937;font-weight:600;">${fmtMoney(deductions)}</td>
+    </tr>`;
+
   return `
 <div id="payslip-container" style="width:794px;min-height:1123px;display:flex;flex-direction:column;font-family:'Inter','Segoe UI',Arial,Helvetica,sans-serif;font-size:10pt;color:#1F2937;line-height:1.4;background:#ffffff;box-sizing:border-box;padding:40px 50px;">
 
@@ -105,12 +120,7 @@ export function buildPayslipHTML(rec, driver = {}, settings = {}) {
         <th style="background:#9A8471;color:#fff;padding:9px 12px;text-align:right;font-weight:600;font-size:8.5pt;text-transform:uppercase;letter-spacing:0.5px;">Amount (AED)</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td style="padding:10px 12px;border-bottom:2px solid #1F2937;font-size:9.5pt;color:#1F2937;font-weight:600;">Total Deductions</td>
-        <td style="padding:10px 12px;border-bottom:2px solid #1F2937;text-align:right;font-size:9.5pt;color:#1F2937;font-weight:600;">${fmtMoney(deductions)}</td>
-      </tr>
-    </tbody>
+    <tbody>${deductionRows}</tbody>
   </table>
 
   <div style="display:flex;justify-content:flex-end;margin-bottom:40px;">

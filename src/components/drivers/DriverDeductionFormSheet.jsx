@@ -35,8 +35,8 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-  const remaining = Math.max(0, Number(form.total_amount) - 0); // remaining tracked server-side; show total here
-  const monthsLeft = form.monthly_deduction > 0 ? Math.ceil(Number(form.total_amount) / Number(form.monthly_deduction)) : 0;
+  const remaining = editItem ? Number(editItem.remaining_balance ?? editItem.total_amount) : Number(form.total_amount);
+  const monthsLeft = form.monthly_deduction > 0 ? Math.ceil(remaining / Number(form.monthly_deduction)) : 0;
 
   const handleSave = async () => {
     if (!form.description.trim()) { toast({ title: 'Description required', variant: 'destructive' }); return; }
@@ -50,7 +50,9 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
         monthly_deduction: Number(form.monthly_deduction) || 0,
         issue_date: form.issue_date,
         status: form.status,
-        remaining_balance: Number(form.total_amount) || 0,
+        remaining_balance: editItem
+          ? Math.max(0, (Number(editItem.remaining_balance) || 0) + (Number(form.total_amount) - Number(editItem.total_amount)))
+          : Number(form.total_amount) || 0,
         months_left: monthsLeft,
       };
       if (editItem) await base44.entities.DriverDeduction.update(editItem.id, payload);
@@ -112,7 +114,7 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
             </div>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-            Months Left (est.): <span className="text-foreground font-semibold">{monthsLeft}</span> · Remaining: <span className="text-foreground font-semibold">{formatCurrency(form.total_amount)}</span>
+            Months Left (est.): <span className="text-foreground font-semibold">{monthsLeft}</span> · Remaining: <span className="text-foreground font-semibold">{formatCurrency(remaining)}</span>
           </div>
           <div className="flex gap-2 pt-2">
             <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">

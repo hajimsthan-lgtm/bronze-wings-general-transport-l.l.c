@@ -85,7 +85,7 @@ export default function Salary() {
       // Auto-apply active installment deductions (FIFO) for each driver
       const toCreate = [];
       for (const d of eligible) {
-        const deducted = await applyDeductions(d.name, null);
+        const { total: deducted, breakdown } = await applyDeductions(d.name, null);
         toCreate.push({
           driver_name: d.name,
           month,
@@ -98,6 +98,7 @@ export default function Salary() {
           status: 'pending',
           payment_method: 'bank_transfer',
           notes: '',
+          applied_deductions: breakdown,
         });
       }
       await base44.entities.SalaryRecord.bulkCreate(toCreate);
@@ -127,28 +128,38 @@ export default function Salary() {
     await downloadPayslipPDF(rec, drv, settings);
   };
 
-  // Apply installment deductions (FIFO by issue_date) — reduces remaining_balance,
-  // decrements months_left, marks completed when fully paid. Returns total deducted.
-  const applyDeductions = async (driverName, selectedIds) => {
+  // Apply installment deductions (FIFO by issue_date) — reduces remaining_balance by the
+  // (editable) amount, recomputes months_left, marks completed when fully paid.
+  // selectedItems: null = all active (monthly_deduction); or [{id, amount}].
+  // Returns { total, breakdown }.
+  const applyDeductions = async (driverName, selectedItems) => {
     const all = await base44.entities.DriverDeduction.filter({ driver_name: driverName, status: 'active' }).catch(() => []);
     const sorted = (all || [])
       .filter((d) => Number(d.monthly_deduction) > 0 && Number(d.remaining_balance) > 0)
-      .filter((d) => !selectedIds || selectedIds.includes(d.id))
       .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
+    const items = !selectedItems
+      ? sorted.map((d) => ({ id: d.id, amount: Number(d.monthly_deduction) || 0 }))
+      : selectedItems;
     let total = 0;
-    for (const d of sorted) {
+    const breakdown = [];
+    for (const it of items) {
+      const d = (all || []).find((x) => x.id === it.id);
+      if (!d) continue;
+      const amt = Math.min(Number(it.amount) || 0, Number(d.remaining_balance) || 0);
+      if (amt <= 0) continue;
+      const newRemaining = Math.max(0, (Number(d.remaining_balance) || 0) - amt);
       const monthly = Number(d.monthly_deduction) || 0;
-      const newRemaining = Math.max(0, (Number(d.remaining_balance) || 0) - monthly);
-      const newMonthsLeft = Math.max(0, (Number(d.months_left) || 0) - 1);
+      const newMonthsLeft = monthly > 0 ? Math.ceil(newRemaining / monthly) : 0;
       const newStatus = newRemaining <= 0 ? 'completed' : 'active';
       await base44.entities.DriverDeduction.update(d.id, {
         remaining_balance: newRemaining,
         months_left: newMonthsLeft,
         status: newStatus,
       });
-      total += monthly;
+      total += amt;
+      breakdown.push({ description: d.description || d.type, type: d.type, amount: amt });
     }
-    return total;
+    return { total, breakdown };
   };
 
   const exportColumns = [
@@ -242,6 +253,9 @@ export default function Salary() {
                   {r.month} {r.year} · {(r.payment_method || '').replace(/_/g, ' ')}
                   {r.payment_date ? ` · paid ${formatDate(r.payment_date)}` : ''}
                 </p>
+                {r.applied_deductions?.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {r.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
+                )}
               </div>
               <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground mr-2">
                 <span title="Base">{formatCurrency(r.base_salary)}</span>
@@ -283,10 +297,11 @@ export default function Salary() {
             editItem={editItem}
             prefillDriver={prefillDriver}
             onSave={async (data) => {
-              const { applied_deductions, ...salaryData } = data;
-              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, salaryData);
-              else await base44.entities.SalaryRecord.create(salaryData);
-              if (applied_deductions && applied_deductions.length > 0) {
+              const { applied_deductions = [], ...salaryData } = data;
+              const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
+              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, { ...salaryData, applied_deductions: breakdown });
+              else await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown });
+              if (applied_deductions.length > 0) {
                 await applyDeductions(salaryData.driver_name, applied_deductions);
               }
               load();

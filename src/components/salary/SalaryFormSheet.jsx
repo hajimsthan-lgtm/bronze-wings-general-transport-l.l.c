@@ -33,6 +33,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
   const [form, setForm] = useState(blank);
   const [driverDeductions, setDriverDeductions] = useState([]);
   const [selectedDeductionIds, setSelectedDeductionIds] = useState([]);
+  const [deductionAmounts, setDeductionAmounts] = useState({});
 
   useEffect(() => { base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {}); }, []);
 
@@ -48,9 +49,11 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         net_salary: editItem.net_salary ?? '',
       });
       setSelectedDeductionIds([]);
+      setDeductionAmounts({});
     } else {
       setForm({ ...blank(), driver_name: prefillDriver || '' });
       setSelectedDeductionIds([]);
+      setDeductionAmounts({});
     }
   }, [editItem, prefillDriver]);
 
@@ -78,14 +81,37 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
     const drv = drivers.find((d) => d.name === name);
     setForm((prev) => recalcNet({ ...prev, driver_name: name, base_salary: drv?.base_salary ?? prev.base_salary }));
     setSelectedDeductionIds([]);
+    setDeductionAmounts({});
   };
 
   const toggleDeduction = (id) => {
     setSelectedDeductionIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-      const sum = next.reduce((s, did) => {
+      const willSelect = !prev.includes(id);
+      const next = willSelect ? [...prev, id] : prev.filter((x) => x !== id);
+      setDeductionAmounts((am) => {
+        const am2 = { ...am };
+        if (willSelect && am2[id] == null) {
+          const d = driverDeductions.find((x) => x.id === id);
+          const def = Math.min(Number(d?.monthly_deduction) || 0, Number(d?.remaining_balance) || 0);
+          am2[id] = def > 0 ? def : Number(d?.monthly_deduction) || 0;
+        }
+        const sum = next.reduce((s, did) => {
+          const d = driverDeductions.find((x) => x.id === did);
+          return s + (Number(am2[did]) || Number(d?.monthly_deduction) || 0);
+        }, 0);
+        setForm((f) => recalcNet({ ...f, deductions: sum }));
+        return am2;
+      });
+      return next;
+    });
+  };
+
+  const setDeductionAmount = (id, value) => {
+    setDeductionAmounts((am) => {
+      const next = { ...am, [id]: value };
+      const sum = selectedDeductionIds.reduce((s, did) => {
         const d = driverDeductions.find((x) => x.id === did);
-        return s + (Number(d?.monthly_deduction) || 0);
+        return s + (Number(next[did]) || Number(d?.monthly_deduction) || 0);
       }, 0);
       setForm((f) => recalcNet({ ...f, deductions: sum }));
       return next;
@@ -95,6 +121,11 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
   const handle = async () => {
     setSaving(true);
     try {
+      const applied = selectedDeductionIds.map((id) => {
+        const d = driverDeductions.find((x) => x.id === id);
+        const amount = Number(deductionAmounts[id]) || Number(d?.monthly_deduction) || 0;
+        return { id, amount, description: d?.description || d?.type || '', type: d?.type || 'other' };
+      }).filter((x) => x.amount > 0);
       await onSave({
         ...form,
         year: Number(form.year),
@@ -103,7 +134,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         bonus: Number(form.bonus) || 0,
         deductions: Number(form.deductions) || 0,
         net_salary: Number(form.net_salary) || 0,
-        applied_deductions: selectedDeductionIds,
+        applied_deductions: applied,
       });
     } finally {
       setSaving(false);
@@ -130,6 +161,8 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         deductions={driverDeductions}
         selectedIds={selectedDeductionIds}
         onToggle={toggleDeduction}
+        amounts={deductionAmounts}
+        onAmountChange={setDeductionAmount}
       />
 
       <div className="grid grid-cols-2 gap-3">

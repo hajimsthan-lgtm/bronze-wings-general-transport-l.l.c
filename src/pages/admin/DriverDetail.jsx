@@ -143,7 +143,10 @@ export default function DriverDetail() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
             <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
-          </div>
+            {rec.applied_deductions?.length > 0 && (
+              <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {rec.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
+            )}
+            </div>
           <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
           <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
         </div>
@@ -226,6 +229,9 @@ export default function DriverDetail() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
                     <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
+                    {rec.applied_deductions?.length > 0 && (
+                      <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {rec.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
+                    )}
                   </div>
                   <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
                   <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
