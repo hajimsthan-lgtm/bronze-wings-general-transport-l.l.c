@@ -3,10 +3,17 @@ import { FileText, Eye, Plus, ChevronDown } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', collapsible = false, defaultOpen = true, children }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [viewOpen, setViewOpen] = useState(false);
   const isOpen = !collapsible || open;
+
+  const handleView = () => {
+    setViewOpen(true);
+    onView?.();
+  };
 
   return (
     <div className={`glass-card rounded-2xl p-5 animate-fade-in-up relative overflow-hidden flex flex-col h-full ${className}`} style={{ borderLeft: `4px solid ${accent}` }}>
@@ -28,14 +35,14 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
         </div>
         <div className="flex gap-1.5">
           {onNew && (
-            <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
-              <Plus className="w-3 h-3" /> {newLabel || 'New'}
+            <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
+              <Plus className="w-3.5 h-3.5" />
             </button>
           )}
           <button onClick={onPdf} title="Download PDF" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: accent, boxShadow: `0 4px 14px -4px ${accent}` }}>
             <FileText className="w-3 h-3" /> PDF
           </button>
-          <button onClick={onView} title="View all" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
+          <button onClick={handleView} title="View all" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
             <Eye className="w-3 h-3" /> View
           </button>
         </div>
@@ -48,6 +55,24 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
           {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
         </div>
       </div>
+
+      {/* View Popup Modal */}
+      <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-foreground flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
+                <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+              </div>
+              {title}
+              {count != null && <span className="text-xs font-normal text-muted-foreground">· {count} record{count === 1 ? '' : 's'}</span>}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="rounded-xl border border-border overflow-hidden p-4">
+            {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
