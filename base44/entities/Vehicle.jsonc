@@ -46,6 +46,9 @@
     "assigned_driver": {
       "type": "string"
     },
+    "vendor_name": {
+      "type": "string"
+    },
     "registration_expiry": {
       "type": "string",
       "format": "date"

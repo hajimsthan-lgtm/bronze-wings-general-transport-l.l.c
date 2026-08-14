@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Plus, Store } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -24,6 +24,7 @@ export default function TripModeFields({ p }) {
     fileInputRef, handleFileUpload, uploading,
     isOvertime, overtimeMetric, extraCharges,
     revenueOverridden, autoRevenue,
+    serviceProviderVendors,
   } = p;
 
   return (
@@ -116,14 +117,24 @@ export default function TripModeFields({ p }) {
 
       {/* Assignment */}
       <Section title="Assignment" icon={Truck} accent="20,184,166" delay={180}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><Store className="w-3 h-3" /> Service Provider</Label>
+            <Select value={form.vendor_name || 'none'} onValueChange={(v) => update('vendor_name', v === 'none' ? '' : v)}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="None" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {serviceProviderVendors.map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
             <IconInput icon={Truck} list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
             <datalist id="vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
             {isNewVehicle && (
               <CreateNewCard label="vehicle" value={form.vehicle_plate} created={createdFlags.vehicle} loading={creating === 'vehicle'}
-                onCreate={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—' }, 'vehicle')} />
+                onCreate={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name || undefined }, 'vehicle')} />
             )}
           </div>
           <div>
@@ -132,10 +143,24 @@ export default function TripModeFields({ p }) {
             <datalist id="driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
             {isNewDriver && (
               <CreateNewCard label="driver" value={form.driver_name} created={createdFlags.driver} loading={creating === 'driver'}
-                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: '—' }, 'driver')} />
+                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name || undefined }, 'driver')} />
             )}
           </div>
         </div>
+        {form.vendor_name && (
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <Button type="button" variant="outline" size="sm" disabled={!form.vehicle_plate || creating === 'vehicle'}
+              onClick={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name }, 'vehicle')}
+              className="border-border gap-1.5 h-8 text-xs">
+              <Plus className="w-3.5 h-3.5" /> Add Vehicle to {form.vendor_name}
+            </Button>
+            <Button type="button" variant="outline" size="sm" disabled={!form.driver_name || creating === 'driver'}
+              onClick={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name }, 'driver')}
+              className="border-border gap-1.5 h-8 text-xs">
+              <Plus className="w-3.5 h-3.5" /> Add Driver to {form.vendor_name}
+            </Button>
+          </div>
+        )}
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('payment_status')}</Label>
           <Select value={form.payment_status} onValueChange={(v) => update('payment_status', v)}>

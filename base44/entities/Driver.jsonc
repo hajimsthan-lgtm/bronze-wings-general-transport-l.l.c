@@ -36,6 +36,9 @@
     "assigned_vehicle": {
       "type": "string"
     },
+    "vendor_name": {
+      "type": "string"
+    },
     "base_salary": {
       "type": "number",
       "default": 0

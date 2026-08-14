@@ -16,7 +16,7 @@ import TripFinancialFields from './TripFinancialFields';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
-  from_location: '', to_location: '', vehicle_plate: '', driver_name: '',
+  from_location: '', to_location: '', vehicle_plate: '', driver_name: '', vendor_name: '',
   client_name: '', trip_type: 'one_way', delivery_note_number: '', delivery_note_url: '',
   hours: '', return_trip_number: '', payment_status: 'corporate_credit',
   trip_date: new Date().toISOString().split('T')[0],
@@ -44,6 +44,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [clients, setClients] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [fixedCharges, setFixedCharges] = useState([]);
   const [autoFilled, setAutoFilled] = useState(false);
   const [createdFlags, setCreatedFlags] = useState({ client: false, vehicle: false, driver: false });
@@ -66,12 +67,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       base44.entities.Trip.list('-created_date', 200).catch(() => []),
       base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
       base44.entities.Driver.list('-created_date', 200).catch(() => []),
-      base44.entities.Client.list('-created_date', 200).catch(() => [])]
-      ).then(([trips, vehs, drvs, clnts]) => {
+      base44.entities.Client.list('-created_date', 200).catch(() => []),
+      base44.entities.Vendor.list('-created_date', 200).catch(() => [])]
+      ).then(([trips, vehs, drvs, clnts, vnds]) => {
         setTripsList(trips || []);
         setVehicles(vehs || []);
         setDrivers(drvs || []);
         setClients(clnts || []);
+        setVendors((vnds || []).filter((v) => v.category === 'service_provider'));
       });
     }
   }, [open]);
@@ -237,8 +240,10 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const autoTripNumber = editTrip ? editTrip.trip_number || '' : generateTripNumber();
 
-  const buildData = (isDraft = false) => ({
-    ...form,
+  const buildData = (isDraft = false) => {
+    const { vendor_name, ...rest } = form;
+    return {
+    ...rest,
     is_draft: isDraft,
     trip_number: form.trip_number || autoTripNumber,
     trip_date: form.load_datetime ?
@@ -251,7 +256,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     max_allowed_duration: Number(form.max_allowed_duration) || 0,
     overtime_rate: Number(form.overtime_rate) || 0,
     calculated_duration: Number(form.calculated_duration) || 0
-  });
+    };
+  };
 
   const createEntity = async (type, payload, flagKey, isContract = false) => {
     const setter = isContract ? setCCreating : setCreating;
@@ -348,8 +354,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const fromSuggestions = [...new Set(tripsList.map((tr) => tr.from_location).filter(Boolean))];
   const toSuggestions = [...new Set(tripsList.map((tr) => tr.to_location).filter(Boolean))];
-  const vehicleSuggestions = vehicles.map((v) => v.plate_number).filter(Boolean);
-  const driverSuggestions = drivers.map((d) => d.name).filter(Boolean);
+  const vehicleSuggestions = (form.vendor_name ? vehicles.filter((v) => v.vendor_name === form.vendor_name) : vehicles).map((v) => v.plate_number).filter(Boolean);
+  const driverSuggestions = (form.vendor_name ? drivers.filter((d) => d.vendor_name === form.vendor_name) : drivers).map((d) => d.name).filter(Boolean);
   const clientSuggestions = clients.map((c) => c.name).filter(Boolean);
   const selectedClientData = clients.find((c) => c.name?.toLowerCase() === form.client_name?.toLowerCase());
   const availableContacts = selectedClientData ?
@@ -383,6 +389,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const tripCtx = {
     form, update, setRevenueOverride, t, inputCls,
     fromSuggestions, toSuggestions, vehicleSuggestions, driverSuggestions, clientSuggestions,
+    serviceProviderVendors: vendors,
     isNewClient, isNewVehicle, isNewDriver,
     createdFlags, creating, createEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, false),
     fixedCharges, autoFilled,
