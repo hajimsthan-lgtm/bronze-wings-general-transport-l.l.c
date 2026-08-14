@@ -49,10 +49,22 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     return DEFAULT_WIDTHS;
   });
   const [resizing, setResizing] = useState(null);
+  const [savedSnapshot, setSavedSnapshot] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LAYOUT_KEY);
+      if (saved) return { ...DEFAULT_WIDTHS, ...JSON.parse(saved) };
+    } catch {}
+    return DEFAULT_WIDTHS;
+  });
+  const hasLayoutChanges = useMemo(
+    () => JSON.stringify(widths) !== JSON.stringify(savedSnapshot),
+    [widths, savedSnapshot]
+  );
 
   // Save column layout to localStorage
   const saveLayout = () => {
     localStorage.setItem(LAYOUT_KEY, JSON.stringify(widths));
+    setSavedSnapshot(widths);
     toast({ title: 'Layout Saved', description: 'Column widths saved for future sessions' });
   };
 
@@ -124,17 +136,25 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   return (
     <div className="relative">
       {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
-      <div className="flex items-center gap-2 mb-1.5">
+      <div className="relative mb-1.5">
         <div
           ref={topScrollRef}
           onScroll={() => syncScroll(topScrollRef.current, tableScrollRef.current)}
-          className="flex-1 overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md"
+          className="overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md"
         >
           <div style={{ width: totalWidth, height: '1px' }} />
         </div>
-        <Button variant="outline" size="sm" onClick={saveLayout} className="shrink-0 h-7 text-xs gap-1">
-          <Save className="w-3.5 h-3.5" /> Save Layout
-        </Button>
+        {hasLayoutChanges && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={saveLayout}
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 shrink-0 z-10 bg-background/80 backdrop-blur-sm"
+            title="Save Layout"
+          >
+            <Save className="w-3.5 h-3.5" />
+          </Button>
+        )}
       </div>
       {/* Main scrollable table */}
       <div
