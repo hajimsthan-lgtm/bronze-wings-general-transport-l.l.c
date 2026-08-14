@@ -71,12 +71,13 @@ const COLS_TRIP = [
 
 const COLS_STANDARD = [
   { label: 'SL.\nNo',            w: 8,  align: 'center' },
-  { label: 'DESCRIPTION',       w: 80, align: 'center' },
+  { label: 'MONTH',              w: 22, align: 'center' },
+  { label: 'DESCRIPTION',       w: 60, align: 'center' },
   { label: 'QTY',               w: 10, align: 'center' },
   { label: 'UNIT\nPRICE',       w: 22, align: 'center' },
   { label: 'TOTAL',             w: 14, align: 'center' },
   { label: 'VAT\n5%',           w: 18, align: 'center' },
-  { label: 'TOTAL\nPRICE',      w: 42, align: 'center' },
+  { label: 'TOTAL\nPRICE',      w: 40, align: 'center' },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -101,6 +102,14 @@ function getMonthYear(dateStr) {
   if (isNaN(d.getTime())) return String(dateStr);
   const months = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
   return `${months[d.getMonth()]}`;
+}
+
+function getMonthYearFull(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function str(v) { return String(v ?? ''); }
@@ -490,11 +499,14 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
     ci++;
   }
 
-  // MONTH column (monthly only)
-  if (invoiceType === 'monthly') {
+  // MONTH column (monthly + standard)
+  if (invoiceType === 'monthly' || invoiceType === 'standard') {
     pdf.setFont('times', 'bold');
-    pdf.setFontSize(fSize);
-    pdf.text(getMonthYear(item.date || invoice.issue_date), cols[ci].center, vCenter, { align: 'center' });
+    pdf.setFontSize(invoiceType === 'monthly' ? fSize : 8);
+    const monthStr = invoiceType === 'monthly'
+      ? getMonthYear(item.date || invoice.issue_date)
+      : getMonthYearFull(item.date || invoice.issue_date);
+    pdf.text(monthStr, cols[ci].center, vCenter, { align: 'center' });
     ci++;
   }
 

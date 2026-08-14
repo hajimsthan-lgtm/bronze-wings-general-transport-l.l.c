@@ -20,6 +20,14 @@ function getMonthYear(dateStr) {
   return `${months[d.getMonth()]}`;
 }
 
+function getMonthYearFull(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 function fmtMoney(n) {
   return Number(n ?? 0).toLocaleString('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -81,7 +89,8 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
 
     return `<tr style="background:${rowBg};">
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;">${idx + 1}</td>
-      <td style="padding:6px 8px;border:1px solid #000;font-size:11pt;color:#333;line-height:1.4;min-width:220px;word-wrap:break-word;overflow-wrap:break-word;">${desc}</td>
+      <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${getMonthYearFull(item.date || invoice.issue_date)}</td>
+      <td style="padding:6px 8px;border:1px solid #000;font-size:11pt;color:#333;line-height:1.4;min-width:180px;word-wrap:break-word;overflow-wrap:break-word;">${desc}</td>
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${qty}</td>
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${fmtMoney(unitPrice)}</td>
       <td style="padding:6px 4px;border:1px solid #000;text-align:center;font-size:11pt;color:#333;${nf}">${fmtMoney(grossAmount)}</td>
@@ -173,8 +182,9 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <table style="width:100%;border-collapse:collapse;font-size:10.5pt;table-layout:fixed;">
     <thead>
       <tr>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:6%;">SL.<br>No</th>
-        <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:42%;">Description</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">SL.<br>No</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:12%;">Month</th>
+        <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:33%;">Description</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">Qty</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:11%;">Unit<br>Price</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">Total</th>
@@ -183,7 +193,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
       </tr>
     </thead>
     <tbody>
-      ${rowsHtml || `<tr><td colspan="7" style="padding:14px;border:1px solid #000;text-align:center;font-size:10.5pt;color:#999;">No items</td></tr>`}
+      ${rowsHtml || `<tr><td colspan="8" style="padding:14px;border:1px solid #000;text-align:center;font-size:10.5pt;color:#999;">No items</td></tr>`}
     </tbody>
     </tfoot>
   </table>
