@@ -17,7 +17,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  PieChart, Pie, Cell } from
+  RadialBarChart, RadialBar, PolarAngleAxis, Cell } from
 'recharts';
 
 const CARD = {
@@ -237,12 +237,13 @@ export default function Dashboard() {
           <div className="flex items-center gap-4 h-full">
             <div className="relative" style={{ width: 150, height: 150, flexShrink: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={donutData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={3} stroke="none">
+                <RadialBarChart data={donutData} cx="50%" cy="50%" innerRadius="32%" outerRadius="100%" startAngle={90} endAngle={-270} barSize={9}>
+                  <PolarAngleAxis type="number" domain={[0, Math.max(expTotal, 1)]} tick={false} />
+                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.04)' }} cornerRadius={6} isAnimationActive>
                     {donutData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                  </Pie>
+                  </RadialBar>
                   <Tooltip contentStyle={tooltipStyle} formatter={(v) => formatCurrency(v)} />
-                </PieChart>
+                </RadialBarChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-[11px] uppercase tracking-wider text-white/40">TOTAL</span>
