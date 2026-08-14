@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, Pencil, Trash2, ChevronDown, Save } from 'lucide-react';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save } from 'lucide-react';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -156,7 +156,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             ['TO', 'text-left'],
             ['TRIP FARE', 'text-left'],
             ['STATUS', 'text-left'],
-            ['', 'text-center']].
+            ['ACTIONS', 'text-center']].
             map(([label, align], i) => {
               const index = i + 1;
               return (
@@ -277,41 +277,26 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell className="align-top trips-grid-td">
-                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-center gap-1">
                     <button
                       onClick={() => onOpenDetail?.(trip)}
-                      className="rounded-full bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 p-1.5 transition-colors"
-                      title="WhatsApp">
-                      
-                      <MessageCircle className="w-3.5 h-3.5" />
+                      className="rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
+                      title="View">
+                      <Eye className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onOpenDetail?.(trip)}
-                      className="rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
-                      title="View Details">
-                      
-                      <Printer className="w-3.5 h-3.5" />
+                      onClick={() => onEdit?.(trip)}
+                      className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
+                      title="Edit">
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <MoreHorizontal className="w-3.5 h-3.5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit?.(trip)}>
-                          <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onOpenDetail?.(trip)}>
-                          <User className="w-3.5 h-3.5 mr-2" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onDelete?.(trip)} className="text-destructive">
-                          <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <button
+                      onClick={() => onDelete?.(trip)}
+                      className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
+                      title="Delete">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>);
