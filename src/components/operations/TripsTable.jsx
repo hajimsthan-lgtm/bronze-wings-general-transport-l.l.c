@@ -237,7 +237,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
                       onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
+                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight text-sm"
                       title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
