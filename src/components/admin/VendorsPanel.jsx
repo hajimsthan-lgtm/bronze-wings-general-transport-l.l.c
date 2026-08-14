@@ -93,7 +93,7 @@ function VendorForm({ editItem, onSave, onCancel }) {
       <div><Label className="text-xs text-muted-foreground mb-1.5">Name</Label><Input value={form.name} onChange={(e) => update('name', e.target.value)} className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Category</Label>
-          <Select value={form.category} onValueChange={(v) => update('category', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['fuel', 'maintenance', 'parts', 'insurance', 'other'].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+          <Select value={form.category} onValueChange={(v) => update('category', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['fuel', 'maintenance', 'parts', 'insurance', 'service_provider', 'other'].map((c) => <SelectItem key={c} value={c}>{c.replace('_', ' ')}</SelectItem>)}</SelectContent></Select></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>
           <Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent></Select></div>
       </div>

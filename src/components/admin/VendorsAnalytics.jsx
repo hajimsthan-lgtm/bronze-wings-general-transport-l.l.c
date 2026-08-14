@@ -11,7 +11,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 
-const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', other: '#94a3b8' };
+const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', service_provider: '#3b82f6', other: '#94a3b8' };
 
 export default function VendorsAnalytics({ vendors = [], expenses = [], loading, onAdd, onBrowse }) {
   if (loading && vendors.length === 0) return <LoadingSpinner />;

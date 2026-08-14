@@ -27,6 +27,7 @@
         "maintenance",
         "parts",
         "insurance",
+        "service_provider",
         "other"
       ],
       "default": "other"

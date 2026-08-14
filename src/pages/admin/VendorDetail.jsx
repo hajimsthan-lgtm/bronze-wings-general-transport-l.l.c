@@ -10,7 +10,8 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Receipt, Wrench, Store } from 'lucide-react';
+import { Receipt, Wrench, Store, BarChart3 } from 'lucide-react';
+import VendorAnalytics from '@/components/admin/VendorAnalytics';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { safeAll } from '@/lib/safeRequest';
 
@@ -80,12 +81,17 @@ export default function VendorDetail({ id: propId, inline = false }) {
         ]}
       />
       )}
-      <Tabs defaultValue="expenses">
+      <Tabs defaultValue="analytics">
         <TabsList className="bg-card border border-border">
+          <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1.5" />{t('analytics') || 'Analytics'}</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
           <TabsTrigger value="services">{t('services')} ({fServices.length})</TabsTrigger>
           <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="analytics" className="mt-4">
+          <VendorAnalytics vendor={vendor} expenses={fExpenses} services={fServices} />
+        </TabsContent>
 
         <TabsContent value="expenses" className="mt-4">
           {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (

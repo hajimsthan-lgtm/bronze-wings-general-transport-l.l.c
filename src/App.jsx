@@ -41,6 +41,7 @@ const Drivers = lazy(() => import('@/pages/admin/Drivers'));
 const Clients = lazy(() => import('@/pages/admin/Clients'));
 
 const Documents = lazy(() => import('@/pages/admin/Documents'));
+const Salary = lazy(() => import('@/pages/admin/Salary'));
 const VehicleDetail = lazy(() => import('@/pages/admin/VehicleDetail'));
 const DriverDetail = lazy(() => import('@/pages/admin/DriverDetail'));
 const ClientDetail = lazy(() => import('@/pages/admin/ClientDetail'));
@@ -100,6 +101,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/clients" element={<Clients />} />
           <Route path="/admin/vendors" element={<Navigate to="/admin/clients?tab=vendors" replace />} />
           <Route path="/admin/documents" element={<Documents />} />
+          <Route path="/admin/salary" element={<Salary />} />
           <Route path="/admin/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/admin/drivers/:id" element={<DriverDetail />} />
           <Route path="/admin/clients/:id" element={<ClientDetail />} />

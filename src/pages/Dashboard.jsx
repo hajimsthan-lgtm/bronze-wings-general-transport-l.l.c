@@ -12,6 +12,7 @@ import QuickActions from '@/components/dashboard/QuickActions';
 import HeroGreetingCard from '@/components/dashboard/HeroGreetingCard';
 import BalanceCard from '@/components/dashboard/BalanceCard';
 import GoalsList from '@/components/dashboard/GoalsList';
+import SalarySummaryCard from '@/components/dashboard/SalarySummaryCard';
 import { motion } from 'framer-motion';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -272,6 +273,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Salary summary — deductions vs base for current month */}
+      <SalarySummaryCard />
 
       {/* Goals + pending customers */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5">
