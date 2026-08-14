@@ -22,7 +22,7 @@ const DEFAULT_FORM = {
   trip_date: new Date().toISOString().split('T')[0],
   load_datetime: '', offload_datetime: '', trip_number: '',
   status: 'scheduled', revenue: '', distance_km: '', notes: '', contact_person: '',
-  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: '', overtime_rate: ''
+  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50
 };
 
 const DEFAULT_CONTRACT = {
