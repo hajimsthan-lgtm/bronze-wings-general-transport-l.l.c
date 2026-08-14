@@ -234,33 +234,40 @@ export default function Dashboard() {
 
         <div className="rounded-3xl p-5 sm:p-6" style={CARD}>
           <h2 className="text-base font-semibold text-white mb-5">Expense Breakdown</h2>
-          <div className="flex items-center gap-4 h-full">
-            <div className="relative" style={{ width: 150, height: 150, flexShrink: 0 }}>
+          <div className="flex items-center gap-5 h-full">
+            <div className="relative" style={{ width: 160, height: 160, flexShrink: 0 }}>
+              <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.14) 0%, transparent 68%)', filter: 'blur(10px)' }} />
               <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart data={donutData} cx="50%" cy="50%" innerRadius="32%" outerRadius="100%" startAngle={90} endAngle={-270} barSize={9}>
+                <RadialBarChart data={donutData} cx="50%" cy="50%" innerRadius="28%" outerRadius="100%" startAngle={90} endAngle={-270} barSize={11}>
                   <PolarAngleAxis type="number" domain={[0, Math.max(expTotal, 1)]} tick={false} />
-                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.04)' }} cornerRadius={6} isAnimationActive>
+                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.035)' }} cornerRadius={7} isAnimationActive>
                     {donutData.map((d, i) => <Cell key={i} fill={d.color} />)}
                   </RadialBar>
                   <Tooltip contentStyle={tooltipStyle} formatter={(v) => formatCurrency(v)} />
                 </RadialBarChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[11px] uppercase tracking-wider text-white/40">TOTAL</span>
-                <span className="text-2xl font-bold text-white">{formatCurrency(expTotal)}</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-semibold">TOTAL</span>
+                <span className="text-xl font-bold text-white tabular-nums mt-0.5">{formatCurrency(expTotal)}</span>
               </div>
             </div>
-            <div className="flex-1 space-y-2 min-w-0">
-              {donutData.map((d) =>
-                  <div key={d.name} className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-white/60 truncate">{d.name}</p>
-                    <p className="text-[13px] text-white font-semibold">{formatCurrency(d.value)}</p>
+            <div className="flex-1 space-y-3 min-w-0">
+              {donutData.map((d) => {
+                const pct = expTotal ? Math.round(d.value / expTotal * 100) : 0;
+                return (
+                  <div key={d.name} className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color, boxShadow: `0 0 6px ${d.color}` }} />
+                      <p className="text-[13px] text-white/60 truncate flex-1">{d.name}</p>
+                      <p className="text-[13px] text-white font-semibold tabular-nums">{formatCurrency(d.value)}</p>
+                      <span className="text-xs text-white/40 w-8 text-right tabular-nums">{pct}%</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-white/[0.05] overflow-hidden ml-4">
+                      <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%`, background: d.color, boxShadow: `0 0 6px ${d.color}` }} />
+                    </div>
                   </div>
-                  <span className="text-xs text-white/40">{expTotal ? Math.round(d.value / expTotal * 100) : 0}%</span>
-                </div>
-                  )}
+                );
+              })}
             </div>
           </div>
         </div>
