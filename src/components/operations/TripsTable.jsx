@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, ArrowRight, Pencil, Trash2, ChevronDown, Save } from 'lucide-react';
+import { Copy, Check, MoreHorizontal, MessageCircle, Printer, User, Pencil, Trash2, ChevronDown, Save } from 'lucide-react';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -27,7 +27,7 @@ const STATUS_LABELS = {
 };
 
 const DEFAULT_WIDTHS = {
-  0: 44, 1: 120, 2: 90, 3: 220, 4: 130, 5: 260, 6: 100, 7: 120, 8: 100
+  0: 44, 1: 120, 2: 90, 3: 220, 4: 130, 5: 160, 6: 160, 7: 100, 8: 120, 9: 100
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
@@ -152,7 +152,8 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             ['DATE', 'text-left'],
             ['CLIENT', 'text-left'],
             ['VEHICLE', 'text-left'],
-            ['ROUTE', 'text-left'],
+            ['FROM', 'text-left'],
+            ['TO', 'text-left'],
             ['TRIP FARE', 'text-left'],
             ['STATUS', 'text-left'],
             ['', 'text-center']].
@@ -226,13 +227,14 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   </button>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                  <div className="flex flex-col gap-0.5 overflow-hidden">
-                    <div className="flex items-center gap-1.5 leading-tight min-w-0">
-                      <span className="text-black truncate font-medium flex-1 min-w-0">{trip.from_location || '—'}</span>
-                      <ArrowRight className="w-3 h-3 text-black/40 flex-shrink-0" />
-                      <span className="text-black truncate font-medium flex-1 min-w-0">{trip.to_location || '—'}</span>
-                    </div>
-                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider truncate">{trip.hours}h</div> : null}
+                  <div className="text-black truncate font-medium leading-tight" title={trip.from_location || ''}>
+                    {trip.from_location || '—'}
+                  </div>
+                  {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-black/70 uppercase tracking-wider truncate mt-0.5">{trip.hours}h</div> : null}
+                </TableCell>
+                <TableCell className="text-xs align-top trips-grid-td">
+                  <div className="text-black truncate font-medium leading-tight" title={trip.to_location || ''}>
+                    {trip.to_location || '—'}
                   </div>
                 </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">

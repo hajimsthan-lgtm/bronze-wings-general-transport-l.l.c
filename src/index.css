@@ -1864,6 +1864,8 @@
   }
   .trips-grid-th:last-child,
   .trips-grid-td:last-child { border-right: none; }
+  .trips-grid-td { padding: 0.625rem 0.75rem !important; vertical-align: top !important; line-height: 1.25 !important; }
+  .trips-grid-th { padding: 0.5rem 0.75rem !important; vertical-align: top !important; }
   .theme-light .trips-grid-table tr { border-bottom-color: rgba(0,0,0,0.06); }
   .theme-light .trips-grid-th,
   .theme-light .trips-grid-td {
