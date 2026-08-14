@@ -140,28 +140,28 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         <div
           ref={topScrollRef}
           onScroll={() => syncScroll(topScrollRef.current, tableScrollRef.current)}
-          className="overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md"
-        >
+          className="overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md">
+          
           <div style={{ width: totalWidth, height: '1px' }} />
         </div>
-        {hasLayoutChanges && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={saveLayout}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 shrink-0 z-10 bg-background/80 backdrop-blur-sm"
-            title="Save Layout"
-          >
+        {hasLayoutChanges &&
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={saveLayout}
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 shrink-0 z-10 bg-background/80 backdrop-blur-sm"
+          title="Save Layout">
+          
             <Save className="w-3.5 h-3.5" />
           </Button>
-        )}
+        }
       </div>
       {/* Main scrollable table */}
       <div
         ref={tableScrollRef}
         onScroll={() => syncScroll(tableScrollRef.current, topScrollRef.current)}
-        className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid"
-      >
+        className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid">
+        
       <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
@@ -170,38 +170,38 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               {resizeHandle(0)}
             </TableHead>
             {[
-            ['TRIP #', 'text-left'],
-            ['DATE', 'text-left'],
-            ['CLIENT', 'text-left'],
-            ['VEHICLE', 'text-left'],
-            ['FROM', 'text-left'],
-            ['TO', 'text-left'],
-            ['TRIP FARE', 'text-left'],
-            ['STATUS', 'text-left'],
-            ['ACTIONS', 'text-center']].
-            map(([label, align], i) => {
-              const index = i + 1;
-              return (
-                <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th sticky top-0 z-10 bg-muted', align)} style={thStyle(index)}>
+              ['TRIP #', 'text-left'],
+              ['DATE', 'text-left'],
+              ['CLIENT', 'text-left'],
+              ['VEHICLE', 'text-left'],
+              ['FROM', 'text-left'],
+              ['TO', 'text-left'],
+              ['TRIP FARE', 'text-left'],
+              ['STATUS', 'text-left'],
+              ['ACTIONS', 'text-center']].
+              map(([label, align], i) => {
+                const index = i + 1;
+                return (
+                  <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th sticky top-0 z-10 bg-muted', align)} style={thStyle(index)}>
                   {label}
                   {resizeHandle(index)}
                 </TableHead>);
 
-            })}
+              })}
           </TableRow>
         </TableHeader>
         <TableBody>
           {trips.map((trip) => {
-            const isSelected = selected.has(trip.id);
-            const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
-            return (
-              <TableRow
-                key={trip.id}
-                className={cn(
-                  'transition-all duration-150 group',
-                  isSelected ? 'bg-primary/[0.07]' : 'hover:bg-primary/5',
-                  trip.status === 'cancelled' && 'opacity-60 border-l-2 border-l-red-500/50'
-                )}>
+              const isSelected = selected.has(trip.id);
+              const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
+              return (
+                <TableRow
+                  key={trip.id}
+                  className={cn(
+                    'transition-all duration-150 group',
+                    isSelected ? 'bg-primary/[0.07]' : 'hover:bg-primary/5',
+                    trip.status === 'cancelled' && 'opacity-60 border-l-2 border-l-red-500/50'
+                  )}>
                 
                 <TableCell className="pl-3 trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
@@ -209,13 +209,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <div className="flex items-center gap-1.5 overflow-hidden">
                     <button
-                      onClick={(e) => {e.stopPropagation();copyRef(trip);}}
-                      className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 truncate"
-                      title="Click to copy trip number">
+                        onClick={(e) => {e.stopPropagation();copyRef(trip);}}
+                        className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 truncate"
+                        title="Click to copy trip number">
                       <span className="truncate">{ref}</span>
                       {copiedId === trip.id ?
-                      <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
-                      <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
+                        <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
+                        <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
                     </button>
                   </div>
                 </TableCell>
@@ -226,9 +226,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top trips-grid-td">
                   <button
-                    onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                    className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block truncate leading-tight"
-                    title={trip.client_name}>
+                      onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
+                      className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block truncate leading-tight"
+                      title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
                   <div className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">{trip.contact_person || ''}</div>
@@ -236,15 +236,15 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
-                    onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                    className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
-                    title="View vehicle">
+                      onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
+                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight"
+                      title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
                   <button
-                    onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                    className="text-[10px] text-muted-foreground hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5"
-                    title="View driver">
+                      onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
+                      className="text-[10px] hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5 text-[#000105]"
+                      title="View driver">
                     {trip.driver_name || ''}
                   </button>
                 </TableCell>
@@ -267,13 +267,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className={cn(
-                          'text-[10px] font-bold px-2 py-1 rounded-full border inline-flex items-center gap-1 transition-colors hover:brightness-125',
-                          trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-                          trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-                          trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-                          trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10'
-                        )}>
+                          className={cn(
+                            'text-[10px] font-bold px-2 py-1 rounded-full border inline-flex items-center gap-1 transition-colors hover:brightness-125',
+                            trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+                            trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                            trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+                            trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10'
+                          )}>
                         
                         {trip.status === 'completed' ? '✓ Complete' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
                         <ChevronDown className="w-3 h-3 opacity-60" />
@@ -283,47 +283,47 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                       <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Set Status</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {['scheduled', 'in_transit', 'completed', 'cancelled'].map((st) =>
-                      <DropdownMenuItem
-                        key={st}
-                        onClick={() => handleStatusChange(trip, st)}
-                        className={cn(
-                          'gap-2 text-xs',
-                          trip.status === st && 'bg-primary/10 font-semibold'
-                        )}>
+                        <DropdownMenuItem
+                          key={st}
+                          onClick={() => handleStatusChange(trip, st)}
+                          className={cn(
+                            'gap-2 text-xs',
+                            trip.status === st && 'bg-primary/10 font-semibold'
+                          )}>
                         
                           <span className="w-2 h-2 rounded-full" style={{ background: STATUS_HEX[st] }} />
                           {STATUS_LABELS[st]}
                           {trip.status === st && <Check className="w-3 h-3 ml-auto" />}
                         </DropdownMenuItem>
-                      )}
+                        )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
                 <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-center gap-1">
                     <button
-                      onClick={() => onOpenDetail?.(trip)}
-                      className="rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
-                      title="View">
+                        onClick={() => onOpenDetail?.(trip)}
+                        className="rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
+                        title="View">
                       <Eye className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onEdit?.(trip)}
-                      className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
-                      title="Edit">
+                        onClick={() => onEdit?.(trip)}
+                        className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
+                        title="Edit">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => setDeleteTarget(trip)}
-                      className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
-                      title="Delete">
+                        onClick={() => setDeleteTarget(trip)}
+                        className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
+                        title="Delete">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </TableCell>
               </TableRow>);
 
-          })}
+            })}
         </TableBody>
       </Table>
       </div>
@@ -340,7 +340,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => { onDelete?.(deleteTarget); setDeleteTarget(null); }}
+              onClick={() => {onDelete?.(deleteTarget);setDeleteTarget(null);}}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
