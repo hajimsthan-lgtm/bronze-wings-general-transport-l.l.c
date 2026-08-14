@@ -10,8 +10,9 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Receipt, Wrench, Store, BarChart3 } from 'lucide-react';
+import { Receipt, Wrench, Store, BarChart3, Users } from 'lucide-react';
 import VendorAnalytics from '@/components/admin/VendorAnalytics';
+import VendorFleetTab from '@/components/admin/VendorFleetTab';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { safeAll } from '@/lib/safeRequest';
 
@@ -86,6 +87,7 @@ export default function VendorDetail({ id: propId, inline = false }) {
           <TabsTrigger value="analytics"><BarChart3 className="w-3.5 h-3.5 mr-1.5" />{t('analytics') || 'Analytics'}</TabsTrigger>
           <TabsTrigger value="expenses">{t('expenses')} ({fExpenses.length})</TabsTrigger>
           <TabsTrigger value="services">{t('services')} ({fServices.length})</TabsTrigger>
+          {vendor.category === 'service_provider' && <TabsTrigger value="fleet"><Users className="w-3.5 h-3.5 mr-1.5" />Fleet</TabsTrigger>}
           <TabsTrigger value="documents">{t('documents')}</TabsTrigger>
         </TabsList>
 
@@ -127,6 +129,12 @@ export default function VendorDetail({ id: propId, inline = false }) {
             </div>
           )}
         </TabsContent>
+
+        {vendor.category === 'service_provider' && (
+          <TabsContent value="fleet" className="mt-4">
+            <VendorFleetTab vendor={vendor} />
+          </TabsContent>
+        )}
 
         <TabsContent value="documents" className="mt-4">
           <EntityDocumentsTab entityType="vendor" entityId={vendor.id} />
