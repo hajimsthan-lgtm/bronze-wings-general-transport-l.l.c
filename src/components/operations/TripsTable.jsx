@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save } from 'lucide-react';
 
 import { useI18n } from '@/lib/i18n';
@@ -37,6 +38,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // Column widths (resizable) — all columns always visible, text wraps
   const [widths, setWidths] = useState(() => {
@@ -292,7 +294,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onDelete?.(trip)}
+                      onClick={() => setDeleteTarget(trip)}
                       className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
                       title="Delete">
                       <Trash2 className="w-3.5 h-3.5" />
@@ -305,6 +307,26 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         </TableBody>
       </Table>
       </div>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this trip?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete trip {deleteTarget?.trip_number || `#${deleteTarget?.id?.slice(-6)}`}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { onDelete?.(deleteTarget); setDeleteTarget(null); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>);
 
 }
