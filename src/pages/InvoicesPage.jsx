@@ -3,7 +3,7 @@ import { Plus, Loader2, FileText, Search, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
-import { downloadInvoicePDF } from '@/lib/invoiceHtml';
+import { downloadInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -328,7 +328,9 @@ export default function InvoicesPage() {
     setDownloadingId(inv.id);
     try {
       const settings = await getCompanySettings();
-      await downloadInvoicePDF(inv, inv.client_name, settings);
+      const isMonthly = /^Monthly\s+(Contract|Rental)/i.test(inv.line_items?.[0]?.description || '');
+      const downloader = isMonthly ? downloadMonthlyInvoicePDF : downloadInvoicePDF;
+      await downloader(inv, inv.client_name, settings);
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
     } finally {

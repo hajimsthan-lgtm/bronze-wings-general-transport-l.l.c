@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -17,7 +18,7 @@ import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { cn } from '@/lib/utils';
 
-const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0 };
+const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0, vat_excluded: false };
 
 const STATUS_STYLES = {
   paid: 'bg-emerald-500/20 text-emerald-400',
@@ -162,6 +163,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           amount: Number(trip.revenue || trip.base_fare || 0),
           service: 'TRIP',
           uom: 'TRIP',
+          vat_excluded: false,
         });
       }
       return { ...prev, line_items: items };
@@ -204,6 +206,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           quantity: 1,
           unit_price: Number(contract.monthly_rate || 0),
           amount: Number(contract.monthly_rate || 0),
+          vat_excluded: false,
         });
       }
       return { ...prev, line_items: items };
@@ -225,7 +228,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const previewItems = form.line_items.filter(i => i.description?.trim() || Number(i.unit_price) > 0 || Number(i.amount) > 0 || i._trip_number || i._contract_id);
 
   const subtotal = form.line_items.reduce((s, item) => s + (Number(item.amount) || 0), 0);
-  const vatAmount = subtotal * (Number(form.vat_rate) / 100);
+  const vatAmount = form.line_items.reduce((s, item) => s + (item.vat_excluded ? 0 : (Number(item.amount) || 0) * (Number(form.vat_rate) / 100)), 0);
   const total = subtotal + vatAmount;
   const payAmount = receivePayment ? Number(payment.amount) || 0 : 0;
   const balanceDue = Math.max(0, total - payAmount);
@@ -537,6 +540,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                         <Input value={formatCurrency(item.amount)} readOnly className={`${inputCls} opacity-60 text-sm`} />
                       </div>
                     </div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+                      <Checkbox checked={!!item.vat_excluded} onCheckedChange={(v) => updateItem(i, 'vat_excluded', !!v)} />
+                      <span className="text-[11px] text-muted-foreground">VAT Excluded</span>
+                    </label>
                   </div>
                 ))}
               </div>

@@ -108,6 +108,10 @@
           "uom": {
             "type": "string",
             "default": "TRIP"
+          },
+          "vat_excluded": {
+            "type": "boolean",
+            "default": false
           }
         }
       }

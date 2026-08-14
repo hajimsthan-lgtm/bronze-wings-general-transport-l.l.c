@@ -68,7 +68,12 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const totalTaxable = subtotal - totalDiscount;
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
-  const vatAmount = totalTaxable * vatRate / 100;
+  const vatAmount = items.reduce((s, i) => {
+    const q = Number(i.quantity) || 0, p = Number(i.unit_price) || 0;
+    const g = Number(i.amount ?? (q * p));
+    const t = g - (Number(i.discount) || 0);
+    return s + (i.vat_excluded ? 0 : t * vatRate / 100);
+  }, 0);
   const total = totalTaxable + vatAmount;
 
   const rowsHtml = items.map((item, idx) => {
@@ -77,7 +82,7 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     const grossAmount = Number(item.amount ?? (qty * unitPrice));
     const discount = Number(item.discount) || 0;
     const taxableAmount = grossAmount - discount;
-    const lineVat = taxableAmount * (vatRate / 100);
+    const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
     const desc = normalizeRoute(item.description ?? '')
       .split('\n')
@@ -285,7 +290,12 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const totalTaxable = subtotal;
-  const vatAmount = totalTaxable * vatRate / 100;
+  const vatAmount = items.reduce((s, i) => {
+    const q = Number(i.quantity) || 0, p = Number(i.unit_price) || 0;
+    const g = Number(i.amount ?? (q * p));
+    const t = g - (Number(i.discount) || 0);
+    return s + (i.vat_excluded ? 0 : t * vatRate / 100);
+  }, 0);
   const total = totalTaxable + vatAmount;
 
   const rowsHtml = items.map((item, idx) => {
@@ -293,7 +303,7 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     const unitPrice = Number(item.unit_price) || 0;
     const grossAmount = Number(item.amount ?? (qty * unitPrice));
     const taxableAmount = grossAmount;
-    const lineVat = taxableAmount * (vatRate / 100);
+    const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
     const desc = normalizeRoute(item.description ?? '')
       .split('\n')
@@ -496,7 +506,12 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const totalTaxable = subtotal;
-  const vatAmount = totalTaxable * vatRate / 100;
+  const vatAmount = items.reduce((s, i) => {
+    const q = Number(i.quantity) || 0, p = Number(i.unit_price) || 0;
+    const g = Number(i.amount ?? (q * p));
+    const t = g - (Number(i.discount) || 0);
+    return s + (i.vat_excluded ? 0 : t * vatRate / 100);
+  }, 0);
   const total = totalTaxable + vatAmount;
 
   const tripDates = items.map(i => i.date).filter(Boolean).sort();
@@ -509,7 +524,7 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     const unitPrice = Number(item.unit_price) || 0;
     const grossAmount = Number(item.amount ?? (qty * unitPrice));
     const taxableAmount = grossAmount;
-    const lineVat = taxableAmount * (vatRate / 100);
+    const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
     const desc = normalizeRoute(item.description ?? '')
       .split('\n')

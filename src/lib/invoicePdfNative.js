@@ -476,7 +476,7 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   const gross = Number(item.amount ?? (qty * unitPrice));
   const discount = Number(item.discount) || 0;
   const taxable = gross - discount;
-  const lineVat = taxable * (vatRate / 100);
+  const lineVat = item.vat_excluded ? 0 : taxable * (vatRate / 100);
   const lineTotal = taxable + lineVat;
 
   const vCenter = y + rowH / 2 + 1;
@@ -698,8 +698,15 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   }, 0);
   const totalDiscount = items.reduce((sum, i) => sum + (Number(i.discount) || 0), 0);
   const taxable = subtotal - totalDiscount;
-  const vat = taxable * vatRate / 100;
-  const total = taxable + vat;
+  const taxableForVat = items.reduce((s, i) => {
+    if (i.vat_excluded) return s;
+    const q = Number(i.quantity) || 0;
+    const p = Number(i.unit_price) || 0;
+    const g = Number(i.amount ?? (q * p));
+    return s + (g - (Number(i.discount) || 0));
+  }, 0);
+  const vat = taxableForVat * vatRate / 100;
+  const total = subtotal - totalDiscount + vat;
 
   if (y + 7 > contentBottom) {
     pdf.addPage();
