@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, Receipt, Layers } from 'lucide-react';
+import { Loader2, Receipt, Layers, RefreshCw, PencilLine } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +55,7 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedIndices, setSelectedIndices] = useState([]);
+  const [manualOverrides, setManualOverrides] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -65,39 +66,43 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
       setReference('');
       setNotes('');
       setSelectedIndices(sortedInvoices.map((_, i) => i));
+      setManualOverrides({});
       generatePaymentReference().then(setReference).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, totalBalance]);
 
-  // FIFO allocation: sequentially deduct from payment amount, oldest first
+  // FIFO allocation with manual overrides: a locked amount takes its FIFO slot,
+  // the remaining budget auto-fills the rest in oldest-first order.
   const allocations = useMemo(() => {
     let remaining = Number(amount) || 0;
     return sortedInvoices.map((inv, idx) => {
       const isSelected = selectedIndices.includes(idx);
       const balance = Math.max(0, (Number(inv.total_amount) || 0) - (Number(inv.paid_amount) || 0));
-      if (!isSelected || remaining <= 0) {
-        return {
-          invoice_id: inv.id,
-          invoice_number: inv.invoice_number,
-          invoice_total: Number(inv.total_amount) || 0,
-          already_paid: Number(inv.paid_amount) || 0,
-          allocated_amount: 0,
-          is_selected: isSelected,
-        };
-      }
-      const allocation = Math.min(remaining, balance);
-      remaining -= allocation;
-      return {
+      const base = {
         invoice_id: inv.id,
         invoice_number: inv.invoice_number,
         invoice_total: Number(inv.total_amount) || 0,
         already_paid: Number(inv.paid_amount) || 0,
-        allocated_amount: allocation,
-        is_selected: true,
+        is_selected: isSelected,
       };
+      if (!isSelected) {
+        return { ...base, allocated_amount: 0, is_manual: false };
+      }
+      const override = manualOverrides[inv.id];
+      const hasManual = override !== undefined && override !== '';
+      let allocation;
+      if (hasManual) {
+        allocation = Math.min(Math.max(0, Number(override) || 0), balance);
+      } else if (remaining <= 0) {
+        allocation = 0;
+      } else {
+        allocation = Math.min(remaining, balance);
+      }
+      remaining -= allocation;
+      return { ...base, allocated_amount: allocation, is_manual: hasManual };
     });
-  }, [sortedInvoices, amount, selectedIndices]);
+  }, [sortedInvoices, amount, selectedIndices, manualOverrides]);
 
   const totalAllocated = useMemo(() =>
     allocations.reduce((s, a) => s + (a.allocated_amount || 0), 0), [allocations]);
@@ -109,6 +114,12 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
       prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
     );
   };
+
+  const handleManualEdit = (inv, value) => {
+    setManualOverrides(prev => ({ ...prev, [inv.id]: value }));
+  };
+
+  const handleAutoRearrange = () => setManualOverrides({});
 
   const amt = Number(amount) || 0;
   const canConfirm = amt > 0 && totalAllocated > 0 && !saving;
@@ -141,7 +152,7 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
             Bulk Payment — {sortedInvoices.length} Invoices
           </DialogTitle>
           <DialogDescription>
-            Enter the total received amount. Payment is auto-allocated across selected invoices in FIFO order (oldest first).
+            Enter the total received amount. Payment is auto-allocated across selected invoices in FIFO order (oldest first). Edit any allocated amount to override manually, then use Auto Rearrange to reset.
           </DialogDescription>
         </DialogHeader>
 
@@ -184,11 +195,23 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
 
           {/* FIFO Invoice List */}
           <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-blue-300 bg-blue-500/10 border border-blue-500/20">
-                <Layers className="w-3 h-3" /> FIFO
-              </span>
-              <span className="text-[10px] text-muted-foreground">Oldest invoice paid first</span>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-blue-300 bg-blue-500/10 border border-blue-500/20">
+                  <Layers className="w-3 h-3" /> FIFO
+                </span>
+                <span className="text-[10px] text-muted-foreground">Oldest invoice paid first</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAutoRearrange}
+                disabled={Object.keys(manualOverrides).length === 0}
+                className="h-6 text-[10px] px-2 gap-1 text-violet-300 hover:text-violet-200 hover:bg-violet-500/10 disabled:opacity-40"
+                title="Reset all manual overrides and re-allocate FIFO"
+              >
+                <RefreshCw className="w-3 h-3" /> Auto Rearrange
+              </Button>
             </div>
             {sortedInvoices.map((inv, idx) => {
               const alloc = allocations[idx];
@@ -211,17 +234,29 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
                         Out: {formatCurrency(balance)}
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0 min-w-[80px]">
+                    <div className="flex flex-col items-end flex-shrink-0 min-w-[96px]">
                       {alloc.is_selected ? (
                         <>
-                          <p className="text-sm font-mono text-foreground tabular-nums">
-                            {formatCurrency(alloc.allocated_amount)}
-                          </p>
-                          {alloc.allocated_amount > 0 && (
-                            <p className={`text-[9px] ${isFull ? 'text-emerald-400' : 'text-amber-400'}`}>
-                              {isFull ? 'Full' : 'Partial'}
-                            </p>
-                          )}
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={manualOverrides[inv.id] !== undefined ? manualOverrides[inv.id] : (alloc.allocated_amount || '')}
+                            onChange={e => handleManualEdit(inv, e.target.value)}
+                            className={`w-24 h-7 text-xs font-mono tabular-nums text-right px-2 ${alloc.is_manual ? 'border-violet-500/40' : ''}`}
+                            title={alloc.is_manual ? 'Manually overwritten — Auto Rearrange to reset' : 'Auto-allocated (FIFO)'}
+                          />
+                          <div className="flex items-center gap-1 mt-0.5 h-3">
+                            {alloc.is_manual ? (
+                              <span className="text-[8px] font-semibold text-violet-300 flex items-center gap-0.5">
+                                <PencilLine className="w-2.5 h-2.5" /> Manual
+                              </span>
+                            ) : alloc.allocated_amount > 0 ? (
+                              <span className={`text-[8px] ${isFull ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                {isFull ? 'Full' : 'Partial'}
+                              </span>
+                            ) : null}
+                          </div>
                         </>
                       ) : (
                         <p className="text-xs text-muted-foreground">—</p>
