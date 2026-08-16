@@ -11,28 +11,17 @@ import DriversAnalytics from '@/components/admin/DriversAnalytics';
 import DriverCard from '@/components/admin/DriverCard';
 import DriverListRow from '@/components/admin/DriverListRow';
 import ViewToggle from '@/components/common/ViewToggle';
-import SubTabBar from '@/components/common/SubTabBar';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ImageUpload from '@/components/common/ImageUpload';
-import Salary from './Salary';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users, BarChart3, LayoutGrid } from 'lucide-react';
 
 export default function Drivers() {
-  const { t } = useI18n();
-  const [tab, setTab] = useState('drivers');
-  return (
-    <div>
-      <div className="mb-5">
-        <SubTabBar value={tab} onChange={setTab} options={[{ value: 'drivers', label: t('drivers') }, { value: 'salary', label: t('salary') }]} />
-      </div>
-      {tab === 'drivers' ? <DriversTab /> : <Salary />}
-    </div>
-  );
+  return <DriversTab />;
 }
 
 function DriversTab() {

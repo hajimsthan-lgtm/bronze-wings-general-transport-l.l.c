@@ -14,30 +14,16 @@ import CsvImportButton from '@/components/common/CsvImportButton';
 import VehicleCard from '@/components/admin/VehicleCard';
 import VehicleListRow from '@/components/admin/VehicleListRow';
 import ViewToggle from '@/components/common/ViewToggle';
-import SubTabBar from '@/components/common/SubTabBar';
 import ImageUpload from '@/components/common/ImageUpload';
 import TypeCombobox from '@/components/admin/TypeCombobox';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
-import Services from './Services';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Truck, Pencil, Trash2, Sparkles, BarChart3, LayoutGrid } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 
 export default function Vehicles() {
-  const { t } = useI18n();
-  const [tab, setTab] = useState(() => {
-    const p = new URLSearchParams(window.location.search);
-    return p.get('tab') === 'services' ? 'services' : 'vehicles';
-  });
-  return (
-    <div>
-      <div className="mb-5">
-        <SubTabBar value={tab} onChange={setTab} options={[{ value: 'vehicles', label: t('vehicles') }, { value: 'services', label: t('maintenance') }]} />
-      </div>
-      {tab === 'vehicles' ? <VehiclesTab /> : <Services />}
-    </div>
-  );
+  return <VehiclesTab />;
 }
 
 function VehiclesTab() {

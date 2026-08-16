@@ -246,7 +246,7 @@ export default function Salary() {
               </div>
               <div className="flex-1 min-w-0">
                 {driverMap[r.driver_name]
-                  ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}?tab=salary`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>
+                  ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>
                   : <p className="text-sm font-medium text-foreground">{r.driver_name}</p>}
                 <p className="text-xs text-muted-foreground truncate">
                   {r.month} {r.year} · {(r.payment_method || '').replace(/_/g, ' ')}
