@@ -158,13 +158,13 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
       </div>
 
       {/* ===== License & Details Card ===== */}
-      <div className="glass-card p-6 animate-fade-in-up">
-        <div className="flex items-center gap-2.5 mb-4">
+      <div className="glass-card animate-fade-in-up flex flex-col max-h-[calc(100vh-220px)]">
+        <div className="flex items-center gap-2.5 p-6 pb-4 flex-shrink-0">
           <IconChip icon={FileText} accent="#a855f7" size={32} />
           <h3 className="text-[15px] font-semibold text-foreground">License &amp; Details</h3>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 px-6 pb-6 overflow-y-auto thin-scroll">
           <AccordionItem sectionKey="license" openKey={openSection} setOpenKey={setOpenSection} title="License" icon={ShieldCheck} accent="#1ED760">
             <Row label="License #" value={driver.license_number} />
             <Row label="License Expiry" value={formatDate(driver.license_expiry)} tone={expiryTone(driver.license_expiry)} />
