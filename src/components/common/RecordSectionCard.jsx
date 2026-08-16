@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { FileText, Eye, Plus, ChevronDown } from 'lucide-react';
+import { FileText, Eye, Plus } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', collapsible = true, defaultOpen = false, children }) {
-  const [open, setOpen] = useState(defaultOpen);
+export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', children }) {
   const [viewOpen, setViewOpen] = useState(false);
-  const isOpen = !collapsible || open;
 
   const handleView = () => {
     setViewOpen(true);
@@ -17,63 +15,42 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
 
   return (
     <div
-      onClick={() => collapsible && setOpen(!open)}
-      className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 ${isOpen ? "p-5 cursor-default" : ""} ${className}`}
+      className={`glass-card rounded-2xl p-4 animate-fade-in-up relative overflow-hidden flex flex-col items-center text-center gap-2 ${className}`}
       style={{ borderLeft: `4px solid ${accent}` }}>
-      
-      {isOpen && <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.18)} 0%, transparent 70%)` }} />}
-      <div className={`flex items-center justify-between relative ${isOpen ? 'mb-4' : ''}`}>
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
-            <Icon className="w-4 h-4" style={{ color: accent }} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-base font-semibold text-foreground truncate">{title}</h3>
-            <p className="text-xs text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          {isOpen &&
-          <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
-              {onNew &&
-            <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-            }
-              <button onClick={onPdf} title="Download PDF" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: accent, boxShadow: `0 4px 14px -4px ${accent}` }}>
-                <FileText className="w-3 h-3" /> PDF
-              </button>
-              <button onClick={handleView} title="View all" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
-                <Eye className="w-3 h-3" /> View
-              </button>
-            </div>
-          }
-          {collapsible &&
-          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? 'rotate-180' : ''}`} />
-          }
-        </div>
+      <div className="absolute -top-12 -right-8 w-28 h-28 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.18)} 0%, transparent 70%)` }} />
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 relative" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
+        <Icon className="w-5 h-5" style={{ color: accent }} />
       </div>
-      {isOpen &&
-      <div
-        className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)] relative"
-        style={{ maxHeight: '5000px', opacity: 1 }}>
-        
-          <div className="rounded-xl border border-border overflow-hidden p-4">
-            {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
-          </div>
-        </div>
-      }
+      <div className="min-w-0 w-full">
+        <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
+        <p className="text-[11px] text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
+      </div>
+      <button onClick={handleView} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors w-full justify-center">
+        <Eye className="w-3.5 h-3.5" /> Quick View
+      </button>
 
-      {/* View Popup Modal */}
+      {/* Quick View Popup */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
         <DialogContent className="bg-card border-border max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display text-foreground flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
-                <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+            <DialogTitle className="font-display text-foreground flex items-center justify-between gap-2 pr-8">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
+                  <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+                </div>
+                <span className="truncate">{title}</span>
+                {count != null && <span className="text-xs font-normal text-muted-foreground flex-shrink-0">· {count} record{count === 1 ? '' : 's'}</span>}
               </div>
-              {title}
-              {count != null && <span className="text-xs font-normal text-muted-foreground">· {count} record{count === 1 ? '' : 's'}</span>}
+              <div className="flex gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                {onNew && (
+                  <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button onClick={onPdf} title="Download PDF" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: accent, boxShadow: `0 4px 14px -4px ${accent}` }}>
+                  <FileText className="w-3 h-3" /> PDF
+                </button>
+              </div>
             </DialogTitle>
           </DialogHeader>
           <div className="rounded-xl border border-border overflow-hidden p-4">
@@ -81,6 +58,6 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
           </div>
         </DialogContent>
       </Dialog>
-    </div>);
-
+    </div>
+  );
 }
