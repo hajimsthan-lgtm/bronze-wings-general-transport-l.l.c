@@ -173,8 +173,8 @@ export default function DriverDetail() {
 
   return (
     <div className="detail-page space-y-4">
-      {/* Top row: back header — date filtering is handled by the global top header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Top row: back header — sticky, date filtering is handled by the global top header */}
+      <div className="sticky top-0 z-30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <EntityDetailHeader backTo="/admin/drivers" />
       </div>
 

@@ -7,14 +7,14 @@ export default function EntityDetailHeader({ title, subtitle, badge, info = [], 
   const navigate = useNavigate();
   const { t } = useI18n();
   return (
-    <div className="mb-6">
+    <div>
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
         onClick={() => backTo ? navigate(backTo) : navigate(-1)}
-        className="back-btn text-muted-foreground hover:text-foreground mb-3 -ml-2 transition-colors duration-200 active:scale-[0.97]">
-        
-        <ArrowLeft className="back-arrow w-4 h-4" /> {t('back')}
+        aria-label={t('back')}
+        className="back-btn w-9 h-9 rounded-full glass-sm border border-white/10 text-muted-foreground hover:text-foreground transition-colors duration-200 active:scale-[0.97]">
+        <ArrowLeft className="back-arrow w-4 h-4" />
       </Button>
       
 
