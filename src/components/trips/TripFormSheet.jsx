@@ -569,26 +569,29 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             <ContractModeFields p={contractCtx} />}
           </div>
 
-          <div className="space-y-5">
+          {/* Right column — sticky on desktop: calc (fixed top) + map/financial (scrollable below) */}
+          <div className="flex flex-col gap-5 lg:sticky lg:top-4 lg:max-h-[calc(82vh-170px)]">
             {mode === 'trip' && (
-              <div className="sticky top-0 z-10 -mt-4 pt-4 pb-3 bg-gradient-to-b from-card via-card/95 to-transparent">
+              <div className="flex-shrink-0">
                 <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
               </div>
             )}
-            {mode === 'trip' &&
-            <TripMapPanel
-              from={form.from_location}
-              to={form.to_location}
-              onSelectFrom={(v) => update('from_location', v)}
-              onSelectTo={(v) => update('to_location', v)}
-              onRouteInfo={handleRouteInfo}
-              tripType={form.trip_type}
-            />
-            }
-            {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
-            {mode === 'contract' &&
-            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
-            }
+            <div className="space-y-5 lg:flex-1 lg:overflow-y-auto lg:min-h-0 lg:pr-1">
+              {mode === 'trip' &&
+              <TripMapPanel
+                from={form.from_location}
+                to={form.to_location}
+                onSelectFrom={(v) => update('from_location', v)}
+                onSelectTo={(v) => update('to_location', v)}
+                onRouteInfo={handleRouteInfo}
+                tripType={form.trip_type}
+              />
+              }
+              {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
+              {mode === 'contract' &&
+              <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
+              }
+            </div>
           </div>
         </div>
 
