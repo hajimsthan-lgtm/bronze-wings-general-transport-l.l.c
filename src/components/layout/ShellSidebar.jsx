@@ -69,7 +69,7 @@ export default function ShellSidebar({ query = '' }) {
           <div className="leading-tight">
             <span className="text-[15px] font-bold tracking-tight text-foreground">
               {showSplit ? firstPart + ' ' : ''}
-              <span style={{ color: 'rgb(var(--panel-accent-rgb))' }} className="font-light [font-family:'Inter',_ui-sans-serif,_system-ui,_sans-serif]">{showSplit ? accentPart : companyName}</span>
+              <span style={{ color: 'rgb(var(--panel-accent-rgb))' }} className="font-medium [font-family:'Abril_Fatface',_system-ui]">{showSplit ? accentPart : companyName}</span>
             </span>
             <span className="block text-[8.5px] tracking-[0.2em] uppercase text-muted-foreground/70 mt-0.5">General Transport</span>
           </div>
