@@ -20,7 +20,7 @@ import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText } from 'lucide-react';
+import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText, Truck } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
@@ -187,6 +187,9 @@ export default function DriverDetail() {
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard
               collapsible
+              defaultOpen={false}
+              icon={Truck}
+              accent="#f43f5e"
               title={`Trips — ${driver.name}`}
               subtitle={`${dateFrom} → ${dateTo}`}
               loading={dataLoading}
