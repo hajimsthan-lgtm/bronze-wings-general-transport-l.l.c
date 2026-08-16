@@ -107,7 +107,7 @@ export default function ShellSidebar({ query = '' }) {
                   style={active ? { background: c, color: readableOn(c) } : undefined}>
                   
                     <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
-                    <span className="truncate">{label}</span>
+                    <span className="truncate text-[#000000]">{label}</span>
                   </button>);
 
             })}
