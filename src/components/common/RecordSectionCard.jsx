@@ -20,7 +20,7 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
       onClick={() => collapsible && setOpen(!open)}
       className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in-up ${collapsible ? 'cursor-pointer' : ''} ${className}`}
       style={{ borderLeft: `4px solid ${accent}` }}>
-      <div className="flex items-center justify-between p-4 border-b border-border gap-3">
+      <div className="flex items-center justify-between p-4 gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.12), border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
             <Icon className="w-5 h-5" style={{ color: accent }} />
@@ -53,13 +53,13 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
           )}
         </div>
       </div>
-      {isOpen && (
-        <div className="p-4">
-          <div className="rounded-xl border border-border overflow-hidden p-4">
+      <div className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}>
+        <div className="overflow-hidden">
+          <div className="p-4">
             {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Quick View Popup */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
