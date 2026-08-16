@@ -26,59 +26,59 @@ export default function TopBar() {
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="w-full px-4 md:px-6 bg-background/85 backdrop-blur-xl border-b border-border/50 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.4)]">
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        <div className="flex items-center justify-between py-1.5 gap-2">
+          {/* Left: status filter pills for Operations pages */}
+          {showOpsFilter && (
+            <div className="hidden md:flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-1">
+              {opsFilter.options.map((s) => {
+                const active = opsFilter.value === s;
+                const count = s === 'all' ? null : opsFilter.counts?.[s];
+                return (
+                  <button
+                    key={s}
+                    onClick={() => opsFilter.onChange?.(s)}
+                    className={`px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap ${
+                      active
+                        ? 'border-primary text-primary bg-primary/10'
+                        : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {/* mobile sub-nav tiles — desktop tiles live in the main header */}
+          <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1" />
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+            <div className="md:hidden flex items-center gap-2">
+              {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
+              {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
+              {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
+            </div>
+            {location.pathname.startsWith('/reports/') && <ReportClientDropdown />}
+            {(location.pathname === '/trips' || location.pathname === '/contracts') && (
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
+                aria-label={t('new_trip')}
+                title={t('new_trip')}
+                className="btn-new-trip flex items-center justify-center w-8 h-8 rounded-full text-white transition-all flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
+            {location.pathname === '/expenses' && (
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('expenses:new'))}
+                className="btn-new-expense inline-flex items-center gap-1.5 h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white transition-all whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" /> {t('add_new')}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
