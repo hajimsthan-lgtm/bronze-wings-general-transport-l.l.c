@@ -49,7 +49,7 @@ export default function ShellSidebar({ query = '' }) {
       
       {/* Brand / wordmark */}
       <div className="px-5 pt-5 pb-3 flex-shrink-0">
-        <Link to="/" className="flex items-center gap-3 group/brand">
+        <Link to="/command-center" className="flex items-center gap-3 group/brand cursor-pointer transition-opacity hover:opacity-80 active:scale-[0.98]">
           {logoUrl ?
           <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-border/60" style={{ boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)' }}>
               <img src={logoUrl} alt="" className="w-full h-full object-contain" />

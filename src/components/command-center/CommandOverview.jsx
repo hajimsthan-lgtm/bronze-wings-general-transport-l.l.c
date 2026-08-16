@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function CommandOverview({ stats }) {
   return (
@@ -13,10 +14,11 @@ export default function CommandOverview({ stats }) {
       <div className="grid grid-cols-2 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
+          const chipClass = s.chip || 'chip-blue';
           return (
-            <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.03]">
-              <div className="w-10 h-10 rounded-xl bg-foreground/10 flex items-center justify-center flex-shrink-0">
-                <Icon className="w-4 h-4 text-muted-foreground" />
+            <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.04] border border-border/30">
+              <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', chipClass)}>
+                <Icon className="w-4 h-4 text-white" />
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold truncate">{s.label}</p>

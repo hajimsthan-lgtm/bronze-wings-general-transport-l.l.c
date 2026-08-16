@@ -23,13 +23,13 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
       }} />
       <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center gap-6">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate('/')}>
+        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => navigate('/command-center')}>
           <div className="w-9 h-9 rounded-xl brand-gradient-bg flex items-center justify-center transition-transform group-hover:scale-105">
             <Feather className="w-5 h-5 text-white" />
           </div>
           <div className="leading-tight">
             <span className="text-sm font-bold brand-gradient-text">Bronze Wings</span>
-            <span className="block text-[9px] tracking-[0.2em] text-muted-foreground">COMMAND CENTER</span>
+            <span className="block text-[9px] tracking-[0.2em] text-muted-foreground">HOME</span>
           </div>
         </div>
 

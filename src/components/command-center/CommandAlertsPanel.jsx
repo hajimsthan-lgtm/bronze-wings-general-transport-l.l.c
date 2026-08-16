@@ -7,7 +7,9 @@ export default function CommandAlertsPanel({ alerts }) {
   return (
     <div className="cmd-card animate-enter-up" style={{ animationDelay: '0.4s' }}>
       <div className="flex items-center gap-2 mb-4">
-        <AlertTriangle className="w-4 h-4 text-amber-400" />
+        <div className="w-7 h-7 rounded-lg chip-red flex items-center justify-center">
+          <AlertTriangle className="w-4 h-4 text-white" />
+        </div>
         <h3 className="text-sm font-semibold">Actionable Alerts</h3>
         <span className="ml-auto text-xs text-muted-foreground">{alerts.length} active</span>
       </div>
@@ -17,13 +19,15 @@ export default function CommandAlertsPanel({ alerts }) {
           const isUrgent = a.severity === 'urgent';
           return (
             <Link key={i} to={a.link} className={cn(
-              'flex items-center gap-3 p-3 rounded-xl border-l-[3px] transition-all hover:-translate-y-0.5 group',
-              isUrgent ? 'bg-red-500/[0.06] border-red-500 hover:bg-red-500/[0.1]' : 'bg-amber-500/[0.06] border-amber-500 hover:bg-amber-500/[0.1]'
+              'flex items-center gap-3 p-3 rounded-xl border-l-[4px] transition-all hover:-translate-y-0.5 group',
+              isUrgent
+                ? 'bg-gradient-to-r from-red-500/[0.12] to-rose-500/[0.06] border-red-500 hover:from-red-500/[0.18] hover:to-rose-500/[0.1]'
+                : 'bg-gradient-to-r from-amber-500/[0.12] to-orange-500/[0.06] border-amber-500 hover:from-amber-500/[0.18] hover:to-orange-500/[0.1]'
             )}>
               <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                isUrgent ? 'bg-red-500/15' : 'bg-amber-500/15'
+                isUrgent ? 'chip-red' : 'chip-amber'
               )}>
-                <Icon className={cn('w-4 h-4', isUrgent ? 'text-red-400' : 'text-amber-400')} />
+                <Icon className="w-4 h-4 text-white" />
               </div>
               <span className="text-sm text-foreground flex-1">{a.message}</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />

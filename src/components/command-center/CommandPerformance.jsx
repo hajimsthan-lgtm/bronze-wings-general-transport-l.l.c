@@ -22,14 +22,16 @@ export default function CommandPerformance({ data, range, setRange }) {
           <h3 className="text-sm font-semibold">Performance</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Revenue trend</p>
         </div>
-        <div className="flex items-center gap-1 p-1 rounded-full bg-foreground/[0.04] border border-border/30">
+        <div className="flex items-center gap-1 p-1 rounded-full bg-foreground/[0.06] border border-border/40">
           {RANGES.map(r => (
             <button
               key={r}
               onClick={() => setRange(r)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
-                range === r ? 'brand-gradient-bg text-white shadow-md' : 'text-muted-foreground hover:text-foreground'
+                'px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
+                range === r
+                  ? 'bg-[#0A84FF] text-white shadow-md shadow-[0_2px_8px_rgba(10,132,255,0.4)]'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-foreground/5'
               )}
             >
               {r}

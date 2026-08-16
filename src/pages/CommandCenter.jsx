@@ -105,17 +105,17 @@ export default function CommandCenter() {
   };
 
   const metrics = [
-    { icon: DollarSign, label: 'Total Revenue', value: formatCurrency(totalRevenue), delta: computeDelta(revSpark), spark: revSpark, isHero: true },
-    { icon: Truck, label: 'Active Trips', value: activeTrips, delta: computeDelta(tripsSpark), spark: tripsSpark },
-    { icon: Gauge, label: 'Fleet Health', value: `${fleetHealth}%`, delta: computeDelta(healthSpark), spark: healthSpark },
-    { icon: TrendingUp, label: 'Avg Trip Value', value: formatCurrency(avgTripValue), delta: computeDelta(avgSpark), spark: avgSpark },
+    { icon: DollarSign, label: 'Total Revenue', value: formatCurrency(totalRevenue), delta: computeDelta(revSpark), spark: revSpark, isHero: true, chip: 'chip-revenue', sparkVariant: 'brand' },
+    { icon: Truck, label: 'Active Trips', value: activeTrips, delta: computeDelta(tripsSpark), spark: tripsSpark, chip: 'chip-blue', sparkVariant: 'blue' },
+    { icon: Gauge, label: 'Fleet Health', value: `${fleetHealth}%`, delta: computeDelta(healthSpark), spark: healthSpark, chip: 'chip-green', sparkVariant: 'green' },
+    { icon: TrendingUp, label: 'Avg Trip Value', value: formatCurrency(avgTripValue), delta: computeDelta(avgSpark), spark: avgSpark, chip: 'chip-violet', sparkVariant: 'violet' },
   ];
 
   const overviewStats = [
-    { icon: Truck, label: 'Active Trips', value: activeTrips },
-    { icon: FileText, label: 'Pending Invoices', value: pendingInvoices },
-    { icon: Gauge, label: 'Fleet Health', value: `${fleetHealth}%` },
-    { icon: TrendingUp, label: 'Avg Trip Value', value: formatCurrency(avgTripValue) },
+    { icon: Truck, label: 'Active Trips', value: activeTrips, chip: 'chip-blue' },
+    { icon: FileText, label: 'Pending Invoices', value: pendingInvoices, chip: 'chip-amber' },
+    { icon: Gauge, label: 'Fleet Health', value: `${fleetHealth}%`, chip: 'chip-green' },
+    { icon: TrendingUp, label: 'Avg Trip Value', value: formatCurrency(avgTripValue), chip: 'chip-violet' },
   ];
 
   // Performance chart data
