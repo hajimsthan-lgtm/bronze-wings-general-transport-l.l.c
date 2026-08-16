@@ -1,10 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Settings as SettingsIcon, Sun, Moon, LayoutDashboard, Route, FileText } from 'lucide-react';
+import { Settings as SettingsIcon, Sun, Moon, LayoutDashboard, Route, FileText } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import AlertBell from '@/components/layout/AlertBell';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
+import GlobalSearch from '@/components/layout/GlobalSearch';
 
 const QUICK_LINKS = [
   { label: 'Dashboard', path: '/', icon: LayoutDashboard, match: (p) => p === '/' },
@@ -56,17 +57,9 @@ export default function ShellNavbar({ query, setQuery }) {
         })}
       </nav>
 
-      {/* Center: search */}
+      {/* Center: global search */}
       <div className="flex-1 flex justify-center px-2">
-        <div className="relative w-full max-w-[420px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search navigation…"
-            className="w-full h-9 pl-10 pr-4 rounded-full text-[13px] bg-muted/50 border border-border/50 text-foreground placeholder:text-muted-foreground transition-all focus:outline-none focus:border-primary/40 focus:bg-muted/70"
-          />
-        </div>
+        <GlobalSearch query={query} setQuery={setQuery} />
       </div>
 
       {/* Right cluster */}
