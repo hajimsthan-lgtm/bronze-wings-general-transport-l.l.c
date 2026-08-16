@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Phone, Mail, BadgeCheck, ChevronDown, Truck, Wallet, ShieldCheck, Globe2, CalendarDays, HeartPulse, TrendingUp, FileText, Car } from 'lucide-react';
+import { Phone, Mail, BadgeCheck, ChevronDown, Truck, Wallet, ShieldCheck, Globe2, CalendarDays, HeartPulse, TrendingUp, FileText, Car, Pencil } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
+import DriverEditDialog from '@/components/admin/DriverEditDialog';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -46,14 +47,23 @@ function AccordionItem({ title, icon: Icon, accent, defaultOpen, children }) {
   );
 }
 
-export default function DriverProfileCard({ driver, vehicle, stats }) {
+export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
   const isActive = driver.status === 'active';
   const dotColor = isActive ? '#34d399' : driver.status === 'on_leave' ? '#f59e0b' : '#94a3b8';
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <div className="space-y-4">
       {/* ===== Profile Card — banded model ===== */}
       <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
+        {/* edit pencil — top corner */}
+        <button
+          onClick={() => setEditOpen(true)}
+          aria-label="Edit driver"
+          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+        </button>
         {/* header band */}
         <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#34d399', 0.10)} 0%, transparent 100%)` }}>
           <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#34d399', 0.5)} 0%, transparent 70%)` }} />
@@ -166,6 +176,8 @@ export default function DriverProfileCard({ driver, vehicle, stats }) {
           </AccordionItem>
         </div>
       </div>
+
+      <DriverEditDialog open={editOpen} onOpenChange={setEditOpen} driver={driver} onSave={onSave} />
     </div>
   );
 }

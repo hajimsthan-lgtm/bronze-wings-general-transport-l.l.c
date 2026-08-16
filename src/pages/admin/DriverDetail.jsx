@@ -95,6 +95,12 @@ export default function DriverDetail() {
   const expYears = yearsSince(driver.join_date);
   const totalHours = fTrips.reduce((s, x) => s + (Number(x.hours) || Number(x.calculated_duration) || 0), 0);
 
+  const saveDriver = async (patch) => {
+    const updated = await base44.entities.Driver.update(driver.id, patch);
+    setDriver(updated);
+    toast({ title: 'Driver updated' });
+  };
+
   const reloadSalaries = () => base44.entities.SalaryRecord.filter({ driver_name: driver.name }).then(setSalaries).catch(() => {});
   const markPaid = async (rec) => {
     setSalaryBusyId(rec.id);
@@ -172,9 +178,11 @@ export default function DriverDetail() {
         <EntityDetailHeader backTo="/admin/drivers" />
       </div>
 
-      {/* Grid: profile (left) | sections + widgets (right) */}
+      {/* Grid: profile (left, sticky) | sections + widgets (right, scroll) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
-        <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} />
+        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto thin-scroll">
+          <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
+        </div>
         <div className="space-y-4">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard
