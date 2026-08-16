@@ -54,7 +54,6 @@
     "driver_name",
     "type",
     "total_amount",
-    "monthly_deduction",
     "issue_date"
   ],
   "rls": {

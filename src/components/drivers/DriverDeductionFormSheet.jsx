@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { formatCurrency } from '@/lib/formatters';
 
 const TYPES = [
   { value: 'housing_advance', label: 'Housing Advance' },
@@ -24,19 +23,11 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
     type: editItem?.type || 'housing_advance',
     description: editItem?.description || '',
     total_amount: editItem?.total_amount || 0,
-    monthly_deduction: editItem?.monthly_deduction || 0,
     issue_date: editItem?.issue_date || new Date().toISOString().split('T')[0],
     status: editItem?.status || 'active',
   }));
 
-  // reset form when target changes
-  const key = `${editItem?.id || 'new'}-${open}`;
-  useState(() => { /* no-op, key forces remount via parent if needed */ });
-
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
-
-  const remaining = editItem ? Number(editItem.remaining_balance ?? editItem.total_amount) : Number(form.total_amount);
-  const monthsLeft = form.monthly_deduction > 0 ? Math.ceil(remaining / Number(form.monthly_deduction)) : 0;
 
   const handleSave = async () => {
     if (!form.description.trim()) { toast({ title: 'Description required', variant: 'destructive' }); return; }
@@ -47,13 +38,13 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
         type: form.type,
         description: form.description.trim(),
         total_amount: Number(form.total_amount) || 0,
-        monthly_deduction: Number(form.monthly_deduction) || 0,
+        monthly_deduction: 0,
         issue_date: form.issue_date,
         status: form.status,
         remaining_balance: editItem
           ? Math.max(0, (Number(editItem.remaining_balance) || 0) + (Number(form.total_amount) - Number(editItem.total_amount)))
           : Number(form.total_amount) || 0,
-        months_left: monthsLeft,
+        months_left: 0,
       };
       if (editItem) await base44.entities.DriverDeduction.update(editItem.id, payload);
       else await base44.entities.DriverDeduction.create(payload);
@@ -86,15 +77,9 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Description</Label>
             <Input value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="e.g. Housing Advance — Mohammed" className="bg-input border-border" />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Total Amount (AED)</Label>
-              <Input type="number" value={form.total_amount} onChange={(e) => set('total_amount', e.target.value)} className="bg-input border-border" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Monthly Deduction (AED)</Label>
-              <Input type="number" value={form.monthly_deduction} onChange={(e) => set('monthly_deduction', e.target.value)} className="bg-input border-border" />
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Total Amount (AED)</Label>
+            <Input type="number" value={form.total_amount} onChange={(e) => set('total_amount', e.target.value)} className="bg-input border-border" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -114,7 +99,7 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
             </div>
           </div>
           <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-            Months Left (est.): <span className="text-foreground font-semibold">{monthsLeft}</span> · Remaining: <span className="text-foreground font-semibold">{formatCurrency(remaining)}</span>
+            The deduction amount applied per salary run is set during salary generation (Pending Deductions · FIFO block). Remaining balance updates automatically as deductions are applied.
           </div>
           <div className="flex gap-2 pt-2">
             <Button onClick={handleSave} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">

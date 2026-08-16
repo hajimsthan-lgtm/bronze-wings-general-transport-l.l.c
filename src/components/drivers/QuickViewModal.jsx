@@ -41,7 +41,7 @@ export default function QuickViewModal({
 
   const exportData = filtered.map((r) => {
     const o = {};
-    columns.forEach((c) => { o[c.key] = r[c.key]; });
+    columns.forEach((c) => { o[c.key] = c.transform ? c.transform(r) : r[c.key]; });
     return o;
   });
   const dateRange = `${from || 'start'} → ${to || 'now'}`;
