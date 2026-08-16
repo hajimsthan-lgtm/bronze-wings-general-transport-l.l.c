@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, FileText, Receipt, UserPlus, Fuel, ChevronDown } from 'lucide-react';
+import { Plus, FileText, Receipt, UserPlus, Fuel, ChevronDown, Wrench } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
@@ -16,6 +16,7 @@ const ACTIONS = [
   { label: 'Add Expense', icon: Receipt, grad: ['#f97316', '#fb923c'], glow: 'rgba(249,115,22,0.3)', to: '/expenses?open=expense' },
   { label: 'Add Driver', icon: UserPlus, grad: ['#06b6d4', '#22d3ee'], glow: 'rgba(6,182,212,0.3)', to: '/admin/drivers?new=1' },
   { label: 'Fuel Entry', icon: Fuel, grad: ['#10b981', '#34d399'], glow: 'rgba(16,185,129,0.3)', to: '/admin/vehicles' },
+  { label: 'Maintenance', icon: Wrench, grad: ['#8b5cf6', '#a78bfa'], glow: 'rgba(139,92,246,0.3)', to: '/maintenance?new=1' },
 ];
 const INVOICE = { label: '+ New Invoice', icon: FileText, grad: ['#14b8a6', '#5eead4'], glow: 'rgba(20,184,166,0.3)' };
 
@@ -38,7 +39,7 @@ export default function QuickActions() {
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}>
       <h2 className="text-[11px] uppercase tracking-[0.08em] font-semibold text-[#6b7280] mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {ACTIONS.map((a, i) => (
           <motion.button
             key={a.label}

@@ -68,7 +68,7 @@ export default function TripModeFields({ p }) {
 
       {/* Route */}
       <Section title="Route" icon={RouteIcon} accent="16,185,129" delay={60}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('from')}</Label>
             <IconInput icon={MapPin} list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={inputCls} />
@@ -95,7 +95,7 @@ export default function TripModeFields({ p }) {
 
       {/* Schedule */}
       <Section title="Schedule" icon={CalendarClock} accent="245,158,11" delay={120}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Load Date &amp; Time</Label>
             <DateTimePicker value={form.load_datetime} onChange={(v) => update('load_datetime', v)} placeholder="Load time" />
@@ -105,7 +105,7 @@ export default function TripModeFields({ p }) {
             <DateTimePicker value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} placeholder="Offload time" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Duration Unit</Label>
             <Select value={form.duration_unit} onValueChange={(v) => update('duration_unit', v)}>
@@ -150,7 +150,7 @@ export default function TripModeFields({ p }) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
             <IconInput icon={Truck} list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
@@ -214,7 +214,7 @@ export default function TripModeFields({ p }) {
 
       {/* Delivery */}
       <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
             <IconInput icon={FileText} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', e.target.value)} className={inputCls} />

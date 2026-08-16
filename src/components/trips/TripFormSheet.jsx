@@ -538,27 +538,27 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-4xl max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="hud-icon-tile w-10 h-10">
-                {mode === 'trip' ? <Truck className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[96vw] sm:w-[92vw] max-w-4xl max-h-[88vh] sm:max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="hud-icon-tile w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
+                {mode === 'trip' ? <Truck className="w-4 h-4 sm:w-5 sm:h-5" /> : <FileText className="w-4 h-4 sm:w-5 sm:h-5" />}
               </div>
-              <div>
-                <DialogTitle className="font-display text-foreground text-lg leading-tight">{title}</DialogTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
+              <div className="min-w-0">
+                <DialogTitle className="font-display text-foreground text-base sm:text-lg leading-tight truncate">{title}</DialogTitle>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
                   {mode === 'trip' ? 'Fill in trip details · Live calculation on the right' : 'Set up monthly contract terms'}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
               <button
                 type="button"
                 onClick={handleCloseAttempt}
                 aria-label="Close"
-                className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
+                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -573,7 +573,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Body: scrollable form with standalone floating calc panel in right column */}
         <div className="flex-1 overflow-y-auto premium-scroll">
-        <div className="px-5 py-4 grid lg:grid-cols-[1fr_280px] gap-5 items-start">
+        <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_280px] gap-3 sm:gap-5 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
             <TripModeFields p={tripCtx} /> :
@@ -630,7 +630,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
+        <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2 h-9">
             <X className="w-4 h-4" />
             <span className="hidden sm:inline">{t('cancel')}</span>

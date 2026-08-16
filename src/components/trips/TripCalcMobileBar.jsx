@@ -23,7 +23,7 @@ export default function TripCalcMobileBar({ form, isOvertime, overtimeMetric, ex
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between px-5 py-2.5"
+        className="w-full flex items-center justify-between px-3 sm:px-5 py-2.5"
       >
         <div className="flex items-center gap-2">
           <span className="live-pulse-dot" />
@@ -40,7 +40,7 @@ export default function TripCalcMobileBar({ form, isOvertime, overtimeMetric, ex
 
       {/* Expanded breakdown */}
       {expanded && (
-        <div className="px-5 pb-3 space-y-2 animate-fade-in">
+        <div className="px-3 sm:px-5 pb-3 space-y-2 animate-fade-in">
           <CalcRow label="Base Fare" value={formatCurrency(Number(form.base_fare) || 0)} />
           <CalcRow label={`Duration (${form.duration_unit === 'days' ? 'days' : 'hrs'})`} value={form.calculated_duration ? `${form.calculated_duration}` : '—'} />
           <CalcRow label="Max Allowed" value={form.max_allowed_duration || '—'} />

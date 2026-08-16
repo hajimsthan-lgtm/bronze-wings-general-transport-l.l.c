@@ -6,13 +6,13 @@ export default function ModeToggle({ mode, onChange, t }) {
     { key: 'contract', label: t('monthly_contract'), icon: null },
   ];
   return (
-    <div className="inline-flex items-center gap-1 p-1 rounded-full bg-white/5 border border-white/10">
+    <div className="inline-flex items-center gap-0.5 sm:gap-1 p-1 rounded-full bg-white/5 border border-white/10">
       {options.map((o) => (
         <button
           key={o.key}
           type="button"
           onClick={() => onChange(o.key)}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold transition-all duration-200 ${
             mode === o.key ? 'text-white' : 'text-white/40 hover:text-white/60'
           }`}
           style={
