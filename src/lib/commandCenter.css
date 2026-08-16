@@ -1,0 +1,62 @@
+/* ===== Bronze Wings Command Center — brand gradient tokens & utilities ===== */
+
+:root {
+  --brand-bronze-rgb: 201, 135, 59;
+  --brand-blue-rgb: 10, 132, 255;
+}
+
+/* Brand gradient text (one-time shimmer on load) */
+.brand-gradient-text {
+  background: linear-gradient(135deg, rgb(var(--brand-bronze-rgb)) 0%, rgb(var(--brand-blue-rgb)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: brand-shimmer-sweep 1.2s ease-out forwards;
+}
+
+.brand-gradient-bg {
+  background: linear-gradient(135deg, rgb(var(--brand-bronze-rgb)) 0%, rgb(var(--brand-blue-rgb)) 100%);
+}
+
+.brand-glow {
+  box-shadow: 0 0 0 1px rgba(var(--brand-bronze-rgb), 0.25), 0 8px 32px -8px rgba(var(--brand-blue-rgb), 0.35);
+}
+
+/* Command center card */
+.cmd-card {
+  border-radius: 20px;
+  padding: 24px;
+  background: linear-gradient(165deg, rgba(var(--surf-1-rgb), 0.72) 0%, rgba(var(--surf-2-rgb), 0.82) 100%);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(var(--panel-accent-rgb), 0.10);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.cmd-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--panel-accent-rgb), 0.20);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Light mode overrides */
+.theme-light .cmd-card {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.theme-light .cmd-card:hover {
+  border-color: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+@keyframes brand-shimmer-sweep {
+  0% { background-position: 200% center; }
+  100% { background-position: 0% center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-gradient-text { animation: none !important; }
+  .cmd-card { transition: none !important; }
+}

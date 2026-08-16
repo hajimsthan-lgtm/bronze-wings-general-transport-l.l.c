@@ -55,6 +55,7 @@ const Agents = lazy(() => import('@/pages/Agents'));
 const Quotations = lazy(() => import('@/pages/Quotations'));
 const Agreements = lazy(() => import('@/pages/Agreements'));
 const InvoicesPage = lazy(() => import('@/pages/InvoicesPage'));
+const CommandCenter = lazy(() => import('@/pages/CommandCenter'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -85,6 +86,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/command-center" element={<CommandCenter />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/trips" element={<Operations />} />
