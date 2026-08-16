@@ -16,6 +16,9 @@
     },
     "description": {
       "type": "string"
+    },
+    "reference": {
+      "type": "string"
     }
   },
   "required": [
