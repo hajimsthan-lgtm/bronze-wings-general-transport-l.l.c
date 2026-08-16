@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot } from 'lucide-react';
+import { ArrowLeft, Building2, User, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -14,6 +14,7 @@ import FactoryResetCard from '@/components/settings/FactoryResetCard';
 import UserManualCard from '@/components/settings/UserManualCard';
 import DisplaySettingsCard from '@/components/settings/DisplaySettingsCard';
 import SoundSettingsCard from '@/components/settings/SoundSettingsCard';
+import StorageSettingsCard from '@/components/settings/StorageSettingsCard';
 
 export default function Settings() {
   const { language, toggleLanguage } = useI18n();
@@ -64,6 +65,7 @@ export default function Settings() {
     { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
     { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
     { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
+    { key: 'storage', label: 'Storage', icon: Database, render: () => <StorageSettingsCard /> },
     { key: 'agents', label: 'AI Agents', icon: Bot, render: () => (
       <Link to="/agents" className="block p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/30 hover:bg-emerald-500/[0.06] transition-all">
         <div className="flex items-center gap-4">

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
-import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
+import DocumentsSection from '@/components/admin/DocumentsSection';
 import StatusBadge from '@/components/common/StatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DetailSkeleton from '@/components/detail/DetailMotion';
@@ -392,9 +392,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
           </CollapsibleSection>
 
           {/* Documents */}
-          <CollapsibleSection title={t('documents')} icon={FileText} accent="#a855f7">
-            <EntityDocumentsTab entityType="client" entityId={client.id} />
-          </CollapsibleSection>
+          <DocumentsSection entityType="client" entityId={client.id} accent="#a855f7" defaultOpen={false} />
         </div>
       </div>
 

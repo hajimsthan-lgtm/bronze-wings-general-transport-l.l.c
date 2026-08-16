@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
-import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
+import DocumentsSection from '@/components/admin/DocumentsSection';
 import VehicleProfileCard from '@/components/admin/VehicleProfileCard';
 import ContractsSection from '@/components/contracts/ContractsSection';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -303,9 +303,7 @@ export default function VehicleDetail() {
           </RecordSectionCard>
 
           {/* Documents — small card, collapsed by default */}
-          <RecordSectionCard title={t('documents')} icon={FileText} accent="#a855f7" count={null} collapsible defaultOpen={false} loading={false} className="h-full">
-            <EntityDocumentsTab entityType="vehicle" entityId={vehicle.id} />
-          </RecordSectionCard>
+          <DocumentsSection entityType="vehicle" entityId={vehicle.id} accent="#a855f7" defaultOpen={false} />
 
           {/* Profit summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

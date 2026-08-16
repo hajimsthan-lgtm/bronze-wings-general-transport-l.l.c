@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, FileText, Trash2, Download, Loader2, Paperclip } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
+import { getDocStatus, getExpirySubtext, DOC_STATUS_VAR } from '@/lib/documentHealth';
 import TabTableCard from '@/components/admin/TabTableCard';
 
 const TYPES = ['registration', 'insurance', 'license', 'permit', 'contract', 'invoice', 'other'];
@@ -132,13 +133,20 @@ export default function EntityDocumentsTab({ entityType, entityId, collapsible =
       emptyHint=""
     >
       {docs.map((d) => {
-        const st = d.status || statusOf(d.expiry_date);
+        const st = getDocStatus(d);
+        const subtext = getExpirySubtext(d.expiry_date);
         return (
           <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-            <div className="col-span-5 text-foreground font-medium truncate">{d.title}</div>
+            <div className="col-span-5 flex items-center gap-2 text-foreground font-medium truncate min-w-0">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: `hsl(var(--${DOC_STATUS_VAR[st]}))` }} />
+              <span className="truncate">{d.title}</span>
+            </div>
             <div className="col-span-2 text-muted-foreground capitalize truncate">{d.type}</div>
-            <div className="col-span-2 text-muted-foreground">{d.expiry_date ? formatDate(d.expiry_date) : '—'}</div>
-            <div className={`col-span-2 text-[11px] font-semibold uppercase ${STATUS_TONE[st] || 'text-muted-foreground'}`}>{st.replace('_', ' ')}</div>
+            <div className="col-span-2 min-w-0">
+              <div className="text-muted-foreground truncate">{d.expiry_date ? formatDate(d.expiry_date) : '—'}</div>
+              {subtext && <div className="text-[10px] leading-tight" style={{ color: `hsl(var(--${DOC_STATUS_VAR[subtext.tone]}))` }}>{subtext.text}</div>}
+            </div>
+            <div className="col-span-2 text-[11px] font-semibold uppercase" style={{ color: `hsl(var(--${DOC_STATUS_VAR[st]}))` }}>{st.replace('_', ' ')}</div>
             <div className="col-span-1 text-right flex items-center justify-end gap-1">
               {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary p-1.5"><Download className="w-4 h-4" /></a>}
               <button onClick={() => remove(d)} className="text-muted-foreground hover:text-red-400 p-1.5"><Trash2 className="w-3.5 h-3.5" /></button>

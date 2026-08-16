@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
-import EntityDocumentsTab from '@/components/admin/EntityDocumentsTab';
+import DocumentsSection from '@/components/admin/DocumentsSection';
 import DriverProfileCard from '@/components/admin/DriverProfileCard';
 import ContractsSection from '@/components/contracts/ContractsSection';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -296,16 +296,7 @@ export default function DriverDetail() {
           </RecordSectionCard>
 
           {/* Documents — small card, click-to-collapse */}
-          <RecordSectionCard
-              title={t('documents')}
-              icon={FileText}
-              accent="#a855f7"
-              count={null}
-              collapsible
-              defaultOpen={false}
-              loading={false}>
-            <EntityDocumentsTab entityType="driver" entityId={driver.id} />
-          </RecordSectionCard>
+          <DocumentsSection entityType="driver" entityId={driver.id} accent="#a855f7" defaultOpen={false} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DriverDeductionsSection driverName={driver.name} />
