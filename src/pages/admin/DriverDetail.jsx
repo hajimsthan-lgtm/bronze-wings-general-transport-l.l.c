@@ -20,7 +20,10 @@ import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText, Truck } from 'lucide-react';
+import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText, Truck, Pencil } from 'lucide-react';
+import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
+import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
@@ -50,6 +53,9 @@ export default function DriverDetail() {
   const [companySettings, setCompanySettings] = useState({});
   const [payslipBusyId, setPayslipBusyId] = useState(null);
   const [viewer, setViewer] = useState(null);
+  const [salaryFormOpen, setSalaryFormOpen] = useState(false);
+  const [expenseFormOpen, setExpenseFormOpen] = useState(false);
+  const [expenseEdit, setExpenseEdit] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,6 +108,7 @@ export default function DriverDetail() {
   };
 
   const reloadSalaries = () => base44.entities.SalaryRecord.filter({ driver_name: driver.name }).then(setSalaries).catch(() => {});
+  const reloadExpenses = () => base44.entities.Expense.filter({ driver_name: driver.name }).then(setExpenses).catch(() => {});
   const markPaid = async (rec) => {
     setSalaryBusyId(rec.id);
     try {
@@ -226,24 +233,29 @@ export default function DriverDetail() {
               defaultOpen={false}
               onView={() => setViewer('salary')}
               onPdf={salaryPdf}
+              onNew={() => setSalaryFormOpen(true)}
+              newLabel="Add salary"
               loading={dataLoading}
               emptyIcon={WalletIcon}
-              emptyLabel={t('no_data')}>
-            <div className="space-y-3">
-              {fSalaries.slice(0, 5).map((rec) => (
-                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
-                    {rec.applied_deductions?.length > 0 && (
-                      <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {rec.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
+              emptyLabel={t('no_data')}
+              columns={[
+                { label: 'Period', className: 'col-span-3' },
+                { label: 'Payment Date', className: 'col-span-3' },
+                { label: 'Net Salary', className: 'col-span-3 text-right' },
+                { label: 'Status', className: 'col-span-2' },
+                { label: '', className: 'col-span-1 text-right' },
+              ]}>
+            {fSalaries.slice(0, 5).map((rec) => (
+              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                <div className="col-span-3 text-foreground font-medium">{rec.month} {rec.year}</div>
+                <div className="col-span-3 text-muted-foreground">{formatDate(rec.payment_date)}</div>
+                <div className="col-span-3 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
+                <div className="col-span-2"><StatusBadge status={rec.status} /></div>
+                <div className="col-span-1 text-right">
                   <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </RecordSectionCard>
 
           {/* Expenses — small card, click-to-collapse */}
@@ -256,21 +268,31 @@ export default function DriverDetail() {
               defaultOpen={false}
               onView={() => setViewer('expenses')}
               onPdf={expensesPdf}
+              onNew={() => { setExpenseEdit(null); setExpenseFormOpen(true); }}
+              newLabel="Add expense"
               loading={dataLoading}
               emptyIcon={ReceiptIcon}
-              emptyLabel={t('no_data')}>
-            <div className="space-y-3">
-              {fExpenses.slice(0, 5).map((rec) => (
-                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
-                  <StatusBadge status={rec.status} />
+              emptyLabel={t('no_data')}
+              columns={[
+                { label: 'Date', className: 'col-span-2' },
+                { label: 'Category', className: 'col-span-2' },
+                { label: 'Description', className: 'col-span-3' },
+                { label: 'Amount', className: 'col-span-2 text-right' },
+                { label: 'Status', className: 'col-span-2' },
+                { label: '', className: 'col-span-1 text-right' },
+              ]}>
+            {fExpenses.slice(0, 5).map((rec) => (
+              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
+                <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
+                <div className="col-span-2 text-muted-foreground capitalize">{rec.category}</div>
+                <div className="col-span-3 text-foreground truncate">{rec.description || rec.category}</div>
+                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
+                <div className="col-span-2"><StatusBadge status={rec.status} /></div>
+                <div className="col-span-1 text-right">
+                  <Button size="sm" variant="ghost" onClick={() => { setExpenseEdit(rec); setExpenseFormOpen(true); }} className="h-7 px-2 text-muted-foreground hover:text-foreground" title="Edit expense"><Pencil className="w-3.5 h-3.5" /></Button>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </RecordSectionCard>
 
           {/* Documents — small card, click-to-collapse */}
@@ -293,6 +315,34 @@ export default function DriverDetail() {
           </div>
         </div>
       </div>
+
+      <Sheet open={salaryFormOpen} onOpenChange={setSalaryFormOpen}>
+        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-display text-foreground">Add Salary</SheetTitle>
+          </SheetHeader>
+          <SalaryFormSheet
+            editItem={null}
+            prefillDriver={driver.name}
+            onSave={async (data) => {
+              const { applied_deductions = [], ...salaryData } = data;
+              const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
+              await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown });
+              reloadSalaries();
+              setSalaryFormOpen(false);
+            }}
+            onCancel={() => setSalaryFormOpen(false)}
+          />
+        </SheetContent>
+      </Sheet>
+
+      <ExpenseFormSheet
+        open={expenseFormOpen}
+        onOpenChange={setExpenseFormOpen}
+        editItem={expenseEdit}
+        prefillDriver={driver.name}
+        onSaved={reloadExpenses}
+      />
 
       <BreakdownDialog
         open={!!breakdown}
