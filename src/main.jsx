@@ -5,6 +5,7 @@ import App from '@/App.jsx'
 import '@/index.css'
 import '@/mobile-theme.css'
 import '@/lib/lightThemeFixes.css'
+import '@/lib/gradientAccents.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>

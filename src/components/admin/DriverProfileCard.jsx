@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Phone, Mail, BadgeCheck, ChevronDown, Wallet, ShieldCheck, Globe2, TrendingUp, FileText, Car, Pencil } from 'lucide-react';
-import StatusBadge from '@/components/common/StatusBadge';
 import DriverEditDialog from '@/components/admin/DriverEditDialog';
 import IconChip from '@/components/common/IconChip';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -17,10 +16,16 @@ const expiryTone = (d) => {
   return d <= soon ? 'text-amber-400' : 'text-foreground';
 };
 
+const STATUS_CONFIG = {
+  active: { varName: 'success', label: 'Active' },
+  inactive: { varName: 'muted-foreground', label: 'Inactive' },
+  on_leave: { varName: 'warning', label: 'On Leave' },
+};
+
 function Row({ label, value, tone }) {
   const isEmpty = !value || value === '—';
   return (
-    <div className="flex items-center justify-between gap-2 text-[13px] px-0.5 py-1">
+    <div className="flex items-center justify-between gap-2 text-[13px] px-0.5 py-1.5">
       <span className="text-muted-foreground">{label}</span>
       <span className={`font-medium truncate text-right tabular-nums ${isEmpty ? 'text-muted-foreground/40' : (tone || 'text-foreground')}`}>{value || '—'}</span>
     </div>
@@ -40,9 +45,9 @@ function AccordionItem({ sectionKey, openKey, setOpenKey, title, icon: Icon, acc
       <button
         type="button"
         onClick={() => setOpenKey(open ? null : sectionKey)}
-        className="w-full flex items-center gap-2.5 px-3 min-h-[44px] hover:bg-muted/40 transition-colors duration-200"
+        className="w-full flex items-center gap-2.5 px-3 min-h-[48px] hover:bg-muted/40 transition-colors duration-200"
       >
-        <span className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.10), border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
+        <span className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${hexToRgba(accent, 0.14)}, ${hexToRgba(accent, 0.08)})`, border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
           <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
         </span>
         <span className="text-sm font-medium text-foreground flex-1 text-left">{title}</span>
@@ -50,7 +55,7 @@ function AccordionItem({ sectionKey, openKey, setOpenKey, title, icon: Icon, acc
       </button>
       <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
         <div className="overflow-hidden">
-          <div className="px-3 pb-3 pt-1 space-y-1 border-t border-border/40">{children}</div>
+          <div className="px-3 pb-3 pt-1.5 space-y-1.5 border-t border-border/40">{children}</div>
         </div>
       </div>
     </div>
@@ -60,11 +65,12 @@ function AccordionItem({ sectionKey, openKey, setOpenKey, title, icon: Icon, acc
 export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
   const [editOpen, setEditOpen] = useState(false);
   const [openSection, setOpenSection] = useState('license');
+  const stCfg = STATUS_CONFIG[driver.status] || STATUS_CONFIG.active;
 
   return (
-    <div className="space-y-4">
-      {/* ===== Identity Card ===== */}
-      <div className="glass-card relative overflow-hidden animate-fade-in-up">
+    <div className="space-y-5">
+      {/* ===== Identity Card — gradient wash + gradient border ===== */}
+      <div className="glass-card grad-wash grad-card-border relative overflow-hidden animate-fade-in-up">
         <button
           onClick={() => setEditOpen(true)}
           aria-label="Edit driver"
@@ -73,12 +79,12 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
           <Pencil className="w-3.5 h-3.5" />
         </button>
 
-        <div className="px-5 pt-5 pb-4">
+        <div className="px-6 pt-6 pb-5">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-full overflow-hidden border border-border bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 grad-avatar">
               {driver.image_url
                 ? <img src={driver.image_url} alt="" className="w-full h-full object-cover" />
-                : <span className="text-lg font-medium text-primary">{initialsOf(driver.name)}</span>}
+                : <span className="text-lg font-medium text-white">{initialsOf(driver.name)}</span>}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -87,7 +93,17 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">Transport Driver</p>
             </div>
-            <StatusBadge status={driver.status} />
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border flex-shrink-0"
+              style={{
+                background: `linear-gradient(135deg, hsl(var(--${stCfg.varName}) / 0.15), hsl(var(--${stCfg.varName}) / 0.08))`,
+                borderColor: `hsl(var(--${stCfg.varName}) / 0.25)`,
+                color: `hsl(var(--${stCfg.varName}))`,
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: `hsl(var(--${stCfg.varName}))` }} />
+              {stCfg.label}
+            </span>
           </div>
         </div>
 
@@ -104,9 +120,9 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
           ))}
         </div>
 
-        <div className="border-t border-border/80 mx-5 my-4" />
+        <div className="border-t border-border/80 mx-6 my-4" />
 
-        <div className="px-5 pb-4 space-y-3">
+        <div className="px-6 pb-5 space-y-3.5">
           {driver.phone && (
             <a href={`tel:${driver.phone}`} className="flex items-center gap-2.5 text-xs">
               <Phone className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -129,7 +145,7 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
         </div>
 
         {vehicle && (
-          <div className="mx-5 mb-5 flex items-center gap-3 rounded-xl p-3 border border-border/50 bg-muted/20">
+          <div className="mx-6 mb-5 flex items-center gap-3 rounded-xl p-3 border border-border/50 bg-muted/20">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Car className="w-4 h-4 text-primary" />
             </div>
@@ -142,13 +158,13 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
       </div>
 
       {/* ===== License & Details Card ===== */}
-      <div className="glass-card p-5 animate-fade-in-up">
+      <div className="glass-card p-6 animate-fade-in-up">
         <div className="flex items-center gap-2.5 mb-4">
           <IconChip icon={FileText} accent="#a855f7" size={32} />
           <h3 className="text-[15px] font-semibold text-foreground">License &amp; Details</h3>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <AccordionItem sectionKey="license" openKey={openSection} setOpenKey={setOpenSection} title="License" icon={ShieldCheck} accent="#1ED760">
             <Row label="License #" value={driver.license_number} />
             <Row label="License Expiry" value={formatDate(driver.license_expiry)} tone={expiryTone(driver.license_expiry)} />

@@ -37,7 +37,7 @@ export default function WeeklyActivityChart({ trips = [] }) {
         <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
       </div>
 
-      <div className="p-4">
+      <div className="p-5">
         <div className="relative flex items-end justify-between gap-2 h-36">
           {counts.map((c, i) => {
             const isPeak = i === peakIdx;
@@ -48,7 +48,7 @@ export default function WeeklyActivityChart({ trips = [] }) {
                   className="w-full rounded-t-md transition-all duration-500"
                   style={{
                     height: `${Math.max(c ? 6 : 4, (c / max) * 96)}px`,
-                    background: total === 0 ? hexToRgba('#1ED760', 0.10) : isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
+                    background: total === 0 ? hexToRgba('#1ED760', 0.10) : isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : `linear-gradient(180deg, ${hexToRgba('#1ED760', 0.35)}, ${hexToRgba('#1ED760', 0.5)})`,
                     boxShadow: isPeak && total > 0 ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
                   }}
                 />

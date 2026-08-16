@@ -67,7 +67,7 @@ export default function DriverDeductionsSection({ driverName }) {
             <p className="text-xs text-muted-foreground truncate">Company loans & advances</p>
           </div>
         </div>
-        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} size="sm" className="h-7 px-3 bg-primary hover:bg-primary/90 rounded-full text-[13px] font-medium">
+        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} size="sm" className="grad-btn h-7 px-3 rounded-full text-[13px] font-medium border-0">
           <Plus className="w-3.5 h-3.5 mr-1" /> Add
         </Button>
       </div>
@@ -78,13 +78,13 @@ export default function DriverDeductionsSection({ driverName }) {
           {loading ? (
             <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
           ) : deductions.length === 0 ? (
-            <EmptyState icon={Wallet} title="No deductions recorded" />
+            <div className="py-4"><EmptyState icon={Wallet} title="No deductions recorded" /></div>
           ) : deductions.map((d) => {
             const meta = TYPE_META[d.type] || TYPE_META.other;
             const st = STATUS_META[d.status] || STATUS_META.active;
             const Icon = meta.icon;
             return (
-              <div key={d.id} className="flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors">
+              <div key={d.id} className="flex items-start gap-3 p-5 hover:bg-muted/20 transition-colors">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.20)' }}>
                   <Icon className="w-4 h-4 text-primary" />
                 </div>

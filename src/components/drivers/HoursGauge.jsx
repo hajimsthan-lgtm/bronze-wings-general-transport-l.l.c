@@ -23,7 +23,7 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-5">
         <div className="relative flex items-center justify-center my-2">
           <svg width="140" height="140" className="-rotate-90">
             <circle cx="70" cy="70" r={r} fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.12" strokeWidth="6" />

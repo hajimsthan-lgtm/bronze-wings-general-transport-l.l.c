@@ -1,0 +1,40 @@
+/* ===== Token-aware gradient accents — adapt per theme automatically ===== */
+:root {
+  --grad-wash-opacity: 0.08;
+}
+.theme-light {
+  --grad-wash-opacity: 0.04;
+}
+
+.grad-wash {
+  background: linear-gradient(135deg, hsl(var(--primary) / var(--grad-wash-opacity, 0.08)), hsl(var(--card)));
+}
+.grad-avatar {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+}
+.grad-btn {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.82)) !important;
+  box-shadow: 0 4px 14px -4px hsl(var(--primary) / 0.4);
+  transition: box-shadow 0.25s ease, filter 0.25s ease;
+}
+.grad-btn:hover {
+  box-shadow: 0 6px 22px -4px hsl(var(--primary) / 0.55);
+  filter: brightness(1.05);
+}
+.grad-card-border {
+  position: relative;
+}
+.grad-card-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--border) / 0.5));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}

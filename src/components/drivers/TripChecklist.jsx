@@ -21,7 +21,7 @@ export default function TripChecklist({ trips = [] }) {
         </span>
       </div>
 
-      <div className="p-4 space-y-2">
+      <div className="p-5 space-y-2">
         {list.length === 0 && <EmptyState icon={ListChecks} title="No trips in this period" />}
         {list.map((t) => {
           const ok = t.status === 'completed';

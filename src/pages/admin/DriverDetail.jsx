@@ -172,14 +172,14 @@ export default function DriverDetail() {
   };
 
   return (
-    <div className="detail-page space-y-4">
+    <div className="detail-page space-y-5 pt-2">
       {/* Grid: profile (left, frozen) | sections + widgets (right, scroll) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start lg:h-[calc(100vh-3.5rem)]">
-        <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start lg:h-[calc(100vh-3.5rem)]">
+        <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-5">
           <EntityDetailHeader backTo="/admin/drivers" />
           <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
         </div>
-        <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll">
+        <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll pr-1">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard
               collapsible
@@ -229,7 +229,7 @@ export default function DriverDetail() {
               loading={dataLoading}
               emptyIcon={WalletIcon}
               emptyLabel={t('no_data')}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {fSalaries.slice(0, 5).map((rec) => (
                 <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
                   <div className="flex-1 min-w-0">
@@ -259,7 +259,7 @@ export default function DriverDetail() {
               loading={dataLoading}
               emptyIcon={ReceiptIcon}
               emptyLabel={t('no_data')}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {fExpenses.slice(0, 5).map((rec) => (
                 <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
                   <div className="flex-1 min-w-0">
