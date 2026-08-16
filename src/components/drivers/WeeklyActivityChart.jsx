@@ -23,67 +23,45 @@ export default function WeeklyActivityChart({ trips = [] }) {
   const max = Math.max(1, ...counts);
 
   return (
-    <div
-      className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
-      style={{ borderLeft: '4px solid #1ED760' }}
-    >
-      <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.18), transparent 70%)' }} />
-      <div className="flex items-center justify-between mb-4 relative">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#1ED760', 0.14), border: `1px solid ${hexToRgba('#1ED760', 0.3)}` }}>
+    <div className="glass-card rounded-2xl overflow-hidden animate-fade-in-up transition-all duration-200" style={{ borderLeft: '4px solid #1ED760' }}>
+      <div className="flex items-center justify-between h-12 px-4 border-b border-border">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba('#1ED760', 0.10), border: `1px solid ${hexToRgba('#1ED760', 0.25)}` }}>
             <BarChart3 className="w-4 h-4 text-primary" />
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Weekly Activity</h3>
-            <p className="text-xs text-muted-foreground">{total} trips this week</p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground truncate">Weekly Activity</h3>
+            <p className="text-xs text-muted-foreground truncate">{total} trips this week</p>
           </div>
         </div>
-        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+        <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
       </div>
 
-      <div className="relative">
-        <div className="rounded-xl border border-border overflow-hidden p-4">
-          {total === 0 ? (
-            <>
-              <div className="relative flex items-end justify-between gap-2 h-36">
-                {DAYS.map((d, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
-                    <div className="w-full rounded-t-md border border-dashed border-border/40" style={{ height: '8px' }} />
-                    <span className="text-[10px] text-muted-foreground/50">{d}</span>
-                  </div>
-                ))}
+      <div className="p-4">
+        <div className="relative flex items-end justify-between gap-2 h-36">
+          {counts.map((c, i) => {
+            const isPeak = i === peakIdx;
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
+                <span className="text-[10px] text-muted-foreground tabular-nums">{c || ''}</span>
+                <div
+                  className="w-full rounded-t-md transition-all duration-500"
+                  style={{
+                    height: `${Math.max(c ? 6 : 4, (c / max) * 96)}px`,
+                    background: total === 0 ? hexToRgba('#1ED760', 0.10) : isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
+                    boxShadow: isPeak && total > 0 ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
+                  }}
+                />
+                <span className={`text-[10px] ${isPeak ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>{DAYS[i]}</span>
               </div>
-              <p className="text-[11px] text-muted-foreground/60 text-center mt-3">No trips this week yet</p>
-            </>
-          ) : (
-            <>
-              <div className="relative flex items-end justify-between gap-2 h-36">
-                {counts.map((c, i) => {
-                  const isPeak = i === peakIdx;
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
-                      <span className="text-[10px] text-muted-foreground tabular-nums">{c || ''}</span>
-                      <div
-                        className="w-full rounded-t-md transition-all duration-500"
-                        style={{
-                          height: `${Math.max(c ? 6 : 2, (c / max) * 96)}px`,
-                          background: isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
-                          boxShadow: isPeak ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
-                        }}
-                      />
-                      <span className={`text-[10px] ${isPeak ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>{DAYS[i]}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              {peakIdx >= 0 && (
-                <p className="relative text-[11px] text-muted-foreground mt-3">
-                  Peak: <span className="text-foreground font-semibold">{DAYS[peakIdx]}</span> · {counts[peakIdx]} trips
-                </p>
-              )}
-            </>
-          )}
+            );
+          })}
         </div>
+        {peakIdx >= 0 && (
+          <p className="text-[11px] text-muted-foreground mt-3">
+            Peak: <span className="text-foreground font-semibold">{DAYS[peakIdx]}</span> · {counts[peakIdx]} trips
+          </p>
+        )}
       </div>
     </div>
   );

@@ -10,46 +10,33 @@ export default function HoursGauge({ hours = 0, target = 40 }) {
   const offset = circ * (1 - pct / 100);
 
   return (
-    <div
-      className="glass-card rounded-2xl p-5 animate-fade-in-up transition-all duration-300 relative overflow-hidden"
-      style={{ borderLeft: '4px solid #a855f7' }}
-    >
-      <div className="absolute -top-16 -right-10 w-40 h-40 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%)' }} />
-      <div className="flex items-center justify-between mb-4 relative">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
+    <div className="glass-card rounded-2xl overflow-hidden animate-fade-in-up transition-all duration-200" style={{ borderLeft: '4px solid #a855f7' }}>
+      <div className="flex items-center justify-between h-12 px-4 border-b border-border">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba('#a855f7', 0.10), border: `1px solid ${hexToRgba('#a855f7', 0.25)}` }}>
             <Clock className="w-4 h-4" style={{ color: '#a855f7' }} />
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Time Tracker</h3>
-            <p className="text-xs text-muted-foreground">Hours this period</p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground truncate">Time Tracker</h3>
+            <p className="text-xs text-muted-foreground truncate">Hours this period</p>
           </div>
         </div>
       </div>
 
-      <div className="relative">
-        <div className="rounded-xl border border-border overflow-hidden p-4">
-          <div className="relative flex items-center justify-center my-2">
-            <svg width="140" height="140" className="-rotate-90">
-              <circle cx="70" cy="70" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
-              <circle cx="70" cy="70" r={r} fill="none" stroke="url(#hg-grad)" strokeWidth="10" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
-              <defs>
-                <linearGradient id="hg-grad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#4ADE80" />
-                  <stop offset="100%" stopColor="#a855f7" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold text-foreground tabular-nums">{String(h).padStart(2, '0')}:{String(m).padStart(2, '0')}</span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Work Time</span>
-            </div>
+      <div className="p-4">
+        <div className="relative flex items-center justify-center my-2">
+          <svg width="140" height="140" className="-rotate-90">
+            <circle cx="70" cy="70" r={r} fill="none" stroke="hsl(var(--primary))" strokeOpacity="0.12" strokeWidth="6" />
+            <circle cx="70" cy="70" r={r} fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} style={{ transition: 'stroke-dashoffset 0.6s ease' }} />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl font-bold text-foreground tabular-nums">{String(h).padStart(2, '0')}:{String(m).padStart(2, '0')}</span>
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">Work Time</span>
           </div>
-
-          <p className="relative text-[11px] text-muted-foreground text-center">
-            {hours.toFixed(1)} h of {target}h target
-          </p>
         </div>
+        <p className="text-[11px] text-muted-foreground text-center tabular-nums">
+          {hours.toFixed(1)}h of {target}h target
+        </p>
       </div>
     </div>
   );

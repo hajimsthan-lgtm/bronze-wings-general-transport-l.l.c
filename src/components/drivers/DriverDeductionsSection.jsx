@@ -53,22 +53,22 @@ export default function DriverDeductionsSection({ driverName }) {
 
   return (
     <div
-      className="glass-card rounded-2xl overflow-hidden transition-all duration-300"
+      className="glass-card rounded-2xl overflow-hidden transition-all duration-200"
       style={{ borderLeft: '4px solid hsl(var(--destructive))' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(var(--panel-accent-rgb),0.12)', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}>
-            <Wallet className="w-5 h-5 text-primary" />
+      <div className="flex items-center justify-between h-12 px-4 border-b border-border">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}>
+            <Wallet className="w-4 h-4 text-primary" />
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Pending Deductions</h3>
-            <p className="text-xs text-muted-foreground">Company loans & advances to be deducted monthly</p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-foreground truncate">Pending Deductions</h3>
+            <p className="text-xs text-muted-foreground truncate">Company loans & advances</p>
           </div>
         </div>
-        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} size="sm" className="bg-primary hover:bg-primary/90 rounded-full">
-          <Plus className="w-3.5 h-3.5 mr-1" /> Add Deduction
+        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} size="sm" className="h-7 px-3 bg-primary hover:bg-primary/90 rounded-full text-[13px] font-medium">
+          <Plus className="w-3.5 h-3.5 mr-1" /> Add
         </Button>
       </div>
 
@@ -78,7 +78,7 @@ export default function DriverDeductionsSection({ driverName }) {
           {loading ? (
             <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
           ) : deductions.length === 0 ? (
-            <EmptyState icon={Wallet} title="No deductions recorded" className="py-10" />
+            <EmptyState icon={Wallet} title="No deductions recorded" />
           ) : deductions.map((d) => {
             const meta = TYPE_META[d.type] || TYPE_META.other;
             const st = STATUS_META[d.status] || STATUS_META.active;

@@ -11,7 +11,7 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
   const isOpen = !collapsible || open;
 
   const isHex = accent.startsWith('#');
-  const tileBg = isHex ? hexToRgba(accent, 0.12) : 'rgba(255,255,255,0.05)';
+  const tileBg = isHex ? hexToRgba(accent, 0.10) : 'rgba(255,255,255,0.05)';
   const tileBorder = isHex ? `1px solid ${hexToRgba(accent, 0.25)}` : '1px solid rgba(255,255,255,0.08)';
   const iconColor = isHex ? accent : 'hsl(var(--foreground))';
 
@@ -46,12 +46,12 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
       <div className="flex items-center justify-between p-4 border-b border-border gap-3 transition-colors duration-200 hover:bg-muted/30">
         <div className="flex items-center gap-3 min-w-0">
           {Icon && (
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: tileBg, border: tileBorder }}>
-              <Icon className="w-5 h-5" style={{ color: iconColor }} />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: tileBg, border: tileBorder }}>
+              <Icon className="w-4 h-4" style={{ color: iconColor }} />
             </div>
           )}
           <div className="min-w-0">
-            <h3 className="text-base font-semibold text-foreground truncate">{title}</h3>
+            <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
             <p className="text-xs text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
           </div>
         </div>
@@ -78,8 +78,8 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
           <DialogHeader>
             <DialogTitle className="font-display text-foreground flex items-center justify-between gap-2 pr-8">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
-                  <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.10), border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
+                  <Icon className="w-4 h-4" style={{ color: accent }} />
                 </div>
                 <span className="truncate">{title}</span>
                 {count != null && <span className="text-xs font-normal text-muted-foreground flex-shrink-0">· {count} record{count === 1 ? '' : 's'}</span>}
