@@ -49,29 +49,29 @@ export default function ShellSidebar({ query = '' }) {
       
       {/* Brand / wordmark */}
       <div className="px-5 pt-5 pb-3 flex-shrink-0">
-        <Link to="/" className="flex items-center gap-2.5 group/brand">
+        <Link to="/" className="flex flex-col gap-2 group/brand">
           {logoUrl ?
-          <div className="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 border border-border/60" style={{ boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)' }}>
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-border/60" style={{ boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)' }}>
               <img src={logoUrl} alt="" className="w-full h-full object-contain" />
             </div> :
 
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
               background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
               border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-              boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)'
+              boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45), inset 0 1px 0 rgba(255,255,255,0.06)'
             }}>
-            
-              <span className="text-[11px] font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
+              <span className="text-[13px] font-bold [font-family:'Abril_Fatface',_system-ui]" style={{ color: 'rgb(var(--panel-accent-rgb))', textShadow: '0 0 10px rgba(var(--panel-accent-rgb),0.55)' }}>BW</span>
             </div>
           }
+          <div className="h-px w-full bg-border/40" />
           <div className="leading-tight">
-            <span className="text-[15px] font-bold tracking-tight text-foreground">
+            <span className="block text-[15px] font-bold tracking-tight text-foreground [font-family:'Abril_Fatface',_system-ui]">
               {showSplit ? firstPart + ' ' : ''}
-              <span style={{ color: 'rgb(var(--panel-accent-rgb))' }} className="font-medium [font-family:'Abril_Fatface',_system-ui]">{showSplit ? accentPart : companyName}</span>
+              <span style={{ color: 'rgb(var(--panel-accent-rgb))' }}>{showSplit ? accentPart : companyName}</span>
             </span>
-            <span className="block text-[8.5px] tracking-[0.2em] uppercase text-muted-foreground/70 mt-0.5">General Transport</span>
+            <span className="block text-[8.5px] tracking-[0.2em] uppercase text-muted-foreground/70 mt-1">General Transport</span>
           </div>
         </Link>
       </div>
