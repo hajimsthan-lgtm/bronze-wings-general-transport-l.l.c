@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Loader2, FileText, Search, Building2 } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, SlidersHorizontal, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -23,11 +23,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import InvoiceCard, { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
+import InvoiceStatCards from '@/components/invoices/InvoiceStatCards';
+import InvoiceListPane from '@/components/invoices/InvoiceListPane';
+import InvoiceDetailPane from '@/components/invoices/InvoiceDetailPane';
 import PaymentModal from '@/components/invoices/PaymentModal';
 import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
+import HeaderActionButton from '@/components/layout/HeaderActionButton';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -43,13 +53,16 @@ export default function InvoicesPage() {
   const [uploadingId, setUploadingId] = useState(null);
   const [search, setSearch] = useState('');
   const [clientFilter, setClientFilter] = useState('all');
-  const [signedFilter, setSignedFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
-  const [paymentModal, setPaymentModal] = useState(null); // { inv, mode }
+  const [paymentModal, setPaymentModal] = useState(null);
   const [bulkPaymentModal, setBulkPaymentModal] = useState(false);
-  const [cancelModal, setCancelModal] = useState(null); // inv
+  const [cancelModal, setCancelModal] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [tab, setTab] = useState('all');
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
 
@@ -62,7 +75,6 @@ export default function InvoicesPage() {
     if (client) navigate(`/admin/clients/${client.id}`);
   };
 
-  // Delete ClientPayment records linked to an invoice (used when reverting paid/partially_paid → draft/sent)
   const deletePaymentsForInvoice = async (inv) => {
     const payments = await base44.entities.ClientPayment.filter({ client_name: inv.client_name }, '-created_date', 200).catch(() => []);
     const linked = (payments || []).filter(p => (p.allocated_invoices || []).some(a => a.invoice_id === inv.id));
@@ -72,9 +84,8 @@ export default function InvoicesPage() {
   };
 
   const handleNew = () => { setEditing(null); setSheetOpen(true); };
-  const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); };
+  const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); setMobileDetailOpen(false); };
 
-  // Intercept status changes: paid/partially_paid → payment modal, cancelled → reason modal
   const handleStatusChangeRequest = (inv, newStatus) => {
     if (newStatus === 'paid' || newStatus === 'partially_paid') {
       setPaymentModal({ inv, mode: newStatus });
@@ -112,14 +123,12 @@ export default function InvoicesPage() {
     const total = Number(inv.total_amount || 0);
     const alreadyPaid = Number(inv.paid_amount || 0);
     const newPaidAmount = alreadyPaid + payData.amount;
-    // Determine actual status based on amount
     const actualStatus = newPaidAmount >= total ? 'paid' : 'partially_paid';
     try {
       await base44.entities.Invoice.update(inv.id, {
         status: actualStatus,
         paid_amount: newPaidAmount,
       });
-      // Create ClientPayment record so it flows to client section, Soa, and P&L
       await base44.entities.ClientPayment.create({
         reference_number: payData.reference,
         client_name: inv.client_name,
@@ -167,7 +176,7 @@ export default function InvoicesPage() {
     await doStatusUpdate(inv, 'cancelled', { voided: true, void_reason: reason });
   };
 
-  // Auto-overdue: mark invoices as overdue if due_date has passed
+  // Auto-overdue
   useEffect(() => {
     if (!allInvoices.length) return;
     const today = new Date().toISOString().split('T')[0];
@@ -190,7 +199,6 @@ export default function InvoicesPage() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.Invoice.update(inv.id, { signed_invoice_url: file_url, signed_date: today });
-
       const client = clients.find(c => c.name === inv.client_name);
       if (client) {
         await base44.entities.Document.create({
@@ -202,7 +210,6 @@ export default function InvoicesPage() {
           notes: `Signed by client for ${inv.invoice_number}`,
         }).catch(() => {});
       }
-
       toast({ title: 'Signed invoice attached', description: inv.invoice_number });
       refetch();
     } catch (e) {
@@ -214,7 +221,6 @@ export default function InvoicesPage() {
 
   const handleBulkStatusChange = async () => {
     if (selected.size === 0 || !bulkStatus) return;
-    // Intercept payment / cancel to use modals with auto functions
     if (bulkStatus === 'paid' || bulkStatus === 'partially_paid') {
       setBulkPaymentModal(true);
       return;
@@ -253,7 +259,6 @@ export default function InvoicesPage() {
     const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
     if (selectedInvoices.length === 0) return;
     try {
-      // Create a single ClientPayment with FIFO allocations
       await base44.entities.ClientPayment.create({
         reference_number: payData.reference,
         client_name: selectedInvoices[0]?.client_name || '',
@@ -271,7 +276,6 @@ export default function InvoicesPage() {
         status: 'completed',
         notes: payData.notes,
       });
-      // Update each invoice's paid_amount and status
       await base44.entities.Invoice.bulkUpdate(
         payData.allocations.map(a => {
           const inv = selectedInvoices.find(i => i.id === a.invoice_id);
@@ -318,6 +322,7 @@ export default function InvoicesPage() {
       await deleteInvoice.mutateAsync(inv.id);
       await restructureInvoiceSequence(invNum);
       toast({ title: 'Invoice deleted' });
+      if (selectedId === inv.id) setSelectedId(null);
       refetch();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Delete error', description: e.message });
@@ -338,131 +343,217 @@ export default function InvoicesPage() {
     }
   };
 
-  const filtered = useMemo(() => {
+  // Base filter (date + client + search + status)
+  const baseFiltered = useMemo(() => {
     return allInvoices.filter(inv => {
       const matchesDate = !inv.issue_date || ((!dateFrom || inv.issue_date >= dateFrom) && (!dateTo || inv.issue_date <= dateTo));
       const matchesClient = clientFilter === 'all' || inv.client_name === clientFilter;
       const q = search.trim().toLowerCase();
       const matchesSearch = !q || (inv.invoice_number || '').toLowerCase().includes(q) || (inv.client_name || '').toLowerCase().includes(q);
-      const matchesSigned = signedFilter === 'all' ||
-        (signedFilter === 'signed' && !!inv.signed_invoice_url) ||
-        (signedFilter === 'unsigned' && !inv.signed_invoice_url);
-      return matchesDate && matchesClient && matchesSearch && matchesSigned;
+      const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+      return matchesDate && matchesClient && matchesSearch && matchesStatus;
     });
-  }, [allInvoices, dateFrom, dateTo, clientFilter, search, signedFilter]);
+  }, [allInvoices, dateFrom, dateTo, clientFilter, search, statusFilter]);
 
+  // Tab counts
+  const counts = useMemo(() => ({
+    all: baseFiltered.length,
+    draft: baseFiltered.filter(i => i.status === 'draft').length,
+    unpaid: baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled').length,
+  }), [baseFiltered]);
+
+  // Tab-filtered list
+  const filtered = useMemo(() => {
+    if (tab === 'draft') return baseFiltered.filter(i => i.status === 'draft');
+    if (tab === 'unpaid') return baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled');
+    return baseFiltered;
+  }, [baseFiltered, tab]);
+
+  const selectedInvoice = filtered.find(i => i.id === selectedId) || baseFiltered.find(i => i.id === selectedId) || null;
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
+  const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
+
+  const handleSelectRow = (id) => {
+    setSelectedId(id);
+    if (window.innerWidth < 1024) {
+      setMobileDetailOpen(true);
+    }
+  };
+
   return (
-    <div>
-      <div className="max-w-6xl mx-auto">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 mb-5 flex-wrap">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by number or client..."
-              className="search-2026 w-full pl-9 pr-3 py-2 text-sm rounded-lg"
-            />
-          </div>
-          <div className="relative">
-            <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Select value={clientFilter} onValueChange={setClientFilter}>
-              <SelectTrigger className="w-44 pl-8 h-9 text-xs bg-muted/40 border-border">
-                <SelectValue placeholder="All Clients" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Clients</SelectItem>
-                {clients.map(c => (
-                  <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Select value={signedFilter} onValueChange={setSignedFilter}>
-            <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Invoices</SelectItem>
-              <SelectItem value="signed">Signed</SelectItem>
-              <SelectItem value="unsigned">Not Signed</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Invoice</Button>
+    <div className="max-w-[1400px] mx-auto">
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-3 mb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Invoices</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your invoices</p>
         </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+          <HeaderActionButton
+            label="Create Invoice"
+            variant="trip"
+            onClick={handleNew}
+          />
+        </div>
+      </div>
 
-        {/* Bulk action bar */}
-        {selected.size > 0 && (
-          <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
-            <span className="text-sm font-semibold text-primary">{selected.size} selected</span>
-            <Select value={bulkStatus} onValueChange={setBulkStatus}>
-              <SelectTrigger className="w-44 h-8 text-xs">
-                <SelectValue placeholder="Change status to..." />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button size="sm" onClick={handleBulkStatusChange} disabled={!bulkStatus} className="h-8">Apply</Button>
-            <Button size="sm" variant="outline" onClick={() => { setSelected(new Set()); setBulkStatus(''); }} className="h-8">Clear</Button>
-          </div>
-        )}
-
-        {/* List */}
+      {/* Stat cards */}
+      <div className="mb-5">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
-              <FileText className="w-7 h-7 text-primary" />
-            </div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">
-              {allInvoices.length === 0 ? 'No invoices yet' : 'No matches found'}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              {allInvoices.length === 0 ? 'Create your first invoice to get started.' : 'Try a different search or filter.'}
-            </p>
-            {allInvoices.length === 0 && (
-              <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Invoice</Button>
-            )}
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
           </div>
         ) : (
-          <>
-            {/* Select All */}
-            <label className="flex items-center gap-2 mb-3 cursor-pointer">
-              <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-primary cursor-pointer" />
-              <span className="text-xs text-muted-foreground">{allSelected ? 'Deselect All' : 'Select All'}</span>
-            </label>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filtered.map(inv => (
-                <InvoiceCard
-                  key={inv.id}
-                  inv={inv}
-                  selected={selected.has(inv.id)}
-                  onSelect={toggleSelect}
-                  onStatusChangeRequest={handleStatusChangeRequest}
-                  onAttachSigned={handleAttachSigned}
-                  onDownload={handleDownload}
-                  onEdit={handleEdit}
-                  onDelete={setDeleteTarget}
-                  downloadingId={downloadingId}
-                  uploadingId={uploadingId}
-                  onClientClick={handleClientClick}
-                />
-              ))}
-            </div>
-          </>
+          <InvoiceStatCards invoices={allInvoices} />
         )}
       </div>
+
+      {/* Filter bar */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        {activeFilterCount > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
+            {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
+            <button onClick={() => { setClientFilter('all'); setStatusFilter('all'); setSearch(''); }} className="ml-0.5 hover:opacity-70">
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        )}
+        <div className="relative">
+          <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
+          <Select value={clientFilter} onValueChange={setClientFilter}>
+            <SelectTrigger className="w-40 pl-8 h-9 text-xs bg-muted/40 border-border">
+              <SelectValue placeholder="All Clients" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clients</SelectItem>
+              {clients.map(c => (
+                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            {STATUS_OPTIONS.map(opt => (
+              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
+          <span className="text-sm font-semibold text-primary">{selected.size} selected</span>
+          <Select value={bulkStatus} onValueChange={setBulkStatus}>
+            <SelectTrigger className="w-44 h-8 text-xs">
+              <SelectValue placeholder="Change status to..." />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map(opt => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="sm" onClick={handleBulkStatusChange} disabled={!bulkStatus} className="h-8">Apply</Button>
+          <Button size="sm" variant="outline" onClick={() => { setSelected(new Set()); setBulkStatus(''); }} className="h-8">Clear</Button>
+        </div>
+      )}
+
+      {/* Two-pane layout */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      ) : baseFiltered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
+            <FileText className="w-7 h-7 text-primary" />
+          </div>
+          <h3 className="text-sm font-semibold text-foreground mb-1">
+            {allInvoices.length === 0 ? 'No invoices yet' : 'No matches found'}
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            {allInvoices.length === 0 ? 'Create your first invoice to get started.' : 'Try a different search or filter.'}
+          </p>
+          {allInvoices.length === 0 && (
+            <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Invoice</Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-22rem)] min-h-[400px]">
+          {/* Left pane — list */}
+          <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
+            <InvoiceListPane
+              invoices={filtered}
+              selectedId={selectedId}
+              onSelect={handleSelectRow}
+              tab={tab}
+              onTabChange={setTab}
+              counts={counts}
+              search={search}
+              onSearchChange={setSearch}
+              selectedSet={selected}
+              onToggleSelect={toggleSelect}
+              allSelected={allSelected}
+              onToggleSelectAll={toggleSelectAll}
+              onClientClick={handleClientClick}
+            />
+          </div>
+
+          {/* Right pane — detail (desktop) */}
+          <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
+            <InvoiceDetailPane
+              inv={selectedInvoice}
+              clients={clients}
+              onClientClick={handleClientClick}
+              onEdit={handleEdit}
+              onDelete={setDeleteTarget}
+              onDownload={handleDownload}
+              onAttachSigned={handleAttachSigned}
+              onStatusChangeRequest={handleStatusChangeRequest}
+              downloadingId={downloadingId}
+              uploadingId={uploadingId}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile detail sheet */}
+      <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
+        <SheetContent side="bottom" className="h-[90vh] p-0 overflow-hidden">
+          <SheetHeader className="px-4 py-3 border-b border-border/40">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setMobileDetailOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center border border-border/50">
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <SheetTitle className="text-base font-bold">Invoice Details</SheetTitle>
+            </div>
+          </SheetHeader>
+          <div className="h-[calc(90vh-3.5rem)] overflow-hidden">
+            <InvoiceDetailPane
+              inv={selectedInvoice}
+              clients={clients}
+              onClientClick={handleClientClick}
+              onEdit={handleEdit}
+              onDelete={setDeleteTarget}
+              onDownload={handleDownload}
+              onAttachSigned={handleAttachSigned}
+              onStatusChangeRequest={handleStatusChangeRequest}
+              downloadingId={downloadingId}
+              uploadingId={uploadingId}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} />
 
