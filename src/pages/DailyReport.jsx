@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import PullToRefresh from '@/components/common/PullToRefresh';
 import ReportStatCard, { hexToRgba } from '@/components/reports/ReportStatCard';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Truck, DollarSign, Fuel, FileText, Trophy } from 'lucide-react';
@@ -73,6 +72,13 @@ export default function DailyReport() {
     return () => { cancelled = true; };
   }, [loadData]);
 
+  // Listen for global pull-to-refresh (handled by AppLayout)
+  useEffect(() => {
+    const handler = () => loadData();
+    window.addEventListener('global:refresh', handler);
+    return () => window.removeEventListener('global:refresh', handler);
+  }, [loadData]);
+
   const revenue = trips.reduce((s, t) => s + (t.revenue || 0), 0);
   const expenseTotal = expenses.reduce((s, e) => s + (e.amount || 0), 0);
   const fuelTotal = fuelRecords.reduce((s, f) => s + (f.total_cost || 0), 0);
@@ -102,8 +108,7 @@ export default function DailyReport() {
   const dateRange = `${formatDate(dateFrom)} - ${formatDate(dateTo)}`;
 
   return (
-    <PullToRefresh onRefresh={loadData}>
-    <div className="relative">
+    <div className="relative min-h-full">
       {/* Ambient handled by app layout */}
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -205,6 +210,5 @@ export default function DailyReport() {
         </div>
       )}
     </div>
-    </PullToRefresh>
   );
 }
