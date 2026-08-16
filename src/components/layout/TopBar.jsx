@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { Plus } from 'lucide-react';
+import HeaderActionButton from './HeaderActionButton';
 import ClientNavDropdown from './ClientNavDropdown';
 import DriverNavDropdown from './DriverNavDropdown';
 import VehicleNavDropdown from './VehicleNavDropdown';
@@ -57,22 +57,18 @@ export default function TopBar() {
             </div>
             {location.pathname.startsWith('/reports/') && <ReportClientDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && (
-              <button
+              <HeaderActionButton
+                label={t('new_trip')}
+                variant="trip"
                 onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
-                aria-label={t('new_trip')}
-                title={t('new_trip')}
-                className="btn-new-trip flex items-center justify-center w-8 h-8 rounded-full text-white transition-all flex-shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+              />
             )}
             {location.pathname === '/expenses' && (
-              <button
+              <HeaderActionButton
+                label={t('add_new')}
+                variant="expense"
                 onClick={() => window.dispatchEvent(new CustomEvent('expenses:new'))}
-                className="btn-new-expense inline-flex items-center gap-1.5 h-8 px-4 rounded-full text-xs font-semibold uppercase tracking-wider text-white transition-all whitespace-nowrap"
-              >
-                <Plus className="w-3.5 h-3.5" /> {t('add_new')}
-              </button>
+              />
             )}
           </div>
         </div>
