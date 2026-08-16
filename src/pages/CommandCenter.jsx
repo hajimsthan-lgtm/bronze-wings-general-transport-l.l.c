@@ -8,7 +8,7 @@ import CommandAlertBanner from '@/components/command-center/CommandAlertBanner';
 import CommandMetrics from '@/components/command-center/CommandMetrics';
 import CommandAlertsPanel from '@/components/command-center/CommandAlertsPanel';
 import CommandOverview from '@/components/command-center/CommandOverview';
-import CommandPerformance from '@/components/command-center/CommandPerformance';
+import CommandAnalytics from '@/components/command-center/CommandAnalytics';
 import CommandIntelligence from '@/components/command-center/CommandIntelligence';
 import CommandActivity from '@/components/command-center/CommandActivity';
 import { Truck, FileText, Gauge, TrendingUp, Wrench, FileWarning, DollarSign } from 'lucide-react';
@@ -118,24 +118,28 @@ export default function CommandCenter() {
     { icon: TrendingUp, label: 'Avg Trip Value', value: formatCurrency(avgTripValue), chip: 'chip-violet' },
   ];
 
-  // Performance chart data
+  // Analytics chart data — revenue, expenses, profit per day/week
   const rangeDays = range === '7D' ? 7 : range === '30D' ? 30 : 90;
   const perfData = [];
   if (range === '90D') {
     for (let w = 12; w >= 0; w--) {
-      let rev = 0;
+      let rev = 0, exp = 0;
       for (let i = w * 7 + 6; i >= w * 7; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        rev += fTrips.filter(t => t.trip_date === d.toISOString().split('T')[0]).reduce((s, t) => s + (Number(t.revenue) || 0), 0);
+        const key = d.toISOString().split('T')[0];
+        rev += fTrips.filter(t => t.trip_date === key).reduce((s, t) => s + (Number(t.revenue) || 0), 0);
+        exp += fExpenses.filter(e => e.date === key).reduce((s, e) => s + (Number(e.amount) || 0), 0);
       }
-      perfData.push({ label: `W${13 - w}`, revenue: rev });
+      perfData.push({ label: `W${13 - w}`, revenue: rev, expenses: exp, profit: rev - exp });
     }
   } else {
     for (let i = rangeDays - 1; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
       const key = d.toISOString().split('T')[0];
       const label = rangeDays <= 7 ? d.toLocaleDateString('en', { weekday: 'short' }) : d.toLocaleDateString('en', { month: 'numeric', day: 'numeric' });
-      perfData.push({ label, revenue: fTrips.filter(t => t.trip_date === key).reduce((s, t) => s + (Number(t.revenue) || 0), 0) });
+      const rev = fTrips.filter(t => t.trip_date === key).reduce((s, t) => s + (Number(t.revenue) || 0), 0);
+      const exp = fExpenses.filter(e => e.date === key).reduce((s, e) => s + (Number(e.amount) || 0), 0);
+      perfData.push({ label, revenue: rev, expenses: exp, profit: rev - exp });
     }
   }
 
@@ -207,7 +211,7 @@ export default function CommandCenter() {
         {allAlerts.length > 0 && <CommandAlertsPanel alerts={allAlerts} />}
         <div className="grid grid-cols-1 lg:grid-cols-[35fr_65fr] gap-6">
           <CommandOverview stats={overviewStats} />
-          <CommandPerformance data={perfData} range={range} setRange={setRange} />
+          <CommandAnalytics data={perfData} range={range} setRange={setRange} />
         </div>
         <CommandIntelligence fleetUtil={fleetUtil} cashFlowData={cashFlowData} topPerformers={topPerformers} maxPerformer={maxPerformer} />
         <CommandActivity recentTrips={fTrips.slice(0, 6)} recentInvoices={fInvoices.slice(0, 6)} />

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar, Search, Bell, Settings, Feather } from 'lucide-react';
-import ThemeToggle from '@/components/common/ThemeToggle';
 import { cn } from '@/lib/utils';
 
 export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo, alertCount = 0, user }) {
@@ -88,9 +87,6 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
           <button onClick={() => navigate('/settings')} className={iconBtn} title="Settings">
             <Settings className="w-4 h-4" />
           </button>
-
-          {/* Theme toggle */}
-          <ThemeToggle />
 
           {/* Avatar */}
           <button onClick={() => navigate('/settings')} className="flex items-center gap-2 pl-2 ml-1 border-l border-border/30">
