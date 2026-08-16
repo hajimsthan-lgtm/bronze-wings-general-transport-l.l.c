@@ -15,19 +15,22 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
 
   return (
     <div
-      className={`glass-card rounded-2xl p-4 animate-fade-in-up relative overflow-hidden flex flex-col items-center text-center gap-2 ${className}`}
+      className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in-up ${className}`}
       style={{ borderLeft: `4px solid ${accent}` }}>
-      <div className="absolute -top-12 -right-8 w-28 h-28 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${hexToRgba(accent, 0.18)} 0%, transparent 70%)` }} />
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 relative" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
-        <Icon className="w-5 h-5" style={{ color: accent }} />
+      <div className="flex items-center justify-between p-4 border-b border-border gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.12), border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
+            <Icon className="w-5 h-5" style={{ color: accent }} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-foreground truncate">{title}</h3>
+            <p className="text-xs text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
+          </div>
+        </div>
+        <button onClick={handleView} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors flex-shrink-0">
+          <Eye className="w-3.5 h-3.5" /> Quick View
+        </button>
       </div>
-      <div className="min-w-0 w-full">
-        <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
-        <p className="text-[11px] text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
-      </div>
-      <button onClick={handleView} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors w-full justify-center">
-        <Eye className="w-3.5 h-3.5" /> Quick View
-      </button>
 
       {/* Quick View Popup */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
