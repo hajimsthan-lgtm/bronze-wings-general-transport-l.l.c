@@ -13,15 +13,15 @@ function getPageContext(pathname) {
   for (const item of navItems) {
     for (const child of item.children || []) {
       if (pathname === child.path || pathname.startsWith(child.path + '/')) {
-        return { parent: item.label, current: child.label };
+        return { parent: item.label, current: child.label, icon: child.icon, color: child.color, isDashboard: false };
       }
     }
   }
-  if (pathname === '/') return { parent: null, current: 'Dashboard' };
-  if (pathname.startsWith('/settings')) return { parent: null, current: 'Settings' };
-  if (pathname.startsWith('/agents')) return { parent: null, current: 'AI Agents' };
-  if (pathname.startsWith('/prompt-generator')) return { parent: null, current: 'Prompt Studio' };
-  return { parent: null, current: '' };
+  if (pathname === '/') return { parent: null, current: 'Dashboard', icon: null, color: null, isDashboard: true };
+  if (pathname.startsWith('/settings')) return { parent: null, current: 'Settings', icon: 'Settings', color: '#6366f1', isDashboard: false };
+  if (pathname.startsWith('/agents')) return { parent: null, current: 'AI Agents', icon: 'Bot', color: '#a855f7', isDashboard: false };
+  if (pathname.startsWith('/prompt-generator')) return { parent: null, current: 'Prompt Studio', icon: 'Sparkles', color: '#ec4899', isDashboard: false };
+  return { parent: null, current: '', icon: null, color: null, isDashboard: true };
 }
 
 function getSubModules(activeTab) {
@@ -64,19 +64,36 @@ export default function MobileHeader() {
       <div className="relative h-14 px-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <Link to="/" className="flex items-center gap-2 min-w-0">
-            <div className="relative flex-shrink-0">
-              <div
-                className="absolute inset-0 rounded-lg blur-md opacity-50"
-                style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.30) 0%, transparent 70%)' }}
-              />
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="relative w-7 h-7 rounded-lg object-contain ring-1 ring-white/10" />
-              ) : (
-                <div className="relative w-7 h-7 rounded-lg border border-[rgba(var(--panel-accent-rgb),0.3)] bg-[rgba(var(--panel-accent-rgb),0.1)] flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary">BW</span>
-                </div>
-              )}
-            </div>
+            {pageContext.isDashboard ? (
+              <div className="relative flex-shrink-0">
+                <div
+                  className="absolute inset-0 rounded-lg blur-md opacity-50"
+                  style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.30) 0%, transparent 70%)' }}
+                />
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="relative w-7 h-7 rounded-lg object-contain ring-1 ring-white/10" />
+                ) : (
+                  <div className="relative w-7 h-7 rounded-lg border border-[rgba(var(--panel-accent-rgb),0.3)] bg-[rgba(var(--panel-accent-rgb),0.1)] flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-primary">BW</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              (() => {
+                const PageIcon = pageContext.icon ? getIcon(pageContext.icon) : null;
+                return (
+                  <div
+                    className="relative flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
+                    style={{
+                      background: `linear-gradient(135deg, ${pageContext.color || 'var(--primary)'}22, ${pageContext.color || 'var(--primary)'}11)`,
+                      border: `1px solid ${pageContext.color || 'var(--primary)'}44`,
+                    }}
+                  >
+                    {PageIcon && <PageIcon className="w-4 h-4" style={{ color: pageContext.color || 'var(--primary)' }} />}
+                  </div>
+                );
+              })()
+            )}
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-tight truncate" style={{ fontFamily: 'var(--font-heading)' }}>
                 {pageContext.current || <BrandName variant="mobile" />}
@@ -90,7 +107,7 @@ export default function MobileHeader() {
 
         {/* Icon cluster — generous gaps, 40px touch targets */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
-          <GlobalDateFilter />
+          <GlobalDateFilter className={iconBtnCls} />
           <button
             onClick={toggleMode}
             className={iconBtnCls}

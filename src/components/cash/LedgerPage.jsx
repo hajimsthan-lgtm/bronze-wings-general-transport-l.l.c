@@ -4,6 +4,7 @@ import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -154,9 +155,19 @@ export default function LedgerPage({
   const outSpan = hasRecipient ? 'md:col-span-1' : 'md:col-span-2';
 
   return (
-    <div className="professional-page-bg min-h-screen pb-28 md:pb-20">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
-        {/* sub-header toggle row */}
+  <div className="professional-page-bg min-h-screen pb-28 md:pb-20">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+      {/* Mobile analytics dashboard */}
+      <LedgerAnalytics
+        rows={rows || []}
+        inflowKey={inflowKey}
+        outflowKey={outflowKey}
+        inflowLabel={inflowLabel}
+        outflowLabel={outflowLabel}
+        title={exportTitle}
+      />
+
+      {/* sub-header toggle row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           {modeOptions && <Toggle options={modeOptions} value={mode} onChange={setMode} />}
           <Toggle options={[{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }]} value={view} onChange={setView} />

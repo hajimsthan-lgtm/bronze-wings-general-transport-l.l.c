@@ -16,7 +16,7 @@ const PRESETS = [
 
 const toISO = (d) => (d ? format(d, 'yyyy-MM-dd') : '');
 
-export default function GlobalDateFilter() {
+export default function GlobalDateFilter({ className = '' }) {
   const { dateFrom, dateTo, setDateFrom, setDateTo, setToday } = useGlobalDate();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState('range'); // 'range' | 'single'
@@ -46,7 +46,8 @@ export default function GlobalDateFilter() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all duration-200 shrink-0"
+          className={`relative w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200 shrink-0 ${className}`}
+          style={!className ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } : undefined}
           aria-label="Global date filter"
           title={isFiltered ? `${label}` : 'Filter all pages by date'}
         >
