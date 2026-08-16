@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, Home, Car, FileText, Wallet, Wrench, Package } fr
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import DriverDeductionFormSheet from './DriverDeductionFormSheet';
+import EmptyState from '@/components/common/EmptyState';
 
 const TYPE_META = {
   housing_advance: { icon: Home, label: 'Housing Advance' },
@@ -77,10 +78,7 @@ export default function DriverDeductionsSection({ driverName }) {
           {loading ? (
             <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
           ) : deductions.length === 0 ? (
-            <div className="p-8 text-center">
-              <Wallet className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No deductions recorded</p>
-            </div>
+            <EmptyState icon={Wallet} title="No deductions recorded" className="py-10" />
           ) : deductions.map((d) => {
             const meta = TYPE_META[d.type] || TYPE_META.other;
             const st = STATUS_META[d.status] || STATUS_META.active;

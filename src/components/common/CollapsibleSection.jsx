@@ -12,9 +12,9 @@ export default function CollapsibleSection({ title, icon: Icon, accent = '#1ED76
   return (
     <div
       onClick={() => setOpen(!open)}
-      className="glass-card rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in-up cursor-pointer"
+      className="glass-card rounded-2xl overflow-hidden transition-all duration-200 animate-fade-in-up cursor-pointer hover:-translate-y-px hover:shadow-lg"
       style={{ borderLeft: `4px solid ${accent}` }}>
-      <div className="flex items-center justify-between p-4 border-b border-border gap-3">
+      <div className="flex items-center justify-between p-4 border-b border-border gap-3 transition-colors duration-200 hover:bg-muted/30">
         <div className="flex items-center gap-3 min-w-0">
           {Icon && (
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: tileBg, border: tileBorder }}>
@@ -31,7 +31,7 @@ export default function CollapsibleSection({ title, icon: Icon, accent = '#1ED76
           <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? 'rotate-180' : ''}`} />
         </div>
       </div>
-      <div className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
+      <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
         <div className="overflow-hidden">
           <div className="p-4">{children}</div>
         </div>

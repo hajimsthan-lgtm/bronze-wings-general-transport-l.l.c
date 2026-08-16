@@ -43,30 +43,45 @@ export default function WeeklyActivityChart({ trips = [] }) {
 
       <div className="relative">
         <div className="rounded-xl border border-border overflow-hidden p-4">
-          <div className="relative flex items-end justify-between gap-2 h-36">
-            {counts.map((c, i) => {
-              const isPeak = i === peakIdx;
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
-                  <span className="text-[10px] text-muted-foreground tabular-nums">{c || ''}</span>
-                  <div
-                    className="w-full rounded-t-md transition-all duration-500"
-                    style={{
-                      height: `${Math.max(c ? 6 : 2, (c / max) * 96)}px`,
-                      background: isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
-                      boxShadow: isPeak ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
-                    }}
-                  />
-                  <span className={`text-[10px] ${isPeak ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>{DAYS[i]}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {peakIdx >= 0 && (
-            <p className="relative text-[11px] text-muted-foreground mt-3">
-              Peak: <span className="text-foreground font-semibold">{DAYS[peakIdx]}</span> · {counts[peakIdx]} trips
-            </p>
+          {total === 0 ? (
+            <>
+              <div className="relative flex items-end justify-between gap-2 h-36">
+                {DAYS.map((d, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
+                    <div className="w-full rounded-t-md border border-dashed border-border/40" style={{ height: '8px' }} />
+                    <span className="text-[10px] text-muted-foreground/50">{d}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground/60 text-center mt-3">No trips this week yet</p>
+            </>
+          ) : (
+            <>
+              <div className="relative flex items-end justify-between gap-2 h-36">
+                {counts.map((c, i) => {
+                  const isPeak = i === peakIdx;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{c || ''}</span>
+                      <div
+                        className="w-full rounded-t-md transition-all duration-500"
+                        style={{
+                          height: `${Math.max(c ? 6 : 2, (c / max) * 96)}px`,
+                          background: isPeak ? 'linear-gradient(180deg,#4ADE80,#1ED760)' : hexToRgba('#1ED760', 0.22),
+                          boxShadow: isPeak ? '0 0 12px rgba(30,215,96,0.5)' : 'none',
+                        }}
+                      />
+                      <span className={`text-[10px] ${isPeak ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>{DAYS[i]}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {peakIdx >= 0 && (
+                <p className="relative text-[11px] text-muted-foreground mt-3">
+                  Peak: <span className="text-foreground font-semibold">{DAYS[peakIdx]}</span> · {counts[peakIdx]} trips
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -34,15 +34,19 @@ function Row({ label, value, tone }) {
 function AccordionItem({ title, icon: Icon, accent, defaultOpen, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="rounded-xl border border-white/[0.06] overflow-hidden" style={{ background: hexToRgba('#ffffff', 0.03) }}>
-      <button type="button" onClick={() => setOpen((o) => !o)} className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/[0.03] transition-colors">
+    <div className="rounded-xl border border-border overflow-hidden transition-all duration-200 hover:-translate-y-px hover:shadow-md" style={{ background: hexToRgba('#ffffff', 0.03) }}>
+      <button type="button" onClick={() => setOpen((o) => !o)} className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-muted/30 transition-colors duration-200">
         <span className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(accent, 0.14), border: `1px solid ${hexToRgba(accent, 0.3)}` }}>
           <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
         </span>
         <span className="text-sm font-medium text-foreground flex-1 text-left">{title}</span>
         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && <div className="px-3 pb-3 pt-0.5 space-y-2">{children}</div>}
+      <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
+        <div className="overflow-hidden">
+          <div className="px-3 pb-3 pt-0.5 space-y-2 border-t border-border/40">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -96,9 +100,9 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
         {/* inline stats strip */}
         <div className="grid grid-cols-3 divide-x divide-white/[0.06]">
           {[
-            { label: 'Trips', value: stats?.trips ?? 0, accent: '#1ED760' },
+            { label: 'Trips', value: stats?.trips ?? 0, accent: 'hsl(var(--foreground))' },
             { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
-            { label: 'Experience', value: stats?.experience ?? '—', accent: '#a855f7' },
+            { label: 'Experience', value: stats?.experience ?? '—', accent: 'hsl(var(--foreground))' },
           ].map((s) => (
             <div key={s.label} className="px-2 py-3 text-center">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">{s.label}</p>
@@ -126,7 +130,7 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
           <div className="flex items-center gap-2.5 text-xs">
             <Wallet className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
             <span className="text-muted-foreground">Base Salary</span>
-            <span className="ml-auto font-semibold text-foreground">{formatCurrency(driver.base_salary)}</span>
+            <span className="ml-auto font-semibold text-foreground tabular-nums">{formatCurrency(driver.base_salary)}</span>
           </div>
         </div>
 

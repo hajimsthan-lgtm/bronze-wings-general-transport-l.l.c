@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, ListChecks } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import EmptyState from '@/components/common/EmptyState';
 
 export default function TripChecklist({ trips = [] }) {
   const list = trips.slice(0, 6);
@@ -26,7 +27,7 @@ export default function TripChecklist({ trips = [] }) {
 
       <div className="relative">
         <div className="rounded-xl border border-border overflow-hidden p-4 space-y-2">
-          {list.length === 0 && <p className="text-xs text-muted-foreground py-2">No trips in this period.</p>}
+          {list.length === 0 && <EmptyState icon={ListChecks} title="No trips in this period" className="py-6" />}
           {list.map((t) => {
             const ok = t.status === 'completed';
             return (
