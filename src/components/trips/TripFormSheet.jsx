@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Truck, FileText, X, Check, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
@@ -6,9 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
+import { getCompanySettings } from '@/lib/companySettings';
 import ModeToggle from './ModeToggle';
 import TripModeFields from './TripModeFields';
 import TripCalcPanel from './TripCalcPanel';
+import TripCalcMobileBar from './TripCalcMobileBar';
 import ContractModeFields from './contract/ContractModeFields';
 import ContractProfitPanel from './contract/ContractProfitPanel';
 import TripMapPanel from './TripMapPanel';
@@ -55,6 +57,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [creating, setCreating] = useState(null);
   const [cCreating, setCCreating] = useState(null);
   const [revenueOverride, setRevenueOverride] = useState(false);
+  const [vendorRateOverride, setVendorRateOverride] = useState(false);
+  const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
 
@@ -66,6 +70,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   useEffect(() => {
     if (open) {
+      getCompanySettings().then(setCompanySettings).catch(() => {});
       Promise.all([
       base44.entities.Trip.list('-created_date', 200).catch(() => []),
       base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
@@ -219,6 +224,29 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   useEffect(() => {
     if (!revenueOverride) setForm((prev) => ({ ...prev, revenue: autoRevenue || '' }));
   }, [autoRevenue, revenueOverride]);
+
+  // Auto-calculate vendor agreed rate from trip revenue (configurable percentage)
+  const autoVendorRate = (() => {
+    const revenue = Number(form.revenue) || 0;
+    const pct = Number(companySettings.vendor_rate_percentage) || 80;
+    return Math.round(revenue * pct / 100 * 100) / 100;
+  })();
+
+  useEffect(() => {
+    if (form.assignment_mode === 'vendor' && !vendorRateOverride) {
+      setForm((prev) => ({ ...prev, vendor_agreed_rate: autoVendorRate || '' }));
+    }
+  }, [autoVendorRate, vendorRateOverride, form.assignment_mode]);
+
+  useEffect(() => {
+    if (form.assignment_mode !== 'vendor') setVendorRateOverride(false);
+  }, [form.assignment_mode]);
+
+  const handleRouteInfo = useCallback((info) => {
+    if (info.distanceKm != null) {
+      setForm((prev) => ({ ...prev, distance_km: info.distanceKm }));
+    }
+  }, []);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -441,7 +469,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     autoTripNumber, tripNumberOverridden,
     fileInputRef, handleFileUpload, uploading,
     isOvertime, overtimeMetric, extraCharges,
-    revenueOverridden, autoRevenue
+    revenueOverridden, autoRevenue,
+    autoVendorRate, vendorRateOverridden: vendorRateOverride, setVendorRateOverride
   };
 
   const contractCtx = {
@@ -458,7 +487,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-3xl max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col">
+        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-4xl max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col">
         <DialogHeader className="px-5 pt-4 pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -484,6 +513,13 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
         </DialogHeader>
 
+        {/* Mobile calc bar — trip mode only, non-scrolling */}
+        {mode === 'trip' && (
+          <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+        )}
+
+        {/* Body: scrollable form + fixed calc panel (desktop) */}
+        <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 overflow-y-auto">
         <div className="px-5 py-4 grid lg:grid-cols-[1fr_260px] gap-5 items-start">
           <div className="space-y-5">
@@ -493,40 +529,25 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
 
           <div className="space-y-5">
-            {mode === 'trip' ?
-            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} /> :
-            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />}
             {mode === 'trip' &&
             <TripMapPanel
               from={form.from_location}
               to={form.to_location}
               onSelectFrom={(v) => update('from_location', v)}
-              onSelectTo={(v) => update('to_location', v)} />
+              onSelectTo={(v) => update('to_location', v)}
+              onRouteInfo={handleRouteInfo}
+              tripType={form.trip_type}
+            />
             }
             {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
+            {mode === 'contract' &&
+            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
+            }
           </div>
         </div>
 
-        {/* Mobile condensed bar */}
-        {mode === 'trip' ?
-        <div className="lg:hidden glass-card p-4 space-y-2 mb-4">
-            <p className="eyebrow">Live Calculation</p>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Base Fare</span>
-              <span className="font-medium tabular-nums">{formatCurrency(Number(form.base_fare) || 0)}</span>
-            </div>
-            {isOvertime &&
-          <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Overtime</span>
-                <span className="font-medium tabular-nums text-rose-300">+{formatCurrency(extraCharges)}</span>
-              </div>
-          }
-            <div className="border-t border-white/10 pt-2 flex justify-between items-baseline">
-              <span className="text-sm font-semibold text-foreground">Revenue</span>
-              <span className={`text-lg font-bold tabular-nums font-display ${revenueOverridden ? 'text-red-400' : 'text-primary'}`}>{formatCurrency(Number(form.revenue) || 0)}</span>
-            </div>
-          </div> :
-
+        {/* Contract mode mobile condensed bar */}
+        {mode === 'contract' && (
         <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-3 gap-3 text-center">
             <div>
               <p className="eyebrow mb-1">{t('monthly_rental')}</p>
@@ -541,7 +562,17 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(totalBillable)}</p>
             </div>
           </div>
-        }
+        )}
+        </div>
+
+        {/* Desktop fixed calc panel — outside scroll area */}
+        {mode === 'trip' && (
+        <div className="hidden lg:flex flex-shrink-0 w-[260px] border-l border-border/50">
+          <div className="p-4 space-y-3 w-full">
+            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+          </div>
+        </div>
+        )}
         </div>
 
         {/* Footer */}

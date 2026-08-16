@@ -101,6 +101,10 @@
       "type": "number",
       "default": 16
     },
+    "vendor_rate_percentage": {
+      "type": "number",
+      "default": 80
+    },
     "template_config": {
       "type": "object",
       "additionalProperties": true

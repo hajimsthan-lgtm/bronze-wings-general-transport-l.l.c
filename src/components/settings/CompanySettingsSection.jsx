@@ -130,6 +130,20 @@ export default function CompanySettingsSection() {
       </div>
 
       <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <Label className="text-xs text-white/50 mb-2 block font-semibold uppercase tracking-wider">Vendor Rate (Internal)</Label>
+        <p className="text-[11px] text-white/40 mb-2.5">Default percentage of trip revenue auto-assigned as the vendor agreed rate. Override per trip in the trip form.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-white/40 mb-1.5">Vendor Rate (%)</Label>
+            <Input type="number" min="0" max="100" step="1" value={settings.vendor_rate_percentage ?? 80} onChange={(e) => update('vendor_rate_percentage', Number(e.target.value))} className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+          <div className="flex items-end pb-1">
+            <p className="text-[11px] text-white/40">Vendor receives <span className="text-primary font-semibold">{settings.vendor_rate_percentage ?? 80}%</span> of trip revenue; company retains the rest as margin.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-white/[0.06]">
         <Label className="text-xs text-white/50 mb-2 block font-semibold uppercase tracking-wider">Bank Details (for invoices)</Label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="sm:col-span-2">

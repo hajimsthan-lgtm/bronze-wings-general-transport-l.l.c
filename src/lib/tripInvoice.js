@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
+import { stripVendorData, assertNoVendorData } from '@/lib/vendorPrivacy';
 
 import { generateNextInvoiceNumber as nextInvoiceNumber } from '@/lib/invoiceSequence';
 export { nextInvoiceNumber };
@@ -7,6 +8,8 @@ export { nextInvoiceNumber };
 /**
  * Build a trip description string: "FromLocation To ToLocation (driver, vehicle)".
  * Omits the parenthetical if neither driver nor vehicle is present.
+ * NOTE: Vendor name is intentionally excluded — client-facing descriptions must
+ * never reveal which service provider handled the trip.
  */
 export function buildTripDesc(trip) {
   const extra = [trip.driver_name, trip.vehicle_plate].filter(Boolean).join(', ');
@@ -33,10 +36,13 @@ export async function getTripInvoice(tripId) {
 export async function generateTripInvoice(trip) {
   const existing = await getTripInvoice(trip.id);
   if (existing) return existing;
+  // Strip vendor-only fields before building client-facing invoice data
+  const safeTrip = stripVendorData(trip);
+  assertNoVendorData(safeTrip, 'generateTripInvoice');
   const invoiceNumber = await nextInvoiceNumber();
   const settings = await getCompanySettings();
   const vatRate = settings.default_vat_rate || 5;
-  const revenue = Number(trip.revenue) || 0;
+  const revenue = Number(safeTrip.revenue) || 0;
   const vatAmount = Math.round(revenue * vatRate) / 100;
   return base44.entities.Invoice.create({
     invoice_number: invoiceNumber,
@@ -44,7 +50,7 @@ export async function generateTripInvoice(trip) {
     contact_person: trip.contact_person || '',
     issue_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-    line_items: [{ description: buildTripDesc(trip), quantity: 1, unit_price: revenue, amount: revenue }],
+    line_items: [{ description: buildTripDesc(safeTrip), quantity: 1, unit_price: revenue, amount: revenue }],
     subtotal: revenue,
     vat_rate: vatRate,
     vat_amount: vatAmount,
@@ -61,10 +67,13 @@ export async function setTripInvoiceSent(trip, sent) {
     return base44.entities.Invoice.update(inv.id, { status: sent ? 'sent' : 'draft' });
   }
   if (!sent) return null;
+  // Strip vendor-only fields before building client-facing invoice data
+  const safeTrip = stripVendorData(trip);
+  assertNoVendorData(safeTrip, 'setTripInvoiceSent');
   const invoiceNumber = await nextInvoiceNumber();
   const settings = await getCompanySettings();
   const vatRate = settings.default_vat_rate || 5;
-  const revenue = Number(trip.revenue) || 0;
+  const revenue = Number(safeTrip.revenue) || 0;
   const vatAmount = Math.round(revenue * vatRate) / 100;
   return base44.entities.Invoice.create({
     invoice_number: invoiceNumber,
@@ -72,7 +81,7 @@ export async function setTripInvoiceSent(trip, sent) {
     contact_person: trip.contact_person || '',
     issue_date: new Date().toISOString().split('T')[0],
     due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-    line_items: [{ description: buildTripDesc(trip), quantity: 1, unit_price: revenue, amount: revenue }],
+    line_items: [{ description: buildTripDesc(safeTrip), quantity: 1, unit_price: revenue, amount: revenue }],
     subtotal: revenue,
     vat_rate: vatRate,
     vat_amount: vatAmount,

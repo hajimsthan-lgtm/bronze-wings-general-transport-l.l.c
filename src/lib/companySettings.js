@@ -21,6 +21,7 @@ const DEFAULTS = {
   inv_logo_source: 'company',
   inv_logo_url: '',
   inv_logo_size: 16,
+  vendor_rate_percentage: 80,
 };
 
 export async function getCompanySettings() {

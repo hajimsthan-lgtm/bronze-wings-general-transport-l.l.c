@@ -15,9 +15,8 @@ export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraC
   const total = Math.round((revenue + vat) * 100) / 100;
 
   return (
-    <div className="hidden lg:block">
-      <div className="sticky top-4 space-y-3">
-        <div className="glass-card p-4 space-y-3">
+    <div className="space-y-3">
+      <div className="glass-card p-4 space-y-3">
           <div className="flex items-center gap-2">
             <span className="live-pulse-dot" />
             <p className="eyebrow">Live Calculation</p>
@@ -43,9 +42,8 @@ export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraC
             <span className="text-2xl font-bold tabular-nums font-display text-gradient animate-glow-pulse">{formatCurrency(total)}</span>
           </div>
         </div>
-        <div className="glass-card p-3">
-          <p className="text-[10px] text-muted-foreground leading-relaxed">Trip date is set automatically from the load time. Revenue is auto-calculated and can be overwritten. VAT shown for reference.</p>
-        </div>
+      <div className="glass-card p-3">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">Trip date is set automatically from the load time. Revenue is auto-calculated and can be overwritten. VAT shown for reference.</p>
       </div>
     </div>
   );
