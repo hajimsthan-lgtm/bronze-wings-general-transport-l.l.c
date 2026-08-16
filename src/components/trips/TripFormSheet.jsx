@@ -564,7 +564,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         )}
 
         {/* Body: scrollable form with standalone floating calc panel in right column */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto premium-scroll">
         <div className="px-5 py-4 grid lg:grid-cols-[1fr_280px] gap-5 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
@@ -573,7 +573,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
 
           {/* Right column — frozen/sticky: Live Calculation + collapsible Location Picker */}
-          <div className={cn("flex flex-col gap-5 lg:sticky lg:top-4", !mapCollapsed && "lg:max-h-[calc(82vh-170px)] lg:overflow-y-auto")}>
+          <div className={cn("flex flex-col gap-5 lg:sticky lg:top-4", !mapCollapsed && "lg:max-h-[calc(82vh-170px)] lg:overflow-y-auto premium-scroll")}>
             {mode === 'trip' && (
               <div className="flex-shrink-0">
                 <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
@@ -596,6 +596,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             {mode === 'contract' &&
             <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
             }
+            {mode === 'trip' && !mapCollapsed && (
+              <div className="text-center text-[9px] opacity-20 select-none" aria-hidden>🚚</div>
+            )}
           </div>
         </div>
 

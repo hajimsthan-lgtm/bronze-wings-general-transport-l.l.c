@@ -141,10 +141,9 @@ export default function TripModeFields({ p }) {
         {form.assignment_mode === 'vendor' && (
           <div>
             <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><Store className="w-3 h-3" /> Service Provider</Label>
-            <Select value={form.vendor_name || 'none'} onValueChange={(v) => { update('vendor_name', v === 'none' ? '' : v); update('vehicle_plate', ''); update('driver_name', ''); }}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select provider" /></SelectTrigger>
+            <Select value={form.vendor_name || ''} onValueChange={(v) => { update('vendor_name', v); update('vehicle_plate', ''); update('driver_name', ''); }}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select Vendor" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
                 {serviceProviderVendors.map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}
               </SelectContent>
             </Select>

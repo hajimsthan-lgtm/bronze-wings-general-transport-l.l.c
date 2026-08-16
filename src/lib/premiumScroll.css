@@ -1,0 +1,18 @@
+/* ===== Premium Slim Scrollbar — Linear/Vercel style ===== */
+.premium-scroll { scrollbar-width: thin; scrollbar-color: rgba(var(--panel-accent-rgb), 0.25) transparent; }
+.premium-scroll::-webkit-scrollbar { display: block; width: 6px; height: 6px; }
+.premium-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 9999px; margin: 4px; }
+.premium-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--panel-accent-rgb), 0.15);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.premium-scroll:hover::-webkit-scrollbar-thumb { background: rgba(var(--panel-accent-rgb), 0.35); }
+.premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(var(--panel-accent-rgb), 0.65); }
+.premium-scroll::-webkit-scrollbar-thumb:active { background: rgb(var(--panel-accent-rgb)); }
+.premium-scroll::-webkit-scrollbar-corner { background: transparent; }
+
+/* Light mode — slightly darker thumb for visibility on white */
+.theme-light .premium-scroll::-webkit-scrollbar-thumb { background: rgba(var(--panel-accent-rgb), 0.25); }
+.theme-light .premium-scroll:hover::-webkit-scrollbar-thumb { background: rgba(var(--panel-accent-rgb), 0.45); }
+.theme-light .premium-scroll::-webkit-scrollbar-thumb:hover { background: rgba(var(--panel-accent-rgb), 0.75); }
