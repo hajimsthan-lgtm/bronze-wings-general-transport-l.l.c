@@ -56,7 +56,6 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-          {isOpen && <div className="flex items-center gap-1.5">{actions}</div>}
           {collapsible && (
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? 'rotate-180' : ''}`} />
           )}
@@ -65,6 +64,9 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
       <div className="grid transition-[grid-template-rows] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}>
         <div className="overflow-hidden">
           <div className="p-4">
+            <div className="flex items-center justify-end gap-1.5 mb-3" onClick={(e) => e.stopPropagation()}>
+              {actions}
+            </div>
             {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
           </div>
         </div>

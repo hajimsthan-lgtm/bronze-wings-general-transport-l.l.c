@@ -232,8 +232,7 @@ export default function DriverDetail() {
               onPdf={salaryPdf}
               loading={dataLoading}
               emptyIcon={WalletIcon}
-              emptyLabel={t('no_data')}
-              className="h-full">
+              emptyLabel={t('no_data')}>
             <div className="space-y-2">
               {fSalaries.slice(0, 5).map((rec) => (
                 <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
@@ -263,8 +262,7 @@ export default function DriverDetail() {
               onPdf={expensesPdf}
               loading={dataLoading}
               emptyIcon={ReceiptIcon}
-              emptyLabel={t('no_data')}
-              className="h-full">
+              emptyLabel={t('no_data')}>
             <div className="space-y-2">
               {fExpenses.slice(0, 5).map((rec) => (
                 <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
@@ -287,8 +285,7 @@ export default function DriverDetail() {
               count={null}
               collapsible
               defaultOpen={false}
-              loading={false}
-              className="h-full">
+              loading={false}>
             <EntityDocumentsTab entityType="driver" entityId={driver.id} />
           </RecordSectionCard>
 
