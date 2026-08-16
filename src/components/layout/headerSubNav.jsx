@@ -156,11 +156,11 @@ export default function HeaderSubNav({ className = '' }) {
         
         <Link
           to={activeItem.path}
-          className="group/sub relative flex items-center gap-2 h-9 px-5 rounded-full transition-all duration-300 w-full justify-center"
+          className="group/sub relative flex items-center gap-2 h-9 px-5 rounded-full transition-all duration-300 w-full justify-center hidden"
           style={{ animation: 'subnav-light 0.5s cubic-bezier(0.22,1,0.36,1) both' }}>
           
           <span
-            className="absolute inset-0 rounded-full transition-all duration-300"
+            className="absolute inset-0 rounded-full transition-all duration-300 hidden"
             style={{
               background: `linear-gradient(135deg, rgba(${activeSt.glow},0.22), rgba(${activeSt.glow},0.10))`,
               border: `1px solid rgba(${activeSt.glow},0.45)`,
