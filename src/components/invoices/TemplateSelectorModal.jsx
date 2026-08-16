@@ -82,7 +82,7 @@ export default function TemplateSelectorModal({ open, onClose, onSelect, documen
                   }`}
                 >
                   <div
-                    className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
+                    className="tpl-badge w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-xs font-bold"
                     style={{ background: tpl.template_config?.header?.accentColor || '#1a1a1a' }}
                   >
                     {tpl.name?.[0]?.toUpperCase() || 'T'}
