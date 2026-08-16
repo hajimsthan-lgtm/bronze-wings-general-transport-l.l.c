@@ -43,6 +43,18 @@ export default function CollapsibleSection({
       shineVia: 'via-violet-400/25',
       shineTo: 'to-violet-400/0',
     },
+    amber: {
+      icon: 'text-amber-400',
+      label: 'text-amber-400',
+      count: 'text-amber-500',
+      chevron: 'text-amber-400',
+      bar: 'bg-amber-500/[0.06] hover:bg-amber-500/[0.10]',
+      edge: 'bg-amber-500',
+      edgeShadow: 'shadow-[0_0_10px_rgba(245,158,11,0.6)]',
+      shineFrom: 'from-amber-400/0',
+      shineVia: 'via-amber-400/25',
+      shineTo: 'to-amber-400/0',
+    },
   };
   const a = ACCENTS[accent] || ACCENTS.blue;
 

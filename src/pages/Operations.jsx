@@ -18,7 +18,7 @@ import ContractsTable from '@/components/operations/ContractsTable';
 import CollapsibleSection from '@/components/operations/CollapsibleSection';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
-import DraftsListSheet from '@/components/trips/DraftsListSheet';
+import DraftsTable from '@/components/operations/DraftsTable';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
@@ -99,7 +99,7 @@ export default function Operations() {
   const [editContract, setEditContract] = useState(null);
   const [detailContract, setDetailContract] = useState(null);
   const [prefill, setPrefill] = useState(null);
-  const [draftsOpen, setDraftsOpen] = useState(false);
+
 
   // Trip detail sheet is URL-backed so Android hardware back closes it.
   const detailTripId = searchParams.get('tripId');
@@ -212,7 +212,7 @@ export default function Operations() {
   const openNewContract = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
   const openEditTrip = (trip) => { setFormMode('trip'); setEditTrip(trip); setEditContract(null); setFormOpen(true); };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
-  const handleContinueDraft = (draft) => { setDraftsOpen(false); openEditTrip(draft); };
+  const handleContinueDraft = (draft) => { openEditTrip(draft); };
   const handleDeleteDraft = async (draft) => { await deleteTrip.mutateAsync(draft.id); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
@@ -357,27 +357,38 @@ export default function Operations() {
 
         {loading ? (
           <LoadingSpinner />
-        ) : (mode === 'trip' && noTrips) || (mode === 'contract' && noContracts) || (mode === 'all' && allEmpty) ? (
-          <EmptyState
-            icon={mode === 'contract' ? FileText : Truck}
-            title={t('no_data')}
-            description={mode === 'contract' ? 'Create your first monthly contract to track rental profitability' : 'Create your first trip to get started'}
-            action={mode === 'contract'
-              ? <button onClick={openNewContract} className="clay-btn-ghost text-sm">{t('new_contract')}</button>
-              : <button onClick={openNewTrip} className="clay-btn-ghost text-sm">{t('new_trip')}</button>}
-          />
         ) : (
           <div className="space-y-4">
-            {showTrips && draftTrips.length > 0 && (
-              <button
-                onClick={() => setDraftsOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-sm border border-primary/20 hover:border-primary/40 text-xs font-medium text-primary transition-all group"
+            {/* Drafts — always visible, default collapsed */}
+            {showTrips && (
+              <CollapsibleSection
+                icon={FileEdit}
+                label="Drafts"
+                count={draftTrips.length}
+                accent="amber"
+                defaultCollapsed={true}
               >
-                <FileEdit className="w-3.5 h-3.5" />
-                Drafts
-                <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] tabular-nums">{draftTrips.length}</span>
-                <span className="text-muted-foreground/60 group-hover:text-primary/80 transition-colors hidden sm:inline">· continue editing</span>
-              </button>
+                {draftTrips.length === 0 ? (
+                  <EmptyState
+                    icon={FileEdit}
+                    title="No drafts yet"
+                    description="Unsaved trips will appear here"
+                  />
+                ) : (
+                  <DraftsTable drafts={draftTrips} onContinue={handleContinueDraft} onDelete={handleDeleteDraft} />
+                )}
+              </CollapsibleSection>
+            )}
+            {/* Empty state — when no trips/contracts */}
+            {((mode === 'trip' && noTrips) || (mode === 'contract' && noContracts) || (mode === 'all' && allEmpty)) && (
+              <EmptyState
+                icon={mode === 'contract' ? FileText : Truck}
+                title={t('no_data')}
+                description={mode === 'contract' ? 'Create your first monthly contract to track rental profitability' : 'Create your first trip to get started'}
+                action={mode === 'contract'
+                  ? <button onClick={openNewContract} className="clay-btn-ghost text-sm">{t('new_contract')}</button>
+                  : <button onClick={openNewTrip} className="clay-btn-ghost text-sm">{t('new_trip')}</button>}
+              />
             )}
             {showTrips && filteredTrips.length > 0 && (
               <CollapsibleSection
@@ -439,13 +450,6 @@ export default function Operations() {
         onDelete={async (c) => { await deleteContractById(c); setDetailContract(null); }}
       />
 
-      <DraftsListSheet
-        open={draftsOpen}
-        onOpenChange={setDraftsOpen}
-        drafts={draftTrips}
-        onContinue={handleContinueDraft}
-        onDelete={handleDeleteDraft}
-      />
     </div>
   );
 }

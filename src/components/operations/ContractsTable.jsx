@@ -1,27 +1,51 @@
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Eye, Pencil, Trash2, MoreVertical } from 'lucide-react';
-import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
+import { cn } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/formatters';
+
+const STATUS_HEX = {
+  active: '#34d399',
+  expired: '#fbbf24',
+  terminated: '#f87171',
+};
+
+const STATUS_LABELS = {
+  active: 'Active',
+  expired: 'Expired',
+  terminated: 'Terminated',
+};
 
 export default function ContractsTable({ contracts, expensesByContract, onEdit, onDelete, onDetails }) {
   const { t } = useI18n();
 
   return (
-    <div className="rounded-xl border border-border bg-card/60 backdrop-blur-md overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('record_id')} / {t('client')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap hidden md:table-cell">{t('period')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap hidden lg:table-cell">{t('driver')} / {t('vehicle')}</th>
-            <th className="text-right text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('monthly_rental')}</th>
-            <th className="text-right text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('net_profit')} / {t('profit_margin')}</th>
-            <th className="text-left text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('status')}</th>
-            <th className="text-right text-xs text-muted-foreground tracking-wider font-semibold uppercase px-4 py-3 whitespace-nowrap">{t('actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid">
+      <Table className="trips-grid-table">
+        <TableHeader>
+          <TableRow className="bg-muted hover:bg-muted">
+            {[
+              ['RECORD ID / CLIENT', 'text-left'],
+              ['PERIOD', 'text-left'],
+              ['DRIVER / VEHICLE', 'text-left'],
+              ['MONTHLY RENTAL', 'text-right'],
+              ['NET PROFIT / MARGIN', 'text-right'],
+              ['STATUS', 'text-left'],
+              ['ACTIONS', 'text-center'],
+            ].map(([label, align]) => (
+              <TableHead
+                key={label}
+                className={cn(
+                  'text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th sticky top-0 z-10 bg-muted',
+                  align
+                )}
+              >
+                {label}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {contracts.map((c) => {
             const expenses = expensesByContract[c.id] || [];
             const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
@@ -30,49 +54,79 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
             const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
             const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';
             return (
-              <tr key={c.id} className="border-b border-border/60 hover:bg-primary/5 transition-colors">
-                <td className="px-4 py-3 whitespace-nowrap">
+              <TableRow key={c.id} className="hover:bg-primary/5 transition-all duration-150 group">
+                {/* RECORD ID / CLIENT */}
+                <TableCell className="align-top trips-grid-td">
                   <p className="font-mono text-xs text-foreground">#{c.id?.slice(-6).toUpperCase()}</p>
                   <p className="text-foreground font-medium truncate max-w-[180px]">{c.company_name || '—'}</p>
-                </td>
-                <td className="px-4 py-3 hidden md:table-cell whitespace-nowrap">
-                  <span className="text-foreground tabular-nums">{formatDate(c.start_date)}</span>
-                  <span className="text-muted-foreground mx-1">→</span>
-                  <span className="text-foreground tabular-nums">{formatDate(c.end_date)}</span>
-                </td>
-                <td className="px-4 py-3 hidden lg:table-cell whitespace-nowrap">
-                  <p className="text-foreground truncate max-w-[140px]">{c.driver_name || '—'}</p>
+                </TableCell>
+                {/* PERIOD */}
+                <TableCell className="align-top trips-grid-td whitespace-nowrap">
+                  <span className="text-foreground tabular-nums text-xs">{formatDate(c.start_date)}</span>
+                  <span className="text-muted-foreground mx-1 text-xs">→</span>
+                  <span className="text-foreground tabular-nums text-xs">{formatDate(c.end_date)}</span>
+                </TableCell>
+                {/* DRIVER / VEHICLE */}
+                <TableCell className="align-top trips-grid-td">
+                  <p className="text-foreground truncate max-w-[140px] text-xs">{c.driver_name || '—'}</p>
                   <p className="text-xs text-muted-foreground tabular-nums">{c.vehicle_plate || ''}</p>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <span className="font-semibold text-foreground tabular-nums">{formatCurrency(monthlyRate)}</span>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <p className={`font-semibold tabular-nums ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
-                  <p className={`text-xs tabular-nums ${marginTone}`}>{margin}%</p>
-                </td>
-                <td className="px-4 py-3">
-                  <StatusPill variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="w-8 h-8 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onDetails?.(c)} className="cursor-pointer flex items-center gap-2"><Eye className="w-3.5 h-3.5" /> {t('details')}</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit?.(c)} className="cursor-pointer flex items-center gap-2"><Pencil className="w-3.5 h-3.5" /> {t('edit')}</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDelete?.(c)} className="cursor-pointer flex items-center gap-2 text-red-400"><Trash2 className="w-3.5 h-3.5" /> {t('delete')}</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
+                </TableCell>
+                {/* MONTHLY RENTAL */}
+                <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
+                  <span className="font-semibold text-foreground tabular-nums text-xs">{formatCurrency(monthlyRate)}</span>
+                </TableCell>
+                {/* NET PROFIT / MARGIN */}
+                <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
+                  <p className={cn('font-semibold tabular-nums text-xs', netProfit >= 0 ? 'text-emerald-400' : 'text-red-400')}>
+                    {formatCurrency(netProfit)}
+                  </p>
+                  <p className={cn('text-xs tabular-nums', marginTone)}>{margin}%</p>
+                </TableCell>
+                {/* STATUS */}
+                <TableCell className="align-top trips-grid-td">
+                  <span
+                    className={cn(
+                      'text-[10px] font-bold px-2 py-1 rounded-full border inline-flex items-center gap-1',
+                      c.status === 'active' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+                      c.status === 'expired' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+                      c.status === 'terminated' && 'text-red-400 border-red-500/30 bg-red-500/10'
+                    )}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_HEX[c.status] || '#a1a1aa' }} />
+                    {STATUS_LABELS[c.status] || c.status}
+                  </span>
+                </TableCell>
+                {/* ACTIONS */}
+                <TableCell className="align-top trips-grid-td">
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => onDetails?.(c)}
+                      className="rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
+                      title="View"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onEdit?.(c)}
+                      className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onDelete?.(c)}
+                      className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
