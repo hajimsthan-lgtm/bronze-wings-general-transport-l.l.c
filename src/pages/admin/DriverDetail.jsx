@@ -178,12 +178,12 @@ export default function DriverDetail() {
         <EntityDetailHeader backTo="/admin/drivers" />
       </div>
 
-      {/* Grid: profile (left, sticky) | sections + widgets (right, scroll) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
-        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto thin-scroll">
+      {/* Grid: profile (left, frozen) | sections + widgets (right, scroll) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start lg:h-[calc(100vh-3.5rem)]">
+        <div className="lg:h-full lg:overflow-y-auto thin-scroll">
           <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard
               collapsible
