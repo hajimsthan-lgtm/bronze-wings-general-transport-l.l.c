@@ -359,8 +359,8 @@ export default function Operations() {
           <LoadingSpinner />
         ) : (
           <div className="space-y-4">
-            {/* Drafts — always visible, default collapsed */}
-            {showTrips && (
+            {/* Drafts — only visible when drafts exist */}
+            {showTrips && draftTrips.length > 0 && (
               <CollapsibleSection
                 icon={FileEdit}
                 label="Drafts"
@@ -368,15 +368,7 @@ export default function Operations() {
                 accent="amber"
                 defaultCollapsed={true}
               >
-                {draftTrips.length === 0 ? (
-                  <EmptyState
-                    icon={FileEdit}
-                    title="No drafts yet"
-                    description="Unsaved trips will appear here"
-                  />
-                ) : (
-                  <DraftsTable drafts={draftTrips} onContinue={handleContinueDraft} onDelete={handleDeleteDraft} />
-                )}
+                <DraftsTable drafts={draftTrips} onContinue={handleContinueDraft} onDelete={handleDeleteDraft} />
               </CollapsibleSection>
             )}
             {/* Empty state — when no trips/contracts */}
