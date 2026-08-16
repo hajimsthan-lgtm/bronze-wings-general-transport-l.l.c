@@ -12,6 +12,7 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
+import BulkActionBar from '@/components/operations/BulkActionBar';
 
 const STATUS_HEX = {
   scheduled: '#60a5fa',
@@ -32,7 +33,7 @@ const DEFAULT_WIDTHS = {
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
-export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
+export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -127,6 +128,16 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map((t) => t.id)));
   };
   const allSelected = trips.length > 0 && selected.size === trips.length;
+  const clearSelection = () => setSelected(new Set());
+  const selectedIds = Array.from(selected);
+  const handleBulkStatus = async (status) => {
+    if (onBulkStatus) await onBulkStatus(selectedIds, status);
+    clearSelection();
+  };
+  const handleBulkDelete = async () => {
+    if (onBulkDelete) await onBulkDelete(selectedIds);
+    clearSelection();
+  };
 
   const handleStatusChange = async (trip, newStatus) => {
     if (newStatus === trip.status) return;
@@ -354,6 +365,16 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating bulk action bar */}
+      <BulkActionBar
+        selectedCount={selected.size}
+        totalCount={trips.length}
+        onSelectAll={toggleAll}
+        onClear={clearSelection}
+        onBulkStatus={handleBulkStatus}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>);
 
 }

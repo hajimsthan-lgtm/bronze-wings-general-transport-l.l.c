@@ -20,6 +20,7 @@ import StatTilesCard from '@/components/dashboard/premium/StatTilesCard';
 import PerformanceChart from '@/components/dashboard/premium/PerformanceChart';
 import TripsTableCard from '@/components/dashboard/premium/TripsTableCard';
 import InvoicesListCard from '@/components/dashboard/premium/InvoicesListCard';
+import TripsStatusCard from '@/components/dashboard/TripsStatusCard';
 
 const donutTooltip = {
   background: 'rgba(var(--surf-2-rgb),0.95)',
@@ -102,6 +103,8 @@ export default function Dashboard() {
   const paidInv = fInvoices.filter((i) => i.status === 'paid').length;
   const invCollectionPct = fInvoices.length ? Math.round(paidInv / fInvoices.length * 100) : 0;
   const completedPct = totalTrips ? Math.round(completedTrips / totalTrips * 100) : 0;
+  const activeTripsTransit = fTrips.filter((t) => t.status === 'in_transit').length;
+  const pendingTripsScheduled = fTrips.filter((t) => t.status === 'scheduled').length;
 
   const goals = [
     { label: 'On-Time Delivery', pct: onTimePct, color: '#34d399' },
@@ -281,6 +284,9 @@ export default function Dashboard() {
 
         {/* Performance chart — full width */}
         <PerformanceChart data={revData} range={range} setRange={setRange} />
+
+        {/* Trips status — active vs pending summary */}
+        <TripsStatusCard activeCount={activeTripsTransit} pendingCount={pendingTripsScheduled} completedCount={completedTrips} />
 
         {/* Detail row — 65/35 */}
         <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-5">

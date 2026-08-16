@@ -9,6 +9,7 @@ import { Check, Send, Undo2, ArrowRight, ChevronDown } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import BulkActionBar from '@/components/operations/BulkActionBar';
 
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -33,12 +34,35 @@ const STATUS_HEX = {
   cancelled: '#f87171',
 };
 
-export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged }) {
+export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const updateTrip = useTripUpdate();
   const { toast } = useToast();
   const [busy, setBusy] = useState({});
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleOne = (id) => {
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  };
+  const toggleAll = () => {
+    setSelected((s) => (s.size === trips.length ? new Set() : new Set(trips.map((t) => t.id))));
+  };
+  const clearSelection = () => setSelected(new Set());
+  const selectedIds = Array.from(selected);
+
+  const handleBulkStatus = async (status) => {
+    if (onBulkStatus) await onBulkStatus(selectedIds, status);
+    clearSelection();
+  };
+  const handleBulkDelete = async () => {
+    if (onBulkDelete) await onBulkDelete(selectedIds);
+    clearSelection();
+  };
 
   const handleInvoiceSent = async (e, trip, sent) => {
     e.stopPropagation();
@@ -68,9 +92,31 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
 
   return (
     <div>
+      {/* Select-all header — only when trips exist */}
+      {trips.length > 0 && (
+        <div className="flex items-center gap-2 mb-2 px-1">
+          <button
+            onClick={toggleAll}
+            className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span
+              className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
+                selected.size === trips.length
+                  ? 'bg-primary border-primary'
+                  : 'border-border/60 bg-input'
+              }`}
+            >
+              {selected.size === trips.length && <Check className="w-3 h-3 text-primary-foreground" />}
+            </span>
+            {selected.size > 0 ? `${selected.size} selected` : 'Select all'}
+          </button>
+        </div>
+      )}
+
       {trips.map((trip, i) => {
         const invoice = invoiceMap?.[trip.id];
         const isSent = invoice?.status === 'sent';
+        const isSelected = selected.has(trip.id);
         const statusOpt = STATUS_OPTIONS.find((s) => s.value === trip.status) || STATUS_OPTIONS[0];
         const color = STATUS_HEX[trip.status] || '#94a3b8';
         const profit = (Number(trip.revenue) || 0) - (Number(trip.fuel_cost) || 0) - (Number(trip.toll_cost) || 0) - (Number(trip.other_cost) || 0);
@@ -83,6 +129,10 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
             style={{
               animationDelay: `${Math.min(i * 0.03, 0.4)}s`,
               ['--row-accent']: color,
+              ...(isSelected ? {
+                background: 'linear-gradient(165deg, rgba(var(--panel-accent-rgb),0.12) 0%, rgba(var(--surf-2-rgb),0.80) 100%)',
+                borderColor: 'rgba(var(--panel-accent-rgb),0.40)',
+              } : {}),
             }}
           >
             <span
@@ -90,7 +140,17 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               style={{ background: color, boxShadow: `0 0 8px ${color}` }}
             />
             <div className="flex items-center gap-2.5 p-2 sm:p-2.5">
-              {/* Prominent date block — big like a company name heading */}
+              {/* Bulk-select checkbox */}
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleOne(trip.id); }}
+                className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors ${
+                  isSelected ? 'bg-primary border-primary' : 'border-border/60 bg-input hover:border-primary/50'
+                }`}
+              >
+                {isSelected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+              </button>
+
+              {/* Prominent date block */}
               <div
                 className="flex flex-col items-center justify-center w-11 h-11 rounded-xl flex-shrink-0"
                 style={{ background: hexToRgba(color, 0.10), border: `1px solid ${hexToRgba(color, 0.24)}` }}
@@ -188,6 +248,16 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
           </div>
         );
       })}
+
+      {/* Floating bulk action bar */}
+      <BulkActionBar
+        selectedCount={selected.size}
+        totalCount={trips.length}
+        onSelectAll={toggleAll}
+        onClear={clearSelection}
+        onBulkStatus={handleBulkStatus}
+        onBulkDelete={handleBulkDelete}
+      />
     </div>
   );
 }
