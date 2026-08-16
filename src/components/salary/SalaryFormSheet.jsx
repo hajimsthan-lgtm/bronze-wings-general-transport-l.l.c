@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/formatters';
 import SalaryDeductionsPicker from './SalaryDeductionsPicker';
+import SalaryOvertimePicker from './SalaryOvertimePicker';
+import { settleOvertimeEntries } from '@/lib/overtimeCalc';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -34,6 +36,9 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
   const [driverDeductions, setDriverDeductions] = useState([]);
   const [selectedDeductionIds, setSelectedDeductionIds] = useState([]);
   const [deductionAmounts, setDeductionAmounts] = useState({});
+  const [overtimeEntries, setOvertimeEntries] = useState([]);
+  const [selectedOvertimeIds, setSelectedOvertimeIds] = useState([]);
+  const [overtimeAmounts, setOvertimeAmounts] = useState({});
 
   useEffect(() => { base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {}); }, []);
 
@@ -54,6 +59,8 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
       setForm({ ...blank(), driver_name: prefillDriver || '' });
       setSelectedDeductionIds([]);
       setDeductionAmounts({});
+      setSelectedOvertimeIds([]);
+      setOvertimeAmounts({});
     }
   }, [editItem, prefillDriver]);
 
@@ -70,6 +77,22 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
       .catch(() => setDriverDeductions([]));
   }, [form.driver_name]);
 
+  // Fetch pending overtime entries for the selected driver, filtered by selected month/year
+  useEffect(() => {
+    if (!form.driver_name) { setOvertimeEntries([]); return; }
+    base44.entities.DriverOvertime.filter({ driver_name: form.driver_name, status: 'pending' })
+      .then((res) => {
+        const monthIdx = MONTHS.indexOf(form.month);
+        const filtered = (res || []).filter((e) => {
+          if (!e.date) return true;
+          const d = new Date(e.date);
+          return d.getMonth() === monthIdx && d.getFullYear() === Number(form.year);
+        });
+        setOvertimeEntries(filtered);
+      })
+      .catch(() => setOvertimeEntries([]));
+  }, [form.driver_name, form.month, form.year]);
+
   const recalcNet = (f) => ({
     ...f,
     net_salary: (Number(f.base_salary) || 0) + (Number(f.overtime) || 0) + (Number(f.bonus) || 0) - (Number(f.deductions) || 0),
@@ -82,6 +105,35 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
     setForm((prev) => recalcNet({ ...prev, driver_name: name, base_salary: drv?.base_salary ?? prev.base_salary }));
     setSelectedDeductionIds([]);
     setDeductionAmounts({});
+    setSelectedOvertimeIds([]);
+    setOvertimeAmounts({});
+  };
+
+  const toggleOvertime = (id) => {
+    setSelectedOvertimeIds((prev) => {
+      const willSelect = !prev.includes(id);
+      const next = willSelect ? [...prev, id] : prev.filter((x) => x !== id);
+      setOvertimeAmounts((am) => {
+        const am2 = { ...am };
+        if (willSelect && am2[id] == null) {
+          const entry = overtimeEntries.find((e) => e.id === id);
+          am2[id] = entry?.amount ?? '';
+        }
+        const sum = next.reduce((s, oid) => s + (Number(am2[oid]) || 0), 0);
+        setForm((f) => recalcNet({ ...f, overtime: sum }));
+        return am2;
+      });
+      return next;
+    });
+  };
+
+  const setOvertimeAmount = (id, value) => {
+    setOvertimeAmounts((am) => {
+      const next = { ...am, [id]: value };
+      const sum = selectedOvertimeIds.reduce((s, oid) => s + (Number(next[oid]) || 0), 0);
+      setForm((f) => recalcNet({ ...f, overtime: sum }));
+      return next;
+    });
   };
 
   const toggleDeduction = (id) => {
@@ -122,7 +174,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         const amount = Number(deductionAmounts[id]) || 0;
         return { id, amount, description: d?.description || d?.type || '', type: d?.type || 'other' };
       }).filter((x) => x.amount > 0);
-      await onSave({
+      const result = await onSave({
         ...form,
         year: Number(form.year),
         base_salary: Number(form.base_salary) || 0,
@@ -132,6 +184,15 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         net_salary: Number(form.net_salary) || 0,
         applied_deductions: applied,
       });
+      // Settle selected overtime entries
+      const otIdsToSettle = selectedOvertimeIds.filter((id) => {
+        const amt = Number(overtimeAmounts[id]) || 0;
+        return amt > 0;
+      });
+      if (otIdsToSettle.length > 0) {
+        const salaryId = result?.id || result?._id || '';
+        await settleOvertimeEntries(otIdsToSettle, salaryId);
+      }
     } finally {
       setSaving(false);
     }
@@ -159,6 +220,14 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
         onToggle={toggleDeduction}
         amounts={deductionAmounts}
         onAmountChange={setDeductionAmount}
+      />
+
+      <SalaryOvertimePicker
+        overtimeEntries={overtimeEntries}
+        selectedIds={selectedOvertimeIds}
+        onToggle={toggleOvertime}
+        amounts={overtimeAmounts}
+        onAmountChange={setOvertimeAmount}
       />
 
       <div className="grid grid-cols-2 gap-3">

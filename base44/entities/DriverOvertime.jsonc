@@ -1,0 +1,120 @@
+{
+  "name": "DriverOvertime",
+  "type": "object",
+  "properties": {
+    "driver_name": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "trip",
+        "manual"
+      ],
+      "default": "manual"
+    },
+    "trip_id": {
+      "type": "string"
+    },
+    "trip_number": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "hours": {
+      "type": "number",
+      "default": 0
+    },
+    "rate": {
+      "type": "number",
+      "default": 0
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "scenario": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "tiered",
+        "flat_daily",
+        "weekend_multiplier"
+      ],
+      "default": "standard"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "applied"
+      ],
+      "default": "pending"
+    },
+    "applied_salary_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "driver_name",
+    "date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

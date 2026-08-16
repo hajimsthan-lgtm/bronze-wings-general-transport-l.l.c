@@ -27,7 +27,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import WeeklyActivityChart from '@/components/drivers/WeeklyActivityChart';
 import HoursGauge from '@/components/drivers/HoursGauge';
-import TripChecklist from '@/components/drivers/TripChecklist';
+import DriverOvertimeCard from '@/components/drivers/DriverOvertimeCard';
 import DriverOutstandingPayments from '@/components/drivers/DriverOutstandingPayments';
 import DriverDeductionsSection from '@/components/drivers/DriverDeductionsSection';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -302,7 +302,7 @@ export default function DriverDetail() {
             <DriverDeductionsSection driverName={driver.name} />
             <WeeklyActivityChart trips={trips} />
             <HoursGauge hours={totalHours} trips={fTrips} />
-            <TripChecklist trips={fTrips} />
+            <DriverOvertimeCard driverName={driver.name} trips={trips} />
           </div>
         </div>
       </div>
@@ -318,9 +318,10 @@ export default function DriverDetail() {
             onSave={async (data) => {
               const { applied_deductions = [], ...salaryData } = data;
               const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
-              await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown });
+              const rec = await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown });
               reloadSalaries();
               setSalaryFormOpen(false);
+              return rec;
             }}
             onCancel={() => setSalaryFormOpen(false)}
           />

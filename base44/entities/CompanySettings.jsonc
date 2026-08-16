@@ -108,6 +108,40 @@
     "template_config": {
       "type": "object",
       "additionalProperties": true
+    },
+    "overtime_scenario": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "tiered",
+        "flat_daily",
+        "weekend_multiplier"
+      ],
+      "default": "standard"
+    },
+    "overtime_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "overtime_tier1_multiplier": {
+      "type": "number",
+      "default": 1.25
+    },
+    "overtime_tier2_multiplier": {
+      "type": "number",
+      "default": 1.5
+    },
+    "overtime_tier2_threshold": {
+      "type": "number",
+      "default": 2
+    },
+    "overtime_flat_daily": {
+      "type": "number",
+      "default": 0
+    },
+    "overtime_weekend_multiplier": {
+      "type": "number",
+      "default": 1.5
     }
   },
   "required": [

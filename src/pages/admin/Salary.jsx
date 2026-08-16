@@ -305,13 +305,15 @@ export default function Salary() {
             onSave={async (data) => {
               const { applied_deductions = [], ...salaryData } = data;
               const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
-              if (editItem) await base44.entities.SalaryRecord.update(editItem.id, { ...salaryData, applied_deductions: breakdown });
-              else await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown });
+              let rec;
+              if (editItem) { rec = await base44.entities.SalaryRecord.update(editItem.id, { ...salaryData, applied_deductions: breakdown }); }
+              else { rec = await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown }); }
               if (applied_deductions.length > 0) {
                 await applyDeductions(salaryData.driver_name, applied_deductions);
               }
               load();
               setFormOpen(false);
+              return rec;
             }}
             onCancel={() => setFormOpen(false)}
           />
