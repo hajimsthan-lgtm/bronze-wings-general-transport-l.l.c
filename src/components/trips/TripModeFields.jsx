@@ -10,6 +10,7 @@ import Section from './Section';
 import IconInput from './IconInput';
 import TripTypeSelector from './TripTypeSelector';
 import VendorPaymentFields from './VendorPaymentFields';
+import TripFinancialFields from './TripFinancialFields';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -241,7 +242,8 @@ export default function TripModeFields({ p }) {
         </div>
       </Section>
 
-      {/* Financial — moved to the right column (TripFinancialFields) */}
+      {/* Financial — data entry fields, belongs with the form */}
+      <TripFinancialFields p={p} />
 
       {/* Notes */}
       <Section title={t('notes')} icon={StickyNote} accent="148,163,184" delay={360}>

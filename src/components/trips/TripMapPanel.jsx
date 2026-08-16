@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Navigation, MapPin, Search, Loader2, X, LocateFixed, Plus, AlertTriangle, Flag } from 'lucide-react';
+import { Navigation, MapPin, Search, Loader2, X, LocateFixed, Plus, AlertTriangle, Flag, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_CENTER = [25.2048, 55.2708]; // Dubai
 const ROUTE_COLOR = '#0A84FF';
@@ -88,7 +89,7 @@ function FitBounds({ fitCoords }) {
   return null;
 }
 
-export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRouteInfo, tripType }) {
+export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRouteInfo, tripType, collapsed = false, onToggleCollapse }) {
   const [active, setActive] = useState('from');
   const [fromCoord, setFromCoord] = useState(null);
   const [toCoord, setToCoord] = useState(null);
@@ -240,12 +241,13 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
 
   return (
     <div className="glass-card overflow-hidden">
-      <div className="p-3 border-b border-white/10 space-y-2.5">
+      <div className={cn("p-3 space-y-2.5", !collapsed && "border-b border-white/10")}>
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
+          <button type="button" onClick={onToggleCollapse} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Navigation className="w-4 h-4 text-primary" />
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Location Picker</span>
-          </div>
+            <ChevronDown className={cn("w-3.5 h-3.5 text-muted-foreground transition-transform duration-200", !collapsed && "rotate-180")} />
+          </button>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setActive('from')}
@@ -295,6 +297,8 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
           </div>
         </div>
 
+        {!collapsed && (
+        <>
         <div className="flex items-center gap-1.5">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -346,8 +350,11 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
             ))}
           </div>
         )}
+        </>
+        )}
       </div>
 
+      {!collapsed && (
       <div className="relative" style={{ height: 300 }}>
         <MapContainer center={DEFAULT_CENTER} zoom={11} className="w-full h-full" ref={refCb} zoomControl>
           <TileLayer
@@ -424,6 +431,7 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

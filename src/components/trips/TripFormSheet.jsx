@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Truck, FileText, X, Check, Loader2, Save, FileQuestion } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [vendorRateOverride, setVendorRateOverride] = useState(false);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [showClosePrompt, setShowClosePrompt] = useState(false);
+  const [mapCollapsed, setMapCollapsed] = useState(true);
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
 
@@ -91,6 +93,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   useEffect(() => {
     if (open) {
+      setMapCollapsed(true);
       setRevenueOverride(false);
       if (editContract) {
         setMode('contract');
@@ -569,29 +572,30 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             <ContractModeFields p={contractCtx} />}
           </div>
 
-          {/* Right column — sticky on desktop: calc (fixed top) + map/financial (scrollable below) */}
-          <div className="flex flex-col gap-5 lg:sticky lg:top-4 lg:max-h-[calc(82vh-170px)]">
+          {/* Right column — frozen/sticky: Live Calculation + collapsible Location Picker */}
+          <div className={cn("flex flex-col gap-5 lg:sticky lg:top-4", !mapCollapsed && "lg:max-h-[calc(82vh-170px)] lg:overflow-y-auto")}>
             {mode === 'trip' && (
               <div className="flex-shrink-0">
                 <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
               </div>
             )}
-            <div className="space-y-5 lg:flex-1 lg:overflow-y-auto lg:min-h-0 lg:pr-1">
-              {mode === 'trip' &&
-              <TripMapPanel
-                from={form.from_location}
-                to={form.to_location}
-                onSelectFrom={(v) => update('from_location', v)}
-                onSelectTo={(v) => update('to_location', v)}
-                onRouteInfo={handleRouteInfo}
-                tripType={form.trip_type}
-              />
-              }
-              {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
-              {mode === 'contract' &&
-              <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
-              }
-            </div>
+            {mode === 'trip' && (
+              <div className="flex-shrink-0">
+                <TripMapPanel
+                  from={form.from_location}
+                  to={form.to_location}
+                  onSelectFrom={(v) => update('from_location', v)}
+                  onSelectTo={(v) => update('to_location', v)}
+                  onRouteInfo={handleRouteInfo}
+                  tripType={form.trip_type}
+                  collapsed={mapCollapsed}
+                  onToggleCollapse={() => setMapCollapsed(!mapCollapsed)}
+                />
+              </div>
+            )}
+            {mode === 'contract' &&
+            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
+            }
           </div>
         </div>
 
