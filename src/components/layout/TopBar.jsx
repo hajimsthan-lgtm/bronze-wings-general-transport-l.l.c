@@ -24,7 +24,7 @@ export default function TopBar() {
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="w-full px-4 md:px-6 bg-background/85 backdrop-blur-xl border-b border-border/50 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.4)]">
-        <div className="flex items-center justify-between py-2 gap-2">
+        <div className="flex items-center justify-between py-2 gap-2 min-h-[54px]">
           {/* Left: status filter pills for Operations pages */}
           {showOpsFilter && (
             <div className="hidden md:flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-1">
