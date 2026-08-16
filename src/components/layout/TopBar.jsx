@@ -21,8 +21,6 @@ export default function TopBar() {
   const isOpsPage = location.pathname === '/trips' || location.pathname === '/contracts';
   const showOpsFilter = isOpsPage && opsFilter.active && opsFilter.options?.length > 0;
 
-  if (subNav.length === 0 && !showOpsFilter) return null;
-
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] md:top-20 z-40">
       <div className="w-full px-4 md:px-6 bg-background/85 backdrop-blur-xl border-b border-border/50 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.4)]">
