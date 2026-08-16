@@ -13,7 +13,17 @@ const TYPE_ICON = {
 };
 
 export default function SalaryDeductionsPicker({ deductions, selectedIds, onToggle, amounts, onAmountChange }) {
-  if (!deductions || deductions.length === 0) return null;
+  if (!deductions || deductions.length === 0) {
+    return (
+      <div className="rounded-xl border border-border bg-muted/10 p-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Wallet className="w-3.5 h-3.5 text-muted-foreground/50" />
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground/60 font-semibold">Pending Deductions · FIFO</span>
+        </div>
+        <p className="text-xs text-muted-foreground/50 italic py-1">No pending deductions for this driver</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-2">
@@ -25,7 +35,7 @@ export default function SalaryDeductionsPicker({ deductions, selectedIds, onTogg
       {deductions.map((d) => {
         const Icon = TYPE_ICON[d.type] || Package;
         const checked = selectedIds.includes(d.id);
-        const amt = amounts?.[d.id] ?? d.monthly_deduction;
+        const amt = amounts?.[d.id] ?? '';
         return (
           <div
             key={d.id}
@@ -41,15 +51,15 @@ export default function SalaryDeductionsPicker({ deductions, selectedIds, onTogg
                 <span className="text-xs font-medium text-foreground truncate">{d.description || d.type}</span>
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5 flex flex-wrap gap-x-2.5">
-                <span>Monthly: <span className="text-foreground/80 font-medium">{formatCurrency(d.monthly_deduction)}</span></span>
+                <span>Total: <span className="text-foreground/80 font-medium">{formatCurrency(d.total_amount)}</span></span>
                 <span>Remaining: <span className="text-foreground/80 font-medium">{formatCurrency(d.remaining_balance)}</span></span>
-                <span>Months left: <span className="text-foreground/80 font-medium">{d.months_left ?? 0}</span></span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
               <Input
                 type="number"
                 value={amt}
+                placeholder="0"
                 onChange={(e) => onAmountChange(d.id, e.target.value)}
                 disabled={!checked}
                 className="h-7 w-24 bg-input border-border text-xs text-right tabular-nums"

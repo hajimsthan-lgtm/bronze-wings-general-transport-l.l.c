@@ -135,10 +135,10 @@ export default function Salary() {
   const applyDeductions = async (driverName, selectedItems) => {
     const all = await base44.entities.DriverDeduction.filter({ driver_name: driverName, status: 'active' }).catch(() => []);
     const sorted = (all || [])
-      .filter((d) => Number(d.monthly_deduction) > 0 && Number(d.remaining_balance) > 0)
+      .filter((d) => Number(d.remaining_balance) > 0)
       .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
     const items = !selectedItems
-      ? sorted.map((d) => ({ id: d.id, amount: Number(d.monthly_deduction) || 0 }))
+      ? sorted.map((d) => ({ id: d.id, amount: 0 }))
       : selectedItems;
     let total = 0;
     const breakdown = [];
@@ -148,8 +148,7 @@ export default function Salary() {
       const amt = Math.min(Number(it.amount) || 0, Number(d.remaining_balance) || 0);
       if (amt <= 0) continue;
       const newRemaining = Math.max(0, (Number(d.remaining_balance) || 0) - amt);
-      const monthly = Number(d.monthly_deduction) || 0;
-      const newMonthsLeft = monthly > 0 ? Math.ceil(newRemaining / monthly) : 0;
+      const newMonthsLeft = 0;
       const newStatus = newRemaining <= 0 ? 'completed' : 'active';
       await base44.entities.DriverDeduction.update(d.id, {
         remaining_balance: newRemaining,

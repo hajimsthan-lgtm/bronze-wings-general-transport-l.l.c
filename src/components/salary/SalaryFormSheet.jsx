@@ -63,7 +63,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
     base44.entities.DriverDeduction.filter({ driver_name: form.driver_name, status: 'active' })
       .then((res) => {
         const sorted = (res || [])
-          .filter((d) => Number(d.monthly_deduction) > 0 && Number(d.remaining_balance) > 0)
+          .filter((d) => Number(d.remaining_balance) > 0)
           .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
         setDriverDeductions(sorted);
       })
@@ -91,13 +91,10 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
       setDeductionAmounts((am) => {
         const am2 = { ...am };
         if (willSelect && am2[id] == null) {
-          const d = driverDeductions.find((x) => x.id === id);
-          const def = Math.min(Number(d?.monthly_deduction) || 0, Number(d?.remaining_balance) || 0);
-          am2[id] = def > 0 ? def : Number(d?.monthly_deduction) || 0;
+          am2[id] = '';
         }
         const sum = next.reduce((s, did) => {
-          const d = driverDeductions.find((x) => x.id === did);
-          return s + (Number(am2[did]) || Number(d?.monthly_deduction) || 0);
+          return s + (Number(am2[did]) || 0);
         }, 0);
         setForm((f) => recalcNet({ ...f, deductions: sum }));
         return am2;
@@ -110,8 +107,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
     setDeductionAmounts((am) => {
       const next = { ...am, [id]: value };
       const sum = selectedDeductionIds.reduce((s, did) => {
-        const d = driverDeductions.find((x) => x.id === did);
-        return s + (Number(next[did]) || Number(d?.monthly_deduction) || 0);
+        return s + (Number(next[did]) || 0);
       }, 0);
       setForm((f) => recalcNet({ ...f, deductions: sum }));
       return next;
@@ -123,7 +119,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
     try {
       const applied = selectedDeductionIds.map((id) => {
         const d = driverDeductions.find((x) => x.id === id);
-        const amount = Number(deductionAmounts[id]) || Number(d?.monthly_deduction) || 0;
+        const amount = Number(deductionAmounts[id]) || 0;
         return { id, amount, description: d?.description || d?.type || '', type: d?.type || 'other' };
       }).filter((x) => x.amount > 0);
       await onSave({
