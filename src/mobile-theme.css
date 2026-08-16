@@ -4,6 +4,25 @@
    Keyed off the same .theme-light toggle used app-wide.
    ═══════════════════════════════════════════════════════ */
 
+/* ── Strict scroll boundary — lock body, contain overscroll ── */
+@media (max-width: 767px) {
+  html, body {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  #root {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  /* Unified scroll container — strict boundary, no rubber-band */
+  main {
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* ── Dark mode mobile tokens (default + all dark variants) ── */
 @media (max-width: 767px) {
   :root,

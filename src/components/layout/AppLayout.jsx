@@ -9,6 +9,7 @@ import MobileNav from '@/components/layout/MobileNav';
 import MobileCanvasBackground from '@/components/mobile/MobileCanvasBackground';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function AppLayout() {
   const location = useLocation();
@@ -16,7 +17,7 @@ export default function AppLayout() {
 
   return (
     <div
-      className="min-h-[100dvh] md:h-[100dvh] flex flex-col md:overflow-hidden"
+      className="h-[100dvh] flex flex-col overflow-hidden"
       style={{ background: 'var(--app-bg)' }}
     >
       <MobileCanvasBackground />
@@ -40,19 +41,28 @@ export default function AppLayout() {
           <div className="flex-1 min-w-0 flex flex-col">
             <ShellNavbar query={navQuery} setQuery={setNavQuery} />
             <TopBar />
-            <main className="flex-1 min-h-0 md:overflow-y-auto thin-scroll" style={{ background: 'var(--bg-canvas)' }}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={location.pathname}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  className="p-4 pb-32 md:p-6 md:pb-10"
-                >
-                  <Outlet />
-                </motion.div>
-              </AnimatePresence>
+            <main
+              className="flex-1 min-h-0 overflow-y-auto thin-scroll"
+              style={{
+                background: 'var(--bg-canvas)',
+                overscrollBehaviorY: 'contain',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <PullToRefresh>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                    className="p-4 pb-32 md:p-6 md:pb-10"
+                  >
+                    <Outlet />
+                  </motion.div>
+                </AnimatePresence>
+              </PullToRefresh>
             </main>
             <AppFooter />
           </div>
