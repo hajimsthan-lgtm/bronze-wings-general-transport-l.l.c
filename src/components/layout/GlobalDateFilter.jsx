@@ -40,18 +40,20 @@ export default function GlobalDateFilter() {
     ? (isSingle ? dateFrom : `${dateFrom} → ${dateTo}`)
     : 'Dates';
 
+  const isFiltered = !!(dateFrom || dateTo);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="flex items-center gap-2 h-9 px-3 sm:px-4 rounded-xl transition-all shrink-0 bg-input border border-white/10"
-          style={{ boxShadow: 'inset 2px 2px 4px rgba(0,0,0,0.4), inset -2px -2px 4px rgba(255,255,255,0.03)' }}
+          className="relative w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all duration-200 shrink-0"
           aria-label="Global date filter"
-          title="Filter all pages by date"
+          title={isFiltered ? `${label}` : 'Filter all pages by date'}
         >
-          <CalendarIcon className="w-4 h-4 text-blue-400 shrink-0" />
-          <span className="text-sm text-foreground font-mono tabular-nums truncate hidden lg:inline max-w-[140px]">{label}</span>
-          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+          <CalendarIcon className="w-4 h-4" />
+          {isFiltered && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
+          )}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-popover border-border" align="center">

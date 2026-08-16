@@ -217,6 +217,68 @@ export default function Dashboard() {
           <StatTilesCard tiles={tiles} />
         </div>
 
+        {/* Alerts — surfaced high, directly beneath hero metrics */}
+        {hasAlerts && (
+          <PremiumCard padding="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 rounded-lg chip-red flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-white" />
+              </div>
+              <h2 className="text-sm font-semibold text-white">{t('actionable_alerts')}</h2>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {overdueInvoices.length + maintenanceVehicles.length + expiringDocs.length + serviceDueVehicles.length + driverDocAlerts.length} active
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {overdueInvoices.length > 0 && (
+                <Link to="/admin/clients" className="flex items-center gap-3 p-3 rounded-xl border-l-[4px] bg-gradient-to-r from-red-500/[0.12] to-rose-500/[0.06] border-red-500 hover:from-red-500/[0.18] hover:to-rose-500/[0.1] transition-all hover:-translate-y-0.5 group">
+                  <div className="w-8 h-8 rounded-lg chip-red flex items-center justify-center flex-shrink-0">
+                    <FileWarning className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-white flex-1">{overdueInvoices.length} {t('overdue_invoices')}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                </Link>
+              )}
+              {maintenanceVehicles.length > 0 && (
+                <Link to="/admin/vehicles" className="flex items-center gap-3 p-3 rounded-xl border-l-[4px] bg-gradient-to-r from-amber-500/[0.12] to-orange-500/[0.06] border-amber-500 hover:from-amber-500/[0.18] hover:to-orange-500/[0.1] transition-all hover:-translate-y-0.5 group">
+                  <div className="w-8 h-8 rounded-lg chip-amber flex items-center justify-center flex-shrink-0">
+                    <Wrench className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-white flex-1">{maintenanceVehicles.length} {t('maintenance_due')}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                </Link>
+              )}
+              {expiringDocs.length > 0 && (
+                <Link to="/admin/documents" className="flex items-center gap-3 p-3 rounded-xl border-l-[4px] bg-gradient-to-r from-amber-500/[0.12] to-orange-500/[0.06] border-amber-500 hover:from-amber-500/[0.18] hover:to-orange-500/[0.1] transition-all hover:-translate-y-0.5 group">
+                  <div className="w-8 h-8 rounded-lg chip-amber flex items-center justify-center flex-shrink-0">
+                    <FileWarning className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-white flex-1">{expiringDocs.length} {t('expiring_docs')}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                </Link>
+              )}
+              {serviceDueVehicles.length > 0 && (
+                <Link to="/admin/vehicles" className="flex items-center gap-3 p-3 rounded-xl border-l-[4px] bg-gradient-to-r from-amber-500/[0.12] to-orange-500/[0.06] border-amber-500 hover:from-amber-500/[0.18] hover:to-orange-500/[0.1] transition-all hover:-translate-y-0.5 group">
+                  <div className="w-8 h-8 rounded-lg chip-amber flex items-center justify-center flex-shrink-0">
+                    <Wrench className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-white flex-1">{serviceDueVehicles.length} vehicle{serviceDueVehicles.length !== 1 ? 's' : ''} due for service</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                </Link>
+              )}
+              {driverDocAlerts.length > 0 && (
+                <Link to="/admin/drivers" className="flex items-center gap-3 p-3 rounded-xl border-l-[4px] bg-gradient-to-r from-red-500/[0.12] to-rose-500/[0.06] border-red-500 hover:from-red-500/[0.18] hover:to-rose-500/[0.1] transition-all hover:-translate-y-0.5 group">
+                  <div className="w-8 h-8 rounded-lg chip-red flex items-center justify-center flex-shrink-0">
+                    <FileWarning className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-white flex-1">{driverDocAlerts.length} driver document{driverDocAlerts.length !== 1 ? 's' : ''} expiring</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-white transition-colors flex-shrink-0" />
+                </Link>
+              )}
+            </div>
+          </PremiumCard>
+        )}
+
         {/* Performance chart — full width */}
         <PerformanceChart data={revData} range={range} setRange={setRange} />
 
@@ -300,47 +362,6 @@ export default function Dashboard() {
           </PremiumCard>
         </div>
 
-        {/* Alerts */}
-        {hasAlerts && (
-          <PremiumCard padding="p-5">
-            <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              {t('actionable_alerts')}
-            </h2>
-            <div className="space-y-2">
-              {overdueInvoices.length > 0 && (
-                <Link to="/admin/clients" className="flex items-center justify-between p-3 rounded-xl bg-red-500/[0.06] border border-red-500/10 hover:bg-red-500/[0.1] transition-colors group">
-                  <div className="flex items-center gap-3"><FileWarning className="w-4 h-4 text-red-400" /><span className="text-sm text-white">{overdueInvoices.length} {t('overdue_invoices')}</span></div>
-                  <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
-                </Link>
-              )}
-              {maintenanceVehicles.length > 0 && (
-                <Link to="/admin/vehicles" className="flex items-center justify-between p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/10 hover:bg-amber-500/[0.1] transition-colors group">
-                  <div className="flex items-center gap-3"><Wrench className="w-4 h-4 text-amber-400" /><span className="text-sm text-white">{maintenanceVehicles.length} {t('maintenance_due')}</span></div>
-                  <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
-                </Link>
-              )}
-              {expiringDocs.length > 0 && (
-                <Link to="/admin/documents" className="flex items-center justify-between p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/10 hover:bg-amber-500/[0.1] transition-colors group">
-                  <div className="flex items-center gap-3"><FileWarning className="w-4 h-4 text-amber-400" /><span className="text-sm text-white">{expiringDocs.length} {t('expiring_docs')}</span></div>
-                  <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
-                </Link>
-              )}
-              {serviceDueVehicles.length > 0 && (
-                <Link to="/admin/vehicles" className="flex items-center justify-between p-3 rounded-xl bg-orange-500/[0.06] border border-orange-500/10 hover:bg-orange-500/[0.1] transition-colors group">
-                  <div className="flex items-center gap-3"><Wrench className="w-4 h-4 text-orange-400" /><span className="text-sm text-white">{serviceDueVehicles.length} vehicle{serviceDueVehicles.length !== 1 ? 's' : ''} due for service</span></div>
-                  <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
-                </Link>
-              )}
-              {driverDocAlerts.length > 0 && (
-                <Link to="/admin/drivers" className="flex items-center justify-between p-3 rounded-xl bg-red-500/[0.06] border border-red-500/10 hover:bg-red-500/[0.1] transition-colors group">
-                  <div className="flex items-center gap-3"><FileWarning className="w-4 h-4 text-red-400" /><span className="text-sm text-white">{driverDocAlerts.length} driver document{driverDocAlerts.length !== 1 ? 's' : ''} expiring</span></div>
-                  <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white transition-colors" />
-                </Link>
-              )}
-            </div>
-          </PremiumCard>
-        )}
       </div>
     </PullToRefresh>
   );
