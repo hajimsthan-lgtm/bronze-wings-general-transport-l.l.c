@@ -13,7 +13,7 @@ export default function DriverListRow({ d, onOpen, onEdit, onDelete }) {
 
   return (
     <>
-      <div className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={() => onOpen?.(d)} style={{ ['--row-accent']: ACCENT }}>
+      <div className="row-card row-edge-glow flex items-start gap-3 cursor-pointer group" onClick={() => onOpen?.(d)} style={{ ['--row-accent']: ACCENT }}>
         <div className="relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0 text-sm font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, color: '#fff' }}>
           {d.image_url ? <img src={d.image_url} alt={d.name} className="w-full h-full object-cover" /> : getInitials(d.name)}
         </div>

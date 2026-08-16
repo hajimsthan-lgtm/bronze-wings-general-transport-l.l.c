@@ -12,7 +12,7 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
   return (
     <>
       <div
-        className={`row-card row-edge-glow flex items-center gap-3 cursor-pointer group ${selected ? 'ring-1 ring-primary/50' : ''}`}
+        className={`row-card row-edge-glow flex items-start gap-3 cursor-pointer group ${selected ? 'ring-1 ring-primary/50' : ''}`}
         onClick={() => onOpen?.(v)}
         style={{ ['--row-accent']: '#1ED760' }}
       >

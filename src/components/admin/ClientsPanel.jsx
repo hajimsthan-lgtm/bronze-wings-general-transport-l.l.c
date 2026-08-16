@@ -15,6 +15,7 @@ import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Plus, Search, Building2, BarChart3, LayoutGrid } from 'lucide-react';
+import MobileFAB from '@/components/mobile/MobileFAB';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 
 export default function ClientsPanel() {
@@ -76,7 +77,7 @@ export default function ClientsPanel() {
             status: r.status || r.Status || 'active',
             payment_terms: r.payment_terms || r['Payment Terms'] || 'Net 30',
           })} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>
 
@@ -109,6 +110,7 @@ export default function ClientsPanel() {
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Building2} title={`${editItem ? t('edit') : t('add_new')} Client`} subtitle="Add a new client company">
           <ClientForm editItem={editItem} onSave={async (data, existingId) => { if (existingId) await base44.entities.Client.update(existingId, data); else if (editItem) await base44.entities.Client.update(editItem.id, data); else await base44.entities.Client.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Client" />
     </div>
   );
 }

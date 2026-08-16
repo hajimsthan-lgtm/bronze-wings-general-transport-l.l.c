@@ -19,6 +19,7 @@ import ImageUpload from '@/components/common/ImageUpload';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users, BarChart3, LayoutGrid } from 'lucide-react';
+import MobileFAB from '@/components/mobile/MobileFAB';
 
 export default function Drivers() {
   return <DriversTab />;
@@ -89,7 +90,7 @@ function DriversTab() {
             assigned_vehicle: r.assigned_vehicle || r.Vehicle || '',
             base_salary: Number(r.base_salary || r['Base Salary']) || 0,
           })} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>
 
@@ -122,6 +123,7 @@ function DriversTab() {
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Users} title={`${editItem ? t('edit') : t('add_new')} Driver`} subtitle="Register a new driver">
           <DriverForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Driver.update(editItem.id, data); else await base44.entities.Driver.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Driver" />
     </div>
   );
 }

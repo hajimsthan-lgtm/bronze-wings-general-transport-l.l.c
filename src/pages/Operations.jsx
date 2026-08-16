@@ -24,7 +24,8 @@ import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2, FileEdit, Plus } from 'lucide-react';
+import MobileFAB from '@/components/mobile/MobileFAB';
 import { setOpsFilter, clearOpsFilter } from '@/lib/operationsFilterStore';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
@@ -442,6 +443,7 @@ export default function Operations() {
         onDelete={async (c) => { await deleteContractById(c); setDetailContract(null); }}
       />
 
+      <MobileFAB icon={Plus} onClick={mode === 'contract' ? openNewContract : openNewTrip} label={mode === 'contract' ? 'New Contract' : 'New Trip'} />
     </div>
   );
 }

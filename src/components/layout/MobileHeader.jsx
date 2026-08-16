@@ -1,5 +1,5 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Settings, ArrowLeft, Sun, Moon, Bot } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Settings, Sun, Moon, Bot } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useI18n } from '@/lib/i18n';
@@ -36,7 +36,6 @@ function getSubModules(activeTab) {
 export default function MobileHeader() {
   const { theme, toggleTheme, mode, toggleMode } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
-  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -61,17 +60,9 @@ export default function MobileHeader() {
       />
       <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(var(--panel-accent-rgb),0.20) 50%, transparent)' }} />
 
-      {/* Row 1: Back + Logo + Page context + Icon cluster */}
+      {/* Row 1: Logo + Page context + Icon cluster */}
       <div className="relative h-14 px-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70 hover:border-[rgba(var(--panel-accent-rgb),0.3)]`}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-
           <Link to="/" className="flex items-center gap-2 min-w-0">
             <div className="relative flex-shrink-0">
               <div

@@ -14,7 +14,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadPayslipPDF } from '@/lib/payslipHtml';
-import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard } from 'lucide-react';
+import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
 import { safeListAll } from '@/lib/safeRequest';
 import MobileFAB from '@/components/mobile/MobileFAB';
@@ -247,48 +248,65 @@ export default function Salary() {
       ) : (
         <div className="space-y-2">
           {filtered.map((r) => (
-            <div key={r.id} className="row-card flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
-                <Wallet className="w-4 h-4 text-white/70" />
-              </div>
-              <div className="flex-1 min-w-0">
-                {driverMap[r.driver_name]
-                  ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>
-                  : <p className="text-sm font-medium text-foreground">{r.driver_name}</p>}
-                <p className="text-xs text-muted-foreground truncate">
-                  {r.month} {r.year} · {(r.payment_method || '').replace(/_/g, ' ')}
-                  {r.payment_date ? ` · paid ${formatDate(r.payment_date)}` : ''}
-                </p>
-                {r.applied_deductions?.length > 0 && (
-                  <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {r.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
-                )}
-              </div>
-              <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground mr-2">
-                <span title="Base">{formatCurrency(r.base_salary)}</span>
-                <span title="Overtime" className="text-emerald-400/80">+{formatCurrency(r.overtime)}</span>
-                <span title="Deductions" className="text-red-400/80">-{formatCurrency(r.deductions)}</span>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(r.net_salary)}</p>
-                <StatusBadge status={r.status} />
-              </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {r.status !== 'paid' && (
-                  <button title="Mark Paid" onClick={() => markPaid(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-emerald-500/15 text-emerald-400 transition-colors disabled:opacity-50">
-                    <CheckCircle className="w-4 h-4" />
-                  </button>
-                )}
-                <button title="Download Payslip" onClick={() => payslip(r)} className="p-2 rounded-lg hover:bg-primary/15 text-[#38BDF8] transition-colors">
-                  <Download className="w-4 h-4" />
-                </button>
-                <button title="Edit" onClick={() => { setEditItem(r); setPrefillDriver(''); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button title="Delete" onClick={() => remove(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-red-500/15 text-red-400 transition-colors disabled:opacity-50">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            <div key={r.id} className="row-card flex items-start gap-3 min-h-[56px]">
+               <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
+                 <Wallet className="w-4 h-4 text-white/70" />
+               </div>
+               <div className="flex-1 min-w-0 pt-0.5">
+                 {driverMap[r.driver_name]
+                   ? <Link to={`/admin/drivers/${driverMap[r.driver_name]}`} className="text-sm font-medium text-foreground hover:text-[#38BDF8] transition-colors hover:underline">{r.driver_name}</Link>
+                   : <p className="text-sm font-medium text-foreground">{r.driver_name}</p>}
+                 <p className="text-xs text-muted-foreground truncate">
+                   {r.month} {r.year} · {(r.payment_method || '').replace(/_/g, ' ')}
+                   {r.payment_date ? ` · paid ${formatDate(r.payment_date)}` : ''}
+                 </p>
+                 {r.applied_deductions?.length > 0 && (
+                   <p className="text-[10px] text-muted-foreground/70 truncate">Deductions: {r.applied_deductions.map((d) => `${d.description} ${formatCurrency(d.amount)}`).join(' · ')}</p>
+                 )}
+               </div>
+               <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground mr-2">
+                 <span title="Base">{formatCurrency(r.base_salary)}</span>
+                 <span title="Overtime" className="text-emerald-400/80">+{formatCurrency(r.overtime)}</span>
+                 <span title="Deductions" className="text-red-400/80">-{formatCurrency(r.deductions)}</span>
+               </div>
+               <div className="text-right flex-shrink-0 pt-0.5">
+                 <p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(r.net_salary)}</p>
+                 <StatusBadge status={r.status} />
+               </div>
+               <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
+                 {r.status !== 'paid' && (
+                   <button title="Mark Paid" onClick={() => markPaid(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-emerald-500/15 text-emerald-400 transition-colors disabled:opacity-50">
+                     <CheckCircle className="w-4 h-4" />
+                   </button>
+                 )}
+                 <button title="Download Payslip" onClick={() => payslip(r)} className="p-2 rounded-lg hover:bg-primary/15 text-[#38BDF8] transition-colors">
+                   <Download className="w-4 h-4" />
+                 </button>
+                 <button title="Edit" onClick={() => { setEditItem(r); setPrefillDriver(''); setFormOpen(true); }} className="p-2 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors">
+                   <Pencil className="w-4 h-4" />
+                 </button>
+                 <button title="Delete" onClick={() => remove(r)} disabled={busyId === r.id} className="p-2 rounded-lg hover:bg-red-500/15 text-red-400 transition-colors disabled:opacity-50">
+                   <Trash2 className="w-4 h-4" />
+                 </button>
+               </div>
+               <div className="sm:hidden flex-shrink-0">
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <button className="p-2 -mr-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors">
+                       <MoreVertical className="w-4 h-4" />
+                     </button>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent align="end" className="bg-card border-border">
+                     {r.status !== 'paid' && (
+                       <DropdownMenuItem onClick={() => markPaid(r)} disabled={busyId === r.id}>Mark Paid</DropdownMenuItem>
+                     )}
+                     <DropdownMenuItem onClick={() => payslip(r)}>Download Payslip</DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => { setEditItem(r); setPrefillDriver(''); setFormOpen(true); }}>Edit</DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => remove(r)} className="text-red-400">Delete</DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenu>
+               </div>
+             </div>
           ))}
         </div>
       )}

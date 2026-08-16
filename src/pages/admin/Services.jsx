@@ -19,6 +19,7 @@ import MaintenanceAnalytics from '@/components/admin/MaintenanceAnalytics';
 import { downloadMaintenancePDF } from '@/lib/maintenancePdf';
 import { getCompanySettings } from '@/lib/companySettings';
 import { Download } from 'lucide-react';
+import MobileFAB from '@/components/mobile/MobileFAB';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -61,7 +62,7 @@ export default function Services() {
             <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
           </div>
           <ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>
 
@@ -90,6 +91,7 @@ export default function Services() {
           <ServiceForm editItem={editItem} presetPlate={presetPlate} onSave={async (data) => { if (editItem) await base44.entities.ServiceRecord.update(editItem.id, data); else await base44.entities.ServiceRecord.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Maintenance" />
     </div>
   );
 }

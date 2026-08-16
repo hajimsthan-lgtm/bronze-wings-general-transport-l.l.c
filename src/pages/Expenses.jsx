@@ -25,6 +25,7 @@ import ReportStatusBadge from '@/components/reports/ReportStatusBadge';
 import DonutChart from '@/components/reports/DonutChart';
 import TrendChart from '@/components/reports/TrendChart';
 import { createPortal } from 'react-dom';
+import MobileFAB from '@/components/mobile/MobileFAB';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExpenseCard from '@/components/expenses/ExpenseCard';
 import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToRgba } from '@/components/expenses/expenseMeta';
@@ -123,12 +124,6 @@ export default function Expenses() {
       </div>
 
       <PullToRefresh onRefresh={() => refetch()}>
-        <div className="flex justify-end md:hidden mb-4">
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-11 px-4">
-            <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
-          </Button>
-        </div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {analytics.map((a, i) => {
             const Icon = a.icon;
@@ -238,6 +233,7 @@ export default function Expenses() {
       </AlertDialog>
 
       <ExpenseFormSheet open={formOpen} onOpenChange={setFormOpen} editItem={editItem} />
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Expense" />
     </div>
   );
 }
