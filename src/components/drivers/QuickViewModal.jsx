@@ -25,6 +25,7 @@ export default function QuickViewModal({
   open, onOpenChange, title, icon: Icon, accent = '#1ED760',
   records = [], dateField = 'date', columns = [],
   renderRow, bodyRender, summaryFooter, filename = 'quick-view',
+  onCustomPdf,
 }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -44,9 +45,11 @@ export default function QuickViewModal({
     columns.forEach((c) => { o[c.key] = c.transform ? c.transform(r) : r[c.key]; });
     return o;
   });
-  const dateRange = `${from || 'start'} → ${to || 'now'}`;
+  const dateRange = (from || to) ? `${from || ''} - ${to || ''}`.trim().replace(/^-|-$/g, '').trim() : 'All time';
   const handleCsv = () => exportToCSV(exportData, filename, columns);
-  const handlePdf = () => exportToPDF(exportData, filename, columns, title, { dateRange });
+  const handlePdf = () => onCustomPdf
+    ? onCustomPdf(filtered, from, to)
+    : exportToPDF(exportData, filename, columns, title, { dateRange });
 
   const applyPreset = (label) => {
     setPreset(label);
@@ -65,7 +68,7 @@ export default function QuickViewModal({
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="font-display text-foreground">{title}</DialogTitle>
-              <p className="text-xs text-muted-foreground">{filtered.length} records · {dateRange}</p>
+              <p className="text-xs text-muted-foreground">{filtered.length} record{filtered.length !== 1 ? 's' : ''} · {dateRange}</p>
             </div>
           </div>
         </DialogHeader>

@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import DriverDeductionFormSheet from './DriverDeductionFormSheet';
 import EmptyState from '@/components/common/EmptyState';
 import QuickViewModal from './QuickViewModal';
+import { exportDeductionsPDF } from '@/lib/exportUtils';
 
 const TYPE_META = {
   housing_advance: { icon: Home, label: 'Housing Advance' },
@@ -31,11 +32,17 @@ export default function DriverDeductionsSection({ driverName }) {
   const [editItem, setEditItem] = useState(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
 
+  const [salaryRecords, setSalaryRecords] = useState([]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await base44.entities.DriverDeduction.filter({ driver_name: driverName }).catch(() => []);
+      const [res, sr] = await Promise.all([
+        base44.entities.DriverDeduction.filter({ driver_name: driverName }).catch(() => []),
+        base44.entities.SalaryRecord.filter({ driver_name: driverName }).catch(() => []),
+      ]);
       setDeductions(res || []);
+      setSalaryRecords(sr || []);
     } finally { setLoading(false); }
   }, [driverName]);
 
@@ -160,6 +167,9 @@ export default function DriverDeductionsSection({ driverName }) {
         records={deductions}
         dateField="issue_date"
         filename={`driver-${driverName}-deductions`}
+        onCustomPdf={(filtered, from, to) =>
+          exportDeductionsPDF(filtered, salaryRecords, driverName, { from, to }, `driver-${driverName}-deductions`)
+        }
         columns={[
           { label: 'Description', key: 'description' },
           { label: 'Type', key: 'type' },
