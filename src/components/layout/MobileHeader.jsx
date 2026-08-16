@@ -35,7 +35,7 @@ export default function MobileHeader() {
           WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)' }} />
+      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--mobile-hairline-via, rgba(255,255,255,0.18)) 50%, transparent)' }} />
       <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(30,215,96,0.30) 50%, transparent)' }} />
       <div
         className="relative h-14 px-4 flex items-center justify-between"

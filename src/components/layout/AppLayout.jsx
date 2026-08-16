@@ -6,6 +6,7 @@ import ShellNavbar from '@/components/layout/ShellNavbar';
 import TopBar from '@/components/layout/TopBar';
 import MobileHeader from '@/components/layout/MobileHeader';
 import MobileNav from '@/components/layout/MobileNav';
+import MobileCanvasBackground from '@/components/mobile/MobileCanvasBackground';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
 
@@ -18,11 +19,13 @@ export default function AppLayout() {
       className="min-h-[100dvh] md:h-[100dvh] flex flex-col md:overflow-hidden"
       style={{ background: 'var(--app-bg)' }}
     >
+      <MobileCanvasBackground />
+
       {/* Mobile header — full-bleed on small screens */}
       <MobileHeader />
 
       {/* Rounded outer shell — desktop only gets the card container */}
-      <div className="flex-1 min-h-0 md:p-4">
+      <div className="flex-1 min-h-0 md:p-4 relative z-10">
         <div
           className="flex flex-col md:flex-row md:h-full md:rounded-[24px] md:border md:border-border/60 md:overflow-hidden"
           style={{

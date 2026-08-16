@@ -23,11 +23,11 @@ export default function MobileNav() {
           background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
           backdropFilter: 'blur(16px) saturate(1.4)',
           WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 -6px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+          border: '1px solid var(--mobile-surface-ring, rgba(255,255,255,0.10))',
+          boxShadow: 'var(--mobile-card-shadow, 0 -6px 24px rgba(0,0,0,0.35)), inset 0 1px 0 var(--mobile-surface-ring, rgba(255,255,255,0.06))',
         }}
       >
-        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent)' }} />
+        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--mobile-hairline-via, rgba(255,255,255,0.18)) 50%, transparent)' }} />
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = activeTab === item.key;

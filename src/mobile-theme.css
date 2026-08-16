@@ -1,105 +1,70 @@
 /* ═══════════════════════════════════════════════════════
-   MOBILE THEME — Reference app flat design (light + dark)
-   Mobile only (<768px); desktop themes completely untouched
+   MOBILE VISUAL SYSTEM — Glass + Animated Sky Backgrounds
+   Mobile only (<768px); desktop completely untouched.
+   Keyed off the same .theme-light toggle used app-wide.
    ═══════════════════════════════════════════════════════ */
 
-/* ── Dark mobile theme variables ── */
+/* ── Dark mode mobile tokens (default + all dark variants) ── */
 @media (max-width: 767px) {
   :root,
   .theme-navy,
   .theme-emerald,
   .theme-amethyst {
-    --background: 0 0% 0%;
-    --background-elevated: 0 0% 10%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --foreground: 0 0% 100%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 63%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 210 94% 54%;
-    --primary-light: 210 94% 62%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 210 94% 54%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --neon: 210 94% 54%;
-    --magenta: 210 94% 54%;
-    --success: 142 71% 45%;
-    --success-light: 142 71% 52%;
-    --warning: 38 92% 50%;
-    --danger: 0 72% 51%;
-    --border: 0 0% 16%;
-    --input: 0 0% 8%;
-    --ring: 210 94% 54%;
-    --panel-accent-rgb: 33, 150, 243;
-    --panel-accent2-rgb: 100, 181, 246;
-    --surf-1-rgb: 26, 26, 26;
-    --surf-2-rgb: 0, 0, 0;
-    --sidebar-primary: 210 94% 54%;
-    --sidebar-ring: 210 94% 54%;
-    --app-bg: #000000;
-    --nav-inactive: rgba(160,160,160,0.5);
-    --surf-1: rgba(26,26,26,0.98);
-    --surf-2: rgba(0,0,0,1);
-    --panel-bg: #1a1a1a;
-    --panel-border-color: rgba(255,255,255,0.06);
-    --panel-blur: none;
-    --header-tint-1: rgba(26,26,26,0.95);
-    --header-tint-2: rgba(0,0,0,0.98);
+    --mobile-bg-canvas: #040416;
+    --mobile-surface: rgba(255, 255, 255, 0.04);
+    --mobile-surface-hover: rgba(255, 255, 255, 0.07);
+    --mobile-surface-ring: rgba(255, 255, 255, 0.10);
+    --mobile-text: rgba(255, 255, 255, 0.90);
+    --mobile-text-2: rgba(255, 255, 255, 0.60);
+    --mobile-text-3: rgba(255, 255, 255, 0.45);
+    --mobile-text-4: rgba(255, 255, 255, 0.30);
+    --mobile-hairline-via: rgba(255, 255, 255, 0.20);
+    --mobile-card-shadow: none;
+    --mobile-card-glow: 0 0 24px rgba(255, 255, 255, 0.03);
+    --mobile-chip-shadow: 0 0 16px rgba(255, 255, 255, 0.06);
+
+    --app-bg: transparent;
+    --bg-canvas: transparent;
+    --panel-bg: transparent;
+    --panel-drop-shadow: none;
+    --header-tint-1: rgba(4, 4, 22, 0.72);
+    --header-tint-2: rgba(4, 4, 22, 0.82);
+    --nav-inactive: rgba(160, 160, 180, 0.5);
   }
 
-  /* ── Light mobile theme variables ── */
+  /* ── Light mode mobile tokens ── */
   .theme-light {
-    --background: 0 0% 93%;
-    --background-elevated: 0 0% 100%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --foreground: 0 0% 0%;
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 210 94% 54%;
-    --primary-light: 210 94% 62%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 0%;
-    --accent: 210 94% 54%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --neon: 210 94% 54%;
-    --magenta: 210 94% 54%;
-    --success: 142 71% 45%;
-    --success-light: 142 71% 52%;
-    --warning: 38 92% 50%;
-    --danger: 0 72% 51%;
-    --border: 0 0% 87%;
-    --input: 0 0% 100%;
-    --ring: 210 94% 54%;
-    --panel-accent-rgb: 33, 150, 243;
-    --panel-accent2-rgb: 100, 181, 246;
-    --surf-1-rgb: 255, 255, 255;
-    --surf-2-rgb: 238, 238, 238;
-    --sidebar-primary: 210 94% 54%;
-    --sidebar-ring: 210 94% 54%;
-    --app-bg: #eeeeee;
-    --nav-inactive: rgba(100,100,100,0.5);
-    --surf-1: rgba(255,255,255,0.98);
-    --surf-2: rgba(238,238,238,1);
-    --panel-bg: #ffffff;
-    --panel-border-color: rgba(0,0,0,0.08);
-    --panel-blur: none;
-    --header-tint-1: rgba(255,255,255,0.95);
-    --header-tint-2: rgba(238,238,238,0.98);
+    --mobile-bg-canvas: #F4F6FB;
+    --mobile-surface: rgba(255, 255, 255, 0.55);
+    --mobile-surface-hover: rgba(255, 255, 255, 0.68);
+    --mobile-surface-ring: rgba(0, 0, 0, 0.06);
+    --mobile-text: rgba(10, 10, 24, 0.90);
+    --mobile-text-2: rgba(10, 10, 24, 0.60);
+    --mobile-text-3: rgba(10, 10, 24, 0.45);
+    --mobile-text-4: rgba(10, 10, 24, 0.30);
+    --mobile-hairline-via: rgba(0, 0, 0, 0.10);
+    --mobile-card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    --mobile-card-glow: none;
+    --mobile-chip-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+
+    --app-bg: transparent;
+    --bg-canvas: transparent;
+    --panel-bg: transparent;
+    --panel-drop-shadow: none;
+    --header-tint-1: rgba(244, 246, 251, 0.72);
+    --header-tint-2: rgba(244, 246, 251, 0.82);
+    --nav-inactive: rgba(100, 100, 120, 0.5);
   }
 
-  /* ── Flat card surfaces (both modes) ── */
+  /* ── Body + page canvas ── */
+  body {
+    background: var(--mobile-bg-canvas) !important;
+  }
+  .professional-page-bg {
+    background: var(--mobile-bg-canvas) !important;
+  }
+
+  /* ═══ Glass card surfaces ═══ */
   .glass-card,
   .clay-card,
   .entity-card,
@@ -111,21 +76,57 @@
   .glass-sm,
   .glass-panel,
   .detail-header-card {
-    background: hsl(var(--card)) !important;
-    background-color: hsl(var(--card)) !important;
+    background: var(--mobile-surface) !important;
     background-image: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: 1px solid hsl(var(--border)) !important;
-    box-shadow: none !important;
+    backdrop-filter: blur(40px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+    border: 1px solid var(--mobile-surface-ring) !important;
+    box-shadow: var(--mobile-card-shadow), var(--mobile-card-glow), inset 0 1px 0 0 var(--mobile-surface-ring) !important;
   }
+
+  /* Hairline gradient at top edge */
   .glass-card::before,
+  .clay-card::before,
+  .entity-card::before,
+  .kpi-card::before,
+  .stat-tile::before,
+  .glass::before,
+  .glass-sm::before,
+  .glass-panel::before,
+  .detail-header-card::before,
+  .row-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    height: 1px !important;
+    width: auto !important;
+    background: linear-gradient(90deg, transparent, var(--mobile-hairline-via), transparent) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+
+  /* Disable conflicting ::after overlays */
   .glass-card::after,
+  .clay-card::after,
   .entity-card::after,
-  .row-card::before,
+  .kpi-card::after,
+  .stat-tile::after,
+  .glass::after,
+  .glass-sm::after,
+  .glass-panel::after,
+  .detail-header-card::after,
   .row-edge-glow::after {
     display: none !important;
   }
+
+  /* Hover states */
   .glass-card:hover,
   .clay-card:hover,
   .entity-card:hover,
@@ -133,68 +134,97 @@
   .glass-card-hover:hover,
   .kpi-card:hover,
   .stat-tile:hover {
-    background: hsl(var(--card)) !important;
-    background-color: hsl(var(--card)) !important;
-    border-color: rgba(33,150,243,0.40) !important;
+    background: var(--mobile-surface-hover) !important;
+    border-color: rgba(33, 150, 243, 0.30) !important;
     transform: none !important;
-    box-shadow: 0 0 0 1px rgba(33,150,243,0.12) !important;
+    box-shadow: var(--mobile-card-shadow), 0 0 0 1px rgba(33, 150, 243, 0.12), inset 0 1px 0 0 var(--mobile-surface-ring) !important;
   }
 
-  /* Light mode cards get subtle shadow */
-  .theme-light .glass-card,
-  .theme-light .clay-card,
-  .theme-light .entity-card,
-  .theme-light .row-card,
-  .theme-light .glass-card-hover,
-  .theme-light .kpi-card,
-  .theme-light .stat-tile,
-  .theme-light .glass,
-  .theme-light .glass-sm,
-  .theme-light .glass-panel,
-  .theme-light .detail-header-card {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    border: 1px solid #e0e0e0 !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
-  }
-  .theme-light .glass-card:hover,
-  .theme-light .clay-card:hover,
-  .theme-light .entity-card:hover,
-  .theme-light .row-card:hover,
-  .theme-light .glass-card-hover:hover,
-  .theme-light .kpi-card:hover,
-  .theme-light .stat-tile:hover {
-    background: #ffffff !important;
-    border-color: rgba(33,150,243,0.40) !important;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.12) !important;
+  /* ── Trip section cards — glass ── */
+  .trip-section {
+    background: var(--mobile-surface) !important;
+    border: 1px solid var(--mobile-surface-ring) !important;
+    backdrop-filter: blur(40px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+    box-shadow: var(--mobile-card-shadow), inset 0 1px 0 0 var(--mobile-surface-ring) !important;
   }
 
-  /* ── Page + body background ── */
-  .professional-page-bg {
-    background: hsl(var(--background)) !important;
-  }
-  body {
-    background: hsl(var(--background)) !important;
+  /* ── Trip type cards — glass ── */
+  .trip-type-card {
+    background: var(--mobile-surface) !important;
+    border-color: var(--mobile-surface-ring) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
   }
 
-  /* ── Sub-tabs / Radix tabs — blue active ── */
+  /* ═══ Text tiers — light mode overrides ═══ */
+  .theme-light [class*="text-white/20"],
+  .theme-light [class*="text-white/25"],
+  .theme-light [class*="text-white/30"],
+  .theme-light [class*="text-white/35"],
+  .theme-light [class*="text-white/40"],
+  .theme-light [class*="text-white/45"],
+  .theme-light [class*="text-white/50"] {
+    color: rgba(10, 10, 24, 0.45) !important;
+  }
+  .theme-light [class*="text-white/55"],
+  .theme-light [class*="text-white/60"],
+  .theme-light [class*="text-white/65"],
+  .theme-light [class*="text-white/70"],
+  .theme-light [class*="text-white/75"],
+  .theme-light [class*="text-white/80"] {
+    color: rgba(10, 10, 24, 0.60) !important;
+  }
+  .theme-light [class*="text-white/85"],
+  .theme-light [class*="text-white/90"],
+  .theme-light [class*="text-white/95"],
+  .theme-light [class*="text-white"],
+  .theme-light [class*="text-white/100"] {
+    color: rgba(10, 10, 24, 0.90) !important;
+  }
+
+  /* ── Sub-tab text — light mode ── */
+  .theme-light .sub-tab {
+    color: rgba(10, 10, 24, 0.45) !important;
+  }
+  .theme-light .sub-tab:hover {
+    color: rgba(10, 10, 24, 0.60) !important;
+    background: rgba(0, 0, 0, 0.03) !important;
+  }
+
+  /* ── Eyebrow text — light mode ── */
+  .theme-light .eyebrow {
+    color: rgba(10, 10, 24, 0.42) !important;
+  }
+
+  /* ═══ Shimmer — light mode ═══ */
+  .theme-light .shimmer-bg {
+    background: linear-gradient(90deg, rgba(0,0,0,0.03) 25%, rgba(33,150,243,0.10) 37%, rgba(0,0,0,0.03) 63%) !important;
+    background-size: 400% 100% !important;
+  }
+
+  /* ═══ Glow & shadow — light mode colored blooms ═══ */
+  .theme-light .entity-avatar {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* ═══ Structural overrides (mode-independent) ═══ */
   .sub-tab-active {
-    background: rgba(33,150,243,0.15) !important;
-    border-color: rgba(33,150,243,0.35) !important;
+    background: rgba(33, 150, 243, 0.15) !important;
+    border-color: rgba(33, 150, 243, 0.35) !important;
     color: #2196f3 !important;
     box-shadow: none !important;
   }
   [role="tab"][data-state="active"] {
-    background: rgba(33,150,243,0.15) !important;
-    border: 1px solid rgba(33,150,243,0.35) !important;
+    background: rgba(33, 150, 243, 0.15) !important;
+    border: 1px solid rgba(33, 150, 243, 0.35) !important;
     box-shadow: none !important;
   }
 
-  /* ── Filter chips ── */
   .filter-chip {
     background: transparent !important;
-    border-color: hsl(var(--border)) !important;
-    color: hsl(var(--muted-foreground)) !important;
+    border-color: var(--mobile-surface-ring) !important;
+    color: var(--mobile-text-2) !important;
   }
   .filter-chip-active {
     background: #2196f3 !important;
@@ -202,12 +232,11 @@
     color: #fff !important;
   }
 
-  /* ── Primary buttons — solid blue ── */
   .lightning-btn,
   .clay-btn,
   .btn-new-trip {
     background: #2196f3 !important;
-    box-shadow: 0 4px 14px rgba(33,150,243,0.3) !important;
+    box-shadow: 0 4px 14px rgba(33, 150, 243, 0.3) !important;
   }
   .lightning-btn:hover,
   .clay-btn:hover,
@@ -218,46 +247,44 @@
   .lightning-btn::after,
   .clay-btn::after { display: none !important; }
 
-  /* ── Sidebar / nav rail — flat ── */
   .morph-sidebar,
   .skeuo-sidebar {
-    background: hsl(var(--background)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-right: 1px solid hsl(var(--border)) !important;
+    background: var(--mobile-surface) !important;
+    backdrop-filter: blur(40px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+    border-right: 1px solid var(--mobile-surface-ring) !important;
     box-shadow: none !important;
   }
 
-  /* ── Header bars — flat ── */
   .obsidian-header,
   .obsidian-header-row,
   .obsidian-subnav-row {
-    background: hsl(var(--card)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: hsl(var(--border)) !important;
-    box-shadow: none !important;
+    background: var(--mobile-surface) !important;
+    backdrop-filter: blur(40px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
+    border-color: var(--mobile-surface-ring) !important;
+    box-shadow: var(--mobile-card-shadow) !important;
   }
 
-  /* ── Inputs — flat ── */
   .clay-input,
   input.bg-input,
   input[class*="bg-input"],
   .search-2026 {
-    background: hsl(var(--input)) !important;
-    border-color: hsl(var(--border)) !important;
-    box-shadow: none !important;
-    color: hsl(var(--foreground)) !important;
+    background: var(--mobile-surface) !important;
+    border-color: var(--mobile-surface-ring) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    color: var(--mobile-text) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
   }
   .clay-input:focus,
   input.bg-input:focus,
   input[class*="bg-input"]:focus,
   .search-2026:focus {
-    border-color: rgba(33,150,243,0.5) !important;
-    box-shadow: 0 0 0 2px rgba(33,150,243,0.15) !important;
+    border-color: rgba(33, 150, 243, 0.5) !important;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15) !important;
   }
 
-  /* ── Text gradient — blue ── */
   .text-gradient {
     background: linear-gradient(135deg, #64b5f6 0%, #2196f3 100%) !important;
     -webkit-background-clip: text !important;
@@ -265,13 +292,15 @@
     -webkit-text-fill-color: transparent !important;
   }
 
-  /* ── Brand shine — blue tint ── */
   .brand-shine {
     background: linear-gradient(90deg, #ffffff 0%, #64b5f6 30%, #ffffff 50%, #2196f3 70%, #ffffff 100%) !important;
     background-size: 220% auto !important;
   }
+  .theme-light .brand-shine {
+    background: linear-gradient(90deg, #1a1a2e 0%, #2196f3 30%, #1a1a2e 50%, #2196f3 70%, #1a1a2e 100%) !important;
+    background-size: 220% auto !important;
+  }
 
-  /* ── Skeuo / morph tiles — remove blur ── */
   .skeuo-tile,
   .morph-tile,
   .skeuo-nav-row,
@@ -279,46 +308,67 @@
   .skeuo-toggle,
   .morph-row,
   .morph-toggle {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    backdrop-filter: blur(20px) saturate(1.3) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
   }
 
-  /* ── Empty orb — blue ── */
   .empty-orb {
-    background: radial-gradient(circle, rgba(33,150,243,0.15) 0%, hsl(var(--card)) 70%) !important;
-    border-color: rgba(33,150,243,0.20) !important;
+    background: radial-gradient(circle, rgba(33, 150, 243, 0.15) 0%, var(--mobile-surface) 70%) !important;
+    border-color: rgba(33, 150, 243, 0.20) !important;
   }
 
-  /* ── Trip section cards — flat ── */
-  .trip-section {
-    background: hsl(var(--card)) !important;
-    border-color: hsl(var(--border)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow: none !important;
+  /* ═══ Mobile utility classes ═══ */
+  .mobile-glass {
+    background: var(--mobile-surface);
+    backdrop-filter: blur(40px) saturate(1.5);
+    -webkit-backdrop-filter: blur(40px) saturate(1.5);
+    border: 1px solid var(--mobile-surface-ring);
+    box-shadow: var(--mobile-card-shadow), inset 0 1px 0 0 var(--mobile-surface-ring);
+    border-radius: 1.5rem;
+    position: relative;
   }
+  .mobile-text-1 { color: var(--mobile-text); }
+  .mobile-text-2 { color: var(--mobile-text-2); }
+  .mobile-text-3 { color: var(--mobile-text-3); }
+  .mobile-text-4 { color: var(--mobile-text-4); }
 
-  /* ── Light mode: white text overrides for dark-on-light ── */
-  .theme-light [class*="text-white/20"],
-  .theme-light [class*="text-white/25"],
-  .theme-light [class*="text-white/30"],
-  .theme-light [class*="text-white/35"],
-  .theme-light [class*="text-white/40"],
-  .theme-light [class*="text-white/45"],
-  .theme-light [class*="text-white/50"] {
-    color: #666666 !important;
+  /* ═══ Background animation keyframes ═══ */
+  @keyframes mobile-nebula-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.1); }
+    66% { transform: translate(-20px, 25px) scale(0.95); }
   }
-  .theme-light [class*="text-white/55"],
-  .theme-light [class*="text-white/60"],
-  .theme-light [class*="text-white/65"],
-  .theme-light [class*="text-white/70"],
-  .theme-light [class*="text-white/75"],
-  .theme-light [class*="text-white/80"],
-  .theme-light [class*="text-white"],
-  .theme-light [class*="text-white/85"],
-  .theme-light [class*="text-white/90"],
-  .theme-light [class*="text-white/95"],
-  .theme-light [class*="text-white/100"] {
-    color: #000000 !important;
+  @keyframes mobile-star-twinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.8); }
+    50% { opacity: 0.9; transform: scale(1.2); }
+  }
+  @keyframes mobile-shooting-star {
+    0% { transform: translateX(0) translateY(0) rotate(-25deg); opacity: 0; }
+    8% { opacity: 1; }
+    100% { transform: translateX(-320px) translateY(160px) rotate(-25deg); opacity: 0; }
+  }
+  @keyframes mobile-cloud-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -15px) scale(1.08); }
+  }
+  @keyframes mobile-sun-pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+  }
+  @keyframes mobile-dust-float {
+    0%, 100% { transform: translate(0, 0); opacity: 0.25; }
+    50% { transform: translate(10px, -20px); opacity: 0.5; }
+  }
+}
+
+/* ── Reduced motion: disable background animations ── */
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .mobile-bg-orb,
+  .mobile-bg-star,
+  .mobile-bg-shoot,
+  .mobile-bg-cloud,
+  .mobile-bg-sun,
+  .mobile-bg-dust {
+    animation: none !important;
   }
 }
