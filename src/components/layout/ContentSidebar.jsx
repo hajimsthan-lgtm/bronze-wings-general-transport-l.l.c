@@ -9,7 +9,7 @@ import {
 import { getCompanySettings } from '@/lib/companySettings';
 import { railVisibility, useRailCollapsed } from '@/lib/railVisibility';
 
-const navItems = [
+export const navItems = [
   {
     key: 'operations', label: 'Operations', icon: Route, color: '#00f2c3',
     children: [
