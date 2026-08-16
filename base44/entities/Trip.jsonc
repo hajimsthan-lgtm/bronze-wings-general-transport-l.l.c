@@ -17,6 +17,9 @@
     "driver_name": {
       "type": "string"
     },
+    "vendor_name": {
+      "type": "string"
+    },
     "client_name": {
       "type": "string"
     },
@@ -90,6 +93,26 @@
         "bank_received"
       ],
       "default": "corporate_credit"
+    },
+    "vendor_agreed_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "vendor_payment_status": {
+      "type": "string",
+      "enum": [
+        "unpaid",
+        "paid",
+        "partially_paid"
+      ],
+      "default": "unpaid"
+    },
+    "vendor_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "vendor_payment_notes": {
+      "type": "string"
     },
     "status": {
       "type": "string",

@@ -9,6 +9,7 @@ import DateTimePicker from '@/components/common/DateTimePicker';
 import Section from './Section';
 import IconInput from './IconInput';
 import TripTypeSelector from './TripTypeSelector';
+import VendorPaymentFields from './VendorPaymentFields';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -25,7 +26,13 @@ export default function TripModeFields({ p }) {
     isOvertime, overtimeMetric, extraCharges,
     revenueOverridden, autoRevenue,
     serviceProviderVendors,
+    allVehicles, allDrivers,
   } = p;
+
+  const selectedVehicle = allVehicles?.find((v) => v.plate_number === form.vehicle_plate);
+  const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
+  const vehicleIsVendor = !!selectedVehicle?.vendor_name;
+  const driverIsVendor = !!selectedDriver?.vendor_name;
 
   return (
     <>
@@ -117,50 +124,72 @@ export default function TripModeFields({ p }) {
 
       {/* Assignment */}
       <Section title="Assignment" icon={Truck} accent="20,184,166" delay={180}>
-        <div className="grid grid-cols-3 gap-3">
+        {/* Mode toggle */}
+        <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+          <button type="button" onClick={() => { update('assignment_mode', 'company'); update('vendor_name', ''); }}
+            className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${form.assignment_mode !== 'vendor' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+            <Truck className="w-3.5 h-3.5" /> Company Fleet
+          </button>
+          <button type="button" onClick={() => update('assignment_mode', 'vendor')}
+            className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${form.assignment_mode === 'vendor' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+            <Store className="w-3.5 h-3.5" /> Service Provider
+          </button>
+        </div>
+
+        {/* Service Provider dropdown — only in vendor mode */}
+        {form.assignment_mode === 'vendor' && (
           <div>
             <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><Store className="w-3 h-3" /> Service Provider</Label>
-            <Select value={form.vendor_name || 'none'} onValueChange={(v) => update('vendor_name', v === 'none' ? '' : v)}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="None" /></SelectTrigger>
+            <Select value={form.vendor_name || 'none'} onValueChange={(v) => { update('vendor_name', v === 'none' ? '' : v); update('vehicle_plate', ''); update('driver_name', ''); }}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select provider" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {serviceProviderVendors.map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
             <IconInput icon={Truck} list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
             <datalist id="vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
-            {isNewVehicle && (
+            {vehicleIsVendor && (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
+            )}
+            {isNewVehicle && form.assignment_mode === 'vendor' && form.vendor_name && (
+              <button type="button" onClick={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name }, 'vehicle')}
+                disabled={creating === 'vehicle'}
+                className="text-[10px] text-primary hover:text-primary-light mt-1 inline-flex items-center gap-1 transition-colors">
+                <Plus className="w-3 h-3" /> Add new vehicle under {form.vendor_name}
+              </button>
+            )}
+            {isNewVehicle && form.assignment_mode === 'company' && (
               <CreateNewCard label="vehicle" value={form.vehicle_plate} created={createdFlags.vehicle} loading={creating === 'vehicle'}
-                onCreate={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name || undefined }, 'vehicle')} />
+                onCreate={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—' }, 'vehicle')} />
             )}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('driver')}</Label>
             <IconInput icon={User} list="driver-suggestions" value={form.driver_name} onChange={(e) => update('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
             <datalist id="driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
-            {isNewDriver && (
+            {driverIsVendor && (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
+            )}
+            {isNewDriver && form.assignment_mode === 'vendor' && form.vendor_name && (
+              <button type="button" onClick={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name }, 'driver')}
+                disabled={creating === 'driver'}
+                className="text-[10px] text-primary hover:text-primary-light mt-1 inline-flex items-center gap-1 transition-colors">
+                <Plus className="w-3 h-3" /> Add new driver under {form.vendor_name}
+              </button>
+            )}
+            {isNewDriver && form.assignment_mode === 'company' && (
               <CreateNewCard label="driver" value={form.driver_name} created={createdFlags.driver} loading={creating === 'driver'}
-                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name || undefined }, 'driver')} />
+                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: '—' }, 'driver')} />
             )}
           </div>
         </div>
-        {form.vendor_name && (
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <Button type="button" variant="outline" size="sm" disabled={!form.vehicle_plate || creating === 'vehicle'}
-              onClick={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name }, 'vehicle')}
-              className="border-border gap-1.5 h-8 text-xs">
-              <Plus className="w-3.5 h-3.5" /> Add Vehicle to {form.vendor_name}
-            </Button>
-            <Button type="button" variant="outline" size="sm" disabled={!form.driver_name || creating === 'driver'}
-              onClick={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name }, 'driver')}
-              className="border-border gap-1.5 h-8 text-xs">
-              <Plus className="w-3.5 h-3.5" /> Add Driver to {form.vendor_name}
-            </Button>
-          </div>
-        )}
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('payment_status')}</Label>
           <Select value={form.payment_status} onValueChange={(v) => update('payment_status', v)}>
@@ -169,6 +198,11 @@ export default function TripModeFields({ p }) {
           </Select>
         </div>
       </Section>
+
+      {/* Vendor Payment — only in Service Provider mode */}
+      {form.assignment_mode === 'vendor' && form.vendor_name && (
+        <VendorPaymentFields p={p} />
+      )}
 
       {/* Delivery */}
       <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>

@@ -173,7 +173,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               ['TRIP #', 'text-left'],
               ['DATE', 'text-left'],
               ['CLIENT', 'text-left'],
-              ['VEHICLE', 'text-left'],
+              ['VEHICLE & DRIVER', 'text-left'],
               ['FROM', 'text-left'],
               ['TO', 'text-left'],
               ['TRIP FARE', 'text-left'],
@@ -241,12 +241,19 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                       title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
-                  <button
-                      onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                      className="hover:text-primary transition-colors block text-left truncate leading-tight mt-0.5 text-[#000000] text-sm"
-                      title="View driver">
-                    {trip.driver_name || ''}
-                  </button>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <button
+                        onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
+                        className="hover:text-primary transition-colors block text-left truncate leading-tight text-[#000000] text-sm"
+                        title="View driver">
+                      {trip.driver_name || ''}
+                    </button>
+                    {trip.vendor_name && (
+                      <span className="inline-flex items-center px-1 py-0 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
+                        Vendor
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
                   <div className="text-foreground truncate font-medium leading-tight" title={trip.from_location || ''}>

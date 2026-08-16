@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import VendorTransactionLedger from '@/components/vendors/VendorTransactionLedger';
 
 const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Driver Supplier', both: 'Both' };
 const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
@@ -231,32 +232,16 @@ export default function ServiceProviderDetail() {
             ))}
           </RecordSectionCard>
 
-          {/* Transactions */}
-          <RecordSectionCard
-            title="Transactions"
-            icon={Receipt}
-            accent="#ef4444"
-            count={expenses.length}
-            loading={dataLoading}
-            emptyIcon={Receipt}
-            emptyLabel="No transactions yet"
-            columns={[
-              { label: 'Date', className: 'col-span-2' },
-              { label: 'Description', className: 'col-span-4' },
-              { label: 'Category', className: 'col-span-2' },
-              { label: 'Amount', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-2' },
-            ]}>
-            {expenses.slice(0, 10).map((e) => (
-              <div key={e.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground">{formatDate(e.date)}</div>
-                <div className="col-span-4 text-foreground truncate">{e.description || e.category}</div>
-                <div className="col-span-2 text-muted-foreground capitalize">{e.category}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(e.amount)}</div>
-                <div className="col-span-2"><StatusBadge status={e.status} /></div>
-              </div>
-            ))}
-          </RecordSectionCard>
+          {/* Vendor Transaction Ledger */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#ef444415', border: '1px solid #ef444430' }}>
+                <Receipt className="w-4 h-4 text-red-400" />
+              </span>
+              <h3 className="text-sm font-semibold text-foreground">Transaction Ledger</h3>
+            </div>
+            <VendorTransactionLedger vendorName={vendor.name} />
+          </div>
 
           {/* Documents */}
           <DocumentsSection entityType="vendor" entityId={vendor.id} accent="#a855f7" defaultOpen={false} />

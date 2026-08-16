@@ -13,6 +13,7 @@ import ContractModeFields from './contract/ContractModeFields';
 import ContractProfitPanel from './contract/ContractProfitPanel';
 import TripMapPanel from './TripMapPanel';
 import TripFinancialFields from './TripFinancialFields';
+import VendorPaymentFields from './VendorPaymentFields';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
@@ -22,7 +23,9 @@ const DEFAULT_FORM = {
   trip_date: new Date().toISOString().split('T')[0],
   load_datetime: '', offload_datetime: '', trip_number: '',
   status: 'scheduled', revenue: '', distance_km: '', notes: '', contact_person: '',
-  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50
+  duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50,
+  assignment_mode: 'company',
+  vendor_agreed_rate: '', vendor_payment_status: 'unpaid', vendor_due_date: '', vendor_payment_notes: ''
 };
 
 const DEFAULT_CONTRACT = {
@@ -119,7 +122,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           max_allowed_duration: editTrip.max_allowed_duration || '',
           overtime_rate: editTrip.overtime_rate || '',
           duration_unit: editTrip.duration_unit || 'hours',
-          calculated_duration: editTrip.calculated_duration || ''
+          calculated_duration: editTrip.calculated_duration || '',
+          assignment_mode: editTrip.vendor_name ? 'vendor' : 'company',
+          vendor_agreed_rate: editTrip.vendor_agreed_rate || '',
+          vendor_payment_status: editTrip.vendor_payment_status || 'unpaid',
+          vendor_due_date: editTrip.vendor_due_date || '',
+          vendor_payment_notes: editTrip.vendor_payment_notes || ''
         });
       } else {
         setMode(initialMode || 'trip');
@@ -241,7 +249,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const autoTripNumber = editTrip ? editTrip.trip_number || '' : generateTripNumber();
 
   const buildData = (isDraft = false) => {
-    const { vendor_name, ...rest } = form;
+    const { assignment_mode, ...rest } = form;
     return {
     ...rest,
     is_draft: isDraft,
@@ -255,7 +263,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     base_fare: Number(form.base_fare) || 0,
     max_allowed_duration: Number(form.max_allowed_duration) || 0,
     overtime_rate: Number(form.overtime_rate) || 0,
-    calculated_duration: Number(form.calculated_duration) || 0
+    calculated_duration: Number(form.calculated_duration) || 0,
+    vendor_name: form.assignment_mode === 'vendor' ? form.vendor_name : '',
+    vendor_agreed_rate: Number(form.vendor_agreed_rate) || 0,
+    vendor_payment_status: form.vendor_payment_status || 'unpaid',
+    vendor_due_date: form.vendor_due_date || null,
+    vendor_payment_notes: form.vendor_payment_notes || ''
     };
   };
 
@@ -307,8 +320,34 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     try {
       if (mode === 'trip') {
         const data = buildData(false);
-        if (editTrip) await updateTrip.mutateAsync({ id: editTrip.id, data });else
-        await createTrip.mutateAsync(data);
+        let savedTrip;
+        if (editTrip) { savedTrip = await updateTrip.mutateAsync({ id: editTrip.id, data }); }
+        else { savedTrip = await createTrip.mutateAsync(data); }
+        const tripId = savedTrip?.id || editTrip?.id;
+        // Auto-create/update linked vendor transaction
+        if (form.assignment_mode === 'vendor' && form.vendor_name && tripId) {
+          const vtData = {
+            vendor_name: form.vendor_name,
+            trip_id: tripId,
+            trip_number: data.trip_number,
+            description: `Trip ${data.trip_number} — ${data.from_location} → ${data.to_location}`,
+            amount: Number(form.vendor_agreed_rate) || 0,
+            paid_amount: 0,
+            payment_status: form.vendor_payment_status || 'unpaid',
+            date: data.trip_date || todayStr(),
+            due_date: form.vendor_due_date || null,
+            notes: form.vendor_payment_notes || '',
+            source: 'trip'
+          };
+          const existing = await base44.entities.VendorTransaction.filter({ trip_id: tripId }).catch(() => []);
+          if (existing && existing.length > 0) {
+            await base44.entities.VendorTransaction.update(existing[0].id, vtData).catch(() => {});
+          } else {
+            await base44.entities.VendorTransaction.create(vtData).catch(() => {});
+          }
+        } else if (editTrip && form.assignment_mode !== 'vendor' && editTrip.vendor_name) {
+          await base44.entities.VendorTransaction.deleteMany({ trip_id: editTrip.id }).catch(() => {});
+        }
         if (form.client_name && form.from_location && form.to_location && (Number(form.revenue) || 0) > 0) {
           const routeDesc = `${form.from_location} → ${form.to_location}`;
           if (!fixedCharges.find((c) => c.description === routeDesc)) {
@@ -354,8 +393,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const fromSuggestions = [...new Set(tripsList.map((tr) => tr.from_location).filter(Boolean))];
   const toSuggestions = [...new Set(tripsList.map((tr) => tr.to_location).filter(Boolean))];
-  const vehicleSuggestions = (form.vendor_name ? vehicles.filter((v) => v.vendor_name === form.vendor_name) : vehicles).map((v) => v.plate_number).filter(Boolean);
-  const driverSuggestions = (form.vendor_name ? drivers.filter((d) => d.vendor_name === form.vendor_name) : drivers).map((d) => d.name).filter(Boolean);
+  const companyVehicles = vehicles.filter((v) => !v.vendor_name);
+  const companyDrivers = drivers.filter((d) => !d.vendor_name);
+  const vendorVehicles = form.vendor_name ? vehicles.filter((v) => v.vendor_name === form.vendor_name) : [];
+  const vendorDrivers = form.vendor_name ? drivers.filter((d) => d.vendor_name === form.vendor_name) : [];
+  const vehicleSuggestions = (form.assignment_mode === 'vendor' ? vendorVehicles : companyVehicles).map((v) => v.plate_number).filter(Boolean);
+  const driverSuggestions = (form.assignment_mode === 'vendor' ? vendorDrivers : companyDrivers).map((d) => d.name).filter(Boolean);
   const clientSuggestions = clients.map((c) => c.name).filter(Boolean);
   const selectedClientData = clients.find((c) => c.name?.toLowerCase() === form.client_name?.toLowerCase());
   const availableContacts = selectedClientData ?
@@ -390,6 +433,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     form, update, setRevenueOverride, t, inputCls,
     fromSuggestions, toSuggestions, vehicleSuggestions, driverSuggestions, clientSuggestions,
     serviceProviderVendors: vendors,
+    allVehicles: vehicles, allDrivers: drivers,
     isNewClient, isNewVehicle, isNewDriver,
     createdFlags, creating, createEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, false),
     fixedCharges, autoFilled,
@@ -414,8 +458,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-3xl max-h-[82vh] overflow-y-auto rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%]">
-        <DialogHeader className="px-5 pt-4 pb-3 border-b border-border/50">
+        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[92vw] max-w-3xl max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col">
+        <DialogHeader className="px-5 pt-4 pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="hud-icon-tile w-10 h-10">
@@ -440,6 +484,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
         </DialogHeader>
 
+        <div className="flex-1 overflow-y-auto">
         <div className="px-5 py-4 grid lg:grid-cols-[1fr_260px] gap-5 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
@@ -448,18 +493,17 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
 
           <div className="space-y-5">
+            {mode === 'trip' ?
+            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} /> :
+            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />}
             {mode === 'trip' &&
             <TripMapPanel
               from={form.from_location}
               to={form.to_location}
               onSelectFrom={(v) => update('from_location', v)}
               onSelectTo={(v) => update('to_location', v)} />
-
             }
             {mode === 'trip' && <TripFinancialFields p={tripCtx} />}
-            {mode === 'trip' ?
-            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} /> :
-            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />}
           </div>
         </div>
 
@@ -498,9 +542,10 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
           </div>
         }
+        </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-3 px-5 py-3 border-t border-border">
+        <div className="flex items-center gap-3 px-5 py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2">
             <X className="w-4 h-4" />
             {t('cancel')}
