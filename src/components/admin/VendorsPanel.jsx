@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, LayoutGrid, Search, Store } from 'lucide-react';
+import { BarChart3, LayoutGrid, Search, Store, Plus } from 'lucide-react';
 import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
 import VendorCard from '@/components/admin/VendorCard';
+import MobileFAB from '@/components/mobile/MobileFAB';
+import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -54,7 +56,7 @@ export default function VendorsPanel() {
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendors..." className="pl-9 search-2026 h-10" />
           </div>
           {loading ? (
-            <div className="h-32 flex items-center justify-center"><div className="w-8 h-8 border-[3px] border-muted border-t-primary rounded-full animate-spin" /></div>
+            <ResponsiveLoading type="list" count={4} />
           ) : searched.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mx-auto mb-4"><Store className="w-7 h-7 text-muted-foreground" /></div>
@@ -76,6 +78,7 @@ export default function VendorsPanel() {
           <VendorForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vendor.update(editItem.id, data); else await base44.entities.Vendor.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
         </SheetContent>
       </Sheet>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vendor" />
     </div>
   );
 }

@@ -17,6 +17,9 @@ import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { safeListAll } from '@/lib/safeRequest';
+import MobileFAB from '@/components/mobile/MobileFAB';
+import ResponsiveStats from '@/components/mobile/ResponsiveStats';
+import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -188,7 +191,7 @@ export default function Salary() {
           <Button onClick={generatePayroll} disabled={generating} variant="outline" className="h-10 border-border">
             <Sparkles className="w-4 h-4 mr-1.5 text-amber-400" />{generating ? 'Generating…' : 'Generate Payroll'}
           </Button>
-          <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10">
+          <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10 hidden md:inline-flex">
             <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
           </Button>
         </div>
@@ -227,15 +230,19 @@ export default function Salary() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
-        <ReportStatCard index={0} label="Total Payroll" value={totalPayroll} format={formatCurrency} icon={Wallet} color="#38BDF8" />
-        <ReportStatCard index={1} label={t('paid')} value={totalPaid} format={formatCurrency} icon={CheckCircle2} color="#22c55e" />
-        <ReportStatCard index={2} label={t('pending')} value={totalPending} format={formatCurrency} icon={Clock} color="#f59e0b" />
-        <ReportStatCard index={3} label="Records" value={filtered.length} format={(v) => String(v)} icon={CreditCard} color="#a855f7" />
-      </div>
+      <ResponsiveStats
+        stats={[
+          { label: 'Total Payroll', value: totalPayroll, format: formatCurrency, icon: Wallet, color: '#38BDF8' },
+          { label: t('paid'), value: totalPaid, format: formatCurrency, icon: CheckCircle2, color: '#22c55e' },
+          { label: t('pending'), value: totalPending, format: formatCurrency, icon: Clock, color: '#f59e0b' },
+          { label: 'Records', value: filtered.length, format: (v) => String(v), icon: CreditCard, color: '#a855f7' },
+        ]}
+        desktopGridClass="md:grid-cols-2 lg:grid-cols-4"
+        className="mb-5"
+      />
 
       {/* List */}
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
+      {loading ? <ResponsiveLoading type="list" count={4} /> : filtered.length === 0 ? (
         <EmptyState icon={Wallet} title={t('no_data')} description="Generate payroll for the selected month or add a salary record manually." />
       ) : (
         <div className="space-y-2">
@@ -310,6 +317,7 @@ export default function Salary() {
           />
         </SheetContent>
       </Sheet>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} label="Add Salary" />
     </div>
   );
 }

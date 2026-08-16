@@ -8,10 +8,12 @@ import DonutChart from '@/components/reports/DonutChart';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import ResponsiveStats from '@/components/mobile/ResponsiveStats';
+import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 
 export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecords = [], expenses = [], loading, onBrowseVehicles }) {
   const navigate = useNavigate();
-  if (loading && vehicles.length === 0) return <LoadingSpinner />;
+  if (loading && vehicles.length === 0) return <ResponsiveLoading type="stat" count={5} />;
 
   const active = vehicles.filter((v) => v.status === 'active').length;
   const maintenance = vehicles.filter((v) => v.status === 'maintenance').length;
@@ -118,13 +120,17 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
         )}
       </ReportSectionCard>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Vehicles" value={vehicles.length} icon={Truck} color="#1ED760" onClick={onBrowseVehicles} />
-        <ReportStatCard index={2} label="Active Fleet" value={active} icon={Truck} color="#34d399" onClick={onBrowseVehicles} />
-        <ReportStatCard index={3} label="In Maintenance" value={maintenance} icon={Wrench} color="#f59e0b" onClick={onBrowseVehicles} />
-        <ReportStatCard index={4} label="Fuel Efficiency" value={fuelEff} format={(v) => `${v.toFixed(1)} KM/L`} icon={FuelIcon} color="#f97316" onClick={onBrowseVehicles} />
-        <ReportStatCard index={5} label="Fleet Expenses" value={fleetExpenses} format={formatCurrency} icon={Wallet} color="#ef4444" to="/expenses" />
-      </div>
+      <ResponsiveStats
+        stats={[
+          { label: 'Total Vehicles', value: vehicles.length, icon: Truck, color: '#1ED760', onClick: onBrowseVehicles },
+          { label: 'Active Fleet', value: active, icon: Truck, color: '#34d399', onClick: onBrowseVehicles },
+          { label: 'In Maintenance', value: maintenance, icon: Wrench, color: '#f59e0b', onClick: onBrowseVehicles },
+          { label: 'Fuel Efficiency', value: fuelEff, format: (v) => `${v.toFixed(1)} KM/L`, icon: FuelIcon, color: '#f97316', onClick: onBrowseVehicles },
+          { label: 'Fleet Expenses', value: fleetExpenses, format: formatCurrency, icon: Wallet, color: '#ef4444', to: '/expenses' },
+        ]}
+        desktopGridClass="md:grid-cols-2 lg:grid-cols-5"
+        className="mb-6"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ReportSectionCard index={6} color="#1ED760" title="Fleet Status Distribution">

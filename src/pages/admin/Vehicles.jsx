@@ -21,6 +21,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Truck, Pencil, Trash2, Sparkles, BarChart3, LayoutGrid } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
+import MobileFAB from '@/components/mobile/MobileFAB';
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -106,7 +107,7 @@ function VehiclesTab() {
             insurance_expiry: r.insurance_expiry || r['Ins Expiry'] || '',
             fuel_type: r.fuel_type || r.Fuel || 'diesel',
           })} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
+          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
         </div>
       </div>
 
@@ -178,6 +179,7 @@ function VehiclesTab() {
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Register a new vehicle in the fleet">
           <VehicleForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vehicle.update(editItem.id, data); else await base44.entities.Vehicle.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
+      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
     </div>
   );
 }

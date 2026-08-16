@@ -10,11 +10,13 @@ import ExportButtons from '@/components/common/ExportButtons';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
+import ResponsiveStats from '@/components/mobile/ResponsiveStats';
+import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 
 const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', service_provider: '#3b82f6', other: '#94a3b8' };
 
 export default function VendorsAnalytics({ vendors = [], expenses = [], loading, onAdd, onBrowse }) {
-  if (loading && vendors.length === 0) return <LoadingSpinner />;
+  if (loading && vendors.length === 0) return <ResponsiveLoading type="stat" count={4} />;
 
   const spendMap = {};
   expenses.forEach((e) => { if (e.vendor_name) spendMap[e.vendor_name] = (spendMap[e.vendor_name] || 0) + (Number(e.amount) || 0); });
@@ -55,13 +57,11 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
         </div>
         <div className="flex items-center gap-2">
           <ExportButtons data={vendors.map((v) => ({ name: v.name, category: v.category, contact: v.contact_person, email: v.email, phone: v.phone, trn: v.trn, status: v.status, spend: spendMap[v.name] || 0 }))} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Spend', key: 'spend', numeric: true }]} />
-          {onAdd && <Button onClick={onAdd} className="h-10"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>}
+          {onAdd && <Button onClick={onAdd} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {kpis.map((k, i) => <ReportStatCard key={k.label} index={i} label={k.label} value={k.value} format={k.format} icon={k.icon} color={k.color} extra={k.extra} onClick={k.onClick} />)}
-      </div>
+      <ResponsiveStats stats={kpis} desktopGridClass="md:grid-cols-2 lg:grid-cols-4" className="mb-6" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ReportSectionCard index={4} color="#f59e0b" title="Top Vendors by Spend">

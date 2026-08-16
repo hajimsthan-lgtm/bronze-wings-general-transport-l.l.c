@@ -19,6 +19,8 @@ import ReportStatusBadge from '@/components/reports/ReportStatusBadge';
 import DonutChart from '@/components/reports/DonutChart';
 import BarTrendChart from '@/components/reports/BarTrendChart';
 import Sparkline from '@/components/reports/Sparkline';
+import ResponsiveStats from '@/components/mobile/ResponsiveStats';
+import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 
 const STATUS_COLOR = { paid: '#22c55e', partially_paid: '#f59e0b', partial: '#f59e0b', sent: '#1ED760', draft: '#94a3b8', pending: '#f97316' };
 
@@ -92,7 +94,7 @@ export default function Soa() {
     return issued - paid;
   });
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <ResponsiveLoading type="stat" count={3} />;
 
   return (
     <div className="relative">
@@ -102,12 +104,15 @@ export default function Soa() {
         <SoaExportButtons rows={soaRows} filename="soa" date={new Date().toLocaleDateString('en-GB').replace(/\//g, '-')} clientName={reportClient === 'all' ? '' : reportClient} dateRange={dateRange} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <ReportStatCard index={0} label={t('total')} value={totalAmount} format={formatCurrency} icon={FileText} color="#1ED760" />
-        <ReportStatCard index={1} label={t('paid')} value={paidAmount} format={formatCurrency} icon={FileText} color="#22c55e" />
-        <ReportStatCard index={2} label="Balance" value={balance} format={formatCurrency} icon={FileText} color="#f97316"
-          extra={<Sparkline data={outSeries.length ? outSeries : [0, 0]} type="area" color="#f97316" width={90} height={32} />} />
-      </div>
+      <ResponsiveStats
+        stats={[
+          { label: t('total'), value: totalAmount, format: formatCurrency, icon: FileText, color: '#1ED760' },
+          { label: t('paid'), value: paidAmount, format: formatCurrency, icon: FileText, color: '#22c55e' },
+          { label: 'Balance', value: balance, format: formatCurrency, icon: FileText, color: '#f97316' },
+        ]}
+        desktopGridClass="md:grid-cols-3"
+        className="mb-6"
+      />
 
       {pieData.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
