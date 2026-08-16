@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { DEFAULT_TEMPLATE } from './defaultTemplate';
+import { ChevronDown, LayoutTemplate } from 'lucide-react';
+import { PRESET_TEMPLATES, deepClone } from './defaultTemplate';
 
 // ── Reusable controls ──
 function Toggle({ label, checked, onChange }) {
@@ -46,7 +46,7 @@ function ColorInput({ label, value, onChange }) {
       <div className="flex items-center gap-2">
         <input
           type="color"
-          value={value || '#000000'}
+          value={value || '#ffffff'}
           onChange={(e) => onChange(e.target.value)}
           className="w-9 h-8 rounded-lg border border-border bg-transparent cursor-pointer flex-shrink-0"
         />
@@ -54,7 +54,7 @@ function ColorInput({ label, value, onChange }) {
           type="text"
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="#000000"
+          placeholder="None (transparent)"
           className="flex-1 h-8 px-2 rounded-lg bg-muted/40 border border-border text-xs font-mono text-foreground"
         />
       </div>
@@ -88,7 +88,6 @@ function ColumnRow({ col, index, onToggle, onAlign, onReorder }) {
   );
 }
 
-// ── Collapsible section ──
 function Section({ title, icon: Icon, open, onToggle, children }) {
   return (
     <div className="border-b border-border/40">
@@ -103,6 +102,37 @@ function Section({ title, icon: Icon, open, onToggle, children }) {
         <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && <div className="px-3 pb-3 space-y-0.5">{children}</div>}
+    </div>
+  );
+}
+
+function PresetPicker({ onApply }) {
+  return (
+    <div className="px-3 py-3 border-b border-border/40">
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+        <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
+        Sample Templates
+      </p>
+      <div className="grid grid-cols-1 gap-1.5">
+        {PRESET_TEMPLATES.map(preset => (
+          <button
+            key={preset.id}
+            onClick={() => onApply(deepClone(preset.config))}
+            className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/40 hover:border-primary/40 hover:bg-muted/40 transition-all text-left group"
+          >
+            <div
+              className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold"
+              style={{ background: preset.config.header.accentColor }}
+            >
+              {preset.name[0]}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">{preset.name}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{preset.description}</p>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -133,18 +163,23 @@ export default function TemplateSidebar({ template, onChange, selectedSection })
 
   return (
     <div className="h-full overflow-y-auto thin-scroll">
+      <PresetPicker onApply={onChange} />
+
       <Section title="Header" icon={HeaderIcon} open={openSections.header || selectedSection === 'header'} onToggle={() => toggleSection('header')}>
         <Segmented label="Logo Position" options={[{value:'left',label:'Left'},{value:'center',label:'Center'},{value:'right',label:'Right'}]} value={template.header.logoPosition} onChange={v => update('header','logoPosition',v)} />
         <Segmented label="Logo Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.header.logoSize} onChange={v => update('header','logoSize',v)} />
         <Segmented label="Company Info" options={[{value:'left',label:'Left'},{value:'right',label:'Right'}]} value={template.header.companyInfoPlacement} onChange={v => update('header','companyInfoPlacement',v)} />
         <Segmented label="Title Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.header.titleFontSize} onChange={v => update('header','titleFontSize',v)} />
         <Segmented label="Title Weight" options={[{value:'bold',label:'Bold'},{value:'normal',label:'Normal'}]} value={template.header.titleWeight} onChange={v => update('header','titleWeight',v)} />
+        <Segmented label="Title Font" options={[{value:'sans',label:'Sans'},{value:'serif',label:'Serif'},{value:'mono',label:'Mono'}]} value={template.header.titleFontFamily} onChange={v => update('header','titleFontFamily',v)} />
         <ColorInput label="Accent Color" value={template.header.accentColor} onChange={v => update('header','accentColor',v)} />
+        <ColorInput label="Header Background" value={template.header.headerBgColor} onChange={v => update('header','headerBgColor',v)} />
         <div className="pt-1 border-t border-border/30 mt-1">
           <Toggle label="Invoice Number" checked={template.header.showInvoiceNumber} onChange={v => update('header','showInvoiceNumber',v)} />
           <Toggle label="Issue Date" checked={template.header.showIssueDate} onChange={v => update('header','showIssueDate',v)} />
           <Toggle label="Due Date" checked={template.header.showDueDate} onChange={v => update('header','showDueDate',v)} />
           <Toggle label="Status Badge" checked={template.header.showStatusBadge} onChange={v => update('header','showStatusBadge',v)} />
+          <Toggle label="Bill To / Party Block" checked={template.header.showBillTo} onChange={v => update('header','showBillTo',v)} />
         </div>
       </Section>
 
@@ -154,6 +189,9 @@ export default function TemplateSidebar({ template, onChange, selectedSection })
           <ColumnRow key={col.key} col={col} index={i} onToggle={toggleCol} onAlign={alignCol} onReorder={reorderCol} />
         ))}
         <div className="pt-1 border-t border-border/30 mt-1">
+          <Segmented label="Table Font Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.table.fontSize} onChange={v => update('table','fontSize',v)} />
+          <ColorInput label="Header Text Color" value={template.table.headerTextColor} onChange={v => update('table','headerTextColor',v)} />
+          <ColorInput label="Body Text Color" value={template.table.bodyTextColor} onChange={v => update('table','bodyTextColor',v)} />
           <Toggle label="Zebra Striping" checked={template.table.zebraStriping} onChange={v => update('table','zebraStriping',v)} />
           <Toggle label="Header Row Background" checked={template.table.headerRowBg} onChange={v => update('table','headerRowBg',v)} />
           <Toggle label="Header Bold" checked={template.table.headerRowBold} onChange={v => update('table','headerRowBold',v)} />
@@ -173,6 +211,8 @@ export default function TemplateSidebar({ template, onChange, selectedSection })
           <Toggle label="Show Total" checked={template.content.showTotal} onChange={v => update('content','showTotal',v)} />
           <Toggle label="Show Balance Due" checked={template.content.showBalanceDue} onChange={v => update('content','showBalanceDue',v)} />
           <Toggle label="Emphasize Total" checked={template.content.totalEmphasis} onChange={v => update('content','totalEmphasis',v)} />
+          <Segmented label="Totals Font Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.content.totalsFontSize} onChange={v => update('content','totalsFontSize',v)} />
+          <ColorInput label="Totals Background" value={template.content.totalsBgColor} onChange={v => update('content','totalsBgColor',v)} />
         </div>
       </Section>
 
@@ -184,17 +224,20 @@ export default function TemplateSidebar({ template, onChange, selectedSection })
         <Toggle label="Page Numbers" checked={template.footer.showPageNumbers} onChange={v => update('footer','showPageNumbers',v)} />
         <Toggle label="Divider Line" checked={template.footer.showDivider} onChange={v => update('footer','showDivider',v)} />
         <Segmented label="Alignment" options={[{value:'left',label:'Left'},{value:'center',label:'Center'},{value:'right',label:'Right'}]} value={template.footer.alignment} onChange={v => update('footer','alignment',v)} />
+        <Segmented label="Footer Font Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.footer.fontSize} onChange={v => update('footer','fontSize',v)} />
+        <ColorInput label="Footer Background" value={template.footer.bgColor} onChange={v => update('footer','bgColor',v)} />
       </Section>
 
       <Section title="Layout" icon={LayoutIcon} open={openSections.layout || selectedSection === 'layout'} onToggle={() => toggleSection('layout')}>
         <Segmented label="Page Size" options={[{value:'A4',label:'A4'},{value:'Letter',label:'Letter'}]} value={template.layout.pageSize} onChange={v => update('layout','pageSize',v)} />
         <Segmented label="Margins" options={[{value:'narrow',label:'Narrow'},{value:'normal',label:'Normal'},{value:'wide',label:'Wide'}]} value={template.layout.margin} onChange={v => update('layout','margin',v)} />
+        <Segmented label="Body Font" options={[{value:'sans',label:'Sans'},{value:'serif',label:'Serif'},{value:'mono',label:'Mono'}]} value={template.layout.bodyFontFamily} onChange={v => update('layout','bodyFontFamily',v)} />
+        <Segmented label="Body Font Size" options={[{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}]} value={template.layout.bodyFontSize} onChange={v => update('layout','bodyFontSize',v)} />
       </Section>
     </div>
   );
 }
 
-// Inline icon components to avoid extra imports
 function HeaderIcon(props) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="6" rx="1" /></svg>; }
 function TableIcon(props) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="1" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /></svg>; }
 function ContentIcon(props) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="14" y2="18" /></svg>; }

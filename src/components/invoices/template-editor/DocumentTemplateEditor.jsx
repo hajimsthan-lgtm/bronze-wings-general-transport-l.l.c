@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Undo2, Redo2, RotateCcw, FileDown, X, Save, Loader2, Smartphone, Monitor } from 'lucide-react';
+import { Undo2, Redo2, RotateCcw, X, Save, Loader2, Smartphone, Monitor } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings, saveCompanySettings } from '@/lib/companySettings';
 import { useToast } from '@/components/ui/use-toast';
@@ -12,13 +12,20 @@ import { DEFAULT_TEMPLATE, deepClone, mergeTemplate } from './defaultTemplate';
 import TemplatePreview from './TemplatePreview';
 import TemplateSidebar from './TemplateSidebar';
 
-export default function InvoiceTemplateEditor({ open, onClose }) {
+const DOC_CONFIG = {
+  invoice: { title: 'Edit Invoice Template', entity: 'Invoice', numKey: 'invoice_number' },
+  quotation: { title: 'Edit Quotation Template', entity: 'Quotation', numKey: 'quotation_number' },
+  agreement: { title: 'Edit Agreement Template', entity: 'Agreement', numKey: 'agreement_number' },
+};
+
+export default function DocumentTemplateEditor({ open, onClose, documentType = 'invoice' }) {
   const { toast } = useToast();
+  const cfg = DOC_CONFIG[documentType] || DOC_CONFIG.invoice;
   const [template, setTemplate] = useState(deepClone(DEFAULT_TEMPLATE));
   const [history, setHistory] = useState([]);
   const [future, setFuture] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
-  const [invoice, setInvoice] = useState(null);
+  const [doc, setDoc] = useState(null);
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,20 +40,21 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
     (async () => {
       setLoading(true);
       try {
-        const [settingsData, invoices] = await Promise.all([
+        const [settingsData, docs] = await Promise.all([
           getCompanySettings(),
-          base44.entities.Invoice.list('-created_date', 5).catch(() => []),
+          base44.entities[cfg.entity].list('-created_date', 5).catch(() => []),
         ]);
         if (cancelled) return;
         setSettings(settingsData);
-        setInvoice(invoices?.[0] || null);
-        setTemplate(mergeTemplate(settingsData.template_config));
+        setDoc(docs?.[0] || null);
+        const allConfigs = settingsData.template_config || {};
+        setTemplate(mergeTemplate(allConfigs[documentType]));
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [open]);
+  }, [open, documentType]);
 
   const updateTemplate = useCallback((newTpl) => {
     setTemplate(prev => {
@@ -95,8 +103,11 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveCompanySettings({ template_config: template });
-      toast({ title: 'Template saved', description: 'New invoices will use this layout.' });
+      const existing = await getCompanySettings();
+      const allConfigs = existing.template_config || {};
+      const updatedConfigs = { ...allConfigs, [documentType]: template };
+      await saveCompanySettings({ template_config: updatedConfigs });
+      toast({ title: 'Template saved', description: `New ${documentType}s will use this layout.` });
       onClose();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Save failed', description: e.message });
@@ -107,7 +118,7 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
 
   const handleRerenderExisting = async () => {
     setShowRerender(false);
-    toast({ title: 'Re-render queued', description: 'Existing invoices will use the new template on next PDF export.' });
+    toast({ title: 'Re-render queued', description: `Existing ${documentType}s will use the new template on next PDF export.` });
   };
 
   if (!open) return null;
@@ -117,8 +128,8 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card/60 backdrop-blur-xl flex-shrink-0">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-bold text-foreground">Edit Invoice Template</h2>
-          {invoice && <span className="text-xs text-muted-foreground hidden sm:inline">Previewing: {invoice.invoice_number}</span>}
+          <h2 className="text-sm font-bold text-foreground">{cfg.title}</h2>
+          {doc && <span className="text-xs text-muted-foreground hidden sm:inline">Previewing: {doc[cfg.numKey] || '—'}</span>}
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={undo} disabled={history.length === 0} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-30" title="Undo">
@@ -145,7 +156,6 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
 
       {/* Body: preview + sidebar */}
       <div className="flex-1 flex overflow-hidden min-h-0">
-        {/* Preview canvas */}
         <div className="flex-1 overflow-hidden min-h-0 p-3">
           {loading ? (
             <div className="flex items-center justify-center h-full">
@@ -154,7 +164,8 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
           ) : (
             <TemplatePreview
               template={template}
-              invoice={invoice}
+              doc={doc}
+              documentType={documentType}
               settings={settings}
               selectedSection={selectedSection}
               onSelectSection={setSelectedSection}
@@ -164,7 +175,6 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
           )}
         </div>
 
-        {/* Sidebar */}
         <div className="w-72 lg:w-80 flex-shrink-0 border-l border-border bg-card/40 overflow-hidden flex flex-col">
           <div className="px-3 py-2 border-b border-border">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Template Controls</p>
@@ -182,18 +192,17 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
               onClick={() => setShowRerender(true)}
               className="text-[11px] text-muted-foreground hover:text-primary transition-colors w-full text-left"
             >
-              Re-render existing invoices with new template →
+              Re-render existing {documentType}s with new template →
             </button>
           </div>
         </div>
       </div>
 
-      {/* Reset confirm */}
       <AlertDialog open={showReset} onOpenChange={setShowReset}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Reset to Default?</AlertDialogTitle>
-            <AlertDialogDescription>This will discard all your changes and restore the default invoice template layout.</AlertDialogDescription>
+            <AlertDialogDescription>This will discard all your changes and restore the default template layout.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -202,13 +211,12 @@ export default function InvoiceTemplateEditor({ open, onClose }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Re-render confirm */}
       <AlertDialog open={showRerender} onOpenChange={setShowRerender}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Re-render Existing Invoices?</AlertDialogTitle>
+            <AlertDialogTitle>Re-render Existing {documentType === 'invoice' ? 'Invoices' : documentType === 'quotation' ? 'Quotations' : 'Agreements'}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will apply the new template to all existing invoices when they are next exported as PDF. Past invoices remain unchanged until re-exported.
+              This will apply the new template to all existing {documentType}s when they are next exported as PDF. Past {documentType}s remain unchanged until re-exported.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

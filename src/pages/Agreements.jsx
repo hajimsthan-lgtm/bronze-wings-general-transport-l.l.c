@@ -21,6 +21,7 @@ import AgreementStatCards from '@/components/agreements/AgreementStatCards';
 import DocumentListPane from '@/components/documents/DocumentListPane';
 import DocumentDetailPane from '@/components/documents/DocumentDetailPane';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
+import DocumentTemplateEditor from '@/components/invoices/template-editor/DocumentTemplateEditor';
 import { formatCurrency } from '@/lib/formatters';
 
 const STATUS_CONFIG = {
@@ -58,6 +59,7 @@ export default function Agreements() {
   const [selectedId, setSelectedId] = useState(null);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -166,7 +168,11 @@ export default function Agreements() {
           <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your agreements</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+          <button
+            onClick={() => setTemplateEditorOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            title="Edit Agreement Template"
+          >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
           <HeaderActionButton label="Create Agreement" variant="trip" onClick={handleNew} />
@@ -308,6 +314,8 @@ export default function Agreements() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <DocumentTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} documentType="agreement" />
 
       <AgreementFormSheet open={sheetOpen} onOpenChange={setSheetOpen} agreement={editing} onSaved={load} />
 

@@ -21,6 +21,7 @@ import QuotationStatCards from '@/components/quotations/QuotationStatCards';
 import DocumentListPane from '@/components/documents/DocumentListPane';
 import DocumentDetailPane from '@/components/documents/DocumentDetailPane';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
+import DocumentTemplateEditor from '@/components/invoices/template-editor/DocumentTemplateEditor';
 import { formatCurrency } from '@/lib/formatters';
 
 const STATUS_CONFIG = {
@@ -62,6 +63,7 @@ export default function Quotations() {
   const [selectedId, setSelectedId] = useState(null);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,7 +177,11 @@ export default function Quotations() {
           <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your quotations</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+          <button
+            onClick={() => setTemplateEditorOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            title="Edit Quotation Template"
+          >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
           <HeaderActionButton label="Create Quotation" variant="trip" onClick={handleNew} />
@@ -317,6 +323,8 @@ export default function Quotations() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <DocumentTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} documentType="quotation" />
 
       <QuotationFormSheet open={sheetOpen} onOpenChange={setSheetOpen} quotation={editing} onSaved={load} />
 

@@ -38,7 +38,7 @@ import PaymentModal from '@/components/invoices/PaymentModal';
 import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
-import InvoiceTemplateEditor from '@/components/invoices/template-editor/InvoiceTemplateEditor';
+import DocumentTemplateEditor from '@/components/invoices/template-editor/DocumentTemplateEditor';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -585,7 +585,7 @@ export default function InvoicesPage() {
         onConfirm={handleCancelConfirm}
       />
 
-      <InvoiceTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} />
+      <DocumentTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} documentType="invoice" />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>
