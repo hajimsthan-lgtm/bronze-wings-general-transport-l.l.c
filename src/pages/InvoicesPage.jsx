@@ -38,6 +38,7 @@ import PaymentModal from '@/components/invoices/PaymentModal';
 import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
+import InvoiceTemplateEditor from '@/components/invoices/template-editor/InvoiceTemplateEditor';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -63,6 +64,7 @@ export default function InvoicesPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
 
@@ -390,7 +392,11 @@ export default function InvoicesPage() {
           <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your invoices</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+          <button
+            onClick={() => setTemplateEditorOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            title="Edit Invoice Template"
+          >
             <SlidersHorizontal className="w-4 h-4" />
           </button>
           <HeaderActionButton
@@ -578,6 +584,8 @@ export default function InvoicesPage() {
         onOpenChange={(open) => { if (!open) setCancelModal(null); }}
         onConfirm={handleCancelConfirm}
       />
+
+      <InvoiceTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>
