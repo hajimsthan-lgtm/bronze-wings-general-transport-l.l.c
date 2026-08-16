@@ -175,7 +175,7 @@ export default function DriverDetail() {
     <div className="detail-page space-y-5 pt-2">
       {/* Grid: profile (left, frozen) | sections + widgets (right, scroll) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start lg:h-[calc(100vh-3.5rem)]">
-        <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-5">
+        <div className="lg:h-full thin-scroll space-y-5">
           <EntityDetailHeader backTo="/admin/drivers" />
           <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
         </div>
