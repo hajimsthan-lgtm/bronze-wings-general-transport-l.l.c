@@ -18,12 +18,13 @@ import ContractsTable from '@/components/operations/ContractsTable';
 import CollapsibleSection from '@/components/operations/CollapsibleSection';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
+import DraftsListSheet from '@/components/trips/DraftsListSheet';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsToolbar from '@/components/operations/OperationsToolbar';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import { setOpsFilter, clearOpsFilter } from '@/lib/operationsFilterStore';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
@@ -98,6 +99,7 @@ export default function Operations() {
   const [editContract, setEditContract] = useState(null);
   const [detailContract, setDetailContract] = useState(null);
   const [prefill, setPrefill] = useState(null);
+  const [draftsOpen, setDraftsOpen] = useState(false);
 
   // Trip detail sheet is URL-backed so Android hardware back closes it.
   const detailTripId = searchParams.get('tripId');
@@ -155,7 +157,10 @@ export default function Operations() {
     return map;
   }, [allExpenses]);
 
+  const draftTrips = useMemo(() => trips.filter((trip) => trip.is_draft), [trips]);
+
   const filteredTrips = useMemo(() => trips.filter((trip) => {
+    if (trip.is_draft) return false;
     if (!inGlobalDateRange(normalizeDate(trip.trip_date), dateFrom, dateTo)) return false;
     if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
     if (search) {
@@ -191,7 +196,7 @@ export default function Operations() {
 
   const tripCounts = useMemo(() => {
     const c = { scheduled: 0, in_transit: 0, completed: 0, cancelled: 0 };
-    trips.forEach((tr) => { if (c[tr.status] != null) c[tr.status]++; });
+    trips.forEach((tr) => { if (!tr.is_draft && c[tr.status] != null) c[tr.status]++; });
     return c;
   }, [trips]);
   const contractCounts = useMemo(() => {
@@ -207,6 +212,8 @@ export default function Operations() {
   const openNewContract = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
   const openEditTrip = (trip) => { setFormMode('trip'); setEditTrip(trip); setEditContract(null); setFormOpen(true); };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
+  const handleContinueDraft = (draft) => { setDraftsOpen(false); openEditTrip(draft); };
+  const handleDeleteDraft = async (draft) => { await deleteTrip.mutateAsync(draft.id); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
@@ -361,6 +368,17 @@ export default function Operations() {
           />
         ) : (
           <div className="space-y-4">
+            {showTrips && draftTrips.length > 0 && (
+              <button
+                onClick={() => setDraftsOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full glass-sm border border-primary/20 hover:border-primary/40 text-xs font-medium text-primary transition-all group"
+              >
+                <FileEdit className="w-3.5 h-3.5" />
+                Drafts
+                <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] tabular-nums">{draftTrips.length}</span>
+                <span className="text-muted-foreground/60 group-hover:text-primary/80 transition-colors hidden sm:inline">· continue editing</span>
+              </button>
+            )}
             {showTrips && filteredTrips.length > 0 && (
               <CollapsibleSection
                 icon={Landmark}
@@ -419,6 +437,14 @@ export default function Operations() {
         onClose={() => setDetailContract(null)}
         onEdit={(c) => { setDetailContract(null); openEditContract(c); }}
         onDelete={async (c) => { await deleteContractById(c); setDetailContract(null); }}
+      />
+
+      <DraftsListSheet
+        open={draftsOpen}
+        onOpenChange={setDraftsOpen}
+        drafts={draftTrips}
+        onContinue={handleContinueDraft}
+        onDelete={handleDeleteDraft}
       />
     </div>
   );

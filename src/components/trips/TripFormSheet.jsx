@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Truck, FileText, X, Check, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Truck, FileText, X, Check, Loader2, Save, FileQuestion } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
@@ -59,6 +60,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [revenueOverride, setRevenueOverride] = useState(false);
   const [vendorRateOverride, setVendorRateOverride] = useState(false);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
+  const [showClosePrompt, setShowClosePrompt] = useState(false);
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
 
@@ -281,7 +283,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     return {
     ...rest,
     is_draft: isDraft,
-    trip_number: form.trip_number || autoTripNumber,
+    trip_number: isDraft ? '' : (form.trip_number || autoTripNumber || generateTripNumber()),
     trip_date: form.load_datetime ?
     form.load_datetime.split('T')[0] :
     form.offload_datetime ? form.offload_datetime.split('T')[0] : todayStr(),
@@ -343,11 +345,49 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const monthlyRate = Number(contract.monthly_rate) || 0;
   const totalBillable = monthlyRate + totalExpenses;
 
+  const handleSaveDraft = async () => {
+    setSaving(true);
+    try {
+      if (mode === 'trip') {
+        const data = buildData(true);
+        data.trip_number = '';
+        data.is_draft = true;
+        if (editTrip) {
+          await updateTrip.mutateAsync({ id: editTrip.id, data });
+        } else {
+          await createTrip.mutateAsync(data);
+        }
+        onOpenChange(false);
+        onSaved?.();
+      }
+    } finally { setSaving(false); }
+  };
+
+  const isFormDirty = useMemo(() => {
+    if (mode === 'trip') {
+      return !!(form.client_name || form.from_location || form.to_location || form.base_fare ||
+        form.vehicle_plate || form.driver_name || form.load_datetime || form.vendor_name || form.notes);
+    }
+    return !!(contract.company_name || contract.monthly_rate || contract.start_date);
+  }, [mode, form, contract]);
+
+  const handleCloseAttempt = () => {
+    if (isFormDirty) {
+      setShowClosePrompt(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
   const handleSubmit = async () => {
     setSaving(true);
     try {
       if (mode === 'trip') {
         const data = buildData(false);
+        data.is_draft = false;
+        if (!data.trip_number) {
+          data.trip_number = generateTripNumber();
+        }
         let savedTrip;
         if (editTrip) { savedTrip = await updateTrip.mutateAsync({ id: editTrip.id, data }); }
         else { savedTrip = await createTrip.mutateAsync(data); }
@@ -503,12 +543,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div className="flex items-center gap-3">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
-              <DialogClose
+              <button
+                type="button"
+                onClick={handleCloseAttempt}
                 aria-label="Close"
                 className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
               >
                 <X className="w-4 h-4" />
-              </DialogClose>
+              </button>
             </div>
           </div>
         </DialogHeader>
@@ -518,10 +560,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
         )}
 
-        {/* Body: scrollable form + fixed calc panel (desktop) */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* Body: scrollable form with standalone floating calc panel in right column */}
         <div className="flex-1 overflow-y-auto">
-        <div className="px-5 py-4 grid lg:grid-cols-[1fr_260px] gap-5 items-start">
+        <div className="px-5 py-4 grid lg:grid-cols-[1fr_280px] gap-5 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
             <TripModeFields p={tripCtx} /> :
@@ -529,6 +570,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </div>
 
           <div className="space-y-5">
+            {mode === 'trip' && (
+              <div className="sticky top-0 z-10 -mt-4 pt-4 pb-3 bg-gradient-to-b from-card via-card/95 to-transparent">
+                <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+              </div>
+            )}
             {mode === 'trip' &&
             <TripMapPanel
               from={form.from_location}
@@ -565,29 +611,59 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         )}
         </div>
 
-        {/* Desktop fixed calc panel — outside scroll area */}
-        {mode === 'trip' && (
-        <div className="hidden lg:flex flex-shrink-0 w-[260px] border-l border-border/50">
-          <div className="p-4 space-y-3 w-full">
-            <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
-          </div>
-        </div>
-        )}
-        </div>
-
         {/* Footer */}
-        <div className="flex items-center gap-3 px-5 py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2 h-9">
             <X className="w-4 h-4" />
-            {t('cancel')}
+            <span className="hidden sm:inline">{t('cancel')}</span>
           </Button>
           <div className="flex-1" />
-          <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90 gap-2 min-w-[120px]">
+          {mode === 'trip' && (
+            <Button variant="outline" onClick={handleSaveDraft} disabled={saving} className="border-primary/30 text-primary hover:bg-primary/10 gap-2 h-9">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span className="hidden sm:inline">Save Draft</span>
+              <span className="sm:hidden">Draft</span>
+            </Button>
+          )}
+          <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90 gap-2 h-9 min-w-[100px] sm:min-w-[120px]">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {saving ? t('loading') : t('submit')}
+            <span className="hidden sm:inline">{saving ? t('loading') : t('submit')}</span>
+            <span className="sm:hidden">{saving ? '...' : 'Submit'}</span>
           </Button>
         </div>
       </DialogContent>
+
+      {/* Close prompt — save draft before closing? */}
+      <AlertDialog open={showClosePrompt} onOpenChange={setShowClosePrompt}>
+        <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-primary/25">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-foreground">
+              <FileQuestion className="w-5 h-5 text-primary" />
+              Save as draft before closing?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              You have unsaved progress. Save as a draft to continue later, or discard it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="border-border">Keep editing</AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={() => { setShowClosePrompt(false); onOpenChange(false); }}
+              className="border-destructive/30 text-destructive hover:bg-destructive/10"
+            >
+              Discard
+            </Button>
+            <AlertDialogAction
+              onClick={async () => { setShowClosePrompt(false); await handleSaveDraft(); }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Save Draft
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>);
 
 }
