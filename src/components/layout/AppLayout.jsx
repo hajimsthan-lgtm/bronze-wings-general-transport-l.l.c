@@ -48,7 +48,7 @@ export default function AppLayout() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  className="p-4 pb-28 md:p-6 md:pb-10"
+                  className="p-4 pb-32 md:p-6 md:pb-10"
                 >
                   <Outlet />
                 </motion.div>

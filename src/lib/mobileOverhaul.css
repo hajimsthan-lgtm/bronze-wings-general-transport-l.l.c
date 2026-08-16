@@ -1,0 +1,31 @@
+/* ===== Mobile UI Overhaul — scoped to < 768px, desktop untouched ===== */
+
+/* Swipeable carousel scroll-snap */
+.mobile-snap-scroll {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.mobile-snap-item { scroll-snap-align: start; }
+
+/* Prevent iOS auto-zoom on input focus — 16px minimum */
+@media (max-width: 767px) {
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], input[type="tel"], input[type="url"],
+  input[type="search"], textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile touch target baseline */
+@media (max-width: 767px) {
+  .mobile-touch {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Light mode: skeleton shimmer uses lighter base */
+.theme-light .skel-block {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 200% 100%;
+}

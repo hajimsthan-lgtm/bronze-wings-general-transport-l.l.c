@@ -1,29 +1,53 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Settings, GraduationCap, ArrowLeft, Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Settings, ArrowLeft, Sun, Moon, Bot } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
-import { useTour, gatherTourSteps } from '@/lib/tour';
-import { useToast } from '@/components/ui/use-toast';
 import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import BrandName from '@/components/layout/BrandName';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
+import { navItems, getIcon } from '@/lib/navConfig';
+import { getTabFromPath } from '@/lib/TabHistoryContext';
+
+function getPageContext(pathname) {
+  for (const item of navItems) {
+    for (const child of item.children || []) {
+      if (pathname === child.path || pathname.startsWith(child.path + '/')) {
+        return { parent: item.label, current: child.label };
+      }
+    }
+  }
+  if (pathname === '/') return { parent: null, current: 'Dashboard' };
+  if (pathname.startsWith('/settings')) return { parent: null, current: 'Settings' };
+  if (pathname.startsWith('/agents')) return { parent: null, current: 'AI Agents' };
+  if (pathname.startsWith('/prompt-generator')) return { parent: null, current: 'Prompt Studio' };
+  return { parent: null, current: '' };
+}
+
+function getSubModules(activeTab) {
+  if (activeTab === 'accounts') {
+    const accounts = navItems.find((n) => n.key === 'accounts');
+    const documents = navItems.find((n) => n.key === 'documents');
+    return [...(accounts?.children || []), ...(documents?.children || [])];
+  }
+  return navItems.find((n) => n.key === activeTab)?.children || [];
+}
 
 export default function MobileHeader() {
   const { theme, toggleTheme, mode, toggleMode } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
-  const tour = useTour();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const startTour = () => {
-    const steps = gatherTourSteps();
-    if (!steps.length) { toast({ title: 'No guided sections on this page' }); return; }
-    tour.start(steps);
-  };
+  const location = useLocation();
 
   useEffect(() => {
     getCompanySettings().then((s) => setLogoUrl(s.logo_url));
   }, []);
+
+  const pageContext = useMemo(() => getPageContext(location.pathname), [location.pathname]);
+  const activeTab = useMemo(() => getTabFromPath(location.pathname), [location.pathname]);
+  const subModules = useMemo(() => getSubModules(activeTab), [activeTab]);
+
+  const iconBtnCls = 'w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0';
 
   return (
     <header className="md:hidden sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
@@ -31,67 +55,105 @@ export default function MobileHeader() {
         className="absolute inset-0"
         style={{
           background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
-          backdropFilter: 'blur(12px) saturate(1.3)',
-          WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
+          backdropFilter: 'blur(16px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
         }}
       />
-      <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--mobile-hairline-via, rgba(255,255,255,0.18)) 50%, transparent)' }} />
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(30,215,96,0.30) 50%, transparent)' }} />
-      <div
-        className="relative h-14 px-4 flex items-center justify-between"
-      >
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="relative">
-            <div
-              className="absolute inset-0 rounded-lg blur-md opacity-60"
-              style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.35) 0%, transparent 70%)' }}
-            />
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt="Bronze Wings"
-                className="relative w-8 h-8 rounded-lg object-contain ring-1 ring-white/10"
-              />
-            ) : (
-              <div className="relative w-8 h-8 rounded-lg border border-blue-500/30 bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(30,215,96,0.2)]">
-                <span className="text-xs font-bold text-blue-400">BW</span>
-              </div>
-            )}
-          </div>
-          <BrandName variant="mobile" />
-        </Link>
-        <div className="flex items-center gap-0.5">
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(var(--panel-accent-rgb),0.20) 50%, transparent)' }} />
+
+      {/* Row 1: Back + Logo + Page context + Icon cluster */}
+      <div className="relative h-14 px-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            title="Go back"
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white flex-shrink-0"
+            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70 hover:border-[rgba(var(--panel-accent-rgb),0.3)]`}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
+
+          <Link to="/" className="flex items-center gap-2 min-w-0">
+            <div className="relative flex-shrink-0">
+              <div
+                className="absolute inset-0 rounded-lg blur-md opacity-50"
+                style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.30) 0%, transparent 70%)' }}
+              />
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="relative w-7 h-7 rounded-lg object-contain ring-1 ring-white/10" />
+              ) : (
+                <div className="relative w-7 h-7 rounded-lg border border-[rgba(var(--panel-accent-rgb),0.3)] bg-[rgba(var(--panel-accent-rgb),0.1)] flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-primary">BW</span>
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-tight truncate" style={{ fontFamily: 'var(--font-heading)' }}>
+                {pageContext.current || <BrandName variant="mobile" />}
+              </p>
+              {pageContext.parent && (
+                <p className="text-[10px] text-muted-foreground leading-tight truncate">{pageContext.parent}</p>
+              )}
+            </div>
+          </Link>
+        </div>
+
+        {/* Icon cluster — generous gaps, 40px touch targets */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <GlobalDateFilter />
           <button
             onClick={toggleMode}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0"
+            className={iconBtnCls}
             style={{
               background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
               border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
               color: 'hsl(var(--muted-foreground))',
             }}
             aria-label={mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={mode === 'dark' ? 'Light mode' : 'Dark mode'}
           >
-            {mode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           <Link
+            to="/agents"
+            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70`}
+            aria-label="AI Agents"
+          >
+            <Bot className="w-5 h-5" />
+          </Link>
+          <Link
             to="/settings"
-            className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 transition-all hover:border-blue-500/30 hover:text-white flex-shrink-0"
+            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70`}
             aria-label="Settings"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-5 h-5" />
           </Link>
         </div>
       </div>
+
+      {/* Row 2: Sub-module pills — horizontal scroll, only when sub-modules exist */}
+      {subModules.length > 0 && (
+        <div className="relative px-3 pb-2 overflow-x-auto no-scrollbar premium-scroll">
+          <div className="flex items-center gap-2 min-w-max">
+            {subModules.map((mod) => {
+              const Icon = getIcon(mod.icon);
+              const active = location.pathname === mod.path || location.pathname.startsWith(mod.path + '/');
+              return (
+                <Link
+                  key={mod.key}
+                  to={mod.path}
+                  className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
+                    active
+                      ? 'bg-[rgba(var(--panel-accent-rgb),0.18)] text-primary border border-[rgba(var(--panel-accent-rgb),0.35)]'
+                      : 'bg-white/5 text-muted-foreground border border-white/10'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: mod.color }} />
+                  {mod.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

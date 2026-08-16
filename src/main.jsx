@@ -7,6 +7,7 @@ import '@/mobile-theme.css'
 import '@/lib/lightThemeFixes.css'
 import '@/lib/gradientAccents.css'
 import '@/lib/premiumScroll.css'
+import '@/lib/mobileOverhaul.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
