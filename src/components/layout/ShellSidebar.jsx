@@ -49,7 +49,7 @@ export default function ShellSidebar({ query = '' }) {
       
       {/* Brand / wordmark */}
       <div className="px-5 pt-5 pb-3 flex-shrink-0">
-        <Link to="/" className="flex flex-col gap-2 group/brand">
+        <Link to="/" className="flex items-center gap-3 group/brand">
           {logoUrl ?
           <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-border/60" style={{ boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)' }}>
               <img src={logoUrl} alt="" className="w-full h-full object-contain" />
@@ -65,7 +65,6 @@ export default function ShellSidebar({ query = '' }) {
               <span className="text-[13px] font-bold [font-family:'Abril_Fatface',_system-ui]" style={{ color: 'rgb(var(--panel-accent-rgb))', textShadow: '0 0 10px rgba(var(--panel-accent-rgb),0.55)' }}>BW</span>
             </div>
           }
-          <div className="h-px w-full bg-border/40" />
           <div className="leading-tight">
             <span className="block text-[15px] font-bold tracking-tight [font-family:'Abril_Fatface',_system-ui]" style={{ color: '#000000' }}>Bronze Wings</span>
             <span className="block text-[10px] font-semibold tracking-tight mt-0.5" style={{ color: '#2563eb' }}>General Transport L.L.C</span>
