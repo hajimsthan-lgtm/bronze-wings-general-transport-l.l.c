@@ -46,6 +46,8 @@ const VehicleDetail = lazy(() => import('@/pages/admin/VehicleDetail'));
 const DriverDetail = lazy(() => import('@/pages/admin/DriverDetail'));
 const ClientDetail = lazy(() => import('@/pages/admin/ClientDetail'));
 const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
+const Vendors = lazy(() => import('@/pages/admin/Vendors'));
+const ServiceProviderDetail = lazy(() => import('@/pages/admin/ServiceProviderDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 const Agents = lazy(() => import('@/pages/Agents'));
@@ -99,13 +101,14 @@ const AuthenticatedApp = () => {
           <Route path="/admin/vehicles" element={<Vehicles />} />
           <Route path="/admin/drivers" element={<Drivers />} />
           <Route path="/admin/clients" element={<Clients />} />
-          <Route path="/admin/vendors" element={<Navigate to="/admin/clients?tab=vendors" replace />} />
+          <Route path="/admin/vendors" element={<Vendors />} />
           <Route path="/admin/documents" element={<Documents />} />
           <Route path="/admin/salary" element={<Salary />} />
           <Route path="/admin/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/admin/drivers/:id" element={<DriverDetail />} />
           <Route path="/admin/clients/:id" element={<ClientDetail />} />
           <Route path="/admin/vendors/:id" element={<VendorDetail />} />
+          <Route path="/admin/service-providers/:id" element={<ServiceProviderDetail />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/prompt-generator" element={<PromptGenerator />} />
           <Route path="/agents" element={<Agents />} />

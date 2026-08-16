@@ -77,6 +77,31 @@
       ],
       "default": "diesel"
     },
+    "supply_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "supply_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "supply_rate_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "monthly",
+        "per_trip"
+      ],
+      "default": "daily"
+    },
+    "supply_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "returned"
+      ],
+      "default": "active"
+    },
     "notes": {
       "type": "string"
     }

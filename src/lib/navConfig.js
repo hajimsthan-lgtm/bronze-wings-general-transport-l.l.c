@@ -1,13 +1,13 @@
 // Shared navigation config for the app shell sidebar.
 // Single source of truth — imported by ShellSidebar.
 import {
-  Route, Receipt, Shield, Truck, UsersRound, Building2,
+  Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet,
   Files, FilePlus2, FileSignature, Bot, Sparkles,
 } from 'lucide-react';
 
 const ICONS = {
-  Route, Receipt, Shield, Truck, UsersRound, Building2,
+  Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet,
   Files, FilePlus2, FileSignature, Bot, Sparkles,
 };
@@ -26,6 +26,7 @@ export const navItems = [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: 'Truck', color: '#3b82f6' },
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
+      { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
     ],
   },
   {

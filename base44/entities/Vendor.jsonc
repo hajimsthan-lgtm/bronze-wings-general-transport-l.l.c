@@ -32,6 +32,26 @@
       ],
       "default": "other"
     },
+    "provider_type": {
+      "type": "string",
+      "enum": [
+        "vehicle_supplier",
+        "driver_supplier",
+        "both"
+      ],
+      "default": "vehicle_supplier"
+    },
+    "contract_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "contract_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "rate_terms": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "enum": [

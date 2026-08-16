@@ -54,6 +54,22 @@
       "type": "string",
       "format": "date"
     },
+    "supply_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "supply_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "supply_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "returned"
+      ],
+      "default": "active"
+    },
     "notes": {
       "type": "string"
     }
