@@ -1,45 +1,69 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, FileDown, Pencil, Trash2, Loader2, FileSignature, Search, Building2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Plus, Loader2, FileSignature, SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import PageHeader from '@/components/common/PageHeader';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import AgreementFormSheet from '@/components/agreements/AgreementFormSheet';
+import AgreementStatCards from '@/components/agreements/AgreementStatCards';
+import DocumentListPane from '@/components/documents/DocumentListPane';
+import DocumentDetailPane from '@/components/documents/DocumentDetailPane';
+import HeaderActionButton from '@/components/layout/HeaderActionButton';
+import { formatCurrency } from '@/lib/formatters';
 
-const STATUS_COLORS = {
-  draft: 'bg-muted text-muted-foreground',
-  sent: 'bg-blue-500/15 text-blue-400',
-  signed: 'bg-purple-500/15 text-purple-400',
-  active: 'bg-green-500/15 text-green-400',
-  expired: 'bg-orange-500/15 text-orange-400',
-  terminated: 'bg-red-500/15 text-red-400',
+const STATUS_CONFIG = {
+  draft: { pill: 'bg-muted text-muted-foreground border-border', label: 'Draft' },
+  sent: { pill: 'bg-blue-500/15 text-blue-400 border-blue-500/20', label: 'Sent' },
+  signed: { pill: 'bg-purple-500/15 text-purple-400 border-purple-500/20', label: 'Signed' },
+  active: { pill: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', label: 'Active' },
+  expired: { pill: 'bg-orange-500/15 text-orange-400 border-orange-500/20', label: 'Expired' },
+  terminated: { pill: 'bg-red-500/15 text-red-400 border-red-500/20', label: 'Terminated' },
 };
+
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All Status' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'sent', label: 'Sent' },
+  { value: 'signed', label: 'Signed' },
+  { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'terminated', label: 'Terminated' },
+];
 
 export default function Agreements() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
-  const [clients, setClients] = useState([]);
   const [search, setSearch] = useState('');
   const [clientFilter, setClientFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [tab, setTab] = useState('all');
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [data, clientData] = await Promise.all([
-        base44.entities.Agreement.list('-created_date', 50),
+        base44.entities.Agreement.list('-created_date', 200),
         base44.entities.Client.list('-created_date', 200).catch(() => []),
       ]);
       setList(data || []);
@@ -54,13 +78,21 @@ export default function Agreements() {
   useEffect(() => { load(); }, [load]);
 
   const handleNew = () => { setEditing(null); setSheetOpen(true); };
-  const handleEdit = (a) => { setEditing(a); setSheetOpen(true); };
+  const handleEdit = (a) => { setEditing(a); setSheetOpen(true); setMobileDetailOpen(false); };
 
-  const handleDelete = async (a) => {
-    if (!confirm('Delete this agreement?')) return;
+  const handleClientClick = (clientName) => {
+    const client = clients.find(c => c.name === clientName);
+    if (client) navigate(`/admin/clients/${client.id}`);
+  };
+
+  const handleDelete = async () => {
+    const a = deleteTarget;
+    setDeleteTarget(null);
+    if (!a) return;
     try {
       await base44.entities.Agreement.delete(a.id);
       toast({ title: 'Agreement deleted' });
+      if (selectedId === a.id) setSelectedId(null);
       load();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Delete error', description: e.message });
@@ -79,108 +111,220 @@ export default function Agreements() {
     }
   };
 
-  // Filter list by search text and client dropdown
-  const filtered = list.filter(a => {
-    const q = search.trim().toLowerCase();
-    const matchesSearch = !q ||
-      (a.agreement_number || '').toLowerCase().includes(q) ||
-      (a.client_name || '').toLowerCase().includes(q) ||
-      (a.title || '').toLowerCase().includes(q);
-    const matchesClient = clientFilter === 'all' || (a.client_name || '') === clientFilter;
-    return matchesSearch && matchesClient;
-  });
+  const baseFiltered = useMemo(() => {
+    return list.filter(a => {
+      const q = search.trim().toLowerCase();
+      const matchesSearch = !q ||
+        (a.agreement_number || '').toLowerCase().includes(q) ||
+        (a.client_name || '').toLowerCase().includes(q) ||
+        (a.title || '').toLowerCase().includes(q);
+      const matchesClient = clientFilter === 'all' || a.client_name === clientFilter;
+      const matchesStatus = statusFilter === 'all' || a.status === statusFilter;
+      return matchesSearch && matchesClient && matchesStatus;
+    });
+  }, [list, search, clientFilter, statusFilter]);
+
+  const counts = useMemo(() => ({
+    all: baseFiltered.length,
+    draft: baseFiltered.filter(a => a.status === 'draft').length,
+    active: baseFiltered.filter(a => a.status === 'active' || a.status === 'signed').length,
+  }), [baseFiltered]);
+
+  const filtered = useMemo(() => {
+    if (tab === 'draft') return baseFiltered.filter(a => a.status === 'draft');
+    if (tab === 'active') return baseFiltered.filter(a => a.status === 'active' || a.status === 'signed');
+    return baseFiltered;
+  }, [baseFiltered, tab]);
+
+  const selectedItem = filtered.find(a => a.id === selectedId) || baseFiltered.find(a => a.id === selectedId) || null;
+  const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0);
+
+  const tabs = [
+    { key: 'all', label: 'All Agreements', count: counts.all },
+    { key: 'draft', label: 'Draft', count: counts.draft },
+    { key: 'active', label: 'Active', count: counts.active },
+  ];
+
+  const handleSelectRow = (id) => {
+    setSelectedId(id);
+    if (window.innerWidth < 1024) setMobileDetailOpen(true);
+  };
+
+  const totalFields = useMemo(() => {
+    if (!selectedItem) return [];
+    return [
+      { label: 'Contract Value', key: 'amount', bold: true, format: () => formatCurrency(selectedItem.amount || 0) },
+    ];
+  }, [selectedItem]);
 
   return (
-    <div>
-      <div className="max-w-6xl mx-auto">
-        {/* Toolbar: search bar + client dropdown + new button */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by number, client, or title..."
-              className="search-2026 w-full pl-9 pr-3 py-2 text-sm rounded-lg"
-            />
-          </div>
-          <div className="relative">
-            <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
-            <Select value={clientFilter} onValueChange={setClientFilter}>
-              <SelectTrigger className="w-52 pl-8 h-9 text-xs bg-muted/40 border-border">
-                <SelectValue placeholder="All Clients" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Clients</SelectItem>
-                {clients.map(c => (
-                  <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" /> New Agreement</Button>
+    <div className="max-w-[1400px] mx-auto">
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-3 mb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Agreements</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your agreements</p>
         </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+          <HeaderActionButton label="Create Agreement" variant="trip" onClick={handleNew} />
+        </div>
+      </div>
 
+      {/* Stat cards */}
+      <div className="mb-5">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
-              <FileSignature className="w-7 h-7 text-primary" />
-            </div>
-            <h3 className="text-sm font-semibold text-foreground mb-1">
-              {list.length === 0 ? 'No agreements yet' : 'No matches found'}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              {list.length === 0 ? 'Create your first agreement to get started.' : 'Try a different search or client filter.'}
-            </p>
-            {list.length === 0 && (
-              <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Agreement</Button>
-            )}
-          </div>
+          <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map(a => (
-              <div key={a.id} className="glass-card-hover p-4 rounded-xl">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <div className="text-xs text-muted-foreground font-mono">{a.agreement_number || '—'}</div>
-                    <div className="text-sm font-semibold text-foreground mt-0.5">{a.client_name || '—'}</div>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase ${STATUS_COLORS[a.status] || STATUS_COLORS.draft}`}>
-                    {a.status || 'draft'}
-                  </span>
-                </div>
-                {a.title && <div className="text-xs text-muted-foreground mb-2 line-clamp-1">{a.title}</div>}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-xs text-muted-foreground">
-                    {a.start_date ? new Date(a.start_date).toLocaleDateString() : '—'}
-                  </div>
-                  {a.amount != null && <div className="text-sm font-bold font-mono text-primary">AED {Number(a.amount || 0).toFixed(2)}</div>}
-                </div>
-                <div className="flex gap-1.5">
-                  <Button size="sm" variant="outline" onClick={() => handleDownload(a)} disabled={downloadingId === a.id} className="flex-1 h-8 text-xs">
-                    {downloadingId === a.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <FileDown className="w-3 h-3 mr-1" />}
-                    PDF
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleEdit(a)} className="h-8 w-8 p-0"><Pencil className="w-3.5 h-3.5" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(a)} className="h-8 w-8 p-0 text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <AgreementStatCards agreements={list} />
         )}
       </div>
 
-      <AgreementFormSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        agreement={editing}
-        onSaved={load}
-      />
+      {/* Filter bar */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        {activeFilterCount > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
+            {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
+            <button onClick={() => { setClientFilter('all'); setStatusFilter('all'); setSearch(''); }} className="ml-0.5 hover:opacity-70">
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        )}
+        <Select value={clientFilter} onValueChange={setClientFilter}>
+          <SelectTrigger className="w-40 h-9 text-xs bg-muted/40 border-border">
+            <SelectValue placeholder="All Clients" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Clients</SelectItem>
+            {clients.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Two-pane layout */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+      ) : baseFiltered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
+            <FileSignature className="w-7 h-7 text-primary" />
+          </div>
+          <h3 className="text-sm font-semibold text-foreground mb-1">
+            {list.length === 0 ? 'No agreements yet' : 'No matches found'}
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            {list.length === 0 ? 'Create your first agreement to get started.' : 'Try a different search or filter.'}
+          </p>
+          {list.length === 0 && <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Agreement</Button>}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-22rem)] min-h-[400px]">
+          <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
+            <DocumentListPane
+              items={filtered}
+              selectedId={selectedId}
+              onSelect={handleSelectRow}
+              tab={tab}
+              onTabChange={setTab}
+              tabs={tabs}
+              search={search}
+              onSearchChange={setSearch}
+              statusConfig={STATUS_CONFIG}
+              numberField="agreement_number"
+              dateField="start_date"
+              dateLabel="Started"
+              computeAmount={(a) => Number(a.amount || 0)}
+              subtitleField="title"
+              onClientClick={handleClientClick}
+            />
+          </div>
+          <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
+            <DocumentDetailPane
+              item={selectedItem}
+              statusConfig={STATUS_CONFIG}
+              numberField="agreement_number"
+              subtitleField="title"
+              subtitleLabel="Title"
+              dateFields={[
+                { label: 'Start Date', key: 'start_date' },
+                { label: 'End Date', key: 'end_date' },
+              ]}
+              totalFields={totalFields}
+              onClientClick={handleClientClick}
+              onEdit={handleEdit}
+              onDelete={setDeleteTarget}
+              onDownload={handleDownload}
+              downloadingId={downloadingId}
+              emptyIcon={FileSignature}
+              emptyTitle="Select an agreement"
+              emptyDescription="Choose an agreement from the list to view its full details here."
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile detail sheet */}
+      <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
+        <SheetContent side="bottom" className="h-[90vh] p-0 overflow-hidden">
+          <SheetHeader className="px-4 py-3 border-b border-border/40">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setMobileDetailOpen(false)} className="w-8 h-8 rounded-lg flex items-center justify-center border border-border/50">
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <SheetTitle className="text-base font-bold">Agreement Details</SheetTitle>
+            </div>
+          </SheetHeader>
+          <div className="h-[calc(90vh-3.5rem)] overflow-hidden">
+            <DocumentDetailPane
+              item={selectedItem}
+              statusConfig={STATUS_CONFIG}
+              numberField="agreement_number"
+              subtitleField="title"
+              subtitleLabel="Title"
+              dateFields={[
+                { label: 'Start Date', key: 'start_date' },
+                { label: 'End Date', key: 'end_date' },
+              ]}
+              totalFields={totalFields}
+              onClientClick={handleClientClick}
+              onEdit={handleEdit}
+              onDelete={setDeleteTarget}
+              onDownload={handleDownload}
+              downloadingId={downloadingId}
+              emptyIcon={FileSignature}
+              emptyTitle="Select an agreement"
+              emptyDescription="Choose an agreement from the list to view its full details here."
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <AgreementFormSheet open={sheetOpen} onOpenChange={setSheetOpen} agreement={editing} onSaved={load} />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Agreement?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete agreement {deleteTarget?.agreement_number}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
