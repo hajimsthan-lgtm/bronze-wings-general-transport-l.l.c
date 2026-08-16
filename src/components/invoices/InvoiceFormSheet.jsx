@@ -38,7 +38,7 @@ function StatusPill({ status }) {
   );
 }
 
-export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSaved, defaultClientName }) {
+export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSaved, defaultClientName, customTemplateId = null }) {
   const { t } = useI18n();
   const { toast } = useToast();
   const createInvoice = useInvoiceCreate();
@@ -258,6 +258,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         vat_rate: Number(form.vat_rate),
         status: resultingStatus,
         paid_amount: payAmount,
+        ...(customTemplateId ? { custom_template_id: customTemplateId } : {}),
       };
       let invoiceId = editInvoice?.id;
       let invoiceNumber = form.invoice_number;

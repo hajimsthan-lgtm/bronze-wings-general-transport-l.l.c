@@ -18,10 +18,13 @@ const DOC_CONFIG = {
   agreement: { title: 'Edit Agreement Template', entity: 'Agreement', numKey: 'agreement_number' },
 };
 
-export default function DocumentTemplateEditor({ open, onClose, documentType = 'invoice' }) {
+export default function DocumentTemplateEditor({ open, onClose, documentType = 'invoice', saveTarget = 'companySettings', templateId = null }) {
   const { toast } = useToast();
   const cfg = DOC_CONFIG[documentType] || DOC_CONFIG.invoice;
+  const isCustomMode = saveTarget === 'customTemplate';
   const [template, setTemplate] = useState(deepClone(DEFAULT_TEMPLATE));
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
   const [history, setHistory] = useState([]);
   const [future, setFuture] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
@@ -40,21 +43,50 @@ export default function DocumentTemplateEditor({ open, onClose, documentType = '
     (async () => {
       setLoading(true);
       try {
-        const [settingsData, docs] = await Promise.all([
-          getCompanySettings(),
-          base44.entities[cfg.entity].list('-created_date', 5).catch(() => []),
-        ]);
-        if (cancelled) return;
-        setSettings(settingsData);
-        setDoc(docs?.[0] || null);
-        const allConfigs = settingsData.template_config || {};
-        setTemplate(mergeTemplate(allConfigs[documentType]));
+        if (isCustomMode && templateId) {
+          // Load existing custom template
+          const [settingsData, tpl] = await Promise.all([
+            getCompanySettings(),
+            base44.entities.CustomTemplate.get(templateId).catch(() => null),
+          ]);
+          if (cancelled) return;
+          setSettings(settingsData);
+          setDoc(null);
+          if (tpl) {
+            setTemplateName(tpl.name || '');
+            setTemplateDescription(tpl.description || '');
+            setTemplate(mergeTemplate(tpl.template_config));
+          }
+        } else if (isCustomMode && !templateId) {
+          // New custom template — load a sample doc for preview
+          const [settingsData, docs] = await Promise.all([
+            getCompanySettings(),
+            base44.entities[cfg.entity].list('-created_date', 5).catch(() => []),
+          ]);
+          if (cancelled) return;
+          setSettings(settingsData);
+          setDoc(docs?.[0] || null);
+          setTemplateName('');
+          setTemplateDescription('');
+          setTemplate(deepClone(DEFAULT_TEMPLATE));
+        } else {
+          // CompanySettings mode (quotations/agreements)
+          const [settingsData, docs] = await Promise.all([
+            getCompanySettings(),
+            base44.entities[cfg.entity].list('-created_date', 5).catch(() => []),
+          ]);
+          if (cancelled) return;
+          setSettings(settingsData);
+          setDoc(docs?.[0] || null);
+          const allConfigs = settingsData.template_config || {};
+          setTemplate(mergeTemplate(allConfigs[documentType]));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [open, documentType]);
+  }, [open, documentType, isCustomMode, templateId]);
 
   const updateTemplate = useCallback((newTpl) => {
     setTemplate(prev => {
@@ -101,13 +133,32 @@ export default function DocumentTemplateEditor({ open, onClose, documentType = '
   };
 
   const handleSave = async () => {
+    if (isCustomMode && !templateName.trim()) {
+      toast({ variant: 'destructive', title: 'Template name required' });
+      return;
+    }
     setSaving(true);
     try {
-      const existing = await getCompanySettings();
-      const allConfigs = existing.template_config || {};
-      const updatedConfigs = { ...allConfigs, [documentType]: template };
-      await saveCompanySettings({ template_config: updatedConfigs });
-      toast({ title: 'Template saved', description: `New ${documentType}s will use this layout.` });
+      if (isCustomMode) {
+        const payload = {
+          name: templateName.trim(),
+          description: templateDescription.trim(),
+          document_type: documentType,
+          template_config: template,
+        };
+        if (templateId) {
+          await base44.entities.CustomTemplate.update(templateId, payload);
+        } else {
+          await base44.entities.CustomTemplate.create(payload);
+        }
+        toast({ title: 'Custom template saved', description: `"${templateName}" is now available in the template selector.` });
+      } else {
+        const existing = await getCompanySettings();
+        const allConfigs = existing.template_config || {};
+        const updatedConfigs = { ...allConfigs, [documentType]: template };
+        await saveCompanySettings({ template_config: updatedConfigs });
+        toast({ title: 'Template saved', description: `New ${documentType}s will use this layout.` });
+      }
       onClose();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Save failed', description: e.message });
@@ -127,9 +178,29 @@ export default function DocumentTemplateEditor({ open, onClose, documentType = '
     <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex flex-col animate-fade-in">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card/60 backdrop-blur-xl flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-bold text-foreground">{cfg.title}</h2>
-          {doc && <span className="text-xs text-muted-foreground hidden sm:inline">Previewing: {doc[cfg.numKey] || '—'}</span>}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <h2 className="text-sm font-bold text-foreground flex-shrink-0">
+            {isCustomMode ? (templateId ? 'Edit Custom Template' : 'New Custom Template') : cfg.title}
+          </h2>
+          {isCustomMode && (
+            <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
+              <input
+                type="text"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="Template name (e.g. Modern Blue)"
+                className="h-8 px-2.5 rounded-lg bg-muted/40 border border-border text-xs text-foreground w-40 flex-shrink-0 focus:outline-none focus:border-primary/50"
+              />
+              <input
+                type="text"
+                value={templateDescription}
+                onChange={(e) => setTemplateDescription(e.target.value)}
+                placeholder="Description (optional)"
+                className="h-8 px-2.5 rounded-lg bg-muted/40 border border-border text-xs text-foreground flex-1 min-w-0 focus:outline-none focus:border-primary/50"
+              />
+            </div>
+          )}
+          {!isCustomMode && doc && <span className="text-xs text-muted-foreground hidden sm:inline">Previewing: {doc[cfg.numKey] || '—'}</span>}
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={undo} disabled={history.length === 0} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-30" title="Undo">

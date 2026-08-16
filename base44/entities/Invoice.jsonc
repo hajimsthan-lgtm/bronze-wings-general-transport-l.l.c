@@ -138,6 +138,9 @@
     "signed_date": {
       "type": "string",
       "format": "date"
+    },
+    "custom_template_id": {
+      "type": "string"
     }
   },
   "required": [

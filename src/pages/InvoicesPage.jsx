@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, SlidersHorizontal, ArrowLeft, X } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -38,7 +38,8 @@ import PaymentModal from '@/components/invoices/PaymentModal';
 import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
-import DocumentTemplateEditor from '@/components/invoices/template-editor/DocumentTemplateEditor';
+import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
+import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -64,7 +65,9 @@ export default function InvoicesPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
-  const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
+  const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
+  const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
 
@@ -85,7 +88,26 @@ export default function InvoicesPage() {
     return linked.length;
   };
 
-  const handleNew = () => { setEditing(null); setSheetOpen(true); };
+  const handleNew = async () => {
+    setEditing(null);
+    try {
+      const customTpls = await base44.entities.CustomTemplate.filter({ document_type: 'invoice' }, '-updated_date', 100).catch(() => []);
+      if (customTpls.length > 0) {
+        setTemplateSelectorOpen(true);
+      } else {
+        setSelectedTemplateId(null);
+        setSheetOpen(true);
+      }
+    } catch {
+      setSelectedTemplateId(null);
+      setSheetOpen(true);
+    }
+  };
+
+  const handleTemplateSelect = (templateId) => {
+    setSelectedTemplateId(templateId);
+    setSheetOpen(true);
+  };
   const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); setMobileDetailOpen(false); };
 
   const handleStatusChangeRequest = (inv, newStatus) => {
@@ -393,11 +415,11 @@ export default function InvoicesPage() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={() => setTemplateEditorOpen(true)}
+            onClick={() => setTemplateManagerOpen(true)}
             className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            title="Edit Invoice Template"
+            title="Custom Templates"
           >
-            <SlidersHorizontal className="w-4 h-4" />
+            <LayoutTemplate className="w-4 h-4" />
           </button>
           <HeaderActionButton
             label="Create Invoice"
@@ -561,7 +583,7 @@ export default function InvoicesPage() {
         </SheetContent>
       </Sheet>
 
-      <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} />
+      <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} customTemplateId={selectedTemplateId} />
 
       <PaymentModal
         invoice={paymentModal?.inv}
@@ -585,7 +607,9 @@ export default function InvoicesPage() {
         onConfirm={handleCancelConfirm}
       />
 
-      <DocumentTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} documentType="invoice" />
+      <CustomTemplateManager open={templateManagerOpen} onClose={() => setTemplateManagerOpen(false)} documentType="invoice" />
+
+      <TemplateSelectorModal open={templateSelectorOpen} onClose={() => setTemplateSelectorOpen(false)} onSelect={handleTemplateSelect} documentType="invoice" />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>

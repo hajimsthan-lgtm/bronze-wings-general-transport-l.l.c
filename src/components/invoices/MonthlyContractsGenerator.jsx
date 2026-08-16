@@ -5,9 +5,10 @@ import { useI18n } from '@/lib/i18n';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
-import { Calendar, FileText, Loader2, Repeat } from 'lucide-react';
+import { Calendar, FileText, Loader2, LayoutTemplate, Repeat } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
 import StatusBadge from '@/components/common/StatusBadge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function MonthlyContractsGenerator({ clientName, onInvoicesChanged }) {
   const { t } = useI18n();
@@ -15,6 +16,8 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [invoicingId, setInvoicingId] = useState(null);
+  const [customTemplates, setCustomTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState('default');
 
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +28,10 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [clientName]);
+
+  useEffect(() => {
+    base44.entities.CustomTemplate.filter({ document_type: 'invoice' }, '-updated_date', 100).catch(() => []).then(setCustomTemplates);
+  }, []);
 
   const invoiceContract = async (contract) => {
     setInvoicingId(contract.id);
@@ -61,6 +68,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         due_date: due.toISOString().split('T')[0],
         line_items: [{ description: desc, quantity: 1, unit_price: subtotal, amount: subtotal }],
         subtotal, vat_rate: 5, vat_amount: vatAmount, total_amount: total, paid_amount: 0, status: 'draft',
+        ...(selectedTemplate !== 'default' ? { custom_template_id: selectedTemplate } : {}),
       });
       toast({ title: t('invoice_created') || 'Invoice created' });
       onInvoicesChanged?.();
@@ -83,6 +91,24 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
           <p className="text-[11px] text-muted-foreground">{contracts.length} contracts · generate invoices in one click</p>
         </div>
       </div>
+
+      {customTemplates.length > 0 && (
+        <div className="flex items-center gap-2 mb-3 p-2.5 rounded-lg bg-muted/20 border border-border/40">
+          <LayoutTemplate className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+          <span className="text-xs text-muted-foreground flex-shrink-0">Template:</span>
+          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+            <SelectTrigger className="h-8 flex-1 text-xs bg-muted/40 border-border min-w-0">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default — Standard fixed layout</SelectItem>
+              {customTemplates.map(tpl => (
+                <SelectItem key={tpl.id} value={tpl.id}>{tpl.name} — Custom</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <div className="space-y-1.5">
         {contracts.map((c) => {
           const active = c.status === 'active';
