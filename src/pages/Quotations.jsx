@@ -11,8 +11,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue } from
+'@/components/ui/select';
 import QuotationFormSheet from '@/components/quotations/QuotationFormSheet';
 
 const STATUS_COLORS = {
@@ -20,7 +20,7 @@ const STATUS_COLORS = {
   sent: 'bg-blue-500/15 text-blue-400',
   accepted: 'bg-green-500/15 text-green-400',
   rejected: 'bg-red-500/15 text-red-400',
-  expired: 'bg-orange-500/15 text-orange-400',
+  expired: 'bg-orange-500/15 text-orange-400'
 };
 
 export default function Quotations() {
@@ -38,9 +38,9 @@ export default function Quotations() {
     setLoading(true);
     try {
       const [data, clientData] = await Promise.all([
-        base44.entities.Quotation.list('-created_date', 50),
-        base44.entities.Client.list('-created_date', 200).catch(() => []),
-      ]);
+      base44.entities.Quotation.list('-created_date', 50),
+      base44.entities.Client.list('-created_date', 200).catch(() => [])]
+      );
       setList(data || []);
       setClients(clientData || []);
     } catch (e) {
@@ -50,10 +50,10 @@ export default function Quotations() {
     }
   }, [toast]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {load();}, [load]);
 
-  const handleNew = () => { setEditing(null); setSheetOpen(true); };
-  const handleEdit = (q) => { setEditing(q); setSheetOpen(true); };
+  const handleNew = () => {setEditing(null);setSheetOpen(true);};
+  const handleEdit = (q) => {setEditing(q);setSheetOpen(true);};
 
   const handleDelete = async (q) => {
     if (!confirm('Delete this quotation?')) return;
@@ -79,18 +79,18 @@ export default function Quotations() {
   };
 
   // Filter list by search text and client dropdown
-  const filtered = list.filter(q => {
+  const filtered = list.filter((q) => {
     const qLower = search.trim().toLowerCase();
     const matchesSearch = !qLower ||
-      (q.quotation_number || '').toLowerCase().includes(qLower) ||
-      (q.client_name || '').toLowerCase().includes(qLower) ||
-      (q.subject || '').toLowerCase().includes(qLower);
+    (q.quotation_number || '').toLowerCase().includes(qLower) ||
+    (q.client_name || '').toLowerCase().includes(qLower) ||
+    (q.subject || '').toLowerCase().includes(qLower);
     const matchesClient = clientFilter === 'all' || (q.client_name || '') === clientFilter;
     return matchesSearch && matchesClient;
   });
 
   return (
-    <div className="professional-page-bg min-h-screen p-4 sm:p-6">
+    <div className="professional-page-bg min-h-screen p-4 sm:p-6 text-gray-50 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         {/* Toolbar: search bar (left) + client dropdown (right) + new button */}
         <div className="flex items-center gap-3 mb-5">
@@ -99,10 +99,10 @@ export default function Quotations() {
             <input
               type="text"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by number, client, or subject..."
-              className="search-2026 w-full pl-9 pr-3 py-2 text-sm rounded-lg"
-            />
+              className="search-2026 w-full pl-9 pr-3 py-2 text-sm rounded-lg" />
+            
           </div>
           <div className="relative">
             <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
@@ -112,9 +112,9 @@ export default function Quotations() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Clients</SelectItem>
-                {clients.map(c => (
-                  <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                ))}
+                {clients.map((c) =>
+                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -122,12 +122,12 @@ export default function Quotations() {
         </div>
 
         {/* List */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
+        {loading ?
+        <div className="flex items-center justify-center py-20">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
+          </div> :
+        filtered.length === 0 ?
+        <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
               <FileText className="w-7 h-7 text-primary" />
             </div>
@@ -137,18 +137,18 @@ export default function Quotations() {
             <p className="text-xs text-muted-foreground mb-4">
               {list.length === 0 ? 'Create your first quotation to get started.' : 'Try a different search or client filter.'}
             </p>
-            {list.length === 0 && (
-              <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Quotation</Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map(q => {
-              const subtotal = (q.line_items || []).reduce((s, i) => s + (Number(i.amount) || 0), 0);
-              const vat = subtotal * (q.vat_rate || 5) / 100;
-              const total = subtotal + vat;
-              return (
-                <div key={q.id} className="glass-card-hover p-4 rounded-xl">
+            {list.length === 0 &&
+          <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Quotation</Button>
+          }
+          </div> :
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filtered.map((q) => {
+            const subtotal = (q.line_items || []).reduce((s, i) => s + (Number(i.amount) || 0), 0);
+            const vat = subtotal * (q.vat_rate || 5) / 100;
+            const total = subtotal + vat;
+            return (
+              <div key={q.id} className="glass-card-hover p-4 rounded-xl">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <div className="text-xs text-muted-foreground font-mono">{q.quotation_number || '—'}</div>
@@ -173,19 +173,19 @@ export default function Quotations() {
                     <Button size="sm" variant="ghost" onClick={() => handleEdit(q)} className="h-8 w-8 p-0"><Pencil className="w-3.5 h-3.5" /></Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDelete(q)} className="h-8 w-8 p-0 text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
                   </div>
-                </div>
-              );
-            })}
+                </div>);
+
+          })}
           </div>
-        )}
+        }
       </div>
 
       <QuotationFormSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         quotation={editing}
-        onSaved={load}
-      />
-    </div>
-  );
+        onSaved={load} />
+      
+    </div>);
+
 }
