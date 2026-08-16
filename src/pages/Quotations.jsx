@@ -90,7 +90,7 @@ export default function Quotations() {
   });
 
   return (
-    <div className="professional-page-bg min-h-screen p-4 sm:p-6 text-gray-50 bg-gray-50">
+    <div>
       <div className="max-w-6xl mx-auto">
         {/* Toolbar: search bar (left) + client dropdown (right) + new button */}
         <div className="flex items-center gap-3 mb-5">

@@ -354,7 +354,7 @@ export default function InvoicesPage() {
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
   return (
-    <div className="professional-page-bg min-h-screen p-4 sm:p-6">
+    <div>
       <div className="max-w-6xl mx-auto">
         {/* Toolbar */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">

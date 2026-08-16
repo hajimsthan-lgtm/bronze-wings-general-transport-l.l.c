@@ -37,7 +37,7 @@ export default function AppLayout() {
           <div className="flex-1 min-w-0 flex flex-col">
             <ShellNavbar query={navQuery} setQuery={setNavQuery} />
             <TopBar />
-            <main className="flex-1 min-h-0 md:overflow-y-auto thin-scroll">
+            <main className="flex-1 min-h-0 md:overflow-y-auto thin-scroll" style={{ background: 'var(--bg-canvas)' }}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={location.pathname}

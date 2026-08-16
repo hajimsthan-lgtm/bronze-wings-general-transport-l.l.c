@@ -91,7 +91,7 @@ export default function Agreements() {
   });
 
   return (
-    <div className="professional-page-bg min-h-screen p-4 sm:p-6">
+    <div>
       <div className="max-w-6xl mx-auto">
         {/* Toolbar: search bar + client dropdown + new button */}
         <div className="flex items-center gap-3 mb-5">

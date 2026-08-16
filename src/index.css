@@ -65,6 +65,7 @@
 
     /* Theme-adaptive shell vars */
     --app-bg: #0a0b0e;
+    --bg-canvas: #0d0e12;
     --panel-bg: linear-gradient(180deg, rgba(22,24,30,0.92) 0%, rgba(10,11,14,0.96) 100%);
     --panel-border-color: rgba(0,242,195,0.10);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.04);
@@ -349,6 +350,7 @@
     --clay-shadow-light: 0 0% 100%;
 
     --app-bg: #EEEEEE;
+    --bg-canvas: #F3F4F6;
     --panel-bg: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,250,252,0.96) 100%);
     --panel-border-color: rgba(41,98,255,0.12);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.8);
