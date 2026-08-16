@@ -301,7 +301,7 @@ export default function DriverDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DriverDeductionsSection driverName={driver.name} />
             <WeeklyActivityChart trips={trips} />
-            <HoursGauge hours={totalHours} />
+            <HoursGauge hours={totalHours} trips={fTrips} />
             <TripChecklist trips={fTrips} />
           </div>
         </div>
