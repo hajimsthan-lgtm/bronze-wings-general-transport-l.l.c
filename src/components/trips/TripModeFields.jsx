@@ -186,9 +186,17 @@ export default function TripModeFields({ p }) {
             )}
             {isNewDriver && form.assignment_mode === 'company' && (
               <CreateNewCard label="driver" value={form.driver_name} created={createdFlags.driver} loading={creating === 'driver'}
-                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: '—' }, 'driver')} />
+                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: form.driver_phone || '—' }, 'driver')} />
             )}
           </div>
+        </div>
+        {/* Driver mobile number */}
+        <div>
+          <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><User className="w-3 h-3" /> Driver Mobile Number</Label>
+          <IconInput icon={User} type="tel" value={form.driver_phone || ''} onChange={(e) => update('driver_phone', e.target.value)} placeholder="+971 50 123 4567" className={inputCls} />
+          {selectedDriver?.phone && selectedDriver.phone !== '—' && (
+            <p className="text-[10px] text-emerald-400 mt-1">Auto-filled from driver profile</p>
+          )}
         </div>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('payment_status')}</Label>

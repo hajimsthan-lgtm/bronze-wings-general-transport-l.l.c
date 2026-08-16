@@ -21,7 +21,7 @@ import VendorPaymentFields from './VendorPaymentFields';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
-  from_location: '', to_location: '', vehicle_plate: '', driver_name: '', vendor_name: '',
+  from_location: '', to_location: '', vehicle_plate: '', driver_name: '', driver_phone: '', vendor_name: '',
   client_name: '', trip_type: 'one_way', delivery_note_number: '', delivery_note_url: '',
   hours: '', return_trip_number: '', payment_status: 'corporate_credit',
   trip_date: new Date().toISOString().split('T')[0],
@@ -156,7 +156,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     setForm((prev) => ({ ...prev, [field]: value }));
     if (field === 'client_name') setCreatedFlags((prev) => ({ ...prev, client: false }));
     if (field === 'vehicle_plate') setCreatedFlags((prev) => ({ ...prev, vehicle: false }));
-    if (field === 'driver_name') setCreatedFlags((prev) => ({ ...prev, driver: false }));
+    if (field === 'driver_name') {
+      setCreatedFlags((prev) => ({ ...prev, driver: false }));
+      // Auto-fill driver phone from known drivers
+      const matched = drivers.find((d) => d.name?.toLowerCase() === value?.toLowerCase());
+      if (matched && matched.phone) {
+        setForm((prev) => ({ ...prev, driver_phone: matched.phone }));
+      }
+    }
   };
 
   const updateContract = (field, value) => {
@@ -285,6 +292,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     const { assignment_mode, ...rest } = form;
     return {
     ...rest,
+    driver_phone: form.driver_phone || '',
     is_draft: isDraft,
     trip_number: isDraft ? '' : (form.trip_number || autoTripNumber || generateTripNumber()),
     trip_date: form.load_datetime ?

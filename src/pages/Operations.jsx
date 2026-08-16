@@ -35,6 +35,7 @@ const TRIP_EXPORT_COLUMNS = [
   { label: 'Trip #', key: 'trip_number' },
   { label: 'Date', key: 'trip_date' },
   { label: 'Driver', key: 'driver_name' },
+  { label: 'Driver Phone', key: 'driver_phone' },
   { label: 'Vehicle', key: 'vehicle_plate' },
   { label: 'Client', key: 'client_name' },
   { label: 'From', key: 'from_location' },

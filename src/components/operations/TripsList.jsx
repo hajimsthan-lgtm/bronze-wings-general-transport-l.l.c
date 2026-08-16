@@ -9,7 +9,23 @@ import { Check, Send, Undo2, ArrowRight, ChevronDown } from 'lucide-react';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
+import { formatDate } from '@/lib/formatters';
 import BulkActionBar from '@/components/operations/BulkActionBar';
+
+const TRIP_EXPORT_COLUMNS = [
+  { label: 'Trip #', key: 'trip_number' },
+  { label: 'Date', key: 'trip_date' },
+  { label: 'Driver', key: 'driver_name' },
+  { label: 'Driver Phone', key: 'driver_phone' },
+  { label: 'Vehicle', key: 'vehicle_plate' },
+  { label: 'Client', key: 'client_name' },
+  { label: 'From', key: 'from_location' },
+  { label: 'To', key: 'to_location' },
+  { label: 'Revenue', key: 'revenue', numeric: true },
+  { label: 'Status', key: 'status' },
+  { label: 'Payment', key: 'payment_status' },
+];
 
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -62,6 +78,20 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
   const handleBulkDelete = async () => {
     if (onBulkDelete) await onBulkDelete(selectedIds);
     clearSelection();
+  };
+
+  const selectedTrips = trips.filter((t) => selected.has(t.id));
+  const handleBulkExportCSV = () => {
+    if (selectedTrips.length === 0) return;
+    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    exportToCSV(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
+    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to CSV` });
+  };
+  const handleBulkExportPDF = () => {
+    if (selectedTrips.length === 0) return;
+    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips');
+    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };
 
   const handleInvoiceSent = async (e, trip, sent) => {
@@ -257,6 +287,8 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
         onClear={clearSelection}
         onBulkStatus={handleBulkStatus}
         onBulkDelete={handleBulkDelete}
+        onBulkExportCSV={handleBulkExportCSV}
+        onBulkExportPDF={handleBulkExportPDF}
       />
     </div>
   );

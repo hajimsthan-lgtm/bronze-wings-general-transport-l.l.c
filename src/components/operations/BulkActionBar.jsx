@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Trash2, X, CheckCheck, ChevronDown } from 'lucide-react';
+import { Trash2, X, CheckCheck, ChevronDown, Download } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
+import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
 
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
@@ -14,7 +15,7 @@ const STATUS_OPTIONS = [
  * Floating bulk-action bar — appears when trips are selected.
  * Provides count, select-all, bulk status update, and bulk delete.
  */
-export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, onClear, onBulkStatus, onBulkDelete }) {
+export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, onClear, onBulkStatus, onBulkDelete, onBulkExportCSV, onBulkExportPDF }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const allSelected = selectedCount === totalCount;
 
@@ -85,6 +86,30 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Export selected — CSV */}
+          {onBulkExportCSV && (
+            <button
+              onClick={onBulkExportCSV}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
+              title="Export selected as CSV"
+            >
+              <ExcelIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">CSV</span>
+            </button>
+          )}
+
+          {/* Export selected — PDF */}
+          {onBulkExportPDF && (
+            <button
+              onClick={onBulkExportPDF}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 hover:text-rose-200 transition-colors text-xs font-semibold"
+              title="Export selected as PDF"
+            >
+              <PdfIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">PDF</span>
+            </button>
+          )}
 
           {/* Bulk delete */}
           <button

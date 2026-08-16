@@ -21,6 +21,7 @@ import PerformanceChart from '@/components/dashboard/premium/PerformanceChart';
 import TripsTableCard from '@/components/dashboard/premium/TripsTableCard';
 import InvoicesListCard from '@/components/dashboard/premium/InvoicesListCard';
 import TripsStatusCard from '@/components/dashboard/TripsStatusCard';
+import FleetUtilizationGauge from '@/components/dashboard/FleetUtilizationGauge';
 
 const donutTooltip = {
   background: 'rgba(var(--surf-2-rgb),0.95)',
@@ -285,8 +286,11 @@ export default function Dashboard() {
         {/* Performance chart — full width */}
         <PerformanceChart data={revData} range={range} setRange={setRange} />
 
-        {/* Trips status — active vs pending summary */}
-        <TripsStatusCard activeCount={activeTripsTransit} pendingCount={pendingTripsScheduled} completedCount={completedTrips} />
+        {/* Fleet utilization gauge + Trips status — side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-[40fr_60fr] gap-5">
+          <FleetUtilizationGauge assigned={assignedVehicles} total={totalVehicles} loading={loading} />
+          <TripsStatusCard activeCount={activeTripsTransit} pendingCount={pendingTripsScheduled} completedCount={completedTrips} />
+        </div>
 
         {/* Detail row — 65/35 */}
         <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-5">

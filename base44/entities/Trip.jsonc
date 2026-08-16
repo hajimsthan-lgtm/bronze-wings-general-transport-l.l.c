@@ -17,6 +17,9 @@
     "driver_name": {
       "type": "string"
     },
+    "driver_phone": {
+      "type": "string"
+    },
     "vendor_name": {
       "type": "string"
     },

@@ -12,7 +12,23 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
+import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
+import { formatDate } from '@/lib/formatters';
 import BulkActionBar from '@/components/operations/BulkActionBar';
+
+const TRIP_EXPORT_COLUMNS = [
+  { label: 'Trip #', key: 'trip_number' },
+  { label: 'Date', key: 'trip_date' },
+  { label: 'Driver', key: 'driver_name' },
+  { label: 'Driver Phone', key: 'driver_phone' },
+  { label: 'Vehicle', key: 'vehicle_plate' },
+  { label: 'Client', key: 'client_name' },
+  { label: 'From', key: 'from_location' },
+  { label: 'To', key: 'to_location' },
+  { label: 'Revenue', key: 'revenue', numeric: true },
+  { label: 'Status', key: 'status' },
+  { label: 'Payment', key: 'payment_status' },
+];
 
 const STATUS_HEX = {
   scheduled: '#60a5fa',
@@ -137,6 +153,20 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const handleBulkDelete = async () => {
     if (onBulkDelete) await onBulkDelete(selectedIds);
     clearSelection();
+  };
+
+  const selectedTrips = trips.filter((t) => selected.has(t.id));
+  const handleBulkExportCSV = () => {
+    if (selectedTrips.length === 0) return;
+    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    exportToCSV(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
+    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to CSV` });
+  };
+  const handleBulkExportPDF = () => {
+    if (selectedTrips.length === 0) return;
+    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips');
+    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };
 
   const handleStatusChange = async (trip, newStatus) => {
@@ -374,6 +404,8 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         onClear={clearSelection}
         onBulkStatus={handleBulkStatus}
         onBulkDelete={handleBulkDelete}
+        onBulkExportCSV={handleBulkExportCSV}
+        onBulkExportPDF={handleBulkExportPDF}
       />
     </div>);
 
