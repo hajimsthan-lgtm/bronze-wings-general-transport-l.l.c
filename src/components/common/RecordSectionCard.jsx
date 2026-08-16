@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { FileText, Eye, Plus } from 'lucide-react';
+import { FileText, Eye, Plus, ChevronDown } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', children }) {
+export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760', count, onView, onPdf, onNew, newLabel, loading, emptyIcon, emptyLabel, className = '', collapsible = true, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
   const [viewOpen, setViewOpen] = useState(false);
+  const isOpen = !collapsible || open;
 
   const handleView = () => {
     setViewOpen(true);
@@ -15,7 +17,8 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
 
   return (
     <div
-      className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in-up ${className}`}
+      onClick={() => collapsible && setOpen(!open)}
+      className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 animate-fade-in-up ${collapsible ? 'cursor-pointer' : ''} ${className}`}
       style={{ borderLeft: `4px solid ${accent}` }}>
       <div className="flex items-center justify-between p-4 border-b border-border gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -27,10 +30,36 @@ export default function RecordSectionCard({ title, icon: Icon, accent = '#1ED760
             <p className="text-xs text-muted-foreground">{count != null ? `${count} record${count === 1 ? '' : 's'}` : '—'}</p>
           </div>
         </div>
-        <button onClick={handleView} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors flex-shrink-0">
-          <Eye className="w-3.5 h-3.5" /> Quick View
-        </button>
+        <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          {isOpen && (
+            <>
+              {onNew && (
+                <button onClick={onNew} title={newLabel || 'Add new'} className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <button onClick={onPdf} title="Download PDF" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white transition-transform active:scale-95" style={{ background: accent, boxShadow: `0 4px 14px -4px ${accent}` }}>
+                <FileText className="w-3 h-3" /> PDF
+              </button>
+              {onView && (
+                <button onClick={handleView} title="View all" className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-foreground hover:bg-white/10 transition-colors">
+                  <Eye className="w-3 h-3" /> View
+                </button>
+              )}
+            </>
+          )}
+          {collapsible && (
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-[400ms] ${open ? 'rotate-180' : ''}`} />
+          )}
+        </div>
       </div>
+      {isOpen && (
+        <div className="p-4">
+          <div className="rounded-xl border border-border overflow-hidden p-4">
+            {loading ? <LoadingSpinner /> : count === 0 ? <EmptyState icon={emptyIcon || Icon} title={emptyLabel || 'No records'} /> : children}
+          </div>
+        </div>
+      )}
 
       {/* Quick View Popup */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
