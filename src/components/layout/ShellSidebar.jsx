@@ -67,11 +67,8 @@ export default function ShellSidebar({ query = '' }) {
           }
           <div className="h-px w-full bg-border/40" />
           <div className="leading-tight">
-            <span className="block text-[15px] font-bold tracking-tight text-foreground [font-family:'Abril_Fatface',_system-ui]">
-              {showSplit ? firstPart + ' ' : ''}
-              <span style={{ color: 'rgb(var(--panel-accent-rgb))' }}>{showSplit ? accentPart : companyName}</span>
-            </span>
-            <span className="block text-[8.5px] tracking-[0.2em] uppercase text-muted-foreground/70 mt-1">General Transport</span>
+            <span className="block text-[15px] font-bold tracking-tight [font-family:'Abril_Fatface',_system-ui]" style={{ color: '#000000' }}>Bronze Wings</span>
+            <span className="block text-[10px] font-semibold tracking-tight mt-0.5" style={{ color: '#2563eb' }}>General Transport L.L.C</span>
           </div>
         </Link>
       </div>
