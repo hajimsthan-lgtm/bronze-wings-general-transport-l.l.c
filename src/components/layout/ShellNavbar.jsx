@@ -28,7 +28,7 @@ export default function ShellNavbar({ query, setQuery }) {
 
   return (
     <header
-      className="hidden md:flex items-center gap-4 h-16 px-5 border-b border-border/50 flex-shrink-0 z-30"
+      className="hidden md:flex items-center gap-4 h-16 px-5 border-b border-border/50 flex-shrink-0 z-50"
       style={{
         background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
         backdropFilter: 'blur(14px) saturate(1.3)',
