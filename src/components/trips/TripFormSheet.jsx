@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Truck, FileText, X, Check, Loader2, Save, FileQuestion } from 'lucide-react';
+import { Truck, FileText, X, Check, Loader2, Save, FileQuestion, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, 
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
+import { useToast } from '@/components/ui/use-toast';
 import { getCompanySettings } from '@/lib/companySettings';
 import ModeToggle from './ModeToggle';
 import TripModeFields from './TripModeFields';
@@ -42,6 +43,7 @@ const todayStr = () => new Date().toISOString().split('T')[0];
 
 export default function TripFormSheet({ open, onOpenChange, editTrip, editContract, onSaved, initialMode, prefill }) {
   const { t } = useI18n();
+  const { toast } = useToast();
   const createTrip = useTripCreate();
   const updateTrip = useTripUpdate();
   const [mode, setMode] = useState('trip');
@@ -63,6 +65,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [showClosePrompt, setShowClosePrompt] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(true);
+  const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
 
@@ -154,6 +157,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
     if (field === 'client_name') setCreatedFlags((prev) => ({ ...prev, client: false }));
     if (field === 'vehicle_plate') setCreatedFlags((prev) => ({ ...prev, vehicle: false }));
     if (field === 'driver_name') {
@@ -390,7 +394,24 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     }
   };
 
+  const validateTrip = () => {
+    const e = {};
+    if (!form.client_name?.trim()) e.client_name = 'Client is required';
+    if (!form.from_location?.trim()) e.from_location = 'From location is required';
+    if (!form.to_location?.trim()) e.to_location = 'To location is required';
+    if (!form.vehicle_plate?.trim()) e.vehicle_plate = 'Vehicle is required';
+    if (!form.driver_name?.trim()) e.driver_name = 'Driver is required';
+    if (!form.trip_date) e.trip_date = 'Trip date is required';
+    setErrors(e);
+    if (Object.keys(e).length > 0) {
+      toast({ title: 'Missing required fields', description: Object.values(e).join(' · '), variant: 'destructive' });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (mode === 'trip' && !editTrip && !validateTrip()) return;
     setSaving(true);
     try {
       if (mode === 'trip') {
@@ -509,7 +530,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   editContract ? t('edit_contract') : t('new_contract');
 
   const tripCtx = {
-    form, update, setRevenueOverride, t, inputCls,
+    form, update, setRevenueOverride, t, inputCls, errors,
     fromSuggestions, toSuggestions, vehicleSuggestions, driverSuggestions, clientSuggestions,
     serviceProviderVendors: vendors,
     allVehicles: vehicles, allDrivers: drivers,

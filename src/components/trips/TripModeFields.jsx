@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -28,7 +28,12 @@ export default function TripModeFields({ p }) {
     revenueOverridden, autoRevenue,
     serviceProviderVendors,
     allVehicles, allDrivers,
+    errors = {},
   } = p;
+
+  const errCls = (field) => errors[field] ? ' !border-red-500/70 !ring-2 !ring-red-500/30' : '';
+  const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
+  const loadIsPast = form.load_datetime && new Date(form.load_datetime) < todayMidnight;
 
   const selectedVehicle = allVehicles?.find((v) => v.plate_number === form.vehicle_plate);
   const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
@@ -51,8 +56,9 @@ export default function TripModeFields({ p }) {
       {/* Client */}
       <Section title={t('client')} icon={Building2} accent="30,215,96" delay={0}>
         <div>
-          <Label className="text-xs text-white/60 mb-1.5">{t('client')}</Label>
-          <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={inputCls} />
+          <Label className="text-xs text-white/60 mb-1.5">{t('client')} <span className="text-red-400">*</span></Label>
+          <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={`${inputCls}${errCls('client_name')}`} />
+          {errors.client_name && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.client_name}</p>}
           <datalist id="client-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
           {isNewClient && (
             <CreateNewCard label="client" value={form.client_name} created={createdFlags.client} loading={creating === 'client'}
@@ -81,14 +87,16 @@ export default function TripModeFields({ p }) {
       <Section title="Route" icon={RouteIcon} accent="16,185,129" delay={60}>
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('from')}</Label>
-            <IconInput icon={MapPin} list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={inputCls} />
+            <Label className="text-xs text-white/60 mb-1.5">{t('from')} <span className="text-red-400">*</span></Label>
+            <IconInput icon={MapPin} list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={`${inputCls}${errCls('from_location')}`} />
             <datalist id="from-suggestions">{fromSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
+            {errors.from_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.from_location}</p>}
           </div>
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('to')}</Label>
-            <IconInput icon={Flag} list="to-suggestions" value={form.to_location} onChange={(e) => update('to_location', e.target.value)} placeholder="Abu Dhabi" className={inputCls} />
+            <Label className="text-xs text-white/60 mb-1.5">{t('to')} <span className="text-red-400">*</span></Label>
+            <IconInput icon={Flag} list="to-suggestions" value={form.to_location} onChange={(e) => update('to_location', e.target.value)} placeholder="Abu Dhabi" className={`${inputCls}${errCls('to_location')}`} />
             <datalist id="to-suggestions">{toSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
+            {errors.to_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.to_location}</p>}
           </div>
         </div>
         <div>
@@ -96,8 +104,8 @@ export default function TripModeFields({ p }) {
           <TripTypeSelector value={form.trip_type} onChange={(v) => update('trip_type', v)} t={t} />
         </div>
         <div>
-          <Label className="text-xs text-white/60 mb-1.5">Trip #</Label>
-          <IconInput icon={Hash} value={form.trip_number || autoTripNumber} onChange={(e) => update('trip_number', e.target.value)} className={`${inputCls} font-mono text-xs`} />
+          <Label className="text-xs text-white/60 mb-1.5">Trip # <span className="text-white/30 font-normal">(max 20 chars)</span></Label>
+          <IconInput icon={Hash} value={form.trip_number || autoTripNumber} onChange={(e) => update('trip_number', e.target.value.slice(0, 20))} maxLength={20} className={`${inputCls} font-mono text-xs`} />
           {tripNumberOverridden && (
             <p className="text-[10px] text-red-400 font-semibold mt-1">⚠ Overwritten — auto value was {autoTripNumber}</p>
           )}
@@ -110,6 +118,9 @@ export default function TripModeFields({ p }) {
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Load Date &amp; Time</Label>
             <DateTimePicker value={form.load_datetime} onChange={(v) => update('load_datetime', v)} placeholder="Load time" />
+            {loadIsPast && (
+              <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Load date is in the past — please verify</p>
+            )}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Offload Date &amp; Time</Label>
@@ -163,9 +174,9 @@ export default function TripModeFields({ p }) {
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')} <span className="text-red-400">*</span></Label>
             <Select value={form.vehicle_plate || ''} onValueChange={(v) => update('vehicle_plate', v)}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+              <SelectTrigger className={`${inputCls}${errCls('vehicle_plate')}`}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
               <SelectContent>
                 {availableVehicles.map((v) => (
                   <SelectItem key={v.id} value={v.plate_number}>
@@ -177,11 +188,12 @@ export default function TripModeFields({ p }) {
             {vehicleIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
             )}
+            {errors.vehicle_plate && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.vehicle_plate}</p>}
           </div>
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('driver')}</Label>
+            <Label className="text-xs text-white/60 mb-1.5">{t('driver')} <span className="text-red-400">*</span></Label>
             <Select value={form.driver_name || ''} onValueChange={(v) => update('driver_name', v)}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select driver" /></SelectTrigger>
+              <SelectTrigger className={`${inputCls}${errCls('driver_name')}`}><SelectValue placeholder="Select driver" /></SelectTrigger>
               <SelectContent>
                 {availableDrivers.map((d) => (
                   <SelectItem key={d.id} value={d.name}>
@@ -193,6 +205,7 @@ export default function TripModeFields({ p }) {
             {driverIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
             )}
+            {errors.driver_name && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.driver_name}</p>}
           </div>
         </div>
         {/* Driver mobile number */}
