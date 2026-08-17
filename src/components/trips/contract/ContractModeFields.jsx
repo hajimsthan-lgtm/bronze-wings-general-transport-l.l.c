@@ -41,7 +41,7 @@ export default function ContractModeFields({ p }) {
       <Section title={t('contract_period')}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
-          <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} className={inputCls} />
+          <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} />
           <datalist id="contract-company-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
           {isNewClient && (
             <CreateNewCard label="client" value={contract.company_name} created={cCreatedFlags.company} loading={cCreating === 'company'}
