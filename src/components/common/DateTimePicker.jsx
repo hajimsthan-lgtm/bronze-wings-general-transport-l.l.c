@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CalendarIcon, Clock } from 'lucide-react';
+import { CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
 import { format, parse } from 'date-fns';
+import TimeWheelPicker from './TimeWheelPicker';
 
 const DATE_FMT = 'yyyy-MM-dd';
 const TIME_FMT = 'HH:mm';
@@ -23,12 +23,14 @@ function toValue(date, time) {
 
 export default function DateTimePicker({ value, onChange, placeholder = 'Pick date & time', disabled }) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState('date');
   const date = toDateTime(value);
   const timeStr = value ? value.split('T')[1] || '00:00' : '00:00';
 
   const handleDaySelect = (day) => {
     if (!day) return;
     onChange(toValue(day, timeStr));
+    setStep('time');
   };
 
   const handleTime = (t) => {
@@ -36,13 +38,24 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
     onChange(toValue(base, t));
   };
 
+  const handleTimeDone = () => {
+    setOpen(false);
+    setStep('date');
+  };
+
+  const handleOpenChange = (o) => {
+    setOpen(o);
+    if (!o) setStep('date');
+  };
+
   const setNow = () => {
     const now = new Date();
     onChange(toValue(now, format(now, TIME_FMT)));
+    setOpen(false);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -64,27 +77,37 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3 bg-card/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl" align="start">
-        <div className="flex justify-end mb-2">
-          <Button type="button" variant="ghost" size="sm" onClick={setNow} className="h-7 text-[11px] text-primary">
-            Now
-          </Button>
-        </div>
-        <Calendar
-          mode="single"
-          selected={date || undefined}
-          onSelect={handleDaySelect}
-          autoFocus
-          className="rounded-lg"
-        />
-        <div className="mt-2 flex items-center gap-2 px-1">
-          <Clock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          <Input
-            type="time"
-            value={timeStr}
-            onChange={e => handleTime(e.target.value)}
-            className="bg-background/50 border-border h-9 text-sm tabular-nums"
-          />
-        </div>
+        {step === 'date' ? (
+          <>
+            <div className="flex justify-end mb-2">
+              <Button type="button" variant="ghost" size="sm" onClick={setNow} className="h-7 text-[11px] text-primary">
+                Now
+              </Button>
+            </div>
+            <Calendar
+              mode="single"
+              selected={date || undefined}
+              onSelect={handleDaySelect}
+              autoFocus
+              className="rounded-lg"
+            />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setStep('date')} className="h-7 text-[11px] text-muted-foreground hover:text-foreground gap-1">
+                <ChevronLeft className="w-3.5 h-3.5" /> Date
+              </Button>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> Pick Time
+              </span>
+              <Button type="button" variant="ghost" size="sm" onClick={handleTimeDone} className="h-7 text-[11px] text-primary gap-1">
+                <Check className="w-3.5 h-3.5" /> Done
+              </Button>
+            </div>
+            <TimeWheelPicker value={timeStr} onChange={handleTime} onDone={handleTimeDone} />
+          </>
+        )}
       </PopoverContent>
     </Popover>
   );
