@@ -60,6 +60,23 @@ export default function TripModeFields({ p }) {
     : (allDrivers || []).filter((d) => !d.vendor_name)
   ).filter((d) => d.status === 'active' || d.name === form.driver_name);
 
+  // Bidirectional auto-link: driver ↔ vehicle based on assigned relationships
+  const handleDriverSelect = (driverName) => {
+    update('driver_name', driverName);
+    const driver = (allDrivers || []).find((d) => d.name === driverName);
+    if (driver?.assigned_vehicle && availableVehicles.some((v) => v.plate_number === driver.assigned_vehicle)) {
+      update('vehicle_plate', driver.assigned_vehicle);
+    }
+  };
+
+  const handleVehicleSelect = (plateNumber) => {
+    update('vehicle_plate', plateNumber);
+    const vehicle = (allVehicles || []).find((v) => v.plate_number === plateNumber);
+    if (vehicle?.assigned_driver && availableDrivers.some((d) => d.name === vehicle.assigned_driver)) {
+      update('driver_name', vehicle.assigned_driver);
+    }
+  };
+
   return (
     <>
       {/* Client */}
@@ -182,26 +199,10 @@ export default function TripModeFields({ p }) {
         )}
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')} <span className="text-red-400">*</span></Label>
-            <Select value={form.vehicle_plate || ''} onValueChange={(v) => update('vehicle_plate', v)}>
-              <SelectTrigger className={`${inputCls}${errCls('vehicle_plate')}`}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
-              <SelectContent>
-                {availableVehicles.map((v) => (
-                  <SelectItem key={v.id} value={v.plate_number}>
-                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {vehicleIsVendor && (
-              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
-            )}
-            {errors.vehicle_plate && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.vehicle_plate}</p>}
-          </div>
+          {/* Driver first — auto-selects assigned vehicle */}
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('driver')} <span className="text-red-400">*</span></Label>
-            <Select value={form.driver_name || ''} onValueChange={(v) => update('driver_name', v)}>
+            <Select value={form.driver_name || ''} onValueChange={handleDriverSelect}>
               <SelectTrigger className={`${inputCls}${errCls('driver_name')}`}><SelectValue placeholder="Select driver" /></SelectTrigger>
               <SelectContent>
                 {availableDrivers.map((d) => (
@@ -214,7 +215,31 @@ export default function TripModeFields({ p }) {
             {driverIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
             )}
+            {selectedDriver?.assigned_vehicle && availableVehicles.some((v) => v.plate_number === selectedDriver.assigned_vehicle) && (
+              <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">↳ Auto-selected assigned vehicle</p>
+            )}
             {errors.driver_name && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.driver_name}</p>}
+          </div>
+          {/* Vehicle second — auto-selects assigned driver */}
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')} <span className="text-red-400">*</span></Label>
+            <Select value={form.vehicle_plate || ''} onValueChange={handleVehicleSelect}>
+              <SelectTrigger className={`${inputCls}${errCls('vehicle_plate')}`}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+              <SelectContent>
+                {availableVehicles.map((v) => (
+                  <SelectItem key={v.id} value={v.plate_number}>
+                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {vehicleIsVendor && (
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
+            )}
+            {selectedVehicle?.assigned_driver && availableDrivers.some((d) => d.name === selectedVehicle.assigned_driver) && (
+              <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">↳ Auto-selected assigned driver</p>
+            )}
+            {errors.vehicle_plate && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.vehicle_plate}</p>}
           </div>
         </div>
         {/* Driver mobile number */}
