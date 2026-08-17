@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Plus, Store } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -34,6 +34,17 @@ export default function TripModeFields({ p }) {
   const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
   const vehicleIsVendor = !!selectedVehicle?.vendor_name;
   const driverIsVendor = !!selectedDriver?.vendor_name;
+
+  // Strict data separation: company vs vendor vehicles/drivers, filtered to active status
+  const availableVehicles = (form.assignment_mode === 'vendor'
+    ? (allVehicles || []).filter((v) => v.vendor_name === form.vendor_name)
+    : (allVehicles || []).filter((v) => !v.vendor_name)
+  ).filter((v) => v.status === 'active' || v.plate_number === form.vehicle_plate);
+
+  const availableDrivers = (form.assignment_mode === 'vendor'
+    ? (allDrivers || []).filter((d) => d.vendor_name === form.vendor_name)
+    : (allDrivers || []).filter((d) => !d.vendor_name)
+  ).filter((d) => d.status === 'active' || d.name === form.driver_name);
 
   return (
     <>
@@ -153,40 +164,34 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')}</Label>
-            <IconInput icon={Truck} list="vehicle-suggestions" value={form.vehicle_plate} onChange={(e) => update('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
-            <datalist id="vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
+            <Select value={form.vehicle_plate || ''} onValueChange={(v) => update('vehicle_plate', v)}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+              <SelectContent>
+                {availableVehicles.map((v) => (
+                  <SelectItem key={v.id} value={v.plate_number}>
+                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {vehicleIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
-            )}
-            {isNewVehicle && form.assignment_mode === 'vendor' && form.vendor_name && (
-              <button type="button" onClick={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—', vendor_name: form.vendor_name }, 'vehicle')}
-                disabled={creating === 'vehicle'}
-                className="text-[10px] text-primary hover:text-primary-light mt-1 inline-flex items-center gap-1 transition-colors">
-                <Plus className="w-3 h-3" /> Add new vehicle under {form.vendor_name}
-              </button>
-            )}
-            {isNewVehicle && form.assignment_mode === 'company' && (
-              <CreateNewCard label="vehicle" value={form.vehicle_plate} created={createdFlags.vehicle} loading={creating === 'vehicle'}
-                onCreate={() => createEntity('Vehicle', { plate_number: form.vehicle_plate, make: '—', model: '—' }, 'vehicle')} />
             )}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('driver')}</Label>
-            <IconInput icon={User} list="driver-suggestions" value={form.driver_name} onChange={(e) => update('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
-            <datalist id="driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
+            <Select value={form.driver_name || ''} onValueChange={(v) => update('driver_name', v)}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select driver" /></SelectTrigger>
+              <SelectContent>
+                {availableDrivers.map((d) => (
+                  <SelectItem key={d.id} value={d.name}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {driverIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
-            )}
-            {isNewDriver && form.assignment_mode === 'vendor' && form.vendor_name && (
-              <button type="button" onClick={() => createEntity('Driver', { name: form.driver_name, phone: '—', vendor_name: form.vendor_name }, 'driver')}
-                disabled={creating === 'driver'}
-                className="text-[10px] text-primary hover:text-primary-light mt-1 inline-flex items-center gap-1 transition-colors">
-                <Plus className="w-3 h-3" /> Add new driver under {form.vendor_name}
-              </button>
-            )}
-            {isNewDriver && form.assignment_mode === 'company' && (
-              <CreateNewCard label="driver" value={form.driver_name} created={createdFlags.driver} loading={creating === 'driver'}
-                onCreate={() => createEntity('Driver', { name: form.driver_name, phone: form.driver_phone || '—' }, 'driver')} />
             )}
           </div>
         </div>

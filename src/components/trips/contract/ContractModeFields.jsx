@@ -24,9 +24,16 @@ export default function ContractModeFields({ p }) {
     cCreatedFlags, cCreating, createContractEntity,
     expenses, expenseForm, setExpenseForm, addExpense, removeExpense,
     activeCat, setActiveCat, catTotals,
+    allVehicles, allDrivers,
   } = p;
 
   const activeMeta = CONTRACT_CATS.find((c) => c.key === activeCat) || CONTRACT_CATS[0];
+
+  // Company fleet only — strict separation from vendor vehicles/drivers
+  const availableVehicles = (allVehicles || [])
+    .filter((v) => !v.vendor_name && (v.status === 'active' || v.plate_number === contract.vehicle_plate));
+  const availableDrivers = (allDrivers || [])
+    .filter((d) => !d.vendor_name && (d.status === 'active' || d.name === contract.driver_name));
 
   return (
     <>
@@ -130,21 +137,29 @@ export default function ContractModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('chiller_van')}</Label>
-            <Input list="contract-vehicle-suggestions" value={contract.vehicle_plate} onChange={(e) => updateContract('vehicle_plate', e.target.value)} placeholder="A 12345" className={inputCls} />
-            <datalist id="contract-vehicle-suggestions">{vehicleSuggestions.map((v) => <option key={v} value={v} />)}</datalist>
-            {isNewVehicle && (
-              <CreateNewCard label="vehicle" value={contract.vehicle_plate} created={cCreatedFlags.vehicle} loading={cCreating === 'vehicle'}
-                onCreate={() => createContractEntity('Vehicle', { plate_number: contract.vehicle_plate, make: '—', model: '—' }, 'vehicle')} />
-            )}
+            <Select value={contract.vehicle_plate || ''} onValueChange={(v) => updateContract('vehicle_plate', v)}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+              <SelectContent>
+                {availableVehicles.map((v) => (
+                  <SelectItem key={v.id} value={v.plate_number}>
+                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('assigned_driver')}</Label>
-            <Input list="contract-driver-suggestions" value={contract.driver_name} onChange={(e) => updateContract('driver_name', e.target.value)} placeholder="Ahmed" className={inputCls} />
-            <datalist id="contract-driver-suggestions">{driverSuggestions.map((d) => <option key={d} value={d} />)}</datalist>
-            {isNewDriver && (
-              <CreateNewCard label="driver" value={contract.driver_name} created={cCreatedFlags.driver} loading={cCreating === 'driver'}
-                onCreate={() => createContractEntity('Driver', { name: contract.driver_name, phone: '—' }, 'driver')} />
-            )}
+            <Select value={contract.driver_name || ''} onValueChange={(v) => updateContract('driver_name', v)}>
+              <SelectTrigger className={inputCls}><SelectValue placeholder="Select driver" /></SelectTrigger>
+              <SelectContent>
+                {availableDrivers.map((d) => (
+                  <SelectItem key={d.id} value={d.name}>
+                    {d.name}{d.phone ? ` · ${d.phone}` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </Section>

@@ -530,7 +530,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     isNewClient: cIsNewClient, isNewVehicle: cIsNewVehicle, isNewDriver: cIsNewDriver,
     cCreatedFlags, cCreating, createContractEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, true),
     expenses, expenseForm, setExpenseForm, addExpense, removeExpense,
-    activeCat, setActiveCat, catTotals
+    activeCat, setActiveCat, catTotals,
+    allVehicles: vehicles, allDrivers: drivers
   };
 
   return (
