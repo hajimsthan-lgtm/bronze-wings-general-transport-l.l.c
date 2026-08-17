@@ -563,6 +563,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
@@ -660,7 +661,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Footer */}
         <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border gap-2 h-9">
+          <Button variant="outline" onClick={handleCloseAttempt} className="border-border gap-2 h-9">
             <X className="w-4 h-4" />
             <span className="hidden sm:inline">{t('cancel')}</span>
           </Button>
@@ -679,38 +680,40 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           </Button>
         </div>
       </DialogContent>
+      </Dialog>
 
-      {/* Close prompt — save draft before closing? */}
+      {/* Close prompt — save draft before closing? (outside Dialog to avoid focus-trap conflict) */}
       <AlertDialog open={showClosePrompt} onOpenChange={setShowClosePrompt}>
-        <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-primary/25">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-foreground">
-              <FileQuestion className="w-5 h-5 text-primary" />
-              Save as draft before closing?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              You have unsaved progress. Save as a draft to continue later, or discard it.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="border-border">Keep editing</AlertDialogCancel>
-            <Button
-              variant="outline"
-              onClick={() => { setShowClosePrompt(false); onOpenChange(false); }}
-              className="border-destructive/30 text-destructive hover:bg-destructive/10"
-            >
-              Discard
-            </Button>
-            <AlertDialogAction
-              onClick={async () => { setShowClosePrompt(false); await handleSaveDraft(); }}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
-            >
-              <Save className="w-4 h-4" />
-              Save Draft
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+      <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-primary/25">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2 text-foreground">
+            <FileQuestion className="w-5 h-5 text-primary" />
+            Save as draft before closing?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
+            You have unsaved progress. Save as a draft to continue later, or discard it.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="border-border">Keep editing</AlertDialogCancel>
+          <Button
+            variant="outline"
+            onClick={() => { setShowClosePrompt(false); onOpenChange(false); }}
+            className="border-destructive/30 text-destructive hover:bg-destructive/10"
+          >
+            Discard
+          </Button>
+          <AlertDialogAction
+            onClick={async () => { setShowClosePrompt(false); await handleSaveDraft(); }}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+          >
+            <Save className="w-4 h-4" />
+            Save Draft
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
       </AlertDialog>
-    </Dialog>);
+      </>
+      );
 
-}
+      }
