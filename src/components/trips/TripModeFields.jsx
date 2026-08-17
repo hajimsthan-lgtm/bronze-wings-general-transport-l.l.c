@@ -35,6 +35,15 @@ export default function TripModeFields({ p }) {
   const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
   const loadIsPast = form.load_datetime && new Date(form.load_datetime) < todayMidnight;
 
+  // Sanitizers — strip dangerous/invalid characters before they reach state
+  const sanitizePlain = (v) => v.replace(/[<>]/g, '').slice(0, 100);
+  const sanitizePhone = (v) => v.replace(/[^0-9+\-\s()]/g, '').slice(0, 20);
+  const sanitizeDistance = (v) => {
+    if (v === '' || v === '-') return '';
+    const n = Math.max(0, Number(v) || 0);
+    return Number.isFinite(n) && n > 0 ? String(n) : '';
+  };
+
   const selectedVehicle = allVehicles?.find((v) => v.plate_number === form.vehicle_plate);
   const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
   const vehicleIsVendor = !!selectedVehicle?.vendor_name;
@@ -88,13 +97,13 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('from')} <span className="text-red-400">*</span></Label>
-            <IconInput icon={MapPin} list="from-suggestions" value={form.from_location} onChange={(e) => update('from_location', e.target.value)} placeholder="Dubai" className={`${inputCls}${errCls('from_location')}`} />
+            <IconInput icon={MapPin} list="from-suggestions" dir="auto" value={form.from_location} onChange={(e) => update('from_location', sanitizePlain(e.target.value))} placeholder="Dubai" className={`${inputCls}${errCls('from_location')}`} />
             <datalist id="from-suggestions">{fromSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
             {errors.from_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.from_location}</p>}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('to')} <span className="text-red-400">*</span></Label>
-            <IconInput icon={Flag} list="to-suggestions" value={form.to_location} onChange={(e) => update('to_location', e.target.value)} placeholder="Abu Dhabi" className={`${inputCls}${errCls('to_location')}`} />
+            <IconInput icon={Flag} list="to-suggestions" dir="auto" value={form.to_location} onChange={(e) => update('to_location', sanitizePlain(e.target.value))} placeholder="Abu Dhabi" className={`${inputCls}${errCls('to_location')}`} />
             <datalist id="to-suggestions">{toSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
             {errors.to_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.to_location}</p>}
           </div>
@@ -211,7 +220,7 @@ export default function TripModeFields({ p }) {
         {/* Driver mobile number */}
         <div>
           <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><User className="w-3 h-3" /> Driver Mobile Number</Label>
-          <IconInput icon={User} type="tel" value={form.driver_phone || ''} onChange={(e) => update('driver_phone', e.target.value)} placeholder="+971 50 123 4567" className={inputCls} />
+          <IconInput icon={User} type="tel" inputMode="tel" value={form.driver_phone || ''} onChange={(e) => update('driver_phone', sanitizePhone(e.target.value))} placeholder="+971 50 123 4567" className={inputCls} />
           {selectedDriver?.phone && selectedDriver.phone !== '—' && (
             <p className="text-[10px] text-emerald-400 mt-1">Auto-filled from driver profile</p>
           )}
@@ -235,11 +244,11 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
-            <IconInput icon={FileText} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', e.target.value)} className={inputCls} />
+            <IconInput icon={FileText} maxLength={50} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', sanitizePlain(e.target.value))} className={inputCls} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('distance')}</Label>
-            <IconInput icon={Ruler} type="number" value={form.distance_km} onChange={(e) => update('distance_km', e.target.value)} className={inputCls} />
+            <IconInput icon={Ruler} type="number" min="0" inputMode="decimal" value={form.distance_km} onChange={(e) => update('distance_km', sanitizeDistance(e.target.value))} className={inputCls} />
           </div>
         </div>
         {form.trip_type === 'return' && (

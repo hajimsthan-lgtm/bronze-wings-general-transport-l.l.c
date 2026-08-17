@@ -396,9 +396,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const validateTrip = () => {
     const e = {};
+    const hasAlphaNum = (s) => /[a-zA-Z0-9\u0600-\u06FF]/.test(s || '');
     if (!form.client_name?.trim()) e.client_name = 'Client is required';
     if (!form.from_location?.trim()) e.from_location = 'From location is required';
+    else if (!hasAlphaNum(form.from_location)) e.from_location = 'Enter a valid location name';
     if (!form.to_location?.trim()) e.to_location = 'To location is required';
+    else if (!hasAlphaNum(form.to_location)) e.to_location = 'Enter a valid location name';
     if (!form.vehicle_plate?.trim()) e.vehicle_plate = 'Vehicle is required';
     if (!form.driver_name?.trim()) e.driver_name = 'Driver is required';
     if (!form.trip_date) e.trip_date = 'Trip date is required';
