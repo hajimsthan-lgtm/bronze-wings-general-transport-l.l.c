@@ -264,6 +264,10 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     }
   }, []);
 
+  const handleSelectFrom = useCallback((v) => setForm((prev) => ({ ...prev, from_location: v })), []);
+  const handleSelectTo = useCallback((v) => setForm((prev) => ({ ...prev, to_location: v })), []);
+  const handleToggleMapCollapse = useCallback(() => setMapCollapsed((prev) => !prev), []);
+
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -617,12 +621,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
                 <TripMapPanel
                   from={form.from_location}
                   to={form.to_location}
-                  onSelectFrom={(v) => update('from_location', v)}
-                  onSelectTo={(v) => update('to_location', v)}
+                  onSelectFrom={handleSelectFrom}
+                  onSelectTo={handleSelectTo}
                   onRouteInfo={handleRouteInfo}
                   tripType={form.trip_type}
                   collapsed={mapCollapsed}
-                  onToggleCollapse={() => setMapCollapsed(!mapCollapsed)}
+                  onToggleCollapse={handleToggleMapCollapse}
                 />
               </div>
             )}

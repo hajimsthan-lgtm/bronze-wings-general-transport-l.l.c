@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Navigation, MapPin, Search, Loader2, X, LocateFixed, Plus, AlertTriangle, Flag, ChevronDown } from 'lucide-react';
@@ -89,7 +89,7 @@ function FitBounds({ fitCoords }) {
   return null;
 }
 
-export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRouteInfo, tripType, collapsed = false, onToggleCollapse }) {
+function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRouteInfo, tripType, collapsed = false, onToggleCollapse }) {
   const [active, setActive] = useState('from');
   const [fromCoord, setFromCoord] = useState(null);
   const [toCoord, setToCoord] = useState(null);
@@ -354,8 +354,9 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
         )}
       </div>
 
-      {!collapsed && (
-      <div className="relative" style={{ height: 300 }}>
+      {/* Map stays mounted to avoid expensive Leaflet re-init on every expand/collapse.
+          Height transitions smoothly instead of conditional mount/unmount. */}
+      <div className={cn("relative overflow-hidden transition-[height] duration-200", collapsed ? "h-0" : "h-[300px]")}>
         <MapContainer center={DEFAULT_CENTER} zoom={11} className="w-full h-full" ref={refCb} zoomControl>
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -431,7 +432,8 @@ export default function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRou
           </div>
         )}
       </div>
-      )}
     </div>
   );
 }
+
+export default memo(TripMapPanel);
