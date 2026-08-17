@@ -68,10 +68,28 @@ function docStatus(expiry) {
  * @returns {{alerts: [], byCategory: {}}}
  */
 export function buildAlerts(data) {
-  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [] } = data;
+  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [], companyDocuments = [] } = data;
   const items = [];
 
   // ── Documents & Expiry ──────────────────────────────────────
+  // Company-level compliance documents (60-day alert window, escalating severity)
+  companyDocuments.forEach((d) => {
+    const days = daysUntil(d.expiry_date);
+    if (days === null) return;
+    if (days <= 60) {
+      items.push({
+        id: `cdoc-${d.id}`,
+        category: 'documents',
+        icon: 'FileWarning',
+        severity: (days < 0 || days <= 7) ? 'critical' : 'warning',
+        title: days < 0 ? 'Company Document Expired' : 'Company Document Expiring',
+        sub: d.document_type || '—',
+        meta: days < 0 ? `${Math.abs(days)}d ago` : `${days}d left`,
+        to: `/admin/company-documents?focus=${d.id}`,
+      });
+    }
+  });
+
   // Standalone documents (entity-attached)
   documents.forEach((d) => {
     const st = d.status || docStatus(d.expiry_date);

@@ -36,15 +36,16 @@ export default function AlertBell() {
 
   useEffect(() => {
     (async () => {
-      const [invoices, vehicles, documents, drivers, trips, clientPayments] = await safeAll([
+      const [invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments] = await safeAll([
         () => base44.entities.Invoice.list('-created_date', 80).catch(() => []),
         () => base44.entities.Vehicle.list().catch(() => []),
         () => base44.entities.Document.list().catch(() => []),
         () => base44.entities.Driver.list().catch(() => []),
         () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
         () => base44.entities.ClientPayment.list('-created_date', 50).catch(() => []),
+        () => base44.entities.CompanyDocument.list().catch(() => []),
       ], 1);
-      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments }));
+      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments }));
     })();
   }, []);
 

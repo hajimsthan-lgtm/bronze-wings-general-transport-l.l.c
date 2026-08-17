@@ -48,6 +48,7 @@ const DriverDetail = lazy(() => import('@/pages/admin/DriverDetail'));
 const ClientDetail = lazy(() => import('@/pages/admin/ClientDetail'));
 const VendorDetail = lazy(() => import('@/pages/admin/VendorDetail'));
 const Vendors = lazy(() => import('@/pages/admin/Vendors'));
+const CompanyDocuments = lazy(() => import('@/pages/admin/CompanyDocuments'));
 const ServiceProviderDetail = lazy(() => import('@/pages/admin/ServiceProviderDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/drivers" element={<Drivers />} />
           <Route path="/admin/clients" element={<Clients />} />
           <Route path="/admin/vendors" element={<Vendors />} />
+          <Route path="/admin/company-documents" element={<CompanyDocuments />} />
           <Route path="/admin/documents" element={<Documents />} />
           <Route path="/admin/salary" element={<Salary />} />
           <Route path="/maintenance" element={<Maintenance />} />

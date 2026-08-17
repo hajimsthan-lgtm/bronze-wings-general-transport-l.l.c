@@ -3,13 +3,13 @@
 import {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
-  Files, FilePlus2, FileSignature, Bot, Sparkles,
+  Files, FilePlus2, FileSignature, Bot, Sparkles, Award,
 } from 'lucide-react';
 
 const ICONS = {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
-  Files, FilePlus2, FileSignature, Bot, Sparkles,
+  Files, FilePlus2, FileSignature, Bot, Sparkles, Award,
 };
 
 export const navItems = [
@@ -29,6 +29,7 @@ export const navItems = [
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
       { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
+      { key: 'company_documents', label: 'Company Docs', path: '/admin/company-documents', icon: 'Award', color: '#06b6d4' },
     ],
   },
   {
