@@ -29,7 +29,6 @@ export const navItems = [
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
       { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
-      { key: 'company_documents', label: 'Company Docs', path: '/admin/company-documents', icon: 'Award', color: '#06b6d4' },
     ],
   },
   {
@@ -50,9 +49,10 @@ export const navItems = [
   {
     key: 'documents', label: 'Documents', icon: 'Files', color: '#06b6d4',
     children: [
-      { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: 'FilePlus2', color: '#06b6d4' },
       { key: 'invoices', label: 'Invoices', path: '/accounts/invoices', icon: 'FileText', color: '#22c55e' },
+      { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: 'FilePlus2', color: '#06b6d4' },
       { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: 'FileSignature', color: '#eab308' },
+      { key: 'company_documents', label: 'Bronze Docs', path: '/admin/company-documents', icon: 'Award', color: '#f59e0b' },
     ],
   },
 ];
