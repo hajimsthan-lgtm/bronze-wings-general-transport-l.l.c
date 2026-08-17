@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { getCompanySettings } from './companySettings';
 import { downloadInvoicePDF } from './invoiceHtml';
+import { hasArabicText, renderCellToImage } from './pdfArabicRenderer';
 
 export function exportToCSV(data, filename, columns) {
   const escape = (val, isNumeric) => {
@@ -113,7 +114,13 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
       } else if (c.key === 'status') {
         return { lines: [String(val)], isStatus: true };
       } else {
-        return { lines: doc.splitTextToSize(String(val), colW - GEN_PAD * 2) };
+        const strVal = String(val);
+        const maxW = colW - GEN_PAD * 2;
+        if (hasArabicText(strVal)) {
+          const { dataUrl, linesCount } = renderCellToImage(strVal, 7.5, maxW, GEN_LINE_H, [30, 30, 30]);
+          return { lines: new Array(linesCount), isImage: true, dataUrl };
+        }
+        return { lines: doc.splitTextToSize(strVal, maxW) };
       }
     });
     const maxLines = Math.max(...cells.map((c) => c.lines.length));
@@ -139,6 +146,10 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
         doc.circle(margin + i * colW + GEN_PAD + 0.8, baselineY - 0.8, 0.8, 'F');
         doc.setTextColor(30, 30, 30);
         doc.text(cell.lines[0], margin + i * colW + GEN_PAD + 3.5, baselineY);
+      } else if (cell.isImage) {
+        const imgW = colW - GEN_PAD * 2;
+        const imgH = cell.lines.length * GEN_LINE_H;
+        doc.addImage(cell.dataUrl, 'PNG', margin + i * colW + GEN_PAD, y, imgW, imgH);
       } else {
         cell.lines.forEach((line, li) => {
           doc.text(line, margin + i * colW + GEN_PAD, baselineY + li * GEN_LINE_H);
@@ -300,6 +311,7 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
 
     // Subsequent rows: Deduction (instalment repaid via salary) — red
     let running = total;
+    instalments.sort((a, b) => new Date(a.appliedDate || 0) - new Date(b.appliedDate || 0));
     instalments.forEach((inst) => {
       running -= inst.amountApplied;
       rows.push({
@@ -316,11 +328,22 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
     });
   }
 
+  // Sort rows chronologically by date (Adding before Deduction on same date)
+  rows.sort((a, b) => {
+    const dA = new Date(a.date || 0);
+    const dB = new Date(b.date || 0);
+    if (dA < dB) return -1;
+    if (dA > dB) return 1;
+    if (a.txnType === 'Adding' && b.txnType !== 'Adding') return -1;
+    if (a.txnType !== 'Adding' && b.txnType === 'Adding') return 1;
+    return 0;
+  });
+
   // ── Column definitions (ledger style) ──────────────────────────────────────
   const cols = [
     { label: 'Date', key: 'date', w: 20 },
-    { label: 'Ref', key: 'refId', w: 14 },
-    { label: 'Description', key: 'description', w: 40 },
+    { label: 'Ref', key: 'refId', w: 18, noWrap: true },
+    { label: 'Description', key: 'description', w: 36 },
     { label: 'Type', key: 'type', w: 18 },
     { label: 'Txn', key: 'txnType', w: 16 },
     { label: 'Method', key: 'method', w: 16 },
@@ -364,9 +387,16 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
       if (c.numeric) {
         const num = Number(val);
         return { lines: [isNaN(num) ? '-' : num.toFixed(2)], numeric: true };
+      } else if (c.noWrap) {
+        return { lines: [String(val)], noWrap: true };
       } else {
         const maxW = c.sw - ROW_PAD * 2;
-        const lines = doc.splitTextToSize(String(val), maxW);
+        const strVal = String(val);
+        if (hasArabicText(strVal)) {
+          const { dataUrl, linesCount } = renderCellToImage(strVal, 6.5, maxW, LINE_H, [30, 30, 30]);
+          return { lines: new Array(linesCount), isImage: true, dataUrl };
+        }
+        const lines = doc.splitTextToSize(strVal, maxW);
         return { lines };
       }
     });
@@ -413,6 +443,12 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
           doc.text(cell.lines[0], x + c.sw - ROW_PAD, cellY, { align: 'right' });
           doc.setTextColor(30, 30, 30);
         }
+      } else if (cell.isImage) {
+        const imgW = c.sw - ROW_PAD * 2;
+        const imgH = cell.lines.length * LINE_H;
+        doc.addImage(cell.dataUrl, 'PNG', x + ROW_PAD, y, imgW, imgH);
+      } else if (cell.noWrap) {
+        doc.text(cell.lines[0], x + ROW_PAD, cellY);
       } else {
         cell.lines.forEach((line, li) => {
           doc.text(line, x + ROW_PAD, cellY + li * LINE_H);
