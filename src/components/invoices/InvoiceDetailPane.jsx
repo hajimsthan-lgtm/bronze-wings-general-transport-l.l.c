@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import {
   ExternalLink, Paperclip, FileDown, Loader2, Pencil, Trash2,
-  CheckCircle2, Plus, FileText, Download,
+  CheckCircle2, Plus, FileText, Download, Eye, Upload, FileSignature, PenLine,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import IconChip from '@/components/common/IconChip';
@@ -37,6 +37,9 @@ export default function InvoiceDetailPane({
   onStatusChangeRequest,
   downloadingId,
   uploadingId,
+  signedDocs,
+  onViewSigned,
+  onDownloadSigned,
 }) {
   const fileRef = useRef(null);
 
@@ -83,6 +86,9 @@ export default function InvoiceDetailPane({
                 <h3 className="text-base font-bold text-foreground font-mono">{inv.invoice_number || '—'}</h3>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${STATUS_PILL[inv.status] || STATUS_PILL.draft}`}>
                   {STATUS_LABEL[inv.status] || inv.status}
+                </span>
+                <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${isSigned ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500/80 border-amber-500/20'}`}>
+                  {isSigned ? <><FileSignature className="w-2.5 h-2.5" /> Signed</> : <><PenLine className="w-2.5 h-2.5" /> Unsigned</>}
                 </span>
               </div>
               <button
@@ -136,13 +142,68 @@ export default function InvoiceDetailPane({
           )}
         </div>
 
-        {/* Signed invoice */}
-        {isSigned && (
-          <div className="mb-4 flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-            <span className="text-xs text-emerald-600">Signed invoice attached</span>
-          </div>
-        )}
+        {/* Signed Document Section */}
+        <div className="mb-5">
+          <p className="eyebrow mb-3">Signature Status</p>
+          {isSigned ? (
+            <div className="space-y-2">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileSignature className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    <span className="text-xs font-semibold text-emerald-600 truncate">
+                      {signedDocs?.[0]?.file_name || 'Signed document'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                    {inv.signed_date || '—'}{inv.signed_uploaded_by ? ` · ${inv.signed_uploaded_by}` : ''}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onViewSigned?.(inv)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    <Eye className="w-3 h-3" /> View
+                  </button>
+                  <button
+                    onClick={() => onDownloadSigned?.(inv)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> Download
+                  </button>
+                </div>
+              </div>
+              {signedDocs && signedDocs.length > 1 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider px-1">Version History</p>
+                  {signedDocs.map((doc, i) => (
+                    <div key={doc.id} className="flex items-center justify-between gap-2 text-[11px] py-1.5 px-2.5 rounded-lg bg-muted/20">
+                      <span className="text-muted-foreground flex-shrink-0">v{signedDocs.length - i}</span>
+                      <span className="text-muted-foreground truncate flex-1">{doc.file_name || '—'}</span>
+                      <span className="text-muted-foreground flex-shrink-0">{doc.upload_date || '—'}</span>
+                      <button
+                        onClick={() => onViewSigned?.({ signed_invoice_url: doc.file_url })}
+                        className="text-primary hover:underline flex-shrink-0"
+                      >
+                        View
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={isUploading}
+              className="w-full rounded-xl border border-dashed border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-center gap-2 text-xs font-semibold text-amber-600 hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+            >
+              {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {isUploading ? 'Uploading...' : 'Upload Signed Copy'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Footer: totals */}

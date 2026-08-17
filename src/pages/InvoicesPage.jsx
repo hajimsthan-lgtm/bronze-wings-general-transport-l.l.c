@@ -63,6 +63,8 @@ export default function InvoicesPage() {
   const [bulkPaymentModal, setBulkPaymentModal] = useState(false);
   const [cancelModal, setCancelModal] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [signedDocs, setSignedDocs] = useState([]);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
@@ -73,6 +75,7 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then(setClients);
+    base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const handleClientClick = (clientName) => {
@@ -221,8 +224,24 @@ export default function InvoicesPage() {
     setUploadingId(inv.id);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const today = new Date().toISOString().split('T')[0];
-      await base44.entities.Invoice.update(inv.id, { signed_invoice_url: file_url, signed_date: today });
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const uploadedBy = currentUser?.full_name || currentUser?.email || '—';
+      await base44.entities.Invoice.update(inv.id, {
+        signed_invoice_url: file_url,
+        signed_date: today,
+        signed_uploaded_by: uploadedBy,
+      });
+      await base44.entities.SignedDocument.create({
+        invoice_id: inv.id,
+        invoice_number: inv.invoice_number,
+        client_name: inv.client_name,
+        file_url: file_url,
+        file_name: file.name,
+        uploaded_by: uploadedBy,
+        upload_date: today,
+        upload_datetime: now.toISOString(),
+      });
       const client = clients.find(c => c.name === inv.client_name);
       if (client) {
         await base44.entities.Document.create({
@@ -241,6 +260,23 @@ export default function InvoicesPage() {
     } finally {
       setUploadingId(null);
     }
+  };
+
+  const handleViewSigned = (inv) => {
+    const url = inv.signed_invoice_url || inv.file_url;
+    if (url) window.open(url, '_blank');
+  };
+
+  const handleDownloadSigned = (inv) => {
+    const url = inv.signed_invoice_url || inv.file_url;
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Signed_${inv.invoice_number || 'invoice'}`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const handleBulkStatusChange = async () => {
@@ -400,6 +436,12 @@ export default function InvoicesPage() {
   const selectedInvoice = filtered.find(i => i.id === selectedId) || baseFiltered.find(i => i.id === selectedId) || null;
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
+  useEffect(() => {
+    if (!selectedInvoice) { setSignedDocs([]); return; }
+    base44.entities.SignedDocument.filter({ invoice_id: selectedInvoice.id }, '-upload_date', 50)
+      .then(setSignedDocs).catch(() => setSignedDocs([]));
+  }, [selectedInvoice?.id]);
+
   const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
 
   const handleSelectRow = (id) => {
@@ -555,6 +597,9 @@ export default function InvoicesPage() {
               onStatusChangeRequest={handleStatusChangeRequest}
               downloadingId={downloadingId}
               uploadingId={uploadingId}
+              signedDocs={signedDocs}
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
             />
           </div>
         </div>
@@ -583,6 +628,9 @@ export default function InvoicesPage() {
               onStatusChangeRequest={handleStatusChangeRequest}
               downloadingId={downloadingId}
               uploadingId={uploadingId}
+              signedDocs={signedDocs}
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
             />
           </div>
         </SheetContent>

@@ -177,11 +177,16 @@ export default function InvoiceListPane({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground">{inv.invoice_number || '—'}</span>
-                      {/* Signed indicator */}
-                      {inv.signed_invoice_url && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/20" title={`Signed ${inv.signed_date || ''}`}>
+                      {/* Signature status badge */}
+                      {inv.signed_invoice_url ? (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/20" title={`Signed ${inv.signed_date || ''}${inv.signed_uploaded_by ? ' by ' + inv.signed_uploaded_by : ''}`}>
                           <FileSignature className="w-2.5 h-2.5" />
                           Signed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-amber-500/10 text-amber-500/80 border-amber-500/20">
+                          <PenLine className="w-2.5 h-2.5" />
+                          Unsigned
                         </span>
                       )}
                     </div>
