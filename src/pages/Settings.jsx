@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -16,6 +16,7 @@ import DisplaySettingsCard from '@/components/settings/DisplaySettingsCard';
 import SoundSettingsCard from '@/components/settings/SoundSettingsCard';
 import StorageSettingsCard from '@/components/settings/StorageSettingsCard';
 import UsersManagementCard from '@/components/settings/UsersManagementCard';
+import LogoutCard from '@/components/settings/LogoutCard';
 
 export default function Settings() {
   const { language, toggleLanguage } = useI18n();
@@ -82,6 +83,7 @@ export default function Settings() {
       </Link>
     ) },
     { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
+    { key: 'logout', label: 'Log out', icon: LogOut, render: () => <LogoutCard /> },
     { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => (
       <div className="space-y-6">
         <DangerZone deleting={deleting} onDelete={handleDelete} user={user} />

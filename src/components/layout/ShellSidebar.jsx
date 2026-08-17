@@ -66,8 +66,8 @@ export default function ShellSidebar({ query = '' }) {
             </div>
           }
           <div className="leading-tight">
-            <span className="block text-[15px] font-bold tracking-tight [font-family:'Abril_Fatface',_system-ui]" style={{ color: '#000000' }}>Bronze Wings</span>
-            <span className="block text-[10px] font-semibold tracking-tight mt-0.5" style={{ color: '#2563eb' }}>General Transport L.L.C</span>
+            <span className="block text-[15px] font-bold tracking-tight [font-family:'Abril_Fatface',_system-ui]" style={{ color: 'hsl(var(--foreground))' }}>Bronze Wings</span>
+            <span className="block text-[10px] font-semibold tracking-tight mt-0.5" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>General Transport L.L.C</span>
           </div>
         </Link>
       </div>
@@ -103,7 +103,7 @@ export default function ShellSidebar({ query = '' }) {
                   style={active ? { background: c, color: readableOn(c) } : undefined}>
                   
                     <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
-                    <span className="truncate text-[#000000]">{label}</span>
+                    <span className="truncate">{label}</span>
                   </button>);
 
             })}
