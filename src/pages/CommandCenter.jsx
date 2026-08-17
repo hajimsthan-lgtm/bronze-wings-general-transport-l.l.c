@@ -30,6 +30,7 @@ export default function CommandCenter() {
   const [documents, setDocuments] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [user, setUser] = useState(null);
   const [range, setRange] = useState('30D');
   const [dateFrom, setDateFrom] = useState('');
@@ -37,15 +38,16 @@ export default function CommandCenter() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const loadData = useCallback(async () => {
-    const [tr, inv, v, d, e, dr] = await safeListAll([
+    const [tr, inv, v, d, e, dr, cl] = await safeListAll([
       () => base44.entities.Trip.list('-created_date', 50).catch(() => []),
       () => base44.entities.Invoice.list('-created_date', 50).catch(() => []),
       () => base44.entities.Vehicle.list().catch(() => []),
       () => base44.entities.Document.list().catch(() => []),
       () => base44.entities.Expense.list('-created_date', 50).catch(() => []),
-      () => base44.entities.Driver.list().catch(() => [])
+      () => base44.entities.Driver.list().catch(() => []),
+      () => base44.entities.Client.list().catch(() => [])
     ]);
-    setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e); setDrivers(dr);
+    setTrips(tr); setInvoices(inv); setVehicles(v); setDocuments(d); setExpenses(e); setDrivers(dr); setClients(cl);
   }, []);
 
   useEffect(() => {
@@ -200,6 +202,8 @@ export default function CommandCenter() {
         setDateFrom={setDateFrom}
         setDateTo={setDateTo}
         alertCount={allAlerts.length}
+        alerts={allAlerts}
+        searchData={{ trips, invoices, drivers, clients }}
         user={user}
       />
       <main className="max-w-[1600px] mx-auto px-6 py-6 space-y-6">

@@ -6,9 +6,9 @@ import { cn } from '@/lib/utils';
 const SPARK_COLORS = {
   brand: { stroke1: '#C9873B', stroke2: '#0A84FF', fill: '#0A84FF' },
   blue: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
-  green: { stroke1: '#10B981', stroke2: '#059669', fill: '#10B981' },
-  violet: { stroke1: '#6366F1', stroke2: '#8B5CF6', fill: '#6366F1' },
-  amber: { stroke1: '#F59E0B', stroke2: '#D97706', fill: '#F59E0B' },
+  green: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
+  violet: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
+  amber: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
 };
 
 function BrandSparkline({ data, width = 140, height = 40, variant = 'brand' }) {
@@ -60,8 +60,8 @@ export default function CommandMetrics({ metrics }) {
         return (
           <div key={m.label} className={cn('cmd-card animate-enter-up', m.isHero && 'xl:p-7')} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
             <div className="flex items-center justify-between mb-3">
-              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', chipClass)}>
-                <Icon className="w-4 h-4 text-white" />
+              <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', m.isHero ? chipClass : 'chip-accent')}>
+                <Icon className={cn('w-4 h-4', m.isHero ? 'text-white' : '')} />
               </div>
               <DeltaBadge delta={m.delta} />
             </div>

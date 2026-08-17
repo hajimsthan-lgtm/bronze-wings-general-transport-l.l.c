@@ -5,17 +5,37 @@ import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
 const BRONZE = '#C9873B';
+const BLUE = '#0A84FF';
+const RED = '#EF4444';
 
 function CashTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
+  const inflow = payload.find(p => p.dataKey === 'inflow')?.value || 0;
+  const outflow = payload.find(p => p.dataKey === 'outflow')?.value || 0;
+  const net = inflow - outflow;
   return (
-    <div className="px-3 py-2 rounded-xl bg-popover/95 backdrop-blur-xl border border-border/40 shadow-xl">
-      <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      {payload.map((p) => (
-        <p key={p.dataKey} className="text-xs font-semibold" style={{ color: p.color }}>
-          {p.dataKey === 'inflow' ? 'Inflow' : 'Outflow'}: {formatCurrency(p.value)}
-        </p>
-      ))}
+    <div className="px-4 py-3 rounded-2xl bg-popover/95 backdrop-blur-xl border border-border/50 shadow-2xl min-w-[160px]">
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">{label}</p>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="w-2 h-2 rounded-full" style={{ background: BLUE }} /> Inflow
+          </span>
+          <span className="text-xs font-bold tabular-nums">{formatCurrency(inflow)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="w-2 h-2 rounded-full" style={{ background: RED }} /> Outflow
+          </span>
+          <span className="text-xs font-bold tabular-nums">{formatCurrency(outflow)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-border/30">
+          <span className="text-xs font-semibold">Net</span>
+          <span className={cn('text-xs font-bold tabular-nums', net >= 0 ? 'text-green-500' : 'text-red-500')}>
+            {formatCurrency(net)}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -37,19 +57,29 @@ export default function CommandIntelligence({ fleetUtil, cashFlowData, topPerfor
         <div style={{ height: 180 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlowData} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'currentColor', opacity: 0.5 }} axisLine={false} tickLine={false} dy={6} />
-              <Tooltip content={<CashTooltip />} cursor={{ fill: 'rgba(128,128,128,0.05)' }} />
-              <Bar dataKey="inflow" fill="#22c55e" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={800} />
-              <Bar dataKey="outflow" fill="#ef4444" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={800} />
+              <defs>
+                <linearGradient id="cf-inflow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={BLUE} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={BLUE} stopOpacity={0.3} />
+                </linearGradient>
+                <linearGradient id="cf-outflow" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={RED} stopOpacity={0.7} />
+                  <stop offset="100%" stopColor={RED} stopOpacity={0.2} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'currentColor', opacity: 0.4 }} axisLine={false} tickLine={false} dy={6} />
+              <Tooltip content={<CashTooltip />} cursor={{ fill: 'rgba(128,128,128,0.04)' }} />
+              <Bar dataKey="inflow" fill="url(#cf-inflow)" radius={[5, 5, 0, 0]} maxBarSize={20} isAnimationActive animationDuration={900} animationEasing="ease-out" />
+              <Bar dataKey="outflow" fill="url(#cf-outflow)" radius={[5, 5, 0, 0]} maxBarSize={20} isAnimationActive animationDuration={900} animationEasing="ease-out" />
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="flex items-center gap-4 mt-2">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500" /> Inflow
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: BLUE }} /> Inflow
           </span>
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Outflow
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: RED }} /> Outflow
           </span>
         </div>
       </div>

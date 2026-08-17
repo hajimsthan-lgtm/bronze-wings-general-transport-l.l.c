@@ -82,8 +82,8 @@ export default function Settings() {
     { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
     { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => (
       <div className="space-y-6">
-        <DangerZone deleting={deleting} onDelete={handleDelete} />
-        <FactoryResetCard />
+        <DangerZone deleting={deleting} onDelete={handleDelete} user={user} />
+        <FactoryResetCard user={user} />
       </div>
     ) },
   ];

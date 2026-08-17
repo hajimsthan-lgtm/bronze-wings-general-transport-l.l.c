@@ -137,23 +137,34 @@ export default function CommandAnalytics({ data, range, setRange }) {
                 <stop offset="100%" stopColor={BLUE} />
               </linearGradient>
               <linearGradient id="an-rev-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={BLUE} stopOpacity={0.28} />
-                <stop offset="60%" stopColor={BRONZE} stopOpacity={0.06} />
-                <stop offset="100%" stopColor={BRONZE} stopOpacity={0.01} />
+                <stop offset="0%" stopColor={BLUE} stopOpacity={0.35} />
+                <stop offset="50%" stopColor={BLUE} stopOpacity={0.12} />
+                <stop offset="100%" stopColor={BLUE} stopOpacity={0.01} />
               </linearGradient>
               <linearGradient id="an-exp-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={RED} stopOpacity={0.55} />
-                <stop offset="100%" stopColor={RED} stopOpacity={0.15} />
+                <stop offset="0%" stopColor={RED} stopOpacity={0.5} />
+                <stop offset="100%" stopColor={RED} stopOpacity={0.08} />
               </linearGradient>
+              <linearGradient id="an-profit-stroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={GREEN} stopOpacity={0.8} />
+                <stop offset="100%" stopColor={GREEN} />
+              </linearGradient>
+              <filter id="an-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
-            <CartesianGrid strokeDasharray="4 6" stroke="rgba(128,128,128,0.1)" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.5 }} axisLine={false} tickLine={false} dy={8} />
-            <YAxis tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.5 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-            <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(10,132,255,0.35)', strokeWidth: 1, strokeDasharray: '4 4' }} />
-            <ReferenceLine y={avgRev} stroke={BRONZE} strokeDasharray="3 5" strokeOpacity={0.4} />
-            <Bar dataKey="expenses" fill="url(#an-exp-fill)" radius={[3, 3, 0, 0]} maxBarSize={28} isAnimationActive animationDuration={800} />
-            <Area dataKey="revenue" stroke="url(#an-rev-stroke)" fill="url(#an-rev-fill)" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: BLUE, stroke: '#fff', strokeWidth: 2 }} isAnimationActive animationDuration={900} />
-            <Line dataKey="profit" stroke={GREEN} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: GREEN, stroke: '#fff', strokeWidth: 1.5 }} isAnimationActive animationDuration={1000} />
+            <CartesianGrid strokeDasharray="3 8" stroke="rgba(128,128,128,0.06)" vertical={false} />
+            <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.4 }} axisLine={false} tickLine={false} dy={8} />
+            <YAxis tick={{ fontSize: 11, fill: 'currentColor', opacity: 0.4 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+            <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'rgba(10,132,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }} />
+            <ReferenceLine y={avgRev} stroke={BRONZE} strokeDasharray="3 5" strokeOpacity={0.3} />
+            <Bar dataKey="expenses" fill="url(#an-exp-fill)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive animationDuration={900} animationEasing="ease-out" />
+            <Area dataKey="revenue" stroke="url(#an-rev-stroke)" fill="url(#an-rev-fill)" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: BLUE, stroke: '#fff', strokeWidth: 2 }} isAnimationActive animationDuration={1000} animationEasing="ease-out" />
+            <Line dataKey="profit" stroke="url(#an-profit-stroke)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: GREEN, stroke: '#fff', strokeWidth: 1.5 }} isAnimationActive animationDuration={1100} animationEasing="ease-out" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

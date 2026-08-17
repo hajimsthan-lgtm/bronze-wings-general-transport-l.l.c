@@ -8,15 +8,17 @@ import {
   AlertDialogCancel, AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import SettingsCard from './SettingsCard';
+import PinGuardModal from './PinGuardModal';
 
-/**
- * Danger Zone with multi-step verification: the confirm button stays
- * disabled until the user types "DELETE". Muted destructive palette that
- * turns vivid on hover.
- */
-export default function DangerZone({ deleting, onDelete }) {
+export default function DangerZone({ deleting, onDelete, user }) {
   const [confirm, setConfirm] = useState('');
+  const [pinOpen, setPinOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const ready = confirm === 'DELETE';
+
+  const handlePinSuccess = () => {
+    setDialogOpen(true);
+  };
 
   return (
     <SettingsCard icon={AlertTriangle} title="Danger Zone" description="Irreversible and destructive actions" accent="danger">
@@ -31,39 +33,46 @@ export default function DangerZone({ deleting, onDelete }) {
           </div>
         </div>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="w-full active:scale-[0.98]">
-              <Trash2 className="w-4 h-4" /> Delete Account
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. Type <span className="font-mono font-semibold text-destructive">DELETE</span> to confirm.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <Input
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Type DELETE"
-              className="bg-white/[0.03] border-white/10"
-              autoFocus
-            />
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setConfirm('')}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => { if (ready) onDelete(); }}
-                disabled={!ready || deleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {deleting ? 'Deleting...' : 'Yes, delete account'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <Button variant="destructive" size="sm" className="w-full active:scale-[0.98]" onClick={() => setPinOpen(true)}>
+          <Trash2 className="w-4 h-4" /> Delete Account
+        </Button>
       </div>
+
+      <PinGuardModal
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onSuccess={handlePinSuccess}
+        user={user}
+        actionLabel="Delete Account"
+      />
+
+      <AlertDialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setConfirm(''); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. Type <span className="font-mono font-semibold text-destructive">DELETE</span> to confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Type DELETE"
+            className="bg-white/[0.03] border-white/10"
+            autoFocus
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setConfirm(''); setDialogOpen(false); }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { if (ready) onDelete(); }}
+              disabled={!ready || deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Yes, delete account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SettingsCard>
   );
 }
