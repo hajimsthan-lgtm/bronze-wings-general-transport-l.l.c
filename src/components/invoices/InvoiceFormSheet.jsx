@@ -145,7 +145,26 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     return set;
   }, [invoices]);
 
-  const clientCompletedTrips = (trips || []).filter(tr => tr.client_name === form.client_name && tr.status === 'completed' && !invoicedTripNumbers.has(tr.trip_number));
+  const selectedClient = clients.find(c => c.name === form.client_name);
+  const availableContacts = useMemo(() => {
+    if (!selectedClient) return [];
+    const contacts = [];
+    if (selectedClient.contact_persons?.length) {
+      selectedClient.contact_persons.forEach(cp => {
+        if (cp.name && !contacts.find(c => c.name === cp.name)) contacts.push(cp);
+      });
+    }
+    if (selectedClient.contact_person && !contacts.find(c => c.name === selectedClient.contact_person)) {
+      contacts.push({ name: selectedClient.contact_person });
+    }
+    return contacts;
+  }, [selectedClient]);
+
+  const clientCompletedTrips = (trips || []).filter(tr => {
+    if (tr.client_name !== form.client_name || tr.status !== 'completed' || invoicedTripNumbers.has(tr.trip_number)) return false;
+    if (form.contact_person && availableContacts.length > 1) return tr.contact_person === form.contact_person;
+    return true;
+  });
   const selectedTripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
 
   const toggleTrip = (trip) => {
@@ -466,7 +485,13 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               )}
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label>
-                <Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className={inputCls} />
+                <Input list="invoice-contacts" value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className={inputCls} placeholder="Select or type contact name" />
+                <datalist id="invoice-contacts">
+                  {availableContacts.map((cp, i) => <option key={i} value={cp.name} />)}
+                </datalist>
+                {availableContacts.length > 1 && (
+                  <p className="text-[10px] text-muted-foreground mt-1">Trips are filtered by the selected contact person.</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
