@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Truck, FileText, X, Check, Loader2, Save, FileQuestion, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Truck, FileText, X, Check, Loader2, Save, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
@@ -63,7 +62,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [revenueOverride, setRevenueOverride] = useState(false);
   const [vendorRateOverride, setVendorRateOverride] = useState(false);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
-  const [showClosePrompt, setShowClosePrompt] = useState(false);
   const [mapCollapsed, setMapCollapsed] = useState(true);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
@@ -382,22 +380,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } finally { setSaving(false); }
   };
 
-  const isFormDirty = useMemo(() => {
-    if (mode === 'trip') {
-      return !!(form.client_name || form.from_location || form.to_location || form.base_fare ||
-        form.vehicle_plate || form.driver_name || form.load_datetime || form.vendor_name || form.notes);
-    }
-    return !!(contract.company_name || contract.monthly_rate || contract.start_date);
-  }, [mode, form, contract]);
-
-  const handleCloseAttempt = () => {
-    if (isFormDirty) {
-      setShowClosePrompt(true);
-    } else {
-      onOpenChange(false);
-    }
-  };
-
   const validateTrip = () => {
     const e = {};
     const hasAlphaNum = (s) => /[a-zA-Z0-9\u0600-\u06FF]/.test(s || '');
@@ -584,14 +566,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
-              <button
-                type="button"
-                onClick={handleCloseAttempt}
+              <DialogClose
                 aria-label="Close"
                 className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </DialogClose>
             </div>
           </div>
         </DialogHeader>
@@ -661,10 +641,10 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Footer */}
         <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 border-t border-border flex-shrink-0 sticky bottom-0 z-20 bg-card/90 backdrop-blur-2xl">
-          <Button variant="outline" onClick={handleCloseAttempt} className="border-border gap-2 h-9">
+          <DialogClose className="inline-flex items-center justify-center gap-2 h-9 rounded-md px-4 py-2 text-sm font-medium border border-input bg-transparent hover:bg-accent hover:text-accent-foreground transition-colors">
             <X className="w-4 h-4" />
             <span className="hidden sm:inline">{t('cancel')}</span>
-          </Button>
+          </DialogClose>
           <div className="flex-1" />
           {mode === 'trip' && (
             <Button variant="outline" onClick={handleSaveDraft} disabled={saving} className="border-primary/30 text-primary hover:bg-primary/10 gap-2 h-9">
@@ -681,38 +661,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         </div>
       </DialogContent>
       </Dialog>
-
-      {/* Close prompt — save draft before closing? (outside Dialog to avoid focus-trap conflict) */}
-      <AlertDialog open={showClosePrompt} onOpenChange={setShowClosePrompt}>
-      <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-primary/25">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2 text-foreground">
-            <FileQuestion className="w-5 h-5 text-primary" />
-            Save as draft before closing?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            You have unsaved progress. Save as a draft to continue later, or discard it.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel className="border-border">Keep editing</AlertDialogCancel>
-          <Button
-            variant="outline"
-            onClick={() => { setShowClosePrompt(false); onOpenChange(false); }}
-            className="border-destructive/30 text-destructive hover:bg-destructive/10"
-          >
-            Discard
-          </Button>
-          <AlertDialogAction
-            onClick={async () => { setShowClosePrompt(false); await handleSaveDraft(); }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Save Draft
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-      </AlertDialog>
       </>
       );
 
