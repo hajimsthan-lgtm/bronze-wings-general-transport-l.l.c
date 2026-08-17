@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Users, UserPlus, Mail, KeyRound, Shield, Pencil, Loader2, Search } from 'lucide-react';
+import { Users, UserPlus, Mail, KeyRound, Shield, Pencil, Trash2, Loader2, Search } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,10 @@ import { Label } from '@/components/ui/label';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from '@/components/ui/select';
@@ -27,6 +31,8 @@ export default function UsersManagementCard({ currentUser }) {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('user');
   const [inviting, setInviting] = useState(false);
+  const [deleteUser, setDeleteUser] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -76,6 +82,21 @@ export default function UsersManagementCard({ currentUser }) {
       toast({ title: 'Could not send reset email', description: err?.message, variant: 'destructive' });
     } finally {
       setResettingId(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteUser) return;
+    setDeletingUser(true);
+    try {
+      await base44.entities.User.delete(deleteUser.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+      toast({ title: `User ${deleteUser.full_name || deleteUser.email} removed` });
+      setDeleteUser(null);
+    } catch (err) {
+      toast({ title: 'Could not remove user', description: err?.message || 'You may not have permission', variant: 'destructive' });
+    } finally {
+      setDeletingUser(false);
     }
   };
 
@@ -195,6 +216,15 @@ export default function UsersManagementCard({ currentUser }) {
                       <KeyRound className="w-3.5 h-3.5" />
                     )}
                   </button>
+                  {!isSelf && (
+                    <button
+                      onClick={() => setDeleteUser(u)}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:text-rose-400 hover:bg-rose-500/[0.08] transition-colors"
+                      title="Remove user"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -258,6 +288,33 @@ export default function UsersManagementCard({ currentUser }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteUser} onOpenChange={(o) => !o && setDeleteUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-4 h-4 text-rose-400" /> Remove User
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove{' '}
+              <span className="font-medium text-foreground">{deleteUser?.full_name || deleteUser?.email}</span>?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingUser}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deletingUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-1.5"
+            >
+              {deletingUser ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+              Remove User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Invite dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
