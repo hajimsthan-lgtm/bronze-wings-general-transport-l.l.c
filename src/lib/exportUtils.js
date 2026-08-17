@@ -257,10 +257,18 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
   doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.5);
   doc.line(margin, headerY + 16, pageW - margin, headerY + 16);
 
-  // ── Build instalment rows ──────────────────────────────────────────────────
-  // For each deduction, find applied instalments from salary records
+  // ── Build ledger rows: adding (loan issued) + deduction (instalment) ────────
+  // For each deduction, emit an "Adding" row (green) for the original advance,
+  // then a "Deduction" row (red) for each instalment applied via salary records.
+  // A running Balance column shows the remaining after each transaction.
   const rows = [];
   for (const d of deductions) {
+    const total = Number(d.total_amount) || 0;
+    const refId = d.id ? String(d.id).substring(0, 8).toUpperCase() : '-';
+    const desc = d.description || d.type || '-';
+    const dtype = (d.type || '').replace(/_/g, ' ');
+
+    // Gather instalments from salary history
     const instalments = [];
     for (const sr of salaryRecords) {
       if (!sr.applied_deductions) continue;
@@ -276,55 +284,49 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
         });
       }
     }
-    if (instalments.length === 0) {
+
+    // Row 1: Adding (the original advance/loan given to employee) — green
+    rows.push({
+      date: d.issue_date || '-',
+      refId,
+      description: desc,
+      type: dtype,
+      txnType: 'Adding',
+      debit: total,        // money given to employee
+      credit: 0,
+      balance: total,      // full amount outstanding
+      method: '-',
+    });
+
+    // Subsequent rows: Deduction (instalment repaid via salary) — red
+    let running = total;
+    instalments.forEach((inst) => {
+      running -= inst.amountApplied;
       rows.push({
-        driver: driverName,
-        refId: d.id ? String(d.id).substring(0, 8).toUpperCase() : '-',
-        description: d.description || d.type || '-',
-        type: (d.type || '').replace(/_/g, ' '),
-        status: d.status || 'active',
-        issueDate: d.issue_date || '-',
-        appliedDate: '-',
-        salaryMonth: '-',
-        paymentMethod: '-',
-        amountApplied: 0,
-        totalAmount: Number(d.total_amount) || 0,
-        remaining: Number(d.remaining_balance) || 0,
+        date: inst.appliedDate || '-',
+        refId,
+        description: `Instalment — ${inst.salaryMonth || '-'}`,
+        type: dtype,
+        txnType: 'Deduction',
+        debit: 0,
+        credit: inst.amountApplied,  // money deducted from salary
+        balance: running,
+        method: inst.paymentMethod || '-',
       });
-    } else {
-      instalments.forEach((inst) => {
-        rows.push({
-          driver: driverName,
-          refId: d.id ? String(d.id).substring(0, 8).toUpperCase() : '-',
-          description: d.description || d.type || '-',
-          type: (d.type || '').replace(/_/g, ' '),
-          status: d.status || 'active',
-          issueDate: d.issue_date || '-',
-          appliedDate: inst.appliedDate || '-',
-          salaryMonth: inst.salaryMonth || '-',
-          paymentMethod: inst.paymentMethod || '-',
-          amountApplied: inst.amountApplied,
-          totalAmount: Number(d.total_amount) || 0,
-          remaining: Number(d.remaining_balance) || 0,
-        });
-      });
-    }
+    });
   }
 
-  // ── Column definitions ─────────────────────────────────────────────────────
+  // ── Column definitions (ledger style) ──────────────────────────────────────
   const cols = [
-    { label: 'Driver', key: 'driver', w: 22 },
+    { label: 'Date', key: 'date', w: 20 },
     { label: 'Ref', key: 'refId', w: 14 },
-    { label: 'Description', key: 'description', w: 28 },
+    { label: 'Description', key: 'description', w: 40 },
     { label: 'Type', key: 'type', w: 18 },
-    { label: 'Status', key: 'status', w: 14 },
-    { label: 'Issue Date', key: 'issueDate', w: 18 },
-    { label: 'Applied Date', key: 'appliedDate', w: 18 },
-    { label: 'Salary Month', key: 'salaryMonth', w: 20 },
-    { label: 'Method', key: 'paymentMethod', w: 16 },
-    { label: 'Applied (AED)', key: 'amountApplied', w: 22, numeric: true },
-    { label: 'Total (AED)', key: 'totalAmount', w: 20, numeric: true },
-    { label: 'Remaining', key: 'remaining', w: 20, numeric: true },
+    { label: 'Txn', key: 'txnType', w: 16 },
+    { label: 'Method', key: 'method', w: 16 },
+    { label: 'Added (AED)', key: 'debit', w: 20, numeric: true },
+    { label: 'Deducted (AED)', key: 'credit', w: 22, numeric: true },
+    { label: 'Balance (AED)', key: 'balance', w: 22, numeric: true },
   ];
 
   const tableW = pageW - margin * 2;
@@ -332,9 +334,13 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
   const scale = tableW / totalColW;
   const scaledCols = cols.map((c) => ({ ...c, sw: c.w * scale }));
 
-  const ROW_PAD = 1.5;  // mm padding inside each cell
-  const LINE_H = 3.6;   // mm per line of text at fontSize 6.5
-  const CELL_PAD_H = 2; // mm top/bottom padding per cell
+  const ROW_PAD = 1.5;
+  const LINE_H = 3.6;
+  const CELL_PAD_H = 2;
+
+  // Light green for Adding, light red for Deduction
+  const BG_GREEN = [220, 252, 231];   // #dcfce7
+  const BG_RED   = [254, 226, 226];    // #fee2e2
 
   const drawTableHeaders = (y) => {
     doc.setFillColor(240, 240, 240);
@@ -350,7 +356,6 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
     return y + 6;
   };
 
-  // Pre-compute wrapped lines for every cell so we know each row's height
   const computeRow = (row) => {
     doc.setFontSize(6.5);
     return scaledCols.map((c) => {
@@ -359,8 +364,6 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
       if (c.numeric) {
         const num = Number(val);
         return { lines: [isNaN(num) ? '-' : num.toFixed(2)], numeric: true };
-      } else if (c.key === 'status') {
-        return { lines: [String(val)], isStatus: true };
       } else {
         const maxW = c.sw - ROW_PAD * 2;
         const lines = doc.splitTextToSize(String(val), maxW);
@@ -373,7 +376,7 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
   doc.setFontSize(6.5);
   let pageNum = 1;
 
-  rows.forEach((row, idx) => {
+  rows.forEach((row) => {
     const cells = computeRow(row);
     const maxLines = Math.max(...cells.map((c) => c.lines.length));
     const rowH = maxLines * LINE_H + CELL_PAD_H * 2;
@@ -386,22 +389,30 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
       doc.setFontSize(6.5);
     }
 
-    // Row background
-    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - CELL_PAD_H, tableW, rowH, 'F'); }
+    // Coloured row background: green = Adding, red = Deduction
+    const bg = row.txnType === 'Adding' ? BG_GREEN : BG_RED;
+    doc.setFillColor(bg[0], bg[1], bg[2]);
+    doc.rect(margin, y - CELL_PAD_H, tableW, rowH, 'F');
 
     doc.setTextColor(30, 30, 30);
     let x = margin;
     cells.forEach((cell, ci) => {
       const c = scaledCols[ci];
-      const cellY = y + LINE_H * 0.4; // baseline of first line
+      const cellY = y + LINE_H * 0.4;
       if (cell.numeric) {
-        doc.text(cell.lines[0], x + c.sw - ROW_PAD, cellY, { align: 'right' });
-      } else if (cell.isStatus) {
-        const color = STATUS_DOT_COLORS[String(cell.lines[0]).toLowerCase()] || [100, 100, 100];
-        doc.setFillColor(color[0], color[1], color[2]);
-        doc.circle(x + ROW_PAD + 0.8, cellY - 0.8, 0.8, 'F');
-        doc.setTextColor(30, 30, 30);
-        doc.text(cell.lines[0], x + ROW_PAD + 3.5, cellY);
+        const num = Number(cell.lines[0]);
+        if (!isNaN(num) && num === 0) {
+          doc.setTextColor(160, 160, 160);
+          doc.text('—', x + c.sw - ROW_PAD, cellY, { align: 'right' });
+          doc.setTextColor(30, 30, 30);
+        } else {
+          // Balance column: red text if outstanding > 0, green if settled
+          if (c.key === 'balance') {
+            doc.setTextColor(num > 0 ? 200 : 22, num > 0 ? 0 : 128, num > 0 ? 0 : 57);
+          }
+          doc.text(cell.lines[0], x + c.sw - ROW_PAD, cellY, { align: 'right' });
+          doc.setTextColor(30, 30, 30);
+        }
       } else {
         cell.lines.forEach((line, li) => {
           doc.text(line, x + ROW_PAD, cellY + li * LINE_H);
@@ -430,8 +441,8 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
     const totalRemaining = deductions.reduce((s, d) => s + (Number(d.remaining_balance) || 0), 0);
 
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 30, 30);
-    doc.text(`TOTAL RECORDS: ${deductions.length}`, margin + 1, y + 4);
-    doc.text(`Instalments: ${rows.length}`, margin + 1, y + 10);
+    doc.text(`TOTAL DEDUCTION RECORDS: ${deductions.length}`, margin + 1, y + 4);
+    doc.text(`Transactions: ${rows.length}`, margin + 1, y + 10);
 
     const colRight = pageW - margin;
     doc.text(`Total Original Amount:`, colRight - 70, y + 4);
@@ -443,8 +454,18 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
     doc.text(`AED ${totalRemaining.toFixed(2)}`, colRight, y + 16, { align: 'right' });
     doc.setTextColor(30, 30, 30);
 
+    // Legend
+    doc.setFontSize(6.5); doc.setFont(undefined, 'normal');
+    doc.setFillColor(BG_GREEN[0], BG_GREEN[1], BG_GREEN[2]);
+    doc.rect(margin + 1, y + 20, 4, 3, 'F');
+    doc.setTextColor(30, 30, 30);
+    doc.text('Adding = advance/loan issued to employee', margin + 7, y + 22.5);
+    doc.setFillColor(BG_RED[0], BG_RED[1], BG_RED[2]);
+    doc.rect(margin + 70, y + 20, 4, 3, 'F');
+    doc.text('Deduction = instalment repaid via salary', margin + 76, y + 22.5);
+
     doc.setDrawColor(200, 200, 200);
-    doc.line(margin, y + 19, pageW - margin, y + 19);
+    doc.line(margin, y + 25, pageW - margin, y + 25);
   }
 
   drawPageFooter(pageNum);
