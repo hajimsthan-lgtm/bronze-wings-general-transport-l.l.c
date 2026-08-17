@@ -355,8 +355,14 @@ function TripMapPanel({ from, to, onSelectFrom, onSelectTo, onRouteInfo, tripTyp
       </div>
 
       {/* Map stays mounted to avoid expensive Leaflet re-init on every expand/collapse.
-          Height transitions smoothly instead of conditional mount/unmount. */}
-      <div className={cn("relative overflow-hidden transition-[height] duration-200", collapsed ? "h-0" : "h-[300px]")}>
+           Height transitions smoothly instead of conditional mount/unmount.
+           When collapsed, inert prevents Leaflet's tabindex=0 container from
+           stealing focus and freezing the Radix Dialog's close buttons. */}
+      <div
+        className={cn("relative overflow-hidden transition-[height] duration-200", collapsed ? "h-0 pointer-events-none" : "h-[300px]")}
+        {...(collapsed ? { inert: '' } : {})}
+        aria-hidden={collapsed || undefined}
+      >
         <MapContainer center={DEFAULT_CENTER} zoom={11} className="w-full h-full" ref={refCb} zoomControl>
           <TileLayer
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
