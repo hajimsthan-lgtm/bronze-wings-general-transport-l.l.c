@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -17,6 +17,7 @@ import SoundSettingsCard from '@/components/settings/SoundSettingsCard';
 import StorageSettingsCard from '@/components/settings/StorageSettingsCard';
 import UsersManagementCard from '@/components/settings/UsersManagementCard';
 import LogoutCard from '@/components/settings/LogoutCard';
+import DateTimePickerStyleCard from '@/components/settings/DateTimePickerStyleCard';
 
 export default function Settings() {
   const { language, toggleLanguage } = useI18n();
@@ -65,6 +66,7 @@ export default function Settings() {
     { key: 'profile', label: 'Profile', icon: User, render: () => <ProfileHeader user={user} loading={loading} onUpdated={handleProfileUpdated} /> },
     { key: 'localization', label: 'Localization', icon: Globe, render: () => <LocalizationCard language={language} onLanguageChange={handleLanguageChange} /> },
     { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
+    { key: 'datetime', label: 'Date & Time', icon: Clock, render: () => <DateTimePickerStyleCard /> },
     { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
     { key: 'users', label: 'Users', icon: Users, render: () => <UsersManagementCard currentUser={user} /> },
     { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import TimeWheelPicker from './TimeWheelPicker';
+import AnalogClockPicker from './AnalogClockPicker';
+import { usePickerStyle } from '@/lib/dateTimePickerStyle';
 
 const DATE_FMT = 'yyyy-MM-dd';
 const TIME_FMT = 'HH:mm';
@@ -24,6 +26,7 @@ function toValue(date, time) {
 export default function DateTimePicker({ value, onChange, placeholder = 'Pick date & time', disabled }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState('date');
+  const pickerStyle = usePickerStyle();
   const date = toDateTime(value);
   const timeStr = value ? value.split('T')[1] || '00:00' : '00:00';
 
@@ -105,7 +108,13 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
                 <Check className="w-3.5 h-3.5" /> Done
               </Button>
             </div>
-            <TimeWheelPicker value={timeStr} onChange={handleTime} onDone={handleTimeDone} />
+            {pickerStyle === 'analog_custom' ? (
+              <AnalogClockPicker value={timeStr} onChange={handleTime} onDone={handleTimeDone} variant="custom" />
+            ) : pickerStyle === 'analog_library' ? (
+              <AnalogClockPicker value={timeStr} onChange={handleTime} onDone={handleTimeDone} variant="library" />
+            ) : (
+              <TimeWheelPicker value={timeStr} onChange={handleTime} onDone={handleTimeDone} />
+            )}
           </>
         )}
       </PopoverContent>
