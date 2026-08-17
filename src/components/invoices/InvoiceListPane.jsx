@@ -1,6 +1,14 @@
-import { Search, FileText } from 'lucide-react';
+import { Search, FileText, ChevronDown, PenLine, FileSignature } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
 
 const STATUS_PILL = {
   draft: 'bg-muted text-muted-foreground border-border',
@@ -18,6 +26,15 @@ const STATUS_LABEL = {
   paid: 'Paid',
   overdue: 'Overdue',
   cancelled: 'Cancelled',
+};
+
+const STATUS_DOT = {
+  draft: 'bg-muted-foreground',
+  sent: 'bg-blue-400',
+  partially_paid: 'bg-orange-400',
+  paid: 'bg-emerald-400',
+  overdue: 'bg-red-400',
+  cancelled: 'bg-muted-foreground/50',
 };
 
 function daysUntilDue(dueDate) {
@@ -53,11 +70,14 @@ export default function InvoiceListPane({
   allSelected,
   onToggleSelectAll,
   onClientClick,
+  onStatusChange,
 }) {
   const tabs = [
-    { key: 'all', label: 'All Invoices', count: counts.all },
+    { key: 'all', label: 'All', count: counts.all },
     { key: 'draft', label: 'Draft', count: counts.draft },
     { key: 'unpaid', label: 'Unpaid', count: counts.unpaid },
+    { key: 'signed', label: 'Signed', count: counts.signed, icon: FileSignature },
+    { key: 'unsigned', label: 'Unsigned', count: counts.unsigned, icon: PenLine },
   ];
 
   return (
@@ -74,7 +94,10 @@ export default function InvoiceListPane({
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t.label}
+            <span className="flex items-center gap-1">
+              {t.icon && <t.icon className="w-3 h-3" />}
+              {t.label}
+            </span>
             <span className={`ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${
               tab === t.key ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
             }`}>
@@ -154,9 +177,13 @@ export default function InvoiceListPane({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground">{inv.invoice_number || '—'}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${STATUS_PILL[inv.status] || STATUS_PILL.draft}`}>
-                        {STATUS_LABEL[inv.status] || inv.status}
-                      </span>
+                      {/* Signed indicator */}
+                      {inv.signed_invoice_url && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/20" title={`Signed ${inv.signed_date || ''}`}>
+                          <FileSignature className="w-2.5 h-2.5" />
+                          Signed
+                        </span>
+                      )}
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); onClientClick?.(inv.client_name); }}
@@ -166,6 +193,36 @@ export default function InvoiceListPane({
                     </button>
                     <span className="text-[11px] text-muted-foreground">{dueLabel(inv)}</span>
                   </div>
+
+                  {/* Status switcher dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className={`inline-flex items-center gap-1 px-1.5 py-1 rounded-md text-[10px] font-semibold border transition-all hover:scale-105 ${STATUS_PILL[inv.status] || STATUS_PILL.draft} flex-shrink-0`}
+                        title="Change status"
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[inv.status] || STATUS_DOT.draft}`} />
+                        {STATUS_LABEL[inv.status] || inv.status}
+                        <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40" onClick={(e) => e.stopPropagation()}>
+                      <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Set Status</div>
+                      <DropdownMenuSeparator />
+                      {STATUS_OPTIONS.map(opt => (
+                        <DropdownMenuItem
+                          key={opt.value}
+                          onClick={(e) => { e.stopPropagation(); onStatusChange?.(inv, opt.value); }}
+                          className={`text-xs gap-2 ${inv.status === opt.value ? 'bg-primary/10 text-primary font-semibold' : ''}`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${STATUS_DOT[opt.value] || 'bg-muted-foreground'}`} />
+                          {opt.label}
+                          {inv.status === opt.value && <span className="ml-auto text-primary">✓</span>}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   {/* Amount */}
                   <div className="text-right flex-shrink-0">

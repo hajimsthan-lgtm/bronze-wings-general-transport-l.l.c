@@ -384,12 +384,16 @@ export default function InvoicesPage() {
     all: baseFiltered.length,
     draft: baseFiltered.filter(i => i.status === 'draft').length,
     unpaid: baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled').length,
+    signed: baseFiltered.filter(i => !!i.signed_invoice_url).length,
+    unsigned: baseFiltered.filter(i => !i.signed_invoice_url).length,
   }), [baseFiltered]);
 
   // Tab-filtered list
   const filtered = useMemo(() => {
     if (tab === 'draft') return baseFiltered.filter(i => i.status === 'draft');
     if (tab === 'unpaid') return baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled');
+    if (tab === 'signed') return baseFiltered.filter(i => !!i.signed_invoice_url);
+    if (tab === 'unsigned') return baseFiltered.filter(i => !i.signed_invoice_url);
     return baseFiltered;
   }, [baseFiltered, tab]);
 
@@ -534,6 +538,7 @@ export default function InvoicesPage() {
               allSelected={allSelected}
               onToggleSelectAll={toggleSelectAll}
               onClientClick={handleClientClick}
+              onStatusChange={handleStatusChangeRequest}
             />
           </div>
 
