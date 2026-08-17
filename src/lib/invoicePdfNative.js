@@ -12,6 +12,7 @@
 import { jsPDF } from 'jspdf';
 import { numberToWords } from './numberToWords';
 import { formatInvoiceNumber } from './invoiceSequence';
+import { hasArabicText, renderCellToImage } from './pdfArabicRenderer';
 
 // ═══════════════════════════════════════════════════════════
 // PAGE CONSTANTS (mm)
@@ -116,6 +117,11 @@ function str(v) { return String(v ?? ''); }
 
 function normalizeRoute(s) {
   let v = str(s);
+  // Preserve Arabic text as-is — the Latin-only normalization regexes below would
+  // strip Arabic characters (they fall outside [a-zA-Z0-9]) and mangle the route.
+  if (hasArabicText(v)) {
+    return v.replace(/\s+/g, ' ').trim();
+  }
   // Extract and preserve parenthetical content (e.g., driver, vehicle info)
   const parenMatch = v.match(/\([^)]*\)/);
   const parenContent = parenMatch ? parenMatch[0].replace(/\s+/g, ' ').trim() : '';
@@ -365,9 +371,15 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   for (const line of rawLines) {
     pdf.setFont('times', line.bold ? 'bold' : 'normal');
     pdf.setFontSize(10);
-    const parts = pdf.splitTextToSize(line.text, maxTextWidth);
-    wrapped.push({ parts, bold: line.bold });
-    totalLines += parts.length;
+    if (hasArabicText(line.text)) {
+      const rendered = renderCellToImage(line.text, 10, maxTextWidth, lineH, [0, 0, 0]);
+      wrapped.push({ imgData: rendered, bold: line.bold });
+      totalLines += rendered.linesCount;
+    } else {
+      const parts = pdf.splitTextToSize(line.text, maxTextWidth);
+      wrapped.push({ parts, bold: line.bold });
+      totalLines += parts.length;
+    }
   }
 
   // Dynamic height: label area + all wrapped lines + padding
@@ -394,9 +406,16 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
     pdf.setFont('times', line.bold ? 'bold' : 'normal');
     pdf.setFontSize(10);
     tc(pdf, BLACK);
-    for (const part of line.parts) {
-      pdf.text(part, leftX, ly);
-      ly += lineH;
+    if (line.imgData) {
+      const imgW = maxTextWidth;
+      const imgH = line.imgData.linesCount * lineH;
+      pdf.addImage(line.imgData.dataUrl, 'PNG', leftX, ly - lineH * 0.75, imgW, imgH);
+      ly += line.imgData.linesCount * lineH;
+    } else {
+      for (const part of line.parts) {
+        pdf.text(part, leftX, ly);
+        ly += lineH;
+      }
     }
   }
 
@@ -462,10 +481,23 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   const style = invStyle || getInvStyle({});
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
   const descText = normalizeRoute(item.description ?? '');
-  const descLines = pdf.splitTextToSize(descText, descCol.w - 4);
+  const fSize = invoiceType === 'monthly' ? 10 : 9;
+  const descColW = descCol.w - 4;
   const lineH = 3.5;
   const minH = 10;
-  const rowH = Math.max(minH, descLines.length * lineH + 3);
+
+  const descIsArabic = hasArabicText(descText);
+  let descLineCount;
+  let descImgData = null;
+  let descLines = null;
+  if (descIsArabic) {
+    descImgData = renderCellToImage(descText, fSize, descColW, lineH, style.rowText);
+    descLineCount = descImgData.linesCount;
+  } else {
+    descLines = pdf.splitTextToSize(descText, descColW);
+    descLineCount = descLines.length;
+  }
+  const rowH = Math.max(minH, descLineCount * lineH + 3);
 
   // Background
   fc(pdf, idx % 2 === 0 ? WHITE : style.rowAltBg);
@@ -481,7 +513,6 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
 
   const vCenter = y + rowH / 2 + 1;
 
-  const fSize = invoiceType === 'monthly' ? 10 : 9;
   pdf.setFontSize(fSize);
   tc(pdf, style.rowText);
 
@@ -513,14 +544,24 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   // DESCRIPTION column (configurable alignment)
   pdf.setFont('times', 'bold');
   pdf.setFontSize(fSize);
-  const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
   const descAlign = style.descAlign;
-  const descTextX = descAlign === 'right' ? descCol.right - 2
-                  : descAlign === 'center' ? descCol.center
-                  : descCol.x + 2;
-  const descPdfAlign = descAlign === 'right' ? 'right' : descAlign === 'center' ? 'center' : 'left';
-  for (let i = 0; i < descLines.length; i++) {
-    pdf.text(descLines[i], descTextX, descStartY + i * lineH, { align: descPdfAlign });
+  if (descImgData) {
+    const imgW = descColW;
+    const imgH = descLineCount * lineH;
+    const imgY = y + (rowH - imgH) / 2;
+    const imgX = descAlign === 'right' ? descCol.right - 2 - imgW
+                : descAlign === 'center' ? descCol.center - imgW / 2
+                : descCol.x + 2;
+    pdf.addImage(descImgData.dataUrl, 'PNG', imgX, imgY, imgW, imgH);
+  } else {
+    const descStartY = y + (rowH - descLines.length * lineH) / 2 + lineH;
+    const descTextX = descAlign === 'right' ? descCol.right - 2
+                    : descAlign === 'center' ? descCol.center
+                    : descCol.x + 2;
+    const descPdfAlign = descAlign === 'right' ? 'right' : descAlign === 'center' ? 'center' : 'left';
+    for (let i = 0; i < descLines.length; i++) {
+      pdf.text(descLines[i], descTextX, descStartY + i * lineH, { align: descPdfAlign });
+    }
   }
   ci++;
 
