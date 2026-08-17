@@ -82,13 +82,16 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   doc.line(margin, headerY + 16, pageW - margin, headerY + 16);
 
   // ── Table ──────────────────────────────────────────────────────────────────
+  const GEN_PAD = 1.5;
+  const GEN_LINE_H = 3.8;
+  const GEN_CELL_PAD = 2;
+
   const drawHeaders = (y) => {
     doc.setFillColor(240, 240, 240); doc.rect(margin, y - 4, tableW, 7, 'F');
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
     columns.forEach((c, i) => {
-      const text = String(c.label).substring(0, 25);
-      if (c.numeric) doc.text(text, margin + (i + 1) * colW - 1, y, { align: 'right' });
-      else doc.text(text, margin + i * colW + 1, y);
+      if (c.numeric) doc.text(String(c.label), margin + (i + 1) * colW - GEN_PAD, y, { align: 'right' });
+      else doc.text(String(c.label), margin + i * colW + GEN_PAD, y);
     });
     doc.setFont(undefined, 'normal');
     return y + 6;
@@ -99,32 +102,50 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   let pageNum = 1;
 
   data.forEach((item, idx) => {
-    if (y > pageH - 25) {
+    // Compute wrapped lines per cell
+    doc.setFontSize(7.5);
+    const cells = columns.map((c) => {
+      let val = c.transform ? c.transform(item) : item[c.key];
+      if (val == null) val = '';
+      if (c.numeric) {
+        const num = Number(String(val).replace(/[^\d.-]/g, ''));
+        return { lines: [isNaN(num) ? '' : num.toFixed(2)], numeric: true };
+      } else if (c.key === 'status') {
+        return { lines: [String(val)], isStatus: true };
+      } else {
+        return { lines: doc.splitTextToSize(String(val), colW - GEN_PAD * 2) };
+      }
+    });
+    const maxLines = Math.max(...cells.map((c) => c.lines.length));
+    const rowH = maxLines * GEN_LINE_H + GEN_CELL_PAD * 2;
+
+    if (y + rowH > pageH - 25) {
       drawPageFooter(pageNum);
       doc.addPage();
       pageNum++;
       y = drawHeaders(20);
       doc.setFontSize(7.5);
     }
-    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - 4, tableW, 6, 'F'); }
+
+    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - GEN_CELL_PAD, tableW, rowH, 'F'); }
     doc.setTextColor(30, 30, 30);
-    columns.forEach((c, i) => {
-      let val = item[c.key];
-      if (val == null) val = '';
-      if (c.numeric) {
-        const num = Number(String(val).replace(/[^\d.-]/g, ''));
-        val = isNaN(num) ? '' : num.toFixed(2);
-        doc.text(String(val), margin + (i + 1) * colW - 1, y, { align: 'right' });
-      } else if (c.key === 'status') {
-        const color = STATUS_DOT_COLORS[String(val).toLowerCase()] || [100, 100, 100];
+    const baselineY = y + GEN_LINE_H * 0.3;
+    cells.forEach((cell, i) => {
+      if (cell.numeric) {
+        doc.text(cell.lines[0], margin + (i + 1) * colW - GEN_PAD, baselineY, { align: 'right' });
+      } else if (cell.isStatus) {
+        const color = STATUS_DOT_COLORS[String(cell.lines[0]).toLowerCase()] || [100, 100, 100];
         doc.setFillColor(color[0], color[1], color[2]);
-        doc.circle(margin + i * colW + 2, y - 1, 0.8, 'F');
-        doc.text(String(val).substring(0, 20), margin + i * colW + 5, y);
+        doc.circle(margin + i * colW + GEN_PAD + 0.8, baselineY - 0.8, 0.8, 'F');
+        doc.setTextColor(30, 30, 30);
+        doc.text(cell.lines[0], margin + i * colW + GEN_PAD + 3.5, baselineY);
       } else {
-        doc.text(String(val).substring(0, 25), margin + i * colW + 1, y);
+        cell.lines.forEach((line, li) => {
+          doc.text(line, margin + i * colW + GEN_PAD, baselineY + li * GEN_LINE_H);
+        });
       }
     });
-    y += 6;
+    y += rowH;
   });
 
   // ── Summary footer ────────────────────────────────────────────────────────
@@ -311,18 +332,41 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
   const scale = tableW / totalColW;
   const scaledCols = cols.map((c) => ({ ...c, sw: c.w * scale }));
 
+  const ROW_PAD = 1.5;  // mm padding inside each cell
+  const LINE_H = 3.6;   // mm per line of text at fontSize 6.5
+  const CELL_PAD_H = 2; // mm top/bottom padding per cell
+
   const drawTableHeaders = (y) => {
     doc.setFillColor(240, 240, 240);
     doc.rect(margin, y - 4, tableW, 7, 'F');
     doc.setFontSize(6.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
     let x = margin;
     scaledCols.forEach((c) => {
-      if (c.numeric) doc.text(c.label, x + c.sw - 1, y, { align: 'right' });
-      else doc.text(c.label.substring(0, 16), x + 1, y);
+      if (c.numeric) doc.text(c.label, x + c.sw - ROW_PAD, y, { align: 'right' });
+      else doc.text(c.label, x + ROW_PAD, y);
       x += c.sw;
     });
     doc.setFont(undefined, 'normal');
     return y + 6;
+  };
+
+  // Pre-compute wrapped lines for every cell so we know each row's height
+  const computeRow = (row) => {
+    doc.setFontSize(6.5);
+    return scaledCols.map((c) => {
+      let val = row[c.key];
+      if (val == null) val = '';
+      if (c.numeric) {
+        const num = Number(val);
+        return { lines: [isNaN(num) ? '-' : num.toFixed(2)], numeric: true };
+      } else if (c.key === 'status') {
+        return { lines: [String(val)], isStatus: true };
+      } else {
+        const maxW = c.sw - ROW_PAD * 2;
+        const lines = doc.splitTextToSize(String(val), maxW);
+        return { lines };
+      }
+    });
   };
 
   let y = drawTableHeaders(headerY + 22);
@@ -330,34 +374,43 @@ export async function exportDeductionsPDF(deductions, salaryRecords, driverName,
   let pageNum = 1;
 
   rows.forEach((row, idx) => {
-    if (y > pageH - 30) {
+    const cells = computeRow(row);
+    const maxLines = Math.max(...cells.map((c) => c.lines.length));
+    const rowH = maxLines * LINE_H + CELL_PAD_H * 2;
+
+    if (y + rowH > pageH - 30) {
       drawPageFooter(pageNum);
       doc.addPage();
       pageNum++;
       y = drawTableHeaders(20);
       doc.setFontSize(6.5);
     }
-    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - 4, tableW, 6, 'F'); }
+
+    // Row background
+    if (idx % 2 === 0) { doc.setFillColor(250, 250, 250); doc.rect(margin, y - CELL_PAD_H, tableW, rowH, 'F'); }
+
     doc.setTextColor(30, 30, 30);
     let x = margin;
-    scaledCols.forEach((c) => {
-      let val = row[c.key];
-      if (val == null) val = '';
-      if (c.numeric) {
-        const num = Number(val);
-        const str = isNaN(num) ? '-' : num.toFixed(2);
-        doc.text(str, x + c.sw - 1, y, { align: 'right' });
-      } else if (c.key === 'status') {
-        const color = STATUS_DOT_COLORS[String(val).toLowerCase()] || [100, 100, 100];
+    cells.forEach((cell, ci) => {
+      const c = scaledCols[ci];
+      const cellY = y + LINE_H * 0.4; // baseline of first line
+      if (cell.numeric) {
+        doc.text(cell.lines[0], x + c.sw - ROW_PAD, cellY, { align: 'right' });
+      } else if (cell.isStatus) {
+        const color = STATUS_DOT_COLORS[String(cell.lines[0]).toLowerCase()] || [100, 100, 100];
         doc.setFillColor(color[0], color[1], color[2]);
-        doc.circle(x + 2, y - 1, 0.8, 'F');
-        doc.text(String(val).substring(0, 12), x + 5, y);
+        doc.circle(x + ROW_PAD + 0.8, cellY - 0.8, 0.8, 'F');
+        doc.setTextColor(30, 30, 30);
+        doc.text(cell.lines[0], x + ROW_PAD + 3.5, cellY);
       } else {
-        doc.text(String(val).substring(0, 20), x + 1, y);
+        cell.lines.forEach((line, li) => {
+          doc.text(line, x + ROW_PAD, cellY + li * LINE_H);
+        });
       }
       x += c.sw;
     });
-    y += 6;
+
+    y += rowH;
   });
 
   // ── Summary footer ─────────────────────────────────────────────────────────
