@@ -14,8 +14,10 @@ export default function AnalogClockPicker({ value, onChange, onDone, variant = '
   const [dragging, setDragging] = useState(false);
   const svgRef = useRef(null);
   const timerRef = useRef(null);
+  const typedDigitsRef = useRef('');
+  const digitTimerRef = useRef(null);
 
-  // Refs for latest values (avoid stale closures in pointer handlers)
+  // Refs for latest values (avoid stale closures in pointer/keyboard handlers)
   const hour24Ref = useRef(0);
   const minuteRef = useRef(0);
   const isPMRef = useRef(false);
@@ -37,7 +39,15 @@ export default function AnalogClockPicker({ value, onChange, onDone, variant = '
     }
   }, []);
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  // Auto-focus the clock on mount for keyboard users
+  useEffect(() => {
+    svgRef.current?.focus();
+  }, []);
+
+  useEffect(() => () => {
+    clearTimeout(timerRef.current);
+    clearTimeout(digitTimerRef.current);
+  }, []);
 
   const displayHour = hour24 % 12 || 12;
 
@@ -94,6 +104,112 @@ export default function AnalogClockPicker({ value, onChange, onDone, variant = '
     }
   };
 
+  const commitHour = (newH) => {
+    setHour24(newH);
+    hour24Ref.current = newH;
+    const pm = newH >= 12;
+    setIsPM(pm);
+    isPMRef.current = pm;
+    onChange?.(`${String(newH).padStart(2, '0')}:${String(minuteRef.current).padStart(2, '0')}`);
+  };
+
+  const commitMinute = (newM) => {
+    setMinute(newM);
+    minuteRef.current = newM;
+    onChange?.(`${String(hour24Ref.current).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+  };
+
+  const handleKeyDown = (e) => {
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        e.preventDefault();
+        if (modeRef.current === 'hour') {
+          commitHour((hour24Ref.current + 23) % 24);
+        } else {
+          commitMinute((minuteRef.current + 59) % 60);
+        }
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        e.preventDefault();
+        if (modeRef.current === 'hour') {
+          commitHour((hour24Ref.current + 1) % 24);
+        } else {
+          commitMinute((minuteRef.current + 1) % 60);
+        }
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        if (modeRef.current === 'hour') {
+          commitHour((hour24Ref.current + 6) % 24);
+        } else {
+          commitMinute((minuteRef.current + 10) % 60);
+        }
+        break;
+      case 'PageDown':
+        e.preventDefault();
+        if (modeRef.current === 'hour') {
+          commitHour((hour24Ref.current + 18) % 24);
+        } else {
+          commitMinute((minuteRef.current + 50) % 60);
+        }
+        break;
+      case 'Home':
+        e.preventDefault();
+        if (modeRef.current === 'hour') commitHour(0);
+        else commitMinute(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        if (modeRef.current === 'hour') commitHour(23);
+        else commitMinute(59);
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (modeRef.current === 'hour') {
+          clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => setMode('minute'), 200);
+        } else {
+          clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => onDone?.(), 200);
+        }
+        break;
+      default:
+        if (/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          typedDigitsRef.current += e.key;
+          clearTimeout(digitTimerRef.current);
+          digitTimerRef.current = setTimeout(() => { typedDigitsRef.current = ''; }, 800);
+          if (modeRef.current === 'hour') {
+            const num = parseInt(typedDigitsRef.current, 10);
+            if (num >= 1 && num <= 12) {
+              const h12 = num % 12;
+              commitHour(isPMRef.current ? h12 + 12 : h12);
+            } else if (num > 12) {
+              typedDigitsRef.current = e.key;
+              const num2 = parseInt(e.key, 10);
+              if (num2 >= 1 && num2 <= 9) {
+                const h12 = num2 % 12;
+                commitHour(isPMRef.current ? h12 + 12 : h12);
+              }
+            }
+          } else {
+            const num = parseInt(typedDigitsRef.current, 10);
+            if (num >= 0 && num <= 59) {
+              commitMinute(num);
+            } else if (num > 59) {
+              typedDigitsRef.current = e.key;
+              const num2 = parseInt(e.key, 10);
+              if (num2 >= 0 && num2 <= 5) commitMinute(num2);
+            }
+          }
+        }
+        break;
+    }
+  };
+
   // Hand position
   const handAngle = mode === 'hour' ? (hour24 % 12) * 30 : minute * 6;
   const handRad = (handAngle - 90) * Math.PI / 180;
@@ -115,11 +231,18 @@ export default function AnalogClockPicker({ value, onChange, onDone, variant = '
       <svg
         ref={svgRef}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="w-[200px] h-[200px] cursor-pointer"
+        className="w-[200px] h-[200px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:rounded-full"
         style={{ touchAction: 'none' }}
+        tabIndex={0}
+        role="slider"
+        aria-valuenow={mode === 'hour' ? hour24 : minute}
+        aria-valuemin={0}
+        aria-valuemax={mode === 'hour' ? 23 : 59}
+        aria-label={mode === 'hour' ? 'Hour' : 'Minute'}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onKeyDown={handleKeyDown}
       >
         <defs>
           <radialGradient id={`dial-${variant}`} cx="50%" cy="40%">
