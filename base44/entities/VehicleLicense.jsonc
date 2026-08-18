@@ -1,0 +1,93 @@
+{
+  "name": "VehicleLicense",
+  "type": "object",
+  "properties": {
+    "trafficPlateNo": {
+      "type": "string"
+    },
+    "placeOfIssue": {
+      "type": "string"
+    },
+    "tcNo": {
+      "type": "string"
+    },
+    "plateCategory": {
+      "type": "string"
+    },
+    "ownerArabic": {
+      "type": "string"
+    },
+    "ownerEnglish": {
+      "type": "string"
+    },
+    "nationality": {
+      "type": "string"
+    },
+    "expDate": {
+      "type": "string"
+    },
+    "regDate": {
+      "type": "string"
+    },
+    "insurer": {
+      "type": "string"
+    },
+    "insExpDate": {
+      "type": "string"
+    },
+    "policyNo": {
+      "type": "string"
+    },
+    "insuranceType": {
+      "type": "string"
+    },
+    "mortgageBy": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "numOfPassengers": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string"
+    },
+    "vehicleColor": {
+      "type": "string"
+    },
+    "vehicleCategory": {
+      "type": "string"
+    },
+    "vehicleType": {
+      "type": "string"
+    },
+    "gvw": {
+      "type": "string"
+    },
+    "emptyWeight": {
+      "type": "string"
+    },
+    "engineNo": {
+      "type": "string"
+    },
+    "chassisNo": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Private",
+        "Commercial",
+        "Truck",
+        "Bus",
+        "Taxi",
+        "Other"
+      ]
+    }
+  },
+  "required": []
+}
