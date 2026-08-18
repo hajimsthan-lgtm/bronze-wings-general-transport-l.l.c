@@ -59,12 +59,13 @@ export default function VehicleCardLight({ v, onOpen, onEdit, onDelete, onOwners
           <div className="w-16 h-16 rounded-full flex items-center justify-center mt-3" style={{ background: '#fff', boxShadow: `0 4px 24px ${cfg.glow}` }}>
             <Truck className="w-8 h-8" style={{ color: cfg.icon }} />
           </div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500 mt-2">{v.type || 'Vehicle'}</p>
         </div>
 
         {/* Bottom section — white with title, subtitle, plate */}
         <div className="px-4 pt-3 pb-4 bg-white">
           <h3 className="text-lg font-bold text-gray-900 leading-tight">{[v.make, v.model].filter(Boolean).join(' ') || 'Unknown'}</h3>
-          <p className="text-sm text-gray-500 mt-0.5">{v.type || '—'}{v.year ? ` · ${v.year}` : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{v.year || '—'}</p>
           <div className="mt-2.5 flex items-baseline gap-1">
             <span className="text-xl font-bold tracking-tight" style={{ color: PRICE_COLOR }}>{v.plate_number || '—'}</span>
           </div>
