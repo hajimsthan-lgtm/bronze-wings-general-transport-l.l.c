@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import EntityFormDialog from '@/components/common/EntityFormDialog';
+
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import VehicleCard from '@/components/admin/VehicleCard';
@@ -16,7 +16,7 @@ import VehicleListRow from '@/components/admin/VehicleListRow';
 import ViewToggle from '@/components/common/ViewToggle';
 import ImageUpload from '@/components/common/ImageUpload';
 import TypeCombobox from '@/components/admin/TypeCombobox';
-import VehicleForm from '@/components/admin/VehicleForm';
+
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -183,27 +183,7 @@ function VehiclesTab() {
         </>
       )}
 
-      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Scan UAE Mulkiya — AI extracts vehicle data automatically">
-          <VehicleForm editItem={editItem} onSave={async (data) => {
-            let saved;
-            if (editItem) saved = await base44.entities.Vehicle.update(editItem.id, data);
-            else saved = await base44.entities.Vehicle.create(data);
-            // If a document was scanned, also file it under Documents linked to this vehicle
-            if (data.ownership_front_url && (!editItem || editItem.ownership_front_url !== data.ownership_front_url)) {
-              await base44.entities.Document.create({
-                title: `Vehicle License — ${data.plate_number || 'Unknown'}`,
-                type: 'registration',
-                related_entity: 'Vehicle',
-                related_id: saved?.id || editItem?.id,
-                file_url: data.ownership_front_url,
-                expiry_date: data.registration_expiry || undefined,
-                notes: 'Auto-filed from Mulkiya scan',
-              }).catch(() => {});
-            }
-            load(); setFormOpen(false);
-          }} onCancel={() => setFormOpen(false)} />
-      </EntityFormDialog>
-      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
+
     </div>
   );
 }
