@@ -100,7 +100,8 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
   return (
     <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/30 relative">
       <div className="absolute bottom-0 left-0 right-0 h-px" style={{
-        background: 'linear-gradient(90deg, transparent, rgba(var(--brand-bronze-rgb),0.3), rgba(var(--brand-blue-rgb),0.3), transparent)'
+        background: 'linear-gradient(90deg, transparent, rgba(0,242,195,0.5), rgba(34,211,238,0.4), transparent)',
+        boxShadow: '0 0 8px rgba(0,242,195,0.3)'
       }} />
       <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center gap-4">
         {/* Logo */}
@@ -130,7 +131,7 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
             onFocus={() => setSearchFocused(true)}
             onKeyDown={(e) => { if (e.key === 'Enter' && searchResults?.[0]?.items?.[0]) handleResultClick(searchResults[0].items[0].link); }}
             placeholder="Search trips, invoices, drivers, clients..."
-            className="w-full h-10 pl-10 pr-4 rounded-full bg-foreground/[0.04] border border-border/40 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:border-[rgba(var(--brand-blue-rgb),0.4)] focus:bg-foreground/[0.06] focus:shadow-[0_0_0_3px_rgba(var(--brand-blue-rgb),0.1)] transition-all"
+            className="w-full h-10 pl-10 pr-4 rounded-full bg-foreground/[0.04] border border-border/40 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:border-[rgba(0,242,195,0.45)] focus:bg-foreground/[0.06] focus:shadow-[0_0_0_3px_rgba(0,242,195,0.12)] transition-all"
           />
 
           {/* Search dropdown */}
@@ -171,11 +172,11 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date Range</h4>
                 <div>
                   <label className="text-xs text-muted-foreground">From</label>
-                  <input type="date" value={dateFrom || ''} onChange={(e) => setDateFrom(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(var(--brand-blue-rgb),0.4)]" />
+                  <input type="date" value={dateFrom || ''} onChange={(e) => setDateFrom(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(0,242,195,0.45)]" />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">To</label>
-                  <input type="date" value={dateTo || ''} onChange={(e) => setDateTo(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(var(--brand-blue-rgb),0.4)]" />
+                  <input type="date" value={dateTo || ''} onChange={(e) => setDateTo(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(0,242,195,0.45)]" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-foreground/5 hover:bg-foreground/10 transition-colors">Clear</button>

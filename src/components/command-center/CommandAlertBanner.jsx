@@ -12,12 +12,12 @@ export default function CommandAlertBanner({ alerts, onDismiss }) {
   return (
     <div className={cn(
       'flex items-center gap-3 px-4 py-3 rounded-2xl border-l-4 animate-enter-up',
-      isUrgent ? 'bg-red-500/[0.06] border-red-500' : 'bg-amber-500/[0.06] border-amber-500'
+      isUrgent ? 'bg-rose-500/[0.08] border-rose-500 shadow-[0_0_24px_-8px_rgba(244,63,94,0.4)]' : 'bg-amber-500/[0.08] border-amber-500 shadow-[0_0_24px_-8px_rgba(251,191,36,0.4)]'
     )}>
       <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-        isUrgent ? 'bg-red-500/15' : 'bg-amber-500/15'
+        isUrgent ? 'bg-rose-500/20 border border-rose-500/40' : 'bg-amber-500/20 border border-amber-500/40'
       )}>
-        <Icon className={cn('w-4 h-4', isUrgent ? 'text-red-400' : 'text-amber-400')} />
+        <Icon className={cn('w-4 h-4', isUrgent ? 'text-rose-400' : 'text-amber-400')} />
       </div>
       <p className="text-sm flex-1">
         <span className={cn('font-semibold', isUrgent ? 'text-red-400' : 'text-amber-400')}>{isUrgent ? 'Urgent: ' : 'Warning: '}</span>

@@ -8,16 +8,16 @@ const TRIP_FILTERS = ['All', 'Done', 'Active'];
 const INV_FILTERS = ['All', 'Paid', 'Pending'];
 
 const statusColor = (status) => ({
-  completed: 'bg-green-500/10 text-green-500',
-  in_transit: 'bg-blue-500/10 text-blue-500',
-  scheduled: 'bg-amber-500/10 text-amber-500',
-  cancelled: 'bg-red-500/10 text-red-500',
-  paid: 'bg-green-500/10 text-green-500',
-  draft: 'bg-foreground/5 text-muted-foreground',
-  sent: 'bg-blue-500/10 text-blue-500',
-  overdue: 'bg-red-500/10 text-red-500',
-  partially_paid: 'bg-amber-500/10 text-amber-500',
-}[status] || 'bg-foreground/5 text-muted-foreground');
+  completed: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+  in_transit: 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30',
+  scheduled: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+  cancelled: 'bg-rose-500/15 text-rose-400 border border-rose-500/30',
+  paid: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30',
+  draft: 'bg-foreground/5 text-muted-foreground border border-border/30',
+  sent: 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30',
+  overdue: 'bg-rose-500/15 text-rose-400 border border-rose-500/30',
+  partially_paid: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+}[status] || 'bg-foreground/5 text-muted-foreground border border-border/30');
 
 function FilterPills({ filters, active, onChange }) {
   return (
@@ -28,7 +28,7 @@ function FilterPills({ filters, active, onChange }) {
           onClick={() => onChange(f)}
           className={cn(
             'px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all',
-            active === f ? 'bg-foreground/10 text-foreground' : 'text-muted-foreground hover:text-foreground'
+            active === f ? 'bg-[#00f2c3]/15 text-[#00f2c3] border border-[#00f2c3]/30' : 'text-muted-foreground hover:text-foreground border border-transparent'
           )}
         >
           {f}
@@ -70,8 +70,8 @@ export default function CommandActivity({ recentTrips, recentInvoices }) {
             <p className="text-sm text-muted-foreground py-6 text-center">No trips</p>
           ) : filteredTrips.map(t => (
             <div key={t.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.05] transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                <Truck className="w-4 h-4 text-blue-400" />
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 12px -4px rgba(34,211,238,0.4)' }}>
+                <Truck className="w-4 h-4 text-cyan-400" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{t.trip_number || `${t.from_location} → ${t.to_location}`}</p>
@@ -102,7 +102,7 @@ export default function CommandActivity({ recentTrips, recentInvoices }) {
             <p className="text-sm text-muted-foreground py-6 text-center">No invoices</p>
           ) : filteredInvoices.map(i => (
             <div key={i.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.05] transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-violet-500/15 border border-violet-500/30 flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 12px -4px rgba(168,85,247,0.4)' }}>
                 <FileText className="w-4 h-4 text-violet-400" />
               </div>
               <div className="flex-1 min-w-0">

@@ -8,10 +8,10 @@ import { formatCurrency } from '@/lib/formatters';
 
 const RANGES = ['7D', '30D', '90D'];
 
-const BRONZE = '#C9873B';
-const BLUE = '#0A84FF';
-const GREEN = '#10B981';
-const RED = '#EF4444';
+const BRONZE = '#00f2c3';
+const BLUE = '#22d3ee';
+const GREEN = '#22c55e';
+const RED = '#f43f5e';
 
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -104,7 +104,7 @@ export default function CommandAnalytics({ data, range, setRange }) {
               className={cn(
                 'px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
                 range === r
-                  ? 'bg-[#0A84FF] text-white shadow-md shadow-[0_2px_8px_rgba(10,132,255,0.4)]'
+                  ? 'bg-[#00f2c3] text-black shadow-md shadow-[0_2px_8px_rgba(0,242,195,0.5)]'
                   : 'text-muted-foreground hover:text-foreground hover:bg-foreground/5'
               )}
             >

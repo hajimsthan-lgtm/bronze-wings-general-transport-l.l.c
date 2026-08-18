@@ -4,11 +4,11 @@ import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const SPARK_COLORS = {
-  brand: { stroke1: '#C9873B', stroke2: '#0A84FF', fill: '#0A84FF' },
-  blue: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
-  green: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
-  violet: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
-  amber: { stroke1: '#0A84FF', stroke2: '#3B82F6', fill: '#0A84FF' },
+  brand: { stroke1: '#00f2c3', stroke2: '#22d3ee', fill: '#00f2c3' },
+  blue: { stroke1: '#06b6d4', stroke2: '#22d3ee', fill: '#06b6d4' },
+  green: { stroke1: '#22c55e', stroke2: '#4ade80', fill: '#22c55e' },
+  violet: { stroke1: '#a855f7', stroke2: '#c084fc', fill: '#a855f7' },
+  amber: { stroke1: '#fbbf24', stroke2: '#f59e0b', fill: '#fbbf24' },
 };
 
 function BrandSparkline({ data, width = 140, height = 40, variant = 'brand' }) {

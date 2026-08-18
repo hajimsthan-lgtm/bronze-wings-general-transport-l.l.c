@@ -4,9 +4,9 @@ import { Crown } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 
-const BRONZE = '#C9873B';
-const BLUE = '#0A84FF';
-const RED = '#EF4444';
+const BRONZE = '#00f2c3';
+const BLUE = '#22d3ee';
+const RED = '#f43f5e';
 
 function CashTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;

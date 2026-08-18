@@ -16,7 +16,7 @@ export default function CommandOverview({ stats }) {
           const Icon = s.icon;
           const chipClass = s.chip || 'chip-blue';
           return (
-            <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.04] border border-border/30">
+            <div key={s.label} className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.04] border border-border/30 hover:border-[rgba(0,242,195,0.25)] transition-colors">
               <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', chipClass)}>
                 <Icon className="w-4 h-4 text-white" />
               </div>

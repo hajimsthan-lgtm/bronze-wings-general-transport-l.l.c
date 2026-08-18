@@ -21,8 +21,8 @@ export default function CommandAlertsPanel({ alerts }) {
             <Link key={i} to={a.link} className={cn(
               'flex items-center gap-3 p-3 rounded-xl border-l-[4px] transition-all hover:-translate-y-0.5 group',
               isUrgent
-                ? 'bg-gradient-to-r from-red-500/[0.12] to-rose-500/[0.06] border-red-500 hover:from-red-500/[0.18] hover:to-rose-500/[0.1]'
-                : 'bg-gradient-to-r from-amber-500/[0.12] to-orange-500/[0.06] border-amber-500 hover:from-amber-500/[0.18] hover:to-orange-500/[0.1]'
+                ? 'bg-gradient-to-r from-rose-500/[0.14] to-rose-500/[0.06] border-rose-500 hover:from-rose-500/[0.20] hover:to-rose-500/[0.1] hover:shadow-[0_0_24px_-8px_rgba(244,63,94,0.5)]'
+                : 'bg-gradient-to-r from-amber-500/[0.14] to-amber-500/[0.06] border-amber-500 hover:from-amber-500/[0.20] hover:to-amber-500/[0.1] hover:shadow-[0_0_24px_-8px_rgba(251,191,36,0.5)]'
             )}>
               <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
                 isUrgent ? 'chip-red' : 'chip-amber'
