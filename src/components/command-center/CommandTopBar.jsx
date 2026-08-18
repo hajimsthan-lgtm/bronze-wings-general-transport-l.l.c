@@ -115,7 +115,7 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
         </div>
 
         {/* Home button */}
-        <button onClick={() => navigate('/command-center')} className={cn(iconBtn, 'flex-shrink-0')} title="Home Dashboard">
+        <button onClick={() => navigate('/')} className={cn(iconBtn, 'flex-shrink-0')} title="Home Dashboard">
           <Home className="w-4 h-4" />
         </button>
 
