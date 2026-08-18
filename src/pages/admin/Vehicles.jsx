@@ -65,6 +65,12 @@ function VehiclesTab() {
   };
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filtered = items.filter((v) => !search || v.plate_number?.toLowerCase().includes(search.toLowerCase()) || v.make?.toLowerCase().includes(search.toLowerCase()));
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
@@ -187,8 +193,14 @@ function VehiclesTab() {
 function VehicleForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, year: editItem.year || '' }); else setForm({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' }); }, [editItem]);
+  const [form, setForm] = useState({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', vendor_name: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
+  useEffect(() => {
+    if (editItem) { setForm({ ...form, ...editItem, year: editItem.year || '' }); }
+    else {
+      const p = new URLSearchParams(window.location.search);
+      setForm({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', vendor_name: p.get('vendor') || '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
+    }
+  }, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
   const handle = async () => { setSaving(true); await onSave({ ...form, year: form.year ? Number(form.year) : undefined }); setSaving(false); };
 

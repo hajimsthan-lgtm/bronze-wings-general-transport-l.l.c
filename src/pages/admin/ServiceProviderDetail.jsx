@@ -187,6 +187,8 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Truck}
             emptyLabel="No vehicles supplied"
+            onNew={() => navigate(`/admin/vehicles?new=1&vendor=${encodeURIComponent(vendor.name)}`)}
+            newLabel="Add vehicle"
             columns={[
               { label: 'Plate', className: 'col-span-3' },
               { label: 'Type', className: 'col-span-2' },
@@ -214,6 +216,8 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Users}
             emptyLabel="No drivers supplied"
+            onNew={() => navigate(`/admin/drivers?new=1&vendor=${encodeURIComponent(vendor.name)}`)}
+            newLabel="Add driver"
             columns={[
               { label: 'Name', className: 'col-span-3' },
               { label: 'Phone', className: 'col-span-2' },

@@ -131,8 +131,14 @@ function DriversTab() {
 function DriverForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
-  useEffect(() => { if (editItem) setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' }); else setForm({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' }); }, [editItem]);
+  const [form, setForm] = useState({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', vendor_name: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
+  useEffect(() => {
+    if (editItem) { setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' }); }
+    else {
+      const p = new URLSearchParams(window.location.search);
+      setForm({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', vendor_name: p.get('vendor') || '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
+    }
+  }, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
   const handle = async () => { setSaving(true); await onSave({ ...form, base_salary: Number(form.base_salary) || 0 }); setSaving(false); };
 
