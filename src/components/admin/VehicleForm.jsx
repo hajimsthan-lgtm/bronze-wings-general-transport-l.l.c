@@ -81,10 +81,7 @@ export default function VehicleForm({ editItem, onSave, onCancel }) {
 
   useEffect(() => {
     if (editItem) setForm({ ...EMPTY, ...editItem, year: editItem.year || '' });
-    else {
-      const p = new URLSearchParams(window.location.search);
-      setForm({ ...EMPTY, vendor_name: p.get('vendor') || '' });
-    }
+    else setForm(EMPTY);
   }, [editItem]);
 
   const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));

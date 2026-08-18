@@ -17,7 +17,7 @@ const EMPTY = {
   gvw: '', emptyWeight: '', engineNo: '', chassisNo: '',
   category: 'Private', notes: '',
   // Vehicle-specific fields
-  year: '', assigned_driver: '', vendor_name: '', fuel_type: 'diesel', status: 'active',
+  year: '', assigned_driver: '', fuel_type: 'diesel', status: 'active',
 };
 
 function Section({ icon: Icon, title, accent, children }) {
@@ -76,7 +76,6 @@ export default function VehicleAddForm({ editItem, onSave, onCancel }) {
         registration_expiry: form.expDate || '',
         insurance_expiry: form.insExpDate || '',
         assigned_driver: form.assigned_driver || '',
-        vendor_name: form.vendor_name || '',
         fuel_type: form.fuel_type || 'diesel',
         status: form.status || 'active',
         notes: form.notes || '',
@@ -138,7 +137,6 @@ export default function VehicleAddForm({ editItem, onSave, onCancel }) {
       <Section icon={Car} title="Fleet Assignment" accent="#10b981">
         <Field label="Year"><Input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="Assigned Driver"><Input value={form.assigned_driver} onChange={(e) => update('assigned_driver', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Vendor"><Input value={form.vendor_name} onChange={(e) => update('vendor_name', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="Fuel Type">
           <Select value={form.fuel_type} onValueChange={(v) => update('fuel_type', v)}>
             <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>

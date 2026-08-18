@@ -35,7 +35,6 @@ export default function DriverEditDialog({ open, onOpenChange, driver, onSave })
         nationality: driver.nationality || '',
         status: driver.status || 'active',
         assigned_vehicle: driver.assigned_vehicle || '',
-        vendor_name: driver.vendor_name || '',
         base_salary: driver.base_salary || 0,
         join_date: driver.join_date || '',
         emergency_contact: driver.emergency_contact || '',
@@ -82,7 +81,6 @@ export default function DriverEditDialog({ open, onOpenChange, driver, onSave })
             </Select>
           </Field>
           <Field label="Assigned Vehicle"><Input value={form.assigned_vehicle || ''} onChange={(e) => set('assigned_vehicle', e.target.value)} placeholder="Plate number" /></Field>
-          <Field label="Vendor / Service Provider"><Input value={form.vendor_name || ''} onChange={(e) => set('vendor_name', e.target.value)} /></Field>
           <Field label="Base Salary"><Input type="number" value={form.base_salary || 0} onChange={(e) => set('base_salary', e.target.value)} /></Field>
           <Field label="Join Date"><Input type="date" value={form.join_date || ''} onChange={(e) => set('join_date', e.target.value)} /></Field>
           <Field label="Emergency Contact"><Input value={form.emergency_contact || ''} onChange={(e) => set('emergency_contact', e.target.value)} /></Field>
