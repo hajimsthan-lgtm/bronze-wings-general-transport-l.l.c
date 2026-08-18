@@ -17,7 +17,7 @@ import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { Plus, Wallet, CheckCircle2, Clock, Sparkles, Pencil, Download, Trash2, CheckCircle, Search, CreditCard, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
-import { safeListAll } from '@/lib/safeRequest';
+import { safeListAll, withRetry } from '@/lib/safeRequest';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import ResponsiveStats from '@/components/mobile/ResponsiveStats';
 import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
@@ -90,6 +90,7 @@ export default function Salary() {
       const toCreate = [];
       for (const d of eligible) {
         const { total: deducted, breakdown } = await applyDeductions(d.name, null);
+        await new Promise((r) => setTimeout(r, 200)); // breather between drivers to avoid rate-limit bursts
         toCreate.push({
           driver_name: d.name,
           month,
@@ -137,7 +138,7 @@ export default function Salary() {
   // selectedItems: null = all active (monthly_deduction); or [{id, amount}].
   // Returns { total, breakdown }.
   const applyDeductions = async (driverName, selectedItems) => {
-    const all = await base44.entities.DriverDeduction.filter({ driver_name: driverName, status: 'active' }).catch(() => []);
+    const all = await withRetry(() => base44.entities.DriverDeduction.filter({ driver_name: driverName, status: 'active' })).catch(() => []);
     const sorted = (all || [])
       .filter((d) => Number(d.remaining_balance) > 0)
       .sort((a, b) => (a.issue_date || '').localeCompare(b.issue_date || ''));
@@ -154,11 +155,11 @@ export default function Salary() {
       const newRemaining = Math.max(0, (Number(d.remaining_balance) || 0) - amt);
       const newMonthsLeft = 0;
       const newStatus = newRemaining <= 0 ? 'completed' : 'active';
-      await base44.entities.DriverDeduction.update(d.id, {
+      await withRetry(() => base44.entities.DriverDeduction.update(d.id, {
         remaining_balance: newRemaining,
         months_left: newMonthsLeft,
         status: newStatus,
-      });
+      }));
       total += amt;
       breakdown.push({ description: d.description || d.type, type: d.type, amount: amt });
     }
