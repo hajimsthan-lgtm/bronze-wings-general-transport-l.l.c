@@ -1,5 +1,5 @@
-import { AlertCircle, CalendarClock, Clock, TrendingUp } from 'lucide-react';
-import KpiCard from '@/components/common/KpiCard';
+import { AlertCircle, CalendarClock, Clock, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 import Sparkline from '@/components/reports/Sparkline';
 import { formatCurrency } from '@/lib/formatters';
 import { deriveStatus, isOverdue } from '@/lib/invoiceWorkflow';
@@ -10,11 +10,9 @@ export default function InvoiceStatCards({ invoices }) {
   nextMonth.setDate(nextMonth.getDate() + 30);
   const nextMonthStr = nextMonth.toISOString().split('T')[0];
 
-  // 1. Overdue (derived flag, not stored status)
   const overdue = invoices.filter(i => isOverdue(i));
   const overdueTotal = overdue.reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
-  // 2. Due within next 30 days (unpaid, not overdue)
   const dueSoon = invoices.filter(i => {
     const s = deriveStatus(i);
     if (i.voided || s === 'paid' || s === 'cancelled' || isOverdue(i)) return false;
@@ -23,7 +21,6 @@ export default function InvoiceStatCards({ invoices }) {
   });
   const dueSoonTotal = dueSoon.reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
-  // 3. Average time to get paid (issue_date → signed_date, fallback to today)
   const paidInvoices = invoices.filter(i => deriveStatus(i) === 'paid' && i.issue_date);
   const avgDays = paidInvoices.length > 0
     ? Math.round(paidInvoices.reduce((s, i) => {
@@ -33,7 +30,6 @@ export default function InvoiceStatCards({ invoices }) {
       }, 0) / paidInvoices.length)
     : 0;
 
-  // Sparkline: last 6 months of paid amounts
   const sparkData = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date();
@@ -45,12 +41,10 @@ export default function InvoiceStatCards({ invoices }) {
     sparkData.push(monthPaid);
   }
 
-  // 4. Total outstanding
   const outstanding = invoices
     .filter(i => { const s = deriveStatus(i); return !i.voided && s !== 'paid' && s !== 'cancelled'; })
     .reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
-  // Trend: this month vs last month outstanding
   const thisMonth = new Date().toISOString().slice(0, 7);
   const lastMonthDate = new Date();
   lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
@@ -62,58 +56,29 @@ export default function InvoiceStatCards({ invoices }) {
     .filter(i => { const s = deriveStatus(i); return !i.voided && s !== 'paid' && s !== 'cancelled' && i.issue_date?.startsWith(lastMonth); })
     .reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
   const trendPct = lastOut > 0 ? ((thisOut - lastOut) / lastOut * 100).toFixed(1) : null;
-  // For outstanding, increase = bad (red), decrease = good (green)
-  const trendDir = trendPct != null ? (Number(trendPct) >= 0 ? 'down' : 'up') : null;
-  const trendLabel = trendPct != null ? `${Number(trendPct) >= 0 ? '+' : ''}${trendPct}% vs last month` : null;
+  const trendUp = trendPct != null && Number(trendPct) >= 0;
+
+  const TrendExtra = () => trendPct != null ? (
+    <div className="flex items-center gap-1 text-[11px] font-semibold" style={{ color: trendUp ? '#ef4444' : '#22c55e' }}>
+      {trendUp ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+      {trendUp ? '+' : ''}{trendPct}% vs last month
+    </div>
+  ) : null;
+
+  const Subtitle = ({ children }) => (
+    <div className="text-[11px] text-muted-foreground truncate">{children}</div>
+  );
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      <KpiCard
-        icon={AlertCircle}
-        title="Overdue"
-        value={String(overdue.length)}
-        subtitle={overdue.length > 0 ? formatCurrency(overdueTotal) : 'All clear'}
-        accent="red"
-        trendValue={overdue.length > 0 ? `${overdue.length} invoices` : null}
-        trend={overdue.length > 0 ? 'down' : 'up'}
-      />
-      <KpiCard
-        icon={CalendarClock}
-        title="Due Next 30 Days"
-        value={String(dueSoon.length)}
-        subtitle={dueSoon.length > 0 ? formatCurrency(dueSoonTotal) : 'Nothing due'}
-        accent="amber"
-      />
-
-      {/* Card 3: Avg time to get paid + sparkline */}
-      <div className="kpi-card group relative overflow-hidden rounded-2xl p-5">
-        <div className="kpi-dots pointer-events-none absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(45,212,191,0.16) 1px, transparent 1px)' }} />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(45,212,191,0.35), transparent)' }} />
-        <div className="relative">
-          <div className="flex items-start justify-between mb-3.5">
-            <p className="eyebrow pt-1">Avg Time to Paid</p>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-white/10 bg-white/[0.04]">
-              <Clock className="w-4 h-4 text-teal-600" />
-            </div>
-          </div>
-          <div className="flex items-end justify-between gap-2">
-            <div>
-              <p className="text-2xl font-bold tracking-tight tabular-nums font-display text-teal-600">{avgDays}<span className="text-sm font-medium text-muted-foreground ml-1">days</span></p>
-              <p className="text-xs text-muted-foreground mt-2">{paidInvoices.length} paid invoices</p>
-            </div>
-            <Sparkline data={sparkData} color="#2dd4bf" width={80} height={36} />
-          </div>
-        </div>
-      </div>
-
-      <KpiCard
-        icon={TrendingUp}
-        title="Total Outstanding"
-        value={formatCurrency(outstanding)}
-        accent="primary"
-        trendValue={trendLabel}
-        trend={trendDir}
-      />
+      <ReportStatCard index={1} label="Overdue" value={overdue.length} icon={AlertCircle} color="#ef4444"
+        extra={overdue.length > 0 ? <Subtitle>{formatCurrency(overdueTotal)}</Subtitle> : <Subtitle>All clear</Subtitle>} />
+      <ReportStatCard index={2} label="Due Next 30 Days" value={dueSoon.length} icon={CalendarClock} color="#f59e0b"
+        extra={dueSoon.length > 0 ? <Subtitle>{formatCurrency(dueSoonTotal)}</Subtitle> : <Subtitle>Nothing due</Subtitle>} />
+      <ReportStatCard index={3} label="Avg Time to Paid" value={avgDays} format={(v) => `${Math.round(v)}`} icon={Clock} color="#14b8a6"
+        extra={<div className="flex items-end justify-between gap-2"><Subtitle>{paidInvoices.length} paid invoices</Subtitle><Sparkline data={sparkData} color="#14b8a6" width={80} height={32} /></div>} />
+      <ReportStatCard index={4} label="Total Outstanding" value={outstanding} format={formatCurrency} icon={TrendingUp} color="#00f2c3"
+        extra={<TrendExtra />} />
     </div>
   );
 }

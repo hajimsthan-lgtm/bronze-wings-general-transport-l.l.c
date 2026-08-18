@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate } from '@/lib/formatters';
 import { Plus, Search, Award, Pencil, Trash2, Upload, FileText, Loader2, ExternalLink, RefreshCw, History, ShieldCheck, AlertTriangle, CheckCircle2, CalendarClock, CalendarX } from 'lucide-react';
-import KpiCard from '@/components/common/KpiCard';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 import CompanyDocRenewDialog from '@/components/company-docs/CompanyDocRenewDialog';
 
 const DOC_TYPES = [
@@ -140,10 +140,10 @@ export default function CompanyDocuments() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
-        <KpiCard icon={ShieldCheck} title="Total Documents" value={String(stats.total)} subtitle={stats.total === 0 ? 'No documents tracked' : 'Compliance docs'} accent="primary" />
-        <KpiCard icon={CheckCircle2} title="Active" value={String(stats.active)} subtitle={stats.active > 0 ? 'All valid' : '—'} accent="emerald" />
-        <KpiCard icon={CalendarClock} title="Expiring Soon" value={String(stats.expiring)} subtitle={stats.expiring > 0 ? 'Needs attention' : 'All clear'} accent="amber" />
-        <KpiCard icon={CalendarX} title="Expired" value={String(stats.expired)} subtitle={stats.expired > 0 ? 'Action required' : 'None expired'} accent="red" />
+        <ReportStatCard index={1} label="Total Documents" value={stats.total} icon={ShieldCheck} color="#00f2c3" />
+        <ReportStatCard index={2} label="Active" value={stats.active} icon={CheckCircle2} color="#22c55e" />
+        <ReportStatCard index={3} label="Expiring Soon" value={stats.expiring} icon={CalendarClock} color="#f59e0b" />
+        <ReportStatCard index={4} label="Expired" value={stats.expired} icon={CalendarX} color="#ef4444" />
       </div>
 
       {/* Toolbar */}
