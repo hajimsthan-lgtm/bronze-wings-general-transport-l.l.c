@@ -27,10 +27,10 @@ const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,215,96,
 
 const statusMeta = (s) => {
   switch (s) {
-    case 'completed': return { color: '#22c55e', text: '#4ade80' };
-    case 'in_transit': return { color: '#1ED760', text: '#4ADE80' };
-    case 'cancelled': return { color: '#ef4444', text: '#f87171' };
-    default: return { color: '#f59e0b', text: '#fbbf24' };
+    case 'completed': return { color: '#22c55e', text: '#4ade80', glow: 'rgba(34,197,94,0.5)' };
+    case 'in_transit': return { color: '#06b6d4', text: '#22d3ee', glow: 'rgba(6,182,212,0.5)' };
+    case 'cancelled': return { color: '#ef4444', text: '#f87171', glow: 'rgba(239,68,68,0.5)' };
+    default: return { color: '#f59e0b', text: '#fbbf24', glow: 'rgba(245,158,11,0.5)' };
   }
 };
 
@@ -143,11 +143,11 @@ export default function DailyReport() {
               {driverRanking.length === 0 ? <p className="text-sm text-white/40">No data</p> : (
                 <div className="space-y-2">
                   {driverRanking.map((d, i) => (
-                    <div key={d.name} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.02] transition-colors">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: i === 0 ? 'rgba(234,179,8,0.18)' : 'rgba(255,255,255,0.05)', color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.5)', border: `1px solid ${i === 0 ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.06)'}` }}>{i + 1}</div>
+                    <div key={d.name} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.04] transition-colors">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: i === 0 ? 'rgba(234,179,8,0.20)' : 'rgba(255,255,255,0.05)', color: i === 0 ? '#fbbf24' : 'rgba(255,255,255,0.5)', border: `1px solid ${i === 0 ? 'rgba(234,179,8,0.45)' : 'rgba(255,255,255,0.06)'}`, boxShadow: i === 0 ? '0 0 12px rgba(234,179,8,0.4)' : 'none' }}>{i + 1}</div>
                       <span className="flex-1 text-sm text-white/80 truncate">{d.name}</span>
                       <span className="text-xs text-white/40 tabular-nums">{d.trips} trips</span>
-                      <span className="text-sm font-semibold text-white/90 tabular-nums">{formatCurrency(d.revenue)}</span>
+                      <span className="text-sm font-semibold tabular-nums" style={{ color: '#4ade80', textShadow: '0 0 10px rgba(34,197,94,0.3)' }}>{formatCurrency(d.revenue)}</span>
                     </div>
                   ))}
                 </div>
@@ -156,9 +156,9 @@ export default function DailyReport() {
           </div>
 
           {/* Trips section */}
-          <div className="relative overflow-hidden p-5" style={contentCardStyle}>
-            <div className="absolute inset-x-0 top-0 h-20 pointer-events-none" style={{ background: topHighlight }} />
-            <h3 className="relative text-sm font-semibold text-white/80 mb-3">{t('trips')} ({trips.length})</h3>
+          <div className="relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(6,182,212,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 28px rgba(6,182,212,0.06)' }}>
+            <div className="absolute inset-x-0 top-0 h-[2px] opacity-60" style={{ background: 'linear-gradient(90deg, transparent, #06b6d4, transparent)', boxShadow: '0 0 10px rgba(6,182,212,0.7)' }} />
+            <h3 className="relative text-sm font-semibold mb-3" style={{ color: 'rgba(34,211,238,0.85)' }}>{t('trips')} ({trips.length})</h3>
             {trips.length === 0 ? <p className="relative text-sm text-white/40">{t('no_data')}</p> : (
               <div className="relative space-y-1">
                 {trips.map((trip, i) => {
@@ -179,9 +179,10 @@ export default function DailyReport() {
                       </div>
                       <div className="flex items-center gap-2.5 flex-shrink-0">
                         <span
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium"
-                          style={{ background: hexToRgba(meta.color, 0.12), border: `1px solid ${hexToRgba(meta.color, 0.20)}`, color: meta.text, letterSpacing: '0.02em' }}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                          style={{ background: hexToRgba(meta.color, 0.16), border: `1px solid ${hexToRgba(meta.color, 0.40)}`, color: meta.text, letterSpacing: '0.02em', boxShadow: `0 0 12px ${meta.glow}, inset 0 1px 0 rgba(255,255,255,0.08)` }}
                         >
+                          <span className="w-1.5 h-1.5 rounded-full mr-1.5" style={{ background: meta.color, boxShadow: `0 0 6px ${meta.color}` }} />
                           {(trip.status || '').replace(/_/g, ' ')}
                         </span>
                         <span className="text-sm font-semibold text-white/90 tabular-nums">{formatCurrency(trip.revenue)}</span>
@@ -194,16 +195,16 @@ export default function DailyReport() {
           </div>
 
           {/* Summary */}
-          <div className="relative overflow-hidden p-5" style={contentCardStyle}>
-            <div className="absolute inset-x-0 top-0 h-20 pointer-events-none" style={{ background: topHighlight }} />
-            <h3 className="relative text-sm font-semibold text-white/80 mb-3">Day Summary</h3>
+          <div className="relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(34,197,94,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 28px rgba(34,197,94,0.06)' }}>
+            <div className="absolute inset-x-0 top-0 h-[2px] opacity-60" style={{ background: 'linear-gradient(90deg, transparent, #22c55e, transparent)', boxShadow: '0 0 10px rgba(34,197,94,0.7)' }} />
+            <h3 className="relative text-sm font-semibold mb-3" style={{ color: 'rgba(74,222,128,0.85)' }}>Day Summary</h3>
             <div className="relative space-y-2.5">
-              <div className="flex justify-between text-sm"><span className="text-white/50">Revenue</span><span className="text-emerald-400 font-medium tabular-nums">{formatCurrency(revenue)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-white/50">{t('expenses')}</span><span className="text-red-400 font-medium tabular-nums">-{formatCurrency(expenseTotal)}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-white/50">{t('fuel')}</span><span className="text-red-400 font-medium tabular-nums">-{formatCurrency(fuelTotal)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-white/50">Revenue</span><span className="font-medium tabular-nums" style={{ color: '#4ade80', textShadow: '0 0 12px rgba(34,197,94,0.4)' }}>{formatCurrency(revenue)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-white/50">{t('expenses')}</span><span className="font-medium tabular-nums" style={{ color: '#f87171', textShadow: '0 0 12px rgba(239,68,68,0.4)' }}>-{formatCurrency(expenseTotal)}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-white/50">{t('fuel')}</span><span className="font-medium tabular-nums" style={{ color: '#f87171', textShadow: '0 0 12px rgba(239,68,68,0.4)' }}>-{formatCurrency(fuelTotal)}</span></div>
               <div className="border-t border-white/[0.06] pt-2.5 flex justify-between text-sm font-bold">
                 <span className="text-white/80">Net</span>
-                <span className={`tabular-nums ${revenue - expenseTotal - fuelTotal >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(revenue - expenseTotal - fuelTotal)}</span>
+                <span className="tabular-nums" style={{ color: revenue - expenseTotal - fuelTotal >= 0 ? '#4ade80' : '#f87171', textShadow: `0 0 14px ${revenue - expenseTotal - fuelTotal >= 0 ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}` }}>{formatCurrency(revenue - expenseTotal - fuelTotal)}</span>
               </div>
             </div>
           </div>
