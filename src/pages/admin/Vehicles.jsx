@@ -184,7 +184,24 @@ function VehiclesTab() {
       )}
 
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Scan UAE Mulkiya — AI extracts vehicle data automatically">
-          <VehicleScanForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vehicle.update(editItem.id, data); else await base44.entities.Vehicle.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+          <VehicleScanForm editItem={editItem} onSave={async (data) => {
+            let saved;
+            if (editItem) saved = await base44.entities.Vehicle.update(editItem.id, data);
+            else saved = await base44.entities.Vehicle.create(data);
+            // If a document was scanned, also file it under Documents linked to this vehicle
+            if (data.ownership_front_url && (!editItem || editItem.ownership_front_url !== data.ownership_front_url)) {
+              await base44.entities.Document.create({
+                title: `Vehicle License — ${data.plate_number || 'Unknown'}`,
+                type: 'registration',
+                related_entity: 'Vehicle',
+                related_id: saved?.id || editItem?.id,
+                file_url: data.ownership_front_url,
+                expiry_date: data.registration_expiry || undefined,
+                notes: 'Auto-filed from Mulkiya scan',
+              }).catch(() => {});
+            }
+            load(); setFormOpen(false);
+          }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
     </div>

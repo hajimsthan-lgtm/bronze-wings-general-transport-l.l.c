@@ -101,11 +101,13 @@ export default function VehicleScanForm({ editItem, onSave, onCancel }) {
 
   const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));
 
-  const handleExtracted = (data) => {
+  const handleExtracted = (data, fileUrl) => {
     const { vehicleFields, extraNotes } = mapExtractedToVehicle(data);
     setForm((p) => ({
       ...p,
       ...vehicleFields,
+      // attach scanned file to ownership card front
+      ownership_front_url: fileUrl || p.ownership_front_url,
       // merge any existing notes with new scan notes (scan takes priority)
       notes: extraNotes || p.notes,
     }));

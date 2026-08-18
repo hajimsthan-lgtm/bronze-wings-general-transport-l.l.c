@@ -31,10 +31,10 @@ export default function VehicleLicenseScanZone({ onExtracted, disabled }) {
     setScanning(true);
     startProgressSim();
     try {
-      const { data } = await uploadAndExtractVehicleLicense(file);
+      const { file_url, data } = await uploadAndExtractVehicleLicense(file);
       stopProgressSim(100);
       setDone(true);
-      onExtracted?.(data);
+      onExtracted?.(data, file_url);
       setTimeout(() => { setScanning(false); setDone(false); setProgress(0); }, 1800);
     } catch (e) {
       stopProgressSim(0);
