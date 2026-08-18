@@ -1,41 +1,8 @@
-import { Search, FileText, ChevronDown, PenLine, FileSignature } from 'lucide-react';
+import { Search, FileText, ChevronDown, PenLine, FileSignature, Send, CreditCard, AlertCircle, Bell } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
-
-const STATUS_PILL = {
-  draft: 'bg-muted text-muted-foreground border-border',
-  sent: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  partially_paid: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
-  paid: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  overdue: 'bg-red-500/15 text-red-400 border-red-500/20',
-  cancelled: 'bg-muted/50 text-muted-foreground/60 border-border',
-};
-
-const STATUS_LABEL = {
-  draft: 'Draft',
-  sent: 'Sent',
-  partially_paid: 'Partial',
-  paid: 'Paid',
-  overdue: 'Overdue',
-  cancelled: 'Cancelled',
-};
-
-const STATUS_DOT = {
-  draft: 'bg-muted-foreground',
-  sent: 'bg-blue-400',
-  partially_paid: 'bg-orange-400',
-  paid: 'bg-emerald-400',
-  overdue: 'bg-red-400',
-  cancelled: 'bg-muted-foreground/50',
-};
+import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
+import { deriveStatus, isOverdue, STATUS_LABELS, STATUS_PILLS, STATUS_DOTS, getAvailableActions } from '@/lib/invoiceWorkflow';
 
 function daysUntilDue(dueDate) {
   if (!dueDate) return null;
@@ -47,8 +14,9 @@ function daysUntilDue(dueDate) {
 }
 
 function dueLabel(inv) {
-  if (inv.status === 'paid') return 'Paid';
-  if (inv.status === 'cancelled') return 'Cancelled';
+  const status = deriveStatus(inv);
+  if (status === 'paid') return 'Paid';
+  if (status === 'cancelled') return 'Cancelled';
   const d = daysUntilDue(inv.due_date);
   if (d == null) return 'No due date';
   if (d < 0) return `${Math.abs(d)}d overdue`;
@@ -70,7 +38,7 @@ export default function InvoiceListPane({
   allSelected,
   onToggleSelectAll,
   onClientClick,
-  onStatusChange,
+  onAction,
 }) {
   const tabs = [
     { key: 'all', label: 'All', count: counts.all },
@@ -146,14 +114,24 @@ export default function InvoiceListPane({
               const total = Number(inv.total_amount || 0);
               const paid = Number(inv.paid_amount || 0);
               const balance = Math.max(0, total - paid);
+              const pct = total > 0 ? Math.min(100, (paid / total) * 100) : 0;
+              const status = deriveStatus(inv);
+              const overdue = isOverdue(inv);
               const isSelected = selectedId === inv.id;
               const isChecked = selectedSet?.has(inv.id);
+              const actions = getAvailableActions(inv);
+
+              // Next-action hint: unsigned for 5+ days
+              let idleDays = 0;
+              if (status === 'unsigned' && inv.sent_for_signature_date) {
+                idleDays = Math.floor((new Date() - new Date(inv.sent_for_signature_date)) / 86400000);
+              }
 
               return (
                 <div
                   key={inv.id}
                   onClick={() => onSelect(inv.id)}
-                  className={`relative flex items-center gap-3 px-3 py-3 cursor-pointer transition-all duration-200 group ${
+                  className={`relative flex items-start gap-3 px-3 py-3 cursor-pointer transition-all duration-200 group ${
                     isSelected
                       ? 'bg-primary/10 border-l-2 border-primary'
                       : 'border-l-2 border-transparent hover:bg-muted/30'
@@ -165,7 +143,7 @@ export default function InvoiceListPane({
                     checked={isChecked || false}
                     onChange={(e) => { e.stopPropagation(); onToggleSelect?.(inv.id, e.target.checked); }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-3.5 h-3.5 rounded accent-primary cursor-pointer flex-shrink-0"
+                    className="w-3.5 h-3.5 mt-1 rounded accent-primary cursor-pointer flex-shrink-0"
                   />
 
                   {/* Avatar */}
@@ -175,18 +153,17 @@ export default function InvoiceListPane({
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-mono text-muted-foreground">{inv.invoice_number || '—'}</span>
-                      {/* Signature status badge */}
-                      {inv.signed_invoice_url ? (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-emerald-500/15 text-emerald-400 border-emerald-500/20" title={`Signed ${inv.signed_date || ''}${inv.signed_uploaded_by ? ' by ' + inv.signed_uploaded_by : ''}`}>
-                          <FileSignature className="w-2.5 h-2.5" />
-                          Signed
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-amber-500/10 text-amber-500/80 border-amber-500/20">
-                          <PenLine className="w-2.5 h-2.5" />
-                          Unsigned
+                      {/* Status badge with overdue flag */}
+                      <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${STATUS_PILLS[status]}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOTS[status]}`} />
+                        {STATUS_LABELS[status]}
+                      </span>
+                      {overdue && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-red-500/15 text-red-400 border-red-500/20" title="Overdue — past due date with balance remaining">
+                          <AlertCircle className="w-2.5 h-2.5" />
+                          Overdue
                         </span>
                       )}
                     </div>
@@ -196,47 +173,72 @@ export default function InvoiceListPane({
                     >
                       {inv.client_name || '—'}
                     </button>
-                    <span className="text-[11px] text-muted-foreground">{dueLabel(inv)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[11px] ${overdue ? 'text-red-400 font-medium' : 'text-muted-foreground'}`}>{dueLabel(inv)}</span>
+                      {/* Next-action hint */}
+                      {idleDays >= 5 && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-500/80 font-medium">
+                          <Bell className="w-2.5 h-2.5" />
+                          Follow up? ({idleDays}d idle)
+                        </span>
+                      )}
+                    </div>
+                    {/* Payment progress indicator */}
+                    {paid > 0 && status !== 'paid' && status !== 'cancelled' && (
+                      <div className="mt-1.5">
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-0.5">
+                          <span className="tabular-nums">AED {paid.toFixed(0)} of AED {total.toFixed(0)}</span>
+                          <span className="tabular-nums">{pct.toFixed(0)}%</span>
+                        </div>
+                        <div className="h-1 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full bg-emerald-500/70 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Status switcher dropdown */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  {/* Quick action icons on hover */}
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
+                    {actions.sendForSignature && (
                       <button
-                        onClick={(e) => e.stopPropagation()}
-                        className={`inline-flex items-center gap-1 px-1.5 py-1 rounded-md text-[10px] font-semibold border transition-all hover:scale-105 ${STATUS_PILL[inv.status] || STATUS_PILL.draft} flex-shrink-0`}
-                        title="Change status"
+                        onClick={(e) => { e.stopPropagation(); onAction('sendForSignature', inv); }}
+                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Send for Signature"
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[inv.status] || STATUS_DOT.draft}`} />
-                        {STATUS_LABEL[inv.status] || inv.status}
-                        <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                        <Send className="w-3 h-3" />
                       </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40" onClick={(e) => e.stopPropagation()}>
-                      <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Set Status</div>
-                      <DropdownMenuSeparator />
-                      {STATUS_OPTIONS.map(opt => (
-                        <DropdownMenuItem
-                          key={opt.value}
-                          onClick={(e) => { e.stopPropagation(); onStatusChange?.(inv, opt.value); }}
-                          className={`text-xs gap-2 ${inv.status === opt.value ? 'bg-primary/10 text-primary font-semibold' : ''}`}
-                        >
-                          <span className={`w-2 h-2 rounded-full ${STATUS_DOT[opt.value] || 'bg-muted-foreground'}`} />
-                          {opt.label}
-                          {inv.status === opt.value && <span className="ml-auto text-primary">✓</span>}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    )}
+                    {actions.attachSigned && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onAction('attachSigned', inv); }}
+                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                        title="Attach Signed Copy"
+                      >
+                        <FileSignature className="w-3 h-3" />
+                      </button>
+                    )}
+                    {actions.recordPayment && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onAction('recordPayment', inv); }}
+                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        title="Record Payment"
+                      >
+                        <CreditCard className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Actions menu */}
+                  <InvoiceActionsMenu inv={inv} onAction={onAction} />
 
                   {/* Amount */}
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right flex-shrink-0 mt-0.5">
                     <p className="text-sm font-bold tabular-nums text-foreground">
-                      {balance > 0 && inv.status !== 'paid' && inv.status !== 'cancelled'
+                      {balance > 0 && status !== 'paid' && status !== 'cancelled'
                         ? formatCurrencyShort(balance)
                         : formatCurrencyShort(total)}
                     </p>
-                    {balance > 0 && inv.status !== 'paid' && inv.status !== 'cancelled' && (
+                    {balance > 0 && status !== 'paid' && status !== 'cancelled' && (
                       <p className="text-[10px] text-muted-foreground tabular-nums">of {formatCurrencyShort(total)}</p>
                     )}
                   </div>

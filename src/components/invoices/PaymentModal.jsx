@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Receipt } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Receipt, AlertTriangle, Upload, FileText, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { deriveStatus } from '@/lib/invoiceWorkflow';
 
 const PAYMENT_MODES = [
   { value: 'cash', label: 'Cash' },
@@ -38,6 +39,7 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
   const alreadyPaid = Number(invoice?.paid_amount || 0);
   const balance = Math.max(0, total - alreadyPaid);
   const defaultAmount = mode === 'paid' ? balance : '';
+  const isUnsigned = invoice ? deriveStatus(invoice) === 'unsigned' : false;
 
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -45,6 +47,11 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
   const [reference, setReference] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [slipUrl, setSlipUrl] = useState('');
+  const [slipName, setSlipName] = useState('');
+  const [uploadingSlip, setUploadingSlip] = useState(false);
+  const [acknowledgedUnsigned, setAcknowledgedUnsigned] = useState(false);
+  const fileRef = useRef(null);
 
   useEffect(() => {
     if (open) {
@@ -53,13 +60,31 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
       setPayMode('bank_transfer');
       setReference('');
       setNotes('');
+      setSlipUrl('');
+      setSlipName('');
+      setAcknowledgedUnsigned(false);
       generatePaymentReference().then(setReference).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode]);
 
   const amt = Number(amount) || 0;
-  const canConfirm = amt > 0 && !saving;
+  const canConfirm = amt > 0 && !saving && (!isUnsigned || acknowledgedUnsigned);
+
+  const handleSlipUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSlip(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setSlipUrl(file_url);
+      setSlipName(file.name);
+    } catch (err) {
+      // ignore
+    } finally {
+      setUploadingSlip(false);
+    }
+  };
 
   const handleConfirm = async () => {
     if (!canConfirm) return;
@@ -71,6 +96,7 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
         mode: payMode,
         reference,
         notes,
+        slipUrl,
       });
       onOpenChange(false);
     } finally {
@@ -94,6 +120,27 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
             only after saving.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Soft warning for unsigned invoices */}
+        {isUnsigned && (
+          <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3">
+            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-xs text-amber-600 mb-1.5">
+                This invoice hasn't been signed yet — record payment anyway?
+              </p>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acknowledgedUnsigned}
+                  onChange={e => setAcknowledgedUnsigned(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer"
+                />
+                <span className="text-xs text-amber-600 font-medium">Yes, record payment on unsigned invoice</span>
+              </label>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4 py-2">
           {/* Summary */}
@@ -167,6 +214,30 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
               placeholder="Auto-generated"
               className="mt-1 font-mono text-xs"
             />
+          </div>
+
+          {/* Payment slip / receipt upload */}
+          <div>
+            <Label className="text-xs">Payment Slip / Receipt (optional)</Label>
+            <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleSlipUpload} />
+            {slipUrl ? (
+              <div className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-2.5">
+                <FileText className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                <span className="text-xs text-foreground truncate flex-1">{slipName}</span>
+                <button onClick={() => { setSlipUrl(''); setSlipName(''); }} className="text-muted-foreground hover:text-red-500 flex-shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadingSlip}
+                className="mt-1 w-full flex items-center justify-center gap-2 rounded-lg border border-dashed border-border/50 p-2.5 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+              >
+                {uploadingSlip ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {uploadingSlip ? 'Uploading...' : 'Upload slip/receipt'}
+              </button>
+            )}
           </div>
 
           <div>

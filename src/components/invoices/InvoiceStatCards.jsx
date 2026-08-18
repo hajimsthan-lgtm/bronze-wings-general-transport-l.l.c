@@ -1,7 +1,8 @@
-import { AlertCircle, CalendarClock, Clock, TrendingUp, TrendingDown } from 'lucide-react';
+import { AlertCircle, CalendarClock, Clock, TrendingUp } from 'lucide-react';
 import KpiCard from '@/components/common/KpiCard';
 import Sparkline from '@/components/reports/Sparkline';
 import { formatCurrency } from '@/lib/formatters';
+import { deriveStatus, isOverdue } from '@/lib/invoiceWorkflow';
 
 export default function InvoiceStatCards({ invoices }) {
   const today = new Date().toISOString().split('T')[0];
@@ -9,20 +10,21 @@ export default function InvoiceStatCards({ invoices }) {
   nextMonth.setDate(nextMonth.getDate() + 30);
   const nextMonthStr = nextMonth.toISOString().split('T')[0];
 
-  // 1. Overdue
-  const overdue = invoices.filter(i => i.status === 'overdue' && !i.voided);
-  const overdueTotal = overdue.reduce((s, i) => s + Number(i.total_amount || 0), 0);
+  // 1. Overdue (derived flag, not stored status)
+  const overdue = invoices.filter(i => isOverdue(i));
+  const overdueTotal = overdue.reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
   // 2. Due within next 30 days (unpaid, not overdue)
   const dueSoon = invoices.filter(i => {
-    if (i.voided || i.status === 'paid' || i.status === 'cancelled' || i.status === 'overdue') return false;
+    const s = deriveStatus(i);
+    if (i.voided || s === 'paid' || s === 'cancelled' || isOverdue(i)) return false;
     if (!i.due_date || i.due_date < today || i.due_date > nextMonthStr) return false;
     return true;
   });
   const dueSoonTotal = dueSoon.reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
   // 3. Average time to get paid (issue_date → signed_date, fallback to today)
-  const paidInvoices = invoices.filter(i => i.status === 'paid' && i.issue_date);
+  const paidInvoices = invoices.filter(i => deriveStatus(i) === 'paid' && i.issue_date);
   const avgDays = paidInvoices.length > 0
     ? Math.round(paidInvoices.reduce((s, i) => {
         const issue = new Date(i.issue_date);
@@ -38,14 +40,14 @@ export default function InvoiceStatCards({ invoices }) {
     d.setMonth(d.getMonth() - i);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const monthPaid = invoices
-      .filter(inv => inv.status === 'paid' && inv.issue_date?.startsWith(key))
+      .filter(inv => deriveStatus(inv) === 'paid' && inv.issue_date?.startsWith(key))
       .reduce((s, inv) => s + Number(inv.paid_amount || 0), 0);
     sparkData.push(monthPaid);
   }
 
   // 4. Total outstanding
   const outstanding = invoices
-    .filter(i => !i.voided && i.status !== 'paid' && i.status !== 'cancelled')
+    .filter(i => { const s = deriveStatus(i); return !i.voided && s !== 'paid' && s !== 'cancelled'; })
     .reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
 
   // Trend: this month vs last month outstanding
@@ -54,10 +56,10 @@ export default function InvoiceStatCards({ invoices }) {
   lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
   const lastMonth = lastMonthDate.toISOString().slice(0, 7);
   const thisOut = invoices
-    .filter(i => !i.voided && i.status !== 'paid' && i.status !== 'cancelled' && i.issue_date?.startsWith(thisMonth))
+    .filter(i => { const s = deriveStatus(i); return !i.voided && s !== 'paid' && s !== 'cancelled' && i.issue_date?.startsWith(thisMonth); })
     .reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
   const lastOut = invoices
-    .filter(i => !i.voided && i.status !== 'paid' && i.status !== 'cancelled' && i.issue_date?.startsWith(lastMonth))
+    .filter(i => { const s = deriveStatus(i); return !i.voided && s !== 'paid' && s !== 'cancelled' && i.issue_date?.startsWith(lastMonth); })
     .reduce((s, i) => s + (Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0);
   const trendPct = lastOut > 0 ? ((thisOut - lastOut) / lastOut * 100).toFixed(1) : null;
   // For outstanding, increase = bad (red), decrease = good (green)

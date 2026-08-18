@@ -36,11 +36,13 @@
       "type": "string",
       "enum": [
         "draft",
+        "unsigned",
+        "signed",
         "sent",
-        "paid",
         "partially_paid",
-        "overdue",
-        "cancelled"
+        "paid",
+        "cancelled",
+        "overdue"
       ],
       "default": "draft"
     },
@@ -141,6 +143,14 @@
     },
     "signed_uploaded_by": {
       "type": "string"
+    },
+    "sent_for_signature_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "signature_skipped": {
+      "type": "boolean",
+      "default": false
     },
     "custom_template_id": {
       "type": "string"

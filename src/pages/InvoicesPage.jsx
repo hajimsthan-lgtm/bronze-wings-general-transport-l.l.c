@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -37,12 +37,15 @@ import InvoiceDetailPane from '@/components/invoices/InvoiceDetailPane';
 import PaymentModal from '@/components/invoices/PaymentModal';
 import BulkPaymentModal from '@/components/invoices/BulkPaymentModal';
 import CancelReasonModal from '@/components/invoices/CancelReasonModal';
+import SendForSignatureDialog from '@/components/invoices/SendForSignatureDialog';
+import SkipSignatureDialog from '@/components/invoices/SkipSignatureDialog';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
 import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
 import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { deriveStatus, computeTabCounts, filterByTab } from '@/lib/invoiceWorkflow';
 
 export default function InvoicesPage() {
   const { toast } = useToast();
@@ -65,6 +68,11 @@ export default function InvoicesPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [signedDocs, setSignedDocs] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [sendForSignatureModal, setSendForSignatureModal] = useState(null);
+  const [skipSignatureModal, setSkipSignatureModal] = useState(null);
+  const [attachTarget, setAttachTarget] = useState(null);
+  const attachSignedInputRef = useRef(null);
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
@@ -113,30 +121,30 @@ export default function InvoicesPage() {
   };
   const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); setMobileDetailOpen(false); };
 
-  const handleStatusChangeRequest = (inv, newStatus) => {
-    if (newStatus === 'paid' || newStatus === 'partially_paid') {
-      setPaymentModal({ inv, mode: newStatus });
-    } else if (newStatus === 'cancelled') {
-      setCancelModal(inv);
-    } else {
-      doStatusUpdate(inv, newStatus);
+  const handleAction = (actionKey, inv) => {
+    switch (actionKey) {
+      case 'sendForSignature':
+        setSendForSignatureModal(inv);
+        break;
+      case 'attachSigned':
+        setAttachTarget(inv);
+        attachSignedInputRef.current?.click();
+        break;
+      case 'skipSignature':
+        setSkipSignatureModal(inv);
+        break;
+      case 'recordPayment':
+        setPaymentModal({ inv, mode: 'paid' });
+        break;
+      case 'cancel':
+        setCancelModal(inv);
+        break;
     }
   };
 
   const doStatusUpdate = async (inv, newStatus, extraData = {}) => {
     try {
-      const wasPaid = inv.status === 'paid' || inv.status === 'partially_paid';
-      const reverting = wasPaid && (newStatus === 'draft' || newStatus === 'sent');
-      const patch = { status: newStatus, ...extraData };
-      if (reverting) {
-        const deletedCount = await deletePaymentsForInvoice(inv);
-        patch.paid_amount = 0;
-        if (deletedCount > 0) {
-          toast({ title: 'Payment records removed', description: `${deletedCount} payment(s) deleted for ${inv.invoice_number}` });
-        }
-      }
-      await base44.entities.Invoice.update(inv.id, patch);
-      toast({ title: 'Status updated', description: `${inv.invoice_number} → ${newStatus.replace(/_/g, ' ')}` });
+      await base44.entities.Invoice.update(inv.id, { status: newStatus, ...extraData });
       refetch();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
@@ -203,24 +211,12 @@ export default function InvoicesPage() {
     await doStatusUpdate(inv, 'cancelled', { voided: true, void_reason: reason });
   };
 
-  // Auto-overdue
-  useEffect(() => {
-    if (!allInvoices.length) return;
-    const today = new Date().toISOString().split('T')[0];
-    const toUpdate = allInvoices.filter(inv =>
-      inv.due_date &&
-      inv.due_date < today &&
-      (inv.status === 'draft' || inv.status === 'sent' || inv.status === 'partially_paid') &&
-      !inv.voided
-    );
-    if (toUpdate.length === 0) return;
-    base44.entities.Invoice.bulkUpdate(
-      toUpdate.map(inv => ({ id: inv.id, status: 'overdue' }))
-    ).then(() => refetch()).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allInvoices.length]);
-
   const handleAttachSigned = async (inv, file) => {
+    // Validate file type (PDF or image only)
+    if (!file.type.match(/(pdf|image\/)/)) {
+      toast({ variant: 'destructive', title: 'Invalid file type', description: 'Only PDF or image files are allowed.' });
+      return;
+    }
     setUploadingId(inv.id);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -231,6 +227,8 @@ export default function InvoicesPage() {
         signed_invoice_url: file_url,
         signed_date: today,
         signed_uploaded_by: uploadedBy,
+        status: 'signed',
+        signature_skipped: false,
       });
       await base44.entities.SignedDocument.create({
         invoice_id: inv.id,
@@ -277,6 +275,69 @@ export default function InvoicesPage() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleSendForSignature = async (inv) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await base44.entities.Invoice.update(inv.id, {
+        status: 'unsigned',
+        sent_for_signature_date: today,
+      });
+      toast({ title: 'Sent for signature', description: `${inv.invoice_number} → Unsigned` });
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
+    }
+  };
+
+  const handleSkipSignature = async (inv) => {
+    try {
+      await base44.entities.Invoice.update(inv.id, {
+        status: 'sent',
+        signature_skipped: true,
+      });
+      toast({ title: 'Signature skipped', description: `${inv.invoice_number} → Sent (payment-ready)` });
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
+    }
+  };
+
+  const handleAttachSignedFromMenu = (e) => {
+    if (e.target.files[0] && attachTarget) {
+      handleAttachSigned(attachTarget, e.target.files[0]);
+    }
+    e.target.value = '';
+    setAttachTarget(null);
+  };
+
+  const handleBulkAction = async (actionKey) => {
+    const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+    if (selectedInvoices.length === 0) return;
+    if (actionKey === 'sendForSignature') {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const draftOnes = selectedInvoices.filter(inv => deriveStatus(inv) === 'draft');
+        if (draftOnes.length === 0) {
+          toast({ title: 'No draft invoices selected', description: 'Only draft invoices can be sent for signature.' });
+          return;
+        }
+        await base44.entities.Invoice.bulkUpdate(
+          draftOnes.map(inv => ({ id: inv.id, status: 'unsigned', sent_for_signature_date: today }))
+        );
+        toast({ title: `${draftOnes.length} invoices sent for signature` });
+        setSelected(new Set());
+        refetch();
+      } catch (e) {
+        toast({ variant: 'destructive', title: 'Error', description: e.message });
+      }
+      return;
+    }
+    if (actionKey === 'cancel') {
+      setCancelModal({ bulk: true });
+      return;
+    }
   };
 
   const handleBulkStatusChange = async () => {
@@ -410,36 +471,32 @@ export default function InvoicesPage() {
       const matchesClient = clientFilter === 'all' || inv.client_name === clientFilter;
       const q = search.trim().toLowerCase();
       const matchesSearch = !q || (inv.invoice_number || '').toLowerCase().includes(q) || (inv.client_name || '').toLowerCase().includes(q);
-      const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || deriveStatus(inv) === statusFilter;
       return matchesDate && matchesClient && matchesSearch && matchesStatus;
     });
   }, [allInvoices, dateFrom, dateTo, clientFilter, search, statusFilter]);
 
-  // Tab counts
-  const counts = useMemo(() => ({
-    all: baseFiltered.length,
-    draft: baseFiltered.filter(i => i.status === 'draft').length,
-    unpaid: baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled').length,
-    signed: baseFiltered.filter(i => !!i.signed_invoice_url).length,
-    unsigned: baseFiltered.filter(i => !i.signed_invoice_url).length,
-  }), [baseFiltered]);
+  // Tab counts — derived from action-based status logic
+  const counts = useMemo(() => computeTabCounts(baseFiltered), [baseFiltered]);
 
   // Tab-filtered list
-  const filtered = useMemo(() => {
-    if (tab === 'draft') return baseFiltered.filter(i => i.status === 'draft');
-    if (tab === 'unpaid') return baseFiltered.filter(i => i.status !== 'paid' && i.status !== 'cancelled');
-    if (tab === 'signed') return baseFiltered.filter(i => !!i.signed_invoice_url);
-    if (tab === 'unsigned') return baseFiltered.filter(i => !i.signed_invoice_url);
-    return baseFiltered;
-  }, [baseFiltered, tab]);
+  const filtered = useMemo(() => filterByTab(baseFiltered, tab), [baseFiltered, tab]);
 
   const selectedInvoice = filtered.find(i => i.id === selectedId) || baseFiltered.find(i => i.id === selectedId) || null;
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
   useEffect(() => {
-    if (!selectedInvoice) { setSignedDocs([]); return; }
+    if (!selectedInvoice) { setSignedDocs([]); setPayments([]); return; }
     base44.entities.SignedDocument.filter({ invoice_id: selectedInvoice.id }, '-upload_date', 50)
       .then(setSignedDocs).catch(() => setSignedDocs([]));
+    base44.entities.ClientPayment.filter({ client_name: selectedInvoice.client_name }, '-created_date', 100)
+      .then(allPays => {
+        const linked = (allPays || []).filter(p =>
+          (p.allocated_invoices || []).some(a => a.invoice_id === selectedInvoice.id)
+        );
+        setPayments(linked);
+      })
+      .catch(() => setPayments([]));
   }, [selectedInvoice?.id]);
 
   const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
@@ -511,34 +568,33 @@ export default function InvoicesPage() {
           </Select>
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            {STATUS_OPTIONS.map(opt => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="unsigned">Unsigned</SelectItem>
+              <SelectItem value="signed">Signed</SelectItem>
+              <SelectItem value="sent">Sent</SelectItem>
+              <SelectItem value="partially_paid">Partial</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
       </div>
 
       {/* Bulk action bar */}
       {selected.size > 0 && (
-        <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
           <span className="text-sm font-semibold text-primary">{selected.size} selected</span>
-          <Select value={bulkStatus} onValueChange={setBulkStatus}>
-            <SelectTrigger className="w-44 h-8 text-xs">
-              <SelectValue placeholder="Change status to..." />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map(opt => (
-                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button size="sm" onClick={handleBulkStatusChange} disabled={!bulkStatus} className="h-8">Apply</Button>
-          <Button size="sm" variant="outline" onClick={() => { setSelected(new Set()); setBulkStatus(''); }} className="h-8">Clear</Button>
+          <Button size="sm" variant="outline" onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10">
+            <Send className="w-3.5 h-3.5 mr-1.5" /> Send for Signature
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => handleBulkAction('cancel')} className="h-8 border-red-500/30 text-red-400 hover:bg-red-500/10">
+            <Ban className="w-3.5 h-3.5 mr-1.5" /> Cancel
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setSelected(new Set())} className="h-8">Clear</Button>
         </div>
       )}
 
@@ -580,7 +636,7 @@ export default function InvoicesPage() {
               allSelected={allSelected}
               onToggleSelectAll={toggleSelectAll}
               onClientClick={handleClientClick}
-              onStatusChange={handleStatusChangeRequest}
+              onAction={handleAction}
             />
           </div>
 
@@ -594,12 +650,13 @@ export default function InvoicesPage() {
               onDelete={setDeleteTarget}
               onDownload={handleDownload}
               onAttachSigned={handleAttachSigned}
-              onStatusChangeRequest={handleStatusChangeRequest}
+              onAction={handleAction}
               downloadingId={downloadingId}
               uploadingId={uploadingId}
               signedDocs={signedDocs}
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              payments={payments}
             />
           </div>
         </div>
@@ -625,12 +682,13 @@ export default function InvoicesPage() {
               onDelete={setDeleteTarget}
               onDownload={handleDownload}
               onAttachSigned={handleAttachSigned}
-              onStatusChangeRequest={handleStatusChangeRequest}
+              onAction={handleAction}
               downloadingId={downloadingId}
               uploadingId={uploadingId}
               signedDocs={signedDocs}
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              payments={payments}
             />
           </div>
         </SheetContent>
@@ -659,6 +717,22 @@ export default function InvoicesPage() {
         onOpenChange={(open) => { if (!open) setCancelModal(null); }}
         onConfirm={handleCancelConfirm}
       />
+
+      <SendForSignatureDialog
+        invoice={sendForSignatureModal}
+        open={!!sendForSignatureModal}
+        onOpenChange={(open) => { if (!open) setSendForSignatureModal(null); }}
+        onConfirm={handleSendForSignature}
+      />
+
+      <SkipSignatureDialog
+        invoice={skipSignatureModal}
+        open={!!skipSignatureModal}
+        onOpenChange={(open) => { if (!open) setSkipSignatureModal(null); }}
+        onConfirm={handleSkipSignature}
+      />
+
+      <input ref={attachSignedInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleAttachSignedFromMenu} />
 
       <CustomTemplateManager open={templateManagerOpen} onClose={() => setTemplateManagerOpen(false)} documentType="invoice" />
 

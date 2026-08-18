@@ -1,30 +1,14 @@
 import { useRef } from 'react';
 import {
-  ExternalLink, Paperclip, FileDown, Loader2, Pencil, Trash2,
-  CheckCircle2, Plus, FileText, Download, Eye, Upload, FileSignature, PenLine,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2,
+  Plus, FileText, Download, Eye, Upload, FileSignature, AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import IconChip from '@/components/common/IconChip';
 import EmptyState from '@/components/common/EmptyState';
+import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
+import InvoiceActivityTimeline from '@/components/invoices/InvoiceActivityTimeline';
 import { formatCurrency, getInitials } from '@/lib/formatters';
-
-const STATUS_PILL = {
-  draft: 'bg-muted text-muted-foreground border-border',
-  sent: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  partially_paid: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
-  paid: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  overdue: 'bg-red-500/15 text-red-400 border-red-500/20',
-  cancelled: 'bg-muted/50 text-muted-foreground/60 border-border',
-};
-
-const STATUS_LABEL = {
-  draft: 'Draft',
-  sent: 'Sent',
-  partially_paid: 'Partial',
-  paid: 'Paid',
-  overdue: 'Overdue',
-  cancelled: 'Cancelled',
-};
+import { deriveStatus, isOverdue, STATUS_LABELS, STATUS_PILLS, STATUS_DOTS } from '@/lib/invoiceWorkflow';
 
 export default function InvoiceDetailPane({
   inv,
@@ -34,12 +18,13 @@ export default function InvoiceDetailPane({
   onDelete,
   onDownload,
   onAttachSigned,
-  onStatusChangeRequest,
+  onAction,
   downloadingId,
   uploadingId,
   signedDocs,
   onViewSigned,
   onDownloadSigned,
+  payments,
 }) {
   const fileRef = useRef(null);
 
@@ -60,12 +45,14 @@ export default function InvoiceDetailPane({
   const balance = Math.max(0, total - paid);
   const subtotal = Number(inv.subtotal || 0);
   const vatAmount = Number(inv.vat_amount || 0);
-  const isPaid = inv.status === 'paid';
-  const isCancelled = inv.status === 'cancelled';
+  const status = deriveStatus(inv);
+  const overdue = isOverdue(inv);
+  const isCancelled = status === 'cancelled';
   const isSigned = !!inv.signed_invoice_url;
   const isUploading = uploadingId === inv.id;
   const isDownloading = downloadingId === inv.id;
   const lineItems = inv.line_items || [];
+  const pct = total > 0 ? Math.min(100, (paid / total) * 100) : 0;
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) onAttachSigned(inv, e.target.files[0]);
@@ -82,14 +69,18 @@ export default function InvoiceDetailPane({
               {getInitials(inv.client_name)}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-bold text-foreground font-mono">{inv.invoice_number || '—'}</h3>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${STATUS_PILL[inv.status] || STATUS_PILL.draft}`}>
-                  {STATUS_LABEL[inv.status] || inv.status}
+                <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${STATUS_PILLS[status]}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOTS[status]}`} />
+                  {STATUS_LABELS[status]}
                 </span>
-                <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${isSigned ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500/80 border-amber-500/20'}`}>
-                  {isSigned ? <><FileSignature className="w-2.5 h-2.5" /> Signed</> : <><PenLine className="w-2.5 h-2.5" /> Unsigned</>}
-                </span>
+                {overdue && (
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 bg-red-500/15 text-red-400 border-red-500/20">
+                    <AlertCircle className="w-2.5 h-2.5" />
+                    Overdue
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => onClientClick?.(inv.client_name)}
@@ -141,6 +132,23 @@ export default function InvoiceDetailPane({
             </div>
           )}
         </div>
+
+        {/* Payment progress */}
+        {paid > 0 && status !== 'cancelled' && (
+          <div className="mb-5 rounded-xl border border-border/40 bg-muted/20 p-3">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-muted-foreground">Payment Progress</span>
+              <span className="font-semibold tabular-nums text-foreground">{pct.toFixed(0)}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div className="h-full bg-emerald-500/70 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+            </div>
+            <div className="flex items-center justify-between text-[11px] mt-1.5">
+              <span className="text-emerald-400 font-medium tabular-nums">AED {paid.toFixed(2)} paid</span>
+              <span className="text-muted-foreground tabular-nums">AED {balance.toFixed(2)} remaining</span>
+            </div>
+          </div>
+        )}
 
         {/* Signed Document Section */}
         <div className="mb-5">
@@ -204,6 +212,9 @@ export default function InvoiceDetailPane({
             </button>
           )}
         </div>
+
+        {/* Activity Timeline */}
+        <InvoiceActivityTimeline inv={inv} signedDocs={signedDocs} payments={payments} />
       </div>
 
       {/* Footer: totals */}
@@ -236,14 +247,6 @@ export default function InvoiceDetailPane({
       <div className="px-5 py-3 border-t border-border/40 flex items-center gap-2">
         <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
         <button
-          onClick={() => fileRef.current?.click()}
-          disabled={isUploading}
-          className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
-          title="Attach signed invoice"
-        >
-          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
-        </button>
-        <button
           onClick={() => onDownload(inv)}
           disabled={isDownloading}
           className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
@@ -254,14 +257,8 @@ export default function InvoiceDetailPane({
 
         <div className="flex-1" />
 
-        {!isPaid && !isCancelled && (
-          <Button
-            onClick={() => onStatusChangeRequest(inv, 'paid')}
-            className="lightning-btn h-9 px-5 text-xs"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-            Mark as Paid
-          </Button>
+        {!isCancelled && (
+          <InvoiceActionsMenu inv={inv} onAction={onAction} variant="button" />
         )}
       </div>
     </div>
