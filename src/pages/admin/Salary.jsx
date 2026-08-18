@@ -193,9 +193,6 @@ export default function Salary() {
           <Button onClick={generatePayroll} disabled={generating} variant="outline" className="h-10 border-border">
             <Sparkles className="w-4 h-4 mr-1.5 text-amber-400" />{generating ? 'Generating…' : 'Generate Payroll'}
           </Button>
-          <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10 hidden md:inline-flex">
-            <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
-          </Button>
         </div>
       </div>
 
@@ -229,6 +226,9 @@ export default function Salary() {
         {(search || monthFilter || yearFilter || statusFilter) && (
           <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setMonthFilter(''); setYearFilter(''); setStatusFilter(''); }} className="text-muted-foreground">Clear</Button>
         )}
+        <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10 ml-auto">
+          <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
+        </Button>
       </div>
 
       {/* KPIs */}
