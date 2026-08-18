@@ -15,12 +15,12 @@ function parseCsv(text) {
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
       if (ch === '"') {
-        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-        else inQuotes = !inQuotes;
+        if (inQuotes && line[i + 1] === '"') {current += '"';i++;} else
+        inQuotes = !inQuotes;
       } else if (ch === ',' && !inQuotes) {
         result.push(current.trim());
         current = '';
-      } else { current += ch; }
+      } else {current += ch;}
     }
     result.push(current.trim());
     return result;
@@ -56,10 +56,10 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
     if (!file) return;
     const text = await file.text();
     const { headers, rows: parsed } = parseCsv(text);
-    if (!headers.length) { toast({ title: 'CSV is empty', variant: 'destructive' }); return; }
+    if (!headers.length) {toast({ title: 'CSV is empty', variant: 'destructive' });return;}
     const mapped = parsed.map((row) => {
       const obj = {};
-      headers.forEach((h, i) => { obj[h.trim()] = row[i] ?? ''; });
+      headers.forEach((h, i) => {obj[h.trim()] = row[i] ?? '';});
       return transform ? transform(obj) : obj;
     }).filter((r) => Object.values(r).some((v) => v !== '' && v !== undefined && v !== null));
     setRows(mapped);
@@ -87,12 +87,12 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
     }
   };
 
-  const reset = () => { setOpen(false); setRows([]); setResults(null); };
+  const reset = () => {setOpen(false);setRows([]);setResults(null);};
 
   return (
     <>
       <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-      <Button variant="outline" onClick={() => fileRef.current?.click()} className={`h-10 border-border ${className}`}>
+      <Button variant="outline" onClick={() => fileRef.current?.click()} className={`h-10 border-border hidden ${className}`}>
         <Upload className="w-4 h-4 mr-1.5" />{label}
       </Button>
       <Dialog open={open} onOpenChange={(v) => !v && reset()}>
@@ -103,8 +103,8 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
               Import {entityName}s — {rows.length} rows
             </DialogTitle>
           </DialogHeader>
-          {!results ? (
-            <>
+          {!results ?
+          <>
               <div className="flex items-center justify-between gap-3 mb-3">
                 <p className="text-xs text-muted-foreground">Review the data below, then click Import to add {rows.length} records.</p>
                 <button onClick={() => downloadSampleCsv(filename, columns)} className="text-xs text-primary hover:underline inline-flex items-center gap-1 flex-shrink-0">
@@ -117,11 +117,11 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
                     <tr>{columns.map((c) => <th key={c.key} className="text-left p-2 font-semibold text-muted-foreground whitespace-nowrap">{c.label}</th>)}</tr>
                   </thead>
                   <tbody>
-                    {rows.slice(0, 50).map((row, i) => (
-                      <tr key={i} className="border-t border-border/50">
+                    {rows.slice(0, 50).map((row, i) =>
+                  <tr key={i} className="border-t border-border/50">
                         {columns.map((c) => <td key={c.key} className="p-2 whitespace-nowrap">{row[c.key] ?? '—'}</td>)}
                       </tr>
-                    ))}
+                  )}
                   </tbody>
                 </table>
                 {rows.length > 50 && <p className="p-2 text-xs text-muted-foreground text-center">… and {rows.length - 50} more rows</p>}
@@ -132,17 +132,17 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
                   {importing ? 'Importing…' : `Import ${rows.length} rows`}
                 </Button>
               </DialogFooter>
-            </>
-          ) : (
-            <div className="py-6 text-center">
+            </> :
+
+          <div className="py-6 text-center">
               {results.success > 0 ? <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" /> : <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />}
               <p className="text-lg font-semibold text-foreground">{results.success} imported successfully</p>
               {results.failed > 0 && <p className="text-sm text-muted-foreground mt-1">{results.failed} rows failed</p>}
               <Button onClick={reset} className="mt-4 bg-primary hover:bg-primary/90">Done</Button>
             </div>
-          )}
+          }
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>);
+
 }
