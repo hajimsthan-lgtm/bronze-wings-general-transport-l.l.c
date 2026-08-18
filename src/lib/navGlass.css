@@ -1,0 +1,29 @@
+/* Fixed sidebar nav text color — pure black in light, white in dark */
+.nav-text-fixed { color: #ffffff; }
+.theme-light .nav-text-fixed { color: #000000; }
+
+/* Glassmorphism nav button — beautiful inactive state */
+.nav-glass-btn {
+  background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-glass-btn:hover {
+  background: linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  border-color: rgba(var(--panel-accent-rgb), 0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 16px -6px rgba(var(--panel-accent-rgb), 0.3);
+  transform: translateY(-1px);
+}
+.theme-light .nav-glass-btn {
+  background: linear-gradient(165deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.005) 100%);
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.theme-light .nav-glass-btn:hover {
+  background: linear-gradient(165deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.01) 100%);
+  border-color: rgba(var(--panel-accent-rgb), 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 0 16px -6px rgba(var(--panel-accent-rgb), 0.25);
+}

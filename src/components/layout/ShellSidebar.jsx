@@ -5,6 +5,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { navItems, secondaryNav, getIcon, readableOn } from '@/lib/navConfig';
+import '@/lib/navGlass.css';
 
 function greetingFor() {
   const h = new Date().getHours();
@@ -98,11 +99,11 @@ export default function ShellSidebar({ query = '' }) {
                   aria-label={label}
                   className={cn(
                     'relative flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-200 select-none',
-                    active ? 'shadow-sm' : 'nav-text-fixed hover:opacity-70 hover:bg-white/[0.04]'
+                    active ? 'shadow-sm' : 'nav-text-fixed nav-glass-btn'
                   )}
                   style={active ? { background: c, color: readableOn(c) } : undefined}>
 
-                    <Icon className={cn('w-4 h-4 flex-shrink-0', active ? '' : 'nav-text-fixed')} style={{ color: active ? readableOn(c) : undefined }} />
+                    <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
                     <span className={cn('truncate', active ? '' : 'nav-text-fixed')}>{label}</span>
                   </button>);
 
@@ -127,11 +128,11 @@ export default function ShellSidebar({ query = '' }) {
               to={item.path}
               className={cn(
                 'flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-200',
-                active ? 'shadow-sm' : 'nav-text-fixed hover:opacity-70 hover:bg-white/[0.04]'
+                active ? 'shadow-sm' : 'nav-text-fixed nav-glass-btn'
               )}
               style={active ? { background: c, color: readableOn(c) } : undefined}>
 
-              <Icon className={cn('w-4 h-4 flex-shrink-0', active ? '' : 'nav-text-fixed')} style={{ color: active ? readableOn(c) : undefined }} />
+              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
               <span className={cn('truncate', active ? '' : 'nav-text-fixed')}>{item.label}</span>
             </Link>);
 
