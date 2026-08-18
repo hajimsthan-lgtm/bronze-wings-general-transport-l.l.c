@@ -68,7 +68,15 @@ export function renderCellToImage(text, fontSizePt, maxWidthMm, lineHeightMm, co
   ctx.textBaseline = 'top';
 
   lines.forEach((line, i) => {
-    ctx.fillText(line, 0, i * lineHeightPx);
+    // Detect RTL content and draw right-to-left
+    const isRtl = ARABIC_RANGE.test(line);
+    if (isRtl) {
+      ctx.direction = 'rtl';
+      ctx.fillText(line, maxWidthPx, i * lineHeightPx);
+    } else {
+      ctx.direction = 'ltr';
+      ctx.fillText(line, 0, i * lineHeightPx);
+    }
   });
 
   return {

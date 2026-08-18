@@ -106,13 +106,21 @@ export default function VendorTransactionLedger({ vendorName }) {
     load();
   };
 
+  // Build export columns — only include Paid Date if at least one row has a paid_date
+  const hasPaidDate = transactions.some(t => t.paid_date);
   const exportColumns = [
     { label: 'Date', key: 'date' },
     { label: 'Trip Ref', key: 'trip_number' },
-    { label: 'Description', key: 'description' },
-    { label: 'Amount', key: 'amount' },
+    { label: 'Notes', key: 'description', transform: (item) => {
+        // Strip redundant "Trip TR-XXXX — " prefix, keep only the route/description part
+        const desc = item.description || '';
+        const stripped = desc.replace(/^Trip\s+[A-Z0-9-]+\s*[—\-]+\s*/i, '').trim();
+        return stripped || desc;
+      }
+    },
+    { label: 'Amount (AED)', key: 'amount', numeric: true },
     { label: 'Status', key: 'payment_status' },
-    { label: 'Paid Date', key: 'paid_date' },
+    ...(hasPaidDate ? [{ label: 'Paid Date', key: 'paid_date' }] : []),
   ];
 
   return (

@@ -28,7 +28,7 @@ export function exportToCSV(data, filename, columns) {
 
 const STATUS_DOT_COLORS = {
   active: [34, 197, 94], paid: [34, 197, 94], completed: [34, 197, 94], accepted: [34, 197, 94], signed: [34, 197, 94],
-  pending: [239, 68, 68], overdue: [239, 68, 68], rejected: [239, 68, 68], cancelled: [239, 68, 68], voided: [239, 68, 68],
+  pending: [239, 68, 68], overdue: [239, 68, 68], rejected: [239, 68, 68], cancelled: [239, 68, 68], voided: [239, 68, 68], unpaid: [239, 68, 68],
   paused: [245, 158, 11], partially_paid: [245, 158, 11], draft: [150, 150, 150], sent: [59, 130, 246],
   inactive: [150, 150, 150], expired: [150, 150, 150], terminated: [150, 150, 150],
 };
@@ -84,8 +84,8 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
 
   // ── Table ──────────────────────────────────────────────────────────────────
   const GEN_PAD = 1.5;
-  const GEN_LINE_H = 3.8;
-  const GEN_CELL_PAD = 2;
+  const GEN_LINE_H = 3.4;
+  const GEN_CELL_PAD = 1.5;
 
   const drawHeaders = (y) => {
     doc.setFillColor(240, 240, 240); doc.rect(margin, y - 4, tableW, 7, 'F');
@@ -111,7 +111,7 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
       if (c.numeric) {
         const num = Number(String(val).replace(/[^\d.-]/g, ''));
         return { lines: [isNaN(num) ? '' : num.toFixed(2)], numeric: true };
-      } else if (c.key === 'status') {
+      } else if (c.key === 'status' || c.key === 'payment_status') {
         return { lines: [String(val)], isStatus: true };
       } else {
         const strVal = String(val);
@@ -141,11 +141,17 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
       if (cell.numeric) {
         doc.text(cell.lines[0], margin + (i + 1) * colW - GEN_PAD, baselineY, { align: 'right' });
       } else if (cell.isStatus) {
-        const color = STATUS_DOT_COLORS[String(cell.lines[0]).toLowerCase()] || [100, 100, 100];
+        const rawStatus = String(cell.lines[0]).toLowerCase();
+        const color = STATUS_DOT_COLORS[rawStatus] || [100, 100, 100];
+        const FRIENDLY = { unpaid: 'Unpaid', paid: 'Paid', partially_paid: 'Partial', draft: 'Draft', sent: 'Sent', signed: 'Signed', cancelled: 'Cancelled', active: 'Active', inactive: 'Inactive', expired: 'Expired', completed: 'Completed', overdue: 'Overdue' };
+        const label = FRIENDLY[rawStatus] || cell.lines[0];
+        const cellX = margin + i * colW + GEN_PAD;
+        // Draw colored dot
         doc.setFillColor(color[0], color[1], color[2]);
-        doc.circle(margin + i * colW + GEN_PAD + 0.8, baselineY - 0.8, 0.8, 'F');
+        doc.circle(cellX + 0.8, baselineY - 0.8, 0.9, 'F');
+        doc.setTextColor(color[0], color[1], color[2]);
+        doc.text(label, cellX + 3.5, baselineY);
         doc.setTextColor(30, 30, 30);
-        doc.text(cell.lines[0], margin + i * colW + GEN_PAD + 3.5, baselineY);
       } else if (cell.isImage) {
         const imgW = colW - GEN_PAD * 2;
         const imgH = cell.lines.length * GEN_LINE_H;
