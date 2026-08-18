@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export default function DriverNavDropdown() {
   const navigate = useNavigate();
   const [drivers, setDrivers] = useState([]);
-  useEffect(() => {base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {});}, []);
+  useEffect(() => {base44.entities.Driver.list('-created_date', 200).then((d) => setDrivers((d || []).filter((x) => !x.vendor_name))).catch(() => {});}, []);
 
   const onSelect = (id) => {if (id === 'all') navigate('/admin/drivers');else navigate(`/admin/drivers/${id}`);};
 

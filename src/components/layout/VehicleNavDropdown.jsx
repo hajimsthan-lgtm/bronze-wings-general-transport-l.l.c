@@ -8,7 +8,7 @@ export default function VehicleNavDropdown() {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
-    base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {});
+    base44.entities.Vehicle.list('-created_date', 200).then((v) => setVehicles((v || []).filter((x) => !x.vendor_name))).catch(() => {});
   }, []);
 
   const onSelect = (id) => {

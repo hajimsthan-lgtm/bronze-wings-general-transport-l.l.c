@@ -65,7 +65,7 @@ function VehiclesTab() {
         () => base44.entities.FuelRecord.list('-created_date', 200).catch(() => []),
         () => base44.entities.Expense.list('-created_date', 200).catch(() => []),
       ]);
-      setItems(v || []); setTrips(tr || []); setFuelRecords(fr || []); setExpenses(ex || []);
+      setItems((v || []).filter((x) => !x.vendor_name)); setTrips(tr || []); setFuelRecords(fr || []); setExpenses(ex || []);
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);

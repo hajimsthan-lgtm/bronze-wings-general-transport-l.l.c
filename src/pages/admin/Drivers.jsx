@@ -45,7 +45,7 @@ function DriversTab() {
         () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
         () => base44.entities.Trip.list('-trip_date', 500).catch(() => []),
       ]);
-      setDrivers(d || []); setTrips(tr || []);
+      setDrivers((d || []).filter((x) => !x.vendor_name)); setTrips(tr || []);
     } finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
