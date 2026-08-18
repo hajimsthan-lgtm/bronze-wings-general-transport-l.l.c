@@ -92,9 +92,9 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
   return (
     <>
       <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-      <Button variant="outline" onClick={() => fileRef.current?.click()} className={`h-10 border-border hidden ${className}`}>
-        <Upload className="w-4 h-4 mr-1.5" />{label}
-      </Button>
+      
+
+      
       <Dialog open={open} onOpenChange={(v) => !v && reset()}>
         <DialogContent className="bg-card border-border max-w-2xl">
           <DialogHeader>
