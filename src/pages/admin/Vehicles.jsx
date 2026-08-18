@@ -16,7 +16,7 @@ import VehicleListRow from '@/components/admin/VehicleListRow';
 import ViewToggle from '@/components/common/ViewToggle';
 import ImageUpload from '@/components/common/ImageUpload';
 import TypeCombobox from '@/components/admin/TypeCombobox';
-import VehicleScanForm from '@/components/admin/VehicleScanForm';
+import VehicleForm from '@/components/admin/VehicleForm';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -184,7 +184,7 @@ function VehiclesTab() {
       )}
 
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Scan UAE Mulkiya — AI extracts vehicle data automatically">
-          <VehicleScanForm editItem={editItem} onSave={async (data) => {
+          <VehicleForm editItem={editItem} onSave={async (data) => {
             let saved;
             if (editItem) saved = await base44.entities.Vehicle.update(editItem.id, data);
             else saved = await base44.entities.Vehicle.create(data);
