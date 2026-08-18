@@ -70,6 +70,13 @@ export default function TopBar() {
                 onClick={() => window.dispatchEvent(new CustomEvent('expenses:new'))}
               />
             )}
+            {(location.pathname === '/admin/salary' || location.pathname === '/salary') && (
+              <HeaderActionButton
+                label={t('add_new')}
+                variant="trip"
+                onClick={() => window.dispatchEvent(new CustomEvent('salary:new'))}
+              />
+            )}
           </div>
         </div>
       </div>

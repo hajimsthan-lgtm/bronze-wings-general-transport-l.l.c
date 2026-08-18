@@ -60,6 +60,12 @@ export default function Salary() {
   };
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    const handler = () => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); };
+    window.addEventListener('salary:new', handler);
+    return () => window.removeEventListener('salary:new', handler);
+  }, []);
+
   const years = useMemo(() => {
     const set = new Set(records.map((r) => String(r.year)));
     set.add(String(now.getFullYear()));
@@ -226,9 +232,6 @@ export default function Salary() {
         {(search || monthFilter || yearFilter || statusFilter) && (
           <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setMonthFilter(''); setYearFilter(''); setStatusFilter(''); }} className="text-muted-foreground">Clear</Button>
         )}
-        <Button onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10 ml-auto">
-          <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
-        </Button>
       </div>
 
       {/* KPIs */}
