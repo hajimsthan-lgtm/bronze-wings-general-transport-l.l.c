@@ -20,6 +20,7 @@ import { downloadMaintenancePDF } from '@/lib/maintenancePdf';
 import { getCompanySettings } from '@/lib/companySettings';
 import { Download } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
+import { withRetry, safeAll } from '@/lib/safeRequest';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -38,7 +39,7 @@ export default function Services() {
   const [search, setSearch] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
 
-  const load = () => { setLoading(true); base44.entities.ServiceRecord.list('-created_date', 200).then(setRecords).finally(() => setLoading(false)); };
+  const load = () => { setLoading(true); withRetry(() => base44.entities.ServiceRecord.list('-created_date', 200)).then(setRecords).finally(() => setLoading(false)); };
   useEffect(() => { load(); }, []);
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -133,7 +134,12 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [vendors, setVendors] = useState([]);
-  useEffect(() => { base44.entities.Vehicle.list('-created_date', 200).then(setVehicles).catch(() => {}); base44.entities.Vendor.list('-created_date', 200).then(setVendors).catch(() => {}); }, []);
+  useEffect(() => {
+    safeAll([
+      () => base44.entities.Vehicle.list('-created_date', 200),
+      () => base44.entities.Vendor.list('-created_date', 200),
+    ], 1).then(([v, vd]) => { setVehicles(v || []); setVendors(vd || []); }).catch(() => {});
+  }, []);
   const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
   useEffect(() => { if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' }); else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' }); }, [editItem, presetPlate]);
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
