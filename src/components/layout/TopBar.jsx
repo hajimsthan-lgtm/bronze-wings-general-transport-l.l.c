@@ -1,4 +1,5 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import PageTitleIndicator from './PageTitleIndicator';
 import HeaderActionButton from './HeaderActionButton';
@@ -13,8 +14,12 @@ export { hasSubNavForPath };
 
 export default function TopBar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useI18n();
   const opsFilter = useOpsFilter();
+
+  const isHome = location.pathname === '/';
+  const handleBack = () => navigate(-1);
 
   const matchedKey = Object.keys(subNavMap).find((k) => location.pathname === k || location.pathname.startsWith(k + '/'));
   const subNav = matchedKey ? subNavMap[matchedKey] : [];
@@ -26,8 +31,32 @@ export default function TopBar() {
     <div className="sticky top-0 md:top-20 z-40">
       <div className="w-full px-4 md:px-6 bg-background/85 backdrop-blur-xl border-b border-border/50 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.4)]">
         <div className="flex items-center justify-between py-2 gap-2 min-h-[54px]">
-           {/* Left: page title indicator */}
-           <PageTitleIndicator />
+           {/* Left: back button + page title indicator */}
+           <div className="flex items-center gap-2 min-w-0">
+             <button
+               onClick={handleBack}
+               disabled={isHome}
+               aria-label="Go back"
+               title="Go back"
+               className={`group relative flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-all duration-300 ${
+                 isHome
+                   ? 'opacity-30 cursor-not-allowed'
+                   : 'hover:scale-105 active:scale-95'
+               }`}
+               style={{
+                 background: isHome
+                   ? 'hsl(var(--muted))'
+                   : 'linear-gradient(145deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))',
+                 border: `1px solid ${isHome ? 'hsl(var(--border))' : 'rgba(var(--panel-accent-rgb),0.45)'}`,
+                 boxShadow: isHome
+                   ? 'none'
+                   : 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.5), 0 2px 8px rgba(0,0,0,0.3)',
+               }}
+             >
+               <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))' }} />
+             </button>
+             <PageTitleIndicator />
+           </div>
            {/* Left: status filter pills for Operations pages */}
            {showOpsFilter && (
             <div className="hidden md:flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto no-scrollbar py-1">
