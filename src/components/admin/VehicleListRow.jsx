@@ -30,7 +30,7 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
             <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
             <StatusBadge status={v.status} />
           </div>
-          <p className="text-xs text-muted-foreground truncate">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''} · {v.type}</p>
+          <p className="text-xs text-muted-foreground truncate">{[v.make, v.model].filter(Boolean).join(' ') || '—'}{v.year ? ` · ${v.year}` : ''} · {v.type}</p>
         </div>
         <div className="hidden md:flex items-center gap-5 text-xs text-muted-foreground">
           <div className="text-right"><p className="text-[10px] uppercase tracking-wider">Driver</p><p className="text-foreground font-medium truncate max-w-[120px]">{v.assigned_driver || '—'}</p></div>

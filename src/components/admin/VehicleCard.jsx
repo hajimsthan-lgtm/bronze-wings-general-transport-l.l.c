@@ -63,7 +63,8 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
       </div>
 
       <PlateBadge plate={v.plate_number} compact className="relative mt-1" />
-      <p className="relative text-[11px] text-muted-foreground truncate mt-1.5">{v.make} {v.model}{v.year ? ` · ${v.year}` : ''}</p>
+      <p className="relative text-sm font-semibold text-foreground truncate mt-1.5">{[v.make, v.model].filter(Boolean).join(' ') || '—'}</p>
+      <p className="relative text-[11px] text-muted-foreground truncate">{v.type}{v.year ? ` · ${v.year}` : ''}</p>
 
       <div className="relative mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         <CardChip icon={Tag} label="Type" value={v.type} accent={ACCENT} />

@@ -67,14 +67,14 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-bold text-foreground leading-tight truncate">{vehicle.make} {vehicle.model} {vehicle.year || ''}</h2>
+              <h2 className="text-base font-bold text-foreground leading-tight truncate">{[vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle'}</h2>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="relative flex w-2 h-2">
                 {vehicle.status === 'active' && <span className="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style={{ background: statusDot(vehicle.status) }} />}
                 <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: statusDot(vehicle.status) }} />
               </span>
-              <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle</span>
+              <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle{vehicle.year ? ` · ${vehicle.year}` : ''}</span>
             </div>
           </div>
           <StatusBadge status={vehicle.status} />
