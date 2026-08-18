@@ -33,6 +33,15 @@ const STATUS_DOT_COLORS = {
   inactive: [150, 150, 150], expired: [150, 150, 150], terminated: [150, 150, 150],
 };
 
+// Truncate long strings like full addresses to a short label
+function shortLocation(val) {
+  if (!val) return '';
+  const s = String(val);
+  // If it contains commas (full address), take just the first segment
+  if (s.includes(',')) return s.split(',')[0].trim();
+  return s.length > 22 ? s.substring(0, 20) + '…' : s;
+}
+
 export async function exportToPDF(data, filename, columns, title, options = {}) {
   const settings = await getCompanySettings();
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -40,6 +49,13 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   const pageH = doc.internal.pageSize.height;
   const margin = 15;
   const tableW = pageW - margin * 2;
+
+  // Compute per-column widths: honour column.w if provided, otherwise equal-split
+  const totalFixed = columns.reduce((s, c) => s + (c.w || 0), 0);
+  const flexCount = columns.filter((c) => !c.w).length;
+  const flexW = flexCount > 0 ? (tableW - totalFixed) / flexCount : 0;
+  const colWidths = columns.map((c) => c.w || flexW);
+  // Backward-compat alias used below
   const colW = tableW / columns.length;
 
   const drawPageFooter = (pageNum) => {
@@ -83,16 +99,21 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   doc.line(margin, headerY + 16, pageW - margin, headerY + 16);
 
   // ── Table ──────────────────────────────────────────────────────────────────
-  const GEN_PAD = 1.5;
+  const GEN_PAD = 2.5;     // increased from 1.5 — prevents cross-column text touch
   const GEN_LINE_H = 3.4;
-  const GEN_CELL_PAD = 1.5;
+  const GEN_CELL_PAD = 2.0;
+
+  // Build running x-offsets from colWidths
+  const colX = (i) => colWidths.slice(0, i).reduce((s, w) => s + w, margin);
 
   const drawHeaders = (y) => {
     doc.setFillColor(240, 240, 240); doc.rect(margin, y - 4, tableW, 7, 'F');
     doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
     columns.forEach((c, i) => {
-      if (c.numeric) doc.text(String(c.label), margin + (i + 1) * colW - GEN_PAD, y, { align: 'right' });
-      else doc.text(String(c.label), margin + i * colW + GEN_PAD, y);
+      const x = colX(i);
+      const cw = colWidths[i];
+      if (c.numeric) doc.text(String(c.label), x + cw - GEN_PAD, y, { align: 'right' });
+      else doc.text(String(c.label), x + GEN_PAD, y);
     });
     doc.setFont(undefined, 'normal');
     return y + 6;
@@ -102,27 +123,38 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   doc.setFontSize(7.5);
   let pageNum = 1;
 
+  const FRIENDLY_STATUS = { unpaid: 'Unpaid', paid: 'Paid', partially_paid: 'Partial', cash_received: 'Cash', bank_received: 'Bank', corporate_credit: 'Corporate', draft: 'Draft', sent: 'Sent', signed: 'Signed', cancelled: 'Cancelled', active: 'Active', inactive: 'Inactive', expired: 'Expired', completed: 'Completed', overdue: 'Overdue', scheduled: 'Scheduled', in_transit: 'In Transit' };
+
   data.forEach((item, idx) => {
-    // Compute wrapped lines per cell
     doc.setFontSize(7.5);
-    const cells = columns.map((c) => {
+    const cells = columns.map((c, i) => {
+      const cw = colWidths[i];
       let val = c.transform ? c.transform(item) : item[c.key];
       if (val == null) val = '';
+
       if (c.numeric) {
         const num = Number(String(val).replace(/[^\d.-]/g, ''));
         return { lines: [isNaN(num) ? '' : num.toFixed(2)], numeric: true };
       } else if (c.key === 'status' || c.key === 'payment_status') {
+        // Status: single line, dot + friendly label — never wraps
         return { lines: [String(val)], isStatus: true };
+      } else if (c.noWrap || c.key === 'trip_number') {
+        // IDs must never wrap mid-string
+        return { lines: [String(val)], noWrap: true };
+      } else if (c.key === 'from_location' || c.key === 'to_location') {
+        // Truncate full addresses to short location label
+        return { lines: [shortLocation(String(val))] };
       } else {
         const strVal = String(val);
-        const maxW = colW - GEN_PAD * 2;
+        const maxW = cw - GEN_PAD * 2;
         if (hasArabicText(strVal)) {
           const { dataUrl, linesCount } = renderCellToImage(strVal, 7.5, maxW, GEN_LINE_H, [30, 30, 30]);
-          return { lines: new Array(linesCount), isImage: true, dataUrl };
+          return { lines: new Array(linesCount), isImage: true, dataUrl, cw };
         }
         return { lines: doc.splitTextToSize(strVal, maxW) };
       }
     });
+
     const maxLines = Math.max(...cells.map((c) => c.lines.length));
     const rowH = maxLines * GEN_LINE_H + GEN_CELL_PAD * 2;
 
@@ -138,27 +170,28 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
     doc.setTextColor(30, 30, 30);
     const baselineY = y + GEN_LINE_H * 0.3;
     cells.forEach((cell, i) => {
+      const x = colX(i);
+      const cw = colWidths[i];
       if (cell.numeric) {
-        doc.text(cell.lines[0], margin + (i + 1) * colW - GEN_PAD, baselineY, { align: 'right' });
+        doc.text(cell.lines[0], x + cw - GEN_PAD, baselineY, { align: 'right' });
       } else if (cell.isStatus) {
         const rawStatus = String(cell.lines[0]).toLowerCase();
         const color = STATUS_DOT_COLORS[rawStatus] || [100, 100, 100];
-        const FRIENDLY = { unpaid: 'Unpaid', paid: 'Paid', partially_paid: 'Partial', draft: 'Draft', sent: 'Sent', signed: 'Signed', cancelled: 'Cancelled', active: 'Active', inactive: 'Inactive', expired: 'Expired', completed: 'Completed', overdue: 'Overdue' };
-        const label = FRIENDLY[rawStatus] || cell.lines[0];
-        const cellX = margin + i * colW + GEN_PAD;
-        // Draw colored dot
+        const label = FRIENDLY_STATUS[rawStatus] || cell.lines[0];
         doc.setFillColor(color[0], color[1], color[2]);
-        doc.circle(cellX + 0.8, baselineY - 0.8, 0.9, 'F');
+        doc.circle(x + GEN_PAD + 0.8, baselineY - 0.8, 0.9, 'F');
         doc.setTextColor(color[0], color[1], color[2]);
-        doc.text(label, cellX + 3.5, baselineY);
+        doc.text(label, x + GEN_PAD + 3.5, baselineY);
         doc.setTextColor(30, 30, 30);
       } else if (cell.isImage) {
-        const imgW = colW - GEN_PAD * 2;
+        const imgW = cw - GEN_PAD * 2;
         const imgH = cell.lines.length * GEN_LINE_H;
-        doc.addImage(cell.dataUrl, 'PNG', margin + i * colW + GEN_PAD, y, imgW, imgH);
+        doc.addImage(cell.dataUrl, 'PNG', x + GEN_PAD, y, imgW, imgH);
+      } else if (cell.noWrap) {
+        doc.text(cell.lines[0], x + GEN_PAD, baselineY);
       } else {
         cell.lines.forEach((line, li) => {
-          doc.text(line, margin + i * colW + GEN_PAD, baselineY + li * GEN_LINE_H);
+          doc.text(line, x + GEN_PAD, baselineY + li * GEN_LINE_H);
         });
       }
     });
@@ -178,7 +211,7 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
           const num = Number(String(item[c.key] || '0').replace(/[^\d.-]/g, ''));
           return s + (isNaN(num) ? 0 : num);
         }, 0);
-        doc.text(sum.toFixed(2), margin + (i + 1) * colW - 1, y + 2, { align: 'right' });
+        doc.text(sum.toFixed(2), colX(i) + colWidths[i] - GEN_PAD, y + 2, { align: 'right' });
       }
     });
     doc.setDrawColor(200, 200, 200);

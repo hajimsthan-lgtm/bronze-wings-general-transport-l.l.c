@@ -32,17 +32,17 @@ const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
 
 const TRIP_EXPORT_COLUMNS = [
-  { label: 'Trip #', key: 'trip_number' },
-  { label: 'Date', key: 'trip_date' },
-  { label: 'Driver', key: 'driver_name' },
-  { label: 'Driver Phone', key: 'driver_phone' },
-  { label: 'Vehicle', key: 'vehicle_plate' },
-  { label: 'Client', key: 'client_name' },
-  { label: 'From', key: 'from_location' },
-  { label: 'To', key: 'to_location' },
-  { label: 'Revenue', key: 'revenue' },
-  { label: 'Status', key: 'status' },
-  { label: 'Payment', key: 'payment_status' },
+  { label: 'Trip #',       key: 'trip_number',     w: 20, noWrap: true },
+  { label: 'Date',         key: 'trip_date',        w: 20 },
+  { label: 'Driver',       key: 'driver_name',      w: 22 },
+  { label: 'Driver Phone', key: 'driver_phone',     w: 24 },
+  { label: 'Vehicle',      key: 'vehicle_plate',    w: 18 },
+  { label: 'Client',       key: 'client_name',      w: 22 },
+  { label: 'From',         key: 'from_location',    w: 22 },
+  { label: 'To',           key: 'to_location',      w: 22 },
+  { label: 'Revenue',      key: 'revenue',          w: 20, numeric: true },
+  { label: 'Status',       key: 'status',           w: 22 },
+  { label: 'Payment',      key: 'payment_status',   w: 27 },
 ];
 const CONTRACT_EXPORT_COLUMNS = [
   { label: 'Contract ID', key: 'contract_id' },
