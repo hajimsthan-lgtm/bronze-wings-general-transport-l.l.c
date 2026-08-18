@@ -20,6 +20,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import { useExpenses, useExpenseCreate, useExpenseUpdate, useExpenseDelete } from '@/hooks/useEntityQueries';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
+import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportRowCard from '@/components/reports/ReportRowCard';
 import ReportStatusBadge from '@/components/reports/ReportStatusBadge';
 import DonutChart from '@/components/reports/DonutChart';
@@ -67,7 +68,7 @@ export default function Expenses() {
   const pendingCount = filtered.filter((e) => e.status === 'pending').length;
   const approvedCount = filtered.filter((e) => e.status === 'approved').length;
   const analytics = [
-    { label: 'Total', value: formatCurrency(totalAmount), icon: Wallet, color: '#f97316' },
+    { label: 'Total', value: totalAmount, format: formatCurrency, icon: Wallet, color: '#f97316' },
     { label: 'Expenses', value: filtered.length, icon: Receipt, color: '#00f2c3' },
     { label: 'Pending', value: pendingCount, icon: Clock, color: '#f59e0b' },
     { label: 'Approved', value: approvedCount, icon: CheckCircle2, color: '#22c55e' },
@@ -124,21 +125,10 @@ export default function Expenses() {
       </div>
 
       <PullToRefresh onRefresh={() => refetch()}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          {analytics.map((a, i) => {
-            const Icon = a.icon;
-            return (
-              <div key={a.label} className="stat-tile p-3.5 animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{a.label}</p>
-                  <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: hexToRgba(a.color, 0.14), border: `1px solid ${hexToRgba(a.color, 0.3)}` }}>
-                    <Icon className="w-3.5 h-3.5" style={{ color: a.color }} />
-                  </span>
-                </div>
-                <p className="text-base md:text-lg font-semibold text-foreground mt-1.5 tabular-nums truncate">{a.value}</p>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          {analytics.map((a, i) => (
+            <ReportStatCard key={a.label} index={i + 1} label={a.label} value={a.value} format={a.format} icon={a.icon} color={a.color} />
+          ))}
         </div>
 
         {donutData.length > 0 && (
