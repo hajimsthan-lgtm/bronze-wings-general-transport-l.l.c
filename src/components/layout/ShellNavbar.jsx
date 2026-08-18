@@ -1,22 +1,19 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Settings as SettingsIcon, Sun, Moon, LayoutDashboard, Route, FileText } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Settings as SettingsIcon, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import AlertBell from '@/components/layout/AlertBell';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
 import GlobalSearch from '@/components/layout/GlobalSearch';
-
-const QUICK_LINKS = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard, match: (p) => p === '/' },
-  { label: 'Operations', path: '/trips', icon: Route, match: (p) => p === '/trips' || p === '/contracts' || p === '/expenses' },
-  { label: 'Invoices', path: '/accounts/invoices', icon: FileText, match: (p) => p.startsWith('/accounts/invoices') },
-];
+import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
 export default function ShellNavbar({ query, setQuery }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { mode, toggleMode } = useTheme();
+  const isHome = location.pathname === '/';
 
   const initials = (user?.full_name || user?.email || 'U')
     .split(' ')
@@ -35,27 +32,31 @@ export default function ShellNavbar({ query, setQuery }) {
         WebkitBackdropFilter: 'blur(14px) saturate(1.3)',
       }}
     >
-      {/* Left: quick nav links */}
-      <nav className="flex items-center gap-1 flex-shrink-0">
-        {QUICK_LINKS.map((l) => {
-          const active = l.match(location.pathname);
-          return (
-            <Link
-              key={l.path}
-              to={l.path}
-              className={cn(
-                'flex items-center gap-1.5 h-9 px-3.5 rounded-full text-[13px] font-medium transition-all duration-200',
-                active
-                  ? 'text-foreground bg-white/[0.07] border border-border/60'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-transparent'
-              )}
-            >
-              <l.icon className="w-3.5 h-3.5" style={{ color: active ? 'rgb(var(--panel-accent-rgb))' : undefined }} />
-              {l.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Left: page heading (moved from subheader) */}
+      <div className="flex items-center gap-2.5 flex-shrink-0 min-w-0">
+        <button
+          onClick={() => navigate(-1)}
+          disabled={isHome}
+          aria-label="Go back"
+          title="Go back"
+          className={cn(
+            'group relative flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-all duration-300',
+            isHome ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
+          )}
+          style={{
+            background: isHome
+              ? 'hsl(var(--muted))'
+              : 'linear-gradient(145deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))',
+            border: `1px solid ${isHome ? 'hsl(var(--border))' : 'rgba(var(--panel-accent-rgb),0.45)'}`,
+            boxShadow: isHome
+              ? 'none'
+              : 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.5), 0 2px 8px rgba(0,0,0,0.3)',
+          }}
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))' }} />
+        </button>
+        <PageTitleIndicator />
+      </div>
 
       {/* Center: global search */}
       <div className="flex-1 flex justify-center px-2">
