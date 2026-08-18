@@ -1627,6 +1627,10 @@
 
   /* ========== Hairline / eyebrow ========== */
   .hairline { border-color: rgba(255,255,255,0.06) !important; }
+
+  /* Fixed sidebar nav text/icon color — pure black in light, white in dark */
+  .nav-text-fixed { color: #ffffff; }
+  .theme-light .nav-text-fixed { color: #000000; }
   .eyebrow {
     font-size: 10px;
     letter-spacing: 0.14em;
