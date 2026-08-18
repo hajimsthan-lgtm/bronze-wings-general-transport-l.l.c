@@ -205,8 +205,26 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         
       <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
-          <TableRow className="bg-muted hover:bg-muted">
-            <TableHead className="relative pl-3 trips-grid-th sticky top-0 z-10 bg-muted" style={thStyle(0)}>
+          {(() => {
+            const headerBg = 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.96) 0%, rgba(var(--surf-2-rgb),0.99) 100%)';
+            const headerShadow = 'inset 0 -1.5px 0 rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.06)';
+            return (
+            <TableRow
+              className="hover:bg-transparent"
+              style={{
+                background: headerBg,
+                backdropFilter: 'blur(16px) saturate(1.3)',
+                WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
+                boxShadow: headerShadow,
+                position: 'sticky',
+                top: 0,
+                zIndex: 20,
+              }}
+            >
+            <TableHead
+              className="relative pl-3 trips-grid-th"
+              style={{ ...thStyle(0), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}
+            >
               <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-border/60" />
               {resizeHandle(0)}
             </TableHead>
@@ -221,15 +239,21 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               ['STATUS', 'text-left'],
               ['ACTIONS', 'text-center']].
               map(([label, align], i) => {
-                const index = i + 1;
-                return (
-                  <TableHead key={label || 'actions'} className={cn('relative text-xs font-semibold uppercase tracking-wider text-foreground/75 trips-grid-th sticky top-0 z-10 bg-muted', align)} style={thStyle(index)}>
-                  {label}
-                  {resizeHandle(index)}
-                </TableHead>);
-
-              })}
-          </TableRow>
+                 const index = i + 1;
+                 return (
+                   <TableHead
+                     key={label || 'actions'}
+                     className={cn('relative text-xs font-bold uppercase tracking-wider text-foreground/80 trips-grid-th', align)}
+                     style={{ ...thStyle(index), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}
+                   >
+                     <span className="relative z-10">{label}</span>
+                     {resizeHandle(index)}
+                   </TableHead>
+                 );
+               })}
+            </TableRow>
+            );
+          })()}
         </TableHeader>
         <TableBody>
           {trips.map((trip) => {
