@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import LiveClock from '@/components/common/LiveClock';
 import BrandName from '@/components/layout/BrandName';
-import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
 import HeaderSubNav from '@/components/layout/headerSubNav';
 import GlobalEntitySelector from '@/components/layout/GlobalEntitySelector';
@@ -80,10 +79,8 @@ export default function DesktopNav() {
               </div>
             }
             <BrandName variant="desktop" />
-          </Link>
-          <div className="w-px h-7 hidden lg:block" style={{ background: 'hsl(var(--border))' }} />
-          <PageTitleIndicator />
-        </div>
+            </Link>
+            </div>
 
         {/* Center cluster — global entity selectors + sub-nav tiles */}
         <div className="flex items-center gap-3">
