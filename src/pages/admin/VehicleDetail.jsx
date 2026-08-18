@@ -18,6 +18,7 @@ import ProfitCard from '@/components/common/ProfitCard';
 import ExportButtons from '@/components/common/ExportButtons';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
 import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
+import VehicleLicensesSection from '@/components/admin/VehicleLicensesSection';
 import { exportToPDF } from '@/lib/exportUtils';
 import { downloadMaintenanceTablePDF } from '@/lib/maintenancePdf';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -301,6 +302,9 @@ export default function VehicleDetail() {
               ))}
             </div>
           </RecordSectionCard>
+
+          {/* Vehicle Licenses — AI scan + manual entry */}
+          <VehicleLicensesSection vehicle={vehicle} defaultOpen={false} />
 
           {/* Documents — small card, collapsed by default */}
           <DocumentsSection entityType="vehicle" entityId={vehicle.id} accent="#a855f7" defaultOpen={false} />
