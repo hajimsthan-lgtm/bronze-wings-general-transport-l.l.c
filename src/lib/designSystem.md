@@ -211,3 +211,102 @@ Every page gets the same header treatment, replacing plain text-only headers.
 - Hover lift: `translateY(-2px)` with 0.3s cubic-bezier.
 - Button press: `scale(0.97)` feedback.
 - Respect `prefers-reduced-motion` — disable all animations when set.
+
+---
+
+## 12 · Forms
+
+### Input fields, dropdowns, text areas
+- **Soft rounded corners** (`rounded-lg` / `rounded-xl`), never sharp boxes.
+- **Subtle gradient-tinted background** — very light, not competing with text:
+  - Dark mode: `rgba(255,255,255,0.03)` → `rgba(255,255,255,0.05)` gradient.
+  - Light mode: `rgba(0,0,0,0.02)` → `rgba(0,0,0,0.04)` gradient.
+  - Never flat white/grey boxes — always a whisper of tint.
+- **Border**: hairline `rgba(255,255,255,0.08)` (dark) / `rgba(0,0,0,0.08)` (light).
+- **Focus state** (consistent across every form in the app):
+  - Border shifts to the **module accent** at ~50% opacity.
+  - Soft **accent glow ring** (`box-shadow: 0 0 0 3px rgba(accent,0.12)`).
+  - No harsh blue browser default — always the module accent.
+
+### Form section groupings
+- Long forms (e.g. New Trip, Invoice form) are **sectioned into softly-tinted cards**,
+  each grouping a topic ("Client Info", "Trip Details", "Financials").
+- Each section card uses the **same tint language as stat cards** — a very light
+  gradient wash in the section's accent color, with a colored left-border or
+  top-accent line identifying the section's theme.
+- Section header inside the card: small icon chip + uppercase label, matching
+  the section-header style in §14.
+- This makes long forms feel **sectioned and scannable** instead of one
+  continuous wall of fields.
+
+### Labels
+- `text-xs`, `text-muted-foreground`, `font-medium`, slight `mb-1.5` gap above input.
+- Never inline labels — always stacked above the field.
+
+---
+
+## 13 · Modals & dialogs
+
+### Dialog / sheet headers
+- Modal headers get the **icon-chip + gradient tint treatment**, not just page headers.
+- **Icon chip**: same `hud-icon-tile` style as page headers — rounded square,
+  colored icon matching the modal's action category (e.g. amber for confirm-delete,
+  blue for send, green for approve).
+- **Gradient tint**: the header area gets a very light gradient wash in the
+  action's accent color, separating it from the body content below.
+- **Title**: bold, `font-display`, dark text — same hierarchy as page titles.
+- **Close button**: top-right, ghost icon style, low visual weight.
+
+### Confirmation dialogs (Actions menu)
+- Status-driven modals (void, cancel, send-for-signature) use the **status color**
+  as their accent: red for destructive, amber for caution, blue for send, green for approve.
+- The icon chip + gradient tint + primary button all share the same status color
+  so the modal's intent is instantly readable.
+
+### Dialog body
+- Body content stays on a **clean neutral background** — no gradient tint inside
+  the body (see §15). Only the header gets the tint.
+- Action buttons in the footer follow the button hierarchy in §2 — one solid
+  primary (status-colored), one ghost/outline cancel.
+
+---
+
+## 14 · Section headers within pages
+
+- Section headers inside a page (e.g. "COST BY SERVICE TYPE", "REVENUE BREAKDOWN")
+  keep their **colored uppercase label style**: `text-[11px]`, `font-semibold`,
+  `uppercase tracking-[0.08em]`, colored in the section's accent.
+- When a section header sits inside a card, that card gets a **matching soft
+  gradient background** in the same accent — so the header and its container
+  read as one themed unit.
+- Optional small icon to the left of the label, matching the accent color.
+- Optional "View All →" or action link on the right, muted, low weight.
+
+---
+
+## 15 · Gradient-tint discipline (when to tint vs. when to stay neutral)
+
+> Applying a gradient tint to *every* card, form section, and modal at once
+> risks visual fatigue — too many soft color washes competing on one screen
+> undercuts the "clean/premium" effect rather than supporting it.
+
+### Tinted (gradient wash is intentional, draws attention)
+- **Stat / KPI cards** — each metric is a distinct category.
+- **Form section groupings** — each section is a topic boundary.
+- **Status-driven modals** — the tint signals the action's intent.
+- **Section header cards** — the header + its container form one themed unit.
+- **Detail header cards** — the hero of a detail page.
+
+### Neutral (clean surface, no gradient — lets data breathe)
+- **Long tables** — dense rows need a quiet background for legibility.
+- **List rows** — the row's own icon chip carries the color, not the row background.
+- **Plain text content** — descriptions, notes, help text.
+- **Dialog bodies** — only the header tints; the body stays neutral.
+- **Input field interiors** — the *card* around a form section tints, not each
+  individual input (inputs stay on a quiet surface so text is maximally legible).
+
+**Principle**: gradient tints mark **category or status boundaries**. When
+everything is tinted, nothing is — the treatment stops reading as intentional
+and becomes noise. Reserve the wash for moments where color helps the user
+*parse structure* (this group is one topic, this modal is destructive, this
+card is one metric) and keep everything else on a calm neutral surface.
