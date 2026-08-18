@@ -199,7 +199,7 @@ export default function ServiceProviderDetail() {
               { label: 'Status', className: 'col-span-3' },
             ]}>
             {vehicles.map((v) => (
-              <div key={v.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => navigate(`/admin/vehicles/${v.id}`)}>
+              <div key={v.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                 <div className="col-span-3 text-foreground font-medium truncate">{v.plate_number}</div>
                 <div className="col-span-2 text-muted-foreground capitalize">{v.type}</div>
                 <div className="col-span-2 text-muted-foreground">{formatDate(v.supply_start_date)}</div>
@@ -228,7 +228,7 @@ export default function ServiceProviderDetail() {
               { label: 'Status', className: 'col-span-3' },
             ]}>
             {drivers.map((d) => (
-              <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors cursor-pointer" onClick={() => navigate(`/admin/drivers/${d.id}`)}>
+              <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                 <div className="col-span-3 text-foreground font-medium truncate">{d.name}</div>
                 <div className="col-span-2 text-muted-foreground truncate">{d.phone}</div>
                 <div className="col-span-2 text-muted-foreground">{formatDate(d.supply_start_date)}</div>
