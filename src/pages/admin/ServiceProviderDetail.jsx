@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VendorTransactionLedger from '@/components/vendors/VendorTransactionLedger';
+import VendorAssetFormSheet from '@/components/vendors/VendorAssetFormSheet';
 
 const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Driver Supplier', both: 'Both' };
 const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
@@ -66,6 +67,7 @@ export default function ServiceProviderDetail() {
   const [openSection, setOpenSection] = useState('contract');
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({});
+  const [assetSheet, setAssetSheet] = useState({ open: false, mode: 'vehicle' });
 
   useEffect(() => {
     let cancelled = false;
@@ -187,7 +189,7 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Truck}
             emptyLabel="No vehicles supplied"
-            onNew={() => navigate(`/admin/vehicles?new=1&vendor=${encodeURIComponent(vendor.name)}`)}
+            onNew={() => setAssetSheet({ open: true, mode: 'vehicle' })}
             newLabel="Add vehicle"
             columns={[
               { label: 'Plate', className: 'col-span-3' },
@@ -216,7 +218,7 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Users}
             emptyLabel="No drivers supplied"
-            onNew={() => navigate(`/admin/drivers?new=1&vendor=${encodeURIComponent(vendor.name)}`)}
+            onNew={() => setAssetSheet({ open: true, mode: 'driver' })}
             newLabel="Add driver"
             columns={[
               { label: 'Name', className: 'col-span-3' },
@@ -251,6 +253,17 @@ export default function ServiceProviderDetail() {
           <DocumentsSection entityType="vendor" entityId={vendor.id} accent="#a855f7" defaultOpen={false} />
         </div>
       </div>
+
+      <VendorAssetFormSheet
+        open={assetSheet.open}
+        onOpenChange={(o) => setAssetSheet((s) => ({ ...s, open: o }))}
+        mode={assetSheet.mode}
+        vendorName={vendor.name}
+        onCreated={(rec) => {
+          if (assetSheet.mode === 'vehicle') setVehicles((v) => [rec, ...v]);
+          else setDrivers((d) => [rec, ...d]);
+        }}
+      />
 
       {/* Edit sheet */}
       <Sheet open={editOpen} onOpenChange={setEditOpen}>
