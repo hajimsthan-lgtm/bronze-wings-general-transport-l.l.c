@@ -16,6 +16,7 @@ import VehicleListRow from '@/components/admin/VehicleListRow';
 import ViewToggle from '@/components/common/ViewToggle';
 import ImageUpload from '@/components/common/ImageUpload';
 import TypeCombobox from '@/components/admin/TypeCombobox';
+import VehicleScanForm from '@/components/admin/VehicleScanForm';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -182,49 +183,10 @@ function VehiclesTab() {
         </>
       )}
 
-      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Register a new vehicle in the fleet">
-          <VehicleForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vehicle.update(editItem.id, data); else await base44.entities.Vehicle.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Truck} title={`${editItem ? t('edit') : t('add_new')} Vehicle`} subtitle="Scan UAE Mulkiya — AI extracts vehicle data automatically">
+          <VehicleScanForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Vehicle.update(editItem.id, data); else await base44.entities.Vehicle.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
-    </div>
-  );
-}
-
-function VehicleForm({ editItem, onSave, onCancel }) {
-  const { t } = useI18n();
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', vendor_name: '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
-  useEffect(() => {
-    if (editItem) { setForm({ ...form, ...editItem, year: editItem.year || '' }); }
-    else {
-      const p = new URLSearchParams(window.location.search);
-      setForm({ plate_number: '', image_url: '', make: '', model: '', year: '', type: 'truck', status: 'active', assigned_driver: '', vendor_name: p.get('vendor') || '', registration_expiry: '', insurance_expiry: '', fuel_type: 'diesel', notes: '' });
-    }
-  }, [editItem]);
-  const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
-  const handle = async () => { setSaving(true); await onSave({ ...form, year: form.year ? Number(form.year) : undefined }); setSaving(false); };
-
-  return (
-    <div className="space-y-4">
-      <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Vehicle Photo" />
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('plate_number')}</Label><Input value={form.plate_number} onChange={(e) => update('plate_number', e.target.value)} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-3 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Make</Label><Input value={form.make} onChange={(e) => update('make', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Model</Label><Input value={form.model} onChange={(e) => update('model', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Year</Label><Input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Type</Label>
-          <TypeCombobox value={form.type} onChange={(v) => update('type', v)} suggestions={['truck', 'trailer', 'tanker', 'crane', 'pickup', 'chillervan', 'freezervan', 'othermachines', 'other']} storageKey="vehicle_type_custom" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>
-          <Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['active', 'maintenance', 'inactive'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
-      </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input value={form.assigned_driver} onChange={(e) => update('assigned_driver', e.target.value)} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Reg. Expiry</Label><Input type="date" value={form.registration_expiry} onChange={(e) => update('registration_expiry', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Ins. Expiry</Label><Input type="date" value={form.insurance_expiry} onChange={(e) => update('insurance_expiry', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>
   );
 }
