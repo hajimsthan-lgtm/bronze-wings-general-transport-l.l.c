@@ -19,7 +19,8 @@ import TypeCombobox from '@/components/admin/TypeCombobox';
 
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
-import VehicleForm from '@/components/admin/VehicleForm';
+import VehicleAddForm from '@/components/admin/VehicleAddForm';
+import { useToast } from '@/components/ui/use-toast';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Truck, Pencil, Trash2, Sparkles, BarChart3, LayoutGrid } from 'lucide-react';
@@ -34,6 +35,7 @@ function VehiclesTab() {
   const { t } = useI18n();
   const { mode: themeMode } = useTheme();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState('');
@@ -192,19 +194,35 @@ function VehiclesTab() {
         onOpenChange={setFormOpen}
         icon={Truck}
         title={editItem ? 'Edit Vehicle' : 'Add New Vehicle'}
-        subtitle="Register a new vehicle or update its details"
+        subtitle="Scan license or enter details manually"
       >
-        <VehicleForm
+        <VehicleAddForm
           editItem={editItem}
           onCancel={() => setFormOpen(false)}
-          onSave={async (data) => {
-            if (editItem) {
-              await base44.entities.Vehicle.update(editItem.id, data);
-            } else {
-              await base44.entities.Vehicle.create(data);
+          onSave={async (vehicleData, licenseData) => {
+            try {
+              if (editItem) {
+                await base44.entities.Vehicle.update(editItem.id, vehicleData);
+                if (licenseData?.trafficPlateNo) {
+                  const existing = await base44.entities.VehicleLicense.filter({ trafficPlateNo: licenseData.trafficPlateNo });
+                  if (existing?.length) {
+                    await base44.entities.VehicleLicense.update(existing[0].id, licenseData);
+                  } else {
+                    await base44.entities.VehicleLicense.create(licenseData);
+                  }
+                }
+              } else {
+                const created = await base44.entities.Vehicle.create(vehicleData);
+                if (licenseData?.trafficPlateNo) {
+                  await base44.entities.VehicleLicense.create(licenseData);
+                }
+                toast({ title: 'Vehicle added', description: `${vehicleData.make} ${vehicleData.model} · ${vehicleData.plate_number}` });
+              }
+              setFormOpen(false);
+              load();
+            } catch (e) {
+              toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });
             }
-            setFormOpen(false);
-            load();
           }}
         />
       </EntityFormDialog>
