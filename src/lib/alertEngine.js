@@ -76,7 +76,8 @@ export function buildAlerts(data) {
   companyDocuments.forEach((d) => {
     const days = daysUntil(d.expiry_date);
     if (days === null) return;
-    if (days <= 60) {
+    const alertWindow = d.alert_days || 60;
+    if (days <= alertWindow) {
       items.push({
         id: `cdoc-${d.id}`,
         category: 'documents',

@@ -14,7 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate } from '@/lib/formatters';
-import { Plus, Search, Award, Pencil, Trash2, Upload, FileText, Loader2, ExternalLink } from 'lucide-react';
+import { Plus, Search, Award, Pencil, Trash2, Upload, FileText, Loader2, ExternalLink, RefreshCw, History, ShieldCheck, AlertTriangle, CheckCircle2, CalendarClock, CalendarX } from 'lucide-react';
+import KpiCard from '@/components/common/KpiCard';
+import CompanyDocRenewDialog from '@/components/company-docs/CompanyDocRenewDialog';
 
 const DOC_TYPES = [
   'Trade License (DED)',
@@ -40,11 +42,11 @@ function daysUntil(dateStr) {
   return Math.round((d - today) / (1000 * 60 * 60 * 24));
 }
 
-function docStatus(expiry) {
+function docStatus(expiry, alertDays = 30) {
   const days = daysUntil(expiry);
   if (days === null) return 'active';
   if (days < 0) return 'expired';
-  if (days <= 30) return 'expiring_soon';
+  if (days <= alertDays) return 'expiring_soon';
   return 'active';
 }
 
@@ -54,8 +56,8 @@ const STATUS_CONFIG = {
   expired: { label: 'Expired', color: '#ef4444', bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)' },
 };
 
-function StatusBadge({ expiry }) {
-  const status = docStatus(expiry);
+function StatusBadge({ expiry, alertDays = 30 }) {
+  const status = docStatus(expiry, alertDays);
   const cfg = STATUS_CONFIG[status];
   const days = daysUntil(expiry);
   return (
@@ -81,6 +83,7 @@ export default function CompanyDocuments() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [renewDoc, setRenewDoc] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -119,16 +122,16 @@ export default function CompanyDocuments() {
       d.document_type?.toLowerCase().includes(search.toLowerCase()) ||
       d.reference_number?.toLowerCase().includes(search.toLowerCase()) ||
       d.issuing_authority?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === 'all' || docStatus(d.expiry_date) === statusFilter;
+    const matchStatus = statusFilter === 'all' || docStatus(d.expiry_date, d.alert_days || 30) === statusFilter;
     const matchType = typeFilter === 'all' || d.document_type === typeFilter;
     return matchSearch && matchStatus && matchType;
   });
 
   const stats = useMemo(() => ({
     total: items.length,
-    active: items.filter(d => docStatus(d.expiry_date) === 'active').length,
-    expiring: items.filter(d => docStatus(d.expiry_date) === 'expiring_soon').length,
-    expired: items.filter(d => docStatus(d.expiry_date) === 'expired').length,
+    active: items.filter(d => docStatus(d.expiry_date, d.alert_days || 30) === 'active').length,
+    expiring: items.filter(d => docStatus(d.expiry_date, d.alert_days || 30) === 'expiring_soon').length,
+    expired: items.filter(d => docStatus(d.expiry_date, d.alert_days || 30) === 'expired').length,
   }), [items]);
 
   return (
@@ -136,11 +139,11 @@ export default function CompanyDocuments() {
       <PageHeader icon={Award} title="Company Documents" description="UAE compliance documents & expiry tracking" />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        <StatCard label="Total" value={stats.total} color="#3b82f6" />
-        <StatCard label="Active" value={stats.active} color="#22c55e" />
-        <StatCard label="Expiring Soon" value={stats.expiring} color="#f59e0b" />
-        <StatCard label="Expired" value={stats.expired} color="#ef4444" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
+        <KpiCard icon={ShieldCheck} title="Total Documents" value={String(stats.total)} subtitle={stats.total === 0 ? 'No documents tracked' : 'Compliance docs'} accent="primary" />
+        <KpiCard icon={CheckCircle2} title="Active" value={String(stats.active)} subtitle={stats.active > 0 ? 'All valid' : '—'} accent="emerald" />
+        <KpiCard icon={CalendarClock} title="Expiring Soon" value={String(stats.expiring)} subtitle={stats.expiring > 0 ? 'Needs attention' : 'All clear'} accent="amber" />
+        <KpiCard icon={CalendarX} title="Expired" value={String(stats.expired)} subtitle={stats.expired > 0 ? 'Action required' : 'None expired'} accent="red" />
       </div>
 
       {/* Toolbar */}
@@ -172,7 +175,11 @@ export default function CompanyDocuments() {
 
       {/* List */}
       {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
-        <EmptyState icon={Award} title="No company documents" description="Add your first compliance document to start tracking expiries" />
+        <EmptyState
+          icon={Award}
+          title={items.length === 0 ? "No company documents" : "No matching documents"}
+          description={items.length === 0 ? "Add your first compliance document to start tracking expiries" : "Try adjusting your search or filters"}
+        />
       ) : (
         <div className="space-y-2">
           {filtered.map(doc => (
@@ -191,8 +198,14 @@ export default function CompanyDocuments() {
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Expiry</p>
                 <p className="text-xs font-medium text-foreground">{doc.expiry_date ? formatDate(doc.expiry_date) : '—'}</p>
               </div>
-              <StatusBadge expiry={doc.expiry_date} />
+              <StatusBadge expiry={doc.expiry_date} alertDays={doc.alert_days || 30} />
               <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                {doc.file_url && (
+                  <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url, '_blank')} className="text-muted-foreground hover:text-primary h-8 px-2" title="View file"><ExternalLink className="w-3.5 h-3.5" /></Button>
+                )}
+                {doc.expiry_date && (
+                  <Button variant="ghost" size="sm" onClick={() => setRenewDoc(doc)} className="text-muted-foreground hover:text-amber-500 h-8 px-2" title="Renew"><RefreshCw className="w-3.5 h-3.5" /></Button>
+                )}
                 <Button variant="ghost" size="sm" onClick={() => { setEditItem(doc); setFormOpen(true); }} className="text-muted-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -233,6 +246,14 @@ export default function CompanyDocuments() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Renew Dialog */}
+      <CompanyDocRenewDialog
+        doc={renewDoc}
+        open={!!renewDoc}
+        onOpenChange={(v) => { if (!v) setRenewDoc(null); }}
+        onRenewed={load}
+      />
     </div>
   );
 }
@@ -261,12 +282,13 @@ function CompanyDocForm({ editItem, onSave, onCancel }) {
     issue_date: '',
     expiry_date: '',
     file_url: '',
+    alert_days: 30,
     notes: '',
   });
 
   useEffect(() => {
-    if (editItem) setForm({ ...form, ...editItem });
-    else setForm({ document_type: DOC_TYPES[0], reference_number: '', issuing_authority: '', issue_date: '', expiry_date: '', file_url: '', notes: '' });
+    if (editItem) setForm({ ...form, ...editItem, alert_days: editItem.alert_days || 30 });
+    else setForm({ document_type: DOC_TYPES[0], reference_number: '', issuing_authority: '', issue_date: '', expiry_date: '', file_url: '', alert_days: 30, notes: '' });
   }, [editItem]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
@@ -333,8 +355,43 @@ function CompanyDocForm({ editItem, onSave, onCancel }) {
       </div>
       {form.expiry_date && (
         <div className="glass-card p-2.5 flex items-center gap-2">
-          <StatusBadge expiry={form.expiry_date} />
-          <span className="text-[10px] text-muted-foreground">Status auto-derived from expiry date</span>
+          <StatusBadge expiry={form.expiry_date} alertDays={form.alert_days || 30} />
+          <span className="text-[10px] text-muted-foreground">Status auto-derived from expiry date & alert threshold</span>
+        </div>
+      )}
+      <div>
+        <Label className="text-xs text-muted-foreground mb-1.5">Alert Threshold (days before expiry)</Label>
+        <Select value={String(form.alert_days || 30)} onValueChange={v => update('alert_days', Number(v))}>
+          <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="7">7 days — Short notice</SelectItem>
+            <SelectItem value="14">14 days — Standard</SelectItem>
+            <SelectItem value="30">30 days — Monthly lead time</SelectItem>
+            <SelectItem value="60">60 days — Long renewal cycle (Trade License, Establishment Card)</SelectItem>
+            <SelectItem value="90">90 days — Extended lead time</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-[10px] text-muted-foreground mt-1">Documents expiring within this window trigger "Expiring Soon" status and header bell alerts.</p>
+      </div>
+      {editItem?.renewal_history?.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <History className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Renewal History ({editItem.renewal_history.length})</p>
+          </div>
+          <div className="space-y-1.5 max-h-32 overflow-y-auto thin-scroll">
+            {[...editItem.renewal_history].reverse().map((r, i) => (
+              <div key={i} className="glass-card px-3 py-2 rounded-lg">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">{r.old_expiry ? formatDate(r.old_expiry) : '—'}</span>
+                  <span className="text-muted-foreground">→</span>
+                  <span className="text-foreground font-medium">{r.new_expiry ? formatDate(r.new_expiry) : '—'}</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto">{r.renewed_date ? formatDate(r.renewed_date) : ''}</span>
+                </div>
+                {r.notes && <p className="text-[10px] text-muted-foreground mt-1">{r.notes}</p>}
+              </div>
+            ))}
+          </div>
         </div>
       )}
       <div>
