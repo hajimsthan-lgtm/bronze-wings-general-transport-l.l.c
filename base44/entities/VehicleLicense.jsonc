@@ -86,7 +86,8 @@
         "Bus",
         "Taxi",
         "Other"
-      ]
+      ],
+      "default": "Private"
     }
   },
   "required": []
