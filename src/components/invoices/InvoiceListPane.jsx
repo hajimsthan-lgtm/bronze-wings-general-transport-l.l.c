@@ -43,9 +43,10 @@ export default function InvoiceListPane({
   const tabs = [
     { key: 'all', label: 'All', count: counts.all },
     { key: 'draft', label: 'Draft', count: counts.draft },
-    { key: 'unpaid', label: 'Unpaid', count: counts.unpaid },
+    { key: 'unsigned', label: 'Waiting for Sign', count: counts.unsigned, icon: PenLine },
     { key: 'signed', label: 'Signed', count: counts.signed, icon: FileSignature },
-    { key: 'unsigned', label: 'Unsigned', count: counts.unsigned, icon: PenLine },
+    { key: 'unpaid', label: 'Unpaid', count: counts.unpaid },
+    { key: 'paid', label: 'Paid', count: counts.paid },
   ];
 
   return (

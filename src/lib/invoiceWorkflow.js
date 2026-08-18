@@ -81,6 +81,7 @@ export function computeTabCounts(invoices) {
     }).length,
     signed: invoices.filter(i => deriveStatus(i) === 'signed').length,
     unsigned: invoices.filter(i => deriveStatus(i) === 'unsigned').length,
+    paid: invoices.filter(i => deriveStatus(i) === 'paid').length,
   };
 }
 
@@ -93,5 +94,6 @@ export function filterByTab(invoices, tab) {
   });
   if (tab === 'signed') return invoices.filter(i => deriveStatus(i) === 'signed');
   if (tab === 'unsigned') return invoices.filter(i => deriveStatus(i) === 'unsigned');
+  if (tab === 'paid') return invoices.filter(i => deriveStatus(i) === 'paid');
   return invoices;
 }
