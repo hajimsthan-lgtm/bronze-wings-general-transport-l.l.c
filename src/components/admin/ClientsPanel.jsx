@@ -52,8 +52,8 @@ export default function ClientsPanel() {
     <div>
       <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground font-display hidden">Clients</h1>
-          <p className="text-sm text-muted-foreground hidden">Customer management</p>
+          
+          
         </div>
         <div className="flex items-center gap-2 flex-wrap">
 ...
