@@ -3,7 +3,7 @@ import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, Shie
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
-import VehicleEditDialog from '@/components/admin/VehicleEditDialog';
+import VehicleEditModal from '@/components/admin/VehicleEditModal';
 import VehicleLicenseInfo from '@/components/admin/VehicleLicenseInfo';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
@@ -28,7 +28,7 @@ const CARD_BASE = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
-export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership, onSave }) {
+export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership, onSaved }) {
   const [expanded, setExpanded] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -160,7 +160,7 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
         </div>
       )}
 
-      <VehicleEditDialog open={editOpen} onOpenChange={setEditOpen} vehicle={vehicle} onSave={onSave} />
+      <VehicleEditModal open={editOpen} onOpenChange={setEditOpen} vehicle={vehicle} onSaved={onSaved} />
     </div>
   );
 }

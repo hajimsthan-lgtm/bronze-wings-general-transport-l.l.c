@@ -97,15 +97,13 @@ export default function VehicleDetail() {
     } catch {}
   };
 
-  const saveVehicle = async (data) => {
-    try {
-      await base44.entities.Vehicle.update(vehicle.id, data);
-      const updated = { ...vehicle, ...data };
-      setVehicle(updated);
-      if (data.plate_number && data.plate_number !== vehicle.plate_number) {
-        await loadRelated(updated);
-      }
-    } catch {}
+  // Called AFTER VehicleEditModal has already persisted the update — just refresh local state.
+  const saveVehicle = (data) => {
+    const updated = { ...vehicle, ...data };
+    setVehicle(updated);
+    if (data.plate_number && data.plate_number !== vehicle.plate_number) {
+      loadRelated(updated);
+    }
   };
 
   const exportRows = [
@@ -222,7 +220,7 @@ export default function VehicleDetail() {
 
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
-        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSave={saveVehicle} />
+        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSaved={saveVehicle} />
         <div className="space-y-4">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard
