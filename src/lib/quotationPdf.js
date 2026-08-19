@@ -378,16 +378,6 @@ export async function downloadQuotationPDF(quotation, settings = {}) {
     y = drawTableRow(pdf, items[idx], cols, y, idx);
   }
 
-  // Totals
-  const subtotal = items.reduce((sum, i) => {
-    const q = Number(i.quantity) || 0;
-    const p = Number(i.unit_price) || 0;
-    return sum + Number(i.amount ?? (q * p));
-  }, 0);
-  const vat = subtotal * vatRate / 100;
-  const total = subtotal + vat;
-  y = drawTotals(pdf, y, { subtotal, vat, total, vatRate });
-
   // Terms + Signatures
   drawTermsAndSignatures(pdf, quotation, s, y);
 
