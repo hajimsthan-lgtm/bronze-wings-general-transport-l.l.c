@@ -1,4 +1,4 @@
-import { Mail, Globe, Mailbox } from 'lucide-react';
+import { Mailbox } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -7,6 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import GmailIcon from '@/components/icons/GmailIcon';
 
 const DEFAULT_COMPANY = 'Bronze Wings General Transport L.L.C';
 
@@ -124,7 +125,7 @@ export default function EmailShareButton({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button type="button" title={title} className={triggerClass} onClick={(e) => e.stopPropagation()}>
-          <Mail className={variant === 'card' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+          <GmailIcon size={variant === 'card' ? 14 : 16} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
@@ -135,7 +136,7 @@ export default function EmailShareButton({
           <span>Mail App</span>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={openGmail} className="cursor-pointer">
-          <Globe className="w-4 h-4" />
+          <GmailIcon size={16} />
           <span>Gmail (Web)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
