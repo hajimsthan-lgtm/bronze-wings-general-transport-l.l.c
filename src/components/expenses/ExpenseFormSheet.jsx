@@ -45,7 +45,7 @@ export default function ExpenseFormSheet({ open, onOpenChange, editItem, prefill
   };
 
   return (
-    <EntityFormDialog open={open} onOpenChange={onOpenChange} icon={Receipt} title={`${editItem ? t('edit') : t('add_new')} Expense`} subtitle="Record a new expense transaction">
+    <EntityFormDialog open={open} onOpenChange={onOpenChange} title={`${editItem ? t('edit') : t('add_new')} Expense`} subtitle="Record a new expense transaction">
       <div className="space-y-4">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Category</Label>
           <Select value={form.category} onValueChange={v => update('category', v)}>

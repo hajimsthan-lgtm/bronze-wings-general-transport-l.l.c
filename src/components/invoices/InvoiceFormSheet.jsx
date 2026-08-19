@@ -408,7 +408,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </div>
 
             {/* Client */}
-            <Section title="Client" icon={User}>
+            <Section title="Client">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">{t('client')}</Label>
                 <Input list="invoice-clients" value={form.client_name} onChange={e => handleClientChange(e.target.value)} className={inputCls} placeholder="Select or type client name" />
@@ -517,7 +517,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Invoice Details */}
-            <Section title="Invoice Details" icon={FileText}>
+            <Section title="Invoice Details">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Invoice #</Label>
@@ -558,7 +558,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Line Items */}
-            <Section title="Line Items" icon={Sparkles}>
+            <Section title="Line Items">
               <div className="space-y-2.5">
                 {form.line_items.map((item, i) => (
                   <div key={i} className="glass-card p-3 space-y-2">
@@ -612,7 +612,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Payment */}
-            <Section title="Payment" icon={CreditCard}>
+            <Section title="Payment">
               <div className="glass-card p-3 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">Receive payment now</p>
@@ -681,7 +681,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 Live Preview
               </div>
             </div>
-            <div className="h-[calc(100%-36px)]">
+            <div className="h-[calc(100%-36px)]" style={{ zoom: 0.8 }}>
               <InvoicePreview form={{ ...form, line_items: previewItems, subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount }} settings={settings} mode={invoiceMode} />
             </div>
           </div>

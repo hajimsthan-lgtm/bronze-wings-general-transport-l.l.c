@@ -159,7 +159,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
           {/* LEFT: Form */}
           <div className={cn('w-full sm:w-1/2 overflow-y-auto px-5 py-5 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
             {/* CLIENT SECTION */}
-            <Section title="Client" icon={Building2} accent="59, 130, 246" delay={0}>
+            <Section title="Client" accent="59, 130, 246" delay={0}>
               <ClientAutocomplete form={form} update={update} />
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -186,7 +186,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
             </Section>
 
             {/* AGREEMENT DETAILS SECTION */}
-            <Section title="Agreement Details" icon={FileSignature} accent="168, 85, 247" delay={40}>
+            <Section title="Agreement Details" accent="168, 85, 247" delay={40}>
               <div>
                 <Label>Agreement Number</Label>
                 <Input value={form.agreement_number} onChange={e => update('agreement_number', e.target.value)} />
@@ -232,7 +232,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
             </Section>
 
             {/* SERVICE ITEMS SECTION */}
-            <Section title="Service Items" icon={Plus} accent="16, 185, 129" delay={80}>
+            <Section title="Service Items" accent="16, 185, 129" delay={80}>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Add line items for itemized billing</span>
                 <Button size="sm" variant="outline" onClick={addItem}><Plus className="w-3.5 h-3.5 mr-1" />Add Item</Button>
@@ -274,7 +274,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
             </Section>
 
             {/* TERMS SECTION */}
-            <Section title="Terms & Content" icon={ScrollText} accent="245, 158, 11" delay={120}>
+            <Section title="Terms & Content" accent="245, 158, 11" delay={120}>
               <div>
                 <Label>Agreement Content</Label>
                 <Textarea
@@ -314,7 +314,7 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
                 Live Preview
               </div>
             </div>
-            <div className="h-[calc(100%-36px)]">
+            <div className="h-[calc(100%-36px)]" style={{ zoom: 0.8 }}>
               <AgreementPreview form={{ ...form, amount: hasItems ? itemsTotal : form.amount }} settings={settings} />
             </div>
           </div>

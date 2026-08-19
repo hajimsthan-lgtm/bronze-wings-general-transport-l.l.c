@@ -96,6 +96,21 @@ export default function Agreements() {
     if (client) navigate(`/admin/clients/${client.id}`);
   };
 
+  const handleViewSigned = (a) => {
+    if (a?.signed_agreement_url) window.open(a.signed_agreement_url, '_blank');
+  };
+
+  const handleDownloadSigned = (a) => {
+    if (!a?.signed_agreement_url) return;
+    const link = document.createElement('a');
+    link.href = a.signed_agreement_url;
+    link.download = `Signed-${a.agreement_number || 'Agreement'}`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleDelete = async () => {
     const a = deleteTarget;
     setDeleteTarget(null);
@@ -354,6 +369,9 @@ export default function Agreements() {
               docType="agreement"
               actionsMenu={selectedItem && !['terminated', 'expired'].includes(deriveStatus(selectedItem)) ? <AgreementActionsMenu agreement={selectedItem} onAction={handleAction} variant="button" /> : null}
               signatureFlag={itemFlag}
+              signedUrlField="signed_agreement_url"
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
             />
           </div>
         </div>
@@ -395,6 +413,9 @@ export default function Agreements() {
               docType="agreement"
               actionsMenu={selectedItem && !['terminated', 'expired'].includes(deriveStatus(selectedItem)) ? <AgreementActionsMenu agreement={selectedItem} onAction={handleAction} variant="button" /> : null}
               signatureFlag={itemFlag}
+              signedUrlField="signed_agreement_url"
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
             />
           </div>
         </SheetContent>

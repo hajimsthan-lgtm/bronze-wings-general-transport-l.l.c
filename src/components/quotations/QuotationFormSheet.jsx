@@ -286,7 +286,7 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
                 Live Preview
               </div>
             </div>
-            <div className="h-[calc(100%-36px)]">
+            <div className="h-[calc(100%-36px)]" style={{ zoom: 0.8 }}>
               <QuotationPreview form={form} settings={settings} />
             </div>
           </div>

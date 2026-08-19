@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag, FileSignature, Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
@@ -32,6 +32,9 @@ export default function DocumentDetailPane({
   docType = 'quotation',
   actionsMenu,
   signatureFlag,
+  signedUrlField,
+  onViewSigned,
+  onDownloadSigned,
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
@@ -171,6 +174,38 @@ export default function DocumentDetailPane({
             </div>
           )}
         </div>
+
+        {/* Signed Copy */}
+        {signedUrlField && item[signedUrlField] && (
+          <div className="mb-5">
+            <p className="eyebrow mb-3">Signed Copy</p>
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileSignature className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <span className="text-xs font-semibold text-emerald-600 truncate">Signed document</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                  {item.signed_date || '—'}{item.signed_uploaded_by ? ` · ${item.signed_uploaded_by}` : ''}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onViewSigned?.(item)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                >
+                  <Eye className="w-3 h-3" /> View
+                </button>
+                <button
+                  onClick={() => onDownloadSigned?.(item)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                >
+                  <Download className="w-3 h-3" /> Download
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {item.notes && (
           <div className="mb-4">
