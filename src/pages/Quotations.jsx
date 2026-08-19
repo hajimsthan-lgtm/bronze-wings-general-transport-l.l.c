@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import QuotationFormSheet from '@/components/quotations/QuotationFormSheet';
 import QuotationStatCards from '@/components/quotations/QuotationStatCards';
+import QuotationPreview from '@/components/quotations/QuotationPreview';
 import DocumentListPane from '@/components/documents/DocumentListPane';
 import DocumentDetailPane from '@/components/documents/DocumentDetailPane';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
@@ -64,6 +65,9 @@ export default function Quotations() {
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -283,6 +287,7 @@ export default function Quotations() {
               emptyIcon={FileText}
               emptyTitle="Select a quotation"
               emptyDescription="Choose a quotation from the list to view its full details here."
+              previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
             />
           </div>
         </div>
@@ -319,6 +324,7 @@ export default function Quotations() {
               emptyIcon={FileText}
               emptyTitle="Select a quotation"
               emptyDescription="Choose a quotation from the list to view its full details here."
+              previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
             />
           </div>
         </SheetContent>

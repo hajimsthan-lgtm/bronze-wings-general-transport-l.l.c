@@ -78,12 +78,14 @@ export default function InvoicesPage() {
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  const [settings, setSettings] = useState({});
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then(setClients);
     base44.auth.me().then(setCurrentUser).catch(() => {});
+    getCompanySettings().then(setSettings).catch(() => {});
   }, []);
 
   const handleClientClick = (clientName) => {
@@ -657,10 +659,11 @@ export default function InvoicesPage() {
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
               payments={payments}
+              settings={settings}
             />
-          </div>
-        </div>
-      )}
+            </div>
+            </div>
+            )}
 
       {/* Mobile detail sheet */}
       <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
@@ -689,10 +692,11 @@ export default function InvoicesPage() {
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
               payments={payments}
+              settings={settings}
             />
-          </div>
-        </SheetContent>
-      </Sheet>
+            </div>
+            </SheetContent>
+            </Sheet>
 
       <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} customTemplateId={selectedTemplateId} />
 

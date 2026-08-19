@@ -1,6 +1,6 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
-  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
@@ -25,8 +25,10 @@ export default function DocumentDetailPane({
   emptyDescription = 'Choose an item from the list to view its full details here.',
   emptyIcon: EmptyIcon = FileText,
   documentLabel = 'Document',
+  previewComponent,
 }) {
   const fileRef = useRef(null);
+  const [view, setView] = useState('details');
 
   if (!item) {
     return (
@@ -40,6 +42,8 @@ export default function DocumentDetailPane({
   const cfg = statusConfig[status] || statusConfig.draft;
   const lineItems = item[lineItemsKey] || [];
   const isDownloading = downloadingId === item.id;
+  const hasPreview = !!previewComponent;
+  const showPreview = hasPreview && view === 'preview';
 
   return (
     <div className="glass-card rounded-2xl h-full flex flex-col overflow-hidden">
@@ -67,6 +71,24 @@ export default function DocumentDetailPane({
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            {hasPreview && (
+              <div className="inline-flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5 mr-1">
+                <button
+                  onClick={() => setView('details')}
+                  className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-semibold transition-colors ${view === 'details' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  title="Details view"
+                >
+                  <LayoutList className="w-3 h-3" /> Details
+                </button>
+                <button
+                  onClick={() => setView('preview')}
+                  className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-semibold transition-colors ${view === 'preview' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  title="Live preview"
+                >
+                  <Eye className="w-3 h-3" /> Preview
+                </button>
+              </div>
+            )}
             <button onClick={() => onEdit(item)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Edit">
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -78,6 +100,11 @@ export default function DocumentDetailPane({
       </div>
 
       {/* Body */}
+      {showPreview ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {previewComponent}
+        </div>
+      ) : (
       <div className="flex-1 overflow-y-auto thin-scroll min-h-0 px-5 py-4">
         {/* Subtitle / subject */}
         {item[subtitleField] && (
@@ -137,9 +164,10 @@ export default function DocumentDetailPane({
           </div>
         )}
       </div>
+      )}
 
       {/* Footer: totals */}
-      {totalFields.length > 0 && (
+      {!showPreview && totalFields.length > 0 && (
         <div className="px-5 py-3 border-t border-border/40 space-y-1.5">
           {totalFields.map(tf => (
             <div

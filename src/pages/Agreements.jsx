@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import AgreementFormSheet from '@/components/agreements/AgreementFormSheet';
 import AgreementStatCards from '@/components/agreements/AgreementStatCards';
+import AgreementPreview from '@/components/agreements/AgreementPreview';
 import DocumentListPane from '@/components/documents/DocumentListPane';
 import DocumentDetailPane from '@/components/documents/DocumentDetailPane';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
@@ -60,6 +61,9 @@ export default function Agreements() {
   const [tab, setTab] = useState('all');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -274,6 +278,7 @@ export default function Agreements() {
               emptyIcon={FileSignature}
               emptyTitle="Select an agreement"
               emptyDescription="Choose an agreement from the list to view its full details here."
+              previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
             />
           </div>
         </div>
@@ -310,6 +315,7 @@ export default function Agreements() {
               emptyIcon={FileSignature}
               emptyTitle="Select an agreement"
               emptyDescription="Choose an agreement from the list to view its full details here."
+              previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
             />
           </div>
         </SheetContent>

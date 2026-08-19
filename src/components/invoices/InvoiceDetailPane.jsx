@@ -1,12 +1,13 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   ExternalLink, FileDown, Loader2, Pencil, Trash2,
-  Plus, FileText, Download, Eye, Upload, FileSignature, AlertCircle,
+  Plus, FileText, Download, Eye, Upload, FileSignature, AlertCircle, LayoutList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
 import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
 import InvoiceActivityTimeline from '@/components/invoices/InvoiceActivityTimeline';
+import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { formatCurrency, getInitials } from '@/lib/formatters';
 import { deriveStatus, isOverdue, STATUS_LABELS, STATUS_PILLS, STATUS_DOTS } from '@/lib/invoiceWorkflow';
 
@@ -25,8 +26,10 @@ export default function InvoiceDetailPane({
   onViewSigned,
   onDownloadSigned,
   payments,
+  settings,
 }) {
   const fileRef = useRef(null);
+  const [view, setView] = useState('details');
 
   if (!inv) {
     return (
@@ -53,6 +56,7 @@ export default function InvoiceDetailPane({
   const isDownloading = downloadingId === inv.id;
   const lineItems = inv.line_items || [];
   const pct = total > 0 ? Math.min(100, (paid / total) * 100) : 0;
+  const showPreview = view === 'preview';
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) onAttachSigned(inv, e.target.files[0]);
@@ -92,6 +96,22 @@ export default function InvoiceDetailPane({
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="inline-flex items-center rounded-lg border border-border/50 bg-muted/30 p-0.5 mr-1">
+              <button
+                onClick={() => setView('details')}
+                className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-semibold transition-colors ${view === 'details' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                title="Details view"
+              >
+                <LayoutList className="w-3 h-3" /> Details
+              </button>
+              <button
+                onClick={() => setView('preview')}
+                className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-semibold transition-colors ${view === 'preview' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                title="Live preview"
+              >
+                <Eye className="w-3 h-3" /> Preview
+              </button>
+            </div>
             <button onClick={() => onEdit(inv)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Edit">
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -103,6 +123,11 @@ export default function InvoiceDetailPane({
       </div>
 
       {/* Body */}
+      {showPreview ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <InvoicePreview form={inv} settings={settings || {}} mode="trip" />
+        </div>
+      ) : (
       <div className="flex-1 overflow-y-auto thin-scroll min-h-0 px-5 py-4">
         {/* Line items */}
         <div className="mb-5">
@@ -216,8 +241,10 @@ export default function InvoiceDetailPane({
         {/* Activity Timeline */}
         <InvoiceActivityTimeline inv={inv} signedDocs={signedDocs} payments={payments} />
       </div>
+      )}
 
       {/* Footer: totals */}
+      {!showPreview && (
       <div className="px-5 py-3 border-t border-border/40 space-y-1.5">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Sub Total</span>
@@ -242,6 +269,7 @@ export default function InvoiceDetailPane({
           <span className="tabular-nums text-primary">{formatCurrency(balance)}</span>
         </div>
       </div>
+      )}
 
       {/* Action row */}
       <div className="px-5 py-3 border-t border-border/40 flex items-center gap-2">
