@@ -5,6 +5,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getAvailableActions } from '@/lib/invoiceWorkflow';
 import { buildEmailLink } from '@/components/common/EmailShareButton';
+import { whatsappUrl } from '@/lib/whatsapp';
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 
 const ACTION_ITEMS = [
   { key: 'sendForSignature', label: 'Send for Signature', icon: Send, hint: 'Available from Draft' },
@@ -43,7 +45,7 @@ export default function InvoiceActionsMenu({ inv, onAction, variant = 'icon' }) 
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <a
-            href={buildEmailLink(inv, 'invoice')}
+            href={buildEmailLink(inv, 'invoice').mailto}
             onClick={(e) => e.stopPropagation()}
             className="text-xs gap-2 cursor-pointer"
             title="Share via Email"
@@ -51,6 +53,14 @@ export default function InvoiceActionsMenu({ inv, onAction, variant = 'icon' }) 
             <Mail className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="flex-1">Email to Client</span>
           </a>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={(e) => { e.stopPropagation(); window.open(whatsappUrl(inv.client_phone, buildEmailLink(inv, 'invoice').body), '_blank', 'noopener,noreferrer'); }}
+          className="text-xs gap-2 cursor-pointer"
+          title="Share via WhatsApp"
+        >
+          <WhatsAppIcon size={14} className="flex-shrink-0" />
+          <span className="flex-1">WhatsApp to Client</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {ACTION_ITEMS.map((item, i) => {

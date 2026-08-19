@@ -3,6 +3,7 @@ import { FileDown, Pencil, Trash2, Loader2, Paperclip, CheckCircle2, Eye, Refres
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import EmailShareButton from '@/components/common/EmailShareButton';
+import WhatsAppShareButton from '@/components/common/WhatsAppShareButton';
 
 const STATUS_COLORS = {
   draft: 'bg-muted text-muted-foreground',
@@ -120,6 +121,7 @@ export default function InvoiceCard({ inv, selected, onSelect, onStatusChangeReq
           PDF
         </Button>
         <EmailShareButton doc={inv} type="invoice" variant="card" />
+        <WhatsAppShareButton doc={inv} type="invoice" variant="card" />
         <Button size="sm" variant="ghost" onClick={() => onEdit(inv)} className="h-8 w-8 p-0"><Pencil className="w-3.5 h-3.5" /></Button>
         <Button size="sm" variant="ghost" onClick={() => onDelete(inv)} className="h-8 w-8 p-0 text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
       </div>

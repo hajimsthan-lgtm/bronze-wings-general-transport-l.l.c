@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
 import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
 import EmailShareButton from '@/components/common/EmailShareButton';
+import WhatsAppShareButton from '@/components/common/WhatsAppShareButton';
 import InvoiceActivityTimeline from '@/components/invoices/InvoiceActivityTimeline';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { formatCurrency, getInitials } from '@/lib/formatters';
@@ -285,6 +286,7 @@ export default function InvoiceDetailPane({
         </button>
 
         <EmailShareButton doc={inv} type="invoice" settings={settings} />
+        <WhatsAppShareButton doc={inv} type="invoice" settings={settings} />
 
         <div className="flex-1" />
 

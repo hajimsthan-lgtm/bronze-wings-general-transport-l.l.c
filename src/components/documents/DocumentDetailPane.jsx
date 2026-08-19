@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
 import EmailShareButton from '@/components/common/EmailShareButton';
+import WhatsAppShareButton from '@/components/common/WhatsAppShareButton';
 import { formatCurrency, getInitials } from '@/lib/formatters';
 
 export default function DocumentDetailPane({
@@ -196,6 +197,7 @@ export default function DocumentDetailPane({
         </button>
 
         <EmailShareButton doc={item} type={docType} settings={settings} />
+        <WhatsAppShareButton doc={item} type={docType} settings={settings} />
 
         <div className="flex-1" />
 
