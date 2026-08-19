@@ -196,11 +196,15 @@ export default function Agreements() {
     all: baseFiltered.length,
     draft: baseFiltered.filter(a => a.status === 'draft').length,
     active: baseFiltered.filter(a => a.status === 'active' || a.status === 'signed').length,
+    signed: baseFiltered.filter(a => !!a.signed_agreement_url || a.status === 'signed').length,
+    notSigned: baseFiltered.filter(a => !a.signed_agreement_url && a.status !== 'signed').length,
   }), [baseFiltered]);
 
   const filtered = useMemo(() => {
     if (tab === 'draft') return baseFiltered.filter(a => a.status === 'draft');
     if (tab === 'active') return baseFiltered.filter(a => a.status === 'active' || a.status === 'signed');
+    if (tab === 'signed') return baseFiltered.filter(a => !!a.signed_agreement_url || a.status === 'signed');
+    if (tab === 'notSigned') return baseFiltered.filter(a => !a.signed_agreement_url && a.status !== 'signed');
     return baseFiltered;
   }, [baseFiltered, tab]);
 
@@ -214,6 +218,8 @@ export default function Agreements() {
     { key: 'all', label: 'All Agreements', count: counts.all },
     { key: 'draft', label: 'Draft', count: counts.draft },
     { key: 'active', label: 'Active', count: counts.active },
+    { key: 'signed', label: 'Signed', count: counts.signed },
+    { key: 'notSigned', label: 'Not Signed', count: counts.notSigned },
   ];
 
   const handleSelectRow = (id) => {
