@@ -2,6 +2,7 @@ import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
+import { useOpsFilter } from '@/lib/operationsFilterStore';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import { normalizeDate } from '@/lib/formatters';
@@ -16,6 +17,7 @@ export default function OperationsToolbar({
   onImported
 }) {
   const { t } = useI18n();
+  const opsFilter = useOpsFilter();
   const MODE_OPTIONS = [
   { value: 'all', label: t('all_operations') },
   { value: 'trip', label: t('per_trip') },
@@ -43,6 +45,29 @@ export default function OperationsToolbar({
           </button>
         }
       </div>
+
+      {/* Status filter pills */}
+      {opsFilter.active && opsFilter.options?.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          {opsFilter.options.map((s) => {
+            const active = opsFilter.value === s;
+            const count = s === 'all' ? null : opsFilter.counts?.[s];
+            return (
+              <button
+                key={s}
+                onClick={() => opsFilter.onChange?.(s)}
+                className={`px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap ${
+                  active
+                    ? 'border-primary text-primary bg-primary/10'
+                    : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                }`}
+              >
+                {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <Select value={mode} onValueChange={onModeChange}>
         <SelectTrigger className="h-9 w-full sm:w-[130px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground hidden">
