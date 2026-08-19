@@ -57,7 +57,7 @@ export default function VendorsAnalytics({ vendors = [], expenses = [], loading,
         
         <div className="flex items-center gap-2">
           <ExportButtons data={vendors.map((v) => ({ name: v.name, category: v.category, contact: v.contact_person, email: v.email, phone: v.phone, trn: v.trn, status: v.status, spend: spendMap[v.name] || 0 }))} filename="vendors" title="Vendors" columns={[{ label: 'Name', key: 'name' }, { label: 'Category', key: 'category' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Spend', key: 'spend', numeric: true }]} />
-          {onAdd && <Button onClick={onAdd} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>}
+          
         </div>
       </div>
 
