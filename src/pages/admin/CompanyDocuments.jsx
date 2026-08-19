@@ -91,6 +91,13 @@ export default function CompanyDocuments() {
   };
   useEffect(() => { load(); }, []);
 
+  // Listen for TopBar "Add Document" event
+  useEffect(() => {
+    const onNew = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('company-docs:new', onNew);
+    return () => window.removeEventListener('company-docs:new', onNew);
+  }, []);
+
   // Auto-open document from URL focus param (deep-link from alert bell)
   useEffect(() => {
     const focusId = searchParams.get('focus');
@@ -168,9 +175,6 @@ export default function CompanyDocuments() {
             {DOC_TYPES.map(dt => <SelectItem key={dt} value={dt}>{dt}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10 whitespace-nowrap">
-          <Plus className="w-4 h-4 mr-1.5" /> Add Document
-        </Button>
       </div>
 
       {/* List */}

@@ -11,6 +11,7 @@ import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
 import VendorCard from '@/components/admin/VendorCard';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
+import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -19,7 +20,7 @@ export default function VendorsPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [mode, setMode] = useState('analytics');
+  const { mode } = useVendorsMode();
   const [search, setSearch] = useState('');
 
   const load = () => {
@@ -31,6 +32,13 @@ export default function VendorsPanel() {
   };
   useEffect(() => { load(); }, []);
 
+  // Listen for TopBar "Add New" event
+  useEffect(() => {
+    const onNew = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('vendors:new', onNew);
+    return () => window.removeEventListener('vendors:new', onNew);
+  }, []);
+
   const spendMap = {};
   expenses.forEach((e) => { if (e.vendor_name) spendMap[e.vendor_name] = (spendMap[e.vendor_name] || 0) + (Number(e.amount) || 0); });
 
@@ -40,15 +48,8 @@ export default function VendorsPanel() {
 
   return (
     <div>
-      <div className="flex items-center justify-end gap-2 mb-4 flex-wrap">
-        <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-          <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-          <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-        </div>
-      </div>
-
       {mode === 'analytics' ? (
-        <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} onBrowse={() => setMode('browse')} />
+        <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} onBrowse={() => setVendorsMode('browse')} />
       ) : (
         <>
           <div className="relative mb-4">

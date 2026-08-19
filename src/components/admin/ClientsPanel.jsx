@@ -9,14 +9,12 @@ import ClientsAnalytics from '@/components/admin/ClientsAnalytics';
 import ClientCard from '@/components/admin/ClientCard';
 import ClientListRow from '@/components/admin/ClientListRow';
 import ClientForm from '@/components/admin/ClientForm';
-import ViewToggle from '@/components/common/ViewToggle';
-import ExportButtons from '@/components/common/ExportButtons';
-import CsvImportButton from '@/components/common/CsvImportButton';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Plus, Search, Building2, BarChart3, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Building2 } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
+import { useClientsMode, setClientsMode, setClientsData, getClientsView } from '@/lib/clientsStore';
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -28,8 +26,8 @@ export default function ClientsPanel() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [search, setSearch] = useState('');
-  const [view, setView] = useState('list');
-  const [mode, setMode] = useState('analytics');
+  const { mode } = useClientsMode();
+  const view = getClientsView();
   const { dateFrom, dateTo } = useGlobalDate();
 
   const load = () => {
@@ -42,47 +40,26 @@ export default function ClientsPanel() {
   };
   useEffect(() => {load();}, []);
 
+  // Listen for TopBar "Add New" event
+  useEffect(() => {
+    const onNew = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('clients:new', onNew);
+    return () => window.removeEventListener('clients:new', onNew);
+  }, []);
+
   const filtered = items.filter((c) => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.contact_person?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search));
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fInvoices = invoices.filter((i) => inGlobalDateRange(i.issue_date, dateFrom, dateTo));
   const revenueMap = {};
   fTrips.forEach((tt) => {if (tt.client_name) revenueMap[tt.client_name] = (revenueMap[tt.client_name] || 0) + (Number(tt.revenue) || 0);});
 
+  // Publish filtered data + load to the store for TopBar Export/Import
+  useEffect(() => { setClientsData(filtered, load); }, [filtered, load]);
+
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          
-          
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-...
-          <ExportButtons data={filtered.map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status, revenue: revenueMap[c.name] || 0 }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }, { label: 'Revenue', key: 'revenue', numeric: true }]} />
-          <CsvImportButton entityName="Client" filename="clients" onImported={load} columns={[
-          { key: 'name', label: 'Name', sample: 'ABC Transport LLC' },
-          { key: 'contact_person', label: 'Contact Person', sample: 'John Doe' },
-          { key: 'email', label: 'Email', sample: 'info@abctransport.com' },
-          { key: 'phone', label: 'Phone', sample: '+97141234567' },
-          { key: 'address', label: 'Address', sample: 'Dubai, UAE' },
-          { key: 'trn', label: 'TRN', sample: '100123456700003' },
-          { key: 'status', label: 'Status', sample: 'active' },
-          { key: 'payment_terms', label: 'Payment Terms', sample: 'Net 30' }]
-          } transform={(r) => ({
-            name: r.name || r.Name || '',
-            contact_person: r.contact_person || r['Contact Person'] || '',
-            email: r.email || r.Email || '',
-            phone: r.phone || r.Phone || '',
-            address: r.address || r.Address || '',
-            trn: r.trn || r.TRN || '',
-            status: r.status || r.Status || 'active',
-            payment_terms: r.payment_terms || r['Payment Terms'] || 'Net 30'
-          })} />
-          <Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
-        </div>
-      </div>
-
       {mode === 'analytics' ?
-      <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} onBrowseClients={() => setMode('browse')} /> :
+      <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} onBrowseClients={() => setClientsMode('browse')} /> :
 
       <>
           <div className="relative mb-5">

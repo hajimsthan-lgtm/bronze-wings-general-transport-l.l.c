@@ -8,6 +8,9 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
+import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
+import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
+import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import ViewToggle from '@/components/common/ViewToggle';
@@ -26,6 +29,13 @@ export default function TopBar() {
   const maintMode = useMaintenanceMode();
   const isVehiclesPage = location.pathname === '/admin/vehicles';
   const vehMode = useVehiclesMode();
+  const isDriversPage = location.pathname === '/admin/drivers';
+  const drvMode = useDriversMode();
+  const isClientsPage = location.pathname === '/admin/clients';
+  const cliMode = useClientsMode();
+  const isVendorsPage = location.pathname === '/admin/vendors';
+  const venMode = useVendorsMode();
+  const isCompanyDocsPage = location.pathname === '/admin/company-documents';
 
   return (
     <div className="sticky top-0 md:top-20 z-40">
@@ -114,6 +124,100 @@ export default function TopBar() {
                   onClick={() => window.dispatchEvent(new CustomEvent('vehicles:new'))}
                 />
               </>
+            )}
+            {isDriversPage && (
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setDriversMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${drvMode.mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setDriversMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${drvMode.mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                {drvMode.mode === 'browse' && (
+                  <ViewToggle view={getDriversView()} onChange={setDriversView} />
+                )}
+                <ExportButtons data={getDriversFiltered().map((d) => ({ name: d.name, phone: d.phone, email: d.email, license_number: d.license_number, license_expiry: d.license_expiry, nationality: d.nationality, status: d.status, assigned_vehicle: d.assigned_vehicle, base_salary: d.base_salary }))} filename="drivers" title="Drivers" columns={[{ label: 'Name', key: 'name' }, { label: 'Phone', key: 'phone' }, { label: 'Email', key: 'email' }, { label: 'License #', key: 'license_number' }, { label: 'License Expiry', key: 'license_expiry' }, { label: 'Nationality', key: 'nationality' }, { label: 'Status', key: 'status' }, { label: 'Vehicle', key: 'assigned_vehicle' }, { label: 'Base Salary', key: 'base_salary' }]} />
+                <CsvImportButton entityName="Driver" filename="drivers" onImported={() => getDriversLoad()?.()} columns={[
+                  { key: 'name', label: 'Name', sample: 'Ahmed Ali' },
+                  { key: 'phone', label: 'Phone', sample: '+971501234567' },
+                  { key: 'email', label: 'Email', sample: 'ahmed@example.com' },
+                  { key: 'license_number', label: 'License #', sample: 'DL-12345' },
+                  { key: 'license_expiry', label: 'License Expiry', sample: '2027-06-15' },
+                  { key: 'nationality', label: 'Nationality', sample: 'UAE' },
+                  { key: 'status', label: 'Status', sample: 'active' },
+                  { key: 'assigned_vehicle', label: 'Vehicle', sample: 'AD-1-12345' },
+                  { key: 'base_salary', label: 'Base Salary', sample: '3500' },
+                ]} transform={(r) => ({
+                  name: r.name || r.Name || '',
+                  phone: r.phone || r.Phone || '',
+                  email: r.email || r.Email || '',
+                  license_number: r.license_number || r['License #'] || '',
+                  license_expiry: r.license_expiry || r['License Expiry'] || '',
+                  nationality: r.nationality || r.Nationality || '',
+                  status: r.status || r.Status || 'active',
+                  assigned_vehicle: r.assigned_vehicle || r.Vehicle || '',
+                  base_salary: Number(r.base_salary || r['Base Salary']) || 0,
+                })} />
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('drivers:new'))}
+                />
+              </>
+            )}
+            {isClientsPage && (
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setClientsMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${cliMode.mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setClientsMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${cliMode.mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                {cliMode.mode === 'browse' && (
+                  <ViewToggle view={getClientsView()} onChange={setClientsView} />
+                )}
+                <ExportButtons data={getClientsFiltered().map((c) => ({ name: c.name, contact: c.contact_person, email: c.email, phone: c.phone, trn: c.trn, status: c.status }))} filename="clients" title="Clients" columns={[{ label: 'Name', key: 'name' }, { label: 'Contact', key: 'contact' }, { label: 'Email', key: 'email' }, { label: 'Phone', key: 'phone' }, { label: 'TRN', key: 'trn' }, { label: 'Status', key: 'status' }]} />
+                <CsvImportButton entityName="Client" filename="clients" onImported={() => getClientsLoad()?.()} columns={[
+                  { key: 'name', label: 'Name', sample: 'ABC Transport LLC' },
+                  { key: 'contact_person', label: 'Contact Person', sample: 'John Doe' },
+                  { key: 'email', label: 'Email', sample: 'info@abctransport.com' },
+                  { key: 'phone', label: 'Phone', sample: '+97141234567' },
+                  { key: 'address', label: 'Address', sample: 'Dubai, UAE' },
+                  { key: 'trn', label: 'TRN', sample: '100123456700003' },
+                  { key: 'status', label: 'Status', sample: 'active' },
+                  { key: 'payment_terms', label: 'Payment Terms', sample: 'Net 30' },
+                ]} transform={(r) => ({
+                  name: r.name || r.Name || '',
+                  contact_person: r.contact_person || r['Contact Person'] || '',
+                  email: r.email || r.Email || '',
+                  phone: r.phone || r.Phone || '',
+                  address: r.address || r.Address || '',
+                  trn: r.trn || r.TRN || '',
+                  status: r.status || r.Status || 'active',
+                  payment_terms: r.payment_terms || r['Payment Terms'] || 'Net 30',
+                })} />
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('clients:new'))}
+                />
+              </>
+            )}
+            {isVendorsPage && (
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setVendorsMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venMode.mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setVendorsMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venMode.mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('vendors:new'))}
+                />
+              </>
+            )}
+            {isCompanyDocsPage && (
+              <HeaderActionButton
+                label="Add Document"
+                variant="trip"
+                onClick={() => window.dispatchEvent(new CustomEvent('company-docs:new'))}
+              />
             )}
           </div>
         </div>
