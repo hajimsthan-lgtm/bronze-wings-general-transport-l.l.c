@@ -1,10 +1,23 @@
 import { cn } from '@/lib/utils';
 
 /**
+ * Extracts the category code from a UAE plate number string.
+ * Plate format: "1/ 99588" or "2/97372" → category code is the part before "/".
+ */
+function parsePlateCategory(plate) {
+  if (!plate) return '';
+  const idx = plate.indexOf('/');
+  if (idx === -1) return '';
+  return plate.slice(0, idx).trim();
+}
+
+/**
  * UAE Abu Dhabi commercial license plate: cyan/teal emirate header + white plate body.
- * Matches the real AD plate layout (top band / bottom number).
+ * Top band: category label (left) + category code (center) + emirate label (right).
+ * Bottom body: the plate number only, large and bold.
  */
 export default function PlateBadge({ plate, holder, compact = false, className = '' }) {
+  const categoryCode = parsePlateCategory(plate);
   return (
     <div
       className={cn(
@@ -14,14 +27,16 @@ export default function PlateBadge({ plate, holder, compact = false, className =
       )}
     >
       {/* Cyan emirate header band */}
-      <div className="relative flex items-center justify-between bg-[#20B2AA] px-1.5" style={{ height: compact ? 12 : 20 }}>
+      <div className="relative flex items-center justify-between bg-[#20B2AA] px-1.5 gap-1" style={{ height: compact ? 12 : 20 }}>
         {/* Left: Arabic "Public" + TRP */}
         <div className="flex flex-col items-center leading-none">
           <span className="text-black font-bold" style={{ fontSize: compact ? 7 : 9 }} dir="rtl">عمومي</span>
           <span className="text-black font-semibold tracking-wide" style={{ fontSize: compact ? 5 : 6 }}>TRP.</span>
         </div>
-        {/* Center: plate category digit */}
-        <span className="text-black font-extrabold leading-none" style={{ fontSize: compact ? 9 : 13 }}>1</span>
+        {/* Center: plate category code (extracted from plate number) */}
+        {categoryCode && (
+          <span className="text-black font-bold leading-none" style={{ fontSize: compact ? 8 : 11 }}>{categoryCode}</span>
+        )}
         {/* Right: Arabic "Abu Dhabi" + A.D */}
         <div className="flex flex-col items-center leading-none">
           <span className="text-black font-bold" style={{ fontSize: compact ? 7 : 9 }} dir="rtl">أبوظبي</span>

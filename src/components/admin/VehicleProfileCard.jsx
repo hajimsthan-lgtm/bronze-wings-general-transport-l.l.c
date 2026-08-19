@@ -4,6 +4,7 @@ import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
 import VehicleEditDialog from '@/components/admin/VehicleEditDialog';
+import VehicleLicenseInfo from '@/components/admin/VehicleLicenseInfo';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -148,9 +149,12 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
             );})}
           </div>
           {vehicle.notes && (
-            <div className="mt-2.5 flex items-start gap-2 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#ffffff', 0.03) }}>
-              <StickyNote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground leading-relaxed">{vehicle.notes}</p>
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <StickyNote className="w-4 h-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Scanned License Data</h3>
+              </div>
+              <VehicleLicenseInfo notes={vehicle.notes} />
             </div>
           )}
         </div>
