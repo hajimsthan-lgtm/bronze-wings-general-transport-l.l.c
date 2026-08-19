@@ -194,6 +194,43 @@ export default function Agreements() {
     }
   };
 
+  const handleAttachSignedFromPane = async (a, file) => {
+    if (!file.type.match(/(pdf|image\/)/)) {
+      toast({ variant: 'destructive', title: 'Invalid file type', description: 'Only PDF or image files are allowed.' });
+      return;
+    }
+    setUploadingId(a.id);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Agreement.update(a.id, {
+        signed_agreement_url: file_url,
+        signed_date: today(),
+        status: 'signed',
+      });
+      toast({ title: 'Signed copy attached', description: `${a.agreement_number || 'Agreement'} marked as signed.` });
+      load();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Upload failed', description: err.message });
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  const handleDeleteSigned = async (a) => {
+    try {
+      await base44.entities.Agreement.update(a.id, {
+        signed_agreement_url: '',
+        signed_date: '',
+        signed_uploaded_by: '',
+        status: 'sent',
+      });
+      toast({ title: 'Signed copy removed', description: `${a.agreement_number || 'Agreement'} reverted to not signed.` });
+      load();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Remove failed', description: err.message });
+    }
+  };
+
   const baseFiltered = useMemo(() => {
     return list.filter(a => {
       const q = search.trim().toLowerCase();
@@ -374,6 +411,9 @@ export default function Agreements() {
               signedUrlField="signed_agreement_url"
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
+              onAttachSigned={handleAttachSignedFromPane}
+              uploadingId={uploadingId}
               getStatus={deriveStatus}
               expiryField="end_date"
             />
@@ -420,6 +460,9 @@ export default function Agreements() {
               signedUrlField="signed_agreement_url"
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
+              onAttachSigned={handleAttachSignedFromPane}
+              uploadingId={uploadingId}
               getStatus={deriveStatus}
               expiryField="end_date"
             />

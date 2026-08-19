@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Plus, Loader2, FileText, SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
@@ -28,6 +28,7 @@ import { formatCurrency } from '@/lib/formatters';
 const STATUS_CONFIG = {
   draft: { pill: 'bg-muted text-muted-foreground border-border', label: 'Draft' },
   sent: { pill: 'bg-blue-500/15 text-blue-400 border-blue-500/20', label: 'Sent' },
+  signed: { pill: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', label: 'Signed' },
   accepted: { pill: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', label: 'Accepted' },
   rejected: { pill: 'bg-red-500/15 text-red-400 border-red-500/20', label: 'Rejected' },
   expired: { pill: 'bg-orange-500/15 text-orange-400 border-orange-500/20', label: 'Expired' },
@@ -37,6 +38,7 @@ const STATUS_OPTIONS = [
   { value: 'all', label: 'All Status' },
   { value: 'draft', label: 'Draft' },
   { value: 'sent', label: 'Sent' },
+  { value: 'signed', label: 'Signed' },
   { value: 'accepted', label: 'Accepted' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'expired', label: 'Expired' },
@@ -66,8 +68,14 @@ export default function Quotations() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [settings, setSettings] = useState({});
+  const [uploadingId, setUploadingId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const signedFileRef = useRef(null);
 
-  useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
+  useEffect(() => {
+    getCompanySettings().then(setSettings).catch(() => {});
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -121,6 +129,61 @@ export default function Quotations() {
     }
   };
 
+  const today = () => new Date().toISOString().split('T')[0];
+
+  const handleAttachSigned = async (q, file) => {
+    if (!file.type.match(/(pdf|image\/)/)) {
+      toast({ variant: 'destructive', title: 'Invalid file type', description: 'Only PDF or image files are allowed.' });
+      return;
+    }
+    setUploadingId(q.id);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Quotation.update(q.id, {
+        signed_quotation_url: file_url,
+        signed_date: today(),
+        signed_uploaded_by: currentUser?.full_name || currentUser?.email || '—',
+        status: 'signed',
+      });
+      toast({ title: 'Signed copy attached', description: `${q.quotation_number || 'Quotation'} marked as signed.` });
+      load();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Upload failed', description: err.message });
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  const handleViewSigned = (q) => {
+    if (q?.signed_quotation_url) window.open(q.signed_quotation_url, '_blank');
+  };
+
+  const handleDownloadSigned = (q) => {
+    if (!q?.signed_quotation_url) return;
+    const link = document.createElement('a');
+    link.href = q.signed_quotation_url;
+    link.download = `Signed-${q.quotation_number || 'Quotation'}`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDeleteSigned = async (q) => {
+    try {
+      await base44.entities.Quotation.update(q.id, {
+        signed_quotation_url: '',
+        signed_date: '',
+        signed_uploaded_by: '',
+        status: 'sent',
+      });
+      toast({ title: 'Signed copy removed', description: `${q.quotation_number || 'Quotation'} reverted to not signed.` });
+      load();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Remove failed', description: err.message });
+    }
+  };
+
   const baseFiltered = useMemo(() => {
     return list.filter(q => {
       const qLower = search.trim().toLowerCase();
@@ -138,11 +201,13 @@ export default function Quotations() {
     all: baseFiltered.length,
     draft: baseFiltered.filter(q => q.status === 'draft').length,
     pending: baseFiltered.filter(q => q.status === 'sent').length,
+    signed: baseFiltered.filter(q => !!q.signed_quotation_url || q.status === 'signed').length,
   }), [baseFiltered]);
 
   const filtered = useMemo(() => {
     if (tab === 'draft') return baseFiltered.filter(q => q.status === 'draft');
     if (tab === 'pending') return baseFiltered.filter(q => q.status === 'sent');
+    if (tab === 'signed') return baseFiltered.filter(q => !!q.signed_quotation_url || q.status === 'signed');
     return baseFiltered;
   }, [baseFiltered, tab]);
 
@@ -153,6 +218,7 @@ export default function Quotations() {
     { key: 'all', label: 'All Quotations', count: counts.all },
     { key: 'draft', label: 'Draft', count: counts.draft },
     { key: 'pending', label: 'Pending', count: counts.pending },
+    { key: 'signed', label: 'Signed', count: counts.signed },
   ];
 
   const handleSelectRow = (id) => {
@@ -290,6 +356,12 @@ export default function Quotations() {
               previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
               settings={settings}
               docType="quotation"
+              signedUrlField="signed_quotation_url"
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
+              onAttachSigned={handleAttachSigned}
+              uploadingId={uploadingId}
             />
           </div>
         </div>
@@ -329,6 +401,12 @@ export default function Quotations() {
               previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
               settings={settings}
               docType="quotation"
+              signedUrlField="signed_quotation_url"
+              onViewSigned={handleViewSigned}
+              onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
+              onAttachSigned={handleAttachSigned}
+              uploadingId={uploadingId}
             />
           </div>
         </SheetContent>

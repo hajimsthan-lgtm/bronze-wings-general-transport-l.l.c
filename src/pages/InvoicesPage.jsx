@@ -279,6 +279,22 @@ export default function InvoicesPage() {
     document.body.removeChild(a);
   };
 
+  const handleDeleteSigned = async (inv) => {
+    try {
+      await base44.entities.Invoice.update(inv.id, {
+        signed_invoice_url: '',
+        signed_date: '',
+        signed_uploaded_by: '',
+        status: 'unsigned',
+        signature_skipped: false,
+      });
+      toast({ title: 'Signed copy removed', description: `${inv.invoice_number} reverted to unsigned.` });
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Remove failed', description: e.message });
+    }
+  };
+
   const handleSendForSignature = async (inv) => {
     try {
       const today = new Date().toISOString().split('T')[0];
@@ -658,12 +674,13 @@ export default function InvoicesPage() {
               signedDocs={signedDocs}
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
               payments={payments}
               settings={settings}
-            />
-            </div>
-            </div>
-            )}
+              />
+              </div>
+              </div>
+              )}
 
       {/* Mobile detail sheet */}
       <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
@@ -691,12 +708,13 @@ export default function InvoicesPage() {
               signedDocs={signedDocs}
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              onDeleteSigned={handleDeleteSigned}
               payments={payments}
               settings={settings}
-            />
-            </div>
-            </SheetContent>
-            </Sheet>
+              />
+              </div>
+              </SheetContent>
+              </Sheet>
 
       <InvoiceFormSheet open={sheetOpen} onOpenChange={setSheetOpen} editInvoice={editing} onSaved={refetch} customTemplateId={selectedTemplateId} />
 

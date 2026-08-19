@@ -78,6 +78,7 @@
       "enum": [
         "draft",
         "sent",
+        "signed",
         "accepted",
         "rejected",
         "expired"
@@ -88,6 +89,16 @@
       "type": "string"
     },
     "terms_conditions": {
+      "type": "string"
+    },
+    "signed_quotation_url": {
+      "type": "string"
+    },
+    "signed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "signed_uploaded_by": {
       "type": "string"
     }
   },

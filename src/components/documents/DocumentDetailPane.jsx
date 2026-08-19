@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag, FileSignature, Download, AlertTriangle,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag, FileSignature, Download, AlertTriangle, Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
@@ -35,12 +35,22 @@ export default function DocumentDetailPane({
   signedUrlField,
   onViewSigned,
   onDownloadSigned,
+  onDeleteSigned,
+  onAttachSigned,
+  uploadingId,
   getStatus,
   expiryField,
   expiringSoonDays = 10,
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
+
+  const isUploading = uploadingId && item && uploadingId === item.id;
+
+  const handleFileChange = (e) => {
+    if (e.target.files[0] && onAttachSigned) onAttachSigned(item, e.target.files[0]);
+    e.target.value = '';
+  };
 
   if (!item) {
     return (
@@ -213,34 +223,54 @@ export default function DocumentDetailPane({
         </div>
 
         {/* Signed Copy */}
-        {signedUrlField && item[signedUrlField] && (
+        {signedUrlField && (
           <div className="mb-5">
             <p className="eyebrow mb-3">Signed Copy</p>
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileSignature className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                  <span className="text-xs font-semibold text-emerald-600 truncate">Signed document</span>
+            {item[signedUrlField] ? (
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileSignature className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                    <span className="text-xs font-semibold text-emerald-600 truncate">Signed document</span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                    {item.signed_date || '—'}{item.signed_uploaded_by ? ` · ${item.signed_uploaded_by}` : ''}
+                  </span>
                 </div>
-                <span className="text-[10px] text-muted-foreground flex-shrink-0">
-                  {item.signed_date || '—'}{item.signed_uploaded_by ? ` · ${item.signed_uploaded_by}` : ''}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onViewSigned?.(item)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    <Eye className="w-3 h-3" /> View
+                  </button>
+                  <button
+                    onClick={() => onDownloadSigned?.(item)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> Download
+                  </button>
+                  {onDeleteSigned && (
+                    <button
+                      onClick={() => onDeleteSigned(item)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors ml-auto"
+                      title="Remove signed copy & revert to not signed"
+                    >
+                      <Trash2 className="w-3 h-3" /> Remove
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onViewSigned?.(item)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
-                >
-                  <Eye className="w-3 h-3" /> View
-                </button>
-                <button
-                  onClick={() => onDownloadSigned?.(item)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                >
-                  <Download className="w-3 h-3" /> Download
-                </button>
-              </div>
-            </div>
+            ) : (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={isUploading}
+                className="w-full rounded-xl border border-dashed border-amber-500/30 bg-amber-500/5 p-3 flex items-center justify-center gap-2 text-xs font-semibold text-amber-600 hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {isUploading ? 'Uploading...' : 'Upload Signed Copy'}
+              </button>
+            )}
           </div>
         )}
 
@@ -266,6 +296,11 @@ export default function DocumentDetailPane({
             </div>
           ))}
         </div>
+      )}
+
+      {/* Hidden file input for signed copy upload */}
+      {signedUrlField && onAttachSigned && (
+        <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} />
       )}
 
       {/* Action row */}

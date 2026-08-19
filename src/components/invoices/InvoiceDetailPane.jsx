@@ -27,6 +27,7 @@ export default function InvoiceDetailPane({
   signedDocs,
   onViewSigned,
   onDownloadSigned,
+  onDeleteSigned,
   payments,
   settings,
 }) {
@@ -207,6 +208,15 @@ export default function InvoiceDetailPane({
                   >
                     <Download className="w-3 h-3" /> Download
                   </button>
+                  {onDeleteSigned && (
+                    <button
+                      onClick={() => onDeleteSigned(inv)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors ml-auto"
+                      title="Remove signed copy & revert to unsigned"
+                    >
+                      <Trash2 className="w-3 h-3" /> Remove
+                    </button>
+                  )}
                 </div>
               </div>
               {signedDocs && signedDocs.length > 1 && (
