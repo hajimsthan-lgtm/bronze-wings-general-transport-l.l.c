@@ -1,4 +1,4 @@
-import { Search, FileText } from 'lucide-react';
+import { Search, FileText, AlertTriangle } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
 
@@ -21,6 +21,9 @@ export default function DocumentListPane({
   onClientClick,
   emptyTitle = 'No documents found',
   emptyDescription = 'Try a different filter or search term.',
+  getStatus,
+  expiryField,
+  expiringSoonDays = 10,
 }) {
   return (
     <div className="glass-card rounded-2xl flex flex-col h-full min-h-0 overflow-hidden">
@@ -68,8 +71,20 @@ export default function DocumentListPane({
             {items.map(item => {
               const isSelected = selectedId === item.id;
               const amount = computeAmount ? computeAmount(item) : Number(item[amountField || 'amount'] || 0);
-              const status = item.status || 'draft';
+              const status = (getStatus ? getStatus(item) : item.status) || 'draft';
               const cfg = statusConfig[status] || statusConfig.draft;
+
+              // Expiring-soon badge (within N days of expiryField), not for already-expired/terminated
+              let expiryBadge = null;
+              if (expiryField && item[expiryField]) {
+                const t = new Date(); t.setHours(0, 0, 0, 0);
+                const e = new Date(item[expiryField]); e.setHours(0, 0, 0, 0);
+                const daysLeft = Math.round((e - t) / 86400000);
+                const activeish = status === 'active' || status === 'signed';
+                if (activeish && daysLeft >= 0 && daysLeft <= expiringSoonDays) {
+                  expiryBadge = daysLeft;
+                }
+              }
 
               return (
                 <div
@@ -91,6 +106,15 @@ export default function DocumentListPane({
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${cfg.pill}`}>
                         {cfg.label}
                       </span>
+                      {expiryBadge !== null && (
+                        <span
+                          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-amber-500/15 text-amber-400 border-amber-500/30"
+                          title={expiryBadge === 0 ? 'Expires today' : `Expires in ${expiryBadge} day(s)`}
+                        >
+                          <AlertTriangle className="w-2.5 h-2.5" />
+                          {expiryBadge === 0 ? 'Expires today' : `${expiryBadge}d left`}
+                        </span>
+                      )}
                     </div>
                     <button
                       onClick={(e) => { e.stopPropagation(); onClientClick?.(item.client_name); }}

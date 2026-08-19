@@ -34,11 +34,29 @@ export const SIG_DOTS = {
 export function deriveStatus(a) {
   if (a.status === 'terminated') return 'terminated';
   if (a.status === 'expired') return 'expired';
+  // Auto-expire: active/signed agreements whose end date has passed
+  if ((a.status === 'active' || a.status === 'signed') && a.end_date) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const end = new Date(a.end_date); end.setHours(0, 0, 0, 0);
+    if (end < today) return 'expired';
+  }
   if (a.status === 'active') return 'active';
   if (a.signed_agreement_url) return 'signed';
   if (a.signature_skipped) return 'sent';
   if (a.sent_for_signature_date) return 'unsigned';
   return 'draft';
+}
+
+// Expiry info based on end_date: days left, expired, or expiring within `soonDays`.
+export function expiryInfo(a, soonDays = 10) {
+  if (!a || !a.end_date) return { daysLeft: null, isExpired: false, isExpiringSoon: false };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const end = new Date(a.end_date); end.setHours(0, 0, 0, 0);
+  const daysLeft = Math.round((end - today) / 86400000);
+  const activeish = a.status === 'active' || a.status === 'signed';
+  const isExpired = daysLeft < 0 && activeish;
+  const isExpiringSoon = !isExpired && daysLeft >= 0 && daysLeft <= soonDays && activeish;
+  return { daysLeft, isExpired, isExpiringSoon };
 }
 
 // Which actions are available for this agreement right now

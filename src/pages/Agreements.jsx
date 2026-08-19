@@ -342,6 +342,8 @@ export default function Agreements() {
               computeAmount={(a) => Number(a.amount || 0)}
               subtitleField="title"
               onClientClick={handleClientClick}
+              getStatus={deriveStatus}
+              expiryField="end_date"
             />
           </div>
           <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
@@ -372,6 +374,8 @@ export default function Agreements() {
               signedUrlField="signed_agreement_url"
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              getStatus={deriveStatus}
+              expiryField="end_date"
             />
           </div>
         </div>
@@ -416,6 +420,8 @@ export default function Agreements() {
               signedUrlField="signed_agreement_url"
               onViewSigned={handleViewSigned}
               onDownloadSigned={handleDownloadSigned}
+              getStatus={deriveStatus}
+              expiryField="end_date"
             />
           </div>
         </SheetContent>

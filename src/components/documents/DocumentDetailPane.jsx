@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag, FileSignature, Download,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag, FileSignature, Download, AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
@@ -35,6 +35,9 @@ export default function DocumentDetailPane({
   signedUrlField,
   onViewSigned,
   onDownloadSigned,
+  getStatus,
+  expiryField,
+  expiringSoonDays = 10,
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
@@ -47,12 +50,26 @@ export default function DocumentDetailPane({
     );
   }
 
-  const status = item.status || 'draft';
+  const status = (getStatus ? getStatus(item) : item.status) || 'draft';
   const cfg = statusConfig[status] || statusConfig.draft;
   const lineItems = item[lineItemsKey] || [];
   const isDownloading = downloadingId === item.id;
   const hasPreview = !!previewComponent;
   const showPreview = hasPreview && view === 'preview';
+
+  // Expiry alert (auto-expired or expiring within N days)
+  let expiryAlert = null;
+  if (expiryField && item[expiryField]) {
+    const t = new Date(); t.setHours(0, 0, 0, 0);
+    const e = new Date(item[expiryField]); e.setHours(0, 0, 0, 0);
+    const daysLeft = Math.round((e - t) / 86400000);
+    const activeish = item.status === 'active' || item.status === 'signed';
+    if (status === 'expired' && activeish) {
+      expiryAlert = { kind: 'expired', daysLeft };
+    } else if (activeish && daysLeft >= 0 && daysLeft <= expiringSoonDays) {
+      expiryAlert = { kind: 'soon', daysLeft };
+    }
+  }
 
   return (
     <div className="glass-card rounded-2xl h-full flex flex-col overflow-hidden">
@@ -124,6 +141,26 @@ export default function DocumentDetailPane({
         </div>
       ) : (
       <div className="flex-1 overflow-y-auto thin-scroll min-h-0 px-5 py-4">
+        {/* Expiry alert */}
+        {expiryAlert && (
+          <div
+            className={`mb-4 flex items-center gap-2 rounded-xl border p-3 ${
+              expiryAlert.kind === 'expired'
+                ? 'border-orange-500/30 bg-orange-500/10 text-orange-400'
+                : 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            <span className="text-xs font-semibold">
+              {expiryAlert.kind === 'expired'
+                ? 'This agreement has expired (end date passed).'
+                : expiryAlert.daysLeft === 0
+                  ? 'Expires today — renewal needed soon.'
+                  : `Expiring in ${expiryAlert.daysLeft} day(s) — renew before the end date.`}
+            </span>
+          </div>
+        )}
+
         {/* Subtitle / subject */}
         {item[subtitleField] && (
           <div className="mb-4">
