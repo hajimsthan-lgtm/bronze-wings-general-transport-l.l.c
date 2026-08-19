@@ -1,9 +1,10 @@
-import { Send, FileSignature, CreditCard, Ban, MoreVertical, FileX } from 'lucide-react';
+import { Send, FileSignature, CreditCard, Ban, MoreVertical, FileX, Mail } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { getAvailableActions } from '@/lib/invoiceWorkflow';
+import { buildEmailLink } from '@/components/common/EmailShareButton';
 
 const ACTION_ITEMS = [
   { key: 'sendForSignature', label: 'Send for Signature', icon: Send, hint: 'Available from Draft' },
@@ -39,6 +40,18 @@ export default function InvoiceActionsMenu({ inv, onAction, variant = 'icon' }) 
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56" onClick={(e) => e.stopPropagation()}>
         <DropdownMenuLabel className="text-[10px] uppercase tracking-wider">Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <a
+            href={buildEmailLink(inv, 'invoice')}
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs gap-2 cursor-pointer"
+            title="Share via Email"
+          >
+            <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="flex-1">Email to Client</span>
+          </a>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {ACTION_ITEMS.map((item, i) => {
           const enabled = actions[item.key];

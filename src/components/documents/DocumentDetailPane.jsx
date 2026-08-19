@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
+import EmailShareButton from '@/components/common/EmailShareButton';
 import { formatCurrency, getInitials } from '@/lib/formatters';
 
 export default function DocumentDetailPane({
@@ -26,6 +27,8 @@ export default function DocumentDetailPane({
   emptyIcon: EmptyIcon = FileText,
   documentLabel = 'Document',
   previewComponent,
+  settings,
+  docType = 'quotation',
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
@@ -191,6 +194,8 @@ export default function DocumentDetailPane({
         >
           {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
         </button>
+
+        <EmailShareButton doc={item} type={docType} settings={settings} />
 
         <div className="flex-1" />
 

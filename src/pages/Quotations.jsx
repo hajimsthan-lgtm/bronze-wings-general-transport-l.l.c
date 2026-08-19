@@ -288,6 +288,8 @@ export default function Quotations() {
               emptyTitle="Select a quotation"
               emptyDescription="Choose a quotation from the list to view its full details here."
               previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
+              settings={settings}
+              docType="quotation"
             />
           </div>
         </div>
@@ -325,6 +327,8 @@ export default function Quotations() {
               emptyTitle="Select a quotation"
               emptyDescription="Choose a quotation from the list to view its full details here."
               previewComponent={<QuotationPreview form={selectedItem} settings={settings} />}
+              settings={settings}
+              docType="quotation"
             />
           </div>
         </SheetContent>

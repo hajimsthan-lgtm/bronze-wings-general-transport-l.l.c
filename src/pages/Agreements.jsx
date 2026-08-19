@@ -279,6 +279,8 @@ export default function Agreements() {
               emptyTitle="Select an agreement"
               emptyDescription="Choose an agreement from the list to view its full details here."
               previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
+              settings={settings}
+              docType="agreement"
             />
           </div>
         </div>
@@ -316,6 +318,8 @@ export default function Agreements() {
               emptyTitle="Select an agreement"
               emptyDescription="Choose an agreement from the list to view its full details here."
               previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
+              settings={settings}
+              docType="agreement"
             />
           </div>
         </SheetContent>
