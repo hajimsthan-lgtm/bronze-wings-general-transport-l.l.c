@@ -175,9 +175,9 @@ export default function DocumentTemplateEditor({ open, onClose, documentType = '
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex flex-col animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex flex-col animate-fade-in pt-2">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card/60 backdrop-blur-xl flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card/60 backdrop-blur-xl flex-shrink-0 rounded-t-xl">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <h2 className="text-sm font-bold text-foreground flex-shrink-0">
             {isCustomMode ? (templateId ? 'Edit Custom Template' : 'New Custom Template') : cfg.title}
@@ -218,7 +218,7 @@ export default function DocumentTemplateEditor({ open, onClose, documentType = '
           </button>
           <div className="w-px h-5 bg-border mx-1" />
           <Button variant="ghost" size="sm" onClick={onClose} className="h-8 text-xs">Cancel</Button>
-          <Button size="sm" onClick={handleSave} disabled={saving || loading} className="lightning-btn h-8 text-xs">
+          <Button size="sm" onClick={handleSave} disabled={saving} className="lightning-btn h-8 text-xs">
             {saving ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
             Save Template
           </Button>
