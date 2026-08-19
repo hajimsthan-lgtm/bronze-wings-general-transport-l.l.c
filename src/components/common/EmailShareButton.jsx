@@ -1,4 +1,12 @@
-import { Mail } from 'lucide-react';
+import { Mail, Globe, Mailbox } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const DEFAULT_COMPANY = 'Bronze Wings General Transport L.L.C';
 
@@ -80,7 +88,11 @@ export function buildEmailLink(doc, type, settings) {
       `Best regards,\n${company}`;
   }
 
-  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return { to, subject, body, mailto: `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}` };
+}
+
+function buildGmailLink({ to, subject, body }) {
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export default function EmailShareButton({
@@ -92,36 +104,41 @@ export default function EmailShareButton({
   title = 'Share via Email',
 }) {
   if (!doc) return null;
-  const href = buildEmailLink(doc, type, settings);
+  const parts = buildEmailLink(doc, type, settings);
 
-  const openMail = (e) => {
+  const openMailApp = (e) => {
     e.stopPropagation();
-    e.preventDefault();
-    window.location.href = href;
+    window.location.href = parts.mailto;
+  };
+  const openGmail = (e) => {
+    e.stopPropagation();
+    window.open(buildGmailLink(parts), '_blank', 'noopener,noreferrer');
   };
 
-  if (variant === 'card') {
-    return (
-      <button
-        type="button"
-        onClick={openMail}
-        title={title}
-        className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-border/50 bg-background text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0"
-      >
-        <Mail className="w-3.5 h-3.5" />
-      </button>
-    );
-  }
+  const triggerClass =
+    variant === 'card'
+      ? 'inline-flex items-center justify-center h-8 w-8 rounded-md border border-border/50 bg-background text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0'
+      : `w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0 ${className}`;
 
-  // icon (default) — matches the download button in detail panes
   return (
-    <button
-      type="button"
-      onClick={openMail}
-      title={title}
-      className={`w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0 ${className}`}
-    >
-      <Mail className="w-4 h-4" />
-    </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button type="button" title={title} className={triggerClass} onClick={(e) => e.stopPropagation()}>
+          <Mail className={variant === 'card' ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenuLabel>Send via</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={openMailApp} className="cursor-pointer">
+          <Mailbox className="w-4 h-4" />
+          <span>Mail App</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={openGmail} className="cursor-pointer">
+          <Globe className="w-4 h-4" />
+          <span>Gmail (Web)</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
