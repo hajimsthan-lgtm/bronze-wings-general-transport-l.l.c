@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, Wrench, Search, BarChart3, LayoutGrid, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Wrench, Search, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
 import ImageUpload from '@/components/common/ImageUpload';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -22,6 +22,7 @@ import { Download } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import DatePicker from '@/components/common/DatePicker';
 import { withRetry, safeAll } from '@/lib/safeRequest';
+import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -36,7 +37,7 @@ export default function Services() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [presetPlate, setPresetPlate] = useState('');
-  const [mode, setMode] = useState('analytics');
+  const mode = useMaintenanceMode();
   const [search, setSearch] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
 
@@ -44,8 +45,11 @@ export default function Services() {
   useEffect(() => {load();}, []);
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
-    if (p.get('new') === '1') {setEditItem(null);setFormOpen(true);setMode('browse');}
+    if (p.get('new') === '1') {setEditItem(null);setFormOpen(true);setMaintenanceMode('browse');}
     if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
+    const onNew = () => {setEditItem(null);setFormOpen(true);};
+    window.addEventListener('maintenance:new', onNew);
+    return () => window.removeEventListener('maintenance:new', onNew);
   }, []);
 
   const filtered = records.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
@@ -53,23 +57,8 @@ export default function Services() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          
-          
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
-          <ExportButtons data={filtered} filename="service_records" title="Service Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Type', key: 'service_type' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost' }, { label: 'Status', key: 'status' }]} />
-          <Button onClick={() => {setEditItem(null);setFormOpen(true);}} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
-        </div>
-      </div>
-
       {mode === 'analytics' ?
-      <MaintenanceAnalytics records={filtered} loading={loading} onBrowse={() => setMode('browse')} /> :
+      <MaintenanceAnalytics records={filtered} loading={loading} onBrowse={() => setMaintenanceMode('browse')} /> :
 
       <>
           <div className="relative mb-5">
