@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, User, ShieldCheck, Car, Hash, StickyNote, Save } from 'lucide-react';
 import VehicleLicenseScanZone from './VehicleLicenseScanZone';
+import { vehicleToLicenseForm, licenseFormToVehicle } from '@/lib/vehicleLicenseNotes';
 
 const CATEGORY_OPTIONS = ['Private', 'Commercial', 'Truck', 'Bus', 'Taxi', 'Other'];
 
@@ -41,22 +42,13 @@ function Field({ label, span2, children }) {
   );
 }
 
-/** Parse "Mitsubishi Fuso" → { make: "Mitsubishi", model: "Fuso" } */
-function splitMakeModel(modelRaw) {
-  const trimmed = (modelRaw || '').trim();
-  if (!trimmed) return { make: '', model: '' };
-  const parts = trimmed.split(/\s+/);
-  if (parts.length >= 2) return { make: parts[0], model: parts.slice(1).join(' ') };
-  return { make: trimmed, model: '' };
-}
-
-export default function VehicleAddForm({ editItem, onSave, onCancel }) {
+export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY);
 
   useEffect(() => {
-    setForm(editItem ? { ...EMPTY, ...editItem } : EMPTY);
-  }, [editItem]);
+    setForm(editItem ? vehicleToLicenseForm(editItem, editLicense) : EMPTY);
+  }, [editItem, editLicense]);
 
   const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));
 
@@ -67,19 +59,7 @@ export default function VehicleAddForm({ editItem, onSave, onCancel }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { make, model } = splitMakeModel(form.model);
-      // 1. Create the Vehicle record
-      const vehicleData = {
-        plate_number: form.trafficPlateNo || '',
-        make, model,
-        year: form.year ? Number(form.year) : undefined,
-        registration_expiry: form.expDate || '',
-        insurance_expiry: form.insExpDate || '',
-        assigned_driver: form.assigned_driver || '',
-        fuel_type: form.fuel_type || 'diesel',
-        status: form.status || 'active',
-        notes: form.notes || '',
-      };
+      const vehicleData = licenseFormToVehicle(form);
       await onSave(vehicleData, form);
     } finally { setSaving(false); }
   };

@@ -38,6 +38,7 @@ function VehiclesTab() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [editLicense, setEditLicense] = useState(null);
   const vehStore = useVehiclesMode();
   const view = vehStore.view;
   const mode = vehStore.mode;
@@ -68,15 +69,27 @@ function VehiclesTab() {
   };
   useEffect(() => { load(); }, []);
 
+  // Fetch the VehicleLicense record for a vehicle (by plate) so the edit form can populate
+  const fetchLicense = async (vehicle) => {
+    if (!vehicle?.plate_number) { setEditLicense(null); return; }
+    try {
+      const records = await base44.entities.VehicleLicense.filter({ trafficPlateNo: vehicle.plate_number });
+      setEditLicense(records?.[0] || null);
+    } catch { setEditLicense(null); }
+  };
+
+  const openEdit = (vehicle) => { setEditItem(vehicle); fetchLicense(vehicle); setFormOpen(true); };
+  const openNew = () => { setEditItem(null); setEditLicense(null); setFormOpen(true); };
+
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
-    if (p.get('new') === '1') { setEditItem(null); setFormOpen(true); }
+    if (p.get('new') === '1') { openNew(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Open form from TopBar "Add New" button
   useEffect(() => {
-    const handler = () => { setEditItem(null); setFormOpen(true); };
+    const handler = () => { openNew(); };
     window.addEventListener('vehicles:new', handler);
     return () => window.removeEventListener('vehicles:new', handler);
   }, []);
@@ -91,7 +104,7 @@ function VehiclesTab() {
 
   return (
     <div>
-      <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
+      <MobileFAB icon={Plus} onClick={openNew} label="Add Vehicle" />
 
       {mode === 'analytics' ? (
         <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
@@ -111,7 +124,7 @@ function VehiclesTab() {
                 {filtered.length > 4 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                     {filtered.slice(0, 4).map((v) => (
-                      <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
+                      <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
                     ))}
                   </div>
                 )}
@@ -128,14 +141,14 @@ function VehiclesTab() {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                   {filtered.slice(filtered.length > 4 ? 4 : 0).map((v) => (
-                    <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
+                    <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
                   ))}
                 </div>
               </div>
             ) : (
             <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filtered.map((v) => (
-                <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
+                <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
               ))}
             </div>
             )
@@ -151,7 +164,7 @@ function VehiclesTab() {
                 </div>
               )}
               {filtered.map((v) => (
-                <VehicleListRow key={v.id} v={v} selected={selected.has(v.id)} onSelect={() => toggleSelect(v.id)} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => { setEditItem(v); setFormOpen(true); }} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
+                <VehicleListRow key={v.id} v={v} selected={selected.has(v.id)} onSelect={() => toggleSelect(v.id)} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
               ))}
             </div>
           )}
@@ -167,7 +180,8 @@ function VehiclesTab() {
       >
         <VehicleAddForm
           editItem={editItem}
-          onCancel={() => setFormOpen(false)}
+          editLicense={editLicense}
+          onCancel={() => { setFormOpen(false); setEditLicense(null); }}
           onSave={async (vehicleData, licenseData) => {
             try {
               if (editItem) {
@@ -188,6 +202,7 @@ function VehiclesTab() {
                 toast({ title: 'Vehicle added', description: `${vehicleData.make} ${vehicleData.model} · ${vehicleData.plate_number}` });
               }
               setFormOpen(false);
+              setEditLicense(null);
               load();
             } catch (e) {
               toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });
