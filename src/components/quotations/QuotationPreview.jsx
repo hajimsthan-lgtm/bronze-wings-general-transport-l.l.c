@@ -159,32 +159,6 @@ export default function QuotationPreview({ form, settings }) {
             </tbody>
           </table>
 
-          {/* Totals */}
-          <div style={{ display: 'flex', gap: 0, marginTop: '4px' }}>
-            {/* Amount in Words */}
-            <div style={{ flex: 1, border: `1px dashed #333`, padding: '5px 6px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontSize: '7.5px', fontWeight: 'bold', color: '#333', marginBottom: '2px' }}>Amount in Words:</div>
-              <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: BLACK, textTransform: 'uppercase', letterSpacing: '0.3px', lineHeight: 1.3 }}>
-                AED {numberToWords(total).toUpperCase()}
-              </div>
-            </div>
-            {/* Subtotal / VAT / Total */}
-            <div style={{ width: '150px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 6px', borderBottom: '0.5px solid #E0E0E0', fontSize: '8.5px' }}>
-                <span style={{ color: '#333', fontWeight: 600 }}>Subtotal:</span>
-                <span style={{ color: BLACK, fontWeight: 'bold', fontFamily: "'Courier New', monospace" }}>AED {fmtMoney(subtotal)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 6px', borderBottom: '0.5px solid #E0E0E0', fontSize: '8.5px' }}>
-                <span style={{ color: '#333', fontWeight: 600 }}>VAT ({vatRate}%):</span>
-                <span style={{ color: BLACK, fontWeight: 'bold', fontFamily: "'Courier New', monospace" }}>AED {fmtMoney(vatAmount)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 6px', borderTop: '1px solid black', borderBottom: '1px solid black', fontSize: '9px' }}>
-                <span style={{ color: BLACK, fontWeight: 'bold' }}>Total Amount:</span>
-                <span style={{ color: BLACK, fontWeight: 'bold', fontFamily: "'Courier New', monospace" }}>AED {fmtMoney(total)}</span>
-              </div>
-            </div>
-          </div>
-
           {/* Terms & Conditions */}
           {(form.terms_conditions || form.notes) && (
             <div style={{ marginTop: '6px' }}>
