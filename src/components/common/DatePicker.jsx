@@ -36,12 +36,23 @@ export default function DatePicker({ value, onChange, placeholder = 'Pick a date
 
   const jumpToDate = (d) => setDisplayMonth(startOfMonth(d));
 
-  // Manual entry: accept DD/MM/YYYY or YYYY-MM-DD; jump the calendar as the user types.
+  // Auto-format typed digits into DD-MM-YYYY (dashes inserted automatically).
+  const autoFormat = (raw) => {
+    const digits = raw.replace(/\D/g, '').slice(0, 8);
+    let out = digits;
+    if (digits.length > 4) out = `${digits.slice(0,2)}-${digits.slice(2,4)}-${digits.slice(4)}`;
+    else if (digits.length > 2) out = `${digits.slice(0,2)}-${digits.slice(2)}`;
+    return out;
+  };
+
+  // Manual entry: accept DD-MM-YYYY (or DD/MM/YYYY, YYYY-MM-DD); jump the calendar as the user types.
   const handleManual = (text) => {
-    setManualText(text);
-    const t = text.trim();
+    const formatted = autoFormat(text);
+    setManualText(formatted);
+    const t = formatted.trim();
     if (!t) return;
-    let d = parse(t, 'dd/MM/yyyy', new Date());
+    let d = parse(t, 'dd-MM-yyyy', new Date());
+    if (!isValid(d)) d = parse(t, 'dd/MM/yyyy', new Date());
     if (!isValid(d)) d = parse(t, DATE_FMT, new Date());
     if (isValid(d)) jumpToDate(d);
   };
@@ -49,7 +60,8 @@ export default function DatePicker({ value, onChange, placeholder = 'Pick a date
   const commitManual = () => {
     const t = manualText.trim();
     if (!t) return;
-    let d = parse(t, 'dd/MM/yyyy', new Date());
+    let d = parse(t, 'dd-MM-yyyy', new Date());
+    if (!isValid(d)) d = parse(t, 'dd/MM/yyyy', new Date());
     if (!isValid(d)) d = parse(t, DATE_FMT, new Date());
     if (isValid(d)) {
       onChange(format(d, DATE_FMT));
@@ -131,7 +143,7 @@ export default function DatePicker({ value, onChange, placeholder = 'Pick a date
                 value={manualText}
                 onChange={(e) => handleManual(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManual(); } }}
-                placeholder="Type DD/MM/YYYY"
+                placeholder="Type DD-MM-YYYY"
                 className="h-8 text-sm tabular-nums"
               />
               <Button type="button" size="sm" onClick={commitManual} className="h-8 px-3">Go</Button>
