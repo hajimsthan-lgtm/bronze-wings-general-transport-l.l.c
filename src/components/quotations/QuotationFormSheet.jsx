@@ -13,6 +13,7 @@ import { generateNextQuotationNumber } from '@/lib/quotationSequence';
 import { useToast } from '@/components/ui/use-toast';
 import QuotationPreview from '@/components/quotations/QuotationPreview';
 import ClientAutocomplete from '@/components/quotations/ClientAutocomplete';
+import DatePicker from '@/components/common/DatePicker';
 
 function fmtDate(d) {
   if (!d) return '';
@@ -198,11 +199,11 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
               </div>
               <div>
                 <Label>Issue Date</Label>
-                <Input type="date" value={form.issue_date || ''} onChange={e => update('issue_date', e.target.value)} />
+                <DatePicker value={form.issue_date || ''} onChange={v => update('issue_date', v)} />
               </div>
               <div>
                 <Label>Valid Until</Label>
-                <Input type="date" value={form.valid_until || ''} onChange={e => update('valid_until', e.target.value)} />
+                <DatePicker value={form.valid_until || ''} onChange={v => update('valid_until', v)} />
               </div>
             </div>
 

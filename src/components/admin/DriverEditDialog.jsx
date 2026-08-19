@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { UsersRound, Save } from 'lucide-react';
+import DatePicker from '@/components/common/DatePicker';
 
 const STATUSES = [
   { value: 'active', label: 'Active' },
@@ -72,7 +73,7 @@ export default function DriverEditDialog({ open, onOpenChange, driver, onSave })
           <Field label="Phone"><Input value={form.phone || ''} onChange={(e) => set('phone', e.target.value)} /></Field>
           <Field label="Email"><Input value={form.email || ''} onChange={(e) => set('email', e.target.value)} /></Field>
           <Field label="License Number"><Input value={form.license_number || ''} onChange={(e) => set('license_number', e.target.value)} /></Field>
-          <Field label="License Expiry"><Input type="date" value={form.license_expiry || ''} onChange={(e) => set('license_expiry', e.target.value)} /></Field>
+          <Field label="License Expiry"><DatePicker value={form.license_expiry || ''} onChange={(v) => set('license_expiry', v)} /></Field>
           <Field label="Nationality"><Input value={form.nationality || ''} onChange={(e) => set('nationality', e.target.value)} /></Field>
           <Field label="Status">
             <Select value={form.status} onValueChange={(v) => set('status', v)}>
@@ -82,9 +83,9 @@ export default function DriverEditDialog({ open, onOpenChange, driver, onSave })
           </Field>
           <Field label="Assigned Vehicle"><Input value={form.assigned_vehicle || ''} onChange={(e) => set('assigned_vehicle', e.target.value)} placeholder="Plate number" /></Field>
           <Field label="Base Salary"><Input type="number" value={form.base_salary || 0} onChange={(e) => set('base_salary', e.target.value)} /></Field>
-          <Field label="Join Date"><Input type="date" value={form.join_date || ''} onChange={(e) => set('join_date', e.target.value)} /></Field>
+          <Field label="Join Date"><DatePicker value={form.join_date || ''} onChange={(v) => set('join_date', v)} /></Field>
           <Field label="Emergency Contact"><Input value={form.emergency_contact || ''} onChange={(e) => set('emergency_contact', e.target.value)} /></Field>
-          <Field label="Visa Expiry"><Input type="date" value={form.visa_expiry || ''} onChange={(e) => set('visa_expiry', e.target.value)} /></Field>
+          <Field label="Visa Expiry"><DatePicker value={form.visa_expiry || ''} onChange={(v) => set('visa_expiry', v)} /></Field>
           <Field label="Notes" full><Textarea rows={2} value={form.notes || ''} onChange={(e) => set('notes', e.target.value)} /></Field>
         </div>
         <DialogFooter>

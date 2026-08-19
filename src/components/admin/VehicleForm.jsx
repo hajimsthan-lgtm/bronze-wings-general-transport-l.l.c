@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Truck, ShieldCheck, StickyNote, Save } from 'lucide-react';
 import VehicleLicenseScanZone from './VehicleLicenseScanZone';
 import TypeCombobox from './TypeCombobox';
+import DatePicker from '@/components/common/DatePicker';
 
 function mapExtractedToVehicle(data) {
   if (!data) return { vehicleFields: {}, extraNotes: '' };
@@ -142,10 +143,10 @@ export default function VehicleForm({ editItem, onSave, onCancel }) {
 
       <FormSection icon={ShieldCheck} title="Registration & Insurance">
         <FormField label="Registration Expiry">
-          <Input type="date" value={form.registration_expiry} onChange={(e) => update('registration_expiry', e.target.value)} className="bg-background border-border" />
+          <DatePicker value={form.registration_expiry} onChange={(v) => update('registration_expiry', v)} />
         </FormField>
         <FormField label="Insurance Expiry">
-          <Input type="date" value={form.insurance_expiry} onChange={(e) => update('insurance_expiry', e.target.value)} className="bg-background border-border" />
+          <DatePicker value={form.insurance_expiry} onChange={(v) => update('insurance_expiry', v)} />
         </FormField>
       </FormSection>
 

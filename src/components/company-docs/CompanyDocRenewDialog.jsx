@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate } from '@/lib/formatters';
 import { RefreshCw, Loader2, ArrowRight, History } from 'lucide-react';
+import DatePicker from '@/components/common/DatePicker';
 
 export default function CompanyDocRenewDialog({ doc, open, onOpenChange, onRenewed }) {
   const { toast } = useToast();
@@ -91,7 +92,7 @@ export default function CompanyDocRenewDialog({ doc, open, onOpenChange, onRenew
             <ArrowRight className="w-4 h-4 text-muted-foreground mt-5" />
             <div className="flex-1">
               <Label className="text-xs text-muted-foreground mb-1.5">New Expiry</Label>
-              <Input type="date" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} className={inputCls} />
+              <DatePicker value={newExpiry} onChange={setNewExpiry} />
             </div>
           </div>
           <div>

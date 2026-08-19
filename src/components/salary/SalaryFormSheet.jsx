@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency } from '@/lib/formatters';
 import SalaryDeductionsPicker from './SalaryDeductionsPicker';
 import SalaryOvertimePicker from './SalaryOvertimePicker';
+import DatePicker from '@/components/common/DatePicker';
 import { settleOvertimeEntries } from '@/lib/overtimeCalc';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -296,7 +297,7 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
 
       <div>
         <Label className="text-xs text-muted-foreground mb-1.5">Payment Date</Label>
-        <Input type="date" value={form.payment_date} onChange={(e) => update('payment_date', e.target.value)} className="bg-background border-border" />
+        <DatePicker value={form.payment_date} onChange={(v) => update('payment_date', v)} />
       </div>
 
       <div>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DatePicker from '@/components/common/DatePicker';
 
 const TYPES = [
   { value: 'housing_advance', label: 'Housing Advance' },
@@ -84,7 +85,7 @@ export default function DriverDeductionFormSheet({ open, onOpenChange, driverNam
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Issue Date</Label>
-              <Input type="date" value={form.issue_date} onChange={(e) => set('issue_date', e.target.value)} className="bg-input border-border" />
+              <DatePicker value={form.issue_date} onChange={(v) => set('issue_date', v)} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Status</Label>

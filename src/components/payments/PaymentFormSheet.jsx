@@ -10,6 +10,7 @@ import { X, Check, Loader2, RefreshCw } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { useClientPaymentCreate, useClientPaymentUpdate } from '@/hooks/useEntityQueries';
 import InvoiceAllocationList from './InvoiceAllocationList';
+import DatePicker from '@/components/common/DatePicker';
 
 const DEFAULT_FORM = {
   reference_number: '',
@@ -256,7 +257,7 @@ export default function PaymentFormSheet({ open, onOpenChange, editItem, lockedC
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Payment Date</Label>
-              <Input type="date" value={form.payment_date} onChange={e => update('payment_date', e.target.value)} className="bg-background border-border mt-1" />
+              <DatePicker value={form.payment_date} onChange={v => update('payment_date', v)} className="mt-1" />
             </div>
           </div>
 

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Truck, Save } from 'lucide-react';
+import DatePicker from '@/components/common/DatePicker';
 
 const TYPES = [
   { value: 'truck', label: 'Truck' },
@@ -105,10 +106,10 @@ export default function VehicleEditDialog({ open, onOpenChange, vehicle, onSave 
           </Field>
           <Field label="Assigned Driver"><Input value={form.assigned_driver || ''} onChange={(e) => set('assigned_driver', e.target.value)} placeholder="Driver name" /></Field>
           <Field label="Odometer (km)"><Input type="number" value={form.odometer_km || 0} onChange={(e) => set('odometer_km', e.target.value)} /></Field>
-          <Field label="Registration Expiry"><Input type="date" value={form.registration_expiry || ''} onChange={(e) => set('registration_expiry', e.target.value)} /></Field>
-          <Field label="Insurance Expiry"><Input type="date" value={form.insurance_expiry || ''} onChange={(e) => set('insurance_expiry', e.target.value)} /></Field>
-          <Field label="Last Service Date"><Input type="date" value={form.last_service_date || ''} onChange={(e) => set('last_service_date', e.target.value)} /></Field>
-          <Field label="Next Service Date"><Input type="date" value={form.next_service_date || ''} onChange={(e) => set('next_service_date', e.target.value)} /></Field>
+          <Field label="Registration Expiry"><DatePicker value={form.registration_expiry || ''} onChange={(v) => set('registration_expiry', v)} /></Field>
+          <Field label="Insurance Expiry"><DatePicker value={form.insurance_expiry || ''} onChange={(v) => set('insurance_expiry', v)} /></Field>
+          <Field label="Last Service Date"><DatePicker value={form.last_service_date || ''} onChange={(v) => set('last_service_date', v)} /></Field>
+          <Field label="Next Service Date"><DatePicker value={form.next_service_date || ''} onChange={(v) => set('next_service_date', v)} /></Field>
           <Field label="Notes" full><Textarea rows={2} value={form.notes || ''} onChange={(e) => set('notes', e.target.value)} /></Field>
         </div>
         <DialogFooter>

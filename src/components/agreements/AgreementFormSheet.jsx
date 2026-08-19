@@ -13,6 +13,7 @@ import { downloadAgreementPDF } from '@/lib/agreementPdf';
 import { useToast } from '@/components/ui/use-toast';
 import AgreementPreview from '@/components/agreements/AgreementPreview';
 import ClientAutocomplete from '@/components/quotations/ClientAutocomplete';
+import DatePicker from '@/components/common/DatePicker';
 
 function fmtDate(d) {
   if (!d) return '';
@@ -221,11 +222,11 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
                 </div>
                 <div>
                   <Label>Start Date</Label>
-                  <Input type="date" value={form.start_date || ''} onChange={e => update('start_date', e.target.value)} />
+                  <DatePicker value={form.start_date || ''} onChange={v => update('start_date', v)} />
                 </div>
                 <div>
                   <Label>End Date</Label>
-                  <Input type="date" value={form.end_date || ''} onChange={e => update('end_date', e.target.value)} />
+                  <DatePicker value={form.end_date || ''} onChange={v => update('end_date', v)} />
                 </div>
               </div>
             </Section>

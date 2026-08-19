@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileText, Truck, User } from 'lucide-react';
+import DatePicker from '@/components/common/DatePicker';
 
 const FUEL_COLORS = {
   diesel: '#f97316',
@@ -177,7 +178,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><Calendar className="w-3 h-3" /> {t('date')}</Label>
-              <Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" />
+              <DatePicker value={form.date} onChange={v => update('date', v)} />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><Gauge className="w-3 h-3" /> Odometer</Label>

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Receipt } from 'lucide-react';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
+import DatePicker from '@/components/common/DatePicker';
 import { useExpenseCreate, useExpenseUpdate } from '@/hooks/useEntityQueries';
 
 export default function ExpenseFormSheet({ open, onOpenChange, editItem, prefillDriver, onSaved }) {
@@ -54,7 +55,7 @@ export default function ExpenseFormSheet({ open, onOpenChange, editItem, prefill
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-xs text-muted-foreground mb-1.5">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border" /></div>
-          <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><DatePicker value={form.date} onChange={v => update('date', v)} /></div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input list="veh-suggestions" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" /><datalist id="veh-suggestions">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>

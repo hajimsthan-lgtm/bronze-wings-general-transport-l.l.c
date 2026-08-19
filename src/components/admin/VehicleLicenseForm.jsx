@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, User, ShieldCheck, Car, Hash, StickyNote } from 'lucide-react';
 import VehicleLicenseScanZone from './VehicleLicenseScanZone';
+import DatePicker from '@/components/common/DatePicker';
 
 const CATEGORY_OPTIONS = ['Private', 'Commercial', 'Truck', 'Bus', 'Taxi', 'Other'];
 
@@ -63,8 +64,8 @@ export default function VehicleLicenseForm({ editItem, onSave, onCancel }) {
         <Field label="Place of Issue"><Input value={form.placeOfIssue} onChange={(e) => update('placeOfIssue', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="TC No."><Input value={form.tcNo} onChange={(e) => update('tcNo', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="Plate Category"><Input value={form.plateCategory} onChange={(e) => update('plateCategory', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Expiry Date"><Input type="date" value={form.expDate} onChange={(e) => update('expDate', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Registration Date"><Input type="date" value={form.regDate} onChange={(e) => update('regDate', e.target.value)} className="bg-background border-border" /></Field>
+        <Field label="Expiry Date"><DatePicker value={form.expDate} onChange={(v) => update('expDate', v)} /></Field>
+        <Field label="Registration Date"><DatePicker value={form.regDate} onChange={(v) => update('regDate', v)} /></Field>
         <Field label="Category" span2>
           <Select value={form.category} onValueChange={(v) => update('category', v)}>
             <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
@@ -83,7 +84,7 @@ export default function VehicleLicenseForm({ editItem, onSave, onCancel }) {
         <Field label="Insurer"><Input value={form.insurer} onChange={(e) => update('insurer', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="Policy No."><Input value={form.policyNo} onChange={(e) => update('policyNo', e.target.value)} className="bg-background border-border" /></Field>
         <Field label="Insurance Type"><Input value={form.insuranceType} onChange={(e) => update('insuranceType', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Insurance Expiry"><Input type="date" value={form.insExpDate} onChange={(e) => update('insExpDate', e.target.value)} className="bg-background border-border" /></Field>
+        <Field label="Insurance Expiry"><DatePicker value={form.insExpDate} onChange={(v) => update('insExpDate', v)} /></Field>
         <Field label="Mortgage By" span2><Input value={form.mortgageBy} onChange={(e) => update('mortgageBy', e.target.value)} className="bg-background border-border" /></Field>
       </Section>
 

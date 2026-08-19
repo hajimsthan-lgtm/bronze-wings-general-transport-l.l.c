@@ -16,6 +16,7 @@ import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
+import DatePicker from '@/components/common/DatePicker';
 import { cn } from '@/lib/utils';
 
 const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0, vat_excluded: false };
@@ -535,11 +536,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">{t('issue_date')}</Label>
-                  <Input type="date" value={form.issue_date} onChange={e => update('issue_date', e.target.value)} className={inputCls} />
+                  <DatePicker value={form.issue_date} onChange={v => update('issue_date', v)} className={inputCls} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">{t('due_date')}</Label>
-                  <Input type="date" value={form.due_date} onChange={e => update('due_date', e.target.value)} className={inputCls} />
+                  <DatePicker value={form.due_date} onChange={v => update('due_date', v)} className={inputCls} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">VAT %</Label>
@@ -644,7 +645,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground mb-1.5">Payment Date</Label>
-                      <Input type="date" value={payment.date} onChange={e => updatePayment('date', e.target.value)} className={inputCls} />
+                      <DatePicker value={payment.date} onChange={v => updatePayment('date', v)} className={inputCls} />
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground mb-1.5">Reference (optional)</Label>

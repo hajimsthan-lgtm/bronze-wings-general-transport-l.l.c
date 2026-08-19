@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { inputClass, labelClass, selectTriggerClass, selectContentClass, selectItemClass } from './styles';
+import DatePicker from '@/components/common/DatePicker';
 
 const MODES = [
   { key: 'one_time', label: 'One-time' },
@@ -92,7 +93,7 @@ export default function TransactionStep1({ form, update, customers, services, st
 
       <div>
         <Label className={labelClass}>{t('date')}</Label>
-        <Input type="date" value={form.service_date} onChange={e => update('service_date', e.target.value)} className={inputClass} />
+        <DatePicker value={form.service_date} onChange={v => update('service_date', v)} className={inputClass} />
       </div>
 
       <div>

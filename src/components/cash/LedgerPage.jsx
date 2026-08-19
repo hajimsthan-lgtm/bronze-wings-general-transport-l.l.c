@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
+import DatePicker from '@/components/common/DatePicker';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -194,14 +195,18 @@ export default function LedgerPage({
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-2">
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Date</label>
-                    <input
-                      type={dateHasTime ? 'datetime-local' : 'date'}
-                      value={form.date}
-                      onChange={(e) => setField('date', e.target.value)}
-                      required
-                      className="clay-input w-full"
-                      style={{ padding: '10px 14px', fontSize: 13 }}
-                    />
+                    {dateHasTime ? (
+                      <input
+                        type="datetime-local"
+                        value={form.date}
+                        onChange={(e) => setField('date', e.target.value)}
+                        required
+                        className="clay-input w-full"
+                        style={{ padding: '10px 14px', fontSize: 13 }}
+                      />
+                    ) : (
+                      <DatePicker value={form.date} onChange={(v) => setField('date', v)} />
+                    )}
                   </div>
                   {hasRecipient && (
                     <div className="md:col-span-2">

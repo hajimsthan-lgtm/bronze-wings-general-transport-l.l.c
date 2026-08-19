@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { inputClass, labelClass, selectTriggerClass, selectContentClass, selectItemClass } from './styles';
+import DatePicker from '@/components/common/DatePicker';
 
 const STATUSES = ['paid', 'pending', 'partial', 'advance', 'reversal'];
 const MODES = ['cash', 'bank_transfer', 'card', 'split'];
@@ -81,7 +82,7 @@ export default function TransactionStep2({ form, update, updateArrayItem, addArr
         <div className="space-y-3 pt-4 border-t border-[#27272a]">
           <div>
             <Label className={labelClass}>{t('due_date')}</Label>
-            <Input type="date" value={form.due_date} onChange={e => update('due_date', e.target.value)} className={inputClass} />
+            <DatePicker value={form.due_date} onChange={v => update('due_date', v)} className={inputClass} />
             {isOverdue && <p className="text-amber-400 text-[10px] mt-1">Warning: Due date has passed</p>}
           </div>
           <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex justify-between items-center">
@@ -150,7 +151,7 @@ export default function TransactionStep2({ form, update, updateArrayItem, addArr
             </div>
             <div>
               <Label className={labelClass}>Received Date</Label>
-              <Input type="date" value={form.advance_received_date} onChange={e => update('advance_received_date', e.target.value)} className={inputClass} />
+              <DatePicker value={form.advance_received_date} onChange={v => update('advance_received_date', v)} className={inputClass} />
             </div>
           </div>
           <div>

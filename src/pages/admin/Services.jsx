@@ -20,6 +20,7 @@ import { downloadMaintenancePDF } from '@/lib/maintenancePdf';
 import { getCompanySettings } from '@/lib/companySettings';
 import { Download } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
+import DatePicker from '@/components/common/DatePicker';
 import { withRetry, safeAll } from '@/lib/safeRequest';
 
 const TYPE_TONE = {
@@ -155,7 +156,7 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Textarea value={form.description} onChange={e => update('description', e.target.value)} rows={2} className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><DatePicker value={form.date} onChange={v => update('date', v)} /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Cost</Label><Input type="number" value={form.cost} onChange={e => update('cost', e.target.value)} className="bg-background border-border" /></div>
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input list="svc-vendors" value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} placeholder="Select or type vendor name" className="bg-background border-border" /><datalist id="svc-vendors">{vendors.map(v => <option key={v.id} value={v.name}>{v.category}</option>)}</datalist></div>

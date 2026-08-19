@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DatePicker from '@/components/common/DatePicker';
 
 const FREQUENCIES = ['one_time', 'monthly', 'quarterly', 'yearly'];
 const DEFAULT = { description: '', amount: '', frequency: 'one_time', start_date: '', status: 'active', notes: '' };
@@ -61,7 +62,7 @@ export default function FixedChargeFormSheet({ open, onOpenChange, editItem, cli
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5">{t('start_date')}</Label>
-              <Input type="date" value={form.start_date} onChange={e => update('start_date', e.target.value)} className="bg-background/50 border-border" />
+              <DatePicker value={form.start_date} onChange={v => update('start_date', v)} />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>

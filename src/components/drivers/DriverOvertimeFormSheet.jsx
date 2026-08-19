@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SCENARIO_META } from '@/lib/overtimeCalc';
+import DatePicker from '@/components/common/DatePicker';
 
 export default function DriverOvertimeFormSheet({ open, onOpenChange, driverName, editItem, onSaved }) {
   const { toast } = useToast();
@@ -97,7 +98,7 @@ export default function DriverOvertimeFormSheet({ open, onOpenChange, driverName
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Date</Label>
-              <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} className="bg-input border-border" />
+              <DatePicker value={form.date} onChange={(v) => set('date', v)} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">Hours</Label>

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Truck, Users } from 'lucide-react';
+import DatePicker from '@/components/common/DatePicker';
 
 /**
  * Inline form for creating a vehicle or driver strictly scoped to a vendor.
@@ -96,7 +97,7 @@ export default function VendorAssetFormSheet({ open, onOpenChange, mode, vendorN
             </>
           )}
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5">Supply Start</Label><Input type="date" value={form.supply_start_date} onChange={(e) => set('supply_start_date', e.target.value)} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Supply Start</Label><DatePicker value={form.supply_start_date} onChange={(v) => set('supply_start_date', v)} /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Supply Rate</Label><Input type="number" value={form.supply_rate} onChange={(e) => set('supply_rate', e.target.value)} className="bg-background border-border" /></div>
           </div>
           {isVehicle && (
