@@ -573,11 +573,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                     <div className="grid grid-cols-3 gap-2">
                       <div>
                         <Label className="text-[10px] text-muted-foreground">{t('quantity')}</Label>
-                        <Input type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} className={`${inputCls} text-sm`} />
+                        <Input type="number" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', e.target.value)} onWheel={e => e.target.blur()} className={`${inputCls} text-sm`} />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">{t('unit_price')}</Label>
-                        <Input type="number" value={item.unit_price} onChange={e => updateItem(i, 'unit_price', e.target.value)} className={`${inputCls} text-sm`} />
+                        <Input type="number" value={item.unit_price || ''} onChange={e => updateItem(i, 'unit_price', e.target.value)} onWheel={e => e.target.blur()} className={`${inputCls} text-sm`} />
                       </div>
                       <div>
                         <Label className="text-[10px] text-muted-foreground">{t('amount')}</Label>
