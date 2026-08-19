@@ -55,8 +55,8 @@ export default function Services() {
     <div>
       <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground font-display hidden">Maintenance</h1>
-          <p className="text-sm text-muted-foreground hidden">Service records & fleet upkeep</p>
+          
+          
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
