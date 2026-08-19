@@ -89,6 +89,24 @@
     },
     "notes": {
       "type": "string"
+    },
+    "signed_agreement_url": {
+      "type": "string"
+    },
+    "signed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "signed_uploaded_by": {
+      "type": "string"
+    },
+    "sent_for_signature_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "signature_skipped": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

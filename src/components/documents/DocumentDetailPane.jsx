@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList,
+  ExternalLink, FileDown, Loader2, Pencil, Trash2, Plus, FileText, Eye, LayoutList, Flag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';
@@ -30,6 +30,8 @@ export default function DocumentDetailPane({
   previewComponent,
   settings,
   docType = 'quotation',
+  actionsMenu,
+  signatureFlag,
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
@@ -59,11 +61,20 @@ export default function DocumentDetailPane({
               {getInitials(item.client_name)}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-bold text-foreground font-mono">{item[numberField] || '—'}</h3>
                 <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${cfg.pill}`}>
                   {cfg.label}
                 </span>
+                {signatureFlag && (
+                  <span
+                    className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold border flex-shrink-0 ${signatureFlag.pill}`}
+                    title={`Signature: ${signatureFlag.label}`}
+                  >
+                    <Flag className="w-2.5 h-2.5" />
+                    {signatureFlag.label}
+                  </span>
+                )}
               </div>
               <button
                 onClick={() => onClientClick?.(item.client_name)}
@@ -198,6 +209,8 @@ export default function DocumentDetailPane({
 
         <EmailShareButton doc={item} type={docType} settings={settings} />
         <WhatsAppShareButton doc={item} type={docType} settings={settings} />
+
+        {actionsMenu}
 
         <div className="flex-1" />
 

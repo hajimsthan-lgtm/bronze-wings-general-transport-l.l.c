@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Loader2, FileSignature, SlidersHorizontal, X, ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Plus, Loader2, FileSignature, SlidersHorizontal, X, ArrowLeft, Upload, Eye, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadAgreementPDF } from '@/lib/agreementPdf';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
+import { signatureFlag, deriveStatus } from '@/lib/agreementWorkflow';
+import AgreementActionsMenu from '@/components/agreements/AgreementActionsMenu';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -62,6 +64,9 @@ export default function Agreements() {
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [templateEditorOpen, setTemplateEditorOpen] = useState(false);
   const [settings, setSettings] = useState({});
+  const [uploadingId, setUploadingId] = useState(null);
+  const signedFileRef = useRef(null);
+  const [attachTarget, setAttachTarget] = useState(null);
 
   useEffect(() => { getCompanySettings().then(setSettings).catch(() => {}); }, []);
 
@@ -117,6 +122,63 @@ export default function Agreements() {
     }
   };
 
+  const today = () => new Date().toISOString().split('T')[0];
+
+  const handleAction = async (key, a) => {
+    try {
+      if (key === 'sendForSignature') {
+        await base44.entities.Agreement.update(a.id, {
+          sent_for_signature_date: today(),
+          status: 'sent',
+        });
+        toast({ title: 'Sent for signature', description: `${a.agreement_number || 'Agreement'} marked as sent for signature.` });
+      } else if (key === 'skipSignature') {
+        await base44.entities.Agreement.update(a.id, {
+          signature_skipped: true,
+          status: 'sent',
+        });
+        toast({ title: 'Signature skipped', description: `${a.agreement_number || 'Agreement'} marked as sent.` });
+      } else if (key === 'markActive') {
+        await base44.entities.Agreement.update(a.id, { status: 'active' });
+        toast({ title: 'Agreement activated', description: `${a.agreement_number || 'Agreement'} is now active.` });
+      } else if (key === 'terminate') {
+        await base44.entities.Agreement.update(a.id, { status: 'terminated' });
+        toast({ title: 'Agreement terminated', description: `${a.agreement_number || 'Agreement'} has been terminated.` });
+      } else if (key === 'attachSigned') {
+        setAttachTarget(a);
+        // trigger file picker on next tick
+        setTimeout(() => signedFileRef.current?.click(), 50);
+        return;
+      }
+      load();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Action failed', description: e.message });
+    }
+  };
+
+  const handleSignedFile = async (e) => {
+    const file = e.target.files[0];
+    const target = attachTarget;
+    setAttachTarget(null);
+    e.target.value = '';
+    if (!file || !target) return;
+    setUploadingId(target.id);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Agreement.update(target.id, {
+        signed_agreement_url: file_url,
+        signed_date: today(),
+        status: 'signed',
+      });
+      toast({ title: 'Signed copy attached', description: `${target.agreement_number || 'Agreement'} marked as signed.` });
+      load();
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Upload failed', description: err.message });
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const baseFiltered = useMemo(() => {
     return list.filter(a => {
       const q = search.trim().toLowerCase();
@@ -144,6 +206,9 @@ export default function Agreements() {
 
   const selectedItem = filtered.find(a => a.id === selectedId) || baseFiltered.find(a => a.id === selectedId) || null;
   const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0);
+  const itemFlag = selectedItem ? signatureFlag(selectedItem) : null;
+  const isUploading = uploadingId === selectedItem?.id;
+  const isSigned = !!selectedItem?.signed_agreement_url;
 
   const tabs = [
     { key: 'all', label: 'All Agreements', count: counts.all },
@@ -281,6 +346,8 @@ export default function Agreements() {
               previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
               settings={settings}
               docType="agreement"
+              actionsMenu={selectedItem && !['terminated', 'expired'].includes(deriveStatus(selectedItem)) ? <AgreementActionsMenu agreement={selectedItem} onAction={handleAction} variant="button" /> : null}
+              signatureFlag={itemFlag}
             />
           </div>
         </div>
@@ -320,10 +387,14 @@ export default function Agreements() {
               previewComponent={<AgreementPreview form={selectedItem} settings={settings} />}
               settings={settings}
               docType="agreement"
+              actionsMenu={selectedItem && !['terminated', 'expired'].includes(deriveStatus(selectedItem)) ? <AgreementActionsMenu agreement={selectedItem} onAction={handleAction} variant="button" /> : null}
+              signatureFlag={itemFlag}
             />
           </div>
         </SheetContent>
       </Sheet>
+
+      <input ref={signedFileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleSignedFile} />
 
       <DocumentTemplateEditor open={templateEditorOpen} onClose={() => setTemplateEditorOpen(false)} documentType="agreement" />
 
