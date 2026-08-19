@@ -7,6 +7,10 @@ import VehicleNavDropdown from './VehicleNavDropdown';
 import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
+import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
+import ExportButtons from '@/components/common/ExportButtons';
+import CsvImportButton from '@/components/common/CsvImportButton';
+import ViewToggle from '@/components/common/ViewToggle';
 import { BarChart3, LayoutGrid, Plus } from 'lucide-react';
 
 export { hasSubNavForPath };
@@ -20,6 +24,8 @@ export default function TopBar() {
 
   const isMaintenancePage = location.pathname === '/maintenance';
   const maintMode = useMaintenanceMode();
+  const isVehiclesPage = location.pathname === '/admin/vehicles';
+  const vehMode = useVehiclesMode();
 
   return (
     <div className="sticky top-0 md:top-20 z-40">
@@ -66,6 +72,46 @@ export default function TopBar() {
                   label={t('add_new')}
                   variant="trip"
                   onClick={() => window.dispatchEvent(new CustomEvent('maintenance:new'))}
+                />
+              </>
+            )}
+            {isVehiclesPage && (
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setVehiclesMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${vehMode.mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setVehiclesMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${vehMode.mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                {vehMode.mode === 'browse' && (
+                  <ViewToggle view={getVehiclesView()} onChange={setVehiclesView} />
+                )}
+                <ExportButtons data={getVehiclesFiltered()} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
+                <CsvImportButton entityName="Vehicle" filename="vehicles" onImported={() => getVehiclesLoad()?.()} columns={[
+                  { key: 'plate_number', label: 'Plate Number', sample: 'AD-1-12345' },
+                  { key: 'make', label: 'Make', sample: 'Mitsubishi' },
+                  { key: 'model', label: 'Model', sample: 'Fuso' },
+                  { key: 'year', label: 'Year', sample: '2022' },
+                  { key: 'type', label: 'Type', sample: 'truck' },
+                  { key: 'status', label: 'Status', sample: 'active' },
+                  { key: 'assigned_driver', label: 'Driver', sample: 'Ahmed Ali' },
+                  { key: 'registration_expiry', label: 'Reg Expiry', sample: '2026-12-31' },
+                  { key: 'insurance_expiry', label: 'Ins Expiry', sample: '2026-12-31' },
+                  { key: 'fuel_type', label: 'Fuel', sample: 'diesel' },
+                ]} transform={(r) => ({
+                  plate_number: r.plate_number || r.Plate || '',
+                  make: r.make || r.Make || '',
+                  model: r.model || r.Model || '',
+                  year: r.year || r.Year ? Number(r.year || r.Year) : undefined,
+                  type: r.type || r.Type || 'truck',
+                  status: r.status || r.Status || 'active',
+                  assigned_driver: r.assigned_driver || r.Driver || '',
+                  registration_expiry: r.registration_expiry || r['Reg Expiry'] || '',
+                  insurance_expiry: r.insurance_expiry || r['Ins Expiry'] || '',
+                  fuel_type: r.fuel_type || r.Fuel || 'diesel',
+                })} />
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('vehicles:new'))}
                 />
               </>
             )}

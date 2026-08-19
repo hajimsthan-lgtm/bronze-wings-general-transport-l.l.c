@@ -9,12 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import ExportButtons from '@/components/common/ExportButtons';
-import CsvImportButton from '@/components/common/CsvImportButton';
 import VehicleCard from '@/components/admin/VehicleCard';
 import VehicleListRow from '@/components/admin/VehicleListRow';
-import ViewToggle from '@/components/common/ViewToggle';
-import ImageUpload from '@/components/common/ImageUpload';
 import TypeCombobox from '@/components/admin/TypeCombobox';
 
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
@@ -23,9 +19,10 @@ import VehicleAddForm from '@/components/admin/VehicleAddForm';
 import { useToast } from '@/components/ui/use-toast';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Plus, Search, Truck, Pencil, Trash2, Sparkles, BarChart3, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Truck, Trash2, Sparkles } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 import MobileFAB from '@/components/mobile/MobileFAB';
+import { useVehiclesMode, setVehiclesMode, setVehiclesView, setVehiclesData } from '@/lib/vehiclesStore';
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -41,8 +38,9 @@ function VehiclesTab() {
   const [search, setSearch] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [view, setView] = useState('list');
-  const [mode, setMode] = useState('analytics');
+  const vehStore = useVehiclesMode();
+  const view = vehStore.view;
+  const mode = vehStore.mode;
   const [trips, setTrips] = useState([]);
   const [fuelRecords, setFuelRecords] = useState([]);
   const [expenses, setExpenses] = useState([]);
@@ -76,57 +74,28 @@ function VehiclesTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Open form from TopBar "Add New" button
+  useEffect(() => {
+    const handler = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('vehicles:new', handler);
+    return () => window.removeEventListener('vehicles:new', handler);
+  }, []);
+
   const filtered = items.filter((v) => !search || v.plate_number?.toLowerCase().includes(search.toLowerCase()) || v.make?.toLowerCase().includes(search.toLowerCase()));
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const fExpenses = expenses.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
 
+  // Publish filtered data + reload to the store so TopBar Export/Import work
+  useEffect(() => { setVehiclesData(filtered, load); }, [filtered, items, trips, fuelRecords, expenses, dateFrom, dateTo]);
+
   return (
     <div>
-      <div data-tour data-tour-title="Header & Controls" data-tour-en="Welcome to the Vehicles portal. Use Analytics for a fleet overview or Browse to manage individual vehicles. Export your fleet to Excel or PDF, and tap Add New to register a vehicle." data-tour-ur="ویہکل پورٹل میں خوش آمدید۔ فلیٹ کے جائزے کے لیے اینالیٹکس استعمال کریں یا انفرادی گاڑیوں کو منتظم کرنے کے لیے براؤز کریں۔ فلیٹ کو ایکسل یا پی ڈی ایف پر برآمد کریں، اور نئی گاڑی داخل کرنے کے لیے نیا اضافہ کریں۔" data-tour-ml="വാഹന പോർട്ടലിലേക്ക് സ്വാഗതം. ഫ്ലീറ്റ് അവലോകനത്തിന് അനലിറ്റിക്സ് ഉപയോഗിക്കുക അല്ലെങ്കിൽ വാഹനങ്ങൾ കൈകാര്യം ചെയ്യാൻ ബ്രൗസ് ചെയ്യുക. എക്സൽ അല്ലെങ്കിൽ PDF ലേക്ക് എക്സ്പോർട്ട് ചെയ്യുക." className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground font-display">Vehicles</h1>
-          <p className="text-sm text-muted-foreground">Fleet management & registration</p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
-          {mode === 'browse' && <ViewToggle view={view} onChange={setView} />}
-          <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Type', key: 'type' }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
-          <CsvImportButton entityName="Vehicle" filename="vehicles" onImported={load} columns={[
-            { key: 'plate_number', label: 'Plate Number', sample: 'AD-1-12345' },
-            { key: 'make', label: 'Make', sample: 'Mitsubishi' },
-            { key: 'model', label: 'Model', sample: 'Fuso' },
-            { key: 'year', label: 'Year', sample: '2022' },
-            { key: 'type', label: 'Type', sample: 'truck' },
-            { key: 'status', label: 'Status', sample: 'active' },
-            { key: 'assigned_driver', label: 'Driver', sample: 'Ahmed Ali' },
-            { key: 'registration_expiry', label: 'Reg Expiry', sample: '2026-12-31' },
-            { key: 'insurance_expiry', label: 'Ins Expiry', sample: '2026-12-31' },
-            { key: 'fuel_type', label: 'Fuel', sample: 'diesel' },
-          ]} transform={(r) => ({
-            plate_number: r.plate_number || r.Plate || '',
-            make: r.make || r.Make || '',
-            model: r.model || r.Model || '',
-            year: r.year || r.Year ? Number(r.year || r.Year) : undefined,
-            type: r.type || r.Type || 'truck',
-            status: r.status || r.Status || 'active',
-            assigned_driver: r.assigned_driver || r.Driver || '',
-            registration_expiry: r.registration_expiry || r['Reg Expiry'] || '',
-            insurance_expiry: r.insurance_expiry || r['Ins Expiry'] || '',
-            fuel_type: r.fuel_type || r.Fuel || 'diesel',
-          })} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10 hidden md:inline-flex"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
-        </div>
-      </div>
-
       <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Vehicle" />
 
       {mode === 'analytics' ? (
         <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
-          <VehiclesAnalytics vehicles={filtered} trips={fTrips} fuelRecords={fFuel} expenses={fExpenses} loading={loading} onBrowseVehicles={() => setMode('browse')} />
+          <VehiclesAnalytics vehicles={filtered} trips={fTrips} fuelRecords={fFuel} expenses={fExpenses} loading={loading} onBrowseVehicles={() => setVehiclesMode('browse')} />
         </div>
       ) : (
         <>
