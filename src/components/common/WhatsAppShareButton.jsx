@@ -1,4 +1,7 @@
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { shareDocWithFile } from '@/lib/docShare';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 
 const DEFAULT_COMPANY = 'Bronze Wings General Transport L.L.C';
@@ -32,7 +35,7 @@ function buildMessage(doc, type, settings) {
       `• Total: AED ${fmtMoney(total)}\n` +
       `• Paid: AED ${fmtMoney(paid)}\n` +
       `• Balance Due: AED ${fmtMoney(balance)}\n\n` +
-      `Kindly review and arrange payment at your earliest convenience. The signed copy is attached.\n\n` +
+      `Kindly review the attached invoice PDF and arrange payment at your earliest convenience.\n\n` +
       `For queries${phone ? ` call ${phone}` : ''}${email ? `${phone ? ' / ' : ''}${email}` : ''}.\n\n` +
       `Best regards,\n${company}`
     );
@@ -46,7 +49,7 @@ function buildMessage(doc, type, settings) {
       `• Valid Until: ${fmtDate(doc.valid_until)}\n` +
       `• Subject: ${doc.subject || '—'}\n` +
       `• Total: AED ${fmtMoney(total)}\n\n` +
-      `We look forward to your favorable response.\n\n` +
+      `Please find the attached quotation PDF. We look forward to your favorable response.\n\n` +
       `For queries${phone ? ` call ${phone}` : ''}${email ? `${phone ? ' / ' : ''}${email}` : ''}.\n\n` +
       `Best regards,\n${company}`
     );
@@ -61,7 +64,7 @@ function buildMessage(doc, type, settings) {
     `• Start: ${fmtDate(doc.start_date)}\n` +
     `• End: ${fmtDate(doc.end_date)}\n` +
     `• Value: AED ${fmtMoney(amount)}\n\n` +
-    `Kindly review and return a signed copy.\n\n` +
+    `Please find the attached agreement PDF. Kindly review and return a signed copy.\n\n` +
     `For queries${phone ? ` call ${phone}` : ''}${email ? `${phone ? ' / ' : ''}${email}` : ''}.\n\n` +
     `Best regards,\n${company}`
   );
@@ -75,27 +78,44 @@ export default function WhatsAppShareButton({
   className = '',
   title = 'Share via WhatsApp',
 }) {
+  const [busy, setBusy] = useState(false);
   if (!doc) return null;
   const phone = doc.client_phone || settings?.phone1 || '';
   const message = buildMessage(doc, type, settings);
-  const url = whatsappUrl(phone, message);
 
   const triggerClass =
     variant === 'card'
       ? 'inline-flex items-center justify-center h-8 w-8 rounded-md border border-border/50 bg-background text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0'
       : `w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex-shrink-0 ${className}`;
 
+  const handleClick = async (e) => {
+    e.stopPropagation();
+    if (busy) return;
+    setBusy(true);
+    try {
+      const shared = await shareDocWithFile(doc, type, settings, {
+        text: message,
+        title: `${type.charAt(0).toUpperCase() + type.slice(1)} ${doc.invoice_number || doc.quotation_number || doc.agreement_number || ''}`,
+      });
+      // If the native share sheet was not available, open WhatsApp with the
+      // message text (the PDF was already downloaded for manual attachment).
+      if (!shared) {
+        window.open(whatsappUrl(phone, message), '_blank', 'noopener,noreferrer');
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <button
       type="button"
       title={title}
       className={triggerClass}
-      onClick={(e) => {
-        e.stopPropagation();
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }}
+      onClick={handleClick}
+      disabled={busy}
     >
-      <WhatsAppIcon size={variant === 'card' ? 14 : 16} />
+      {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <WhatsAppIcon size={variant === 'card' ? 14 : 16} />}
     </button>
   );
 }

@@ -1,4 +1,5 @@
-import { Mailbox } from 'lucide-react';
+import { useState } from 'react';
+import { Mailbox, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -8,6 +9,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import GmailIcon from '@/components/icons/GmailIcon';
+import { shareDocWithFile, downloadDocFile } from '@/lib/docShare';
 
 const DEFAULT_COMPANY = 'Bronze Wings General Transport L.L.C';
 
@@ -43,7 +45,7 @@ export function buildEmailLink(doc, type, settings) {
     subject = `Invoice ${doc.invoice_number || ''} – ${company}`;
     body =
       `Dear ${client},\n\n` +
-      `Please find below the details of Invoice ${doc.invoice_number || '—'} issued by ${company}.\n\n` +
+      `Please find attached Invoice ${doc.invoice_number || '—'} issued by ${company}.\n\n` +
       `Invoice Details:\n` +
       `- Invoice No: ${doc.invoice_number || '—'}\n` +
       `- Issue Date: ${fmtDate(doc.issue_date)}\n` +
@@ -51,8 +53,7 @@ export function buildEmailLink(doc, type, settings) {
       `- Total Amount: AED ${fmtMoney(total)}\n` +
       `- Amount Paid: AED ${fmtMoney(paid)}\n` +
       `- Balance Due: AED ${fmtMoney(balance)}\n\n` +
-      `Kindly review the invoice and arrange the payment at your earliest convenience. ` +
-      `The signed copy is attached for your records.\n\n` +
+      `Kindly review the attached invoice PDF and arrange the payment at your earliest convenience.\n\n` +
       `Should you have any questions, feel free to contact us${phone ? ` at ${phone}` : ''}${email ? ` or ${email}` : ''}.\n\n` +
       `Best regards,\n${company}`;
   } else if (type === 'quotation') {
@@ -60,7 +61,7 @@ export function buildEmailLink(doc, type, settings) {
     subject = `Quotation ${doc.quotation_number || ''} – ${company}`;
     body =
       `Dear ${client},\n\n` +
-      `Thank you for your interest. Please find below the details of Quotation ${doc.quotation_number || '—'} prepared by ${company}.\n\n` +
+      `Thank you for your interest. Please find attached Quotation ${doc.quotation_number || '—'} prepared by ${company}.\n\n` +
       `Quotation Details:\n` +
       `- Quotation No: ${doc.quotation_number || '—'}\n` +
       `- Date: ${fmtDate(doc.issue_date)}\n` +
@@ -76,7 +77,7 @@ export function buildEmailLink(doc, type, settings) {
     subject = `Agreement ${doc.agreement_number || ''} – ${company}`;
     body =
       `Dear ${client},\n\n` +
-      `Please find below the details of Agreement ${doc.agreement_number || '—'} from ${company}.\n\n` +
+      `Please find attached Agreement ${doc.agreement_number || '—'} from ${company}.\n\n` +
       `Agreement Details:\n` +
       `- Agreement No: ${doc.agreement_number || '—'}\n` +
       `- Title: ${doc.title || '—'}\n` +
@@ -84,7 +85,7 @@ export function buildEmailLink(doc, type, settings) {
       `- Start Date: ${fmtDate(doc.start_date)}\n` +
       `- End Date: ${fmtDate(doc.end_date)}\n` +
       `- Contract Value: AED ${fmtMoney(amount)}\n\n` +
-      `Kindly review the agreement and return a signed copy at your earliest convenience.\n\n` +
+      `Kindly review the attached agreement PDF and return a signed copy at your earliest convenience.\n\n` +
       `For any clarification, please contact us${phone ? ` at ${phone}` : ''}${email ? ` or ${email}` : ''}.\n\n` +
       `Best regards,\n${company}`;
   }
@@ -104,16 +105,41 @@ export default function EmailShareButton({
   className = '',
   title = 'Share via Email',
 }) {
+  const [busy, setBusy] = useState(false);
   if (!doc) return null;
   const parts = buildEmailLink(doc, type, settings);
 
-  const openMailApp = (e) => {
+  const openMailApp = async (e) => {
     e.stopPropagation();
-    window.location.href = parts.mailto;
+    if (busy) return;
+    setBusy(true);
+    try {
+      // Try the native share sheet (attaches the PDF) first; fall back to
+      // downloading the PDF + opening the mail app with a pre-filled message.
+      const shared = await shareDocWithFile(doc, type, settings, {
+        text: parts.body,
+        title: parts.subject,
+      });
+      if (!shared) {
+        window.location.href = parts.mailto;
+      }
+    } finally {
+      setBusy(false);
+    }
   };
-  const openGmail = (e) => {
+
+  const openGmail = async (e) => {
     e.stopPropagation();
-    window.open(buildGmailLink(parts), '_blank', 'noopener,noreferrer');
+    if (busy) return;
+    setBusy(true);
+    try {
+      // Gmail Web cannot accept a local file via URL, so download the PDF
+      // for manual attachment, then open the compose window pre-filled.
+      await downloadDocFile(doc, type, settings);
+      window.open(buildGmailLink(parts), '_blank', 'noopener,noreferrer');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const triggerClass =
@@ -124,8 +150,8 @@ export default function EmailShareButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" title={title} className={triggerClass} onClick={(e) => e.stopPropagation()}>
-          <GmailIcon size={variant === 'card' ? 14 : 16} />
+        <button type="button" title={title} className={triggerClass} onClick={(e) => e.stopPropagation()} disabled={busy}>
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <GmailIcon size={variant === 'card' ? 14 : 16} />}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
@@ -133,7 +159,7 @@ export default function EmailShareButton({
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={openMailApp} className="cursor-pointer">
           <Mailbox className="w-4 h-4" />
-          <span>Mail App</span>
+          <span>Mail App (with PDF)</span>
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={openGmail} className="cursor-pointer">
           <GmailIcon size={16} />

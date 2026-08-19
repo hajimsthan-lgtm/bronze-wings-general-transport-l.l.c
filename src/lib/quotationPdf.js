@@ -349,7 +349,7 @@ function drawTermsAndSignatures(pdf, q, s, y) {
   }
 }
 
-export async function downloadQuotationPDF(quotation, settings = {}) {
+export async function buildQuotationPdf(quotation, settings = {}) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   const s = await prepareSettings(settings);
 
@@ -382,5 +382,10 @@ export async function downloadQuotationPDF(quotation, settings = {}) {
   drawTermsAndSignatures(pdf, quotation, s, y);
 
   drawPageNumbers(pdf);
+  return pdf;
+}
+
+export async function downloadQuotationPDF(quotation, settings = {}) {
+  const pdf = await buildQuotationPdf(quotation, settings);
   pdf.save(`quotation-${quotation.quotation_number || quotation.id || 'draft'}.pdf`);
 }

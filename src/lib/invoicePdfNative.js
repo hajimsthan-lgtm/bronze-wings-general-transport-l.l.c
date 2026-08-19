@@ -1051,7 +1051,7 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
 // ═══════════════════════════════════════════════════════════
 // MAIN: RENDER INVOICE PDF
 // ═══════════════════════════════════════════════════════════
-export async function renderInvoicePDF(invoice, clientName, settings, invoiceType = 'monthly', seqNo, draft = false) {
+export async function buildInvoicePdf(invoice, clientName, settings, invoiceType = 'monthly', seqNo, draft = false) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
   // Fetch logo as data URL for embedding
@@ -1121,6 +1121,10 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
     pdf.text(`Page No ${i} of ${pageCount}`, CONTENT_RIGHT, 282, { align: 'right' });
   }
 
-  // Save
+  return pdf;
+}
+
+export async function renderInvoicePDF(invoice, clientName, settings, invoiceType = 'monthly', seqNo, draft = false) {
+  const pdf = await buildInvoicePdf(invoice, clientName, settings, invoiceType, seqNo, draft);
   pdf.save(`invoice-${invoice.invoice_number || invoice.id}.pdf`);
 }

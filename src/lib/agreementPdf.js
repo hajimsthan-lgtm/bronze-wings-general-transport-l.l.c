@@ -353,7 +353,7 @@ function drawSignatures(pdf, a, y) {
   }
 }
 
-export async function downloadAgreementPDF(agreement, settings = {}) {
+export async function buildAgreementPdf(agreement, settings = {}) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   const s = await prepareSettings(settings);
 
@@ -368,5 +368,10 @@ export async function downloadAgreementPDF(agreement, settings = {}) {
   drawSignatures(pdf, agreement, y);
 
   drawPageNumbers(pdf);
+  return pdf;
+}
+
+export async function downloadAgreementPDF(agreement, settings = {}) {
+  const pdf = await buildAgreementPdf(agreement, settings);
   pdf.save(`agreement-${agreement.agreement_number || agreement.id || 'draft'}.pdf`);
 }
