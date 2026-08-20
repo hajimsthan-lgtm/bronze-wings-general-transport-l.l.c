@@ -245,10 +245,10 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
               <div className="rounded-xl border border-border overflow-hidden">
                 {/* Table header */}
                 <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                  <div className="col-span-5">Title</div>
+                  <div className="col-span-4">Title</div>
                   <div className="col-span-2">Type</div>
                   <div className="col-span-2">Expiry</div>
-                  <div className="col-span-2">Status</div>
+                  <div className="col-span-3">Status</div>
                   <div className="col-span-1 text-right">Actions</div>
                 </div>
                 {/* Rows */}
@@ -262,7 +262,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                         className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors"
                       >
                         {/* Title + status dot */}
-                        <div className="col-span-5 flex items-center gap-2 text-foreground font-medium truncate min-w-0">
+                        <div className="col-span-4 flex items-center gap-2 text-foreground font-medium truncate min-w-0">
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ background: `hsl(var(--${DOC_STATUS_VAR[st]}))` }}
@@ -285,7 +285,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                           )}
                         </div>
                         <div
-                          className="col-span-2 text-[11px] font-semibold uppercase"
+                          className="col-span-3 text-[11px] font-semibold uppercase truncate"
                           style={{ color: `hsl(var(--${DOC_STATUS_VAR[st]}))` }}
                         >
                           {st.replace('_', ' ')}
