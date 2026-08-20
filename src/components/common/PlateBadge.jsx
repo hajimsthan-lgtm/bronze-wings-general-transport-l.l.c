@@ -12,12 +12,24 @@ function parsePlateCategory(plate) {
 }
 
 /**
+ * Extracts the plate number (without category prefix) from a UAE plate string.
+ * "1/ 99588" or "2/97372" → the part after "/".
+ */
+function parsePlateNumber(plate) {
+  if (!plate) return '';
+  const idx = plate.indexOf('/');
+  if (idx === -1) return plate;
+  return plate.slice(idx + 1).trim();
+}
+
+/**
  * UAE Abu Dhabi commercial license plate: cyan/teal emirate header + white plate body.
  * Top band: category label (left) + category code (center) + emirate label (right).
  * Bottom body: the plate number only, large and bold.
  */
 export default function PlateBadge({ plate, holder, compact = false, className = '' }) {
   const categoryCode = parsePlateCategory(plate);
+  const plateNumber = parsePlateNumber(plate);
   return (
     <div
       className={cn(
@@ -53,7 +65,7 @@ export default function PlateBadge({ plate, holder, compact = false, className =
           className="font-extrabold tracking-wider text-black leading-none"
           style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: compact ? 14 : 26 }}
         >
-          {plate || '—'}
+          {plateNumber || plate || '—'}
         </span>
         {!compact && holder && (
           <span className="text-[8px] text-neutral-500 mt-0.5 truncate max-w-full">{holder}</span>
