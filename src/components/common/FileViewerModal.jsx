@@ -32,51 +32,48 @@ export default function FileViewerModal({ file, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[300] flex items-center justify-center p-2 sm:p-4"
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md animate-fade-in" />
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-lg animate-fade-in" />
 
-      {/* Modal */}
+      {/* Frameless stage — no card border, content floats edge-to-edge */}
       <div
-        className="relative glass-card rounded-2xl w-full max-w-4xl h-[85vh] flex flex-col overflow-hidden animate-fade-in-up"
+        className="relative w-full max-w-5xl h-[92vh] flex flex-col animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-muted/30">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-sm font-semibold text-foreground truncate">{file.title || 'Document'}</span>
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <a
-              href={file.url}
-              target="_blank"
-              rel="noreferrer"
-              title="Open in new tab"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
-            <button
-              onClick={download}
-              title="Download"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
-            >
-              <Download className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onClose}
-              title="Close"
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Floating top toolbar — pill, no frame attached */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 px-2 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <span className="text-xs font-medium text-white/90 px-2 truncate max-w-[40vw]">{file.title || 'Document'}</span>
+          <div className="w-px h-4 bg-white/10" />
+          <a
+            href={file.url}
+            target="_blank"
+            rel="noreferrer"
+            title="Open in new tab"
+            className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+          <button
+            onClick={download}
+            title="Download"
+            className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={onClose}
+            title="Close"
+            className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white/60 hover:text-white hover:bg-red-500/30 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto bg-background/40">
+        {/* Content — edge-to-edge, no frame */}
+        <div className="flex-1 overflow-auto rounded-2xl bg-black/30">
           {isImage ? (
             <div className="flex items-center justify-center min-h-full p-4">
               <img
@@ -89,11 +86,11 @@ export default function FileViewerModal({ file, onClose }) {
             <iframe
               src={file.url}
               title={file.title || 'Document'}
-              className="w-full h-full border-0"
+              className="w-full h-full border-0 rounded-2xl"
             />
           ) : (
             <div className="flex flex-col items-center justify-center min-h-full gap-3 p-8 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white/60">
                 This file type cannot be previewed inline.
               </p>
               <div className="flex gap-2">
@@ -108,7 +105,7 @@ export default function FileViewerModal({ file, onClose }) {
                 </a>
                 <button
                   onClick={download}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-foreground text-sm font-medium hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 border border-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   Download
