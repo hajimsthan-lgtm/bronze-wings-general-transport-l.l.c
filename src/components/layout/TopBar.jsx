@@ -54,20 +54,15 @@ export default function TopBar() {
               aria-label="Go back"
               title="Go back"
               className={cn(
-                'group relative hidden md:flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-all duration-300',
-                isHome ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
+                'group relative hidden md:flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-all duration-300 border border-transparent',
+                isHome ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105 active:scale-95 hover:border-[rgba(var(--panel-accent-rgb),0.45)]'
               )}
               style={{
-                background: isHome
-                  ? 'hsl(var(--muted))'
-                  : 'linear-gradient(145deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))',
-                border: `1px solid ${isHome ? 'hsl(var(--border))' : 'rgba(var(--panel-accent-rgb),0.45)'}`,
-                boxShadow: isHome
-                  ? 'none'
-                  : 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -4px rgba(var(--panel-accent-rgb),0.5), 0 2px 8px rgba(0,0,0,0.3)',
+                background: 'transparent',
+                boxShadow: 'none',
               }}
             >
-              <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))' }} />
+              <ArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))', filter: isHome ? 'none' : 'drop-shadow(0 0 5px rgba(var(--panel-accent-rgb),0.7))' }} />
             </button>
             <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1" />
           </div>
