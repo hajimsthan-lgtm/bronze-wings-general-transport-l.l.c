@@ -95,7 +95,16 @@ function VehiclesTab() {
     return () => window.removeEventListener('vehicles:new', handler);
   }, []);
 
-  const filtered = items.filter((v) => !search || v.plate_number?.toLowerCase().includes(search.toLowerCase()) || v.make?.toLowerCase().includes(search.toLowerCase()));
+  const q = search.toLowerCase().trim();
+  const filtered = items.filter((v) => !q ||
+    v.plate_number?.toLowerCase().includes(q) ||
+    v.make?.toLowerCase().includes(q) ||
+    v.model?.toLowerCase().includes(q) ||
+    v.assigned_driver?.toLowerCase().includes(q) ||
+    v.vendor_name?.toLowerCase().includes(q) ||
+    v.type?.toLowerCase().includes(q) ||
+    v.notes?.toLowerCase().includes(q)
+  );
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const fExpenses = expenses.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
