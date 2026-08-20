@@ -2,22 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import DriversAnalytics from '@/components/admin/DriversAnalytics';
 import DriverCard from '@/components/admin/DriverCard';
 import DriverListRow from '@/components/admin/DriverListRow';
+import DriverAddForm from '@/components/admin/DriverAddForm';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import ImageUpload from '@/components/common/ImageUpload';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
-import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { useDriversMode, setDriversMode, setDriversData, getDriversView } from '@/lib/driversStore';
 
 export default function Drivers() {
@@ -92,62 +88,10 @@ function DriversTab() {
         </>
       )}
 
-      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Users} title={`${editItem ? t('edit') : t('add_new')} Driver`} subtitle="Register a new driver">
-          <DriverForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Driver.update(editItem.id, data); else await base44.entities.Driver.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Users} title={`${editItem ? t('edit') : t('add_new')} Driver`} subtitle="Scan license or enter details manually">
+          <DriverAddForm editItem={editItem} onSave={async (data) => { if (editItem) await base44.entities.Driver.update(editItem.id, data); else await base44.entities.Driver.create(data); load(); setFormOpen(false); }} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setFormOpen(true); }} label="Add Driver" />
-    </div>
-  );
-}
-
-function DriverForm({ editItem, onSave, onCancel }) {
-  const { t } = useI18n();
-  const [saving, setSaving] = useState(false);
-  const [dupInfo, setDupInfo] = useState(null);
-  const [form, setForm] = useState({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
-  useEffect(() => {
-    if (editItem) { setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' }); }
-    else setForm({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
-  }, [editItem]);
-  const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
-
-  const doSave = async () => { setSaving(true); await onSave({ ...form, base_salary: Number(form.base_salary) || 0 }); setSaving(false); };
-  const handle = async () => {
-    if (!editItem && form.name) {
-      try {
-        const existing = await base44.entities.Driver.list('-created_date', 200);
-        const match = (existing || []).find((d) => d.name?.toLowerCase().trim() === form.name.toLowerCase().trim());
-        if (match) { setDupInfo({ matchLabel: form.name, pendingSave: doSave }); return; }
-      } catch { /* ignore */ }
-    }
-    doSave();
-  };
-
-  return (
-    <div className="space-y-4">
-      <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Driver Photo" shape="circle" />
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Name</Label><Input value={form.name} onChange={(e) => update('name', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={(e) => update('phone', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={(e) => update('email', e.target.value)} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">License #</Label><Input value={form.license_number} onChange={(e) => update('license_number', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">License Expiry</Label><Input type="date" value={form.license_expiry} onChange={(e) => update('license_expiry', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['active', 'inactive', 'on_leave'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Salary</Label><Input type="number" value={form.base_salary} onChange={(e) => update('base_salary', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input value={form.assigned_vehicle} onChange={(e) => update('assigned_vehicle', e.target.value)} className="bg-background border-border" /></div>
-      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
-      <DuplicateConfirmDialog
-        open={!!dupInfo}
-        entityType="driver"
-        matchLabel={dupInfo?.matchLabel || ''}
-        onContinue={() => { const fn = dupInfo?.pendingSave; setDupInfo(null); if (fn) fn(); }}
-        onCancel={() => setDupInfo(null)}
-      />
     </div>
   );
 }

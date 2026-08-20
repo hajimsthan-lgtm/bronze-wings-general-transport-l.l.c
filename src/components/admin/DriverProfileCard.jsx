@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Phone, Mail, BadgeCheck, ChevronDown, Wallet, ShieldCheck, Globe2, TrendingUp, FileText, Car, Pencil } from 'lucide-react';
-import DriverEditDialog from '@/components/admin/DriverEditDialog';
+import DriverEditModal from '@/components/admin/DriverEditModal';
 import IconChip from '@/components/common/IconChip';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
@@ -189,7 +189,7 @@ export default function DriverProfileCard({ driver, vehicle, stats, onSave }) {
         </div>
       </div>
 
-      <DriverEditDialog open={editOpen} onOpenChange={setEditOpen} driver={driver} onSave={onSave} />
+      <DriverEditModal open={editOpen} onOpenChange={setEditOpen} driver={driver} onSaved={onSave} />
     </div>
   );
 }

@@ -23,7 +23,7 @@ import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
-import ClientForm from '@/components/admin/ClientForm';
+import ClientAddForm from '@/components/admin/ClientAddForm';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 import ClientTripsList from '@/components/clients/ClientTripsList';
@@ -403,8 +403,8 @@ export default function ClientDetail({ id: propId, inline = false }) {
       <InvoiceFormSheet open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} editInvoice={editInvoice} defaultClientName={client.name} onSaved={reloadInvoices} />
       <PaymentFormSheet open={paymentFormOpen} onOpenChange={setPaymentFormOpen} editItem={editPayment} lockedClientName={client.name} onSaved={() => { reloadPayments(); reloadInvoices(); }} />
       <ContactPersonEditSheet open={editContactOpen} onOpenChange={(open) => { setEditContactOpen(open); if (!open) setEditContactIndex(null); }} contact={editingContact} onSave={saveContact} onDelete={deleteContact} />
-      <EntityFormDialog open={clientFormOpen} onOpenChange={setClientFormOpen} icon={Building2} title="Edit Client" subtitle="Edit client details and contacts">
-        <ClientForm editItem={client} onSave={async (data) => { await base44.entities.Client.update(client.id, data); setClient(prev => ({ ...prev, ...data })); setClientFormOpen(false); }} onCancel={() => setClientFormOpen(false)} />
+      <EntityFormDialog open={clientFormOpen} onOpenChange={setClientFormOpen} icon={Building2} title="Edit Client" subtitle="Scan trade license or enter details manually">
+        <ClientAddForm editItem={client} onSave={async (data) => { await base44.entities.Client.update(client.id, data); setClient(prev => ({ ...prev, ...data })); setClientFormOpen(false); }} onCancel={() => setClientFormOpen(false)} />
       </EntityFormDialog>
     </div>
   );

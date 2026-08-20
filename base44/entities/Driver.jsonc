@@ -106,6 +106,15 @@
     "overtime_weekend_multiplier": {
       "type": "number",
       "default": 1.5
+    },
+    "license_url": {
+      "type": "string"
+    },
+    "visa_url": {
+      "type": "string"
+    },
+    "emirates_id_url": {
+      "type": "string"
     }
   },
   "required": [
