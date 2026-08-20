@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Building2, UserPlus, Users } from 'lucide-react';
+import { Building2, UserPlus, Users, Plus, Trash2 } from 'lucide-react';
 import ImageUpload from '@/components/common/ImageUpload';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 
@@ -18,15 +18,17 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
   const [selectedExistingId, setSelectedExistingId] = useState('');
   const [form, setForm] = useState({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', department: '', position: '' });
+  const [contactPersons, setContactPersons] = useState([]);
 
   useEffect(() => { base44.entities.Client.list('-created_date', 200).then(setExistingClients).catch(() => {}); }, []);
 
   useEffect(() => {
-    if (editItem) { setForm({ ...editItem }); setSelectedExistingId(''); }
+    if (editItem) { setForm({ ...editItem }); setContactPersons(editItem.contact_persons || []); setSelectedExistingId(''); }
     else {
       setForm({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
       setSelectedExistingId('');
       setNewContact({ name: '', email: '', phone: '', department: '', position: '' });
+      setContactPersons([]);
     }
   }, [editItem]);
 
@@ -44,7 +46,10 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
         await onSave(updated, selectedExisting.id);
       } else {
         const data = { ...form };
-        if (!editItem && form.contact_person) {
+        const validPersons = contactPersons.filter(cp => cp.name?.trim());
+        if (validPersons.length > 0) {
+          data.contact_persons = validPersons;
+        } else if (!editItem && form.contact_person) {
           data.contact_persons = [{ name: form.contact_person, email: form.email, phone: form.phone, department: '', position: '' }];
         }
         await onSave(data);
@@ -149,19 +154,34 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={e => update('trn', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent></Select></div>
       </div>
-      {editItem?.contact_persons?.length > 0 && (
-        <div className="border-t border-border/50 pt-4">
-          <div className="flex items-center gap-2 mb-2"><Users className="w-3.5 h-3.5 text-primary" /><p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Contact Persons ({editItem.contact_persons.length})</p></div>
-          <div className="space-y-1.5">
-            {editItem.contact_persons.map((cp, i) => (
-              <div key={i} className="glass-card p-2 flex items-center justify-between">
-                <div><p className="text-xs font-medium text-foreground">{cp.name}</p>{cp.position && <p className="text-[10px] text-sky-300">{cp.position}</p>}{cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}</div>
-                <p className="text-[10px] text-muted-foreground">{cp.email || cp.phone || '—'}</p>
-              </div>
-            ))}
+      {/* Multi Contact Persons Management */}
+      <div className="border-t border-border/50 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Users className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Contact Persons</p>
           </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setContactPersons(prev => [...prev, { name: '', position: '', email: '', phone: '', department: '' }])} className="h-7 text-xs border-border">
+            <Plus className="w-3 h-3 mr-1" /> Add Contact
+          </Button>
         </div>
-      )}
+        <div className="space-y-2">
+          {contactPersons.map((cp, i) => (
+            <div key={i} className="glass-card p-3 space-y-2 relative">
+              <button type="button" onClick={() => setContactPersons(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-red-400 p-1">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+              <div className="grid grid-cols-2 gap-2 pr-6">
+                <div><Label className="text-[10px] text-muted-foreground mb-1">Name</Label><Input value={cp.name} onChange={e => setContactPersons(prev => prev.map((p, idx) => idx === i ? { ...p, name: e.target.value } : p))} className="bg-background border-border h-8 text-xs" /></div>
+                <div><Label className="text-[10px] text-muted-foreground mb-1">Position</Label><Input value={cp.position} onChange={e => setContactPersons(prev => prev.map((p, idx) => idx === i ? { ...p, position: e.target.value } : p))} placeholder="e.g. Manager" className="bg-background border-border h-8 text-xs" /></div>
+                <div><Label className="text-[10px] text-muted-foreground mb-1">Email</Label><Input value={cp.email} onChange={e => setContactPersons(prev => prev.map((p, idx) => idx === i ? { ...p, email: e.target.value } : p))} className="bg-background border-border h-8 text-xs" /></div>
+                <div><Label className="text-[10px] text-muted-foreground mb-1">Phone</Label><Input value={cp.phone} onChange={e => setContactPersons(prev => prev.map((p, idx) => idx === i ? { ...p, phone: e.target.value } : p))} className="bg-background border-border h-8 text-xs" /></div>
+              </div>
+            </div>
+          ))}
+          {contactPersons.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">No contact persons added yet. Click "Add Contact" to add one.</p>}
+        </div>
+      </div>
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving || (!editItem && !form.name)} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
       <DuplicateConfirmDialog
         open={!!dupInfo}

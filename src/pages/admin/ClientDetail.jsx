@@ -22,6 +22,8 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { setTripInvoiceSent } from '@/lib/tripInvoice';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ContactPersonEditSheet from '@/components/admin/ContactPersonEditSheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
+import ClientForm from '@/components/admin/ClientForm';
 import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
 import ClientProfileCard from '@/components/admin/ClientProfileCard';
 import ClientTripsList from '@/components/clients/ClientTripsList';
@@ -46,6 +48,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
   const [contactFilter, setContactFilter] = useState(null);
   const [editContactIndex, setEditContactIndex] = useState(null);
   const [editContactOpen, setEditContactOpen] = useState(false);
+  const [clientFormOpen, setClientFormOpen] = useState(false);
   const [payments, setPayments] = useState([]);
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
   const [editInvoice, setEditInvoice] = useState(null);
@@ -228,7 +231,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
         <div data-tour data-tour-title="Client Profile" data-tour-en="Client Profile — A snapshot of this client: contact details, TRN, payment terms, and quick counts of trips, invoices, outstanding balances, and payments. Use it to assess the relationship at a glance before diving into any tab." data-tour-ur="کلائنٹ پروفائل — اس کلائنٹ کا خلاصہ: رابطہ تفصیلات، TRN، ادائیگی کی شرائط، اور ٹرپس، انوائسز، باقی بقایاجات، اور ادائیگیوں کے فوری حسابات۔ کسی بھی ٹیب میں جانے سے پہلے تعلق کا جائزہ لینے کے لیے استعمال کریں۔" data-tour-ml="ക്ലയന്റ് പ്രൊഫൈൽ — ഈ ക്ലയന്റിന്റെ ചുരുക്കം: കോൺടാക്റ്റ് വിവരങ്ങൾ, TRN, പേയ്മെന്റ് നിബന്ധനകൾ, യാത്രകൾ, ഇൻവോയ്സുകൾ, ബാക്കികൾ, പേയ്മെന്റുകൾ എന്നിവയുടെ എണ്ണം. ഒരു ടാബിലേക്ക് പ്രവേശിക്കുന്നതിന് മുമ്പ് ബന്ധം ഒറ്റനോട്ടത്തിൽ മനസ്സിലാക്കാൻ ഉപയോഗിക്കുക.">
-          <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} onEditContacts={() => { setEditContactIndex(null); setEditContactOpen(true); }} />
+          <ClientProfileCard client={client} stats={{ trips: displayTrips.length, invoices: displayInvoices.length, outstanding: outstandingInvoices.length, paid: filteredPayments.length }} onEditContacts={() => setClientFormOpen(true)} />
         </div>
         <div className="space-y-4">
           {/* Invoices */}
@@ -400,6 +403,9 @@ export default function ClientDetail({ id: propId, inline = false }) {
       <InvoiceFormSheet open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} editInvoice={editInvoice} defaultClientName={client.name} onSaved={reloadInvoices} />
       <PaymentFormSheet open={paymentFormOpen} onOpenChange={setPaymentFormOpen} editItem={editPayment} lockedClientName={client.name} onSaved={() => { reloadPayments(); reloadInvoices(); }} />
       <ContactPersonEditSheet open={editContactOpen} onOpenChange={(open) => { setEditContactOpen(open); if (!open) setEditContactIndex(null); }} contact={editingContact} onSave={saveContact} onDelete={deleteContact} />
+      <EntityFormDialog open={clientFormOpen} onOpenChange={setClientFormOpen} icon={Building2} title="Edit Client" subtitle="Edit client details and contacts">
+        <ClientForm editItem={client} onSave={async (data) => { await base44.entities.Client.update(client.id, data); setClient(prev => ({ ...prev, ...data })); setClientFormOpen(false); }} onCancel={() => setClientFormOpen(false)} />
+      </EntityFormDialog>
     </div>
   );
 }
