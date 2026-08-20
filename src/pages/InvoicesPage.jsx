@@ -530,8 +530,8 @@ export default function InvoicesPage() {
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight hidden">Invoices</h1>
-        <p className="text-sm text-muted-foreground mt-0.5 hidden">Manage and track all your invoices</p>
+        
+        
       </div>
 
       {/* Stat cards */}
