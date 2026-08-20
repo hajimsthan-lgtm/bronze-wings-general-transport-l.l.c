@@ -79,7 +79,7 @@ export default function MaintenanceAnalytics({ records = [], loading, onBrowse }
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Records" value={records.length} icon={Wrench} color="#1ED760" onClick={onBrowse} />
+        <ReportStatCard index={1} label="Total Records" value={records.length} icon={Wrench} color="#3b82f6" onClick={onBrowse} />
         <ReportStatCard index={2} label="Total Cost" value={totalCost} format={formatCurrency} icon={Wallet} color="#ef4444" onClick={onBrowse} />
         <ReportStatCard index={3} label="Scheduled" value={scheduled} icon={CalendarClock} color="#1ED760" onClick={onBrowse} />
         <ReportStatCard index={4} label="In Progress" value={inProgress} icon={Clock} color="#f59e0b" onClick={onBrowse} />

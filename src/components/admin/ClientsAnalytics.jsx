@@ -1,5 +1,6 @@
 import { Users, Building2, TrendingUp, FileText, Plus } from 'lucide-react';
 import ReportStatCard from '@/components/reports/ReportStatCard';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import ProgressBar from '@/components/reports/ProgressBar';
 import TrendChart from '@/components/reports/TrendChart';
@@ -63,15 +64,21 @@ export default function ClientsAnalytics({ clients = [], trips = [], invoices = 
         <ReportSectionCard index={5} color="#ef4444" title="Outstanding Invoices">
           {outstandingInvs.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No outstanding invoices.</p> : (
             <div className="space-y-1">
-              {outstandingInvs.slice(0, 6).map((inv) => (
-                <div key={inv.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04]">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{inv.invoice_number || '—'}</p>
-                    <p className="text-[11px] text-muted-foreground">{inv.client_name} · {formatDate(inv.issue_date)}</p>
+              {outstandingInvs.slice(0, 6).map((inv) => {
+                const tone = '#ef4444';
+                return (
+                  <div key={inv.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04]">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
+                      <FileText className="w-4 h-4" style={{ color: tone }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{inv.invoice_number || '—'}</p>
+                      <p className="text-[11px] text-muted-foreground">{inv.client_name} · {formatDate(inv.issue_date)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-rose-300 tabular-nums">{formatCurrency(inv.balance)}</span>
                   </div>
-                  <span className="text-sm font-semibold text-rose-300 tabular-nums">{formatCurrency(inv.balance)}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ReportSectionCard>

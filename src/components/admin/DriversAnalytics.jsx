@@ -1,4 +1,4 @@
-import { Users, UserCheck, CalendarClock, TrendingUp, ArrowRight, Truck, Wallet, Clock } from 'lucide-react';
+import { Users, UserCheck, CalendarClock, TrendingUp, ArrowRight, Truck, Wallet, Clock, IdCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
@@ -8,6 +8,7 @@ import Sparkline from '@/components/reports/Sparkline';
 import DonutChart from '@/components/reports/DonutChart';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
+import { hexToRgba } from '@/components/reports/ReportStatCard';
 
 export default function DriversAnalytics({ drivers = [], trips = [], loading, onBrowseDrivers }) {
   const navigate = useNavigate();
@@ -55,8 +56,12 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
           <div className="space-y-1">
             {expiring.map((d) => {
               const expired = new Date(d.license_expiry) < today;
+              const tone = expired ? '#ef4444' : '#f59e0b';
               return (
                 <div key={d.id} className="flex items-center gap-3 py-2 border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.02] rounded-lg px-1 transition-colors" onClick={() => navigate(`/admin/drivers/${d.id}`)}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
+                    <IdCard className="w-4 h-4" style={{ color: tone }} />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
                     <p className="text-[11px] text-muted-foreground">{d.license_number || '—'}</p>
@@ -70,7 +75,7 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
       </ReportSectionCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#1ED760" onClick={onBrowseDrivers} />
+        <ReportStatCard index={1} label="Total Drivers" value={drivers.length} icon={Users} color="#3b82f6" onClick={onBrowseDrivers} />
         <ReportStatCard index={2} label="Active" value={active} icon={UserCheck} color="#34d399" onClick={onBrowseDrivers} />
         <ReportStatCard index={3} label="On Leave" value={onLeave} icon={CalendarClock} color="#f59e0b" onClick={onBrowseDrivers} />
         <ReportStatCard index={4} label="Total Trips" value={totalTrips} icon={TrendingUp} color="#a855f7" to="/trips" extra={<Sparkline data={tripSeries} type="bar" color="#a855f7" />} />
@@ -99,7 +104,7 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
 
         <ReportSectionCard index={6} color="#34d399" title="Driver Status & Availability">
           <div className="flex items-center gap-5 flex-wrap">
-            <DonutChart data={statusDonut.length ? statusDonut : [{ name: 'None', value: 1, color: '#334155' }]} total={drivers.length} height={160} />
+            <DonutChart data={statusDonut.length ? statusDonut : [{ name: 'None', value: 1, color: '#3b82f6' }]} total={drivers.length} height={160} />
             <div className="space-y-2.5 flex-1 min-w-[140px]">
               {statusDonut.map((d) => (
                 <div key={d.name} className="flex items-center gap-2">

@@ -122,7 +122,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
 
       <ResponsiveStats
         stats={[
-          { label: 'Total Vehicles', value: vehicles.length, icon: Truck, color: '#1ED760', onClick: onBrowseVehicles },
+          { label: 'Total Vehicles', value: vehicles.length, icon: Truck, color: '#3b82f6', onClick: onBrowseVehicles },
           { label: 'Active Fleet', value: active, icon: Truck, color: '#34d399', onClick: onBrowseVehicles },
           { label: 'In Maintenance', value: maintenance, icon: Wrench, color: '#f59e0b', onClick: onBrowseVehicles },
           { label: 'Fuel Efficiency', value: fuelEff, format: (v) => `${v.toFixed(1)} KM/L`, icon: FuelIcon, color: '#f97316', onClick: onBrowseVehicles },
@@ -135,7 +135,7 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ReportSectionCard index={6} color="#1ED760" title="Fleet Status Distribution">
           <div className="flex items-center gap-6 flex-wrap">
-            <DonutChart data={donutData.length ? donutData : [{ name: 'None', value: 1, color: '#334155' }]} total={donutTotal} height={180} />
+            <DonutChart data={donutData.length ? donutData : [{ name: 'None', value: 1, color: '#3b82f6' }]} total={donutTotal} height={180} />
             <div className="space-y-2 flex-1 min-w-[140px]">
               {donutData.length === 0 && <p className="text-xs text-muted-foreground">No vehicles yet.</p>}
               {donutData.map((d) => (
