@@ -4,18 +4,13 @@ import { Pencil, Trash2, ChevronRight, Truck as TruckIcon, Check } from 'lucide-
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import StatusBadge from '@/components/common/StatusBadge';
 import { formatDate } from '@/lib/formatters';
-import { parseLicenseNotes } from '@/lib/vehicleLicenseNotes';
+import { buildVehicleSubtitle } from '@/lib/vehicleLicenseNotes';
 
 export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected = false, onSelect }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
 
-  const lic = parseLicenseNotes(v.notes || '');
-  const subtitle = [
-    [v.make, v.model].filter(Boolean).join(' '),
-    lic.vehicleType,
-    lic.chassisNo
-  ].filter(Boolean).join(' · ') || '—';
+  const subtitle = buildVehicleSubtitle(v);
 
   return (
     <>

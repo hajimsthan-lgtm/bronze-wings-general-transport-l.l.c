@@ -120,6 +120,33 @@ export function vehicleToLicenseForm(vehicle = {}, license = null) {
   };
 }
 
+/**
+ * Build a display subtitle for a vehicle: Model · Vehicle Type · Chassis No.
+ * Skips the make+model part when it's just a 4-digit year (legacy data where
+ * the year was accidentally entered in the Model field).
+ */
+export function buildVehicleSubtitle(vehicle = {}) {
+  const lic = parseLicenseNotes(vehicle.notes || '');
+  const makeModel = [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim();
+  const isYearOnly = /^\d{4}$/.test(makeModel);
+  return [
+    (!isYearOnly && makeModel) || '',
+    lic.vehicleType,
+    lic.chassisNo,
+  ].filter(Boolean).join(' · ') || '—';
+}
+
+/**
+ * Build the primary display name for a vehicle (the model).
+ * Falls back to vehicleType from notes when make+model is just a year.
+ */
+export function buildVehicleDisplayName(vehicle = {}) {
+  const lic = parseLicenseNotes(vehicle.notes || '');
+  const makeModel = [vehicle.make, vehicle.model].filter(Boolean).join(' ').trim();
+  const isYearOnly = /^\d{4}$/.test(makeModel);
+  return (!isYearOnly && makeModel) || lic.vehicleType || makeModel || '—';
+}
+
 /** Map a VehicleLicense-style form object → Vehicle entity fields (with serialized notes). */
 export function licenseFormToVehicle(form) {
   const { make, model } = splitMakeModel(form.model);

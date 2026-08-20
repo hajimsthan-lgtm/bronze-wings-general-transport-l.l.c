@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Truck, MoreVertical, Pencil, Trash2, ExternalLink, FileText, ChevronDown } from 'lucide-react';
 import OwnershipCard from '@/components/common/OwnershipCard';
+import { buildVehicleDisplayName } from '@/lib/vehicleLicenseNotes';
 
 const TYPE_THEMES = {
   truck:   { bg: '#F0FDF4', icon: '#1ED760', glow: 'rgba(30,215,96,0.18)' },
@@ -64,7 +65,7 @@ export default function VehicleCardLight({ v, onOpen, onEdit, onDelete, onOwners
 
         {/* Bottom section — white with title, subtitle, plate */}
         <div className="px-4 pt-3 pb-4 bg-white">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight">{[v.make, v.model].filter(Boolean).join(' ') || 'Unknown'}</h3>
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">{buildVehicleDisplayName(v)}</h3>
           <p className="text-sm text-gray-500 mt-0.5">{v.year || '—'}</p>
           <div className="mt-2.5 flex items-baseline gap-1">
             <span className="text-xl font-bold tracking-tight" style={{ color: PRICE_COLOR }}>{v.plate_number || '—'}</span>

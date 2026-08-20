@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, User, ShieldCheck, Car, Hash, StickyNote, Save } from 'lucide-react';
+import { FileText, User, ShieldCheck, Car, Hash, StickyNote, Save, Upload, FileCheck2, X } from 'lucide-react';
 import VehicleLicenseScanZone from './VehicleLicenseScanZone';
 import { vehicleToLicenseForm, licenseFormToVehicle } from '@/lib/vehicleLicenseNotes';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
@@ -21,6 +21,8 @@ const EMPTY = {
   category: 'Private', notes: '',
   // Vehicle-specific fields
   year: '', assigned_driver: '', fuel_type: 'diesel', status: 'active',
+  // Ownership (Mulkia) PDF — saved as a Document on the vehicle
+  ownershipPdf: null,
 };
 
 function Section({ icon: Icon, title, accent, children }) {
@@ -97,6 +99,28 @@ export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel
             <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
             <SelectContent>{CATEGORY_OPTIONS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
+        </Field>
+        <Field label="Ownership PDF (Mulkia)" span2>
+          <div className="flex items-center gap-2">
+            <label className="inline-flex items-center gap-2 h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-foreground cursor-pointer hover:bg-white/10 transition-colors">
+              {form.ownershipPdf ? <FileCheck2 className="w-3.5 h-3.5 text-primary" /> : <Upload className="w-3.5 h-3.5" />}
+              <span className="truncate max-w-[180px]">{form.ownershipPdf ? form.ownershipPdf.name : 'Choose PDF'}</span>
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={(e) => update('ownershipPdf', e.target.files?.[0] || null)}
+              />
+            </label>
+            {form.ownershipPdf && (
+              <button type="button" onClick={() => update('ownershipPdf', null)} className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-destructive hover:bg-white/5 transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          {form.ownershipPdf && !form.expDate && (
+            <p className="text-[11px] text-amber-400 mt-1">Expiry Date above is required for the Ownership document</p>
+          )}
         </Field>
       </Section>
 

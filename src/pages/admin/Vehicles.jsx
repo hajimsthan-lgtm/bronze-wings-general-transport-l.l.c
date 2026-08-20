@@ -16,6 +16,7 @@ import TypeCombobox from '@/components/admin/TypeCombobox';
 import VehiclesAnalytics from '@/components/admin/VehiclesAnalytics';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import VehicleAddForm from '@/components/admin/VehicleAddForm';
+import { saveOwnershipDocument } from '@/lib/vehicleOwnershipDoc';
 import { useToast } from '@/components/ui/use-toast';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -194,10 +195,16 @@ function VehiclesTab() {
                     await base44.entities.VehicleLicense.create(licenseData);
                   }
                 }
+                if (licenseData?.ownershipPdf) {
+                  await saveOwnershipDocument(editItem.id, { pdfFile: licenseData.ownershipPdf, expiryDate: licenseData.expDate });
+                }
               } else {
                 const created = await base44.entities.Vehicle.create(vehicleData);
                 if (licenseData?.trafficPlateNo) {
                   await base44.entities.VehicleLicense.create(licenseData);
+                }
+                if (licenseData?.ownershipPdf) {
+                  await saveOwnershipDocument(created.id, { pdfFile: licenseData.ownershipPdf, expiryDate: licenseData.expDate });
                 }
                 toast({ title: 'Vehicle added', description: `${vehicleData.make} ${vehicleData.model} · ${vehicleData.plate_number}` });
               }

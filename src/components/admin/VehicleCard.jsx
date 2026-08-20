@@ -8,6 +8,7 @@ import CardChip from '@/components/admin/CardChip';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import VehicleCardLight from './VehicleCardLight';
+import { buildVehicleDisplayName } from '@/lib/vehicleLicenseNotes';
 
 const ACCENT = '#1ED760';
 const STATUS_DOT = { active: '#34d399', maintenance: '#f59e0b', inactive: '#94a3b8' };
@@ -63,7 +64,7 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
       </div>
 
       <PlateBadge plate={v.plate_number} compact className="relative mt-1" />
-      <p className="relative text-sm font-semibold text-foreground truncate mt-1.5">{[v.make, v.model].filter(Boolean).join(' ') || '—'}</p>
+      <p className="relative text-sm font-semibold text-foreground truncate mt-1.5">{buildVehicleDisplayName(v)}</p>
       <p className="relative text-[11px] text-muted-foreground truncate">{v.year || ''}</p>
 
       <div className="relative mt-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">

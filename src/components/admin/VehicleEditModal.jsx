@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import VehicleAddForm from './VehicleAddForm';
+import { saveOwnershipDocument } from '@/lib/vehicleOwnershipDoc';
 import { Truck } from 'lucide-react';
 
 /**
@@ -33,6 +34,9 @@ export default function VehicleEditModal({ open, onOpenChange, vehicle, onSaved 
         } else {
           await base44.entities.VehicleLicense.create(licenseData);
         }
+      }
+      if (licenseData?.ownershipPdf) {
+        await saveOwnershipDocument(vehicle.id, { pdfFile: licenseData.ownershipPdf, expiryDate: licenseData.expDate });
       }
       onOpenChange(false);
       onSaved?.(vehicleData, licenseData);
