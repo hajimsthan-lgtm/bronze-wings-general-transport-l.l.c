@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import ClientsAnalytics from '@/components/admin/ClientsAnalytics';
 import ClientCard from '@/components/admin/ClientCard';
 import ClientListRow from '@/components/admin/ClientListRow';
-import ClientForm from '@/components/admin/ClientForm';
+import ClientAddForm from '@/components/admin/ClientAddForm';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Plus, Search, Building2 } from 'lucide-react';
@@ -84,8 +84,8 @@ export default function ClientsPanel() {
         </>
       }
 
-      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Building2} title={`${editItem ? t('edit') : t('add_new')} Client`} subtitle="Add a new client company">
-          <ClientForm editItem={editItem} onSave={async (data, existingId) => {if (existingId) await base44.entities.Client.update(existingId, data);else if (editItem) await base44.entities.Client.update(editItem.id, data);else await base44.entities.Client.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Building2} title={`${editItem ? t('edit') : t('add_new')} Client`} subtitle="Scan trade license or enter details manually">
+          <ClientAddForm editItem={editItem} onSave={async (data, existingId) => {if (existingId) await base44.entities.Client.update(existingId, data);else if (editItem) await base44.entities.Client.update(editItem.id, data);else await base44.entities.Client.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
       </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => {setEditItem(null);setFormOpen(true);}} label="Add Client" />
     </div>);

@@ -4,31 +4,38 @@ import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Building2, UserPlus, Users, Plus, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building2, UserPlus, Users, Plus, Trash2, StickyNote, Save } from 'lucide-react';
+import DocumentScanZone from './DocumentScanZone';
 import ImageUpload from '@/components/common/ImageUpload';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
+import { uploadAndExtractTradeLicense } from '@/lib/tradeLicenseScan';
 
-export default function ClientForm({ editItem, onSave, onCancel }) {
+const EMPTY = {
+  name: '', image_url: '', contact_person: '', email: '', phone: '',
+  address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '',
+};
+
+export default function ClientAddForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
   const [dupInfo, setDupInfo] = useState(null);
   const [existingClients, setExistingClients] = useState([]);
   const [selectedExistingId, setSelectedExistingId] = useState('');
-  const [form, setForm] = useState({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
+  const [form, setForm] = useState(EMPTY);
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', department: '', position: '' });
   const [contactPersons, setContactPersons] = useState([]);
 
   useEffect(() => { base44.entities.Client.list('-created_date', 200).then(setExistingClients).catch(() => {}); }, []);
 
   useEffect(() => {
-    if (editItem) { setForm({ ...editItem }); setContactPersons(editItem.contact_persons || []); setSelectedExistingId(''); }
+    if (editItem) { setForm({ ...EMPTY, ...editItem }); setContactPersons(editItem.contact_persons || []); setSelectedExistingId(''); }
     else {
-      setForm({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
-      setSelectedExistingId('');
+      setForm(EMPTY);
       setNewContact({ name: '', email: '', phone: '', department: '', position: '' });
       setContactPersons([]);
+      setSelectedExistingId('');
     }
   }, [editItem]);
 
@@ -37,6 +44,26 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
 
   const selectedExisting = existingClients.find(c => c.id === selectedExistingId);
   const isAddContactMode = !editItem && !!selectedExistingId;
+
+  const handleExtracted = (data) => {
+    const lines = [];
+    if (data.licenseNumber) lines.push(`License #: ${data.licenseNumber}`);
+    if (data.legalType) lines.push(`Legal Type: ${data.legalType}`);
+    if (data.issueDate) lines.push(`Issue Date: ${data.issueDate}`);
+    if (data.expiryDate) lines.push(`Expiry Date: ${data.expiryDate}`);
+    if (data.poBox) lines.push(`PO Box: ${data.poBox}`);
+    if (data.activities) lines.push(`Activities: ${data.activities}`);
+    if (data.companyNameArabic) lines.push(`Name (AR): ${data.companyNameArabic}`);
+    setForm(p => ({
+      ...p,
+      name: data.companyName || p.name,
+      trn: data.trn || p.trn,
+      address: data.address || p.address,
+      phone: data.phone || p.phone,
+      email: data.email || p.email,
+      notes: lines.length > 0 ? lines.join('\n') : p.notes,
+    }));
+  };
 
   const doSave = async () => {
     setSaving(true);
@@ -58,7 +85,6 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
   };
 
   const handle = async () => {
-    // Only check duplicates on NEW company (not edit, not add-contact mode)
     if (!editItem && !isAddContactMode && form.name) {
       const match = existingClients.find((c) => c.name?.toLowerCase().trim() === form.name.toLowerCase().trim());
       if (match) { setDupInfo({ matchLabel: form.name, pendingSave: doSave }); return; }
@@ -130,7 +156,15 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
 
   return (
     <div className="space-y-4">
+      <DocumentScanZone
+        extractFn={uploadAndExtractTradeLicense}
+        onExtracted={handleExtracted}
+        title="Scan UAE Trade License"
+        description="Drag & drop a PDF or image, or browse. AI extracts all fields — review before saving."
+      />
+
       <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Company Logo / Photo" />
+
       {!editItem && (
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5">Select existing company (optional — to add another contact person)</Label>
@@ -143,6 +177,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
           </Select>
         </div>
       )}
+
       <div><Label className="text-xs text-muted-foreground mb-1.5">Company Name</Label><Input value={form.name} onChange={e => update('name', e.target.value)} className="bg-background border-border" /></div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label><Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
@@ -154,6 +189,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={e => update('trn', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent></Select></div>
       </div>
+
       {/* Multi Contact Persons Management */}
       <div className="border-t border-border/50 pt-4">
         <div className="flex items-center justify-between mb-3">
@@ -182,7 +218,19 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
           {contactPersons.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">No contact persons added yet. Click "Add Contact" to add one.</p>}
         </div>
       </div>
-      <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving || (!editItem && !form.name)} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
+
+      <div className="trip-section" style={{ '--section-accent': '#64748b' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="trip-section-icon"><StickyNote className="w-4 h-4" /></div>
+          <h4 className="text-sm font-semibold text-foreground">Scanned License Data & Notes</h4>
+        </div>
+        <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={3} className="bg-background border-border resize-none" placeholder="Extra license fields from scan (license #, legal type, activities…) appear here." />
+      </div>
+
+      <div className="flex gap-3 mt-6">
+        <Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button>
+        <Button onClick={handle} disabled={saving || (!editItem && !form.name)} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button>
+      </div>
       <DuplicateConfirmDialog
         open={!!dupInfo}
         entityType="client"
