@@ -6,6 +6,8 @@ import ExportButtons from '@/components/common/ExportButtons';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
 import DatePicker from '@/components/common/DatePicker';
+import ReportStatCard from '@/components/reports/ReportStatCard';
+import EmptyState from '@/components/common/EmptyState';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -32,17 +34,6 @@ const nowLocal = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
-
-function StatCell({ label, value, color, icon: Icon }) {
-  return (
-    <div className="flex flex-col justify-center px-5 py-3 flex-1 min-w-0">
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold mb-0.5" style={{ color }}>
-        <Icon className="w-3.5 h-3.5" />{label}
-      </div>
-      <div className="text-xl font-bold text-white tabular-nums truncate">{value}</div>
-    </div>
-  );
-}
 
 function Toggle({ options, value, onChange }) {
   return (
@@ -176,14 +167,12 @@ export default function LedgerPage({
 
         {/* single panel */}
         <div style={PANEL} className="overflow-hidden">
-          {/* summary row */}
-          <div className="flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-white/5">
-            <StatCell label={summaryLabels.inflow} value={fmt(totalIn)} color="#34d399" icon={ArrowDownLeft} />
-            <StatCell label={summaryLabels.outflow} value={fmt(totalOut)} color="#fb7185" icon={ArrowUpRight} />
-            <StatCell label={summaryLabels.balance} value={fmt(closingBalance)} color="rgb(var(--panel-accent-rgb))" icon={BalanceIcon} />
+          {/* summary stat cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
+            <ReportStatCard index={0} label={summaryLabels.inflow} value={totalIn} format={(v) => fmt(v)} icon={ArrowDownLeft} color="#34d399" />
+            <ReportStatCard index={1} label={summaryLabels.outflow} value={totalOut} format={(v) => fmt(v)} icon={ArrowUpRight} color="#fb7185" />
+            <ReportStatCard index={2} label={summaryLabels.balance} value={closingBalance} format={(v) => fmt(v)} icon={BalanceIcon} color="#3b82f6" />
           </div>
-
-          <div className="h-px bg-white/5" />
 
           {/* STATEMENT VIEW — inline add form */}
           {view === 'statement' && (
@@ -192,6 +181,7 @@ export default function LedgerPage({
                 <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                   <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> Add Entry
                 </h2>
+                <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-2">
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Date</label>
@@ -201,8 +191,8 @@ export default function LedgerPage({
                         value={form.date}
                         onChange={(e) => setField('date', e.target.value)}
                         required
-                        className="clay-input w-full"
-                        style={{ padding: '10px 14px', fontSize: 13 }}
+                        className="clay-input w-full date-input-clean"
+                        style={{ padding: '10px 14px', fontSize: 13, height: 40 }}
                       />
                     ) : (
                       <DatePicker value={form.date} onChange={(v) => setField('date', v)} />
@@ -236,6 +226,7 @@ export default function LedgerPage({
                     </button>
                   </div>
                 </div>
+                </div>
               </form>
               <div className="h-px bg-white/5" />
             </>
@@ -247,11 +238,11 @@ export default function LedgerPage({
               <div className="p-5 flex flex-wrap items-end gap-3">
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><CalendarRange className="w-3 h-3" /> From</label>
-                  <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} className="clay-input" style={{ padding: '9px 12px', fontSize: 13 }} />
+                  <DatePicker value={filterFrom || ''} onChange={(v) => setFilterFrom(v)} />
                 </div>
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">To</label>
-                  <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} className="clay-input" style={{ padding: '9px 12px', fontSize: 13 }} />
+                  <DatePicker value={filterTo || ''} onChange={(v) => setFilterTo(v)} />
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Search className="w-3 h-3" /> Item</label>
@@ -268,9 +259,11 @@ export default function LedgerPage({
             {rows === null ? (
               <div className="p-10"><LoadingSpinner /></div>
             ) : display.length === 0 ? (
-              <div className="p-10 text-center text-muted-foreground text-sm">
-                {view === 'report' ? 'No entries match your filters.' : 'No entries yet — add your first transaction above.'}
-              </div>
+              <EmptyState
+                icon={view === 'report' ? Search : Plus}
+                title={view === 'report' ? 'No entries match your filters' : 'No entries yet'}
+                description={view === 'report' ? 'Try adjusting your date range or search query.' : 'Add your first transaction using the form above.'}
+              />
             ) : (
               <table className="w-full text-sm">
                 <thead>

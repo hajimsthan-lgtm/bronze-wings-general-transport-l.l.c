@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown, Pencil } from 'lucide-react';
+import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown, Pencil, Phone, Mail, IdCard, User } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -141,6 +141,44 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
             <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
           </div>
           <p className="text-[10px] text-muted-foreground mt-3 mb-4">Attach front &amp; back (JPG/PNG). Use the flip icon on the card to switch sides.</p>
+
+          {driver && (driver.phone || driver.email || driver.license_number) && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#3b82f6', 0.14), border: `1px solid ${hexToRgba('#3b82f6', 0.3)}` }}>
+                  <User className="w-4 h-4" style={{ color: '#3b82f6' }} />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">Driver Details</h3>
+                {driver.name && <span className="text-xs text-muted-foreground truncate ml-1">· {driver.name}</span>}
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                {driver.phone && (
+                  <a href={`tel:${driver.phone}`} className="rounded-xl p-2.5 border border-white/[0.06] hover:border-white/[0.12] transition-colors" style={{ background: hexToRgba('#22c55e', 0.05) }}>
+                    <div className="flex items-center gap-1.5 mb-1"><Phone className="w-3.5 h-3.5" style={{ color: '#22c55e' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Phone</p></div>
+                    <p className="text-sm font-semibold text-foreground truncate">{driver.phone}</p>
+                  </a>
+                )}
+                {driver.email && (
+                  <a href={`mailto:${driver.email}`} className="rounded-xl p-2.5 border border-white/[0.06] hover:border-white/[0.12] transition-colors" style={{ background: hexToRgba('#3b82f6', 0.05) }}>
+                    <div className="flex items-center gap-1.5 mb-1"><Mail className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Email</p></div>
+                    <p className="text-sm font-semibold text-foreground truncate">{driver.email}</p>
+                  </a>
+                )}
+                {driver.license_number && (
+                  <div className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.05) }}>
+                    <div className="flex items-center gap-1.5 mb-1"><IdCard className="w-3.5 h-3.5" style={{ color: '#a855f7' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">License #</p></div>
+                    <p className="text-sm font-semibold text-foreground truncate">{driver.license_number}</p>
+                  </div>
+                )}
+                {driver.license_expiry && (
+                  <div className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba('#f59e0b', 0.05) }}>
+                    <div className="flex items-center gap-1.5 mb-1"><CalendarClock className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">License Expiry</p></div>
+                    <p className={`text-sm font-semibold tabular-nums truncate ${expiryTone(driver.license_expiry)}`}>{formatDate(driver.license_expiry)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-2.5">
             {detailTiles.map((d) => { const I = d.icon; return (
