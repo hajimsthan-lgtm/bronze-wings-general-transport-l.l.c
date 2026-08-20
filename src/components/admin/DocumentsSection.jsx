@@ -10,6 +10,7 @@ import { FileText, Plus, Trash2, Download, Eye, Loader2, Paperclip, ChevronDown 
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import EmptyState from '@/components/common/EmptyState';
+import FileViewerModal from '@/components/common/FileViewerModal';
 import { getDocStatus, getExpirySubtext, summarizeHealth, getHealthLevel, DOC_STATUS_VAR } from '@/lib/documentHealth';
 
 const TYPES = ['registration', 'insurance', 'license', 'permit', 'contract', 'invoice', 'other'];
@@ -31,6 +32,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
   const [form, setForm] = useState({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [viewing, setViewing] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -293,15 +295,13 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                         <div className="col-span-1 text-right flex items-center justify-end gap-1">
                           {d.file_url && (
                             <>
-                              <a
-                                href={d.file_url}
-                                target="_blank"
-                                rel="noreferrer"
+                              <button
+                                onClick={() => setViewing({ url: d.file_url, title: d.title })}
                                 title="View"
                                 className="text-muted-foreground hover:text-primary p-1.5"
                               >
                                 <Eye className="w-4 h-4" />
-                              </a>
+                              </button>
                               <button
                                 onClick={() => downloadDoc(d)}
                                 title="Download"
@@ -327,6 +327,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
           </div>
         </div>
       </div>
+      <FileViewerModal file={viewing} onClose={() => setViewing(null)} />
     </div>
   );
 }
