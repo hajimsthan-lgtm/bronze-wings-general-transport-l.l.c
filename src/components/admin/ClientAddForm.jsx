@@ -197,16 +197,6 @@ export default function ClientAddForm({ editItem, onSave, onCancel }) {
       )}
 
       <div><Label className="text-xs text-muted-foreground mb-1.5">Company Name</Label><Input value={form.name} onChange={e => update('name', e.target.value)} className="bg-background border-border" /></div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label><Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={e => update('email', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={e => update('phone', e.target.value)} className="bg-background border-border" /></div>
-      </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Textarea value={form.address} onChange={e => update('address', e.target.value)} rows={2} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={e => update('trn', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent></Select></div>
-      </div>
 
       {/* Multi Contact Persons Management */}
       <div className="border-t border-border/50 pt-4">
@@ -235,6 +225,17 @@ export default function ClientAddForm({ editItem, onSave, onCancel }) {
           ))}
           {contactPersons.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">No contact persons added yet. Click "Add Contact" to add one.</p>}
         </div>
+      </div>
+
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label><Input value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className="bg-background border-border" /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={e => update('email', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Phone</Label><Input value={form.phone} onChange={e => update('phone', e.target.value)} className="bg-background border-border" /></div>
+      </div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Textarea value={form.address} onChange={e => update('address', e.target.value)} rows={2} className="bg-background border-border" /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={e => update('trn', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={v => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem></SelectContent></Select></div>
       </div>
 
       <div className="trip-section" style={{ '--section-accent': '#64748b' }}>
