@@ -4,10 +4,18 @@ import { Pencil, Trash2, ChevronRight, Truck as TruckIcon, Check } from 'lucide-
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import StatusBadge from '@/components/common/StatusBadge';
 import { formatDate } from '@/lib/formatters';
+import { parseLicenseNotes } from '@/lib/vehicleLicenseNotes';
 
 export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected = false, onSelect }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
+
+  const lic = parseLicenseNotes(v.notes || '');
+  const subtitle = [
+    [v.make, v.model].filter(Boolean).join(' '),
+    lic.vehicleType,
+    lic.chassisNo
+  ].filter(Boolean).join(' · ') || '—';
 
   return (
     <>
@@ -30,7 +38,7 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
             <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
             <StatusBadge status={v.status} />
           </div>
-          <p className="text-xs text-muted-foreground truncate">{[v.make, v.type].filter(Boolean).join(' ') || '—'}{v.year ? ` · ${v.year}` : ''} · {v.type}</p>
+          <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
         </div>
         <div className="hidden md:flex items-center gap-5 text-xs text-muted-foreground">
           <div className="text-right"><p className="text-[10px] uppercase tracking-wider">Driver</p><p className="text-foreground font-medium truncate max-w-[120px]">{v.assigned_driver || '—'}</p></div>
