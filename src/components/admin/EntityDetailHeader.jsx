@@ -11,7 +11,7 @@ export default function EntityDetailHeader({ title, subtitle, badge, info = [], 
         type="button"
         onClick={() => backTo ? navigate(backTo) : navigate(-1)}
         aria-label={t('back')}
-        className="back-btn w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95">
+        className="back-btn w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95 hidden">
         
       </button>
     </div>);
