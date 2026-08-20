@@ -13,9 +13,9 @@ export default function ReportClientDropdown() {
 
   return (
     <Select value={value} onValueChange={setReportClient}>
-      <SelectTrigger className="w-[130px] sm:w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs hidden">
-        <SelectValue placeholder="All Clients" />
-      </SelectTrigger>
+      
+
+      
       <SelectContent>
         <SelectItem value="all">All Clients</SelectItem>
         {clients.map((c) =>
