@@ -11,8 +11,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue } from
+'@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,14 +21,14 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  AlertDialogTitle } from
+'@/components/ui/alert-dialog';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  SheetTitle } from
+'@/components/ui/sheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import InvoiceCard, { STATUS_OPTIONS } from '@/components/invoices/InvoiceCard';
 import InvoiceStatCards from '@/components/invoices/InvoiceStatCards';
@@ -89,15 +89,15 @@ export default function InvoicesPage() {
   }, []);
 
   const handleClientClick = (clientName) => {
-    const client = clients.find(c => c.name === clientName);
+    const client = clients.find((c) => c.name === clientName);
     if (client) navigate(`/admin/clients/${client.id}`);
   };
 
   const deletePaymentsForInvoice = async (inv) => {
     const payments = await base44.entities.ClientPayment.filter({ client_name: inv.client_name }, '-created_date', 200).catch(() => []);
-    const linked = (payments || []).filter(p => (p.allocated_invoices || []).some(a => a.invoice_id === inv.id));
+    const linked = (payments || []).filter((p) => (p.allocated_invoices || []).some((a) => a.invoice_id === inv.id));
     if (linked.length === 0) return 0;
-    await Promise.all(linked.map(p => base44.entities.ClientPayment.delete(p.id)));
+    await Promise.all(linked.map((p) => base44.entities.ClientPayment.delete(p.id)));
     return linked.length;
   };
 
@@ -121,7 +121,7 @@ export default function InvoicesPage() {
     setSelectedTemplateId(templateId);
     setSheetOpen(true);
   };
-  const handleEdit = (inv) => { setEditing(inv); setSheetOpen(true); setMobileDetailOpen(false); };
+  const handleEdit = (inv) => {setEditing(inv);setSheetOpen(true);setMobileDetailOpen(false);};
 
   const handleAction = (actionKey, inv) => {
     switch (actionKey) {
@@ -164,7 +164,7 @@ export default function InvoicesPage() {
     try {
       await base44.entities.Invoice.update(inv.id, {
         status: actualStatus,
-        paid_amount: newPaidAmount,
+        paid_amount: newPaidAmount
       });
       await base44.entities.ClientPayment.create({
         reference_number: payData.reference,
@@ -177,15 +177,15 @@ export default function InvoicesPage() {
           invoice_number: inv.invoice_number,
           invoice_total: total,
           allocated_amount: payData.amount,
-          is_selected: true,
+          is_selected: true
         }],
         unapplied_balance: 0,
         status: 'completed',
-        notes: payData.notes,
+        notes: payData.notes
       });
       toast({
         title: actualStatus === 'paid' ? 'Invoice Paid' : 'Partial Payment Recorded',
-        description: `${inv.invoice_number} — AED ${payData.amount.toFixed(2)} received`,
+        description: `${inv.invoice_number} — AED ${payData.amount.toFixed(2)} received`
       });
       refetch();
     } catch (e) {
@@ -196,7 +196,7 @@ export default function InvoicesPage() {
   const handleCancelConfirm = async (reason) => {
     if (cancelModal?.bulk) {
       try {
-        const updates = Array.from(selected).map(id => ({ id, status: 'cancelled', voided: true, void_reason: reason }));
+        const updates = Array.from(selected).map((id) => ({ id, status: 'cancelled', voided: true, void_reason: reason }));
         await base44.entities.Invoice.bulkUpdate(updates);
         toast({ title: `${selected.size} invoices cancelled` });
         setSelected(new Set());
@@ -230,7 +230,7 @@ export default function InvoicesPage() {
         signed_date: today,
         signed_uploaded_by: uploadedBy,
         status: 'signed',
-        signature_skipped: false,
+        signature_skipped: false
       });
       await base44.entities.SignedDocument.create({
         invoice_id: inv.id,
@@ -240,9 +240,9 @@ export default function InvoicesPage() {
         file_name: file.name,
         uploaded_by: uploadedBy,
         upload_date: today,
-        upload_datetime: now.toISOString(),
+        upload_datetime: now.toISOString()
       });
-      const client = clients.find(c => c.name === inv.client_name);
+      const client = clients.find((c) => c.name === inv.client_name);
       if (client) {
         await base44.entities.Document.create({
           title: `Signed Invoice ${inv.invoice_number}`,
@@ -250,7 +250,7 @@ export default function InvoicesPage() {
           related_entity: 'Client',
           related_id: client.id,
           file_url: file_url,
-          notes: `Signed by client for ${inv.invoice_number}`,
+          notes: `Signed by client for ${inv.invoice_number}`
         }).catch(() => {});
       }
       toast({ title: 'Signed invoice attached', description: inv.invoice_number });
@@ -286,7 +286,7 @@ export default function InvoicesPage() {
         signed_date: '',
         signed_uploaded_by: '',
         status: 'unsigned',
-        signature_skipped: false,
+        signature_skipped: false
       });
       toast({ title: 'Signed copy removed', description: `${inv.invoice_number} reverted to unsigned.` });
       refetch();
@@ -300,7 +300,7 @@ export default function InvoicesPage() {
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.Invoice.update(inv.id, {
         status: 'unsigned',
-        sent_for_signature_date: today,
+        sent_for_signature_date: today
       });
       toast({ title: 'Sent for signature', description: `${inv.invoice_number} → Unsigned` });
       refetch();
@@ -313,7 +313,7 @@ export default function InvoicesPage() {
     try {
       await base44.entities.Invoice.update(inv.id, {
         status: 'sent',
-        signature_skipped: true,
+        signature_skipped: true
       });
       toast({ title: 'Signature skipped', description: `${inv.invoice_number} → Sent (payment-ready)` });
       refetch();
@@ -331,18 +331,18 @@ export default function InvoicesPage() {
   };
 
   const handleBulkAction = async (actionKey) => {
-    const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+    const selectedInvoices = allInvoices.filter((inv) => selected.has(inv.id));
     if (selectedInvoices.length === 0) return;
     if (actionKey === 'sendForSignature') {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const draftOnes = selectedInvoices.filter(inv => deriveStatus(inv) === 'draft');
+        const draftOnes = selectedInvoices.filter((inv) => deriveStatus(inv) === 'draft');
         if (draftOnes.length === 0) {
           toast({ title: 'No draft invoices selected', description: 'Only draft invoices can be sent for signature.' });
           return;
         }
         await base44.entities.Invoice.bulkUpdate(
-          draftOnes.map(inv => ({ id: inv.id, status: 'unsigned', sent_for_signature_date: today }))
+          draftOnes.map((inv) => ({ id: inv.id, status: 'unsigned', sent_for_signature_date: today }))
         );
         toast({ title: `${draftOnes.length} invoices sent for signature` });
         setSelected(new Set());
@@ -369,15 +369,15 @@ export default function InvoicesPage() {
       return;
     }
     try {
-      const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+      const selectedInvoices = allInvoices.filter((inv) => selected.has(inv.id));
       const revertingTo = bulkStatus === 'draft' || bulkStatus === 'sent';
       if (revertingTo) {
-        const paidOnes = selectedInvoices.filter(inv => inv.status === 'paid' || inv.status === 'partially_paid');
+        const paidOnes = selectedInvoices.filter((inv) => inv.status === 'paid' || inv.status === 'partially_paid');
         if (paidOnes.length > 0) {
-          await Promise.all(paidOnes.map(inv => deletePaymentsForInvoice(inv)));
+          await Promise.all(paidOnes.map((inv) => deletePaymentsForInvoice(inv)));
         }
       }
-      const updates = selectedInvoices.map(inv => {
+      const updates = selectedInvoices.map((inv) => {
         const patch = { id: inv.id, status: bulkStatus };
         if (revertingTo && (inv.status === 'paid' || inv.status === 'partially_paid')) {
           patch.paid_amount = 0;
@@ -395,7 +395,7 @@ export default function InvoicesPage() {
   };
 
   const handleBulkPaymentConfirm = async (payData) => {
-    const selectedInvoices = allInvoices.filter(inv => selected.has(inv.id));
+    const selectedInvoices = allInvoices.filter((inv) => selected.has(inv.id));
     if (selectedInvoices.length === 0) return;
     try {
       await base44.entities.ClientPayment.create({
@@ -404,20 +404,20 @@ export default function InvoicesPage() {
         amount: payData.amount,
         payment_date: payData.date,
         payment_mode: payData.mode,
-        allocated_invoices: payData.allocations.map(a => ({
+        allocated_invoices: payData.allocations.map((a) => ({
           invoice_id: a.invoice_id,
           invoice_number: a.invoice_number,
           invoice_total: a.invoice_total,
           allocated_amount: a.allocated_amount,
-          is_selected: true,
+          is_selected: true
         })),
         unapplied_balance: payData.amount - payData.allocations.reduce((s, a) => s + a.allocated_amount, 0),
         status: 'completed',
-        notes: payData.notes,
+        notes: payData.notes
       });
       await base44.entities.Invoice.bulkUpdate(
-        payData.allocations.map(a => {
-          const inv = selectedInvoices.find(i => i.id === a.invoice_id);
+        payData.allocations.map((a) => {
+          const inv = selectedInvoices.find((i) => i.id === a.invoice_id);
           const newPaid = (Number(inv?.paid_amount) || 0) + a.allocated_amount;
           const newStatus = newPaid >= (Number(a.invoice_total) || 0) - 0.01 ? 'paid' : 'partially_paid';
           return { id: a.invoice_id, paid_amount: newPaid, status: newStatus };
@@ -425,7 +425,7 @@ export default function InvoicesPage() {
       );
       toast({
         title: 'Bulk Payment Recorded',
-        description: `${payData.allocations.length} invoices — AED ${payData.amount.toFixed(2)} allocated (FIFO)`,
+        description: `${payData.allocations.length} invoices — AED ${payData.amount.toFixed(2)} allocated (FIFO)`
       });
       setSelected(new Set());
       setBulkStatus('');
@@ -437,9 +437,9 @@ export default function InvoicesPage() {
   };
 
   const toggleSelect = (id, checked) => {
-    setSelected(prev => {
+    setSelected((prev) => {
       const n = new Set(prev);
-      if (checked) n.add(id); else n.delete(id);
+      if (checked) n.add(id);else n.delete(id);
       return n;
     });
   };
@@ -448,7 +448,7 @@ export default function InvoicesPage() {
     if (selected.size === filtered.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(filtered.map(inv => inv.id)));
+      setSelected(new Set(filtered.map((inv) => inv.id)));
     }
   };
 
@@ -484,8 +484,8 @@ export default function InvoicesPage() {
 
   // Base filter (date + client + search + status)
   const baseFiltered = useMemo(() => {
-    return allInvoices.filter(inv => {
-      const matchesDate = !inv.issue_date || ((!dateFrom || inv.issue_date >= dateFrom) && (!dateTo || inv.issue_date <= dateTo));
+    return allInvoices.filter((inv) => {
+      const matchesDate = !inv.issue_date || (!dateFrom || inv.issue_date >= dateFrom) && (!dateTo || inv.issue_date <= dateTo);
       const matchesClient = clientFilter === 'all' || inv.client_name === clientFilter;
       const q = search.trim().toLowerCase();
       const matchesSearch = !q || (inv.invoice_number || '').toLowerCase().includes(q) || (inv.client_name || '').toLowerCase().includes(q);
@@ -500,21 +500,21 @@ export default function InvoicesPage() {
   // Tab-filtered list
   const filtered = useMemo(() => filterByTab(baseFiltered, tab), [baseFiltered, tab]);
 
-  const selectedInvoice = filtered.find(i => i.id === selectedId) || baseFiltered.find(i => i.id === selectedId) || null;
+  const selectedInvoice = filtered.find((i) => i.id === selectedId) || baseFiltered.find((i) => i.id === selectedId) || null;
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
   useEffect(() => {
-    if (!selectedInvoice) { setSignedDocs([]); setPayments([]); return; }
-    base44.entities.SignedDocument.filter({ invoice_id: selectedInvoice.id }, '-upload_date', 50)
-      .then(setSignedDocs).catch(() => setSignedDocs([]));
-    base44.entities.ClientPayment.filter({ client_name: selectedInvoice.client_name }, '-created_date', 100)
-      .then(allPays => {
-        const linked = (allPays || []).filter(p =>
-          (p.allocated_invoices || []).some(a => a.invoice_id === selectedInvoice.id)
-        );
-        setPayments(linked);
-      })
-      .catch(() => setPayments([]));
+    if (!selectedInvoice) {setSignedDocs([]);setPayments([]);return;}
+    base44.entities.SignedDocument.filter({ invoice_id: selectedInvoice.id }, '-upload_date', 50).
+    then(setSignedDocs).catch(() => setSignedDocs([]));
+    base44.entities.ClientPayment.filter({ client_name: selectedInvoice.client_name }, '-created_date', 100).
+    then((allPays) => {
+      const linked = (allPays || []).filter((p) =>
+      (p.allocated_invoices || []).some((a) => a.invoice_id === selectedInvoice.id)
+      );
+      setPayments(linked);
+    }).
+    catch(() => setPayments([]));
   }, [selectedInvoice?.id]);
 
   const activeFilterCount = (clientFilter !== 'all' ? 1 : 0) + (statusFilter !== 'all' ? 1 : 0) + (search ? 1 : 0) + (dateFrom || dateTo ? 1 : 0);
@@ -530,31 +530,31 @@ export default function InvoicesPage() {
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground tracking-tight">Invoices</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your invoices</p>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight hidden">Invoices</h1>
+        <p className="text-sm text-muted-foreground mt-0.5 hidden">Manage and track all your invoices</p>
       </div>
 
       {/* Stat cards */}
       <div className="mb-5">
-        {loading ? (
-          <div className="flex items-center justify-center py-10">
+        {loading ?
+        <div className="flex items-center justify-center py-10">
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          </div>
-        ) : (
-          <InvoiceStatCards invoices={allInvoices} />
-        )}
+          </div> :
+
+        <InvoiceStatCards invoices={allInvoices} />
+        }
       </div>
 
       {/* Filter bar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        {activeFilterCount > 0 && (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
+        {activeFilterCount > 0 &&
+        <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
             {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
-            <button onClick={() => { setClientFilter('all'); setStatusFilter('all'); setSearch(''); }} className="ml-0.5 hover:opacity-70">
+            <button onClick={() => {setClientFilter('all');setStatusFilter('all');setSearch('');}} className="ml-0.5 hover:opacity-70">
               <X className="w-3 h-3" />
             </button>
           </span>
-        )}
+        }
         <div className="relative">
           <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
           <Select value={clientFilter} onValueChange={setClientFilter}>
@@ -563,9 +563,9 @@ export default function InvoicesPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Clients</SelectItem>
-              {clients.map(c => (
-                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-              ))}
+              {clients.map((c) =>
+              <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -588,21 +588,21 @@ export default function InvoicesPage() {
           <button
             onClick={() => setTemplateManagerOpen(true)}
             className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            title="Custom Templates"
-          >
+            title="Custom Templates">
+            
             <LayoutTemplate className="w-4 h-4" />
           </button>
           <HeaderActionButton
             label="Create Invoice"
             variant="trip"
-            onClick={handleNew}
-          />
+            onClick={handleNew} />
+          
         </div>
       </div>
 
       {/* Bulk action bar */}
-      {selected.size > 0 && (
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
+      {selected.size > 0 &&
+      <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
           <span className="text-sm font-semibold text-primary">{selected.size} selected</span>
           <Button size="sm" variant="outline" onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10">
             <Send className="w-3.5 h-3.5 mr-1.5" /> Send for Signature
@@ -612,15 +612,15 @@ export default function InvoicesPage() {
           </Button>
           <Button size="sm" variant="outline" onClick={() => setSelected(new Set())} className="h-8">Clear</Button>
         </div>
-      )}
+      }
 
       {/* Two-pane layout */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
+      {loading ?
+      <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        </div>
-      ) : baseFiltered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        </div> :
+      baseFiltered.length === 0 ?
+      <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
             <FileText className="w-7 h-7 text-primary" />
           </div>
@@ -630,55 +630,55 @@ export default function InvoicesPage() {
           <p className="text-xs text-muted-foreground mb-4">
             {allInvoices.length === 0 ? 'Create your first invoice to get started.' : 'Try a different search or filter.'}
           </p>
-          {allInvoices.length === 0 && (
-            <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Invoice</Button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
+          {allInvoices.length === 0 &&
+        <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Invoice</Button>
+        }
+        </div> :
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane
-              invoices={filtered}
-              selectedId={selectedId}
-              onSelect={handleSelectRow}
-              tab={tab}
-              onTabChange={setTab}
-              counts={counts}
-              search={search}
-              onSearchChange={setSearch}
-              selectedSet={selected}
-              onToggleSelect={toggleSelect}
-              allSelected={allSelected}
-              onToggleSelectAll={toggleSelectAll}
-              onClientClick={handleClientClick}
-              onAction={handleAction}
-            />
+            invoices={filtered}
+            selectedId={selectedId}
+            onSelect={handleSelectRow}
+            tab={tab}
+            onTabChange={setTab}
+            counts={counts}
+            search={search}
+            onSearchChange={setSearch}
+            selectedSet={selected}
+            onToggleSelect={toggleSelect}
+            allSelected={allSelected}
+            onToggleSelectAll={toggleSelectAll}
+            onClientClick={handleClientClick}
+            onAction={handleAction} />
+          
           </div>
 
           {/* Right pane — detail (desktop) */}
           <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
             <InvoiceDetailPane
-              inv={selectedInvoice}
-              clients={clients}
-              onClientClick={handleClientClick}
-              onEdit={handleEdit}
-              onDelete={setDeleteTarget}
-              onDownload={handleDownload}
-              onAttachSigned={handleAttachSigned}
-              onAction={handleAction}
-              downloadingId={downloadingId}
-              uploadingId={uploadingId}
-              signedDocs={signedDocs}
-              onViewSigned={handleViewSigned}
-              onDownloadSigned={handleDownloadSigned}
-              onDeleteSigned={handleDeleteSigned}
-              payments={payments}
-              settings={settings}
-              />
+            inv={selectedInvoice}
+            clients={clients}
+            onClientClick={handleClientClick}
+            onEdit={handleEdit}
+            onDelete={setDeleteTarget}
+            onDownload={handleDownload}
+            onAttachSigned={handleAttachSigned}
+            onAction={handleAction}
+            downloadingId={downloadingId}
+            uploadingId={uploadingId}
+            signedDocs={signedDocs}
+            onViewSigned={handleViewSigned}
+            onDownloadSigned={handleDownloadSigned}
+            onDeleteSigned={handleDeleteSigned}
+            payments={payments}
+            settings={settings} />
+          
               </div>
               </div>
-              )}
+      }
 
       {/* Mobile detail sheet */}
       <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
@@ -708,8 +708,8 @@ export default function InvoicesPage() {
               onDownloadSigned={handleDownloadSigned}
               onDeleteSigned={handleDeleteSigned}
               payments={payments}
-              settings={settings}
-              />
+              settings={settings} />
+            
               </div>
               </SheetContent>
               </Sheet>
@@ -720,37 +720,37 @@ export default function InvoicesPage() {
         invoice={paymentModal?.inv}
         mode={paymentModal?.mode}
         open={!!paymentModal}
-        onOpenChange={(open) => { if (!open) setPaymentModal(null); }}
-        onConfirm={handlePaymentConfirm}
-      />
+        onOpenChange={(open) => {if (!open) setPaymentModal(null);}}
+        onConfirm={handlePaymentConfirm} />
+      
 
       <BulkPaymentModal
-        invoices={allInvoices.filter(inv => selected.has(inv.id))}
+        invoices={allInvoices.filter((inv) => selected.has(inv.id))}
         open={bulkPaymentModal}
         onOpenChange={setBulkPaymentModal}
-        onConfirm={handleBulkPaymentConfirm}
-      />
+        onConfirm={handleBulkPaymentConfirm} />
+      
 
       <CancelReasonModal
         invoice={cancelModal}
         open={!!cancelModal}
-        onOpenChange={(open) => { if (!open) setCancelModal(null); }}
-        onConfirm={handleCancelConfirm}
-      />
+        onOpenChange={(open) => {if (!open) setCancelModal(null);}}
+        onConfirm={handleCancelConfirm} />
+      
 
       <SendForSignatureDialog
         invoice={sendForSignatureModal}
         open={!!sendForSignatureModal}
-        onOpenChange={(open) => { if (!open) setSendForSignatureModal(null); }}
-        onConfirm={handleSendForSignature}
-      />
+        onOpenChange={(open) => {if (!open) setSendForSignatureModal(null);}}
+        onConfirm={handleSendForSignature} />
+      
 
       <SkipSignatureDialog
         invoice={skipSignatureModal}
         open={!!skipSignatureModal}
-        onOpenChange={(open) => { if (!open) setSkipSignatureModal(null); }}
-        onConfirm={handleSkipSignature}
-      />
+        onOpenChange={(open) => {if (!open) setSkipSignatureModal(null);}}
+        onConfirm={handleSkipSignature} />
+      
 
       <input ref={attachSignedInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleAttachSignedFromMenu} />
 
@@ -758,7 +758,7 @@ export default function InvoicesPage() {
 
       <TemplateSelectorModal open={templateSelectorOpen} onClose={() => setTemplateSelectorOpen(false)} onSelect={handleTemplateSelect} documentType="invoice" />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => {if (!open) setDeleteTarget(null);}}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
@@ -772,6 +772,6 @@ export default function InvoicesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>);
+
 }
