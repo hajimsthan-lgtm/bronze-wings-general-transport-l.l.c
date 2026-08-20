@@ -69,6 +69,9 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <h2 className="text-base font-bold text-foreground leading-tight truncate">{[vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle'}</h2>
+              {vehicle.type && (
+                <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border border-white/10 bg-white/5 text-muted-foreground capitalize">{vehicle.type}</span>
+              )}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="relative flex w-2 h-2">
