@@ -10,12 +10,15 @@ import DocumentScanZone from './DocumentScanZone';
 import ImageUpload from '@/components/common/ImageUpload';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { uploadAndExtractDriverLicense } from '@/lib/driverLicenseScan';
+import { uploadAndExtractVisa } from '@/lib/visaScan';
+import { uploadAndExtractEmiratesId } from '@/lib/emiratesIdScan';
 
 const EMPTY = {
   name: '', image_url: '', phone: '', email: '',
   license_number: '', license_expiry: '', nationality: '',
   status: 'active', assigned_vehicle: '', base_salary: '',
   join_date: '', emergency_contact: '', visa_expiry: '', notes: '',
+  license_url: '', visa_url: '', emirates_id_url: '',
 };
 
 function Section({ icon: Icon, title, accent, children }) {
@@ -52,7 +55,7 @@ export default function DriverAddForm({ editItem, onSave, onCancel }) {
 
   const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));
 
-  const handleExtracted = (data) => {
+  const handleExtracted = (data, fileUrl) => {
     const lines = [];
     if (data.nameArabic) lines.push(`Name (AR): ${data.nameArabic}`);
     if (data.dateOfBirth) lines.push(`DOB: ${data.dateOfBirth}`);
@@ -67,7 +70,26 @@ export default function DriverAddForm({ editItem, onSave, onCancel }) {
       license_number: data.licenseNumber || p.license_number,
       license_expiry: data.licenseExpiry || p.license_expiry,
       nationality: data.nationality || p.nationality,
+      license_url: fileUrl || p.license_url,
       notes: lines.length > 0 ? lines.join('\n') : p.notes,
+    }));
+  };
+
+  const handleVisaExtracted = (data, fileUrl) => {
+    setForm((p) => ({
+      ...p,
+      visa_expiry: data.visaExpiry || p.visa_expiry,
+      nationality: data.nationality || p.nationality,
+      visa_url: fileUrl || p.visa_url,
+    }));
+  };
+
+  const handleEmiratesIdExtracted = (data, fileUrl) => {
+    setForm((p) => ({
+      ...p,
+      name: data.name || p.name,
+      nationality: data.nationality || p.nationality,
+      emirates_id_url: fileUrl || p.emirates_id_url,
     }));
   };
 
@@ -96,6 +118,20 @@ export default function DriverAddForm({ editItem, onSave, onCancel }) {
         onExtracted={handleExtracted}
         title="Scan UAE Driving License"
         description="Drag & drop a PDF or image, or browse. AI extracts all fields — review before saving."
+      />
+
+      <DocumentScanZone
+        extractFn={uploadAndExtractVisa}
+        onExtracted={handleVisaExtracted}
+        title="Scan UAE Visa / Residence"
+        description="Upload visa to auto-fill visa expiry date & nationality."
+      />
+
+      <DocumentScanZone
+        extractFn={uploadAndExtractEmiratesId}
+        onExtracted={handleEmiratesIdExtracted}
+        title="Scan UAE Emirates ID"
+        description="Upload Emirates ID to auto-fill name & nationality."
       />
 
       <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Driver Photo" shape="circle" />

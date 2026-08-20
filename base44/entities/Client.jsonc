@@ -60,6 +60,12 @@
           }
         }
       }
+    },
+    "trade_license_url": {
+      "type": "string"
+    },
+    "vat_certificate_url": {
+      "type": "string"
     }
   },
   "required": [

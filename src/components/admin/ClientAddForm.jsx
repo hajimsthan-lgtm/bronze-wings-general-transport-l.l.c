@@ -11,10 +11,12 @@ import DocumentScanZone from './DocumentScanZone';
 import ImageUpload from '@/components/common/ImageUpload';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { uploadAndExtractTradeLicense } from '@/lib/tradeLicenseScan';
+import { uploadAndExtractVatCertificate } from '@/lib/vatCertificateScan';
 
 const EMPTY = {
   name: '', image_url: '', contact_person: '', email: '', phone: '',
   address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '',
+  trade_license_url: '', vat_certificate_url: '',
 };
 
 export default function ClientAddForm({ editItem, onSave, onCancel }) {
@@ -45,7 +47,7 @@ export default function ClientAddForm({ editItem, onSave, onCancel }) {
   const selectedExisting = existingClients.find(c => c.id === selectedExistingId);
   const isAddContactMode = !editItem && !!selectedExistingId;
 
-  const handleExtracted = (data) => {
+  const handleExtracted = (data, fileUrl) => {
     const lines = [];
     if (data.licenseNumber) lines.push(`License #: ${data.licenseNumber}`);
     if (data.legalType) lines.push(`Legal Type: ${data.legalType}`);
@@ -61,7 +63,16 @@ export default function ClientAddForm({ editItem, onSave, onCancel }) {
       address: data.address || p.address,
       phone: data.phone || p.phone,
       email: data.email || p.email,
+      trade_license_url: fileUrl || p.trade_license_url,
       notes: lines.length > 0 ? lines.join('\n') : p.notes,
+    }));
+  };
+
+  const handleVatExtracted = (data, fileUrl) => {
+    setForm(p => ({
+      ...p,
+      trn: data.trn || p.trn,
+      vat_certificate_url: fileUrl || p.vat_certificate_url,
     }));
   };
 
@@ -161,6 +172,13 @@ export default function ClientAddForm({ editItem, onSave, onCancel }) {
         onExtracted={handleExtracted}
         title="Scan UAE Trade License"
         description="Drag & drop a PDF or image, or browse. AI extracts all fields — review before saving."
+      />
+
+      <DocumentScanZone
+        extractFn={uploadAndExtractVatCertificate}
+        onExtracted={handleVatExtracted}
+        title="Scan UAE VAT Certificate (TRN)"
+        description="Upload the VAT Registration Certificate to auto-fill the TRN number."
       />
 
       <ImageUpload value={form.image_url} onChange={(v) => update('image_url', v)} label="Company Logo / Photo" />
