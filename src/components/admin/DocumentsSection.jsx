@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Plus, Trash2, Download, Loader2, Paperclip, ChevronDown } from 'lucide-react';
+import { FileText, Plus, Trash2, Download, Eye, Loader2, Paperclip, ChevronDown } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import EmptyState from '@/components/common/EmptyState';
@@ -88,6 +88,18 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
     } finally {
       setSaving(false);
     }
+  };
+
+  const downloadDoc = (d) => {
+    if (!d.file_url) return;
+    const a = document.createElement('a');
+    a.href = d.file_url;
+    a.download = d.title || 'document';
+    a.target = '_blank';
+    a.rel = 'noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const remove = async (d) => {
@@ -280,14 +292,24 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                         </div>
                         <div className="col-span-1 text-right flex items-center justify-end gap-1">
                           {d.file_url && (
-                            <a
-                              href={d.file_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-muted-foreground hover:text-primary p-1.5"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
+                            <>
+                              <a
+                                href={d.file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="View"
+                                className="text-muted-foreground hover:text-primary p-1.5"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <button
+                                onClick={() => downloadDoc(d)}
+                                title="Download"
+                                className="text-muted-foreground hover:text-primary p-1.5"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                            </>
                           )}
                           <button
                             onClick={() => remove(d)}
