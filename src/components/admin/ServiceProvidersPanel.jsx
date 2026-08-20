@@ -48,6 +48,13 @@ export default function ServiceProvidersPanel() {
   };
   useEffect(() => { load(); }, []);
 
+  // Listen for sub-header "Add New" event
+  useEffect(() => {
+    const onNew = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('service-providers:new', onNew);
+    return () => window.removeEventListener('service-providers:new', onNew);
+  }, []);
+
   const vehicleCount = (name) => vehicles.filter((v) => v.vendor_name === name).length;
   const driverCount = (name) => drivers.filter((d) => d.vendor_name === name).length;
   const spendMap = {};
@@ -87,7 +94,6 @@ export default function ServiceProvidersPanel() {
             { label: 'Vehicles', key: 'vehicles', numeric: true }, { label: 'Drivers', key: 'drivers', numeric: true },
             { label: 'Spend', key: 'spend', numeric: true }, { label: 'Status', key: 'status' },
           ]} />
-          <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="h-10"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>
         </div>
       </div>
 

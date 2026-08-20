@@ -222,17 +222,10 @@ export default function TopBar() {
               </>
             )}
             {isVendorsPage && (
-              <>
                 <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
                   <button onClick={() => setVendorsMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venMode.mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
                   <button onClick={() => setVendorsMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venMode.mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
                 </div>
-                <HeaderActionButton
-                  label={t('add_new')}
-                  variant="trip"
-                  onClick={() => window.dispatchEvent(new CustomEvent('vendors:new'))}
-                />
-              </>
             )}
             {isCompanyDocsPage && (
               <HeaderActionButton
