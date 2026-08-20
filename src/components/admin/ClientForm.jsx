@@ -17,7 +17,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
   const [existingClients, setExistingClients] = useState([]);
   const [selectedExistingId, setSelectedExistingId] = useState('');
   const [form, setForm] = useState({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
-  const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', department: '' });
+  const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', department: '', position: '' });
 
   useEffect(() => { base44.entities.Client.list('-created_date', 200).then(setExistingClients).catch(() => {}); }, []);
 
@@ -26,7 +26,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
     else {
       setForm({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
       setSelectedExistingId('');
-      setNewContact({ name: '', email: '', phone: '', department: '' });
+      setNewContact({ name: '', email: '', phone: '', department: '', position: '' });
     }
   }, [editItem]);
 
@@ -45,7 +45,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
       } else {
         const data = { ...form };
         if (!editItem && form.contact_person) {
-          data.contact_persons = [{ name: form.contact_person, email: form.email, phone: form.phone, department: '' }];
+          data.contact_persons = [{ name: form.contact_person, email: form.email, phone: form.phone, department: '', position: '' }];
         }
         await onSave(data);
       }
@@ -92,6 +92,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
           </div>
           <div className="space-y-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">Contact Name *</Label><Input value={newContact.name} onChange={e => updateContact('name', e.target.value)} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Position</Label><Input value={newContact.position} onChange={e => updateContact('position', e.target.value)} placeholder="e.g. Manager, Director" className="bg-background border-border" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Department</Label><Input value={newContact.department} onChange={e => updateContact('department', e.target.value)} placeholder="e.g. Finance, Logistics" className="bg-background border-border" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={newContact.email} onChange={e => updateContact('email', e.target.value)} className="bg-background border-border" /></div>
@@ -106,7 +107,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
             <div className="space-y-1.5">
               {existingContacts.map((cp, i) => (
                 <div key={i} className="glass-card p-2 flex items-center justify-between">
-                  <div><p className="text-xs font-medium text-foreground">{cp.name}</p>{cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}</div>
+                  <div><p className="text-xs font-medium text-foreground">{cp.name}</p>{cp.position && <p className="text-[10px] text-sky-300">{cp.position}</p>}{cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}</div>
                   <p className="text-[10px] text-muted-foreground">{cp.email || cp.phone || '—'}</p>
                 </div>
               ))}
@@ -154,7 +155,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
           <div className="space-y-1.5">
             {editItem.contact_persons.map((cp, i) => (
               <div key={i} className="glass-card p-2 flex items-center justify-between">
-                <div><p className="text-xs font-medium text-foreground">{cp.name}</p>{cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}</div>
+                <div><p className="text-xs font-medium text-foreground">{cp.name}</p>{cp.position && <p className="text-[10px] text-sky-300">{cp.position}</p>}{cp.department && <p className="text-[10px] text-primary">{cp.department}</p>}</div>
                 <p className="text-[10px] text-muted-foreground">{cp.email || cp.phone || '—'}</p>
               </div>
             ))}

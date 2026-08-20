@@ -1,4 +1,4 @@
-import { Phone, Mail, Building2, BadgeCheck, Hash, CalendarClock, MapPin, Users, UserRound, Wallet, FileText, Receipt, Truck } from 'lucide-react';
+import { Phone, Mail, Building2, BadgeCheck, Hash, CalendarClock, MapPin, Users, UserRound, Wallet, FileText, Receipt, Truck, Pencil } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -11,7 +11,7 @@ const CARD_BASE = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
-export default function ClientProfileCard({ client, stats }) {
+export default function ClientProfileCard({ client, stats, onEditContacts }) {
   const isActive = client.status === 'active';
   const dotColor = isActive ? '#34d399' : '#94a3b8';
 
@@ -49,6 +49,11 @@ export default function ClientProfileCard({ client, stats }) {
               <span className="text-xs text-muted-foreground">Business Client</span>
             </div>
           </div>
+          {onEditContacts && (
+            <button onClick={onEditContacts} className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Manage contacts">
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
           <StatusBadge status={client.status} />
         </div>
       </div>
@@ -101,10 +106,26 @@ export default function ClientProfileCard({ client, stats }) {
           </div>
         )}
         {client.contact_persons?.length > 0 && (
-          <div className="flex items-center gap-2.5 text-xs">
-            <Users className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-            <span className="text-muted-foreground">Contacts</span>
-            <span className="ml-auto font-semibold text-foreground">{client.contact_persons.length} persons</span>
+          <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Contact Persons</span>
+            </div>
+            <div className="space-y-1.5">
+              {client.contact_persons.map((cp, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  <div className="w-6 h-6 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[9px] font-bold text-sky-300">{initialsOf(cp.name)}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold text-foreground truncate block leading-tight">{cp.name}</span>
+                    {cp.position && <span className="text-[10px] text-muted-foreground truncate block leading-tight">{cp.position}</span>}
+                  </div>
+                  {cp.phone && <a href={`tel:${cp.phone}`} onClick={e => e.stopPropagation()} className="text-muted-foreground hover:text-primary flex-shrink-0"><Phone className="w-3 h-3" /></a>}
+                  {cp.email && <a href={`mailto:${cp.email}`} onClick={e => e.stopPropagation()} className="text-muted-foreground hover:text-primary flex-shrink-0"><Mail className="w-3 h-3" /></a>}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

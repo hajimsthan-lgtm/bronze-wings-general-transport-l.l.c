@@ -54,6 +54,9 @@
           },
           "department": {
             "type": "string"
+          },
+          "position": {
+            "type": "string"
           }
         }
       }

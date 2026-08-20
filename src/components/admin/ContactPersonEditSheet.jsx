@@ -10,11 +10,11 @@ import { Trash2, UserRound } from 'lucide-react';
 export default function ContactPersonEditSheet({ open, onOpenChange, contact, onSave, onDelete }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', department: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', department: '', position: '' });
 
   useEffect(() => {
     if (open && contact) {
-      setForm({ name: contact.name || '', email: contact.email || '', phone: contact.phone || '', department: contact.department || '' });
+      setForm({ name: contact.name || '', email: contact.email || '', phone: contact.phone || '', department: contact.department || '', position: contact.position || '' });
     }
   }, [open, contact]);
 
@@ -38,6 +38,7 @@ export default function ContactPersonEditSheet({ open, onOpenChange, contact, on
         </SheetHeader>
         <div className="space-y-4">
           <div><Label className="text-xs text-muted-foreground mb-1.5">Contact Name</Label><Input value={form.name} onChange={e => update('name', e.target.value)} className="bg-background border-border" /></div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5">Position</Label><Input value={form.position} onChange={e => update('position', e.target.value)} placeholder="e.g. Manager, Director" className="bg-background border-border" /></div>
           <div><Label className="text-xs text-muted-foreground mb-1.5">Department</Label><Input value={form.department} onChange={e => update('department', e.target.value)} placeholder="e.g. Finance, Logistics" className="bg-background border-border" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={e => update('email', e.target.value)} className="bg-background border-border" /></div>
