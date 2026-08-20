@@ -35,7 +35,7 @@ export default function VehicleEditModal({ open, onOpenChange, vehicle, onSaved 
         }
       }
       onOpenChange(false);
-      onSaved?.(vehicleData);
+      onSaved?.(vehicleData, licenseData);
     } catch (e) {
       toast({ title: 'Save failed', description: e?.message, variant: 'destructive' });
     }

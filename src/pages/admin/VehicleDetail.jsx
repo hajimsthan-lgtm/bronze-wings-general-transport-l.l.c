@@ -36,6 +36,7 @@ export default function VehicleDetail() {
   const [expenses, setExpenses] = useState([]);
   const [services, setServices] = useState([]);
   const [driver, setDriver] = useState(null);
+  const [license, setLicense] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [breakdown, setBreakdown] = useState(null);
@@ -72,6 +73,10 @@ export default function VehicleDetail() {
       setExpenses(eR || []);
       setServices(sR || []);
       setDriver((dR && dR[0]) || null);
+      // Fetch license record (holds vehicleType e.g. "TOYOTA HI ACE")
+      base44.entities.VehicleLicense.filter({ trafficPlateNo: plate })
+        .then((res) => { if (!cancelled) setLicense(res?.[0] || null); })
+        .catch(() => {});
     } finally {
       if (!cancelled) setDataLoading(false);
     }
@@ -98,9 +103,10 @@ export default function VehicleDetail() {
   };
 
   // Called AFTER VehicleEditModal has already persisted the update — just refresh local state.
-  const saveVehicle = (data) => {
+  const saveVehicle = (data, licenseData) => {
     const updated = { ...vehicle, ...data };
     setVehicle(updated);
+    if (licenseData) setLicense((prev) => ({ ...prev, ...licenseData }));
     if (data.plate_number && data.plate_number !== vehicle.plate_number) {
       loadRelated(updated);
     }
@@ -220,7 +226,7 @@ export default function VehicleDetail() {
 
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 items-start">
-        <VehicleProfileCard vehicle={vehicle} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSaved={saveVehicle} />
+        <VehicleProfileCard vehicle={vehicle} license={license} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSaved={saveVehicle} />
         <div className="space-y-4">
           {/* Trips — long table, auto-collapse on hover */}
           <TabTableCard

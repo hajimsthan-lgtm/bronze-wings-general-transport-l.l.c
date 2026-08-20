@@ -28,7 +28,9 @@ const CARD_BASE = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
 };
 
-export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwnership, onSaved }) {
+export default function VehicleProfileCard({ vehicle, license, driver, stats, onSaveOwnership, onSaved }) {
+  // vehicleType (e.g. "TOYOTA HI ACE") lives on the VehicleLicense record
+  const vehicleType = license?.vehicleType || [vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle';
   const [expanded, setExpanded] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
@@ -68,10 +70,7 @@ export default function VehicleProfileCard({ vehicle, driver, stats, onSaveOwner
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-bold text-foreground leading-tight truncate">{[vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle'}</h2>
-              {vehicle.type && (
-                <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide border border-white/10 bg-white/5 text-muted-foreground capitalize">{vehicle.type}</span>
-              )}
+              <h2 className="text-base font-bold text-foreground leading-tight truncate">{vehicleType}</h2>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="relative flex w-2 h-2">
