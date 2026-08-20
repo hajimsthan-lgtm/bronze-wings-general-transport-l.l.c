@@ -90,7 +90,8 @@ export default function DocumentListPane({
                 <div
                   key={item.id}
                   onClick={() => onSelect(item.id)}
-                  className={`relative flex items-center gap-3 px-3 py-3 cursor-pointer transition-all duration-200 ${
+                  style={{ gridTemplateColumns: '36px 1fr minmax(90px, auto)' }}
+                  className={`relative grid items-center gap-3 px-3 py-3 cursor-pointer transition-all duration-200 ${
                     isSelected ? 'bg-primary/10 border-l-2 border-primary' : 'border-l-2 border-transparent hover:bg-muted/30'
                   }`}
                 >
@@ -100,7 +101,7 @@ export default function DocumentListPane({
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono text-muted-foreground">{item[numberField] || '—'}</span>
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${cfg.pill}`}>
@@ -130,7 +131,7 @@ export default function DocumentListPane({
                   </div>
 
                   {/* Amount */}
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right">
                     <p className="text-sm font-bold tabular-nums text-foreground">
                       AED {amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </p>

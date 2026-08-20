@@ -529,25 +529,9 @@ export default function InvoicesPage() {
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Invoices</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your invoices</p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => setTemplateManagerOpen(true)}
-            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            title="Custom Templates"
-          >
-            <LayoutTemplate className="w-4 h-4" />
-          </button>
-          <HeaderActionButton
-            label="Create Invoice"
-            variant="trip"
-            onClick={handleNew}
-          />
-        </div>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Invoices</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your invoices</p>
       </div>
 
       {/* Stat cards */}
@@ -600,6 +584,20 @@ export default function InvoicesPage() {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+          <button
+            onClick={() => setTemplateManagerOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            title="Custom Templates"
+          >
+            <LayoutTemplate className="w-4 h-4" />
+          </button>
+          <HeaderActionButton
+            label="Create Invoice"
+            variant="trip"
+            onClick={handleNew}
+          />
+        </div>
       </div>
 
       {/* Bulk action bar */}
@@ -637,7 +635,7 @@ export default function InvoicesPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-22rem)] min-h-[400px]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane

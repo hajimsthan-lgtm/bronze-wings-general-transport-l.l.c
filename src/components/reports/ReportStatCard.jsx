@@ -39,7 +39,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
       <div className="absolute inset-x-0 top-0 h-[2px] opacity-70" style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)`, boxShadow: `0 0 12px ${rgba(0.8)}` }} />
       {/* Ambient color glow */}
       <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-25 group-hover:opacity-40 transition-opacity duration-500" style={{ background: color }} />
-      <div className="relative flex items-start justify-between mb-4">
+      <div className="relative flex items-start justify-between mb-2">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] pt-1.5" style={{ color: rgba(0.85) }}>{label}</p>
         {Icon && (
           <span
@@ -54,8 +54,8 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
           </span>
         )}
       </div>
-      <p className="relative text-2xl sm:text-4xl font-light text-white tabular-nums tracking-tight" style={{ textShadow: `0 0 24px ${rgba(0.3)}` }}>{display}</p>
-      {extra && <div className="relative mt-3 flex items-center justify-between gap-2 z-10">{extra}</div>}
+      <p className="relative text-xl sm:text-2xl font-light text-white tabular-nums tracking-tight" style={{ textShadow: `0 0 24px ${rgba(0.3)}` }}>{display}</p>
+      {extra && <div className="relative mt-2 flex items-center justify-between gap-2 z-10">{extra}</div>}
       {(to || onClick) && (
         <div className="absolute bottom-3 right-4 flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color, textShadow: `0 0 8px ${rgba(0.6)}` }}>
           View <ChevronRight className="w-3 h-3" />
@@ -65,7 +65,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
   );
 
   const clickable = to || onClick;
-  const cls = `relative overflow-hidden p-4 sm:p-6 animate-fade-in-up transition-all duration-400 group bg-card rounded-3xl ${
+  const cls = `relative overflow-hidden p-3 sm:p-4 animate-fade-in-up transition-all duration-400 group bg-card rounded-2xl ${
     clickable ? 'hover:-translate-y-[3px] cursor-pointer' : 'hover:-translate-y-[3px]'
   }`;
   const style = {

@@ -132,7 +132,8 @@ export default function InvoiceListPane({
                 <div
                   key={inv.id}
                   onClick={() => onSelect(inv.id)}
-                  className={`relative flex items-start gap-3 px-3 py-3 cursor-pointer transition-all duration-200 group ${
+                  style={{ gridTemplateColumns: 'auto auto 1fr minmax(90px, auto) 32px' }}
+                  className={`relative grid items-start gap-2.5 px-3 py-3 cursor-pointer transition-all duration-200 group ${
                     isSelected
                       ? 'bg-primary/10 border-l-2 border-primary'
                       : 'border-l-2 border-transparent hover:bg-muted/30'
@@ -153,7 +154,7 @@ export default function InvoiceListPane({
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-mono text-muted-foreground">{inv.invoice_number || '—'}</span>
                       {/* Status badge with overdue flag */}
@@ -196,44 +197,40 @@ export default function InvoiceListPane({
                         </div>
                       </div>
                     )}
+                    {/* Quick action icons on hover */}
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                      {actions.sendForSignature && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onAction('sendForSignature', inv); }}
+                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Send for Signature"
+                        >
+                          <Send className="w-3 h-3" />
+                        </button>
+                      )}
+                      {actions.attachSigned && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onAction('attachSigned', inv); }}
+                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                          title="Attach Signed Copy"
+                        >
+                          <FileSignature className="w-3 h-3" />
+                        </button>
+                      )}
+                      {actions.recordPayment && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onAction('recordPayment', inv); }}
+                          className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Record Payment"
+                        >
+                          <CreditCard className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Quick action icons on hover */}
-                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5">
-                    {actions.sendForSignature && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onAction('sendForSignature', inv); }}
-                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Send for Signature"
-                      >
-                        <Send className="w-3 h-3" />
-                      </button>
-                    )}
-                    {actions.attachSigned && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onAction('attachSigned', inv); }}
-                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors"
-                        title="Attach Signed Copy"
-                      >
-                        <FileSignature className="w-3 h-3" />
-                      </button>
-                    )}
-                    {actions.recordPayment && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onAction('recordPayment', inv); }}
-                        className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        title="Record Payment"
-                      >
-                        <CreditCard className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Actions menu */}
-                  <InvoiceActionsMenu inv={inv} onAction={onAction} />
 
                   {/* Amount */}
-                  <div className="text-right flex-shrink-0 mt-0.5">
+                  <div className="text-right mt-0.5">
                     <p className="text-sm font-bold tabular-nums text-foreground">
                       {balance > 0 && status !== 'paid' && status !== 'cancelled'
                         ? formatCurrencyShort(balance)
@@ -243,6 +240,9 @@ export default function InvoiceListPane({
                       <p className="text-[10px] text-muted-foreground tabular-nums">of {formatCurrencyShort(total)}</p>
                     )}
                   </div>
+
+                  {/* Actions menu */}
+                  <InvoiceActionsMenu inv={inv} onAction={onAction} />
                 </div>
               );
             })}

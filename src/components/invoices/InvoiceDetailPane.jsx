@@ -289,10 +289,11 @@ export default function InvoiceDetailPane({
         <button
           onClick={() => onDownload(inv)}
           disabled={isDownloading}
-          className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors disabled:opacity-50"
+          className="h-9 px-3 rounded-lg flex items-center gap-1.5 bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors text-xs font-semibold disabled:opacity-50"
           title="Download PDF"
         >
-          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          PDF
         </button>
 
         <EmailShareButton doc={inv} type="invoice" settings={settings} />

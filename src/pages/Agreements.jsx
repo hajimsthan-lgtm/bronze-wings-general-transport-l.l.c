@@ -289,21 +289,9 @@ export default function Agreements() {
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Agreements</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your agreements</p>
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => setTemplateEditorOpen(true)}
-            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            title="Edit Agreement Template"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-          </button>
-          <HeaderActionButton label="Create Agreement" variant="trip" onClick={handleNew} />
-        </div>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Agreements</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage and track all your agreements</p>
       </div>
 
       {/* Stat cards */}
@@ -342,6 +330,16 @@ export default function Agreements() {
             {STATUS_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
           </SelectContent>
         </Select>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+          <button
+            onClick={() => setTemplateEditorOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            title="Edit Agreement Template"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+          <HeaderActionButton label="Create Agreement" variant="trip" onClick={handleNew} />
+        </div>
       </div>
 
       {/* Two-pane layout */}
@@ -361,7 +359,7 @@ export default function Agreements() {
           {list.length === 0 && <Button onClick={handleNew} className="lightning-btn"><Plus className="w-4 h-4 mr-2" />New Agreement</Button>}
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-22rem)] min-h-[400px]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <DocumentListPane
               items={filtered}
