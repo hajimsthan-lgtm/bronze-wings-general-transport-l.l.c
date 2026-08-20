@@ -104,7 +104,7 @@ function VehiclesTab() {
     v.vendor_name?.toLowerCase().includes(q) ||
     v.type?.toLowerCase().includes(q) ||
     v.notes?.toLowerCase().includes(q)
-  );
+  ).sort((a, b) => (a.plate_number || '').localeCompare(b.plate_number || ''));
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const fExpenses = expenses.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));

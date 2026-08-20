@@ -47,7 +47,7 @@ export default function ClientsPanel() {
     return () => window.removeEventListener('clients:new', onNew);
   }, []);
 
-  const filtered = items.filter((c) => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.contact_person?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search));
+  const filtered = items.filter((c) => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.contact_person?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search)).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fInvoices = invoices.filter((i) => inGlobalDateRange(i.issue_date, dateFrom, dateTo));
   const revenueMap = {};
