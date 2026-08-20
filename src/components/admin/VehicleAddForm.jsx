@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FileText, User, ShieldCheck, Car, Hash, StickyNote, Save } from 'lucide-react';
 import VehicleLicenseScanZone from './VehicleLicenseScanZone';
 import { vehicleToLicenseForm, licenseFormToVehicle } from '@/lib/vehicleLicenseNotes';
+import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 
 const CATEGORY_OPTIONS = ['Private', 'Commercial', 'Truck', 'Bus', 'Taxi', 'Other'];
 
@@ -45,6 +47,7 @@ function Field({ label, span2, children }) {
 export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY);
+  const [dupInfo, setDupInfo] = useState(null); // { matchLabel, pendingSave }
 
   useEffect(() => {
     setForm(editItem ? vehicleToLicenseForm(editItem, editLicense) : EMPTY);
@@ -56,12 +59,26 @@ export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel
     setForm((p) => ({ ...p, ...data, category: data.category || p.category }));
   };
 
-  const handleSave = async () => {
+  const doSave = async () => {
     setSaving(true);
     try {
       const vehicleData = licenseFormToVehicle(form);
       await onSave(vehicleData, form);
     } finally { setSaving(false); }
+  };
+
+  const handleSave = async () => {
+    // Only check duplicates on NEW records (not edit)
+    if (!editItem && form.trafficPlateNo) {
+      try {
+        const existing = await base44.entities.Vehicle.filter({ plate_number: form.trafficPlateNo });
+        if (existing && existing.length > 0) {
+          setDupInfo({ matchLabel: form.trafficPlateNo, pendingSave: doSave });
+          return;
+        }
+      } catch { /* ignore check failure, proceed */ }
+    }
+    doSave();
   };
 
   return (
@@ -145,6 +162,14 @@ export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel
           <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save Vehicle'}
         </button>
       </div>
+
+      <DuplicateConfirmDialog
+        open={!!dupInfo}
+        entityType="vehicle"
+        matchLabel={dupInfo?.matchLabel || ''}
+        onContinue={() => { const fn = dupInfo?.pendingSave; setDupInfo(null); if (fn) fn(); }}
+        onCancel={() => setDupInfo(null)}
+      />
     </div>
   );
 }

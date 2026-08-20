@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Building2, UserPlus, Users } from 'lucide-react';
 import ImageUpload from '@/components/common/ImageUpload';
+import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 
 export default function ClientForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
+  const [dupInfo, setDupInfo] = useState(null);
   const [existingClients, setExistingClients] = useState([]);
   const [selectedExistingId, setSelectedExistingId] = useState('');
   const [form, setForm] = useState({ name: '', image_url: '', contact_person: '', email: '', phone: '', address: '', trn: '', status: 'active', payment_terms: 'Net 30', notes: '' });
@@ -34,7 +36,7 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
   const selectedExisting = existingClients.find(c => c.id === selectedExistingId);
   const isAddContactMode = !editItem && !!selectedExistingId;
 
-  const handle = async () => {
+  const doSave = async () => {
     setSaving(true);
     try {
       if (isAddContactMode && selectedExisting) {
@@ -48,6 +50,15 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
         await onSave(data);
       }
     } finally { setSaving(false); }
+  };
+
+  const handle = async () => {
+    // Only check duplicates on NEW company (not edit, not add-contact mode)
+    if (!editItem && !isAddContactMode && form.name) {
+      const match = existingClients.find((c) => c.name?.toLowerCase().trim() === form.name.toLowerCase().trim());
+      if (match) { setDupInfo({ matchLabel: form.name, pendingSave: doSave }); return; }
+    }
+    doSave();
   };
 
   if (isAddContactMode) {
@@ -151,6 +162,13 @@ export default function ClientForm({ editItem, onSave, onCancel }) {
         </div>
       )}
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving || (!editItem && !form.name)} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
+      <DuplicateConfirmDialog
+        open={!!dupInfo}
+        entityType="client"
+        matchLabel={dupInfo?.matchLabel || ''}
+        onContinue={() => { const fn = dupInfo?.pendingSave; setDupInfo(null); if (fn) fn(); }}
+        onCancel={() => setDupInfo(null)}
+      />
     </div>
   );
 }

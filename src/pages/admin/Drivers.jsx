@@ -17,6 +17,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
+import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { useDriversMode, setDriversMode, setDriversData, getDriversView } from '@/lib/driversStore';
 
 export default function Drivers() {
@@ -102,13 +103,25 @@ function DriversTab() {
 function DriverForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
+  const [dupInfo, setDupInfo] = useState(null);
   const [form, setForm] = useState({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
   useEffect(() => {
     if (editItem) { setForm({ ...form, ...editItem, base_salary: editItem.base_salary || '' }); }
     else setForm({ name: '', image_url: '', phone: '', email: '', license_number: '', license_expiry: '', nationality: '', status: 'active', assigned_vehicle: '', base_salary: '', join_date: '', visa_expiry: '', notes: '' });
   }, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
-  const handle = async () => { setSaving(true); await onSave({ ...form, base_salary: Number(form.base_salary) || 0 }); setSaving(false); };
+
+  const doSave = async () => { setSaving(true); await onSave({ ...form, base_salary: Number(form.base_salary) || 0 }); setSaving(false); };
+  const handle = async () => {
+    if (!editItem && form.name) {
+      try {
+        const existing = await base44.entities.Driver.list('-created_date', 200);
+        const match = (existing || []).find((d) => d.name?.toLowerCase().trim() === form.name.toLowerCase().trim());
+        if (match) { setDupInfo({ matchLabel: form.name, pendingSave: doSave }); return; }
+      } catch { /* ignore */ }
+    }
+    doSave();
+  };
 
   return (
     <div className="space-y-4">
@@ -128,6 +141,13 @@ function DriverForm({ editItem, onSave, onCancel }) {
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input value={form.assigned_vehicle} onChange={(e) => update('assigned_vehicle', e.target.value)} className="bg-background border-border" /></div>
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
+      <DuplicateConfirmDialog
+        open={!!dupInfo}
+        entityType="driver"
+        matchLabel={dupInfo?.matchLabel || ''}
+        onContinue={() => { const fn = dupInfo?.pendingSave; setDupInfo(null); if (fn) fn(); }}
+        onCancel={() => setDupInfo(null)}
+      />
     </div>
   );
 }

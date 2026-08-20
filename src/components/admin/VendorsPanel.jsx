@@ -11,6 +11,7 @@ import VendorsAnalytics from '@/components/admin/VendorsAnalytics';
 import VendorCard from '@/components/admin/VendorCard';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
+import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
 
 export default function VendorsPanel() {
@@ -87,10 +88,22 @@ export default function VendorsPanel() {
 function VendorForm({ editItem, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
+  const [dupInfo, setDupInfo] = useState(null);
   const [form, setForm] = useState({ name: '', contact_person: '', email: '', phone: '', address: '', trn: '', category: 'other', status: 'active', notes: '' });
   useEffect(() => { if (editItem) setForm({ ...form, ...editItem }); else setForm({ name: '', contact_person: '', email: '', phone: '', address: '', trn: '', category: 'other', status: 'active', notes: '' }); }, [editItem]);
   const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
-  const handle = async () => { setSaving(true); await onSave(form); setSaving(false); };
+
+  const doSave = async () => { setSaving(true); await onSave(form); setSaving(false); };
+  const handle = async () => {
+    if (!editItem && form.name) {
+      try {
+        const existing = await base44.entities.Vendor.list('-created_date', 200);
+        const match = (existing || []).find((v) => v.name?.toLowerCase().trim() === form.name.toLowerCase().trim());
+        if (match) { setDupInfo({ matchLabel: form.name, pendingSave: doSave }); return; }
+      } catch { /* ignore */ }
+    }
+    doSave();
+  };
 
   return (
     <div className="space-y-4">
@@ -108,6 +121,13 @@ function VendorForm({ editItem, onSave, onCancel }) {
       <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Input value={form.address} onChange={(e) => update('address', e.target.value)} className="bg-background border-border" /></div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">TRN</Label><Input value={form.trn} onChange={(e) => update('trn', e.target.value)} className="bg-background border-border" /></div>
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
+      <DuplicateConfirmDialog
+        open={!!dupInfo}
+        entityType="vendor"
+        matchLabel={dupInfo?.matchLabel || ''}
+        onContinue={() => { const fn = dupInfo?.pendingSave; setDupInfo(null); if (fn) fn(); }}
+        onCancel={() => setDupInfo(null)}
+      />
     </div>
   );
 }
