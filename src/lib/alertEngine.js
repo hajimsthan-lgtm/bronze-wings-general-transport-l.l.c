@@ -91,20 +91,37 @@ export function buildAlerts(data) {
     }
   });
 
-  // Standalone documents (entity-attached)
+  // Standalone documents (entity-attached) — cross-reference owning entity
+  const vehicleMap = new Map(vehicles.map(v => [v.id, v]));
+  const driverMap = new Map(drivers.map(d => [d.id, d]));
   documents.forEach((d) => {
     const st = d.status || docStatus(d.expiry_date);
     if (st === 'expired' || st === 'expiring_soon') {
       const days = daysUntil(d.expiry_date);
+      let ownerLabel = '';
+      if (d.related_id) {
+        if (d.related_entity === 'vehicle' || d.related_entity === 'Vehicle') {
+          const v = vehicleMap.get(d.related_id);
+          if (v) ownerLabel = `Vehicle ${v.plate_number || ''}`;
+        } else if (d.related_entity === 'driver' || d.related_entity === 'Driver') {
+          const dr = driverMap.get(d.related_id);
+          if (dr) ownerLabel = dr.name || '';
+        }
+      }
+      const docType = d.title || d.type || 'Document';
+      const sub = ownerLabel ? `${docType} — ${ownerLabel}` : docType;
+      let to = '/admin/documents';
+      if (d.related_id && d.related_entity === 'vehicle') to = `/admin/vehicles/${d.related_id}`;
+      else if (d.related_id && d.related_entity === 'driver') to = `/admin/drivers/${d.related_id}`;
       items.push({
         id: `doc-${d.id}`,
         category: 'documents',
         icon: 'FileWarning',
         severity: st === 'expired' ? 'critical' : 'warning',
         title: st === 'expired' ? 'Document Expired' : 'Document Expiring',
-        sub: d.title || d.name || '—',
+        sub,
         meta: days !== null ? (days < 0 ? `${Math.abs(days)}d ago` : `${days}d left`) : '',
-        to: '/admin/documents',
+        to,
       });
     }
   });
