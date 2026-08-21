@@ -52,14 +52,7 @@ export default function BankReconciliation() {
           { key: 'deposit', label: 'Deposit', type: 'number', sample: '5000.00' },
           { key: 'withdrawal', label: 'Withdrawal', type: 'number', sample: '0.00' },
         ],
-        // SmartCsvImporter handles normalization + mapping; transform is a safety fallback
-        transform: (r) => ({
-          date: r.date || '',
-          reference: r.reference || '',
-          description: r.description || '',
-          deposit: Number(r.deposit) || 0,
-          withdrawal: Number(r.withdrawal) || 0,
-        }),
+        // SmartCsvImporter handles normalization (dates→YYYY-MM-DD, numbers→parsed) + column mapping
       }}
     />
   );

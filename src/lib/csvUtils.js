@@ -163,7 +163,7 @@ const normalizeHeader = (h) => String(h).toLowerCase().replace(/[^a-z0-9]/g, '')
  */
 export const FIELD_ALIASES = {
   date: ['date', 'txndate', 'transactiondate', 'valuedate', 'postingdate', 'dt', 'trxdate', 'businessdate', 'dated'],
-  reference: ['reference', 'ref', 'refno', 'referencenumber', 'chequeno', 'chequenumber', 'transactionid', 'txnid', 'docno', 'documentno', 'slno'],
+  reference: ['reference', 'ref', 'refno', 'referencenumber', 'referenceno', 'chequeno', 'chequenumber', 'transactionid', 'txnid', 'docno', 'documentno'],
   description: ['description', 'desc', 'narration', 'details', 'memo', 'particulars', 'transactiondetails', 'remarks', 'note', 'notes', 'narrationdescription', 'transactiondescription'],
   deposit: ['deposit', 'credit', 'inflow', 'creditamount', 'amountcredit', 'incoming', 'received', 'creditamountaed', 'depositamount'],
   withdrawal: ['withdrawal', 'debit', 'outflow', 'debitamount', 'amountdebit', 'outgoing', 'paid', 'debitamountaed', 'withdrawalamount'],
@@ -192,11 +192,12 @@ export function autoMapColumns(csvHeaders, entityFields) {
       }
     }
     if (mapping[field] !== undefined) continue;
-    // Try contains match (header contains alias or vice versa)
+    // Try contains match — only if header CONTAINS a known alias (min 4 chars)
+    // Shorter aliases (ref, dt, desc) are exact-match only to avoid false positives
     for (let i = 0; i < normalized.length; i++) {
       if (used.has(i)) continue;
       for (const alias of aliases) {
-        if (normalized[i].includes(alias) || alias.includes(normalized[i])) {
+        if (alias.length >= 4 && normalized[i].includes(alias)) {
           mapping[field] = i;
           used.add(i);
           break;
