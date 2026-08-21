@@ -11,6 +11,7 @@ import IconInput from './IconInput';
 import TripTypeSelector from './TripTypeSelector';
 import VendorPaymentFields from './VendorPaymentFields';
 import TripFinancialFields from './TripFinancialFields';
+import SearchableSelect from '@/components/common/SearchableSelect';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -189,12 +190,12 @@ export default function TripModeFields({ p }) {
         {form.assignment_mode === 'vendor' && (
           <div>
             <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><Store className="w-3 h-3" /> Service Provider</Label>
-            <Select value={form.vendor_name || ''} onValueChange={(v) => { update('vendor_name', v); update('vehicle_plate', ''); update('driver_name', ''); }}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select Vendor" /></SelectTrigger>
-              <SelectContent>
-                {serviceProviderVendors.map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.vendor_name || ''}
+              onChange={(v) => { update('vendor_name', v); update('vehicle_plate', ''); update('driver_name', ''); }}
+              placeholder="Select Vendor"
+              items={serviceProviderVendors.map((v) => ({ value: v.name, label: v.name }))}
+            />
           </div>
         )}
 
@@ -202,16 +203,22 @@ export default function TripModeFields({ p }) {
           {/* Driver first — auto-selects assigned vehicle */}
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('driver')} <span className="text-red-400">*</span></Label>
-            <Select value={form.driver_name || ''} onValueChange={handleDriverSelect}>
-              <SelectTrigger className={`${inputCls}${errCls('driver_name')}`}><SelectValue placeholder="Select driver" /></SelectTrigger>
-              <SelectContent>
-                {availableDrivers.map((d) => (
-                  <SelectItem key={d.id} value={d.name}>
-                    {d.name}{d.phone ? ` · ${d.phone}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.driver_name || ''}
+              onChange={handleDriverSelect}
+              placeholder="Select driver"
+              className={errCls('driver_name')}
+              items={availableDrivers.map((d) => ({
+                value: d.name,
+                label: d.name,
+                search: d.phone ? ` ${d.phone}` : '',
+                content: (
+                  <span className="truncate">
+                    {d.name}{d.phone ? <span className="text-muted-foreground"> · {d.phone}</span> : ''}
+                  </span>
+                ),
+              }))}
+            />
             {driverIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
             )}
@@ -223,16 +230,22 @@ export default function TripModeFields({ p }) {
           {/* Vehicle second — auto-selects assigned driver */}
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('vehicle')} <span className="text-red-400">*</span></Label>
-            <Select value={form.vehicle_plate || ''} onValueChange={handleVehicleSelect}>
-              <SelectTrigger className={`${inputCls}${errCls('vehicle_plate')}`}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
-              <SelectContent>
-                {availableVehicles.map((v) => (
-                  <SelectItem key={v.id} value={v.plate_number}>
-                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.vehicle_plate || ''}
+              onChange={handleVehicleSelect}
+              placeholder="Select vehicle"
+              className={errCls('vehicle_plate')}
+              items={availableVehicles.map((v) => ({
+                value: v.plate_number,
+                label: v.plate_number,
+                search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
+                content: (
+                  <span className="truncate">
+                    {v.plate_number}{v.make && v.model ? <span className="text-muted-foreground"> · {v.make} {v.model}</span> : ''}
+                  </span>
+                ),
+              }))}
+            />
             {vehicleIsVendor && (
               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
             )}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SearchableSelect from '@/components/common/SearchableSelect';
 
 export default function VehicleNavDropdown() {
   const navigate = useNavigate();
@@ -11,24 +11,29 @@ export default function VehicleNavDropdown() {
     base44.entities.Vehicle.list('-created_date', 200).then((v) => setVehicles((v || []).filter((x) => !x.vendor_name))).catch(() => {});
   }, []);
 
-  const onSelect = (id) => {
-    if (id === 'all') navigate('/admin/vehicles');
-    else navigate(`/admin/vehicles/${id}`);
-  };
+  const items = [
+    { value: 'all', label: 'All Vehicles' },
+    ...vehicles.map((v) => ({
+      value: v.id,
+      label: v.plate_number,
+      search: v.make ? ` ${v.make} ${v.model || ''}` : '',
+      content: (
+        <span className="truncate">
+          {v.plate_number}{v.make ? <span className="text-muted-foreground"> · {v.make} {v.model || ''}</span> : ''}
+        </span>
+      ),
+    })),
+  ];
 
   return (
-    <Select value="all" onValueChange={onSelect}>
-      <SelectTrigger className="w-[130px] sm:w-[200px] h-8 bg-white/5 border-white/10 text-foreground text-xs">
-        <SelectValue placeholder="Select a vehicle…" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All Vehicles</SelectItem>
-        {vehicles.map((v) => (
-          <SelectItem key={v.id} value={v.id}>
-            {v.plate_number}{v.make ? ` · ${v.make} ${v.model || ''}` : ''}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="w-[130px] sm:w-[200px]">
+      <SearchableSelect
+        value="all"
+        onChange={(id) => id === 'all' ? navigate('/admin/vehicles') : navigate(`/admin/vehicles/${id}`)}
+        placeholder="Select a vehicle…"
+        items={items}
+        className="h-8 bg-white/5 border-white/10 text-foreground text-xs"
+      />
+    </div>
   );
 }

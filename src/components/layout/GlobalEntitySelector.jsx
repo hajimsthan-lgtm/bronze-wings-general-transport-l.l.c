@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SearchableSelect from '@/components/common/SearchableSelect';
 
 const TYPES = [
   { key: 'clients', label: 'Client', path: '/admin/clients', nameKey: 'name', load: () => base44.entities.Client.list('-created_date', 200) },
@@ -22,17 +22,26 @@ export default function GlobalEntitySelector() {
 
   if (!active) return null;
 
+  const items = [
+    { value: 'all', label: `All ${active.label.toLowerCase()}s` },
+    ...list.map((item) => ({
+      value: item.id,
+      label: item[active.nameKey],
+      search: active.key === 'vehicles' ? ` ${item.make || ''} ${item.model || ''}` : (active.key === 'drivers' ? ` ${item.phone || ''}` : ''),
+    })),
+  ];
+
   return (
     <div className="hidden md:flex items-center gap-2">
-      <Select value="all" onValueChange={(id) => id !== 'all' && navigate(`${active.path}/${id}`)}>
-        <SelectTrigger className="w-[160px] h-8 bg-white/5 border-white/10 text-foreground text-xs hover:border-white/20">
-          <SelectValue placeholder={`Select a ${active.label.toLowerCase()}…`} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All {active.label.toLowerCase()}s</SelectItem>
-          {list.map((item) => <SelectItem key={item.id} value={item.id}>{item[active.nameKey]}</SelectItem>)}
-        </SelectContent>
-      </Select>
+      <div className="w-[160px]">
+        <SearchableSelect
+          value="all"
+          onChange={(id) => id !== 'all' && navigate(`${active.path}/${id}`)}
+          placeholder={`Select a ${active.label.toLowerCase()}…`}
+          items={items}
+          className="h-8 bg-white/5 border-white/10 text-foreground text-xs hover:border-white/20"
+        />
+      </div>
     </div>
   );
 }

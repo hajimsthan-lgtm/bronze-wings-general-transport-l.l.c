@@ -8,6 +8,7 @@ import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from '../CreateNewCard';
 import Section from '../Section';
 import { CONTRACT_CATS } from './contractCats';
+import SearchableSelect from '@/components/common/SearchableSelect';
 
 const DOC_PLACEHOLDERS = [
   { key: 'doc_contract_agreement' },
@@ -137,29 +138,39 @@ export default function ContractModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('chiller_van')}</Label>
-            <Select value={contract.vehicle_plate || ''} onValueChange={(v) => updateContract('vehicle_plate', v)}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select vehicle" /></SelectTrigger>
-              <SelectContent>
-                {availableVehicles.map((v) => (
-                  <SelectItem key={v.id} value={v.plate_number}>
-                    {v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={contract.vehicle_plate || ''}
+              onChange={(v) => updateContract('vehicle_plate', v)}
+              placeholder="Select vehicle"
+              items={availableVehicles.map((v) => ({
+                value: v.plate_number,
+                label: v.plate_number,
+                search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
+                content: (
+                  <span className="truncate">
+                    {v.plate_number}{v.make && v.model ? <span className="text-muted-foreground"> · {v.make} {v.model}</span> : ''}
+                  </span>
+                ),
+              }))}
+            />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('assigned_driver')}</Label>
-            <Select value={contract.driver_name || ''} onValueChange={(v) => updateContract('driver_name', v)}>
-              <SelectTrigger className={inputCls}><SelectValue placeholder="Select driver" /></SelectTrigger>
-              <SelectContent>
-                {availableDrivers.map((d) => (
-                  <SelectItem key={d.id} value={d.name}>
-                    {d.name}{d.phone ? ` · ${d.phone}` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={contract.driver_name || ''}
+              onChange={(v) => updateContract('driver_name', v)}
+              placeholder="Select driver"
+              items={availableDrivers.map((d) => ({
+                value: d.name,
+                label: d.name,
+                search: d.phone ? ` ${d.phone}` : '',
+                content: (
+                  <span className="truncate">
+                    {d.name}{d.phone ? <span className="text-muted-foreground"> · {d.phone}</span> : ''}
+                  </span>
+                ),
+              }))}
+            />
           </div>
         </div>
       </Section>
