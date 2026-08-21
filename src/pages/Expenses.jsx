@@ -30,6 +30,7 @@ import MobileFAB from '@/components/mobile/MobileFAB';
 import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExpenseCard from '@/components/expenses/ExpenseCard';
 import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToRgba } from '@/components/expenses/expenseMeta';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 // Category metadata imported from @/components/expenses/expenseMeta
 const EXPENSE_EXPORT_COLUMNS = [
@@ -64,6 +65,7 @@ export default function Expenses() {
     return true;
   });
 
+  const { visible: visExp, sentinelProps: expSentinel, hasMore: hasMoreExp, visibleCount: visE, totalCount: totalE } = useProgressiveRender(filtered);
   const totalAmount = filtered.reduce((s, e) => s + (e.amount || 0), 0);
   const pendingCount = filtered.filter((e) => e.status === 'pending').length;
   const approvedCount = filtered.filter((e) => e.status === 'approved').length;
@@ -146,9 +148,14 @@ export default function Expenses() {
           <EmptyState icon={Receipt} title={t('no_data')} description="Add your first expense" />
         ) : viewMode === 'card' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-            {filtered.map(exp => (
+            {visExp.map(exp => (
               <ExpenseCard key={exp.id} exp={exp} onEdit={(e) => { setEditItem(e); setFormOpen(true); }} onDelete={setDeleteTarget} />
             ))}
+            {hasMoreExp && (
+              <div {...expSentinel} className="col-span-full text-center text-xs text-muted-foreground py-4">
+                Loading more… ({visE}/{totalE})
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-xl border border-border overflow-hidden bg-background/40">
@@ -164,7 +171,7 @@ export default function Expenses() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((exp) => {
+                  {visExp.map((exp) => {
                     const Icon = categoryIcons[exp.category] || categoryIcons.other;
                     const color = categoryColors[exp.category] || '#94a3b8';
                     return (
@@ -196,8 +203,15 @@ export default function Expenses() {
                       </tr>
                     );
                   })}
-                </tbody>
-              </table>
+                  {hasMoreExp && (
+                   <tr {...expSentinel}>
+                     <td colSpan={5} className="text-center text-xs text-muted-foreground py-3">
+                       Loading more… ({visE}/{totalE})
+                     </td>
+                   </tr>
+                  )}
+                  </tbody>
+                  </table>
             </div>
           </div>
         )}
