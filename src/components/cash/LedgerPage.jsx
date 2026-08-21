@@ -175,17 +175,18 @@ export default function LedgerPage({
 
       {/* sub-header toggle row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {modeOptions && <Toggle options={modeOptions} value={mode} onChange={setMode} />}
-          <Toggle options={viewOptions} value={view} onChange={setView} />
-        </div>
-
-        {enableImportUndo && lastBatch && (
-          <ImportUndoBanner
-            batch={lastBatch}
-            onUndo={() => setUndoBatchId(lastBatch.batchId)}
-            onDismiss={() => setLastBatch(null)}
-          />
-        )}
+          <div className="flex items-center gap-3 flex-wrap">
+            {modeOptions && <Toggle options={modeOptions} value={mode} onChange={setMode} />}
+            <Toggle options={viewOptions} value={view} onChange={setView} />
+          </div>
+          {enableImportUndo && lastBatch && (
+            <ImportUndoBanner
+              batch={lastBatch}
+              onUndo={() => setUndoBatchId(lastBatch.batchId)}
+              onDismiss={() => setLastBatch(null)}
+            />
+          )}
+         </div>
 
         {view === 'history' && enableImportUndo ? (
           <ImportHistoryPanel key={historyRefreshKey} entityName={entityName} onUndo={(bid) => setUndoBatchId(bid)} />
