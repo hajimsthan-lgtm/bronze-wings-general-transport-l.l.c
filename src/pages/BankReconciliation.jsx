@@ -40,6 +40,7 @@ export default function BankReconciliation() {
         reference: form.reference || ''
       })}
       dateHasTime={false}
+      enableImportUndo
       exportFilename="bank-reconciliation"
       exportTitle="Bank Reconciliation Statement"
       exportColumns={EXPORT_COLS}

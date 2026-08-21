@@ -43,17 +43,19 @@ function downloadSampleCsv(filename, columns) {
   URL.revokeObjectURL(url);
 }
 
-export default function CsvImportButton({ entityName, filename, columns, transform, enrichRows, onImported, label = 'Import CSV', className = '' }) {
+export default function CsvImportButton({ entityName, filename, columns, transform, enrichRows, onImported, label = 'Import CSV', className = '', batchTracking, onBatchImported }) {
   const { toast } = useToast();
   const fileRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState([]);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
+  const [csvFilename, setCsvFilename] = useState('');
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCsvFilename(file.name);
     const text = await file.text();
     const { headers, rows: parsed } = parseCsv(text);
     if (!headers.length) {toast({ title: 'CSV is empty', variant: 'destructive' });return;}
@@ -75,10 +77,34 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
       if (typeof enrichRows === 'function') {
         finalRows = await enrichRows(rows);
       }
-      const created = await base44.entities[entityName].bulkCreate(finalRows);
-      setResults({ success: created.length, failed: finalRows.length - created.length });
-      toast({ title: `Imported ${created.length} ${entityName.toLowerCase()}s` });
-      onImported?.();
+      if (batchTracking) {
+        const batchId = `IMP-${Date.now()}-${(typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10)}`;
+        const me = await base44.auth.me().catch(() => null);
+        const importedBy = me?.full_name || me?.email || 'Unknown';
+        const importedDatetime = new Date().toISOString();
+        finalRows = finalRows.map((r) => ({ ...r, import_batch_id: batchId }));
+        const created = await base44.entities[entityName].bulkCreate(finalRows);
+        try {
+          await base44.entities.ImportBatch.create({
+            batch_id: batchId,
+            entity_type: entityName,
+            filename: csvFilename || 'unknown.csv',
+            row_count: created.length,
+            imported_by: importedBy,
+            imported_datetime: importedDatetime,
+            status: 'active',
+          });
+        } catch { /* batch record is best-effort */ }
+        setResults({ success: created.length, failed: finalRows.length - created.length });
+        toast({ title: `Imported ${created.length} ${entityName.toLowerCase()}s` });
+        onImported?.();
+        onBatchImported?.({ batchId, filename: csvFilename || 'unknown.csv', rowCount: created.length, importedBy, importedDatetime });
+      } else {
+        const created = await base44.entities[entityName].bulkCreate(finalRows);
+        setResults({ success: created.length, failed: finalRows.length - created.length });
+        toast({ title: `Imported ${created.length} ${entityName.toLowerCase()}s` });
+        onImported?.();
+      }
     } catch (err) {
       setResults({ success: 0, failed: rows.length, error: err.message });
       toast({ title: 'Import failed', description: err.message, variant: 'destructive' });

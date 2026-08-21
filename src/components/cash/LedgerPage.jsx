@@ -10,6 +10,9 @@ import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
 import DatePicker from '@/components/common/DatePicker';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import EmptyState from '@/components/common/EmptyState';
+import ImportUndoBanner from '@/components/bank-rec/ImportUndoBanner';
+import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
+import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -57,7 +60,8 @@ export default function LedgerPage({
   modeOptions, defaultMode, modeFilter,
   rowToAmounts, buildCreate, dateHasTime,
   exportFilename, exportTitle, exportColumns,
-  importConfig
+  importConfig,
+  enableImportUndo
 }) {
   const [rows, setRows] = useState(null);
   const [view, setView] = useState('statement');
@@ -65,6 +69,12 @@ export default function LedgerPage({
   const [saving, setSaving] = useState(false);
   const { dateFrom: filterFrom, dateTo: filterTo, setDateFrom: setFilterFrom, setDateTo: setFilterTo } = useGlobalDate();
   const [q, setQ] = useState('');
+  const [lastBatch, setLastBatch] = useState(null);
+  const [undoBatchId, setUndoBatchId] = useState(null);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const viewOptions = enableImportUndo
+    ? [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }, { value: 'history', label: 'Import History' }]
+    : [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }];
 
   const makeForm = useCallback(() => {
     const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
@@ -166,10 +176,20 @@ export default function LedgerPage({
       {/* sub-header toggle row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           {modeOptions && <Toggle options={modeOptions} value={mode} onChange={setMode} />}
-          <Toggle options={[{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }]} value={view} onChange={setView} />
+          <Toggle options={viewOptions} value={view} onChange={setView} />
         </div>
 
-        {/* single panel */}
+        {enableImportUndo && lastBatch && (
+          <ImportUndoBanner
+            batch={lastBatch}
+            onUndo={() => setUndoBatchId(lastBatch.batchId)}
+            onDismiss={() => setLastBatch(null)}
+          />
+        )}
+
+        {view === 'history' && enableImportUndo ? (
+          <ImportHistoryPanel key={historyRefreshKey} entityName={entityName} onUndo={(bid) => setUndoBatchId(bid)} />
+        ) : (
         <div style={PANEL} className="overflow-hidden">
           {/* summary stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
@@ -194,6 +214,8 @@ export default function LedgerPage({
                        transform={importConfig.transform}
                        onImported={load}
                        label="Import CSV"
+                       batchTracking={enableImportUndo}
+                       onBatchImported={enableImportUndo ? (info) => { setLastBatch(info); setView('statement'); } : undefined}
                      />
                    )}
                  </div>
@@ -325,6 +347,16 @@ export default function LedgerPage({
             )}
           </div>
         </div>
+        )}
+
+        {enableImportUndo && undoBatchId && (
+          <UndoImportDialog
+            batchId={undoBatchId}
+            entityName={entityName}
+            onClose={() => setUndoBatchId(null)}
+            onUndone={() => { setUndoBatchId(null); setLastBatch(null); setHistoryRefreshKey(k => k + 1); load(); }}
+          />
+        )}
       </div>
     </div>
   );

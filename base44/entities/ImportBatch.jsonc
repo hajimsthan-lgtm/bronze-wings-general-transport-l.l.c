@@ -1,46 +1,56 @@
 {
-  "name": "BankReconciliation",
+  "name": "ImportBatch",
   "type": "object",
   "properties": {
-    "date": {
+    "batch_id": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    },
+    "row_count": {
+      "type": "number",
+      "default": 0
+    },
+    "imported_by": {
+      "type": "string"
+    },
+    "imported_datetime": {
+      "type": "string"
+    },
+    "status": {
       "type": "string",
-      "format": "date"
+      "enum": [
+        "active",
+        "undone"
+      ],
+      "default": "active"
     },
-    "deposit": {
+    "undone_by": {
+      "type": "string"
+    },
+    "undone_datetime": {
+      "type": "string"
+    },
+    "rows_removed": {
       "type": "number",
       "default": 0
     },
-    "withdrawal": {
+    "reconciled_removed": {
       "type": "number",
       "default": 0
-    },
-    "description": {
-      "type": "string"
-    },
-    "reference": {
-      "type": "string"
-    },
-    "import_batch_id": {
-      "type": "string"
-    },
-    "reconciled": {
-      "type": "boolean",
-      "default": false
-    },
-    "reconciled_ref_type": {
-      "type": "string"
-    },
-    "reconciled_ref_id": {
-      "type": "string"
-    },
-    "reconciled_ref_label": {
-      "type": "string"
     }
   },
   "required": [
-    "date",
-    "deposit",
-    "withdrawal"
+    "batch_id",
+    "entity_type",
+    "filename",
+    "row_count",
+    "imported_by",
+    "imported_datetime"
   ],
   "rls": {
     "read": {
