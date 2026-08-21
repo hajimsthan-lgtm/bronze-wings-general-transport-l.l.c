@@ -52,6 +52,32 @@ export default function Cash() {
       exportFilename="petty-cash"
       exportTitle="Petty Cash Statement"
       exportColumns={EXPORT_COLS}
+      enableImportUndo
+      importConfig={{
+        columns: [
+          { key: 'date', label: 'Date', type: 'date', required: true, sample: '2026-01-15' },
+          { key: 'recipient', label: 'Recipient', type: 'text', sample: 'John Doe' },
+          { key: 'receipt_number', label: 'Receipt #', type: 'text', sample: 'RCP-001' },
+          { key: 'description', label: 'Description', type: 'text', sample: 'Office supplies' },
+          { key: 'inflow', label: 'Inflow', type: 'number', sample: '0.00' },
+          { key: 'outflow', label: 'Outflow', type: 'number', sample: '150.00' },
+        ],
+        transform: (r) => {
+          const inAmt = Number(r.inflow) || 0;
+          const outAmt = Number(r.outflow) || 0;
+          const isOut = outAmt > 0;
+          return {
+            date: r.date || '',
+            type: isOut ? 'outflow' : 'inflow',
+            amount: isOut ? outAmt : inAmt,
+            description: r.description || '',
+            receipt_number: r.receipt_number || '',
+            category: 'cash',
+            received_from: !isOut ? (r.recipient || '') : '',
+            paid_to: isOut ? (r.recipient || '') : '',
+          };
+        },
+      }}
     />
   );
 }

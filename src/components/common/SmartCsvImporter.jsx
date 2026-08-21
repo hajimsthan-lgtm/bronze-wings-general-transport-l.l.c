@@ -12,7 +12,9 @@ import {
   autoMapColumns, validateRow,
 } from '@/lib/csvUtils';
 
-const CHUNK_SIZE = 200; // rows per bulkCreate call — safe under API limits
+const CHUNK_SIZE = 50; // rows per bulkCreate call — safe under API limits
+const SUB_CHUNK_SIZE = 10; // fallback sub-chunk if full chunk fails
+const RETRY_DELAY = 800; // ms between retries for transient failures
 
 export default function SmartCsvImporter({
   entityName,
@@ -127,27 +129,45 @@ export default function SmartCsvImporter({
 
     setProgress({ done: 0, total, failed: 0, errors: [] });
 
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    const createWithRetry = async (rows, label) => {
+      // Try bulkCreate with up to 2 retries for transient failures
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          return await base44.entities[entityName].bulkCreate(rows);
+        } catch (err) {
+          if (attempt === 2) throw err;
+          await sleep(RETRY_DELAY * (attempt + 1));
+        }
+      }
+    };
+
     for (let ci = 0; ci < chunks.length; ci++) {
       const chunk = chunks[ci];
       try {
-        await base44.entities[entityName].bulkCreate(chunk);
+        await createWithRetry(chunk, `chunk-${ci + 1}`);
         done += chunk.length;
       } catch (err) {
-        failed += chunk.length;
-        errors.push({ chunk: ci + 1, message: err.message || 'Unknown error' });
-        // Try smaller sub-chunks to salvage partial failures
-        if (chunk.length > 25) {
-          const subSize = 25;
-          for (let si = 0; si < chunk.length; si += subSize) {
-            const sub = chunk.slice(si, si + subSize);
-            try {
-              await base44.entities[entityName].bulkCreate(sub);
-              done += sub.length;
-              failed -= sub.length;
-            } catch (subErr) {
-              errors.push({ chunk: `sub-${ci + 1}-${si}`, message: subErr.message });
+        // Chunk failed — fall back to sub-chunks of SUB_CHUNK_SIZE
+        for (let si = 0; si < chunk.length; si += SUB_CHUNK_SIZE) {
+          const sub = chunk.slice(si, si + SUB_CHUNK_SIZE);
+          try {
+            await createWithRetry(sub, `sub-${ci + 1}-${si}`);
+            done += sub.length;
+          } catch (subErr) {
+            // Sub-chunk failed — fall back to individual row creation
+            for (const row of sub) {
+              try {
+                await base44.entities[entityName].create(row);
+                done += 1;
+              } catch (rowErr) {
+                failed += 1;
+                errors.push({ chunk: `row-${ci + 1}`, message: rowErr.message || 'Unknown error' });
+              }
             }
           }
+          setProgress({ done, total, failed, errors });
         }
       }
       setProgress({ done, total, failed, errors });
@@ -390,7 +410,7 @@ export default function SmartCsvImporter({
                 {progress.failed > 0 && <span className="text-rose-400">{progress.failed} failed</span>}
               </div>
               <p className="text-center text-[10px] text-muted-foreground">
-                Uploading in chunks of {CHUNK_SIZE} rows to prevent timeouts…
+                Uploading in chunks of {CHUNK_SIZE} rows with auto-retry and fallback…
               </p>
             </div>
           )}
