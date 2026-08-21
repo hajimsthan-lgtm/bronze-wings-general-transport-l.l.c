@@ -13,6 +13,7 @@ import MobileFAB from '@/components/mobile/MobileFAB';
 import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -44,6 +45,7 @@ export default function VendorsPanel() {
   expenses.forEach((e) => { if (e.vendor_name) spendMap[e.vendor_name] = (spendMap[e.vendor_name] || 0) + (Number(e.amount) || 0); });
 
   const searched = items.filter((v) => !search || v.name?.toLowerCase().includes(search.toLowerCase()) || (v.category || '').includes(search.toLowerCase()));
+  const { visible: visVendors, sentinelProps: venSentinel, hasMore: hasMoreVendors, visibleCount: visVen, totalCount: totalVen } = useProgressiveRender(searched);
 
   const handleEdit = (v) => { setEditItem(v || null); setFormOpen(true); };
 
@@ -66,9 +68,14 @@ export default function VendorsPanel() {
             </div>
           ) : (
             <div className="space-y-2">
-              {searched.map((v) => (
+              {visVendors.map((v) => (
                 <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
               ))}
+              {hasMoreVendors && (
+                <div {...venSentinel} className="text-center text-xs text-muted-foreground py-4">
+                  Loading more… ({visVen}/{totalVen})
+                </div>
+              )}
             </div>
           )}
         </>

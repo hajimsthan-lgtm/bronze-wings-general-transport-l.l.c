@@ -21,6 +21,7 @@ import { safeListAll, withRetry } from '@/lib/safeRequest';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import ResponsiveStats from '@/components/mobile/ResponsiveStats';
 import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -79,6 +80,8 @@ export default function Salary() {
     if (statusFilter && r.status !== statusFilter) return false;
     return true;
   }), [records, search, monthFilter, yearFilter, statusFilter]);
+
+  const { visible: visSalary, sentinelProps: salSentinel, hasMore: hasMoreSalary, visibleCount: visS, totalCount: totalS } = useProgressiveRender(filtered);
 
   const totalPayroll = filtered.reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
   const totalPaid = filtered.filter((r) => r.status === 'paid').reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
@@ -251,7 +254,7 @@ export default function Salary() {
         <EmptyState icon={Wallet} title={t('no_data')} description="Generate payroll for the selected month or add a salary record manually." />
       ) : (
         <div className="space-y-2">
-          {filtered.map((r) => (
+           {visSalary.map((r) => (
             <div key={r.id} className="row-card flex items-start gap-3 min-h-[56px]">
                <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
                  <Wallet className="w-4 h-4 text-white/70" />
@@ -311,9 +314,14 @@ export default function Salary() {
                  </DropdownMenu>
                </div>
              </div>
-          ))}
-        </div>
-      )}
+             ))}
+             {hasMoreSalary && (
+             <div {...salSentinel} className="text-center text-xs text-muted-foreground py-4">
+              Loading more… ({visS}/{totalS})
+             </div>
+             )}
+             </div>
+             )}
 
       {/* Form Sheet */}
       <Sheet open={formOpen} onOpenChange={setFormOpen}>

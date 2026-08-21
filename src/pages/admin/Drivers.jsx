@@ -15,6 +15,7 @@ import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useDriversMode, setDriversMode, setDriversData, getDriversView } from '@/lib/driversStore';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 export default function Drivers() {
   return <DriversTab />;
@@ -55,6 +56,7 @@ function DriversTab() {
   }, []);
 
   const filtered = drivers.filter((d) => !search || d.name?.toLowerCase().includes(search.toLowerCase()) || d.phone?.includes(search) || d.license_number?.toLowerCase().includes(search.toLowerCase())).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const { visible: visDrivers, sentinelProps: drvSentinel, hasMore: hasMoreDrivers, visibleCount: visD, totalCount: totalD } = useProgressiveRender(filtered);
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
 
   // Publish filtered data + load to the store for TopBar Export/Import
@@ -74,15 +76,25 @@ function DriversTab() {
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> :
             view === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filtered.map((d) => (
+                {visDrivers.map((d) => (
                   <DriverCard key={d.id} d={d} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
                 ))}
+                {hasMoreDrivers && (
+                  <div {...drvSentinel} className="col-span-full text-center text-xs text-muted-foreground py-4">
+                    Loading more… ({visD}/{totalD})
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
-                {filtered.map((d) => (
+                {visDrivers.map((d) => (
                   <DriverListRow key={d.id} d={d} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
                 ))}
+                {hasMoreDrivers && (
+                  <div {...drvSentinel} className="text-center text-xs text-muted-foreground py-4">
+                    Loading more… ({visD}/{totalD})
+                  </div>
+                )}
               </div>
             )}
         </>

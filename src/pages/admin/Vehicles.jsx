@@ -24,6 +24,7 @@ import { Plus, Search, Truck, Trash2, Sparkles } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, setVehiclesData } from '@/lib/vehiclesStore';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -105,6 +106,7 @@ function VehiclesTab() {
     v.type?.toLowerCase().includes(q) ||
     v.notes?.toLowerCase().includes(q)
   ).sort((a, b) => (a.plate_number || '').localeCompare(b.plate_number || ''));
+  const { visible: visVehicles, sentinelProps: vehSentinel, hasMore: hasMoreVehicles, visibleCount: visV, totalCount: totalV } = useProgressiveRender(filtered);
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fFuel = fuelRecords.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const fExpenses = expenses.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
@@ -157,9 +159,14 @@ function VehiclesTab() {
               </div>
             ) : (
             <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filtered.map((v) => (
+              {visVehicles.map((v) => (
                 <VehicleCard key={v.id} v={v} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} onOwnershipChange={async (front, back) => { await base44.entities.Vehicle.update(v.id, { ownership_front_url: front, ownership_back_url: back }); load(); }} />
               ))}
+              {hasMoreVehicles && (
+                <div {...vehSentinel} className="col-span-full text-center text-xs text-muted-foreground py-4">
+                  Loading more… ({visV}/{totalV})
+                </div>
+              )}
             </div>
             )
           ) : (
@@ -173,9 +180,14 @@ function VehiclesTab() {
                   </div>
                 </div>
               )}
-              {filtered.map((v) => (
+              {visVehicles.map((v) => (
                 <VehicleListRow key={v.id} v={v} selected={selected.has(v.id)} onSelect={() => toggleSelect(v.id)} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
               ))}
+              {hasMoreVehicles && (
+                <div {...vehSentinel} className="text-center text-xs text-muted-foreground py-4">
+                  Loading more… ({visV}/{totalV})
+                </div>
+              )}
             </div>
           )}
         </>

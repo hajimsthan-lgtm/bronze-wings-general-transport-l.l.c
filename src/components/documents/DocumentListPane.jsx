@@ -1,6 +1,7 @@
 import { Search, FileText, AlertTriangle } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 export default function DocumentListPane({
   items,
@@ -25,6 +26,7 @@ export default function DocumentListPane({
   expiryField,
   expiringSoonDays = 10,
 }) {
+  const { visible, sentinelProps, hasMore, visibleCount, totalCount } = useProgressiveRender(items);
   return (
     <div className="glass-card rounded-2xl flex flex-col h-full min-h-0 overflow-hidden">
       {/* Tab header */}
@@ -68,7 +70,7 @@ export default function DocumentListPane({
           <EmptyState icon={FileText} title={emptyTitle} description={emptyDescription} />
         ) : (
           <div className="divide-y divide-border/30">
-            {items.map(item => {
+            {visible.map(item => {
               const isSelected = selectedId === item.id;
               const amount = computeAmount ? computeAmount(item) : Number(item[amountField || 'amount'] || 0);
               const status = (getStatus ? getStatus(item) : item.status) || 'draft';
@@ -140,9 +142,14 @@ export default function DocumentListPane({
                 </div>
               );
             })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+            {hasMore && (
+             <div {...sentinelProps} className="text-center text-xs text-muted-foreground py-3">
+               Loading more… ({visibleCount}/{totalCount})
+             </div>
+            )}
+            </div>
+            )}
+            </div>
+            </div>
+            );
+            }

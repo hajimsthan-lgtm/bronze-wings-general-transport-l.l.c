@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import { formatCurrency } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
@@ -57,6 +58,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
   const { toast } = useToast();
   const [busy, setBusy] = useState({});
   const [selected, setSelected] = useState(new Set());
+  const { visible: visibleTrips, sentinelProps, hasMore, visibleCount: visN, totalCount: totalN } = useProgressiveRender(trips);
 
   const toggleOne = (id) => {
     setSelected((s) => {
@@ -143,7 +145,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
         </div>
       )}
 
-      {trips.map((trip, i) => {
+      {visibleTrips.map((trip, i) => {
         const invoice = invoiceMap?.[trip.id];
         const isSent = invoice?.status === 'sent';
         const isSelected = selected.has(trip.id);
@@ -278,6 +280,11 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
           </div>
         );
       })}
+      {hasMore && (
+        <div {...sentinelProps} className="text-center text-xs text-muted-foreground py-3">
+          Loading more… ({visN}/{totalN})
+        </div>
+      )}
 
       {/* Floating bulk action bar */}
       <BulkActionBar

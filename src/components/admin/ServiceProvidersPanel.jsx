@@ -14,6 +14,7 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Driver Supplier', both: 'Both' };
 const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
@@ -65,6 +66,8 @@ export default function ServiceProvidersPanel() {
   const totalSpend = vendors.reduce((s, v) => s + (spendMap[v.name] || 0), 0);
 
   const searched = vendors.filter((v) => !search || v.name?.toLowerCase().includes(search.toLowerCase()));
+  const { visible: visProviders, sentinelProps: provSentinel, hasMore: hasMoreProviders, visibleCount: visP, totalCount: totalP } = useProgressiveRender(searched);
+  const { visible: visAllProviders, sentinelProps: allProvSentinel, hasMore: hasMoreAllProviders, visibleCount: visAP, totalCount: totalAP } = useProgressiveRender(vendors);
 
   const handleEdit = (v) => { setEditItem(v || null); setFormOpen(true); };
 
@@ -117,10 +120,10 @@ export default function ServiceProvidersPanel() {
             <EmptyState icon={Wrench} title="No service providers yet" description="Add a service provider to track vehicle and driver suppliers." />
           ) : (
             <div className="space-y-2">
-              {vendors.map((v) => {
-                const tone = TYPE_COLORS[v.provider_type] || '#94a3b8';
-                const statusColor = STATUS_COLOR[v.status] || '#94A3B8';
-                return (
+               {visAllProviders.map((v) => {
+                 const tone = TYPE_COLORS[v.provider_type] || '#94a3b8';
+                 const statusColor = STATUS_COLOR[v.status] || '#94A3B8';
+                 return (
                   <div key={v.id} className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/admin/service-providers/${v.id}`)} style={{ ['--row-accent']: tone }}>
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}>
                       <Wrench className="w-5 h-5" style={{ color: tone }} />
@@ -145,6 +148,11 @@ export default function ServiceProvidersPanel() {
                   </div>
                 );
               })}
+              {hasMoreAllProviders && (
+                <div {...allProvSentinel} className="text-center text-xs text-muted-foreground py-4">
+                  Loading more… ({visAP}/{totalAP})
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -153,7 +161,7 @@ export default function ServiceProvidersPanel() {
           <EmptyState icon={Wrench} title="No service providers found" />
         ) : (
           <div className="space-y-2">
-            {searched.map((v) => {
+            {visProviders.map((v) => {
               const tone = TYPE_COLORS[v.provider_type] || '#94a3b8';
               return (
                 <div key={v.id} className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/admin/service-providers/${v.id}`)} style={{ ['--row-accent']: tone }}>
@@ -171,6 +179,11 @@ export default function ServiceProvidersPanel() {
                 </div>
               );
             })}
+            {hasMoreProviders && (
+              <div {...provSentinel} className="text-center text-xs text-muted-foreground py-4">
+                Loading more… ({visP}/{totalP})
+              </div>
+            )}
           </div>
         )
       )}

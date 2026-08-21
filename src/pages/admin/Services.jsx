@@ -23,6 +23,7 @@ import MobileFAB from '@/components/mobile/MobileFAB';
 import DatePicker from '@/components/common/DatePicker';
 import { withRetry, safeAll } from '@/lib/safeRequest';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -54,6 +55,7 @@ export default function Services() {
 
   const filtered = records.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const searched = filtered.filter((r) => !search || r.vehicle_plate?.toLowerCase().includes(search.toLowerCase()) || (r.service_type || '').includes(search.toLowerCase()));
+  const { visible: visSvc, sentinelProps: svcSentinel, hasMore: hasMoreSvc, visibleCount: visM, totalCount: totalM } = useProgressiveRender(searched);
 
   return (
     <div>
@@ -68,10 +70,15 @@ export default function Services() {
 
           {loading ? <LoadingSpinner /> : searched.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> :
         <div className="space-y-2">
-              {searched.map((r) =>
-          <ServiceRow key={r.id} r={r} onEdit={() => {setEditItem(r);setFormOpen(true);}} onDelete={async () => {await base44.entities.ServiceRecord.delete(r.id);load();}} onPdf={async () => {const s = await getCompanySettings();await downloadMaintenancePDF(r, s);}} />
-          )}
-            </div>
+               {visSvc.map((r) =>
+           <ServiceRow key={r.id} r={r} onEdit={() => {setEditItem(r);setFormOpen(true);}} onDelete={async () => {await base44.entities.ServiceRecord.delete(r.id);load();}} onPdf={async () => {const s = await getCompanySettings();await downloadMaintenancePDF(r, s);}} />
+           )}
+              {hasMoreSvc && (
+                <div {...svcSentinel} className="text-center text-xs text-muted-foreground py-4">
+                  Loading more… ({visM}/{totalM})
+                </div>
+              )}
+             </div>
         }
         </>
       }

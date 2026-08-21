@@ -3,6 +3,7 @@ import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
 import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
 import { deriveStatus, isOverdue, STATUS_LABELS, STATUS_PILLS, STATUS_DOTS, getAvailableActions } from '@/lib/invoiceWorkflow';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 function daysUntilDue(dueDate) {
   if (!dueDate) return null;
@@ -40,6 +41,8 @@ export default function InvoiceListPane({
   onClientClick,
   onAction,
 }) {
+  const { visible: visibleInvoices, sentinelProps, hasMore: hasMoreInvoices, visibleCount: visInv, totalCount: totalInv } = useProgressiveRender(invoices);
+
   const tabs = [
     { key: 'all', label: 'All', count: counts.all },
     { key: 'draft', label: 'Draft', count: counts.draft },
@@ -111,7 +114,7 @@ export default function InvoiceListPane({
           />
         ) : (
           <div className="divide-y divide-border/30">
-            {invoices.map(inv => {
+            {visibleInvoices.map(inv => {
               const total = Number(inv.total_amount || 0);
               const paid = Number(inv.paid_amount || 0);
               const balance = Math.max(0, total - paid);
@@ -246,12 +249,17 @@ export default function InvoiceListPane({
                 </div>
               );
             })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+            {hasMoreInvoices && (
+             <div {...sentinelProps} className="text-center text-xs text-muted-foreground py-3">
+               Loading more… ({visInv}/{totalInv})
+             </div>
+            )}
+            </div>
+            )}
+            </div>
+            </div>
+            );
+            }
 
 function formatCurrencyShort(amount) {
   return `AED ${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;

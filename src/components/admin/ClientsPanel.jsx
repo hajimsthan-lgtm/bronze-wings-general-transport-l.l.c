@@ -15,6 +15,7 @@ import { Plus, Search, Building2 } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { useClientsMode, setClientsMode, setClientsData, getClientsView } from '@/lib/clientsStore';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -48,6 +49,7 @@ export default function ClientsPanel() {
   }, []);
 
   const filtered = items.filter((c) => !search || c.name?.toLowerCase().includes(search.toLowerCase()) || c.contact_person?.toLowerCase().includes(search.toLowerCase()) || c.phone?.includes(search)).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const { visible: visClients, sentinelProps: cliSentinel, hasMore: hasMoreClients, visibleCount: visC, totalCount: totalC } = useProgressiveRender(filtered);
   const fTrips = trips.filter((tt) => inGlobalDateRange(tt.trip_date, dateFrom, dateTo));
   const fInvoices = invoices.filter((i) => inGlobalDateRange(i.issue_date, dateFrom, dateTo));
   const revenueMap = {};
@@ -70,15 +72,25 @@ export default function ClientsPanel() {
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Building2} title={t('no_data')} /> :
         view === 'grid' ?
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filtered.map((c) =>
+                {visClients.map((c) =>
           <ClientCard key={c.id} c={c} onOpen={(cc) => navigate(`/admin/clients/${cc.id}`)} onEdit={(cc) => {setEditItem(cc);setFormOpen(true);}} onDelete={async (cc) => {await base44.entities.Client.delete(cc.id);load();}} />
           )}
+                {hasMoreClients && (
+                  <div {...cliSentinel} className="col-span-full text-center text-xs text-muted-foreground py-4">
+                    Loading more… ({visC}/{totalC})
+                  </div>
+                )}
               </div> :
 
         <div className="space-y-2">
-                {filtered.map((c) =>
+                {visClients.map((c) =>
           <ClientListRow key={c.id} c={c} onOpen={(cc) => navigate(`/admin/clients/${cc.id}`)} onEdit={(cc) => {setEditItem(cc);setFormOpen(true);}} onDelete={async (cc) => {await base44.entities.Client.delete(cc.id);load();}} />
           )}
+                {hasMoreClients && (
+                  <div {...cliSentinel} className="text-center text-xs text-muted-foreground py-4">
+                    Loading more… ({visC}/{totalC})
+                  </div>
+                )}
               </div>
         }
         </>

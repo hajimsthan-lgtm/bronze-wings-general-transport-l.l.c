@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -114,6 +115,7 @@ export default function LedgerPage({
   });
 
   const display = view === 'report' ? reportRows : statementRows;
+  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display);
   const totalIn = display.reduce((s, r) => s + (Number(r.in) || 0), 0);
   const totalOut = display.reduce((s, r) => s + (Number(r.out) || 0), 0);
   const closingBalance = display.length ? display[display.length - 1].running_balance : 0;
@@ -293,7 +295,7 @@ export default function LedgerPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {display.map((r) => (
+                  {visibleRows.map((r) => (
                     <tr key={r.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
                       <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums text-xs">{fmtDate(r.date)}</td>
                       {hasRecipient && <td className="px-5 py-3 text-white/80">{r.recipient || '—'}</td>}
@@ -311,6 +313,13 @@ export default function LedgerPage({
                       )}
                     </tr>
                   ))}
+                  {hasMoreRows && (
+                    <tr {...sentinelProps}>
+                      <td colSpan={hasRecipient ? 8 : 7} className="text-center text-xs text-muted-foreground py-3">
+                        Loading more… ({visR}/{totalR})
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             )}
