@@ -558,19 +558,17 @@ export default function InvoicesPage() {
         }
       </div>
 
-      {/* Bulk action bar */}
-      {selected.size > 0 &&
-      <div className="flex items-center gap-2 mb-4 p-3 rounded-xl bg-primary/10 border border-primary/30">
-          <span className="text-sm font-semibold text-primary">{selected.size} selected</span>
-          <Button size="sm" variant="outline" onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10">
+      {/* Bulk action bar — always visible, active only after selection */}
+      <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl border transition-all duration-300 ${selected.size > 0 ? 'bg-primary/10 border-primary/30' : 'bg-muted/20 border-border/40'}`}>
+          <span className={`text-sm font-semibold ${selected.size > 0 ? 'text-primary' : 'text-muted-foreground'}`}>{selected.size} selected</span>
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed">
             <Send className="w-3.5 h-3.5 mr-1.5" /> Send for Signature
           </Button>
-          <Button size="sm" variant="outline" onClick={() => handleBulkAction('cancel')} className="h-8 border-red-500/30 text-red-400 hover:bg-red-500/10">
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('cancel')} className="h-8 border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed">
             <Ban className="w-3.5 h-3.5 mr-1.5" /> Cancel
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setSelected(new Set())} className="h-8">Clear</Button>
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => setSelected(new Set())} className="h-8 disabled:opacity-40 disabled:cursor-not-allowed">Clear</Button>
         </div>
-      }
 
       {/* Two-pane layout */}
       {loading ?
@@ -593,7 +591,7 @@ export default function InvoicesPage() {
         }
         </div> :
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane
@@ -614,8 +612,8 @@ export default function InvoicesPage() {
           
           </div>
 
-          {/* Right pane — detail (desktop) */}
-          <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
+          {/* Right pane — detail / generator (desktop) */}
+          <div className="hidden lg:block lg:col-span-4 min-h-0 h-full">
             <InvoiceDetailPane
             inv={selectedInvoice}
             clients={clients}

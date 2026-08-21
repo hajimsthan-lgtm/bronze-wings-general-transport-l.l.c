@@ -70,14 +70,14 @@ export default function InvoiceStatCards({ invoices }) {
   );
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      <ReportStatCard index={1} label="Overdue" value={overdue.length} icon={AlertCircle} color="#ef4444"
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+      <ReportStatCard compact index={1} label="Overdue" value={overdue.length} icon={AlertCircle} color="#ef4444"
         extra={overdue.length > 0 ? <Subtitle>{formatCurrency(overdueTotal)}</Subtitle> : <Subtitle>All clear</Subtitle>} />
-      <ReportStatCard index={2} label="Due Next 30 Days" value={dueSoon.length} icon={CalendarClock} color="#f59e0b"
+      <ReportStatCard compact index={2} label="Due Next 30 Days" value={dueSoon.length} icon={CalendarClock} color="#f59e0b"
         extra={dueSoon.length > 0 ? <Subtitle>{formatCurrency(dueSoonTotal)}</Subtitle> : <Subtitle>Nothing due</Subtitle>} />
-      <ReportStatCard index={3} label="Avg Time to Paid" value={avgDays} format={(v) => `${Math.round(v)}`} icon={Clock} color="#14b8a6"
-        extra={<div className="flex items-end justify-between gap-2"><Subtitle>{paidInvoices.length} paid invoices</Subtitle><Sparkline data={sparkData} color="#14b8a6" width={80} height={32} /></div>} />
-      <ReportStatCard index={4} label="Total Outstanding" value={outstanding} format={formatCurrency} icon={TrendingUp} color="#00f2c3"
+      <ReportStatCard compact index={3} label="Avg Time to Paid" value={avgDays} format={(v) => `${Math.round(v)}`} icon={Clock} color="#14b8a6"
+        extra={<div className="flex items-end justify-between gap-2"><Subtitle>{paidInvoices.length} paid invoices</Subtitle><Sparkline data={sparkData} color="#14b8a6" width={70} height={28} /></div>} />
+      <ReportStatCard compact index={4} label="Total Outstanding" value={outstanding} format={formatCurrency} icon={TrendingUp} color="#00f2c3"
         extra={<TrendExtra />} />
     </div>
   );

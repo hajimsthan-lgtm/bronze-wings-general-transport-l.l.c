@@ -28,10 +28,14 @@ export function useCountUp(target, duration = 1200) {
   return val;
 }
 
-export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra, to, onClick }) {
+export default function ReportStatCard({ label, value, format, icon: Icon, color, index = 0, extra, to, onClick, compact = false }) {
   const animated = useCountUp(value);
   const display = format ? format(animated) : Math.round(animated).toLocaleString();
   const rgba = (a) => hexToRgba(color, a);
+  const padCls = compact ? 'p-2.5 sm:p-3' : 'p-3 sm:p-4';
+  const iconWrapCls = compact ? 'w-8 h-8 sm:w-9 sm:h-9 rounded-xl' : 'w-9 h-9 sm:w-11 sm:h-11 rounded-2xl';
+  const iconCls = compact ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4 sm:w-5 sm:h-5';
+  const valueCls = compact ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl';
 
   const inner = (
     <>
@@ -43,18 +47,18 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] pt-1.5" style={{ color: rgba(0.85) }}>{label}</p>
         {Icon && (
           <span
-            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110"
+            className={`${iconWrapCls} flex items-center justify-center text-white transition-transform duration-300 group-hover:scale-110`}
             style={{
               background: `linear-gradient(135deg, ${color}, ${color}aa)`,
               boxShadow: `0 0 20px ${rgba(0.6)}, 0 4px 12px ${rgba(0.4)}, inset 0 1px 0 rgba(255,255,255,0.3)`,
               border: `1px solid ${rgba(0.5)}`,
             }}
           >
-            <Icon className="w-4 h-4 sm:w-5 sm:h-5" style={{ filter: `drop-shadow(0 0 4px ${rgba(0.8)})` }} />
+            <Icon className={iconCls} style={{ filter: `drop-shadow(0 0 4px ${rgba(0.8)})` }} />
           </span>
         )}
       </div>
-      <p className="relative text-xl sm:text-2xl font-light text-white tabular-nums tracking-tight" style={{ textShadow: `0 0 24px ${rgba(0.3)}` }}>{display}</p>
+      <p className={`relative ${valueCls} font-light text-white tabular-nums tracking-tight`} style={{ textShadow: `0 0 24px ${rgba(0.3)}` }}>{display}</p>
       {extra && <div className="relative mt-2 flex items-center justify-between gap-2 z-10">{extra}</div>}
       {(to || onClick) && (
         <div className="absolute bottom-3 right-4 flex items-center gap-0.5 text-[10px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color, textShadow: `0 0 8px ${rgba(0.6)}` }}>
@@ -65,7 +69,7 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
   );
 
   const clickable = to || onClick;
-  const cls = `relative overflow-hidden p-3 sm:p-4 animate-fade-in-up transition-all duration-400 group bg-card rounded-2xl ${
+  const cls = `relative overflow-hidden ${padCls} animate-fade-in-up transition-all duration-400 group bg-card rounded-2xl ${
     clickable ? 'hover:-translate-y-[3px] cursor-pointer' : 'hover:-translate-y-[3px]'
   }`;
   const style = {
