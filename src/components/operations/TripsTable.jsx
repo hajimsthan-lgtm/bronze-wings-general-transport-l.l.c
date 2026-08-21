@@ -57,6 +57,24 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const [selected, setSelected] = useState(new Set());
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  // Progressive rendering — only render a window of rows to keep the DOM
+  // small when the transaction count grows. Selection / bulk actions / export
+  // all operate on the full `trips` array, so nothing is lost.
+  const PAGE = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const sentinelRef = useRef(null);
+  useEffect(() => { setVisibleCount(PAGE); }, [trips]);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setVisibleCount((c) => c + PAGE);
+    }, { root: tableScrollRef.current, rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [trips]);
+  const visibleTrips = trips.slice(0, visibleCount);
+
   // Column widths (resizable) — all columns always visible, text wraps
   const [widths, setWidths] = useState(() => {
     try {
@@ -256,9 +274,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
           })()}
         </TableHeader>
         <TableBody>
-          {trips.map((trip) => {
-              const isSelected = selected.has(trip.id);
-              const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
+          {visibleTrips.map((trip) => {
+               const isSelected = selected.has(trip.id);
+               const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
               return (
                 <TableRow
                   key={trip.id}
@@ -396,9 +414,16 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               </TableRow>);
 
             })}
-        </TableBody>
-      </Table>
-      </div>
+            {visibleCount < trips.length && (
+            <TableRow ref={sentinelRef} className="hover:bg-transparent">
+             <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-3">
+               Loading more… ({visibleCount}/{trips.length})
+             </TableCell>
+            </TableRow>
+            )}
+            </TableBody>
+            </Table>
+            </div>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

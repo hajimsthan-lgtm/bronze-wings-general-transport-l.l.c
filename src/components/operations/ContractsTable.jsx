@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
@@ -19,8 +20,27 @@ const STATUS_LABELS = {
 export default function ContractsTable({ contracts, expensesByContract, onEdit, onDelete, onDetails }) {
   const { t } = useI18n();
 
+  // Progressive rendering — keep DOM small as contract count grows.
+  const PAGE = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+  const scrollRef = useRef(null);
+  const sentinelRef = useRef(null);
+  useEffect(() => { setVisibleCount(PAGE); }, [contracts]);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setVisibleCount((c) => c + PAGE);
+    }, { root: scrollRef.current, rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [contracts]);
+  const visibleContracts = contracts.slice(0, visibleCount);
+
   return (
-    <div className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid">
+    <div
+      ref={scrollRef}
+      className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid">
       <Table className="trips-grid-table">
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
@@ -46,7 +66,7 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {contracts.map((c) => {
+          {visibleContracts.map((c) => {
             const expenses = expensesByContract[c.id] || [];
             const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
             const monthlyRate = Number(c.monthly_rate) || 0;
@@ -124,8 +144,15 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
                 </TableCell>
               </TableRow>
             );
-          })}
-        </TableBody>
+            })}
+            {visibleCount < contracts.length && (
+            <TableRow ref={sentinelRef} className="hover:bg-transparent">
+             <TableCell colSpan={7} className="text-center text-xs text-muted-foreground py-3">
+               Loading more… ({visibleCount}/{contracts.length})
+             </TableCell>
+            </TableRow>
+            )}
+            </TableBody>
       </Table>
     </div>
   );
