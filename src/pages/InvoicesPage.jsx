@@ -46,6 +46,7 @@ import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { deriveStatus, computeTabCounts, filterByTab } from '@/lib/invoiceWorkflow';
+import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, setInvoicesClients } from '@/lib/invoicesStore';
 
 export default function InvoicesPage() {
   const { toast } = useToast();
@@ -57,8 +58,9 @@ export default function InvoicesPage() {
   const [downloadingId, setDownloadingId] = useState(null);
   const [uploadingId, setUploadingId] = useState(null);
   const [search, setSearch] = useState('');
-  const [clientFilter, setClientFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const { clientFilter, statusFilter } = useInvoicesFilters();
+  const setClientFilter = setInvoicesClientFilter;
+  const setStatusFilter = setInvoicesStatusFilter;
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState('');
@@ -83,9 +85,20 @@ export default function InvoicesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.entities.Client.list('-created_date', 500).catch(() => []).then(setClients);
+    base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => { setClients(c); setInvoicesClients(c); });
     base44.auth.me().then(setCurrentUser).catch(() => {});
     getCompanySettings().then(setSettings).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const onNew = () => handleNew();
+    const onTemplates = () => setTemplateManagerOpen(true);
+    window.addEventListener('invoices:new', onNew);
+    window.addEventListener('invoices:templates', onTemplates);
+    return () => {
+      window.removeEventListener('invoices:new', onNew);
+      window.removeEventListener('invoices:templates', onTemplates);
+    };
   }, []);
 
   const handleClientClick = (clientName) => {
@@ -543,61 +556,6 @@ export default function InvoicesPage() {
 
         <InvoiceStatCards invoices={allInvoices} />
         }
-      </div>
-
-      {/* Filter bar */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        {activeFilterCount > 0 &&
-        <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
-            {activeFilterCount} active filter{activeFilterCount > 1 ? 's' : ''}
-            <button onClick={() => {setClientFilter('all');setStatusFilter('all');setSearch('');}} className="ml-0.5 hover:opacity-70">
-              <X className="w-3 h-3" />
-            </button>
-          </span>
-        }
-        <div className="relative">
-          <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
-          <Select value={clientFilter} onValueChange={setClientFilter}>
-            <SelectTrigger className="w-40 pl-8 h-9 text-xs bg-muted/40 border-border">
-              <SelectValue placeholder="All Clients" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Clients</SelectItem>
-              {clients.map((c) =>
-              <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="unsigned">Unsigned</SelectItem>
-              <SelectItem value="signed">Signed</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="partially_paid">Partial</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-          <button
-            onClick={() => setTemplateManagerOpen(true)}
-            className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            title="Custom Templates">
-            
-            <LayoutTemplate className="w-4 h-4" />
-          </button>
-          <HeaderActionButton
-            label="Create Invoice"
-            variant="trip"
-            onClick={handleNew} />
-          
-        </div>
       </div>
 
       {/* Bulk action bar */}

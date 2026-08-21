@@ -13,10 +13,12 @@ import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered,
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
 import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
+import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, clearInvoicesFilters } from '@/lib/invoicesStore';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import ViewToggle from '@/components/common/ViewToggle';
-import { BarChart3, LayoutGrid, Plus } from 'lucide-react';
+import { BarChart3, LayoutGrid, Plus, Building2, LayoutTemplate, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export { hasSubNavForPath };
 
@@ -40,6 +42,8 @@ export default function TopBar() {
   const isVendorsPage = location.pathname === '/admin/vendors';
   const venMode = useVendorsMode();
   const isCompanyDocsPage = location.pathname === '/admin/company-documents';
+  const isInvoicesPage = location.pathname === '/accounts/invoices';
+  const invFilters = useInvoicesFilters();
 
   return (
     <div className="sticky top-0 md:top-20 z-40">
@@ -65,6 +69,47 @@ export default function TopBar() {
               <ArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))', filter: isHome ? 'none' : 'drop-shadow(0 0 5px rgba(var(--panel-accent-rgb),0.7))' }} />
             </button>
             <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1" />
+            {isInvoicesPage && (
+              <div className="hidden md:flex items-center gap-2 ml-2">
+                {((invFilters.clientFilter !== 'all') || (invFilters.statusFilter !== 'all')) && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/25">
+                    {(invFilters.clientFilter !== 'all' ? 1 : 0) + (invFilters.statusFilter !== 'all' ? 1 : 0)} active
+                    <button onClick={clearInvoicesFilters} className="ml-0.5 hover:opacity-70">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                <div className="relative">
+                  <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
+                  <Select value={invFilters.clientFilter} onValueChange={setInvoicesClientFilter}>
+                    <SelectTrigger className="w-40 pl-8 h-9 text-xs bg-muted/40 border-border">
+                      <SelectValue placeholder="All Clients" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Clients</SelectItem>
+                      {(invFilters.clients || []).map((c) => (
+                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Select value={invFilters.statusFilter} onValueChange={setInvoicesStatusFilter}>
+                  <SelectTrigger className="w-36 h-9 text-xs bg-muted/40 border-border">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="unsigned">Unsigned</SelectItem>
+                    <SelectItem value="signed">Signed</SelectItem>
+                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="partially_paid">Partial</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <div className="md:hidden flex items-center gap-2">
@@ -233,6 +278,22 @@ export default function TopBar() {
                 variant="trip"
                 onClick={() => window.dispatchEvent(new CustomEvent('company-docs:new'))}
               />
+            )}
+            {isInvoicesPage && (
+              <>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('invoices:templates'))}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  title="Custom Templates"
+                >
+                  <LayoutTemplate className="w-4 h-4" />
+                </button>
+                <HeaderActionButton
+                  label="Create Invoice"
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('invoices:new'))}
+                />
+              </>
             )}
           </div>
         </div>
