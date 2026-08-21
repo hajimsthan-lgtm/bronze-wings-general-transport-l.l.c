@@ -61,6 +61,20 @@
         }
       }
     },
+    "general_info": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "trade_license_url": {
       "type": "string"
     },

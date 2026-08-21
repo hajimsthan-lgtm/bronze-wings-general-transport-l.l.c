@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, Mail, Building2, BadgeCheck, Hash, CalendarClock, MapPin, Users, UserRound, Wallet, FileText, Receipt, Truck, Pencil, Plus, Trash2, X, Check } from 'lucide-react';
+import { Phone, Mail, Building2, BadgeCheck, Hash, CalendarClock, MapPin, Users, UserRound, Wallet, FileText, Receipt, Truck, Pencil, Plus, Trash2, X, Check, Info } from 'lucide-react';
 import StatusBadge from '@/components/common/StatusBadge';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { base44 } from '@/api/base44Client';
@@ -22,6 +22,11 @@ export default function ClientProfileCard({ client, stats, onEditContacts }) {
   const [newContact, setNewContact] = useState({ name: '', position: '', phone: '' });
   const [saving, setSaving] = useState(false);
 
+  const [generalInfo, setGeneralInfo] = useState(client.general_info || []);
+  const [showInfoForm, setShowInfoForm] = useState(false);
+  const [newInfo, setNewInfo] = useState({ label: '', value: '' });
+  const [savingInfo, setSavingInfo] = useState(false);
+
   const addContact = async () => {
     if (!newContact.name.trim()) return;
     setSaving(true);
@@ -43,6 +48,32 @@ export default function ClientProfileCard({ client, stats, onEditContacts }) {
     try {
       await base44.entities.Client.update(client.id, { contact_persons: updated });
       setContacts(updated);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const addInfo = async () => {
+    if (!newInfo.label.trim() || !newInfo.value.trim()) return;
+    setSavingInfo(true);
+    const updated = [...generalInfo, { label: newInfo.label.trim(), value: newInfo.value.trim() }];
+    try {
+      await base44.entities.Client.update(client.id, { general_info: updated });
+      setGeneralInfo(updated);
+      setNewInfo({ label: '', value: '' });
+      setShowInfoForm(false);
+    } catch (e) {
+      // ignore
+    } finally {
+      setSavingInfo(false);
+    }
+  };
+
+  const removeInfo = async (index) => {
+    const updated = generalInfo.filter((_, i) => i !== index);
+    try {
+      await base44.entities.Client.update(client.id, { general_info: updated });
+      setGeneralInfo(updated);
     } catch (e) {
       // ignore
     }
@@ -213,6 +244,78 @@ export default function ClientProfileCard({ client, stats, onEditContacts }) {
             </div>
           ) : !showForm && (
             <p className="text-[10px] text-muted-foreground/60 italic">No other contacts yet</p>
+          )}
+        </div>
+
+        {/* Company General Information */}
+        <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <Info className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Company General Information</span>
+            <button
+              onClick={() => setShowInfoForm(s => !s)}
+              className="ml-auto w-6 h-6 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors"
+              title="Add info"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {showInfoForm && (
+            <div className="mb-2.5 rounded-xl border border-primary/20 bg-primary/[0.04] p-2.5 space-y-2">
+              <input
+                value={newInfo.label}
+                onChange={e => setNewInfo(p => ({ ...p, label: e.target.value }))}
+                placeholder="Label (e.g. Trade License No.)"
+                className="w-full h-8 rounded-lg bg-input border border-white/10 px-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+              />
+              <input
+                value={newInfo.value}
+                onChange={e => setNewInfo(p => ({ ...p, value: e.target.value }))}
+                placeholder="Value"
+                className="w-full h-8 rounded-lg bg-input border border-white/10 px-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/40"
+              />
+              <div className="flex items-center gap-2 justify-end">
+                <button
+                  onClick={() => { setShowInfoForm(false); setNewInfo({ label: '', value: '' }); }}
+                  className="px-2.5 h-7 rounded-lg text-xs text-muted-foreground hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={addInfo}
+                  disabled={savingInfo || !newInfo.label.trim() || !newInfo.value.trim()}
+                  className="px-2.5 h-7 rounded-lg text-xs font-medium bg-primary text-primary-foreground flex items-center gap-1 hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Check className="w-3.5 h-3.5" /> Save
+                </button>
+              </div>
+            </div>
+          )}
+
+          {generalInfo.length > 0 ? (
+            <div className="space-y-1.5">
+              {generalInfo.map((gi, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs group">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[9px] font-bold text-emerald-300">{gi.label[0]?.toUpperCase() || 'i'}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] text-muted-foreground truncate block leading-tight">{gi.label}</span>
+                    <span className="font-semibold text-foreground truncate block leading-tight">{gi.value}</span>
+                  </div>
+                  <button
+                    onClick={() => removeInfo(i)}
+                    className="text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    title="Remove"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : !showInfoForm && (
+            <p className="text-[10px] text-muted-foreground/60 italic">No general information yet</p>
           )}
         </div>
       </div>
