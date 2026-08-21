@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
+import { persistManualInvoiceNumber } from '@/lib/invoiceSequence';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
@@ -51,6 +52,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [clients, setClients] = useState([]);
   const [trips, setTrips] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [suggestedNumber, setSuggestedNumber] = useState('');
   const [monthlyContracts, setMonthlyContracts] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
@@ -87,6 +89,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       });
       setReceivePayment(false);
       Promise.all([generateInvoiceNumber(), getCompanySettings()]).then(([num, s]) => {
+        setSuggestedNumber(num);
         setForm(prev => ({ ...prev, invoice_number: num, vat_rate: s.default_vat_rate ?? 5 }));
       });
     }
@@ -261,6 +264,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const balanceDue = Math.max(0, total - payAmount);
   const resultingStatus = payAmount <= 0 ? form.status : (payAmount >= total ? 'paid' : 'partially_paid');
   const inputCls = "bg-background/50 border-border backdrop-blur-sm";
+  const isManualOverride = !isEdit && suggestedNumber !== '' && form.invoice_number !== suggestedNumber;
+  const isDuplicate = form.invoice_number !== '' && invoices.some(inv => inv.invoice_number === form.invoice_number);
 
   const handleSave = async () => {
     if (!form.client_name?.trim()) {
@@ -288,6 +293,12 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         const created = await createInvoice.mutateAsync(data);
         invoiceId = created?.id;
         invoiceNumber = created?.invoice_number || form.invoice_number;
+        if (form.invoice_number !== suggestedNumber) {
+          try {
+            const me = await base44.auth.me().catch(() => null);
+            await persistManualInvoiceNumber(form.invoice_number, suggestedNumber, me?.full_name || me?.email || 'Unknown', created?.id);
+          } catch { /* non-blocking — audit is best-effort */ }
+        }
       }
 
       if (receivePayment && payAmount > 0 && invoiceId) {
@@ -521,7 +532,24 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Invoice #</Label>
-                  <Input value={form.invoice_number} readOnly className={`${inputCls} font-mono text-xs opacity-60 cursor-not-allowed`} />
+                  <Input
+                    value={form.invoice_number}
+                    onChange={isEdit ? undefined : (e) => update('invoice_number', e.target.value)}
+                    readOnly={isEdit}
+                    className={`${inputCls} font-mono text-xs ${isEdit ? 'opacity-60 cursor-not-allowed' : isDuplicate ? 'border-red-500/50' : isManualOverride ? 'border-amber-500/50' : 'border-primary/30'}`}
+                  />
+                  {isManualOverride && !isDuplicate && (
+                    <p className="text-[10px] text-amber-400/80 mt-1 flex items-start gap-1">
+                      <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      You're manually setting the invoice number. Make sure it doesn't clash with an existing invoice number.
+                    </p>
+                  )}
+                  {isDuplicate && (
+                    <p className="text-[10px] text-red-400 mt-1 flex items-start gap-1">
+                      <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      This invoice number already exists. Choose a different number.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>

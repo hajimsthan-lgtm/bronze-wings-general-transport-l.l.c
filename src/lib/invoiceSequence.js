@@ -33,8 +33,14 @@ export function computeNextSeq(allInvoices, year) {
 /** Async: query DB and return the next invoice number in YYYY-XXXX format */
 export async function generateNextInvoiceNumber() {
   const year = new Date().getFullYear();
-  const all = await base44.entities.Invoice.list('-created_date', 1000).catch(() => []);
-  return formatInvoiceNumber(year, computeNextSeq(all, year));
+  const [all, settingsList] = await Promise.all([
+    base44.entities.Invoice.list('-created_date', 1000).catch(() => []),
+    base44.entities.CompanySettings.list().catch(() => []),
+  ]);
+  const dbSeq = computeNextSeq(all, year);
+  const s = settingsList?.[0];
+  const counterSeq = s && s.invoice_last_year === year ? (s.invoice_last_seq || 0) : 0;
+  return formatInvoiceNumber(year, Math.max(dbSeq, counterSeq + 1));
 }
 
 /**
@@ -89,3 +95,34 @@ export async function restructureInvoiceSequence(deletedInvoiceNumber) {
   if (!parsed) return;
   await restructureInvoiceYear(parsed.year);
 }
+
+/**
+ * Persist a manually-set invoice number as the new "last used" sequence value,
+ * so the next auto-suggested number is manualNumber + 1.
+ * Also appends an audit-trail entry (who, from, to, when).
+ */
+export async function persistManualInvoiceNumber(manualNumber, originalSuggested, changedBy, invoiceId) {
+  const parsed = parseInvoiceNumber(manualNumber);
+  if (!parsed) return;
+  const list = await base44.entities.CompanySettings.list().catch(() => []);
+  const s = list?.[0];
+  if (!s) return;
+  const audit = Array.isArray(s.invoice_seq_audit) ? s.invoice_seq_audit : [];
+  const entry = {
+    from_number: originalSuggested || '',
+    to_number: manualNumber,
+    changed_by: changedBy || '',
+    changed_date: new Date().toISOString(),
+    invoice_id: invoiceId || '',
+  };
+  const update = { invoice_seq_audit: [entry, ...audit].slice(0, 50) };
+  const currentCounter = s.invoice_last_year === parsed.year ? (s.invoice_last_seq || 0) : 0;
+  if (parsed.seq > currentCounter) {
+    update.invoice_last_seq = parsed.seq;
+    update.invoice_last_year = parsed.year;
+  }
+  await base44.entities.CompanySettings.update(s.id, update);
+}
+
+/** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
+export { generateNextInvoiceNumber as generateInvoiceNumber };

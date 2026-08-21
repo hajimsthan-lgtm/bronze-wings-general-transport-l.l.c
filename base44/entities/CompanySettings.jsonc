@@ -37,6 +37,37 @@
       "type": "string",
       "default": "BW"
     },
+    "invoice_last_seq": {
+      "type": "number",
+      "default": 0
+    },
+    "invoice_last_year": {
+      "type": "number",
+      "default": 0
+    },
+    "invoice_seq_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_number": {
+            "type": "string"
+          },
+          "to_number": {
+            "type": "string"
+          },
+          "changed_by": {
+            "type": "string"
+          },
+          "changed_date": {
+            "type": "string"
+          },
+          "invoice_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "bank_name": {
       "type": "string"
     },

@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, Building2, Check, Loader2 } from 'lucide-react';
-import { getCompanySettings, saveCompanySettings } from '@/lib/companySettings';
+import { getCompanySettings, saveCompanySettings, generateInvoiceNumber } from '@/lib/companySettings';
+import { persistManualInvoiceNumber } from '@/lib/invoiceSequence';
 import { useToast } from '@/components/ui/use-toast';
 import SettingsCard from './SettingsCard';
 
@@ -15,11 +16,18 @@ export default function CompanySettingsSection() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [nextNumberPreview, setNextNumberPreview] = useState('');
+  const [manualSeq, setManualSeq] = useState('');
+  const [auditTrail, setAuditTrail] = useState([]);
 
   useEffect(() => {
     getCompanySettings()
-      .then(setSettings)
+      .then((s) => {
+        setSettings(s);
+        setAuditTrail(Array.isArray(s.invoice_seq_audit) ? s.invoice_seq_audit : []);
+      })
       .catch(() => toast({ title: 'Could not load company settings', variant: 'destructive' }));
+    generateInvoiceNumber().then(setNextNumberPreview).catch(() => {});
   }, []);
 
   if (!settings) {
@@ -53,10 +61,22 @@ export default function CompanySettingsSection() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const seqNum = Number(manualSeq);
+      if (seqNum > 0) {
+        const year = new Date().getFullYear();
+        const manualNumber = `${year}-${String(seqNum).padStart(4, '0')}`;
+        const me = await base44.auth.me().catch(() => null);
+        await persistManualInvoiceNumber(manualNumber, nextNumberPreview, me?.full_name || me?.email || 'Unknown', '');
+        settings.invoice_last_seq = seqNum;
+        settings.invoice_last_year = year;
+      }
       await saveCompanySettings(settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       toast({ title: 'Company settings saved' });
+      setManualSeq('');
+      generateInvoiceNumber().then(setNextNumberPreview).catch(() => {});
+      getCompanySettings().then((s) => setAuditTrail(Array.isArray(s.invoice_seq_audit) ? s.invoice_seq_audit : [])).catch(() => {});
     } catch {
       toast({ title: 'Could not save settings', variant: 'destructive' });
     } finally {
@@ -127,6 +147,35 @@ export default function CompanySettingsSection() {
           <Label className="text-xs text-white/40 mb-1.5">Invoice Prefix</Label>
           <Input value={settings.invoice_prefix} onChange={(e) => update('invoice_prefix', e.target.value)} className="bg-white/[0.03] border-white/[0.06]" />
         </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-white/[0.06]">
+        <Label className="text-xs text-white/50 mb-2 block font-semibold uppercase tracking-wider">Invoice Number Sequence</Label>
+        <p className="text-[11px] text-white/40 mb-2.5">Auto-increments as YYYY-XXXX (e.g. 2026-0001). Manually set the next sequence number below — subsequent invoices continue from there.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-white/40 mb-1.5">Next Invoice Number (auto)</Label>
+            <Input value={nextNumberPreview} readOnly className="bg-white/[0.03] border-white/[0.06] font-mono opacity-60 cursor-not-allowed" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/40 mb-1.5">Manually Set Next Sequence #</Label>
+            <Input type="number" min="1" value={manualSeq} onChange={(e) => setManualSeq(e.target.value)} onWheel={(e) => e.target.blur()} placeholder="e.g. 158" className="bg-white/[0.03] border-white/[0.06]" />
+          </div>
+        </div>
+        {auditTrail.length > 0 && (
+          <div className="mt-3">
+            <Label className="text-xs text-white/40 mb-1.5 block">Recent Manual Overrides</Label>
+            <div className="space-y-1.5 max-h-40 overflow-y-auto thin-scroll">
+              {auditTrail.slice(0, 10).map((entry, i) => (
+                <div key={i} className="text-[11px] text-white/50 bg-white/[0.02] rounded-lg px-3 py-2 border border-white/[0.04]">
+                  <span className="font-mono">{entry.from_number || '—'}</span> → <span className="font-mono text-primary">{entry.to_number}</span>
+                  <span className="text-white/30 ml-2">by {entry.changed_by || '—'}</span>
+                  <span className="text-white/30 ml-2">{entry.changed_date ? new Date(entry.changed_date).toLocaleString() : ''}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-4 border-t border-white/[0.06]">
