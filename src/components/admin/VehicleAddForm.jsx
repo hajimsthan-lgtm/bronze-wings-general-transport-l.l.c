@@ -50,10 +50,17 @@ export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [dupInfo, setDupInfo] = useState(null); // { matchLabel, pendingSave }
+  const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
     setForm(editItem ? vehicleToLicenseForm(editItem, editLicense) : EMPTY);
   }, [editItem, editLicense]);
+
+  useEffect(() => {
+    base44.entities.Driver.list('-created_date', 500)
+      .then((list) => setDrivers(Array.isArray(list) ? list : []))
+      .catch(() => setDrivers([]));
+  }, []);
 
   const update = (f, v) => setForm((p) => ({ ...p, [f]: v }));
 
@@ -157,7 +164,15 @@ export default function VehicleAddForm({ editItem, editLicense, onSave, onCancel
       {/* Fleet assignment fields */}
       <Section icon={Car} title="Fleet Assignment" accent="#10b981">
         <Field label="Year"><Input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Assigned Driver"><Input value={form.assigned_driver} onChange={(e) => update('assigned_driver', e.target.value)} className="bg-background border-border" /></Field>
+        <Field label="Assigned Driver">
+          <Select value={form.assigned_driver || '__none__'} onValueChange={(v) => update('assigned_driver', v === '__none__' ? '' : v)}>
+            <SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select driver" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— None —</SelectItem>
+              {drivers.map((d) => <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Field>
         <Field label="Fuel Type">
           <Select value={form.fuel_type} onValueChange={(v) => update('fuel_type', v)}>
             <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
