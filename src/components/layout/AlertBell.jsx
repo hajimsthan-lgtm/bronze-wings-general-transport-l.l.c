@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { safeAll } from '@/lib/safeRequest';
 import { buildAlerts, CATEGORIES, SEVERITY } from '@/lib/alertEngine';
+import { getCompanySettings } from '@/lib/companySettings';
 import TripsOperationsSection from './TripsOperationsSection';
 import {
   Bell, X, ChevronRight, ChevronDown,
@@ -36,7 +37,7 @@ export default function AlertBell() {
 
   useEffect(() => {
     (async () => {
-      const [invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments] = await safeAll([
+      const [invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, settings] = await safeAll([
         () => base44.entities.Invoice.list('-created_date', 80).catch(() => []),
         () => base44.entities.Vehicle.list().catch(() => []),
         () => base44.entities.Document.list().catch(() => []),
@@ -44,8 +45,9 @@ export default function AlertBell() {
         () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
         () => base44.entities.ClientPayment.list('-created_date', 50).catch(() => []),
         () => base44.entities.CompanyDocument.list().catch(() => []),
+        () => getCompanySettings().catch(() => ({})),
       ], 1);
-      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments }));
+      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, companyName: settings?.company_name || 'Company' }));
     })();
   }, []);
 

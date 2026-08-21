@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, ExternalLink, FileText, Calendar, Clock, User, Upload } from 'lucide-react';
+import { Download, ExternalLink, FileText, Calendar, User } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
-import { getDocVisuals } from '@/lib/documentCategorization';
+import { getDocVisuals, buildDocTitle } from '@/lib/documentCategorization';
 import { daysUntil } from '@/lib/alertEngine';
 
 const STATUS_CFG = {
@@ -44,7 +44,7 @@ export default function DocumentQuickView({ doc, open, onOpenChange, ownerLabel,
           <DialogTitle className="font-display text-foreground flex items-center gap-2.5">
             <span
               className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: `${visualals.color}1a`, border: `1px solid ${visuals.color}40` }}
+              style={{ background: `${visuals.color}1a`, border: `1px solid ${visuals.color}40` }}
             >
               <Icon className="w-4 h-4" style={{ color: visuals.color }} />
             </span>
@@ -148,5 +148,3 @@ function MetaItem({ icon: Icon, label, value }) {
     </div>
   );
 }
-
-import { buildDocTitle } from '@/lib/documentCategorization';

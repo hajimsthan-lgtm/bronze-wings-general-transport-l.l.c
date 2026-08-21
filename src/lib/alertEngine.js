@@ -68,7 +68,7 @@ function docStatus(expiry) {
  * @returns {{alerts: [], byCategory: {}}}
  */
 export function buildAlerts(data) {
-  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [], companyDocuments = [] } = data;
+  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [], companyDocuments = [], companyName = 'Company' } = data;
   const items = [];
 
   // ── Documents & Expiry ──────────────────────────────────────
@@ -83,8 +83,8 @@ export function buildAlerts(data) {
         category: 'documents',
         icon: 'FileWarning',
         severity: (days < 0 || days <= 7) ? 'critical' : 'warning',
-        title: days < 0 ? 'Company Document Expired' : 'Company Document Expiring',
-        sub: d.document_type || '—',
+        title: days < 0 ? 'Document Expired' : 'Document Expiring',
+        sub: `${d.document_type || 'Document'} — ${companyName}`,
         meta: days < 0 ? `${Math.abs(days)}d ago` : `${days}d left`,
         to: `/admin/company-documents?focus=${d.id}`,
       });
@@ -118,8 +118,8 @@ export function buildAlerts(data) {
         category: 'documents',
         icon: 'FileWarning',
         severity: regDays < 0 ? 'critical' : 'warning',
-        title: regDays < 0 ? 'Registration Expired' : 'Registration Expiring',
-        sub: v.plate_number || '—',
+        title: regDays < 0 ? 'Document Expired' : 'Document Expiring',
+        sub: `Vehicle Registration — ${v.plate_number || '—'}`,
         meta: regDays < 0 ? `${Math.abs(regDays)}d ago` : `${regDays}d left`,
         to: `/admin/vehicles/${v.id}`,
       });
@@ -131,8 +131,8 @@ export function buildAlerts(data) {
         category: 'documents',
         icon: 'FileWarning',
         severity: insDays < 0 ? 'critical' : 'warning',
-        title: insDays < 0 ? 'Insurance Expired' : 'Insurance Expiring',
-        sub: v.plate_number || '—',
+        title: insDays < 0 ? 'Document Expired' : 'Document Expiring',
+        sub: `Vehicle Insurance — ${v.plate_number || '—'}`,
         meta: insDays < 0 ? `${Math.abs(insDays)}d ago` : `${insDays}d left`,
         to: `/admin/vehicles/${v.id}`,
       });
@@ -148,8 +148,8 @@ export function buildAlerts(data) {
         category: 'documents',
         icon: 'IdCard',
         severity: licDays < 0 ? 'critical' : 'warning',
-        title: licDays < 0 ? 'License Expired' : 'License Expiring',
-        sub: d.name || '—',
+        title: licDays < 0 ? 'Document Expired' : 'Document Expiring',
+        sub: `Driving License — ${d.name || '—'}`,
         meta: licDays < 0 ? `${Math.abs(licDays)}d ago` : `${licDays}d left`,
         to: `/admin/drivers/${d.id}`,
       });
@@ -161,8 +161,8 @@ export function buildAlerts(data) {
         category: 'documents',
         icon: 'IdCard',
         severity: visaDays < 0 ? 'critical' : 'warning',
-        title: visaDays < 0 ? 'Visa Expired' : 'Visa Expiring',
-        sub: d.name || '—',
+        title: visaDays < 0 ? 'Document Expired' : 'Document Expiring',
+        sub: `Visa — ${d.name || '—'}`,
         meta: visaDays < 0 ? `${Math.abs(visaDays)}d ago` : `${visaDays}d left`,
         to: `/admin/drivers/${d.id}`,
       });

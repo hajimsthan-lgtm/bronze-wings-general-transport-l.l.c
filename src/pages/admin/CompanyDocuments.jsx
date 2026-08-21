@@ -14,9 +14,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate } from '@/lib/formatters';
-import { Plus, Search, Award, Pencil, Trash2, Upload, FileText, Loader2, ExternalLink, RefreshCw, History, ShieldCheck, AlertTriangle, CheckCircle2, CalendarClock, CalendarX } from 'lucide-react';
+import { Plus, Search, Award, Pencil, Trash2, Upload, FileText, Loader2, ExternalLink, RefreshCw, History, ShieldCheck, AlertTriangle, CheckCircle2, CalendarClock, CalendarX, Eye } from 'lucide-react';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import CompanyDocRenewDialog from '@/components/company-docs/CompanyDocRenewDialog';
+import DocumentQuickView from '@/components/company-docs/DocumentQuickView';
+import { getDocVisuals, getDocCategory, DOC_CATEGORIES, buildDocTitle } from '@/lib/documentCategorization';
+import { getCompanySettings } from '@/lib/companySettings';
 
 const DOC_TYPES = [
   'Trade License (DED)',
@@ -84,12 +87,19 @@ export default function CompanyDocuments() {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [renewDoc, setRenewDoc] = useState(null);
+  const [quickViewDoc, setQuickViewDoc] = useState(null);
+  const [companyName, setCompanyName] = useState('Company');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   const load = () => {
     setLoading(true);
     base44.entities.CompanyDocument.list('-created_date', 200).then(setItems).finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    getCompanySettings().then(s => setCompanyName(s.company_name || 'Company')).catch(() => {});
+  }, []);
 
   // Listen for TopBar "Add Document" event
   useEffect(() => {
@@ -131,8 +141,20 @@ export default function CompanyDocuments() {
       d.issuing_authority?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || docStatus(d.expiry_date, d.alert_days || 30) === statusFilter;
     const matchType = typeFilter === 'all' || d.document_type === typeFilter;
-    return matchSearch && matchStatus && matchType;
+    const matchCategory = categoryFilter === 'all' || getDocCategory(d.document_type) === categoryFilter;
+    return matchSearch && matchStatus && matchType && matchCategory;
   });
+
+  // Count per category for tab badges
+  const categoryCounts = useMemo(() => {
+    const counts = { all: items.length };
+    DOC_CATEGORIES.forEach(c => { if (c.key !== 'all') counts[c.key] = 0; });
+    items.forEach(d => {
+      const cat = getDocCategory(d.document_type);
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [items]);
 
   const stats = useMemo(() => ({
     total: items.length,
@@ -151,6 +173,22 @@ export default function CompanyDocuments() {
         <ReportStatCard index={2} label="Active" value={stats.active} icon={CheckCircle2} color="#22c55e" />
         <ReportStatCard index={3} label="Expiring Soon" value={stats.expiring} icon={CalendarClock} color="#f59e0b" />
         <ReportStatCard index={4} label="Expired" value={stats.expired} icon={CalendarX} color="#ef4444" />
+      </div>
+
+      {/* Category filter tabs */}
+      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+        {DOC_CATEGORIES.map(cat => (
+          <button
+            key={cat.key}
+            onClick={() => setCategoryFilter(cat.key)}
+            className={`sub-tab ${categoryFilter === cat.key ? 'sub-tab-active' : ''}`}
+          >
+            {cat.label}
+            {categoryCounts[cat.key] > 0 && (
+              <span className="ml-1.5 text-[10px] font-bold opacity-70">{categoryCounts[cat.key]}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Toolbar */}
@@ -185,16 +223,19 @@ export default function CompanyDocuments() {
           description={items.length === 0 ? "Add your first compliance document to start tracking expiries" : "Try adjusting your search or filters"}
         />
       ) : (
-        <div className="space-y-2">
-          {filtered.map(doc => (
-            <div key={doc.id} className="row-card flex items-center gap-4 cursor-pointer" onClick={() => { setEditItem(doc); setFormOpen(true); }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--panel-accent-rgb),0.1)', border: '1px solid rgba(var(--panel-accent-rgb),0.2)' }}>
-                <Award className="w-4 h-4 text-primary" />
+        <div className="space-y-2 pb-8">
+          {filtered.map(doc => {
+            const visuals = getDocVisuals(doc.document_type);
+            const DocIcon = visuals.icon;
+            const ownerLabel = doc.reference_number || companyName;
+            return (
+            <div key={doc.id} className="row-card flex items-center gap-4 cursor-pointer" onClick={() => setQuickViewDoc(doc)}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${visuals.color}1a`, border: `1px solid ${visuals.color}40` }}>
+                <DocIcon className="w-4 h-4" style={{ color: visuals.color }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{doc.document_type}</p>
+                <p className="text-sm font-medium text-foreground truncate">{buildDocTitle(doc.document_type, ownerLabel)}</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {doc.reference_number && <span>{doc.reference_number} · </span>}
                   {doc.issuing_authority || 'No authority'}
                 </p>
               </div>
@@ -204,13 +245,11 @@ export default function CompanyDocuments() {
               </div>
               <StatusBadge expiry={doc.expiry_date} alertDays={doc.alert_days || 30} />
               <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-                {doc.file_url && (
-                  <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url, '_blank')} className="text-muted-foreground hover:text-primary h-8 px-2" title="View file"><ExternalLink className="w-3.5 h-3.5" /></Button>
-                )}
+                <Button variant="ghost" size="sm" onClick={() => setQuickViewDoc(doc)} className="text-muted-foreground hover:text-primary h-8 px-2" title="Quick view"><Eye className="w-3.5 h-3.5" /></Button>
                 {doc.expiry_date && (
                   <Button variant="ghost" size="sm" onClick={() => setRenewDoc(doc)} className="text-muted-foreground hover:text-amber-500 h-8 px-2" title="Renew"><RefreshCw className="w-3.5 h-3.5" /></Button>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => { setEditItem(doc); setFormOpen(true); }} className="text-muted-foreground h-8 px-2"><Pencil className="w-3.5 h-3.5" /></Button>
+                <Button variant="ghost" size="sm" onClick={() => { setEditItem(doc); setFormOpen(true); }} className="text-muted-foreground h-8 px-2" title="Edit"><Pencil className="w-3.5 h-3.5" /></Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-400 h-8 px-2"><Trash2 className="w-3.5 h-3.5" /></Button>
@@ -228,7 +267,8 @@ export default function CompanyDocuments() {
                 </AlertDialog>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -257,6 +297,14 @@ export default function CompanyDocuments() {
         open={!!renewDoc}
         onOpenChange={(v) => { if (!v) setRenewDoc(null); }}
         onRenewed={load}
+      />
+
+      {/* Quick View Modal */}
+      <DocumentQuickView
+        doc={quickViewDoc}
+        open={!!quickViewDoc}
+        onOpenChange={(v) => { if (!v) setQuickViewDoc(null); }}
+        ownerLabel={quickViewDoc?.reference_number || companyName}
       />
     </div>
   );
