@@ -46,18 +46,19 @@ export default function BankReconciliation() {
       exportColumns={EXPORT_COLS}
       importConfig={{
         columns: [
-          { key: 'date', label: 'Date', sample: '2026-01-15' },
-          { key: 'reference', label: 'Reference #', sample: 'REF-001' },
-          { key: 'description', label: 'Description', sample: 'Bank charges' },
-          { key: 'deposit', label: 'Deposit', sample: '5000.00' },
-          { key: 'withdrawal', label: 'Withdrawal', sample: '0.00' },
+          { key: 'date', label: 'Date', type: 'date', required: true, sample: '2026-01-15' },
+          { key: 'reference', label: 'Reference #', type: 'text', sample: 'REF-001' },
+          { key: 'description', label: 'Description', type: 'text', sample: 'Bank charges' },
+          { key: 'deposit', label: 'Deposit', type: 'number', sample: '5000.00' },
+          { key: 'withdrawal', label: 'Withdrawal', type: 'number', sample: '0.00' },
         ],
+        // SmartCsvImporter handles normalization + mapping; transform is a safety fallback
         transform: (r) => ({
-          date: r.date || r.Date || '',
-          reference: r.reference || r['Reference #'] || r.ref || '',
-          description: r.description || r.Description || '',
-          deposit: Number(r.deposit || r.Deposit) || 0,
-          withdrawal: Number(r.withdrawal || r.Withdrawal) || 0,
+          date: r.date || '',
+          reference: r.reference || '',
+          description: r.description || '',
+          deposit: Number(r.deposit) || 0,
+          withdrawal: Number(r.withdrawal) || 0,
         }),
       }}
     />

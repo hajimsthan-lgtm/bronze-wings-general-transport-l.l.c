@@ -4,7 +4,7 @@ import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
-import CsvImportButton from '@/components/common/CsvImportButton';
+import SmartCsvImporter from '@/components/common/SmartCsvImporter';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
 import DatePicker from '@/components/common/DatePicker';
@@ -208,7 +208,7 @@ export default function LedgerPage({
                      <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> Add Entry
                    </h2>
                    {importConfig && (
-                     <CsvImportButton
+                     <SmartCsvImporter
                        entityName={entityName}
                        filename={exportFilename}
                        columns={importConfig.columns}
