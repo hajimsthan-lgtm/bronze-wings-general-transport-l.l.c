@@ -92,9 +92,14 @@ export default function CsvImportButton({ entityName, filename, columns, transfo
   return (
     <>
       <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFile} />
-      
-
-      
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        className={className || "inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-muted/40 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"}
+      >
+        <Upload className="w-4 h-4" />
+        {label}
+      </button>
       <Dialog open={open} onOpenChange={(v) => !v && reset()}>
         <DialogContent className="bg-card border-border max-w-2xl">
           <DialogHeader>

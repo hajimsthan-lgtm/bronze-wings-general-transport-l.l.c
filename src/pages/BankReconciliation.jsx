@@ -43,6 +43,22 @@ export default function BankReconciliation() {
       exportFilename="bank-reconciliation"
       exportTitle="Bank Reconciliation Statement"
       exportColumns={EXPORT_COLS}
+      importConfig={{
+        columns: [
+          { key: 'date', label: 'Date', sample: '2026-01-15' },
+          { key: 'reference', label: 'Reference #', sample: 'REF-001' },
+          { key: 'description', label: 'Description', sample: 'Bank charges' },
+          { key: 'deposit', label: 'Deposit', sample: '5000.00' },
+          { key: 'withdrawal', label: 'Withdrawal', sample: '0.00' },
+        ],
+        transform: (r) => ({
+          date: r.date || r.Date || '',
+          reference: r.reference || r['Reference #'] || r.ref || '',
+          description: r.description || r.Description || '',
+          deposit: Number(r.deposit || r.Deposit) || 0,
+          withdrawal: Number(r.withdrawal || r.Withdrawal) || 0,
+        }),
+      }}
     />
   );
 }

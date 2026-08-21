@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
+import CsvImportButton from '@/components/common/CsvImportButton';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import LedgerAnalytics from '@/components/cash/LedgerAnalytics';
 import DatePicker from '@/components/common/DatePicker';
@@ -54,7 +55,8 @@ export default function LedgerPage({
   summaryLabels, BalanceIcon,
   modeOptions, defaultMode, modeFilter,
   rowToAmounts, buildCreate, dateHasTime,
-  exportFilename, exportTitle, exportColumns
+  exportFilename, exportTitle, exportColumns,
+  importConfig
 }) {
   const [rows, setRows] = useState(null);
   const [view, setView] = useState('statement');
@@ -178,9 +180,21 @@ export default function LedgerPage({
           {view === 'statement' && (
             <>
               <form onSubmit={addEntry} className="p-5">
-                <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-                  <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> Add Entry
-                </h2>
+                <div className="flex items-center justify-between mb-3">
+                   <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                     <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> Add Entry
+                   </h2>
+                   {importConfig && (
+                     <CsvImportButton
+                       entityName={entityName}
+                       filename={exportFilename}
+                       columns={importConfig.columns}
+                       transform={importConfig.transform}
+                       onImported={load}
+                       label="Import CSV"
+                     />
+                   )}
+                 </div>
                 <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-2">
