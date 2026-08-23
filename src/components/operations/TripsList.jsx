@@ -124,6 +124,18 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
 
   return (
     <div>
+      {/* Bulk action bar — sticky sub-header */}
+      <BulkActionBar
+        selectedCount={selected.size}
+        totalCount={trips.length}
+        onSelectAll={toggleAll}
+        onClear={clearSelection}
+        onBulkStatus={handleBulkStatus}
+        onBulkDelete={handleBulkDelete}
+        onBulkExportCSV={handleBulkExportCSV}
+        onBulkExportPDF={handleBulkExportPDF}
+      />
+
       {/* Select-all header — only when trips exist */}
       {trips.length > 0 && (
         <div className="flex items-center gap-2 mb-2 px-1">
@@ -286,17 +298,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
         </div>
       )}
 
-      {/* Floating bulk action bar */}
-      <BulkActionBar
-        selectedCount={selected.size}
-        totalCount={trips.length}
-        onSelectAll={toggleAll}
-        onClear={clearSelection}
-        onBulkStatus={handleBulkStatus}
-        onBulkDelete={handleBulkDelete}
-        onBulkExportCSV={handleBulkExportCSV}
-        onBulkExportPDF={handleBulkExportPDF}
-      />
+
     </div>
   );
 }

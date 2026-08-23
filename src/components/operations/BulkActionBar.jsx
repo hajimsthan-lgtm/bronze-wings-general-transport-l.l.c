@@ -24,15 +24,14 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
   return (
     <>
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-50 animate-fade-in-up"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 88px)' }}
+        className="sticky top-0 z-30 animate-fade-in-up mb-3"
       >
         <div
-          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl"
+          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl w-full"
           style={{
             background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.22), rgba(var(--surf-2-rgb),0.92))',
             border: '1px solid rgba(var(--panel-accent-rgb),0.40)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10)',
             backdropFilter: 'blur(24px) saturate(1.4)',
             WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
           }}

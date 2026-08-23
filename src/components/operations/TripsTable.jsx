@@ -194,6 +194,18 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
 
   return (
     <div className="relative">
+      {/* Bulk action bar — sticky sub-header */}
+      <BulkActionBar
+        selectedCount={selected.size}
+        totalCount={trips.length}
+        onSelectAll={toggleAll}
+        onClear={clearSelection}
+        onBulkStatus={handleBulkStatus}
+        onBulkDelete={handleBulkDelete}
+        onBulkExportCSV={handleBulkExportCSV}
+        onBulkExportPDF={handleBulkExportPDF}
+      />
+
       {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
       <div className="relative mb-1.5">
         <div
@@ -445,17 +457,6 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Floating bulk action bar */}
-      <BulkActionBar
-        selectedCount={selected.size}
-        totalCount={trips.length}
-        onSelectAll={toggleAll}
-        onClear={clearSelection}
-        onBulkStatus={handleBulkStatus}
-        onBulkDelete={handleBulkDelete}
-        onBulkExportCSV={handleBulkExportCSV}
-        onBulkExportPDF={handleBulkExportPDF}
-      />
     </div>);
 
 }
