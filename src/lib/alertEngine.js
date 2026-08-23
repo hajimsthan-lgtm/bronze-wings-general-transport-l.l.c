@@ -199,7 +199,7 @@ export function buildAlerts(data) {
         title: 'Overdue Invoice',
         sub: i.client_name || '—',
         meta: i.invoice_number || '',
-        to: '/admin/clients',
+        to: '/accounts/invoices',
       })
     );
 
@@ -216,7 +216,7 @@ export function buildAlerts(data) {
         title: 'Partial Payment',
         sub: i.client_name || '—',
         meta: `${i.invoice_number || ''} · ${balance.toFixed(0)} due`,
-        to: '/admin/clients',
+        to: '/accounts/invoices',
       });
     });
 
@@ -234,7 +234,7 @@ export function buildAlerts(data) {
           title: days < 0 ? 'Invoice Past Due' : 'Invoice Due Soon',
           sub: i.client_name || '—',
           meta: `${i.invoice_number || ''} · ${days < 0 ? `${Math.abs(days)}d ago` : `${days}d left`}`,
-          to: '/admin/clients',
+          to: '/accounts/invoices',
         });
       }
     });
@@ -251,7 +251,7 @@ export function buildAlerts(data) {
         title: 'Payment Pending',
         sub: p.client_name || '—',
         meta: p.reference_number || '',
-        to: '/admin/clients',
+        to: '/accounts/invoices',
       })
     );
 

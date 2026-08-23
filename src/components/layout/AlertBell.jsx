@@ -29,6 +29,8 @@ export default function AlertBell() {
   const [activeCategory, setActiveCategory] = useState('all');
   const scrollRef = useRef(null);
   const rafRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
+  const [hoveredAlert, setHoveredAlert] = useState(null);
   const [tripsOpsCount, setTripsOpsCount] = useState(0);
   const [tripsOpsCritical, setTripsOpsCritical] = useState(0);
   const [tripsOpsExpanded, setTripsOpsExpanded] = useState(false);
@@ -96,10 +98,30 @@ export default function AlertBell() {
     });
   }, []);
 
+  const flattenItems = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const items = container.querySelectorAll('[data-bell-item]');
+    items.forEach((item) => {
+      item.style.transform = '';
+      item.style.opacity = '';
+      item.style.pointerEvents = '';
+      item.classList.remove('is-center');
+    });
+  }, []);
+
   const handleScroll = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    container.classList.add('is-scrolling');
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(updatePerspective);
-  }, [updatePerspective]);
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      container.classList.remove('is-scrolling');
+      flattenItems();
+    }, 200);
+  }, [updatePerspective, flattenItems]);
 
   // Initialize perspective when dropdown opens or filter changes
   useEffect(() => {
@@ -342,17 +364,13 @@ export default function AlertBell() {
                             className={`bell-perspective-item ${a.severity === 'critical' ? 'is-critical' : ''}`}
                             style={{ '--sev-color': sev.color, '--sev-glow': sev.glow }}
                             onClick={() => handleAlertClick(a.to)}
+                            onMouseEnter={() => setHoveredAlert(a)}
+                            onMouseLeave={() => setHoveredAlert(null)}
                           >
-                            <span
-                              className="bell-perspective-icon"
-                              style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40` }}
-                            >
+                            <span className="bell-perspective-icon">
                               <Icon className="w-4 h-4" style={{ color: sev.color }} />
                               {a.severity === 'critical' && (
-                                <span
-                                  className="bell-perspective-pulse"
-                                  style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}` }}
-                                />
+                                <span className="bell-perspective-pulse bell-red-blink" />
                               )}
                             </span>
                             <div className="bell-perspective-text">
@@ -369,6 +387,16 @@ export default function AlertBell() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 px-4">
                     <p className="text-[11px] text-white/40">No alerts in this category</p>
+                  </div>
+                )}
+                {hoveredAlert && (
+                  <div className="bell-hover-info">
+                    <span className="bell-hover-info-dot" style={{ background: SEVERITY[hoveredAlert.severity]?.color || '#888' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="bell-hover-info-title">{hoveredAlert.title}</p>
+                      <p className="bell-hover-info-desc">{hoveredAlert.sub}{hoveredAlert.meta ? ` · ${hoveredAlert.meta}` : ''}</p>
+                    </div>
+                    <span className="bell-hover-info-hint">Click to open →</span>
                   </div>
                 )}
               </div>
