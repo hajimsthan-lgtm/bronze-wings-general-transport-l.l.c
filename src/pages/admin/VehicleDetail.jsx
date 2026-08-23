@@ -11,8 +11,10 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import RecordSectionCard from '@/components/common/RecordSectionCard';
 import TabTableCard from '@/components/admin/TabTableCard';
+import CollapsibleSection from '@/components/common/CollapsibleSection';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, FileText } from 'lucide-react';
+import { Inbox, Fuel as FuelIcon, Receipt, Wrench, Truck, FileText, Plus } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import ProfitCard from '@/components/common/ProfitCard';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -232,84 +234,103 @@ export default function VehicleDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 items-start">
         <VehicleProfileCard vehicle={vehicle} license={license} driver={driver} stats={{ trips: fTrips.length, revenue: totalTrips }} onSaveOwnership={saveOwnership} onSaved={saveVehicle} />
         <div className="space-y-4">
-          {/* Trips — long table, auto-collapse on hover */}
-          <TabTableCard
-            collapsible
-            title={`Trips — ${vehicle.plate_number}`}
-            subtitle={`${dateFrom} → ${dateTo}`}
-            loading={dataLoading}
-            columns={[
-              { label: 'Trip ID', className: 'col-span-2' },
-              { label: 'Date', className: 'col-span-2' },
-              { label: 'Route', className: 'col-span-3' },
-              { label: 'Driver', className: 'col-span-2' },
-              { label: 'Amount', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-1 text-right' }]
-            }
-            emptyIcon={Inbox}>
-            {fTrips.map((trip) =>
-              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                <div className="col-span-2 text-muted-foreground whitespace-nowrap">{formatDate(trip.trip_date)}</div>
-                <div className="col-span-3 text-foreground whitespace-normal break-words leading-tight">{trip.from_location} → {trip.to_location}</div>
-                <div className="col-span-2 text-muted-foreground whitespace-normal break-words leading-tight">{trip.driver_name}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
-                <div className="col-span-1 text-right"><StatusBadge status={trip.status} /></div>
+          {/* Trips */}
+          <CollapsibleSection title="Trips" icon={Truck} accent="#1ED760" count={fTrips.length} actions={
+            <ExportButtons data={fTrips} filename={`vehicle-${vehicle.plate_number}-trips`} title={`Trips — ${vehicle.plate_number}`} columns={viewerConfig.trips.columns} />
+          }>
+            {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fTrips.map((trip) => (
+                  <div key={trip.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}><Truck className="w-4 h-4 text-primary" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.driver_name || '—'}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
+                    <StatusBadge status={trip.status} />
+                  </div>
+                ))}
               </div>
             )}
-          </TabTableCard>
+          </CollapsibleSection>
 
           {/* Contracts */}
           <ContractsSection filter={{ vehicle_plate: vehicle.plate_number }} />
 
-          {/* Fuel — small card, collapsed by default */}
-          <RecordSectionCard title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} collapsible defaultOpen={false} onView={() => setViewer('fuel')} onPdf={() => pdfExport('fuel', fFuel)} onNew={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Fuel" loading={dataLoading} emptyIcon={FuelIcon} emptyLabel={t('no_data')} className="h-full">
-            <div className="space-y-2">
-              {fFuel.slice(0, 5).map((rec) => (
-                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f59e0b', 0.06), border: `1px solid ${hexToRgba('#f59e0b', 0.16)}` }}>
-                  <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0"><FuelIcon className="w-4 h-4 text-amber-400" /></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name || ''}</p>
+          {/* Fuel */}
+          <CollapsibleSection title={t('fuel')} icon={FuelIcon} accent="#f59e0b" count={fFuel.length} actions={
+            <>
+              <button onClick={() => navigate(`/fuel?new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="New Fuel"><Plus className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setViewer('fuel')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="View all"><Inbox className="w-3.5 h-3.5" /></button>
+              <button onClick={() => pdfExport('fuel', fFuel)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+            </>
+          }>
+            {dataLoading ? <LoadingSpinner /> : fFuel.length === 0 ? <EmptyState icon={FuelIcon} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fFuel.map((rec) => (
+                  <div key={rec.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(245,158,11,0.35)' }}><FuelIcon className="w-4 h-4 text-amber-400" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{rec.liters}L · {rec.station_name || '—'}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.driver_name || ''}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.total_cost)}</span>
                   </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.total_cost)}</span>
-                </div>
-              ))}
-            </div>
-          </RecordSectionCard>
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
 
-          {/* Maintenance — small card, collapsed by default */}
-          <RecordSectionCard title={t('maintenance')} icon={Wrench} accent="#10b981" count={fServices.length} collapsible defaultOpen={false} onView={() => setViewer('services')} onPdf={() => pdfExport('services', fServices)} onNew={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} newLabel="New Maintenance" loading={dataLoading} emptyIcon={Wrench} emptyLabel={t('no_data')} className="h-full">
-            <div className="space-y-2">
-              {fServices.slice(0, 5).map((rec) => (
-                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#10b981', 0.06), border: `1px solid ${hexToRgba('#10b981', 0.16)}` }}>
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0"><Wrench className="w-4 h-4 text-emerald-400" /></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
-                    <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
+          {/* Maintenance */}
+          <CollapsibleSection title={t('maintenance')} icon={Wrench} accent="#10b981" count={fServices.length} actions={
+            <>
+              <button onClick={() => navigate(`/admin/vehicles?tab=services&new=1&vehicle_plate=${encodeURIComponent(vehicle.plate_number)}`)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="New Maintenance"><Plus className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setViewer('services')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="View all"><Inbox className="w-3.5 h-3.5" /></button>
+              <button onClick={() => pdfExport('services', fServices)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+            </>
+          }>
+            {dataLoading ? <LoadingSpinner /> : fServices.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fServices.map((rec) => (
+                  <div key={rec.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(16,185,129,0.35)' }}><Wrench className="w-4 h-4 text-emerald-400" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground capitalize">{rec.service_type}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(rec.date)} · {rec.vendor_name || '—'}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.cost)}</span>
+                    <StatusBadge status={rec.status} />
                   </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.cost)}</span>
-                  <StatusBadge status={rec.status} />
-                </div>
-              ))}
-            </div>
-          </RecordSectionCard>
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
 
-          {/* Expenses — small card, collapsed by default */}
-          <RecordSectionCard title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} collapsible defaultOpen={false} onView={() => setViewer('expenses')} onPdf={() => pdfExport('expenses', fExpenses)} onNew={() => navigate('/expenses?open=expense')} newLabel="New Expense" loading={dataLoading} emptyIcon={Receipt} emptyLabel={t('no_data')} className="h-full">
-            <div className="space-y-2">
-              {fExpenses.slice(0, 5).map((rec) => (
-                <div key={rec.id} className="rounded-xl p-3 flex items-center gap-3" style={{ background: hexToRgba('#f43f5e', 0.06), border: `1px solid ${hexToRgba('#f43f5e', 0.16)}` }}>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+          {/* Expenses */}
+          <CollapsibleSection title={t('expenses')} icon={Receipt} accent="#f43f5e" count={fExpenses.length} actions={
+            <>
+              <button onClick={() => navigate('/expenses?open=expense')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="New Expense"><Plus className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setViewer('expenses')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="View all"><Inbox className="w-3.5 h-3.5" /></button>
+              <button onClick={() => pdfExport('expenses', fExpenses)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+            </>
+          }>
+            {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={Receipt} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fExpenses.map((rec) => (
+                  <div key={rec.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(244,63,94,0.35)' }}><Receipt className="w-4 h-4 text-rose-400" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                    <StatusBadge status={rec.status} />
                   </div>
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{formatCurrency(rec.amount)}</span>
-                  <StatusBadge status={rec.status} />
-                </div>
-              ))}
-            </div>
-          </RecordSectionCard>
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
 
           {/* Documents — small card, collapsed by default */}
           <DocumentsSection entityType="vehicle" entityId={vehicle.id} accent="#a855f7" defaultOpen={false} autoExpand={expandDocs} flashDocId={flashDocId} />

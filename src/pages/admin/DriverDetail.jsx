@@ -9,7 +9,9 @@ import ContractsSection from '@/components/contracts/ContractsSection';
 import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import BreakdownDialog from '@/components/common/BreakdownDialog';
+import CollapsibleSection from '@/components/common/CollapsibleSection';
 import TabTableCard from '@/components/admin/TabTableCard';
 import RecordSectionCard from '@/components/common/RecordSectionCard';
 import RecordsViewerSheet from '@/components/common/RecordsViewerSheet';
@@ -20,7 +22,7 @@ import { downloadPayslipPDF } from '@/lib/payslipHtml';
 import { getCompanySettings } from '@/lib/companySettings';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText, Truck, Pencil } from 'lucide-react';
+import { Inbox, Wallet as WalletIcon, Receipt as ReceiptIcon, FileDown, FileText, Truck, Pencil, Plus } from 'lucide-react';
 import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
 import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -190,113 +192,84 @@ export default function DriverDetail() {
           <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
         </div>
         <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll pr-1">
-          {/* Trips — long table, auto-collapse on hover */}
-          <TabTableCard
-              collapsible
-              defaultOpen={false}
-              icon={Truck}
-              accent="#f43f5e"
-              title={`Trips — ${driver.name}`}
-              subtitle={`${dateFrom} → ${dateTo}`}
-              loading={dataLoading}
-              columns={[
-              { label: 'Trip ID', className: 'col-span-2' },
-              { label: 'Date', className: 'col-span-2' },
-              { label: 'Route', className: 'col-span-3' },
-              { label: 'Status', className: 'col-span-2' },
-              { label: 'Amount', className: 'col-span-2 text-right' },
-              { label: 'Action', className: 'col-span-1 text-right' }]
-              }
-              emptyIcon={Inbox}>
-            {fTrips.map((trip) =>
-              <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
-                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
-                <div className="col-span-2"><StatusBadge status={trip.status} /></div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
-                <div className="col-span-1 text-right">
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground">View</Button>
-                </div>
+          {/* Trips */}
+          <CollapsibleSection title="Trips" icon={Truck} accent="#1ED760" count={fTrips.length}>
+            {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fTrips.map((trip) => (
+                  <div key={trip.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}><Truck className="w-4 h-4 text-primary" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{trip.from_location} → {trip.to_location}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(trip.trip_date)} · {trip.trip_number || trip.id.slice(0, 6)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(trip.revenue)}</span>
+                    <StatusBadge status={trip.status} />
+                  </div>
+                ))}
               </div>
-              )}
-          </TabTableCard>
+            )}
+          </CollapsibleSection>
 
           {/* Contracts */}
           <ContractsSection filter={{ driver_name: driver.name }} />
 
-          {/* Salary — small card, click-to-collapse */}
-          <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} collapsible />
-          <RecordSectionCard
-              title="Salary Records"
-              icon={WalletIcon}
-              accent="#10b981"
-              count={fSalaries.length}
-              collapsible
-              defaultOpen={false}
-              onView={() => setViewer('salary')}
-              onPdf={salaryPdf}
-              onNew={() => setSalaryFormOpen(true)}
-              newLabel="Add salary"
-              loading={dataLoading}
-              emptyIcon={WalletIcon}
-              emptyLabel={t('no_data')}
-              columns={[
-                { label: 'Period', className: 'col-span-3' },
-                { label: 'Payment Date', className: 'col-span-3' },
-                { label: 'Net Salary', className: 'col-span-3 text-right' },
-                { label: 'Status', className: 'col-span-2' },
-                { label: '', className: 'col-span-1 text-right' },
-              ]}>
-            {fSalaries.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-3 text-foreground font-medium">{rec.month} {rec.year}</div>
-                <div className="col-span-3 text-muted-foreground">{formatDate(rec.payment_date)}</div>
-                <div className="col-span-3 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.net_salary)}</div>
-                <div className="col-span-2"><StatusBadge status={rec.status} /></div>
-                <div className="col-span-1 text-right">
-                  <Button size="sm" variant="ghost" disabled={payslipBusyId === rec.id} onClick={() => downloadPayslip(rec)} className="h-7 px-2 text-muted-foreground hover:text-primary" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></Button>
-                </div>
-              </div>
-            ))}
-          </RecordSectionCard>
+          {/* Outstanding Payments */}
+          <CollapsibleSection title="Outstanding Payments" icon={WalletIcon} accent="#f59e0b" count={salaries.filter(s => s.status !== 'paid').length}>
+            <DriverOutstandingPayments salaries={salaries} onMarkPaid={markPaid} busyId={salaryBusyId} />
+          </CollapsibleSection>
 
-          {/* Expenses — small card, click-to-collapse */}
-          <RecordSectionCard
-              title="Expenses"
-              icon={ReceiptIcon}
-              accent="#f43f5e"
-              count={fExpenses.length}
-              collapsible
-              defaultOpen={false}
-              onView={() => setViewer('expenses')}
-              onPdf={expensesPdf}
-              onNew={() => { setExpenseEdit(null); setExpenseFormOpen(true); }}
-              newLabel="Add expense"
-              loading={dataLoading}
-              emptyIcon={ReceiptIcon}
-              emptyLabel={t('no_data')}
-              columns={[
-                { label: 'Date', className: 'col-span-2' },
-                { label: 'Category', className: 'col-span-2' },
-                { label: 'Description', className: 'col-span-3' },
-                { label: 'Amount', className: 'col-span-2 text-right' },
-                { label: 'Status', className: 'col-span-2' },
-                { label: '', className: 'col-span-1 text-right' },
-              ]}>
-            {fExpenses.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-2 text-muted-foreground">{formatDate(rec.date)}</div>
-                <div className="col-span-2 text-muted-foreground capitalize">{rec.category}</div>
-                <div className="col-span-3 text-foreground truncate">{rec.description || rec.category}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(rec.amount)}</div>
-                <div className="col-span-2"><StatusBadge status={rec.status} /></div>
-                <div className="col-span-1 text-right">
-                  <Button size="sm" variant="ghost" onClick={() => { setExpenseEdit(rec); setExpenseFormOpen(true); }} className="h-7 px-2 text-muted-foreground hover:text-foreground" title="Edit expense"><Pencil className="w-3.5 h-3.5" /></Button>
-                </div>
+          {/* Salary Records */}
+          <CollapsibleSection title="Salary Records" icon={WalletIcon} accent="#10b981" count={fSalaries.length} actions={
+            <>
+              <button onClick={() => setSalaryFormOpen(true)} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Add salary"><Plus className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setViewer('salary')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="View all"><Inbox className="w-3.5 h-3.5" /></button>
+              <button onClick={salaryPdf} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+            </>
+          }>
+            {dataLoading ? <LoadingSpinner /> : fSalaries.length === 0 ? <EmptyState icon={WalletIcon} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fSalaries.map((rec) => (
+                  <div key={rec.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(16,185,129,0.35)' }}><WalletIcon className="w-4 h-4 text-emerald-400" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{rec.month} {rec.year}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(rec.payment_date)} · <span className="capitalize">{rec.status}</span></p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(rec.net_salary)}</span>
+                    <StatusBadge status={rec.status} />
+                    <button onClick={() => downloadPayslip(rec)} disabled={payslipBusyId === rec.id} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Download payslip"><FileDown className="w-3.5 h-3.5" /></button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </RecordSectionCard>
+            )}
+          </CollapsibleSection>
+
+          {/* Expenses */}
+          <CollapsibleSection title="Expenses" icon={ReceiptIcon} accent="#f43f5e" count={fExpenses.length} actions={
+            <>
+              <button onClick={() => { setExpenseEdit(null); setExpenseFormOpen(true); }} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Add expense"><Plus className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setViewer('expenses')} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="View all"><Inbox className="w-3.5 h-3.5" /></button>
+              <button onClick={expensesPdf} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Export PDF"><FileText className="w-3.5 h-3.5" /></button>
+            </>
+          }>
+            {dataLoading ? <LoadingSpinner /> : fExpenses.length === 0 ? <EmptyState icon={ReceiptIcon} title={t('no_data')} /> : (
+              <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+                {fExpenses.map((rec) => (
+                  <div key={rec.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(244,63,94,0.35)' }}><ReceiptIcon className="w-4 h-4 text-rose-400" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{rec.description || rec.category}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{rec.category} · {formatDate(rec.date)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(rec.amount)}</span>
+                    <StatusBadge status={rec.status} />
+                    <button onClick={() => { setExpenseEdit(rec); setExpenseFormOpen(true); }} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Edit expense"><Pencil className="w-3.5 h-3.5" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
 
           {/* Documents — small card, click-to-collapse */}
           <DocumentsSection entityType="driver" entityId={driver.id} accent="#a855f7" defaultOpen={false} />
