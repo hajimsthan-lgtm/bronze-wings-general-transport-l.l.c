@@ -11,23 +11,23 @@ export const STATUS_LABELS = {
 };
 
 export const STATUS_PILLS = {
-  draft: 'bg-muted text-muted-foreground border-border',
-  unsigned: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  signed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  sent: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  partially_paid: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
-  paid: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  cancelled: 'bg-muted/50 text-muted-foreground/60 border-border',
+  draft: 'bg-slate-500/15 text-slate-400 border-slate-500/25',
+  unsigned: 'bg-blue-500/15 text-blue-400 border-blue-500/25',
+  signed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25',
+  sent: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/25',
+  partially_paid: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
+  paid: 'bg-green-500/15 text-green-400 border-green-500/25',
+  cancelled: 'bg-rose-500/15 text-rose-400 border-rose-500/25',
 };
 
 export const STATUS_DOTS = {
-  draft: 'bg-muted-foreground',
+  draft: 'bg-slate-400',
   unsigned: 'bg-blue-400',
   signed: 'bg-emerald-400',
-  sent: 'bg-blue-400',
-  partially_paid: 'bg-orange-400',
-  paid: 'bg-emerald-400',
-  cancelled: 'bg-muted-foreground/50',
+  sent: 'bg-cyan-400',
+  partially_paid: 'bg-amber-400',
+  paid: 'bg-green-400',
+  cancelled: 'bg-rose-400',
 };
 
 // Derive the effective status from invoice data (not from a manually stored field)

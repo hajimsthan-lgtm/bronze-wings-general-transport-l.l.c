@@ -591,7 +591,7 @@ export default function InvoicesPage() {
         }
         </div> :
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane
@@ -613,7 +613,7 @@ export default function InvoicesPage() {
           </div>
 
           {/* Right pane — detail / generator (desktop) */}
-          <div className="hidden lg:block lg:col-span-4 min-h-0 h-full">
+          <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
             <InvoiceDetailPane
             inv={selectedInvoice}
             clients={clients}
