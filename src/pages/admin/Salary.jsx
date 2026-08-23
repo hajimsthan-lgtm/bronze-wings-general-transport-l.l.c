@@ -7,10 +7,10 @@ import StatusBadge from '@/components/common/StatusBadge';
 import ExportButtons from '@/components/common/ExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { getCompanySettings } from '@/lib/companySettings';
 import { downloadPayslipPDF } from '@/lib/payslipHtml';
@@ -323,32 +323,27 @@ export default function Salary() {
              </div>
              )}
 
-      {/* Form Sheet */}
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6">
-            <SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Salary</SheetTitle>
-          </SheetHeader>
-          <SalaryFormSheet
-            editItem={editItem}
-            prefillDriver={prefillDriver}
-            onSave={async (data) => {
-              const { applied_deductions = [], ...salaryData } = data;
-              const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
-              let rec;
-              if (editItem) { rec = await base44.entities.SalaryRecord.update(editItem.id, { ...salaryData, applied_deductions: breakdown }); }
-              else { rec = await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown }); }
-              if (applied_deductions.length > 0) {
-                await applyDeductions(salaryData.driver_name, applied_deductions);
-              }
-              load();
-              setFormOpen(false);
-              return rec;
-            }}
-            onCancel={() => setFormOpen(false)}
-          />
-        </SheetContent>
-      </Sheet>
+      {/* Form Dialog */}
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Wallet} title={`${editItem ? t('edit') : t('add_new')} Salary`} subtitle="Create or edit a salary record">
+        <SalaryFormSheet
+          editItem={editItem}
+          prefillDriver={prefillDriver}
+          onSave={async (data) => {
+            const { applied_deductions = [], ...salaryData } = data;
+            const breakdown = applied_deductions.map(({ description, type, amount }) => ({ description, type, amount }));
+            let rec;
+            if (editItem) { rec = await base44.entities.SalaryRecord.update(editItem.id, { ...salaryData, applied_deductions: breakdown }); }
+            else { rec = await base44.entities.SalaryRecord.create({ ...salaryData, applied_deductions: breakdown }); }
+            if (applied_deductions.length > 0) {
+              await applyDeductions(salaryData.driver_name, applied_deductions);
+            }
+            load();
+            setFormOpen(false);
+            return rec;
+          }}
+          onCancel={() => setFormOpen(false)}
+        />
+      </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => { setEditItem(null); setPrefillDriver(''); setFormOpen(true); }} label="Add Salary" />
     </div>
   );

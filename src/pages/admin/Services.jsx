@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Wrench, Search, Pencil, Trash2, ChevronRight } from 'lucide-react';
@@ -83,12 +83,9 @@ export default function Services() {
         </>
       }
 
-      <Sheet open={formOpen} onOpenChange={setFormOpen}>
-        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-          <SheetHeader className="mb-6"><SheetTitle className="font-display text-foreground">{editItem ? t('edit') : t('add_new')} Maintenance</SheetTitle></SheetHeader>
-          <ServiceForm editItem={editItem} presetPlate={presetPlate} onSave={async (data) => {if (editItem) await base44.entities.ServiceRecord.update(editItem.id, data);else await base44.entities.ServiceRecord.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
-        </SheetContent>
-      </Sheet>
+      <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Wrench} title={`${editItem ? t('edit') : t('add_new')} Maintenance`} subtitle="Record a maintenance or service event">
+        <ServiceForm editItem={editItem} presetPlate={presetPlate} onSave={async (data) => {if (editItem) await base44.entities.ServiceRecord.update(editItem.id, data);else await base44.entities.ServiceRecord.create(data);load();setFormOpen(false);}} onCancel={() => setFormOpen(false)} />
+      </EntityFormDialog>
       <MobileFAB icon={Plus} onClick={() => {setEditItem(null);setFormOpen(true);}} label="Add Maintenance" />
     </div>);
 
