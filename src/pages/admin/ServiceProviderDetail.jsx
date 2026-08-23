@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
@@ -7,13 +7,14 @@ import DocumentsSection from '@/components/admin/DocumentsSection';
 import StatusBadge from '@/components/common/StatusBadge';
 import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
-import RecordSectionCard from '@/components/common/RecordSectionCard';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import CollapsibleSection from '@/components/common/CollapsibleSection';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Wrench, Truck, Users, Receipt, Phone, Mail, MapPin, Calendar, FileText, Pencil, ChevronDown, Trash2 } from 'lucide-react';
+import { Wrench, Truck, Users, Receipt, Phone, Mail, MapPin, Calendar, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -24,24 +25,6 @@ import VendorAssetFormSheet from '@/components/vendors/VendorAssetFormSheet';
 
 const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Driver Supplier', both: 'Both' };
 const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
-
-function AccordionItem({ sectionKey, openKey, setOpenKey, title, icon: Icon, accent, children }) {
-  const open = openKey === sectionKey;
-  return (
-    <div className="rounded-xl overflow-hidden transition-all duration-200" style={{ background: 'hsl(var(--muted) / 0.3)', borderLeft: open ? `2px solid ${accent}` : '2px solid transparent' }}>
-      <button type="button" onClick={() => setOpenKey(open ? null : sectionKey)} className="w-full flex items-center gap-2.5 px-3 min-h-[48px] hover:bg-muted/40 transition-colors duration-200">
-        <span className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${hexToRgba(accent, 0.14)}, ${hexToRgba(accent, 0.08)})`, border: `1px solid ${hexToRgba(accent, 0.25)}` }}>
-          <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
-        </span>
-        <span className="text-sm font-medium text-foreground flex-1 text-left">{title}</span>
-        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-      </button>
-      <div className="grid transition-[grid-template-rows] duration-200 ease-out" style={{ gridTemplateRows: open ? '1fr' : '0fr' }}>
-        <div className="overflow-hidden"><div className="px-3 pb-3 pt-1.5 space-y-1.5 border-t border-border/40">{children}</div></div>
-      </div>
-    </div>
-  );
-}
 
 function Row({ label, value, icon: Icon }) {
   const isEmpty = !value || value === '—';
@@ -56,7 +39,6 @@ function Row({ label, value, icon: Icon }) {
 
 export default function ServiceProviderDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
   const [vendor, setVendor] = useState(null);
@@ -65,7 +47,6 @@ export default function ServiceProviderDetail() {
   const [drivers, setDrivers] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [openSection, setOpenSection] = useState('contract');
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [assetSheet, setAssetSheet] = useState({ open: false, mode: 'vehicle', editRecord: null });
@@ -137,11 +118,18 @@ export default function ServiceProviderDetail() {
   };
 
   return (
-    <div className="detail-page space-y-5 pt-2">
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 lg:h-[calc(100dvh-15rem)]">
+    <div className="detail-page space-y-4 max-w-[1600px] mx-auto w-full overflow-x-hidden">
+      <EntityDetailHeader
+        title={vendor.name}
+        subtitle={TYPE_LABELS[vendor.provider_type] || 'Service Provider'}
+        badge={<StatusBadge status={vendor.status} />}
+        backTo="/admin/vendors"
+      />
+
+      {/* Grid: profile (left) | sections (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 items-start">
         {/* Left: profile column */}
-        <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-5">
-          <EntityDetailHeader backTo="/admin/vendors" />
+        <div className="space-y-4">
           {/* Identity card */}
           <div className="glass-card relative overflow-hidden animate-fade-in-up" style={{ boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 60px ${hexToRgba(tone, 0.06)}, 0 12px 36px rgba(0,0,0,0.10), 0 0 0 1px ${hexToRgba(tone, 0.15)}` }}>
             <div className="absolute -top-1/2 -right-1/4 w-3/4 h-full pointer-events-none" style={{ background: `radial-gradient(ellipse at center, ${hexToRgba(tone, 0.14)}, transparent 70%)` }} />
@@ -185,19 +173,23 @@ export default function ServiceProviderDetail() {
             <Row label="Status" value={vendor.status} />
           </div>
 
-          {/* Accordion: Contract Details */}
-          <AccordionItem sectionKey="contract" openKey={openSection} setOpenKey={setOpenSection} title="Contract Details" icon={Calendar} accent="#f59e0b">
-            <Row label="Start Date" value={formatDate(vendor.contract_start_date)} />
-            <Row label="End Date" value={formatDate(vendor.contract_end_date)} />
-            <Row label="Rate Terms" value={vendor.rate_terms} />
-          </AccordionItem>
+          {/* Contract Details */}
+          <CollapsibleSection title="Contract Details" icon={Calendar} accent="#f59e0b" defaultOpen>
+            <div className="space-y-0.5">
+              <Row label="Start Date" value={formatDate(vendor.contract_start_date)} />
+              <Row label="End Date" value={formatDate(vendor.contract_end_date)} />
+              <Row label="Rate Terms" value={vendor.rate_terms} />
+            </div>
+          </CollapsibleSection>
 
-          {/* Accordion: Rate Terms */}
-          <AccordionItem sectionKey="rates" openKey={openSection} setOpenKey={setOpenSection} title="Rate Terms" icon={FileText} accent="#3b82f6">
-            <Row label="Rate Terms" value={vendor.rate_terms} />
-            <Row label="Active Vehicles" value={`${activeVehicles} / ${vehicles.length}`} />
-            <Row label="Active Drivers" value={`${activeDrivers} / ${drivers.length}`} />
-          </AccordionItem>
+          {/* Rate Terms */}
+          <CollapsibleSection title="Rate Terms" icon={FileText} accent="#3b82f6">
+            <div className="space-y-0.5">
+              <Row label="Rate Terms" value={vendor.rate_terms} />
+              <Row label="Active Vehicles" value={`${activeVehicles} / ${vehicles.length}`} />
+              <Row label="Active Drivers" value={`${activeDrivers} / ${drivers.length}`} />
+            </div>
+          </CollapsibleSection>
 
           {/* Notes */}
           {vendor.notes && (
@@ -208,86 +200,74 @@ export default function ServiceProviderDetail() {
           )}
         </div>
 
-        {/* Right: record cards */}
-        <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll pr-1">
+        {/* Right: record sections */}
+        <div className="space-y-4">
           {/* Supplied Vehicles */}
-          <RecordSectionCard
-            title="Supplied Vehicles"
-            icon={Truck}
-            accent="#3b82f6"
-            count={vehicles.length}
-            loading={dataLoading}
-            emptyIcon={Truck}
-            emptyLabel="No vehicles supplied"
-            onNew={() => openAddAsset('vehicle')}
-            newLabel="Add vehicle"
-            columns={[
-              { label: 'Plate', className: 'col-span-3' },
-              { label: 'Type', className: 'col-span-2' },
-              { label: 'Since', className: 'col-span-2' },
-              { label: 'Rate', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-2' },
-              { label: '', className: 'col-span-1 text-right' },
-            ]}>
-            {vehicles.map((v) => (
-              <div key={v.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-3 text-foreground font-medium truncate">{v.plate_number}</div>
-                <div className="col-span-2 text-muted-foreground capitalize">{v.type}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(v.supply_start_date)}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{v.supply_rate ? formatCurrency(v.supply_rate) : '—'}</div>
-                <div className="col-span-2"><StatusBadge status={v.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
-                <div className="col-span-1 flex items-center justify-end gap-1">
-                  <button onClick={() => openEditAsset('vehicle', v)} title="Edit" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => setConfirmDelete({ type: 'vehicle', id: v.id, label: v.plate_number })} title="Remove" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-red-500/15 hover:text-red-400 transition-all duration-150 active:scale-95"><Trash2 className="w-3.5 h-3.5" /></button>
-                </div>
+          <CollapsibleSection title="Supplied Vehicles" icon={Truck} accent="#3b82f6" count={vehicles.length} actions={
+            <Button onClick={() => openAddAsset('vehicle')} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add
+            </Button>
+          }>
+            {dataLoading ? <LoadingSpinner /> : vehicles.length === 0 ? (
+              <EmptyState icon={Truck} title="No vehicles supplied" />
+            ) : (
+              <div className="space-y-2">
+                {vehicles.map((v) => (
+                  <div key={v.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
+                      <Truck className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{v.plate_number}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{v.type} · {formatDate(v.supply_start_date)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums">{v.supply_rate ? formatCurrency(v.supply_rate) : '—'}</span>
+                    <StatusBadge status={v.supply_status === 'returned' ? 'inactive' : 'active'} />
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => openEditAsset('vehicle', v)} title="Edit" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setConfirmDelete({ type: 'vehicle', id: v.id, label: v.plate_number })} title="Remove" className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </RecordSectionCard>
+            )}
+          </CollapsibleSection>
 
           {/* Supplied Drivers */}
-          <RecordSectionCard
-            title="Supplied Drivers"
-            icon={Users}
-            accent="#0ea5e9"
-            count={drivers.length}
-            loading={dataLoading}
-            emptyIcon={Users}
-            emptyLabel="No drivers supplied"
-            onNew={() => openAddAsset('driver')}
-            newLabel="Add driver"
-            columns={[
-              { label: 'Name', className: 'col-span-3' },
-              { label: 'Phone', className: 'col-span-2' },
-              { label: 'Since', className: 'col-span-2' },
-              { label: 'Rate', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-2' },
-              { label: '', className: 'col-span-1 text-right' },
-            ]}>
-            {drivers.map((d) => (
-              <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
-                <div className="col-span-3 text-foreground font-medium truncate">{d.name}</div>
-                <div className="col-span-2 text-muted-foreground truncate">{d.phone}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(d.supply_start_date)}</div>
-                <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{d.supply_rate ? formatCurrency(d.supply_rate) : '—'}</div>
-                <div className="col-span-2"><StatusBadge status={d.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
-                <div className="col-span-1 flex items-center justify-end gap-1">
-                  <button onClick={() => openEditAsset('driver', d)} title="Edit" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => setConfirmDelete({ type: 'driver', id: d.id, label: d.name })} title="Remove" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-red-500/15 hover:text-red-400 transition-all duration-150 active:scale-95"><Trash2 className="w-3.5 h-3.5" /></button>
-                </div>
+          <CollapsibleSection title="Supplied Drivers" icon={Users} accent="#0ea5e9" count={drivers.length} actions={
+            <Button onClick={() => openAddAsset('driver')} size="sm" className="bg-primary hover:bg-primary/90 h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add
+            </Button>
+          }>
+            {dataLoading ? <LoadingSpinner /> : drivers.length === 0 ? (
+              <EmptyState icon={Users} title="No drivers supplied" />
+            ) : (
+              <div className="space-y-2">
+                {drivers.map((d) => (
+                  <div key={d.id} className="row-card flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 0 18px -6px rgba(var(--panel-accent-rgb),0.35)' }}>
+                      <Users className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{d.phone} · {formatDate(d.supply_start_date)}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground tabular-nums">{d.supply_rate ? formatCurrency(d.supply_rate) : '—'}</span>
+                    <StatusBadge status={d.supply_status === 'returned' ? 'inactive' : 'active'} />
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button onClick={() => openEditAsset('driver', d)} title="Edit" className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setConfirmDelete({ type: 'driver', id: d.id, label: d.name })} title="Remove" className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </RecordSectionCard>
+            )}
+          </CollapsibleSection>
 
-          {/* Vendor Transaction Ledger */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-1">
-              <span className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: '#ef444415', border: '1px solid #ef444430' }}>
-                <Receipt className="w-4 h-4 text-red-400" />
-              </span>
-              <h3 className="text-sm font-semibold text-foreground">Transaction Ledger</h3>
-            </div>
+          {/* Transaction Ledger */}
+          <CollapsibleSection title="Transaction Ledger" icon={Receipt} accent="#ef4444">
             <VendorTransactionLedger vendorName={vendor.name} />
-          </div>
+          </CollapsibleSection>
 
           {/* Documents */}
           <DocumentsSection entityType="vendor" entityId={vendor.id} accent="#a855f7" defaultOpen={false} />
