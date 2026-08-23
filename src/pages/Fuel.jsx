@@ -6,7 +6,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, Fuel as FuelIcon, Droplets, Gauge, Truck, Trash2, Pencil } from 'lucide-react';
+import { Plus, Fuel as FuelIcon, Droplets, Gauge, Truck, Trash2, Pencil, Search } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { useFuelMode } from '@/lib/fuelStore';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -14,6 +14,7 @@ import ReportStatCard from '@/components/reports/ReportStatCard';
 import FuelAnalytics from '@/components/fuel/FuelAnalytics';
 import FuelFormSheet from '@/components/fuel/FuelFormSheet';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
+import { Input } from '@/components/ui/input';
 
 export default function Fuel() {
   const { t } = useI18n();
@@ -23,6 +24,7 @@ export default function Fuel() {
   const [editItem, setEditItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [presetPlate, setPresetPlate] = useState('');
+  const [search, setSearch] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
   const fuelMode = useFuelMode();
 
@@ -48,6 +50,7 @@ export default function Fuel() {
   }, []);
 
   const filtered = records.filter(r => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
+  const searched = filtered.filter(r => !search || (r.vehicle_plate || '').toLowerCase().includes(search.toLowerCase()) || (r.driver_name || '').toLowerCase().includes(search.toLowerCase()) || (r.station_name || '').toLowerCase().includes(search.toLowerCase()) || (r.fuel_type || '').toLowerCase().includes(search.toLowerCase()));
 
   const totalCost = filtered.reduce((s, r) => s + (r.total_cost || 0), 0);
   const totalLiters = filtered.reduce((s, r) => s + (r.liters || 0), 0);
@@ -119,15 +122,21 @@ export default function Fuel() {
       )}
 
       {/* Records List */}
-      {fuelMode === 'browse' && (loading ? (
+      {fuelMode === 'browse' && (
+        <>
+          <div className="relative mb-5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          </div>
+          {loading ? (
         <LoadingSpinner />
-      ) : filtered.length === 0 ? (
+      ) : searched.length === 0 ? (
         <EmptyState icon={Droplets} title="No fuel records" description="Add your first fuel record to start tracking consumption" />
       ) : (
         <div className="glass-card rounded-2xl p-4 sm:p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3 px-1">Recent Records</h3>
           <div className="space-y-1.5">
-            {filtered.slice(0, 50).map((rec, i) => (
+            {searched.slice(0, 50).map((rec, i) => (
               <div
                 key={rec.id}
                 className="group flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors cursor-pointer"
@@ -164,7 +173,9 @@ export default function Fuel() {
             ))}
           </div>
         </div>
-      ))}
+      )}
+        </>
+      )}
 
       {/* Form Sheet */}
       <FuelFormSheet
