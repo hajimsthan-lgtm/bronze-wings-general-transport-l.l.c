@@ -10,6 +10,7 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
+import { useFuelMode, setFuelMode } from '@/lib/fuelStore';
 import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
@@ -36,6 +37,7 @@ export default function TopBar() {
   const isMaintenancePage = location.pathname === '/maintenance';
   const isFuelPage = location.pathname === '/fuel';
   const maintMode = useMaintenanceMode();
+  const fuelMode = useFuelMode();
   const isVehiclesPage = location.pathname === '/admin/vehicles';
   const vehMode = useVehiclesMode();
   const isDriversPage = location.pathname === '/admin/drivers';
@@ -170,11 +172,17 @@ export default function TopBar() {
               />
             )}
             {isFuelPage && (
-              <HeaderActionButton
-                label={t('add_new')}
-                variant="trip"
-                onClick={() => window.dispatchEvent(new CustomEvent('fuel:new'))}
-              />
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setFuelMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${fuelMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setFuelMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${fuelMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="trip"
+                  onClick={() => window.dispatchEvent(new CustomEvent('fuel:new'))}
+                />
+              </>
             )}
             {isMaintenancePage && (
               <>

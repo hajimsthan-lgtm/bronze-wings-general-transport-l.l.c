@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Fuel as FuelIcon, Droplets, Gauge, Truck, Trash2, Pencil } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
+import { useFuelMode } from '@/lib/fuelStore';
 import ExportButtons from '@/components/common/ExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import FuelAnalytics from '@/components/fuel/FuelAnalytics';
@@ -23,6 +24,7 @@ export default function Fuel() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [presetPlate, setPresetPlate] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
+  const fuelMode = useFuelMode();
 
   const load = () => {
     setLoading(true);
@@ -112,12 +114,12 @@ export default function Fuel() {
       </div>
 
       {/* Analytics Dashboard */}
-      {!loading && filtered.length > 0 && (
+      {fuelMode === 'analytics' && !loading && filtered.length > 0 && (
         <FuelAnalytics records={filtered} dateFrom={dateFrom} dateTo={dateTo} />
       )}
 
       {/* Records List */}
-      {loading ? (
+      {fuelMode === 'browse' && (loading ? (
         <LoadingSpinner />
       ) : filtered.length === 0 ? (
         <EmptyState icon={Droplets} title="No fuel records" description="Add your first fuel record to start tracking consumption" />
@@ -162,7 +164,7 @@ export default function Fuel() {
             ))}
           </div>
         </div>
-      )}
+      ))}
 
       {/* Form Sheet */}
       <FuelFormSheet
