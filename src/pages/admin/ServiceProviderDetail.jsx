@@ -13,8 +13,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Wrench, Truck, Users, Receipt, Phone, Mail, MapPin, Calendar, FileText, Pencil, ChevronDown } from 'lucide-react';
+import { Wrench, Truck, Users, Receipt, Phone, Mail, MapPin, Calendar, FileText, Pencil, ChevronDown, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -67,7 +68,8 @@ export default function ServiceProviderDetail() {
   const [openSection, setOpenSection] = useState('contract');
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({});
-  const [assetSheet, setAssetSheet] = useState({ open: false, mode: 'vehicle' });
+  const [assetSheet, setAssetSheet] = useState({ open: false, mode: 'vehicle', editRecord: null });
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +107,33 @@ export default function ServiceProviderDetail() {
     setVendor(updated);
     setEditOpen(false);
     toast({ title: 'Service provider updated' });
+  };
+
+  const openAddAsset = (mode) => setAssetSheet({ open: true, mode, editRecord: null });
+  const openEditAsset = (mode, record) => setAssetSheet({ open: true, mode, editRecord: record });
+
+  const onAssetUpdated = (rec) => {
+    if (assetSheet.mode === 'vehicle') setVehicles((arr) => arr.map((v) => (v.id === rec.id ? rec : v)));
+    else setDrivers((arr) => arr.map((d) => (d.id === rec.id ? rec : d)));
+  };
+
+  const doDelete = async () => {
+    if (!confirmDelete) return;
+    const { type, id: rid } = confirmDelete;
+    try {
+      if (type === 'vehicle') {
+        await base44.entities.Vehicle.delete(rid);
+        setVehicles((arr) => arr.filter((v) => v.id !== rid));
+      } else {
+        await base44.entities.Driver.delete(rid);
+        setDrivers((arr) => arr.filter((d) => d.id !== rid));
+      }
+      toast({ title: type === 'vehicle' ? 'Vehicle removed' : 'Driver removed' });
+    } catch (err) {
+      toast({ title: 'Failed to delete', description: err?.message, variant: 'destructive' });
+    } finally {
+      setConfirmDelete(null);
+    }
   };
 
   return (
@@ -189,14 +218,15 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Truck}
             emptyLabel="No vehicles supplied"
-            onNew={() => setAssetSheet({ open: true, mode: 'vehicle' })}
+            onNew={() => openAddAsset('vehicle')}
             newLabel="Add vehicle"
             columns={[
               { label: 'Plate', className: 'col-span-3' },
               { label: 'Type', className: 'col-span-2' },
               { label: 'Since', className: 'col-span-2' },
               { label: 'Rate', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-3' },
+              { label: 'Status', className: 'col-span-2' },
+              { label: '', className: 'col-span-1 text-right' },
             ]}>
             {vehicles.map((v) => (
               <div key={v.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
@@ -204,7 +234,11 @@ export default function ServiceProviderDetail() {
                 <div className="col-span-2 text-muted-foreground capitalize">{v.type}</div>
                 <div className="col-span-2 text-muted-foreground">{formatDate(v.supply_start_date)}</div>
                 <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{v.supply_rate ? formatCurrency(v.supply_rate) : '—'}</div>
-                <div className="col-span-3"><StatusBadge status={v.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
+                <div className="col-span-2"><StatusBadge status={v.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
+                <div className="col-span-1 flex items-center justify-end gap-1">
+                  <button onClick={() => openEditAsset('vehicle', v)} title="Edit" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => setConfirmDelete({ type: 'vehicle', id: v.id, label: v.plate_number })} title="Remove" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-red-500/15 hover:text-red-400 transition-all duration-150 active:scale-95"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
               </div>
             ))}
           </RecordSectionCard>
@@ -218,14 +252,15 @@ export default function ServiceProviderDetail() {
             loading={dataLoading}
             emptyIcon={Users}
             emptyLabel="No drivers supplied"
-            onNew={() => setAssetSheet({ open: true, mode: 'driver' })}
+            onNew={() => openAddAsset('driver')}
             newLabel="Add driver"
             columns={[
               { label: 'Name', className: 'col-span-3' },
               { label: 'Phone', className: 'col-span-2' },
               { label: 'Since', className: 'col-span-2' },
               { label: 'Rate', className: 'col-span-2 text-right' },
-              { label: 'Status', className: 'col-span-3' },
+              { label: 'Status', className: 'col-span-2' },
+              { label: '', className: 'col-span-1 text-right' },
             ]}>
             {drivers.map((d) => (
               <div key={d.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
@@ -233,7 +268,11 @@ export default function ServiceProviderDetail() {
                 <div className="col-span-2 text-muted-foreground truncate">{d.phone}</div>
                 <div className="col-span-2 text-muted-foreground">{formatDate(d.supply_start_date)}</div>
                 <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{d.supply_rate ? formatCurrency(d.supply_rate) : '—'}</div>
-                <div className="col-span-3"><StatusBadge status={d.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
+                <div className="col-span-2"><StatusBadge status={d.supply_status === 'returned' ? 'inactive' : 'active'} /></div>
+                <div className="col-span-1 flex items-center justify-end gap-1">
+                  <button onClick={() => openEditAsset('driver', d)} title="Edit" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95"><Pencil className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => setConfirmDelete({ type: 'driver', id: d.id, label: d.name })} title="Remove" className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-red-500/15 hover:text-red-400 transition-all duration-150 active:scale-95"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
               </div>
             ))}
           </RecordSectionCard>
@@ -259,11 +298,32 @@ export default function ServiceProviderDetail() {
         onOpenChange={(o) => setAssetSheet((s) => ({ ...s, open: o }))}
         mode={assetSheet.mode}
         vendorName={vendor.name}
+        editRecord={assetSheet.editRecord}
         onCreated={(rec) => {
           if (assetSheet.mode === 'vehicle') setVehicles((v) => [rec, ...v]);
           else setDrivers((d) => [rec, ...d]);
         }}
+        onUpdated={onAssetUpdated}
       />
+
+      {/* Delete confirmation */}
+      <Dialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-foreground flex items-center gap-2">
+              <Trash2 className="w-4 h-4 text-red-400" />
+              Remove {confirmDelete?.type === 'vehicle' ? 'Vehicle' : 'Driver'}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Remove <span className="font-medium text-foreground">{confirmDelete?.label}</span> from this vendor's pool? This only removes the record here — it does not affect your main fleet.
+          </p>
+          <div className="flex gap-3 mt-2">
+            <Button variant="outline" onClick={() => setConfirmDelete(null)} className="flex-1 border-border">Cancel</Button>
+            <Button onClick={doDelete} className="flex-1 bg-red-500 hover:bg-red-600 text-white">Remove</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit sheet */}
       <Sheet open={editOpen} onOpenChange={setEditOpen}>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -21,15 +21,24 @@ import DatePicker from '@/components/common/DatePicker';
  *  - vendorName: string
  *  - onCreated: (record) => void
  */
-export default function VendorAssetFormSheet({ open, onOpenChange, mode, vendorName, onCreated }) {
+export default function VendorAssetFormSheet({ open, onOpenChange, mode, vendorName, onCreated, editRecord, onUpdated }) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const isVehicle = mode === 'vehicle';
+  const isEdit = !!editRecord;
 
   const empty = isVehicle
     ? { plate_number: '', make: '', model: '', year: '', type: 'truck', supply_start_date: '', supply_rate: '', supply_rate_type: 'daily', supply_status: 'active' }
     : { name: '', phone: '', supply_start_date: '', supply_rate: '', supply_status: 'active', status: 'active' };
   const [form, setForm] = useState(empty);
+
+  // Sync form when opening (edit mode pre-fills, add mode resets)
+  useEffect(() => {
+    if (open) {
+      setForm(editRecord ? { ...editRecord, year: editRecord.year ? String(editRecord.year) : '' } : empty);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editRecord, mode]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -46,20 +55,27 @@ export default function VendorAssetFormSheet({ open, onOpenChange, mode, vendorN
         payload.supply_rate = Number(form.supply_rate) || 0;
       }
       const entity = isVehicle ? base44.entities.Vehicle : base44.entities.Driver;
-      const record = await entity.create(payload);
-      toast({ title: isVehicle ? 'Vehicle added to vendor' : 'Driver added to vendor' });
+      let record;
+      if (isEdit) {
+        record = await entity.update(editRecord.id, payload);
+        toast({ title: isVehicle ? 'Vehicle updated' : 'Driver updated' });
+        onUpdated?.(record);
+      } else {
+        record = await entity.create(payload);
+        toast({ title: isVehicle ? 'Vehicle added to vendor' : 'Driver added to vendor' });
+        onCreated?.(record);
+      }
       setForm(empty);
       onOpenChange(false);
-      onCreated?.(record);
     } catch (err) {
-      toast({ title: 'Failed to create', description: err?.message, variant: 'destructive' });
+      toast({ title: 'Failed to save', description: err?.message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
   };
 
   const Icon = isVehicle ? Truck : Users;
-  const title = isVehicle ? 'Add Supplied Vehicle' : 'Add Supplied Driver';
+  const title = isVehicle ? (isEdit ? 'Edit Supplied Vehicle' : 'Add Supplied Vehicle') : (isEdit ? 'Edit Supplied Driver' : 'Add Supplied Driver');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -109,7 +125,7 @@ export default function VendorAssetFormSheet({ open, onOpenChange, mode, vendorN
           )}
           <div className="flex gap-3 mt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1 border-border">Cancel</Button>
-            <Button type="submit" disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? 'Saving…' : 'Add to Vendor'}</Button>
+            <Button type="submit" disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add to Vendor'}</Button>
           </div>
         </form>
       </SheetContent>
