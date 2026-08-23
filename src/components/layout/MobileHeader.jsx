@@ -42,33 +42,43 @@ export default function MobileHeader() {
   const activeTab = useMemo(() => getTabFromPath(location.pathname), [location.pathname]);
   const subModules = useMemo(() => getSubModules(activeTab), [activeTab]);
 
+  const accentColor = pageContext.color || 'rgb(var(--panel-accent-rgb))';
+
   return (
     <header className="md:hidden sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      {/* Premium gradient backdrop with ambient blooms */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
-          backdropFilter: 'blur(16px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+          background: `linear-gradient(180deg, rgba(15,15,25,0.85) 0%, rgba(10,10,20,0.72) 100%)`,
+          backdropFilter: 'blur(20px) saturate(1.6)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(var(--panel-accent-rgb),0.20) 50%, transparent)' }} />
+      {/* Ambient color bloom — uses page accent */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${accentColor}18, transparent 60%), radial-gradient(ellipse 50% 70% at 85% 30%, rgba(168,85,247,0.10), transparent 55%)`,
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40 50%, transparent)` }} />
 
       {/* Row 1: Logo + Page context + Icon cluster */}
-      <div className="relative h-14 px-3 flex items-center justify-between gap-2">
+      <div className="relative h-14 px-3.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <Link to="/" className="flex items-center gap-2 min-w-0">
+          <Link to="/" className="flex items-center gap-2.5 min-w-0">
             {pageContext.isDashboard ? (
               <div className="relative flex-shrink-0">
                 <div
-                  className="absolute inset-0 rounded-lg blur-md opacity-50"
-                  style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.30) 0%, transparent 70%)' }}
+                  className="absolute inset-0 rounded-xl blur-md opacity-60"
+                  style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.40) 0%, transparent 70%)' }}
                 />
                 {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="relative w-7 h-7 rounded-lg object-contain ring-1 ring-white/10" />
+                  <img src={logoUrl} alt="Logo" className="relative w-8 h-8 rounded-xl object-contain ring-1 ring-white/15" />
                 ) : (
-                  <div className="relative w-7 h-7 rounded-lg border border-[rgba(var(--panel-accent-rgb),0.3)] bg-[rgba(var(--panel-accent-rgb),0.1)] flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-primary">BW</span>
+                  <div className="relative w-8 h-8 rounded-xl border border-indigo-400/30 bg-gradient-to-br from-indigo-500/25 to-violet-500/15 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <span className="text-[10px] font-bold text-indigo-300">BW</span>
                   </div>
                 )}
               </div>
@@ -77,23 +87,24 @@ export default function MobileHeader() {
                 const PageIcon = pageContext.icon ? getIcon(pageContext.icon) : null;
                 return (
                   <div
-                    className="relative flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
+                    className="relative flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
                     style={{
-                      background: `linear-gradient(135deg, ${pageContext.color || 'var(--primary)'}22, ${pageContext.color || 'var(--primary)'}11)`,
-                      border: `1px solid ${pageContext.color || 'var(--primary)'}44`,
+                      background: `linear-gradient(135deg, ${pageContext.color || '#6366f1'}30, ${pageContext.color || '#6366f1'}10)`,
+                      border: `1px solid ${pageContext.color || '#6366f1'}50`,
+                      boxShadow: `0 4px 14px -4px ${pageContext.color || '#6366f1'}50, inset 0 1px 0 rgba(255,255,255,0.12)`,
                     }}
                   >
-                    {PageIcon && <PageIcon className="w-4 h-4" style={{ color: pageContext.color || 'var(--primary)' }} />}
+                    {PageIcon && <PageIcon className="w-4.5 h-4.5" style={{ color: pageContext.color || '#6366f1' }} />}
                   </div>
                 );
               })()
             )}
             <div className="min-w-0">
-              <p className="text-sm font-semibold leading-tight truncate" style={{ fontFamily: 'var(--font-heading)' }}>
+              <p className="text-[15px] font-bold leading-tight truncate text-white" style={{ fontFamily: 'var(--font-heading)' }}>
                 {pageContext.current || <BrandName variant="mobile" />}
               </p>
               {pageContext.parent && (
-                <p className="text-[10px] text-muted-foreground leading-tight truncate">{pageContext.parent}</p>
+                <p className="text-[10px] text-white/50 leading-tight truncate font-medium">{pageContext.parent}</p>
               )}
             </div>
           </Link>
@@ -105,7 +116,7 @@ export default function MobileHeader() {
 
       {/* Row 2: Sub-module pills — horizontal scroll, only when sub-modules exist */}
       {subModules.length > 0 && (
-        <div className="relative px-3 pb-2 overflow-x-auto no-scrollbar premium-scroll">
+        <div className="relative px-3.5 pb-2.5 overflow-x-auto no-scrollbar premium-scroll">
           <div className="flex items-center gap-2 min-w-max">
             {subModules.map((mod) => {
               const Icon = getIcon(mod.icon);
@@ -114,13 +125,18 @@ export default function MobileHeader() {
                 <Link
                   key={mod.key}
                   to={mod.path}
-                  className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
+                  className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
                     active
-                      ? 'bg-[rgba(var(--panel-accent-rgb),0.18)] text-primary border border-[rgba(var(--panel-accent-rgb),0.35)]'
-                      : 'bg-white/5 text-muted-foreground border border-white/10'
+                      ? 'text-white border'
+                      : 'bg-white/5 text-white/55 border border-white/10'
                   }`}
+                  style={active ? {
+                    background: `linear-gradient(135deg, ${mod.color || '#6366f1'}28, ${mod.color || '#6366f1'}12)`,
+                    borderColor: `${mod.color || '#6366f1'}50`,
+                    boxShadow: `0 0 16px -2px ${mod.color || '#6366f1'}40, inset 0 1px 0 rgba(255,255,255,0.12)`,
+                  } : {}}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: mod.color }} />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? (mod.color || '#6366f1') : 'rgba(255,255,255,0.5)' }} />
                   {mod.label}
                 </Link>
               );

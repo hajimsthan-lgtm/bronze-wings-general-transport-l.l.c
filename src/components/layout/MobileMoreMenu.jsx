@@ -15,7 +15,12 @@ export default function MobileMoreMenu() {
   const close = () => setOpen(false);
 
   const rowCls =
-    'w-full flex items-center gap-3 h-14 px-4 rounded-2xl bg-white/5 border border-white/10 text-sm font-medium text-foreground/80 active:scale-[0.98] transition-transform';
+    'w-full flex items-center gap-3 h-14 px-4 rounded-2xl text-sm font-semibold text-white/80 active:scale-[0.98] transition-transform';
+  const rowStyle = {
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+    border: '1px solid rgba(255,255,255,0.10)',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+  };
 
   return (
     <>
@@ -23,9 +28,10 @@ export default function MobileMoreMenu() {
         onClick={() => setOpen(true)}
         className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
         style={{
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: 'hsl(var(--muted-foreground))',
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(168,85,247,0.10))',
+          border: '1px solid rgba(99,102,241,0.30)',
+          color: '#a5b4fc',
+          boxShadow: '0 0 14px -2px rgba(99,102,241,0.30), inset 0 1px 0 rgba(255,255,255,0.10)',
         }}
         aria-label="More options"
       >
@@ -41,11 +47,11 @@ export default function MobileMoreMenu() {
           <div
             className="absolute bottom-0 left-0 right-0 rounded-t-3xl overflow-hidden animate-fade-in-up"
             style={{
-              background: 'linear-gradient(180deg, var(--header-tint-1) 0%, var(--header-tint-2) 100%)',
-              backdropFilter: 'blur(24px) saturate(1.5)',
-              WebkitBackdropFilter: 'blur(24px) saturate(1.5)',
-              borderTop: '1px solid rgba(var(--panel-accent-rgb),0.2)',
-              boxShadow: '0 -12px 40px rgba(0,0,0,0.3)',
+              background: 'linear-gradient(180deg, rgba(20,20,32,0.88) 0%, rgba(12,12,22,0.94) 100%)',
+              backdropFilter: 'blur(28px) saturate(1.6)',
+              WebkitBackdropFilter: 'blur(28px) saturate(1.6)',
+              borderTop: '1px solid rgba(99,102,241,0.25)',
+              boxShadow: '0 -12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)',
               paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -70,16 +76,16 @@ export default function MobileMoreMenu() {
             {/* Action rows */}
             <div className="px-3 space-y-2">
               {/* Date Filter — label on left, GlobalDateFilter trigger on right */}
-              <div className="w-full flex items-center justify-between h-14 px-4 rounded-2xl bg-white/5 border border-white/10">
-                <div className="flex items-center gap-3 text-sm font-medium text-foreground/80">
-                  <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="w-full flex items-center justify-between h-14 px-4 rounded-2xl" style={rowStyle}>
+                <div className="flex items-center gap-3 text-sm font-semibold text-white/80">
+                  <Calendar className="w-5 h-5 text-indigo-400 flex-shrink-0" />
                   <span>Date Filter</span>
                 </div>
                 <GlobalDateFilter />
               </div>
 
               {/* Theme toggle */}
-              <button onClick={toggleMode} className={rowCls}>
+              <button onClick={toggleMode} className={rowCls} style={rowStyle}>
                 {mode === 'dark' ? (
                   <Sun className="w-5 h-5 text-amber-400 flex-shrink-0" />
                 ) : (
@@ -89,13 +95,13 @@ export default function MobileMoreMenu() {
               </button>
 
               {/* AI Agents */}
-              <Link to="/agents" onClick={close} className={rowCls}>
+              <Link to="/agents" onClick={close} className={rowCls} style={rowStyle}>
                 <Bot className="w-5 h-5 text-purple-400 flex-shrink-0" />
                 <span>AI Agents</span>
               </Link>
 
               {/* Settings */}
-              <Link to="/settings" onClick={close} className={rowCls}>
+              <Link to="/settings" onClick={close} className={rowCls} style={rowStyle}>
                 <Settings className="w-5 h-5 text-blue-400 flex-shrink-0" />
                 <span>Settings</span>
               </Link>
