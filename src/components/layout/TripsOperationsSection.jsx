@@ -137,7 +137,8 @@ export default function TripsOperationsSection({ expanded, onToggle, onCountChan
                 return (
                   <div
                     key={t.id}
-                    className="p-2 rounded-lg transition-colors hover:bg-white/[0.04]"
+                    className="trips-ops-trip-row p-2 rounded-lg"
+                    style={{ '--trip-color': badge.color }}
                   >
                     {/* Row 1: trip number + status badge */}
                     <div className="flex items-center gap-2 mb-1">
