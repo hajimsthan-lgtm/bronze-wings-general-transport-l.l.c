@@ -194,8 +194,8 @@ export default function Salary() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground hidden">Salary & Payroll</h1>
-          <p className="text-sm text-muted-foreground hidden">{filtered.length} records · {monthFilter || 'All months'} {yearFilter}</p>
+          
+          
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={exportColumns} />
