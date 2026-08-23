@@ -27,8 +27,8 @@ export default function AlertBell() {
     return e;
   });
   const [activeCategory, setActiveCategory] = useState('all');
-  const [centerIndex, setCenterIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const scrollRef = useRef(null);
+  const rafRef = useRef(null);
   const [tripsOpsCount, setTripsOpsCount] = useState(0);
   const [tripsOpsCritical, setTripsOpsCritical] = useState(0);
   const [tripsOpsExpanded, setTripsOpsExpanded] = useState(false);
@@ -67,17 +67,48 @@ export default function AlertBell() {
 
   const filteredAlerts = activeCategory === 'all' ? alerts : alerts.filter((a) => a.category === activeCategory);
 
-  // Reset carousel position when filter or dropdown changes
-  useEffect(() => { setCenterIndex(0); }, [activeCategory, showNotif]);
+  // Scroll-driven perspective: each item scales/fades based on distance from center
+  const updatePerspective = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const center = container.scrollTop + container.clientHeight / 2;
+    const items = container.querySelectorAll('[data-bell-item]');
+    const ITEM_H = 60;
+    const PAD = 120;
+    items.forEach((item) => {
+      const idx = Number(item.dataset.bellItem);
+      const itemCenter = PAD + idx * ITEM_H + 28;
+      const offset = (itemCenter - center) / ITEM_H;
+      const absOff = Math.abs(offset);
+      if (absOff > 3) {
+        item.style.opacity = '0';
+        item.style.pointerEvents = 'none';
+        item.classList.remove('is-center');
+        return;
+      }
+      const scale = Math.max(0.82, 1 - absOff * 0.08);
+      const opacity = Math.max(0.15, 1 - absOff * 0.38);
+      const isCenter = absOff < 0.5;
+      item.style.transform = `scale(${scale})`;
+      item.style.opacity = opacity;
+      item.style.pointerEvents = isCenter ? 'auto' : 'none';
+      item.classList.toggle('is-center', isCenter);
+    });
+  }, []);
 
-  // Auto-advance the perspective carousel
+  const handleScroll = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(updatePerspective);
+  }, [updatePerspective]);
+
+  // Initialize perspective when dropdown opens or filter changes
   useEffect(() => {
-    if (paused || !showNotif || filteredAlerts.length <= 1) return;
-    const timer = setInterval(() => {
-      setCenterIndex((i) => (i + 1) % filteredAlerts.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, [paused, showNotif, filteredAlerts.length]);
+    if (!showNotif) return;
+    requestAnimationFrame(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+      updatePerspective();
+    });
+  }, [showNotif, activeCategory, filteredAlerts.length, updatePerspective]);
 
   const handleTripsOpsCount = useCallback((info) => {
     setTripsOpsCount(info.count || 0);
@@ -297,42 +328,27 @@ export default function AlertBell() {
                 {filteredAlerts.length > 0 ? (
                   <div
                     className="bell-perspective-scroll"
-                    onMouseEnter={() => setPaused(true)}
-                    onMouseLeave={() => setPaused(false)}
+                    ref={scrollRef}
+                    onScroll={handleScroll}
                   >
-                    <div className="bell-perspective-track">
+                    <div className="bell-perspective-list">
                       {filteredAlerts.map((a, i) => {
-                        let offset = i - centerIndex;
-                        const N = filteredAlerts.length;
-                        if (offset > N / 2) offset -= N;
-                        if (offset < -N / 2) offset += N;
-                        const absOff = Math.abs(offset);
-                        if (absOff > 2) return null;
                         const Icon = ICONS[a.icon] || AlertTriangle;
                         const sev = SEVERITY[a.severity] || SEVERITY.info;
-                        const isCenter = offset === 0;
-                        const scale = Math.max(0.82, 1 - absOff * 0.08);
-                        const opacity = Math.max(0.15, 1 - absOff * 0.38);
                         return (
                           <div
                             key={a.id}
-                            className={`bell-perspective-item ${isCenter ? 'is-center' : ''} ${a.severity === 'critical' ? 'is-critical' : ''}`}
-                            style={{
-                              transform: `translateY(calc(${offset} * 56px)) scale(${scale})`,
-                              opacity,
-                              zIndex: 10 - absOff,
-                              pointerEvents: isCenter ? 'auto' : 'none',
-                              '--sev-color': sev.color,
-                              '--sev-glow': sev.glow,
-                            }}
-                            onClick={() => isCenter && handleAlertClick(a.to)}
+                            data-bell-item={i}
+                            className={`bell-perspective-item ${a.severity === 'critical' ? 'is-critical' : ''}`}
+                            style={{ '--sev-color': sev.color, '--sev-glow': sev.glow }}
+                            onClick={() => handleAlertClick(a.to)}
                           >
                             <span
                               className="bell-perspective-icon"
                               style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40` }}
                             >
                               <Icon className="w-4 h-4" style={{ color: sev.color }} />
-                              {a.severity === 'critical' && isCenter && (
+                              {a.severity === 'critical' && (
                                 <span
                                   className="bell-perspective-pulse"
                                   style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}` }}
@@ -344,19 +360,10 @@ export default function AlertBell() {
                               <p className="bell-perspective-sub">{a.sub}</p>
                               {a.meta && <p className="bell-perspective-meta">{a.meta}</p>}
                             </div>
-                            {isCenter && <ChevronRight className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />}
+                            <ChevronRight className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
                           </div>
                         );
                       })}
-                    </div>
-                    <div className="bell-perspective-dots">
-                      {filteredAlerts.slice(0, 12).map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCenterIndex(i)}
-                          className={`bell-perspective-dot ${i === centerIndex ? 'active' : ''}`}
-                        />
-                      ))}
                     </div>
                   </div>
                 ) : (

@@ -325,3 +325,67 @@
 .theme-light .text-white\/40 { color: hsl(var(--muted-foreground)) !important; opacity: 1; }
 .theme-light .text-white\/30 { color: hsl(var(--muted-foreground)) !important; opacity: 0.8; }
 .theme-light .text-white\/20 { color: hsl(var(--muted-foreground)) !important; opacity: 0.7; }
+
+/* ═════════════════════════════════════════════════════════════════
+   LIGHT MODE POLISH — premium toggles, cards, icons, bell scroll
+   ═════════════════════════════════════════════════════════════════ */
+
+/* Premium switch in light mode */
+.theme-light [data-state="checked"].bg-primary,
+.theme-light .bg-primary[data-state="checked"] {
+  background-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 10px rgba(59,130,246,0.25), inset 0 1px 0 rgba(255,255,255,0.3) !important;
+}
+.theme-light [data-state="unchecked"].bg-input,
+.theme-light .bg-input[data-state="unchecked"] {
+  background-color: rgba(0,0,0,0.08) !important;
+}
+.theme-light [data-state="checked"] .block.h-5,
+.theme-light [data-state="checked"] .block.h-4 {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+}
+
+/* Card hover in light mode */
+.theme-light .glass-card:hover,
+.theme-light .entity-card:hover,
+.theme-light .glass-card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(59,130,246,0.12), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+
+/* Premium icon containers in light mode */
+.theme-light .hud-icon-tile,
+.theme-light .trip-section-icon {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.06), 0 0 12px -4px rgba(59,130,246,0.2) !important;
+}
+
+/* Refined card borders in light mode */
+.theme-light [class*="border-white/["] {
+  border-color: rgba(0,0,0,0.06) !important;
+}
+
+/* Bell perspective items in light mode — refined */
+.theme-light .bell-perspective-item {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 100%) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+.theme-light .bell-perspective-item.is-center {
+  background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.98) 100%) !important;
+  border-color: color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 35%, transparent) !important;
+  box-shadow: 0 0 20px -4px rgba(var(--sev-glow, 59,130,246), 0.15), 0 8px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 1px color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 12%, transparent) !important;
+}
+.theme-light .bell-perspective-item .bell-perspective-title { color: hsl(var(--foreground)) !important; }
+.theme-light .bell-perspective-item .bell-perspective-sub { color: hsl(var(--muted-foreground)) !important; }
+.theme-light .bell-perspective-item .bell-perspective-meta { color: hsl(var(--muted-foreground)) !important; opacity: 0.6; }
+
+/* Premium card model — shadcn Card in light mode */
+.theme-light .bg-card {
+  background-color: hsl(var(--card)) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+.theme-light .bg-card:hover {
+  border-color: rgba(59,130,246,0.15) !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 0 0 1px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
