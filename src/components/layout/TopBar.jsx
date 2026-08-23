@@ -17,6 +17,7 @@ import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, get
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
 import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
 import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, clearInvoicesFilters } from '@/lib/invoicesStore';
+import { useLedgerState, setLedgerMode, setLedgerView } from '@/lib/ledgerStore';
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import ViewToggle from '@/components/common/ViewToggle';
@@ -51,6 +52,9 @@ export default function TopBar() {
   const isCompanyDocsPage = location.pathname === '/admin/company-documents';
   const isInvoicesPage = location.pathname === '/accounts/invoices';
   const invFilters = useInvoicesFilters();
+  const isBankRecPage = location.pathname === '/reports/bank-reconciliation';
+  const isPettyCashPage = location.pathname === '/accounts/petty-cash';
+  const ledgerState = useLedgerState();
 
   return (
     <div className="sticky top-0 md:top-20 z-40">
@@ -136,6 +140,32 @@ export default function TopBar() {
               </div>
             )}
             {(location.pathname === '/trips' || location.pathname === '/contracts') && <OpsSubBar />}
+            {(isBankRecPage || isPettyCashPage) && ledgerState.modeOptions?.length > 0 && (
+              <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5 ml-2">
+                {ledgerState.modeOptions.map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => setLedgerMode(o.value)}
+                    className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${ledgerState.mode === o.value ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {(isBankRecPage || isPettyCashPage) && ledgerState.viewOptions?.length > 0 && (
+              <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5 ml-2">
+                {ledgerState.viewOptions.map((o) => (
+                  <button
+                    key={o.value}
+                    onClick={() => setLedgerView(o.value)}
+                    className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${ledgerState.view === o.value ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <div className="md:hidden flex items-center gap-2">

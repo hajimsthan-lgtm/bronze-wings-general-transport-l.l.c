@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
-import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
+import { Plus, Trash2, Pencil, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
 import SmartCsvImporter from '@/components/common/SmartCsvImporter';
@@ -13,8 +13,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ImportUndoBanner from '@/components/bank-rec/ImportUndoBanner';
 import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { ChevronDown } from 'lucide-react';
+import { useLedgerState, setLedgerMode, setLedgerView, initLedger } from '@/lib/ledgerStore';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -42,30 +41,6 @@ const nowLocal = () => {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
-function Toggle({ options, value, onChange }) {
-  const active = options.find((o) => o.value === value);
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger
-        className="glass-sm h-9 min-w-[140px] gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-wide text-foreground/90 shadow-none hover:border-[rgb(var(--panel-accent-rgb))]/40 focus:ring-1 focus:ring-[rgb(var(--panel-accent-rgb))]/40 [&>svg]:right-3 [&>svg]:opacity-100 [&>svg]:text-[rgb(var(--panel-accent2-rgb))]"
-      >
-        <SelectValue placeholder={active?.label} />
-      </SelectTrigger>
-      <SelectContent className="min-w-[160px] rounded-xl border border-white/10 bg-[hsl(var(--popover))] text-foreground shadow-xl">
-        {options.map((o) => (
-          <SelectItem
-            key={o.value}
-            value={o.value}
-            className="rounded-lg text-xs font-medium uppercase tracking-wide focus:bg-[rgb(var(--panel-accent-rgb))]/15 focus:text-foreground"
-          >
-            {o.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 export default function LedgerPage({
   entityName,
   inflowKey, outflowKey, inflowLabel, outflowLabel,
@@ -78,17 +53,23 @@ export default function LedgerPage({
   enableImportUndo
 }) {
   const [rows, setRows] = useState(null);
-  const [view, setView] = useState('statement');
-  const [mode, setMode] = useState(defaultMode);
+  const ledgerState = useLedgerState();
+  const view = ledgerState.view;
+  const mode = ledgerState.mode;
+  const setView = setLedgerView;
+  const setMode = setLedgerMode;
   const [saving, setSaving] = useState(false);
+  const [editId, setEditId] = useState(null);
   const { dateFrom: filterFrom, dateTo: filterTo, setDateFrom: setFilterFrom, setDateTo: setFilterTo } = useGlobalDate();
   const [q, setQ] = useState('');
   const [lastBatch, setLastBatch] = useState(null);
   const [undoBatchId, setUndoBatchId] = useState(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
-  const viewOptions = enableImportUndo
+  const viewOptions = useMemo(() => enableImportUndo
     ? [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }, { value: 'history', label: 'Import History' }]
-    : [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }];
+    : [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }], [enableImportUndo]);
+
+  useEffect(() => { initLedger(entityName, defaultMode, modeOptions, viewOptions); }, [entityName, defaultMode, modeOptions, viewOptions]);
 
   const makeForm = useCallback(() => {
     const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
@@ -101,7 +82,7 @@ export default function LedgerPage({
   const [form, setForm] = useState(makeForm());
 
   const load = useCallback(async () => {
-    const data = await base44.entities[entityName].list('-date', 500).catch(() => []);
+    const data = await base44.entities[entityName].list('-date', 5000).catch(() => []);
     setRows(data || []);
   }, [entityName]);
 
@@ -139,12 +120,31 @@ export default function LedgerPage({
   });
 
   const display = view === 'report' ? reportRows : statementRows;
-  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display);
+  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display, 50, null, [view, entityName]);
   const totalIn = display.reduce((s, r) => s + (Number(r.in) || 0), 0);
   const totalOut = display.reduce((s, r) => s + (Number(r.out) || 0), 0);
   const closingBalance = display.length ? display[display.length - 1].running_balance : 0;
 
   const dateRangeLabel = (filterFrom || filterTo) ? `${filterFrom || 'start'} → ${filterTo || 'today'}` : 'All dates';
+
+  const startEdit = (r) => {
+    const f = {
+      date: dateHasTime ? (r.date || '').slice(0, 16) : (r.date || '').slice(0, 10),
+      recipient: r.recipient || '',
+      description: r.description || '',
+    };
+    f[refKey] = r.ref || '';
+    f[inflowKey] = r.in ? String(r.in) : '';
+    f[outflowKey] = r.out ? String(r.out) : '';
+    setForm(f);
+    setEditId(r.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setForm(makeForm());
+    setEditId(null);
+  };
 
   const addEntry = async (e) => {
     e.preventDefault();
@@ -154,7 +154,13 @@ export default function LedgerPage({
     if (!inAmt && !outAmt) return;
     setSaving(true);
     try {
-      await base44.entities[entityName].create(buildCreate(form, mode, { inAmt, outAmt }));
+      const payload = buildCreate(form, mode, { inAmt, outAmt });
+      if (editId) {
+        await base44.entities[entityName].update(editId, payload);
+        setEditId(null);
+      } else {
+        await base44.entities[entityName].create(payload);
+      }
       setForm(makeForm());
       await load();
     } finally {
@@ -163,6 +169,7 @@ export default function LedgerPage({
   };
 
   const remove = async (id) => {
+    if (editId === id) cancelEdit();
     await base44.entities[entityName].delete(id);
     await load();
   };
@@ -187,25 +194,18 @@ export default function LedgerPage({
         title={exportTitle}
       />
 
-      {/* sub-header toggle row */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            {modeOptions && <Toggle options={modeOptions} value={mode} onChange={setMode} />}
-            <Toggle options={viewOptions} value={view} onChange={setView} />
-          </div>
-          {enableImportUndo && lastBatch && (
-            <ImportUndoBanner
-              batch={lastBatch}
-              onUndo={() => setUndoBatchId(lastBatch.batchId)}
-              onDismiss={() => setLastBatch(null)}
-            />
-          )}
-         </div>
+      {enableImportUndo && lastBatch && (
+        <ImportUndoBanner
+          batch={lastBatch}
+          onUndo={() => setUndoBatchId(lastBatch.batchId)}
+          onDismiss={() => setLastBatch(null)}
+        />
+      )}
 
         {view === 'history' && enableImportUndo ? (
           <ImportHistoryPanel key={historyRefreshKey} entityName={entityName} onUndo={(bid) => setUndoBatchId(bid)} />
         ) : (
-        <div style={PANEL} className="overflow-hidden">
+        <>
           {/* summary stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
             <ReportStatCard index={0} label={summaryLabels.inflow} value={totalIn} format={(v) => fmt(v)} icon={ArrowDownLeft} color="#34d399" />
@@ -218,22 +218,27 @@ export default function LedgerPage({
             <>
               <form onSubmit={addEntry} className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                   <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                     <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> Add Entry
-                   </h2>
-                   {importConfig && (
-                     <SmartCsvImporter
-                       entityName={entityName}
-                       filename={exportFilename}
-                       columns={importConfig.columns}
-                       transform={importConfig.transform}
-                       onImported={load}
-                       label="Import CSV"
-                       batchTracking={enableImportUndo}
-                       onBatchImported={enableImportUndo ? (info) => { setLastBatch(info); setView('statement'); } : undefined}
-                     />
-                   )}
+                 <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+                   <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> {editId ? 'Edit Entry' : 'Add Entry'}
+                 </h2>
+                 <div className="flex items-center gap-2">
+                 {editId && (
+                   <button type="button" onClick={cancelEdit} className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">Cancel Edit</button>
+                 )}
+                 {importConfig && (
+                   <SmartCsvImporter
+                     entityName={entityName}
+                     filename={exportFilename}
+                     columns={importConfig.columns}
+                     transform={importConfig.transform}
+                     onImported={load}
+                     label="Import CSV"
+                     batchTracking={enableImportUndo}
+                     onBatchImported={enableImportUndo ? (info) => { setLastBatch(info); setView('statement'); } : undefined}
+                   />
+                 )}
                  </div>
+                </div>
                 <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-2">
@@ -343,9 +348,14 @@ export default function LedgerPage({
                       <td className="px-5 py-3 text-right font-semibold text-white tabular-nums">{fmt(r.running_balance)}</td>
                       {view === 'statement' && (
                         <td className="px-5 py-3 text-right">
-                          <button onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-400 transition-colors" aria-label="Delete entry">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => startEdit(r)} className="text-white/30 hover:text-amber-400 transition-colors" aria-label="Edit entry">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-400 transition-colors" aria-label="Delete entry">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -361,7 +371,7 @@ export default function LedgerPage({
               </table>
             )}
           </div>
-        </div>
+        </>
         )}
 
         {enableImportUndo && undoBatchId && (

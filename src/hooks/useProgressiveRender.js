@@ -16,12 +16,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * @param {number} pageSize rows per batch (default 50)
  * @param {React.Ref} scrollRoot optional scroll container for the IO root
  */
-export function useProgressiveRender(items, pageSize = 50, scrollRoot = null) {
+export function useProgressiveRender(items, pageSize = 50, scrollRoot = null, resetDeps = []) {
   const [visibleCount, setVisibleCount] = useState(pageSize);
   const sentinelRef = useRef(null);
+  const depsKey = JSON.stringify(resetDeps);
 
-  // Reset to first page whenever the source array reference changes
-  useEffect(() => { setVisibleCount(pageSize); }, [items, pageSize]);
+  // Reset to first page when resetDeps change or item count changes
+  // (not on every items reference change — display arrays are recreated each render)
+  useEffect(() => { setVisibleCount(pageSize); }, [items.length, depsKey, pageSize]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -32,7 +34,7 @@ export function useProgressiveRender(items, pageSize = 50, scrollRoot = null) {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [items, pageSize, scrollRoot]);
+  }, [items.length, depsKey, pageSize, scrollRoot]);
 
   const visible = items.slice(0, visibleCount);
   const hasMore = visibleCount < items.length;
