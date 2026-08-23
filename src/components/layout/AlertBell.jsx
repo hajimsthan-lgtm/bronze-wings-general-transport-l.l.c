@@ -37,6 +37,10 @@ export default function AlertBell() {
   const closeRef = useRef(null);
   const leaveTimer = useRef(null);
   const containerRef = useRef(null);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+  const selectedAlertRef = useRef(null);
+  const autoScrollRaf = useRef(null);
+  const autoScrollPaused = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -132,6 +136,48 @@ export default function AlertBell() {
     });
   }, [showNotif, activeCategory, filteredAlerts.length, updatePerspective]);
 
+  // Auto-scroll the perspective list continuously; pauses on hover or selection
+  useEffect(() => {
+    if (!showNotif || filteredAlerts.length === 0) return;
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const onEnter = () => { autoScrollPaused.current = true; };
+    const onLeave = () => { autoScrollPaused.current = false; };
+    container.addEventListener('mouseenter', onEnter);
+    container.addEventListener('mouseleave', onLeave);
+
+    const step = () => {
+      if (!autoScrollPaused.current && !selectedAlertRef.current && container) {
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        if (maxScroll > 0) {
+          if (container.scrollTop >= maxScroll - 1) {
+            container.scrollTop = 0;
+          } else {
+            container.scrollTop += 0.6;
+          }
+        }
+      }
+      autoScrollRaf.current = requestAnimationFrame(step);
+    };
+    const startTimer = setTimeout(() => {
+      autoScrollRaf.current = requestAnimationFrame(step);
+    }, 600);
+
+    return () => {
+      clearTimeout(startTimer);
+      if (autoScrollRaf.current) cancelAnimationFrame(autoScrollRaf.current);
+      container.removeEventListener('mouseenter', onEnter);
+      container.removeEventListener('mouseleave', onLeave);
+    };
+  }, [showNotif, filteredAlerts.length]);
+
+  // Clear selection when category changes
+  useEffect(() => {
+    setSelectedAlert(null);
+    selectedAlertRef.current = null;
+  }, [activeCategory]);
+
   const handleTripsOpsCount = useCallback((info) => {
     setTripsOpsCount(info.count || 0);
     setTripsOpsCritical(info.critical || 0);
@@ -178,6 +224,8 @@ export default function AlertBell() {
   const handleClose = () => {
     if (closeRef.current) clearInterval(closeRef.current);
     clearTimeout(leaveTimer.current);
+    setSelectedAlert(null);
+    selectedAlertRef.current = null;
     setClosing(true);
     setTimeout(() => { setShowNotif(false); setClosing(false); }, 200);
   };
@@ -361,9 +409,9 @@ export default function AlertBell() {
                           <div
                             key={a.id}
                             data-bell-item={i}
-                            className={`bell-perspective-item ${a.severity === 'critical' ? 'is-critical' : ''}`}
+                            className={`bell-perspective-item ${a.severity === 'critical' ? 'is-critical' : ''} ${selectedAlert?.id === a.id ? 'is-selected' : ''}`}
                             style={{ '--sev-color': sev.color, '--sev-glow': sev.glow }}
-                            onClick={() => handleAlertClick(a.to)}
+                            onClick={() => { setSelectedAlert(a); selectedAlertRef.current = a; autoScrollPaused.current = true; }}
                             onMouseEnter={() => setHoveredAlert(a)}
                             onMouseLeave={() => setHoveredAlert(null)}
                           >
@@ -387,6 +435,21 @@ export default function AlertBell() {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 px-4">
                     <p className="text-[11px] text-white/40">No alerts in this category</p>
+                  </div>
+                )}
+                {selectedAlert && (
+                  <div className="bell-redirect-bar">
+                    <div className="bell-redirect-info">
+                      <span className="bell-redirect-dot" style={{ background: SEVERITY[selectedAlert.severity]?.color || '#888' }} />
+                      <span className="bell-redirect-title">{selectedAlert.title}</span>
+                    </div>
+                    <button
+                      className="bell-redirect-btn"
+                      onClick={() => handleAlertClick(selectedAlert.to)}
+                    >
+                      Open
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 )}
                 {hoveredAlert && (
