@@ -46,27 +46,23 @@ export default function OperationsToolbar({
         }
       </div>
 
-      {/* Status filter pills */}
+      {/* Status filter dropdown */}
       {opsFilter.active && opsFilter.options?.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {opsFilter.options.map((s) => {
-            const active = opsFilter.value === s;
-            const count = s === 'all' ? null : opsFilter.counts?.[s];
-            return (
-              <button
-                key={s}
-                onClick={() => opsFilter.onChange?.(s)}
-                className={`px-3 py-1.5 rounded-full text-xs border transition-colors whitespace-nowrap ${
-                  active
-                    ? 'border-primary text-primary bg-primary/10'
-                    : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
-                }`}
-              >
-                {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
-              </button>
-            );
-          })}
-        </div>
+        <Select value={opsFilter.value} onValueChange={(v) => opsFilter.onChange?.(v)}>
+          <SelectTrigger className="h-9 w-full sm:w-[150px] bg-background/40 border-border text-xs rounded-xl data-[placeholder]:text-muted-foreground">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {opsFilter.options.map((s) => {
+              const count = s === 'all' ? null : opsFilter.counts?.[s];
+              return (
+                <SelectItem key={s} value={s}>
+                  {s === 'all' ? t('all') : t(s)}{count != null ? ` · ${count}` : ''}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
       )}
 
       <Select value={mode} onValueChange={onModeChange}>
