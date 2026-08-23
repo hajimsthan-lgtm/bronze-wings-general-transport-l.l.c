@@ -22,7 +22,7 @@ export default function VendorsPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const { mode } = useVendorsMode();
+  const mode = useVendorsMode();
   const [search, setSearch] = useState('');
 
   const load = () => {

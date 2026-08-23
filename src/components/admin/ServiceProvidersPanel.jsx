@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BarChart3, LayoutGrid, Search, Store, Plus, Truck, Users, TrendingDown, Wrench } from 'lucide-react';
+import { Search, Store, Plus, Truck, Users, TrendingDown, Wrench } from 'lucide-react';
+import { useVendorsMode } from '@/lib/vendorsStore';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ExportButtons from '@/components/common/ExportButtons';
 import EmptyState from '@/components/common/EmptyState';
@@ -30,7 +31,7 @@ export default function ServiceProvidersPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [mode, setMode] = useState('analytics');
+  const mode = useVendorsMode();
   const [search, setSearch] = useState('');
 
   const load = () => {
@@ -88,10 +89,6 @@ export default function ServiceProvidersPanel() {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-            <button onClick={() => setMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-            <button onClick={() => setMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${mode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-          </div>
           <ExportButtons data={exportData} filename="service-providers" title="Service Providers" columns={[
             { label: 'Name', key: 'name' }, { label: 'Type', key: 'type' },
             { label: 'Vehicles', key: 'vehicles', numeric: true }, { label: 'Drivers', key: 'drivers', numeric: true },
