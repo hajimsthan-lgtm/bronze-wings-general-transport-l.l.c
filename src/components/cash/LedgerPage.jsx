@@ -99,31 +99,42 @@ export default function LedgerPage({
 
   // statement rows — running balance over full sorted set
   let run = 0;
-  const statementRows = sorted.map((r) => {
+  const allStatementRows = sorted.map((r) => {
     const a = rowToAmounts(r);
     run += a.in - a.out;
     return { id: r.id, date: r.date, recipient: a.recipient, ref: a.ref, description: r.description, in: a.in, out: a.out, running_balance: run };
   });
 
-  // report view — apply filters, recompute running balance over filtered set
-  const filtered = statementRows.filter((r) => {
+  // apply date + search filter to both views
+  const filtered = allStatementRows.filter((r) => {
     const rDate = (r.date || '').slice(0, 10);
     if (filterFrom && rDate < filterFrom) return false;
     if (filterTo && rDate > filterTo) return false;
     if (q && !((r.description || '').toLowerCase().includes(q.toLowerCase()))) return false;
     return true;
   });
+
+  // recompute running balance over filtered set (for report view)
   let rb = 0;
   const reportRows = filtered.map((r) => {
     rb += (Number(r.in) || 0) - (Number(r.out) || 0);
     return { ...r, date: fmtDate(r.date), running_balance: rb };
   });
 
-  const display = view === 'report' ? reportRows : statementRows;
-  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display, 50, null, [view, entityName]);
-  const totalIn = display.reduce((s, r) => s + (Number(r.in) || 0), 0);
-  const totalOut = display.reduce((s, r) => s + (Number(r.out) || 0), 0);
-  const closingBalance = display.length ? display[display.length - 1].running_balance : 0;
+  // statement view — same filtered set, keep raw date for editing
+  let sb = 0;
+  const statementRows = filtered.map((r) => {
+    sb += (Number(r.in) || 0) - (Number(r.out) || 0);
+    return { ...r, running_balance: sb };
+  });
+
+  // latest transactions first
+  const chronologicalDisplay = view === 'report' ? reportRows : statementRows;
+  const display = chronologicalDisplay.slice().reverse();
+  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display, 50, null, [view, entityName, filterFrom, filterTo, q]);
+  const totalIn = chronologicalDisplay.reduce((s, r) => s + (Number(r.in) || 0), 0);
+  const totalOut = chronologicalDisplay.reduce((s, r) => s + (Number(r.out) || 0), 0);
+  const closingBalance = chronologicalDisplay.length ? chronologicalDisplay[chronologicalDisplay.length - 1].running_balance : 0;
 
   const dateRangeLabel = (filterFrom || filterTo) ? `${filterFrom || 'start'} → ${filterTo || 'today'}` : 'All dates';
 
@@ -202,16 +213,42 @@ export default function LedgerPage({
         />
       )}
 
+        {/* summary stat cards — always visible */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
+          <ReportStatCard index={0} label={summaryLabels.inflow} value={totalIn} format={(v) => fmt(v)} icon={ArrowDownLeft} color="#34d399" />
+          <ReportStatCard index={1} label={summaryLabels.outflow} value={totalOut} format={(v) => fmt(v)} icon={ArrowUpRight} color="#fb7185" />
+          <ReportStatCard index={2} label={summaryLabels.balance} value={closingBalance} format={(v) => fmt(v)} icon={BalanceIcon} color="#3b82f6" />
+        </div>
+
+        {/* date filter bar — always visible */}
+        <div className="p-5 flex flex-wrap items-end gap-3">
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><CalendarRange className="w-3 h-3" /> From</label>
+            <DatePicker value={filterFrom || ''} onChange={(v) => setFilterFrom(v)} />
+          </div>
+          <div>
+            <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">To</label>
+            <DatePicker value={filterTo || ''} onChange={(v) => setFilterTo(v)} />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Search className="w-3 h-3" /> Search</label>
+            <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search description..." className="clay-input w-full" style={{ padding: '9px 12px', fontSize: 13 }} />
+          </div>
+          {(filterFrom || filterTo || q) && (
+            <button
+              onClick={() => { setFilterFrom(''); setFilterTo(''); setQ(''); }}
+              className="text-xs px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            >
+              Clear Filters
+            </button>
+          )}
+        </div>
+        <div className="h-px bg-white/5" />
+
         {view === 'history' && enableImportUndo ? (
-          <ImportHistoryPanel key={historyRefreshKey} entityName={entityName} onUndo={(bid) => setUndoBatchId(bid)} />
+          <ImportHistoryPanel key={historyRefreshKey} entityName={entityName} onUndo={(bid) => setUndoBatchId(bid)} onDeleted={() => setHistoryRefreshKey(k => k + 1)} />
         ) : (
         <>
-          {/* summary stat cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
-            <ReportStatCard index={0} label={summaryLabels.inflow} value={totalIn} format={(v) => fmt(v)} icon={ArrowDownLeft} color="#34d399" />
-            <ReportStatCard index={1} label={summaryLabels.outflow} value={totalOut} format={(v) => fmt(v)} icon={ArrowUpRight} color="#fb7185" />
-            <ReportStatCard index={2} label={summaryLabels.balance} value={closingBalance} format={(v) => fmt(v)} icon={BalanceIcon} color="#3b82f6" />
-          </div>
 
           {/* STATEMENT VIEW — inline add form */}
           {view === 'statement' && (
@@ -290,30 +327,15 @@ export default function LedgerPage({
             </>
           )}
 
-          {/* REPORT VIEW — filters + export */}
+          {/* REPORT VIEW — export */}
           {view === 'report' && (
-            <>
-              <div className="p-5 flex flex-wrap items-end gap-3">
-                <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><CalendarRange className="w-3 h-3" /> From</label>
-                  <DatePicker value={filterFrom || ''} onChange={(v) => setFilterFrom(v)} />
-                </div>
-                <div>
-                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">To</label>
-                  <DatePicker value={filterTo || ''} onChange={(v) => setFilterTo(v)} />
-                </div>
-                <div className="flex-1 min-w-[200px]">
-                  <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Search className="w-3 h-3" /> Item</label>
-                  <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search description..." className="clay-input w-full" style={{ padding: '9px 12px', fontSize: 13 }} />
-                </div>
-                <ExportButtons data={reportRows} filename={exportFilename} columns={exportColumns} title={exportTitle} options={{ dateRange: dateRangeLabel }} />
-              </div>
-              <div className="h-px bg-white/5" />
-            </>
+            <div className="p-5 flex flex-wrap items-end gap-3">
+              <ExportButtons data={reportRows} filename={exportFilename} columns={exportColumns} title={exportTitle} options={{ dateRange: dateRangeLabel }} />
+            </div>
           )}
 
-          {/* table */}
-          <div className="overflow-x-auto thin-scroll">
+          {/* table — scrollable with sticky header */}
+          <div className="overflow-auto thin-scroll" style={{ maxHeight: 'calc(100vh - 440px)' }}>
             {rows === null ? (
               <div className="p-10"><LoadingSpinner /></div>
             ) : display.length === 0 ? (
@@ -324,15 +346,15 @@ export default function LedgerPage({
               />
             ) : (
               <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    <th className="text-left font-semibold px-5 py-3 w-32">Date</th>
+                <thead className="sticky top-0 z-10">
+                  <tr className="text-[10px] uppercase tracking-wider text-muted-foreground bg-background/95 backdrop-blur-sm border-b border-white/10">
+                    <th className="text-left font-semibold px-5 py-3 w-32 whitespace-nowrap">Date</th>
                     {hasRecipient && <th className="text-left font-semibold px-5 py-3">Recipient</th>}
-                    <th className="text-left font-semibold px-5 py-3 w-24">{refLabel}</th>
+                    <th className="text-left font-semibold px-5 py-3 w-36 whitespace-nowrap">{refLabel}</th>
                     <th className="text-left font-semibold px-5 py-3">Description</th>
-                    <th className="text-right font-semibold px-5 py-3 text-emerald-400 w-40">{inflowLabel}</th>
-                    <th className="text-right font-semibold px-5 py-3 text-rose-400 w-40">{outflowLabel}</th>
-                    <th className="text-right font-semibold px-5 py-3" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>Running Balance</th>
+                    <th className="text-right font-semibold px-5 py-3 text-emerald-400 w-40 whitespace-nowrap">{inflowLabel}</th>
+                    <th className="text-right font-semibold px-5 py-3 text-rose-400 w-40 whitespace-nowrap">{outflowLabel}</th>
+                    <th className="text-right font-semibold px-5 py-3 whitespace-nowrap" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>Running Balance</th>
                     {view === 'statement' && <th className="px-5 py-3 w-10"></th>}
                   </tr>
                 </thead>
