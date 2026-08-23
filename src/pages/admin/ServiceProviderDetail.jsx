@@ -143,13 +143,14 @@ export default function ServiceProviderDetail() {
         <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-5">
           <EntityDetailHeader backTo="/admin/vendors" />
           {/* Identity card */}
-          <div className="glass-card relative overflow-hidden animate-fade-in-up">
+          <div className="glass-card relative overflow-hidden animate-fade-in-up" style={{ boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 60px ${hexToRgba(tone, 0.06)}, 0 12px 36px rgba(0,0,0,0.10), 0 0 0 1px ${hexToRgba(tone, 0.15)}` }}>
+            <div className="absolute -top-1/2 -right-1/4 w-3/4 h-full pointer-events-none" style={{ background: `radial-gradient(ellipse at center, ${hexToRgba(tone, 0.14)}, transparent 70%)` }} />
             <button onClick={() => { setEditForm({ ...vendor }); setEditOpen(true); }} className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95">
               <Pencil className="w-3.5 h-3.5" />
             </button>
-            <div className="p-4 pb-3 flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${hexToRgba(tone, 0.18)}, ${hexToRgba(tone, 0.08)})`, border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
-                <Wrench className="w-7 h-7" style={{ color: tone }} />
+            <div className="p-4 pb-3 flex items-center gap-3 relative z-10">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${hexToRgba(tone, 0.22)}, ${hexToRgba(tone, 0.10)})`, border: `1px solid ${hexToRgba(tone, 0.35)}`, boxShadow: `0 0 18px -4px ${hexToRgba(tone, 0.4)}, inset 0 1px 0 rgba(255,255,255,0.12)` }}>
+                <Wrench className="w-7 h-7" style={{ color: tone, filter: `drop-shadow(0 0 6px ${hexToRgba(tone, 0.5)})` }} />
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg font-bold text-foreground truncate">{vendor.name}</h2>

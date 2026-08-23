@@ -53,8 +53,10 @@ export default function Salary() {
       () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
       () => getCompanySettings()]
       );
-      setRecords(r || []);
-      const ownDrivers = (d || []).filter((x) => !x.vendor_name);
+      const allDrivers = d || [];
+      const vendorDriverNames = new Set(allDrivers.filter((x) => x.vendor_name).map((x) => x.name));
+      const ownDrivers = allDrivers.filter((x) => !x.vendor_name);
+      setRecords((r || []).filter((rec) => !vendorDriverNames.has(rec.driver_name)));
       setDrivers(ownDrivers);
       setDriverMap(Object.fromEntries(ownDrivers.map((x) => [x.name, x.id])));
       setSettings(s || {});
@@ -247,7 +249,7 @@ export default function Salary() {
 
       <div className="space-y-2">
            {visSalary.map((r) =>
-        <div key={r.id} className="row-card flex items-start gap-3 min-h-[56px]">
+        <div key={r.id} className={`row-card flex items-start gap-3 min-h-[56px] ${r.status === 'paid' ? 'row-card-accent-paid' : r.status === 'partial' ? 'row-card-accent-partial' : 'row-card-accent-pending'}`}>
                <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
                  <Wallet className="w-4 h-4 text-white/70" />
                </div>
