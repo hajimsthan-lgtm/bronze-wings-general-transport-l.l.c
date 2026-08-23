@@ -273,18 +273,18 @@ export default function ExcelLedgerTable({
                         <button
                           onClick={() => toggleSort(col.key)}
                           className={cn(
-                            'flex items-center gap-1 transition-colors text-[10px]',
+                            'flex items-center gap-1 transition-colors text-xs font-bold',
                             isSorted ? 'text-primary' : 'text-foreground/80 hover:text-foreground'
                           )}
                         >
                           {col.label}
                           <span className="flex flex-col -space-y-1">
-                            <ChevronUp className={cn('w-2.5 h-2.5', isSorted && sortDir === 'asc' ? 'text-primary' : 'text-muted-foreground/40')} />
-                            <ChevronDown className={cn('w-2.5 h-2.5', isSorted && sortDir === 'desc' ? 'text-primary' : 'text-muted-foreground/40')} />
+                            <ChevronUp className={cn('w-3 h-3', isSorted && sortDir === 'asc' ? 'text-primary' : 'text-muted-foreground/40')} />
+                            <ChevronDown className={cn('w-3 h-3', isSorted && sortDir === 'desc' ? 'text-primary' : 'text-muted-foreground/40')} />
                           </span>
                         </button>
                       )}
-                      {!col.sortable && <span className="text-[10px]">{col.label}</span>}
+                      {!col.sortable && <span className="text-xs font-bold">{col.label}</span>}
                       {col.filterable && (
                         <div className="relative" ref={openFilterCol === col.key ? filterRef : null}>
                           <button
@@ -352,13 +352,21 @@ export default function ExcelLedgerTable({
               const isFixed = fixedRefs[r.id];
               const hasInflow = Number(r.in) > 0;
               const hasOutflow = Number(r.out) > 0;
+              // Row tint: green for deposits, red for withdrawals
+              const rowTint = isMissingRef
+                ? 'bg-amber-500/[0.06] hover:bg-amber-500/[0.10]'
+                : hasInflow
+                  ? 'bg-emerald-500/[0.05] hover:bg-emerald-500/[0.09] border-l-2 border-l-emerald-500/40'
+                  : hasOutflow
+                    ? 'bg-rose-500/[0.05] hover:bg-rose-500/[0.09] border-l-2 border-l-rose-500/40'
+                    : 'hover:bg-primary/5';
               return (
                 <TableRow
                   key={r.id}
                   className={cn(
                     'transition-all duration-150 group',
-                    isMissingRef ? 'bg-amber-500/[0.06] hover:bg-amber-500/[0.10]' : 'hover:bg-primary/5',
-                    isFixed && 'bg-emerald-500/[0.04]'
+                    rowTint,
+                    isFixed && 'bg-emerald-500/[0.06]'
                   )}
                 >
                   {columns.map((col) => {
@@ -372,7 +380,7 @@ export default function ExcelLedgerTable({
                       <TableCell
                         key={col.key}
                         className={cn(
-                          'trips-grid-td align-middle',
+                          'trips-grid-td align-middle py-3',
                           col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
                           col.mono && 'font-mono',
                           col.numeric && 'tabular-nums'
@@ -380,70 +388,70 @@ export default function ExcelLedgerTable({
                       >
                         {/* Reference column with missing/fixed indicators */}
                         {isRefCol && isMissingRef && (
-                          <span className="inline-flex items-center gap-1 text-amber-400 text-xs">
-                            <AlertTriangle className="w-3 h-3" />
-                            <span className="italic">missing</span>
+                          <span className="inline-flex items-center gap-1.5 text-amber-400 text-sm">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="italic font-medium">missing</span>
                           </span>
                         )}
                         {isRefCol && isFixed && (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
-                            <CheckCircle2 className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1.5 text-emerald-400 text-sm font-bold">
+                            <CheckCircle2 className="w-4 h-4" />
                             {val}
                           </span>
                         )}
                         {isRefCol && !isMissingRef && !isFixed && (
-                          <span className="text-foreground font-mono text-xs">{val || '—'}</span>
+                          <span className="text-foreground font-mono text-sm font-semibold">{val || '—'}</span>
                         )}
 
                         {/* Inflow column — green */}
                         {isInflowCol && (
-                          <span className={cn('font-mono tabular-nums text-xs font-semibold', hasInflow ? 'text-emerald-400' : 'text-muted-foreground/40')}>
+                          <span className={cn('font-mono tabular-nums text-sm font-bold', hasInflow ? 'text-emerald-400' : 'text-muted-foreground/40')}>
                             {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
                           </span>
                         )}
 
                         {/* Outflow column — red */}
                         {isOutflowCol && (
-                          <span className={cn('font-mono tabular-nums text-xs font-semibold', hasOutflow ? 'text-rose-400' : 'text-muted-foreground/40')}>
+                          <span className={cn('font-mono tabular-nums text-sm font-bold', hasOutflow ? 'text-rose-400' : 'text-muted-foreground/40')}>
                             {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
                           </span>
                         )}
 
                         {/* Running balance — blue accent */}
                         {isBalanceCol && (
-                          <span className="font-mono tabular-nums text-xs font-semibold text-blue-400">
+                          <span className="font-mono tabular-nums text-sm font-bold text-blue-400">
                             {val !== undefined && val !== null && val !== '' ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
                           </span>
                         )}
 
                         {/* Date column */}
                         {col.key === 'date' && (
-                          <span className="text-foreground/90 font-mono text-xs whitespace-nowrap">{val || '—'}</span>
+                          <span className="text-foreground font-mono text-sm font-semibold whitespace-nowrap">{val || '—'}</span>
                         )}
 
                         {/* Description / recipient / other text columns */}
                         {!isRefCol && !isInflowCol && !isOutflowCol && !isBalanceCol && col.key !== 'date' && (
-                          <span className="text-foreground/80 text-xs leading-tight">{val || '—'}</span>
+                          <span className="text-foreground/90 text-sm font-medium leading-snug">{val || '—'}</span>
                         )}
                       </TableCell>
                     );
                   })}
                   {showActions && (
                     <TableCell className="trips-grid-td text-center" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => onEdit?.(r)}
-                          className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
+                          className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-2 transition-colors"
                           title="Edit"
                         >
-                          <Pencil className="w-3.5 h-3.5" />
+                          <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => onDelete?.(r.id)}
-                          className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
+                          className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-2 transition-colors"
                           title="Delete"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </TableCell>
