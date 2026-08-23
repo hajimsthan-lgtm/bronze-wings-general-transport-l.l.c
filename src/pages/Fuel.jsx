@@ -39,6 +39,12 @@ export default function Fuel() {
     if (p.get('vehicle_plate')) setPresetPlate(p.get('vehicle_plate'));
   }, []);
 
+  useEffect(() => {
+    const handler = () => { setEditItem(null); setFormOpen(true); };
+    window.addEventListener('fuel:new', handler);
+    return () => window.removeEventListener('fuel:new', handler);
+  }, []);
+
   const filtered = records.filter(r => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
 
   const totalCost = filtered.reduce((s, r) => s + (r.total_cost || 0), 0);
@@ -93,9 +99,6 @@ export default function Fuel() {
                 { label: 'Odometer', key: 'odometer_reading' },
               ]}
             />
-            <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10">
-              <Plus className="w-4 h-4 mr-1.5" />{t('add_new')}
-            </Button>
           </div>
         }
       />

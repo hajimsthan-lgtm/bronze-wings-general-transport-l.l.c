@@ -169,6 +169,13 @@ export default function TopBar() {
                 onClick={() => window.dispatchEvent(new CustomEvent('salary:new'))}
               />
             )}
+            {isFuelPage && (
+              <HeaderActionButton
+                label={t('add_new')}
+                variant="trip"
+                onClick={() => window.dispatchEvent(new CustomEvent('fuel:new'))}
+              />
+            )}
             {isMaintenancePage && (
               <>
                 <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
