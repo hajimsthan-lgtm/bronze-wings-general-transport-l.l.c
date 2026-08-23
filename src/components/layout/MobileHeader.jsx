@@ -46,23 +46,22 @@ export default function MobileHeader() {
 
   return (
     <header className="md:hidden sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      {/* Premium gradient backdrop with ambient blooms */}
+      {/* Theme-aware backdrop */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 bg-background/90"
         style={{
-          background: 'linear-gradient(180deg, rgba(15,15,25,0.85) 0%, rgba(10,10,20,0.72) 100%)',
           backdropFilter: 'blur(20px) saturate(1.6)',
           WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
         }}
       />
-      {/* Ambient color bloom — uses page accent */}
+      {/* Ambient color bloom — uses page accent (subtle) */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${accentColor}18, transparent 60%), radial-gradient(ellipse 50% 70% at 85% 30%, rgba(var(--panel-accent2-rgb),0.10), transparent 55%)`,
+          background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${accentColor}12, transparent 60%), radial-gradient(ellipse 50% 70% at 85% 30%, rgba(var(--panel-accent2-rgb),0.06), transparent 55%)`,
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${accentColor}40 50%, transparent)` }} />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-border/60" />
 
       {/* Row 1: Logo + Page context + Icon cluster */}
       <div className="relative h-14 px-3.5 flex items-center justify-between gap-2">
@@ -75,9 +74,9 @@ export default function MobileHeader() {
                   style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.40) 0%, transparent 70%)' }}
                 />
                 {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="relative w-8 h-8 rounded-xl object-contain ring-1 ring-white/15" />
+                  <img src={logoUrl} alt="Logo" className="relative w-8 h-8 rounded-xl object-contain ring-1 ring-border" />
                 ) : (
-                  <div className="relative w-8 h-8 rounded-xl border border-[rgba(var(--panel-accent-rgb),0.3)] bg-gradient-to-br from-[rgba(var(--panel-accent-rgb),0.25)] to-[rgba(var(--panel-accent2-rgb),0.15)] flex items-center justify-center shadow-lg" style={{ boxShadow: '0 4px 14px -4px rgba(var(--panel-accent-rgb),0.4)' }}>
+                  <div className="relative w-8 h-8 rounded-xl border border-[rgba(var(--panel-accent-rgb),0.3)] bg-gradient-to-br from-[rgba(var(--panel-accent-rgb),0.20)] to-[rgba(var(--panel-accent2-rgb),0.12)] flex items-center justify-center shadow-lg" style={{ boxShadow: '0 4px 14px -4px rgba(var(--panel-accent-rgb),0.3)' }}>
                     <span className="text-[10px] font-bold text-primary">BW</span>
                   </div>
                 )}
@@ -100,11 +99,11 @@ export default function MobileHeader() {
               })()
             )}
             <div className="min-w-0">
-              <p className="text-[15px] font-bold leading-tight truncate text-white" style={{ fontFamily: 'var(--font-heading)' }}>
+              <p className="text-[15px] font-bold leading-tight truncate text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
                 {pageContext.current || <BrandName variant="mobile" />}
               </p>
               {pageContext.parent && (
-                <p className="text-[10px] text-white/50 leading-tight truncate font-medium">{pageContext.parent}</p>
+                <p className="text-[10px] text-muted-foreground leading-tight truncate font-medium">{pageContext.parent}</p>
               )}
             </div>
           </Link>
@@ -127,16 +126,16 @@ export default function MobileHeader() {
                   to={mod.path}
                   className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
                     active
-                      ? 'text-white border'
-                      : 'bg-white/5 text-white/55 border border-white/10'
+                      ? 'text-foreground border'
+                      : 'bg-muted/50 text-muted-foreground border border-border'
                   }`}
                   style={active ? {
-                    background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}28, ${mod.color || 'rgb(var(--panel-accent-rgb))'}12)`,
+                    background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}22, ${mod.color || 'rgb(var(--panel-accent-rgb))'}10)`,
                     borderColor: `${mod.color || 'rgb(var(--panel-accent-rgb))'}50`,
-                    boxShadow: `0 0 16px -2px ${mod.color || 'rgb(var(--panel-accent-rgb))'}40, inset 0 1px 0 rgba(255,255,255,0.12)`,
+                    boxShadow: `0 0 14px -4px ${mod.color || 'rgb(var(--panel-accent-rgb))'}30`,
                   } : {}}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? (mod.color || 'rgb(var(--panel-accent-rgb))') : 'rgba(255,255,255,0.5)' }} />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? (mod.color || 'rgb(var(--panel-accent-rgb))') : 'hsl(var(--muted-foreground))' }} />
                   {mod.label}
                 </Link>
               );

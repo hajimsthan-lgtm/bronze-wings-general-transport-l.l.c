@@ -18,17 +18,16 @@ export default function MobileNav() {
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div
-        className="relative flex items-stretch justify-around px-2 pt-2.5 pb-2"
+        className="relative flex items-stretch justify-around px-2 pt-2.5 pb-2 bg-background/90"
         style={{
-          background: 'linear-gradient(180deg, rgba(15,15,25,0.82) 0%, rgba(8,8,16,0.92) 100%)',
           backdropFilter: 'blur(24px) saturate(1.6)',
           WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-          borderTop: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.35)',
+          borderTop: '1px solid hsl(var(--border))',
+          boxShadow: '0 -8px 32px rgba(0,0,0,0.08)',
         }}
       >
-        {/* Top gradient hairline */}
-        <div className="absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.30) 30%, rgba(168,85,247,0.25) 70%, transparent)' }} />
+        {/* Top hairline */}
+        <div className="absolute inset-x-0 top-0 h-px bg-border/60" />
 
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -43,9 +42,9 @@ export default function MobileNav() {
               <div
                 className="relative flex items-center justify-center w-11 h-11 rounded-2xl transition-all duration-300"
                 style={active ? {
-                  background: `linear-gradient(135deg, rgba(${item.glow},0.25), rgba(${item.glow},0.08))`,
-                  border: `1px solid rgba(${item.glow},0.40)`,
-                  boxShadow: `0 0 18px -2px rgba(${item.glow},0.45), inset 0 1px 0 rgba(255,255,255,0.12)`,
+                  background: `linear-gradient(135deg, rgba(${item.glow},0.18), rgba(${item.glow},0.06))`,
+                  border: `1px solid rgba(${item.glow},0.35)`,
+                  boxShadow: `0 0 14px -4px rgba(${item.glow},0.35)`,
                 } : {}}
               >
                 {active && (
@@ -57,15 +56,15 @@ export default function MobileNav() {
                 <Icon
                   className="w-[22px] h-[22px] transition-all duration-300"
                   style={{
-                    color: active ? item.color : 'rgba(160,160,180,0.5)',
-                    filter: active ? `drop-shadow(0 0 6px rgba(${item.glow},0.6))` : 'none',
+                    color: active ? item.color : 'hsl(var(--muted-foreground))',
+                    filter: active ? `drop-shadow(0 0 4px rgba(${item.glow},0.4))` : 'none',
                   }}
                   strokeWidth={active ? 2.4 : 2}
                 />
               </div>
               <span
                 className="text-[10px] font-semibold leading-none transition-colors duration-200"
-                style={{ color: active ? item.color : 'rgba(160,160,180,0.5)' }}
+                style={{ color: active ? item.color : 'hsl(var(--muted-foreground))' }}
               >
                 {item.label}
               </span>
