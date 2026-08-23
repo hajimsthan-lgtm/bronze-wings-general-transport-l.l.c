@@ -102,7 +102,7 @@ export default function ClientProfileCard({ client, stats, onEditContacts }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-bold text-foreground leading-tight truncate">{client.name}</h2>
+              <h2 className="text-base font-bold text-foreground leading-tight break-words">{client.name}</h2>
               <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
             </div>
             <div className="flex items-center gap-1.5 mt-1">
