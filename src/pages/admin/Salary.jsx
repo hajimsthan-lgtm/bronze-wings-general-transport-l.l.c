@@ -54,8 +54,9 @@ export default function Salary() {
       () => getCompanySettings()]
       );
       setRecords(r || []);
-      setDrivers(d || []);
-      setDriverMap(Object.fromEntries((d || []).map((x) => [x.name, x.id])));
+      const ownDrivers = (d || []).filter((x) => !x.vendor_name);
+      setDrivers(ownDrivers);
+      setDriverMap(Object.fromEntries(ownDrivers.map((x) => [x.name, x.id])));
       setSettings(s || {});
     } finally {setLoading(false);}
   };
