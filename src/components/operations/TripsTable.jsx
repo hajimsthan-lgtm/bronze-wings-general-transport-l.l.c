@@ -306,9 +306,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   <div className="flex items-center gap-1.5 overflow-hidden">
                     <button
                         onClick={(e) => {e.stopPropagation();copyRef(trip);}}
-                        className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 truncate"
+                        className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 whitespace-normal break-words"
                         title="Click to copy trip number">
-                      <span className="truncate">{ref}</span>
+                      <span className="whitespace-normal break-words">{ref}</span>
                       {copiedId === trip.id ?
                         <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
                         <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
@@ -333,38 +333,39 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
                       onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left truncate leading-tight text-sm"
+                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
                       title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
-                  <div className="flex items-center gap-1 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-1 mt-0.5">
                     <button
                         onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                        className="hover:text-primary transition-colors block text-left truncate leading-tight text-[#000000] text-sm"
+                        className="hover:text-primary transition-colors block text-left whitespace-normal break-words leading-tight text-[#000000] text-sm"
                         title="View driver">
                       {trip.driver_name || ''}
                     </button>
                     {trip.vendor_name && (
-                      <span className="inline-flex items-center px-1 py-0 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
-                        Vendor
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                        {trip.vendor_name}
                       </span>
                     )}
                   </div>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                  <div className="text-foreground truncate font-medium leading-tight" title={trip.from_location || ''}>
-                    {trip.from_location || '—'}
-                  </div>
-                  {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider truncate mt-0.5">{trip.hours}h</div> : null}
-                </TableCell>
-                <TableCell className="text-xs align-top trips-grid-td">
-                  <div className="text-foreground truncate font-medium leading-tight" title={trip.to_location || ''}>
-                    {trip.to_location || '—'}
-                  </div>
-                </TableCell>
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.from_location || ''}>
+                     {trip.from_location || '—'}
+                   </div>
+                   {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
+                 </TableCell>
+                 <TableCell className="text-xs align-top trips-grid-td">
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
+                     {trip.to_location || '—'}
+                   </div>
+                 </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
-                  <div className="text-xs font-semibold font-mono tabular-nums text-foreground truncate">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
-                </TableCell>
+                   <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                 </TableCell>
                   {/* STATUS — inline dropdown for direct change */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
                   <DropdownMenu>
