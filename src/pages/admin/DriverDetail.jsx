@@ -184,14 +184,18 @@ export default function DriverDetail() {
   };
 
   return (
-    <div className="detail-page space-y-5 pt-2">
-      {/* Grid: profile (left, frozen) | sections + widgets (right, scroll) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 lg:h-[calc(100dvh-15rem)]">
-        <div className="lg:h-full lg:overflow-y-auto thin-scroll space-y-5">
-          <EntityDetailHeader backTo="/admin/drivers" />
-          <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
-        </div>
-        <div className="space-y-4 lg:h-full lg:overflow-y-auto thin-scroll pr-1">
+    <div className="detail-page space-y-4 max-w-[1600px] mx-auto w-full overflow-x-hidden">
+      <EntityDetailHeader
+        title={driver.name}
+        subtitle="Transport Driver"
+        badge={<StatusBadge status={driver.status} />}
+        backTo="/admin/drivers"
+      />
+
+      {/* Grid: profile (left) | sections (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 items-start">
+        <DriverProfileCard driver={driver} vehicle={vehicle} stats={{ trips: fTrips.length, revenue: totalTrips, avgPerTrip, experience: `${expYears} yr${expYears === 1 ? '' : 's'}`, expenses: totalExpenses, salary: totalSalary, netProfit }} onSave={saveDriver} />
+        <div className="space-y-4">
           {/* Trips */}
           <CollapsibleSection title="Trips" icon={Truck} accent="#1ED760" count={fTrips.length}>
             {dataLoading ? <LoadingSpinner /> : fTrips.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> : (

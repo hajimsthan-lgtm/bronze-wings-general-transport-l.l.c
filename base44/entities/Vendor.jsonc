@@ -62,6 +62,43 @@
     },
     "notes": {
       "type": "string"
+    },
+    "contact_persons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "department": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "general_info": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [

@@ -9,12 +9,13 @@ import DetailSkeleton from '@/components/detail/DetailMotion';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import CollapsibleSection from '@/components/common/CollapsibleSection';
+import ContactPersonSmartSelector from '@/components/admin/ContactPersonSmartSelector';
+import VendorProfileCard from '@/components/admin/VendorProfileCard';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { safeAll } from '@/lib/safeRequest';
-import { Wrench, Truck, Users, Receipt, Phone, Mail, MapPin, Calendar, FileText, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Truck, Users, Receipt, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -24,18 +25,6 @@ import VendorTransactionLedger from '@/components/vendors/VendorTransactionLedge
 import VendorAssetFormSheet from '@/components/vendors/VendorAssetFormSheet';
 
 const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Driver Supplier', both: 'Both' };
-const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
-
-function Row({ label, value, icon: Icon }) {
-  const isEmpty = !value || value === '—';
-  return (
-    <div className="flex items-center gap-2 text-[13px] px-0.5 py-1.5">
-      {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />}
-      <span className="text-muted-foreground">{label}</span>
-      <span className={`font-medium truncate text-right ml-auto tabular-nums ${isEmpty ? 'text-muted-foreground/40' : 'text-foreground'}`}>{value || '—'}</span>
-    </div>
-  );
-}
 
 export default function ServiceProviderDetail() {
   const { id } = useParams();
@@ -51,6 +40,7 @@ export default function ServiceProviderDetail() {
   const [editForm, setEditForm] = useState({});
   const [assetSheet, setAssetSheet] = useState({ open: false, mode: 'vehicle', editRecord: null });
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [contactFilter, setContactFilter] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,10 +68,7 @@ export default function ServiceProviderDetail() {
   if (loading) return <DetailSkeleton />;
   if (!vendor) return <EmptyState title="Service provider not found" />;
 
-  const tone = TYPE_COLORS[vendor.provider_type] || '#3b82f6';
   const totalSpend = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-  const activeVehicles = vehicles.filter((v) => v.supply_status !== 'returned').length;
-  const activeDrivers = drivers.filter((d) => d.supply_status !== 'returned').length;
 
   const saveVendor = async (patch) => {
     const updated = await base44.entities.Vendor.update(vendor.id, patch);
@@ -126,79 +113,20 @@ export default function ServiceProviderDetail() {
         backTo="/admin/vendors"
       />
 
+      <ContactPersonSmartSelector
+        contactPersons={vendor.contact_persons || []}
+        activeFilter={contactFilter}
+        onFilter={setContactFilter}
+        onAdd={() => { setEditForm({ ...vendor }); setEditOpen(true); }}
+      />
+
       {/* Grid: profile (left) | sections (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 items-start">
-        {/* Left: profile column */}
-        <div className="space-y-4">
-          {/* Identity card */}
-          <div className="glass-card relative overflow-hidden animate-fade-in-up" style={{ boxShadow: `inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 60px ${hexToRgba(tone, 0.06)}, 0 12px 36px rgba(0,0,0,0.10), 0 0 0 1px ${hexToRgba(tone, 0.15)}` }}>
-            <div className="absolute -top-1/2 -right-1/4 w-3/4 h-full pointer-events-none" style={{ background: `radial-gradient(ellipse at center, ${hexToRgba(tone, 0.14)}, transparent 70%)` }} />
-            <button onClick={() => { setEditForm({ ...vendor }); setEditOpen(true); }} className="absolute top-3 right-3 z-20 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150 active:scale-95">
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-            <div className="p-4 pb-3 flex items-center gap-3 relative z-10">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${hexToRgba(tone, 0.22)}, ${hexToRgba(tone, 0.10)})`, border: `1px solid ${hexToRgba(tone, 0.35)}`, boxShadow: `0 0 18px -4px ${hexToRgba(tone, 0.4)}, inset 0 1px 0 rgba(255,255,255,0.12)` }}>
-                <Wrench className="w-7 h-7" style={{ color: tone, filter: `drop-shadow(0 0 6px ${hexToRgba(tone, 0.5)})` }} />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-lg font-bold text-foreground truncate">{vendor.name}</h2>
-                <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider" style={{ color: tone, background: `${tone}15` }}>
-                  {TYPE_LABELS[vendor.provider_type] || 'Service Provider'}
-                </span>
-              </div>
-            </div>
-            {/* 3-stat row */}
-            <div className="grid grid-cols-3 gap-1 px-4 pb-3 border-t border-border/40">
-              <div className="text-center pt-2.5">
-                <p className="text-lg font-bold text-foreground tabular-nums">{vehicles.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Vehicles</p>
-              </div>
-              <div className="text-center pt-2.5 border-x border-border/40">
-                <p className="text-lg font-bold text-foreground tabular-nums">{drivers.length}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Drivers</p>
-              </div>
-              <div className="text-center pt-2.5">
-                <p className="text-lg font-bold text-foreground tabular-nums">{formatCurrency(totalSpend).replace('AED ', '')}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Spend</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact info */}
-          <div className="glass-card p-4 space-y-0.5">
-            <Row label="Contact" value={vendor.contact_person} icon={Users} />
-            <Row label="Phone" value={vendor.phone} icon={Phone} />
-            <Row label="Email" value={vendor.email} icon={Mail} />
-            <Row label="Address" value={vendor.address} icon={MapPin} />
-            <Row label="Status" value={vendor.status} />
-          </div>
-
-          {/* Contract Details */}
-          <CollapsibleSection title="Contract Details" icon={Calendar} accent="#f59e0b" defaultOpen>
-            <div className="space-y-0.5">
-              <Row label="Start Date" value={formatDate(vendor.contract_start_date)} />
-              <Row label="End Date" value={formatDate(vendor.contract_end_date)} />
-              <Row label="Rate Terms" value={vendor.rate_terms} />
-            </div>
-          </CollapsibleSection>
-
-          {/* Rate Terms */}
-          <CollapsibleSection title="Rate Terms" icon={FileText} accent="#3b82f6">
-            <div className="space-y-0.5">
-              <Row label="Rate Terms" value={vendor.rate_terms} />
-              <Row label="Active Vehicles" value={`${activeVehicles} / ${vehicles.length}`} />
-              <Row label="Active Drivers" value={`${activeDrivers} / ${drivers.length}`} />
-            </div>
-          </CollapsibleSection>
-
-          {/* Notes */}
-          {vendor.notes && (
-            <div className="glass-card p-4">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Notes</p>
-              <p className="text-xs text-foreground/80 leading-relaxed">{vendor.notes}</p>
-            </div>
-          )}
-        </div>
+        <VendorProfileCard
+          vendor={vendor}
+          stats={{ vehicles: vehicles.length, drivers: drivers.length, spend: formatCurrency(totalSpend).replace('AED ', ''), expenses: expenses.length }}
+          onEdit={() => { setEditForm({ ...vendor }); setEditOpen(true); }}
+        />
 
         {/* Right: record sections */}
         <div className="space-y-4">
