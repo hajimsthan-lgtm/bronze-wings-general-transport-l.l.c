@@ -8,6 +8,7 @@ import DriverNavDropdown from './DriverNavDropdown';
 import VehicleNavDropdown from './VehicleNavDropdown';
 import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
+import OpsSubBar from '@/components/operations/OpsSubBar';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
@@ -110,6 +111,7 @@ export default function TopBar() {
                 </Select>
               </div>
             )}
+            {(location.pathname === '/trips' || location.pathname === '/contracts') && <OpsSubBar />}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <div className="md:hidden flex items-center gap-2">

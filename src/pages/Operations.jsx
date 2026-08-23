@@ -20,13 +20,13 @@ import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import DraftsTable from '@/components/operations/DraftsTable';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
-import OperationsToolbar from '@/components/operations/OperationsToolbar';
+import OperationsStats from '@/components/operations/OperationsStats';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit, Plus } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
-import { setOpsFilter, clearOpsFilter } from '@/lib/operationsFilterStore';
+import { setOpsFilter, clearOpsFilter, useOpsFilter } from '@/lib/operationsFilterStore';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -81,7 +81,7 @@ export default function Operations() {
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('table');
-  const [search, setSearch] = useState('');
+  const { search } = useOpsFilter();
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
 
@@ -324,9 +324,19 @@ export default function Operations() {
   // Publish status-filter state to the shared store so the TopBar can render
   // the filter pills on the left edge of the sub-nav.
   useEffect(() => {
-    setOpsFilter({ active: true, options: statusOptions, value: statusValue, onChange: onStatusChange, counts: statusCounts });
+    setOpsFilter({
+      active: true, options: statusOptions, value: statusValue, onChange: onStatusChange, counts: statusCounts,
+      mode,
+      exportConfig: {
+        data: exportData,
+        filename: isContractExport ? 'monthly-contracts' : 'trips',
+        title: isContractExport ? 'Monthly Contracts' : 'Trips',
+        columns: isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS,
+      },
+      onImported: () => { refetchTrips(); refetchInvoices(); },
+    });
     return () => clearOpsFilter();
-  }, [statusOptions, statusValue, onStatusChange, statusCounts]);
+  }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, exportData, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
   const showTrips = mode === 'all' || mode === 'trip';
@@ -351,31 +361,22 @@ export default function Operations() {
   const noContracts = showContracts && filteredContracts.length === 0;
   const allEmpty = noTrips && (mode === 'trip' || noContracts) && (mode !== 'trip' ? noContracts : true);
 
+  const totalRevenue = filteredTrips.reduce((s, t) => s + (Number(t.revenue) || 0), 0);
+
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
         <div className="mb-4">
-          <OperationsToolbar
+          <OperationsStats
             mode={mode}
-            onModeChange={setMode}
-            search={search}
-            setSearch={setSearch}
-            dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
-            dateTo={dateTo}
-            setDateTo={setDateTo}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            onNewTrip={openNewTrip}
-            onNewContract={openNewContract}
-            exportData={exportData}
-            exportFilename={isContractExport ? 'monthly-contracts' : 'trips'}
-            exportTitle={isContractExport ? 'Monthly Contracts' : 'Trips'}
-            exportColumns={isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS}
-            onImported={() => { refetchTrips(); refetchInvoices(); }}
+            tripsCount={filteredTrips.length}
+            totalRevenue={totalRevenue}
+            tripCounts={tripCounts}
+            contractsCount={filteredContracts.length}
+            contractCounts={contractCounts}
           />
         </div>
-        {/* All operations controls moved to the sticky sub-head bar (TopBar slot) */}
+        {/* Search & filter controls moved to the sticky sub-header (TopBar) */}
 
         {loading ? (
           <LoadingSpinner />

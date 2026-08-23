@@ -1,9 +1,15 @@
 import { useSyncExternalStore } from 'react';
 
-// Lightweight store so the Operations page can publish its status-filter
-// state and the global TopBar can render the pills without prop drilling
-// (TopBar renders above the page outlet, so context-in-tree won't reach it).
-let state = { active: false, options: [], value: 'all', counts: {} };
+// Lightweight store so the Operations page can publish its toolbar state
+// (search, status filter, export/import config) and the global TopBar can
+// render the controls without prop drilling — TopBar sits above the page
+// outlet so context-in-tree won't reach it.
+let state = {
+  active: false, options: [], value: 'all', counts: {},
+  search: '', mode: 'all',
+  exportConfig: null,
+  onImported: null,
+};
 const listeners = new Set();
 
 function emit() { listeners.forEach((l) => l()); }
@@ -15,8 +21,13 @@ export function setOpsFilter(next) {
   emit();
 }
 
+export function setOpsSearch(value) {
+  state = { ...state, search: value };
+  emit();
+}
+
 export function clearOpsFilter() {
-  state = { active: false, options: [], value: 'all', counts: {} };
+  state = { active: false, options: [], value: 'all', counts: {}, search: '', mode: 'all', exportConfig: null, onImported: null };
   emit();
 }
 
