@@ -13,6 +13,8 @@ import EmptyState from '@/components/common/EmptyState';
 import ImportUndoBanner from '@/components/bank-rec/ImportUndoBanner';
 import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { ChevronDown } from 'lucide-react';
 
 const PANEL = {
   background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.80) 0%, rgba(var(--surf-2-rgb),0.92) 100%)',
@@ -41,14 +43,26 @@ const nowLocal = () => {
 };
 
 function Toggle({ options, value, onChange }) {
+  const active = options.find((o) => o.value === value);
   return (
-    <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
-      {options.map((o) => (
-        <button key={o.value} onClick={() => onChange(o.value)} className={`sub-tab ${value === o.value ? 'sub-tab-active' : ''}`}>
-          {o.label}
-        </button>
-      ))}
-    </div>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
+        className="glass-sm h-9 min-w-[140px] gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-wide text-foreground/90 shadow-none hover:border-[rgb(var(--panel-accent-rgb))]/40 focus:ring-1 focus:ring-[rgb(var(--panel-accent-rgb))]/40 [&>svg]:right-3 [&>svg]:opacity-100 [&>svg]:text-[rgb(var(--panel-accent2-rgb))]"
+      >
+        <SelectValue placeholder={active?.label} />
+      </SelectTrigger>
+      <SelectContent className="min-w-[160px] rounded-xl border border-white/10 bg-[hsl(var(--popover))] text-foreground shadow-xl">
+        {options.map((o) => (
+          <SelectItem
+            key={o.value}
+            value={o.value}
+            className="rounded-lg text-xs font-medium uppercase tracking-wide focus:bg-[rgb(var(--panel-accent-rgb))]/15 focus:text-foreground"
+          >
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
