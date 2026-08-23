@@ -12,6 +12,7 @@ import '@/lib/mobilePremium.css'
 import '@/lib/commandCenter.css'
 import '@/lib/numberInputFix.css'
 import '@/lib/cardInteractions.css'
+import '@/lib/liquidGlass.css'
 import { disableNumberInputSpin } from '@/lib/disableNumberInputSpin'
 
 disableNumberInputSpin();
