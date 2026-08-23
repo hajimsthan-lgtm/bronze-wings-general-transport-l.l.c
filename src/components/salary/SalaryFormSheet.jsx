@@ -41,7 +41,11 @@ export default function SalaryFormSheet({ editItem, prefillDriver, onSave, onCan
   const [selectedOvertimeIds, setSelectedOvertimeIds] = useState([]);
   const [overtimeAmounts, setOvertimeAmounts] = useState({});
 
-  useEffect(() => { base44.entities.Driver.list('-created_date', 200).then(setDrivers).catch(() => {}); }, []);
+  useEffect(() => {
+    base44.entities.Driver.list('-created_date', 200)
+      .then((all) => setDrivers((all || []).filter((d) => !d.vendor_name)))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (editItem) {
