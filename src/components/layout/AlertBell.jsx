@@ -27,6 +27,8 @@ export default function AlertBell() {
     return e;
   });
   const [activeCategory, setActiveCategory] = useState('all');
+  const [centerIndex, setCenterIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [tripsOpsCount, setTripsOpsCount] = useState(0);
   const [tripsOpsCritical, setTripsOpsCritical] = useState(0);
   const [tripsOpsExpanded, setTripsOpsExpanded] = useState(false);
@@ -62,6 +64,20 @@ export default function AlertBell() {
 
   const count = alerts.length + tripsOpsCount;
   const criticalCount = alerts.filter((a) => a.severity === 'critical').length + tripsOpsCritical;
+
+  const filteredAlerts = activeCategory === 'all' ? alerts : alerts.filter((a) => a.category === activeCategory);
+
+  // Reset carousel position when filter or dropdown changes
+  useEffect(() => { setCenterIndex(0); }, [activeCategory, showNotif]);
+
+  // Auto-advance the perspective carousel
+  useEffect(() => {
+    if (paused || !showNotif || filteredAlerts.length <= 1) return;
+    const timer = setInterval(() => {
+      setCenterIndex((i) => (i + 1) % filteredAlerts.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [paused, showNotif, filteredAlerts.length]);
 
   const handleTripsOpsCount = useCallback((info) => {
     setTripsOpsCount(info.count || 0);
@@ -270,7 +286,7 @@ export default function AlertBell() {
 
             {/* Categorized feed */}
             {count > 0 ? (
-              <div className="max-h-[380px] overflow-y-auto thin-scroll p-2 space-y-1">
+              <div className="bell-feed-container">
                 {activeCategory === 'all' && (
                   <TripsOperationsSection
                     expanded={tripsOpsExpanded}
@@ -278,75 +294,76 @@ export default function AlertBell() {
                     onCountChange={handleTripsOpsCount}
                   />
                 )}
-                {visibleCategories
-                  .filter((k) => activeCategory === 'all' || activeCategory === k)
-                  .map((catKey) => {
-                    const cat = CATEGORIES[catKey];
-                    const catAlerts = byCategory[catKey];
-                    const isOpen = expanded[catKey];
-                    const CatIcon = ICONS[cat.icon] || AlertTriangle;
-                    const catCritical = catAlerts.filter((a) => a.severity === 'critical').length;
-                    return (
-                      <div key={catKey} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        {/* Category header */}
-                        <button
-                          onClick={() => setExpanded((p) => ({ ...p, [catKey]: !p[catKey] }))}
-                          className="w-full flex items-center gap-2.5 px-2.5 py-2 transition-all hover:bg-white/[0.03]"
-                        >
-                          <span
-                            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                            style={{ background: `${cat.color}1a`, border: `1px solid ${cat.color}40`, boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 10px -4px rgba(${cat.glow},0.4)` }}
+                {filteredAlerts.length > 0 ? (
+                  <div
+                    className="bell-perspective-scroll"
+                    onMouseEnter={() => setPaused(true)}
+                    onMouseLeave={() => setPaused(false)}
+                  >
+                    <div className="bell-perspective-track">
+                      {filteredAlerts.map((a, i) => {
+                        let offset = i - centerIndex;
+                        const N = filteredAlerts.length;
+                        if (offset > N / 2) offset -= N;
+                        if (offset < -N / 2) offset += N;
+                        const absOff = Math.abs(offset);
+                        if (absOff > 2) return null;
+                        const Icon = ICONS[a.icon] || AlertTriangle;
+                        const sev = SEVERITY[a.severity] || SEVERITY.info;
+                        const isCenter = offset === 0;
+                        const scale = Math.max(0.82, 1 - absOff * 0.08);
+                        const opacity = Math.max(0.15, 1 - absOff * 0.38);
+                        return (
+                          <div
+                            key={a.id}
+                            className={`bell-perspective-item ${isCenter ? 'is-center' : ''} ${a.severity === 'critical' ? 'is-critical' : ''}`}
+                            style={{
+                              transform: `translateY(calc(${offset} * 56px)) scale(${scale})`,
+                              opacity,
+                              zIndex: 10 - absOff,
+                              pointerEvents: isCenter ? 'auto' : 'none',
+                              '--sev-color': sev.color,
+                              '--sev-glow': sev.glow,
+                            }}
+                            onClick={() => isCenter && handleAlertClick(a.to)}
                           >
-                            <CatIcon className="w-3.5 h-3.5" style={{ color: cat.color }} />
-                          </span>
-                          <div className="flex-1 text-left min-w-0">
-                            <p className="text-[11px] font-bold text-white/90 uppercase tracking-wide leading-none truncate">{cat.label}</p>
-                            <p className="text-[9px] text-white/40 mt-0.5 leading-none">
-                              {catAlerts.length} item{catAlerts.length !== 1 ? 's' : ''}
-                              {catCritical > 0 && <span style={{ color: '#fca5a5' }}> · {catCritical} critical</span>}
-                            </p>
+                            <span
+                              className="bell-perspective-icon"
+                              style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40` }}
+                            >
+                              <Icon className="w-4 h-4" style={{ color: sev.color }} />
+                              {a.severity === 'critical' && isCenter && (
+                                <span
+                                  className="bell-perspective-pulse"
+                                  style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}` }}
+                                />
+                              )}
+                            </span>
+                            <div className="bell-perspective-text">
+                              <p className="bell-perspective-title">{a.title}</p>
+                              <p className="bell-perspective-sub">{a.sub}</p>
+                              {a.meta && <p className="bell-perspective-meta">{a.meta}</p>}
+                            </div>
+                            {isCenter && <ChevronRight className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />}
                           </div>
-                          <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform flex-shrink-0 ${isOpen ? '' : '-rotate-90'}`} />
-                        </button>
-
-                        {/* Category items — smooth max-height transition */}
-                        <div
-                          className="overflow-hidden transition-[max-height,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                          style={{ maxHeight: isOpen ? '400px' : '0', opacity: isOpen ? 1 : 0 }}
-                        >
-                          <div className="px-1.5 pb-1.5 space-y-1">
-                            {catAlerts.map((a) => {
-                              const Icon = ICONS[a.icon] || AlertTriangle;
-                              const sev = SEVERITY[a.severity] || SEVERITY.info;
-                              return (
-                                <div
-                                  key={a.id}
-                                  onClick={() => handleAlertClick(a.to)}
-                                  className="group w-full flex items-center gap-2.5 p-2 rounded-lg cursor-pointer transition-colors hover:bg-white/[0.04]"
-                                >
-                                  <span
-                                    className="relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                                    style={{ background: `${sev.color}1a`, border: `1px solid ${sev.color}40` }}
-                                  >
-                                    <Icon className="w-3.5 h-3.5" style={{ color: sev.color }} />
-                                    {a.severity === 'critical' && (
-                                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}`, animation: 'live-pulse 1.6s ease-in-out infinite' }} />
-                                    )}
-                                  </span>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[12px] font-semibold text-white truncate leading-tight">{a.title}</p>
-                                    <p className="text-[10.5px] text-white/55 truncate mt-0.5 leading-tight">{a.sub}</p>
-                                    {a.meta && <p className="text-[9px] text-white/35 truncate mt-0.5 leading-tight uppercase tracking-wide font-mono">{a.meta}</p>}
-                                  </div>
-                                  <ChevronRight className="w-3 h-3 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                    <div className="bell-perspective-dots">
+                      {filteredAlerts.slice(0, 12).map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCenterIndex(i)}
+                          className={`bell-perspective-dot ${i === centerIndex ? 'active' : ''}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 px-4">
+                    <p className="text-[11px] text-white/40">No alerts in this category</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 px-4">
