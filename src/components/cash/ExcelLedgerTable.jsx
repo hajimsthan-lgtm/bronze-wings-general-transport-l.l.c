@@ -1,20 +1,17 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { ChevronUp, ChevronDown, Filter, Search, X, AlertTriangle, Wrench, CheckCircle2 } from 'lucide-react';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { ChevronUp, ChevronDown, Filter, Search, X, AlertTriangle, Wrench, CheckCircle2, Pencil, Trash2, ArrowUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-/**
- * Excel-like ledger table with:
- *  - Click-to-sort column headers
- *  - Per-column filter dropdowns (unique values, checkboxes, search)
- *  - Missing reference detection + highlight
- *  - "Fix missing refs" auto-generator
- */
+const PAGE = 60;
+
 export default function ExcelLedgerTable({
-  rows,                 // already-filtered display rows (latest-first)
-  columns,              // [{ key, label, align, width, mono, numeric, filterable, sortable }]
-  onEdit,               // (row) => void
-  onDelete,             // (id) => void
-  refKey,               // key for reference column (for missing-ref detection)
-  onFixMissingRef,      // async (row, generatedRef) => void  — called per row to persist
+  rows,
+  columns,
+  onEdit,
+  onDelete,
+  refKey,
+  onFixMissingRef,
   showActions = true,
   emptyIcon,
   emptyTitle,
@@ -22,12 +19,17 @@ export default function ExcelLedgerTable({
 }) {
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
-  const [colFilters, setColFilters] = useState({});   // { [colKey]: Set<string> }
+  const [colFilters, setColFilters] = useState({});
   const [openFilterCol, setOpenFilterCol] = useState(null);
   const [filterSearch, setFilterSearch] = useState('');
   const [fixing, setFixing] = useState(false);
-  const [fixedRefs, setFixedRefs] = useState({});     // { [rowId]: generatedRef }
+  const [fixedRefs, setFixedRefs] = useState({});
+  const [visibleCount, setVisibleCount] = useState(PAGE);
+
   const filterRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const topScrollRef = useRef(null);
+  const tableScrollRef = useRef(null);
 
   // Close filter dropdown on outside click
   useEffect(() => {
@@ -38,7 +40,28 @@ export default function ExcelLedgerTable({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Rows with missing reference
+  // Reset visible count when rows change
+  useEffect(() => { setVisibleCount(PAGE); }, [rows]);
+
+  // Progressive rendering via IntersectionObserver
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) setVisibleCount((c) => c + PAGE);
+    }, { root: tableScrollRef.current, rootMargin: '200px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [rows]);
+
+  // Scroll sync
+  const syncScroll = (source, target) => {
+    if (!target) return;
+    if (Math.abs(target.scrollLeft - source.scrollLeft) < 1) return;
+    target.scrollLeft = source.scrollLeft;
+  };
+
+  // Missing reference detection
   const missingRefIds = useMemo(
     () => new Set(rows.filter((r) => !r[refKey] || String(r[refKey]).trim() === '' || String(r[refKey]).trim() === '—').map((r) => r.id)),
     [rows, refKey]
@@ -64,10 +87,9 @@ export default function ExcelLedgerTable({
     return map;
   }, [rows, columns]);
 
-  // Apply column-level filters + sort
+  // Apply column filters + sort
   const processedRows = useMemo(() => {
     let result = rows;
-    // column filters
     for (const [colKey, selected] of Object.entries(colFilters)) {
       if (!selected || selected.size === 0) continue;
       result = result.filter((r) => {
@@ -77,7 +99,6 @@ export default function ExcelLedgerTable({
         return selected.has(v);
       });
     }
-    // sort
     if (sortKey) {
       const col = columns.find((c) => c.key === sortKey);
       result = result.slice().sort((a, b) => {
@@ -91,6 +112,8 @@ export default function ExcelLedgerTable({
     }
     return result;
   }, [rows, colFilters, sortKey, sortDir, columns]);
+
+  const visibleRows = processedRows.slice(0, visibleCount);
 
   const toggleSort = (key) => {
     if (sortKey === key) {
@@ -120,7 +143,6 @@ export default function ExcelLedgerTable({
   };
 
   const clearAllFilters = () => setColFilters({});
-
   const activeFilterCount = Object.values(colFilters).filter((s) => s && s.size > 0).length;
 
   // Auto-fix missing references
@@ -146,29 +168,48 @@ export default function ExcelLedgerTable({
 
   const getDisplayRef = (r) => fixedRefs[r.id] || r[refKey] || '';
 
+  // Glassmorphic header style (matches TripsTable)
+  const headerBg = 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.96) 0%, rgba(var(--surf-2-rgb),0.99) 100%)';
+  const headerShadow = 'inset 0 -1.5px 0 rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.06)';
+
   if (rows.length === 0) {
+    const EmptyIcon = emptyIcon || Search;
     return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] py-10 text-center">
-        <div className="empty-orb w-14 h-14 rounded-full flex items-center justify-center mb-3">
-          {emptyIcon ? <emptyIcon className="w-6 h-6 text-primary/70" /> : <Search className="w-6 h-6 text-primary/70" />}
+      <div className="flex flex-col items-center justify-center min-h-[240px] py-12 text-center">
+        <div className="empty-orb w-16 h-16 rounded-full flex items-center justify-center mb-4">
+          <EmptyIcon className="w-7 h-7 text-primary/70" strokeWidth={1.5} />
         </div>
         <p className="text-sm font-semibold text-foreground/90">{emptyTitle || 'No entries'}</p>
-        <p className="text-xs text-muted-foreground/70 mt-1 max-w-[280px]">{emptyDescription}</p>
+        <p className="text-xs text-muted-foreground/70 mt-1.5 max-w-[300px] leading-relaxed">{emptyDescription}</p>
       </div>
     );
   }
 
   return (
     <div className="relative">
-      {/* Toolbar: missing-ref alert + active filters */}
-      <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/5 bg-white/[0.01]">
+      {/* Toolbar: row count + missing-ref alert + active filters */}
+      <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border/40 bg-background/30">
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-muted-foreground">
-            <span className="text-foreground font-semibold">{processedRows.length}</span> / {rows.length} rows
+          <span className="text-muted-foreground tabular-nums">
+            <span className="text-foreground font-bold">{processedRows.length.toLocaleString()}</span>
+            <span className="text-muted-foreground/50 mx-1">/</span>
+            <span className="text-muted-foreground">{rows.length.toLocaleString()}</span>
+            <span className="ml-1.5 text-muted-foreground/60">rows</span>
           </span>
           {activeFilterCount > 0 && (
-            <button onClick={clearAllFilters} className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors">
+            <button
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/25 text-amber-400 hover:bg-amber-500/20 transition-colors text-[11px] font-semibold"
+            >
               <X className="w-3 h-3" /> Clear {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''}
+            </button>
+          )}
+          {sortKey && (
+            <button
+              onClick={() => { setSortKey(null); setSortDir('desc'); }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 border border-primary/25 text-primary hover:bg-primary/20 transition-colors text-[11px] font-semibold"
+            >
+              <ArrowUpDown className="w-3 h-3" /> Reset sort
             </button>
           )}
         </div>
@@ -184,63 +225,101 @@ export default function ExcelLedgerTable({
         )}
       </div>
 
-      {/* Scrollable table */}
-      <div className="overflow-auto thin-scroll" style={{ maxHeight: 'calc(100vh - 480px)' }}>
-        <table className="w-full text-sm trips-grid-table">
-          <thead className="sticky top-0 z-20">
-            <tr className="text-[10px] uppercase tracking-wider text-muted-foreground bg-background/95 backdrop-blur-sm border-b border-white/10">
+      {/* Top horizontal scrollbar — syncs with table */}
+      <div className="relative mb-1.5">
+        <div
+          ref={topScrollRef}
+          onScroll={() => syncScroll(topScrollRef.current, tableScrollRef.current)}
+          className="overflow-x-auto overflow-y-hidden trips-scroll-top rounded-md"
+        >
+          <div style={{ width: '100%', height: '1px' }} />
+        </div>
+      </div>
+
+      {/* Main scrollable table */}
+      <div
+        ref={tableScrollRef}
+        onScroll={() => syncScroll(tableScrollRef.current, topScrollRef.current)}
+        className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[calc(100vh-440px)] trips-scroll trips-grid"
+      >
+        <Table className="trips-grid-table">
+          <TableHeader>
+            <TableRow
+              className="hover:bg-transparent border-b border-border/40"
+              style={{
+                background: headerBg,
+                backdropFilter: 'blur(16px) saturate(1.3)',
+                WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
+                boxShadow: headerShadow,
+                position: 'sticky',
+                top: 0,
+                zIndex: 20,
+              }}
+            >
               {columns.map((col) => {
                 const isSorted = sortKey === col.key;
                 const filterActive = colFilters[col.key] && colFilters[col.key].size > 0;
                 return (
-                  <th
+                  <TableHead
                     key={col.key}
-                    className={`text-${col.align || 'left'} font-semibold px-4 py-2.5 whitespace-nowrap relative ${col.sortable ? 'cursor-pointer hover:text-foreground' : ''}`}
-                    style={col.width ? { width: col.width } : {}}
+                    className={cn(
+                      'relative trips-grid-th font-bold uppercase tracking-wider text-foreground/80',
+                      col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'
+                    )}
+                    style={col.width ? { width: col.width, minWidth: col.width, background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 } : { background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}
                   >
-                    <div className={`flex items-center gap-1 ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : ''}`}>
+                    <div className={cn('flex items-center gap-1', col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start')}>
                       {col.sortable && (
-                        <button onClick={() => toggleSort(col.key)} className="flex items-center gap-0.5 hover:text-foreground transition-colors">
+                        <button
+                          onClick={() => toggleSort(col.key)}
+                          className={cn(
+                            'flex items-center gap-1 transition-colors text-[10px]',
+                            isSorted ? 'text-primary' : 'text-foreground/80 hover:text-foreground'
+                          )}
+                        >
                           {col.label}
                           <span className="flex flex-col -space-y-1">
-                            <ChevronUp className={`w-2.5 h-2.5 ${isSorted && sortDir === 'asc' ? 'text-primary' : 'text-white/20'}`} />
-                            <ChevronDown className={`w-2.5 h-2.5 ${isSorted && sortDir === 'desc' ? 'text-primary' : 'text-white/20'}`} />
+                            <ChevronUp className={cn('w-2.5 h-2.5', isSorted && sortDir === 'asc' ? 'text-primary' : 'text-muted-foreground/40')} />
+                            <ChevronDown className={cn('w-2.5 h-2.5', isSorted && sortDir === 'desc' ? 'text-primary' : 'text-muted-foreground/40')} />
                           </span>
                         </button>
                       )}
-                      {!col.sortable && <span>{col.label}</span>}
+                      {!col.sortable && <span className="text-[10px]">{col.label}</span>}
                       {col.filterable && (
                         <div className="relative" ref={openFilterCol === col.key ? filterRef : null}>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenFilterCol(openFilterCol === col.key ? null : col.key); setFilterSearch(''); }}
-                            className={`p-0.5 rounded transition-colors ${filterActive ? 'text-primary' : 'text-white/30 hover:text-white/60'}`}
+                            className={cn(
+                              'p-0.5 rounded transition-colors',
+                              filterActive ? 'text-primary' : 'text-muted-foreground/40 hover:text-foreground'
+                            )}
                           >
                             <Filter className="w-3 h-3" />
                           </button>
                           {openFilterCol === col.key && (
                             <div
-                              className="absolute top-full right-0 mt-1 w-56 glass-card z-30 p-2"
+                              className="absolute top-full right-0 mt-1 w-60 glass-card z-30 p-2"
                               style={{ borderRadius: 12 }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-white/5">
-                                <Search className="w-3 h-3 text-white/40" />
+                              <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-border/30">
+                                <Search className="w-3 h-3 text-muted-foreground" />
                                 <input
                                   type="text"
                                   value={filterSearch}
                                   onChange={(e) => setFilterSearch(e.target.value)}
                                   placeholder="Search values…"
-                                  className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-white/30"
+                                  className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
                                   autoFocus
                                 />
                               </div>
-                              <div className="max-h-48 overflow-auto thin-scroll space-y-0.5">
+                              <div className="max-h-52 overflow-auto thin-scroll space-y-0.5">
                                 {(uniqueValues[col.key] || [])
                                   .filter((v) => String(v).toLowerCase().includes(filterSearch.toLowerCase()))
                                   .map((v) => {
                                     const checked = colFilters[col.key]?.has(v);
                                     return (
-                                      <label key={String(v)} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/5 cursor-pointer text-xs">
+                                      <label key={String(v)} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-primary/5 cursor-pointer text-xs">
                                         <input
                                           type="checkbox"
                                           checked={!!checked}
@@ -252,7 +331,7 @@ export default function ExcelLedgerTable({
                                     );
                                   })}
                               </div>
-                              <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                              <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
                                 <button onClick={() => clearColFilter(col.key)} className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">Clear</button>
                                 <button onClick={() => setOpenFilterCol(null)} className="text-[10px] text-primary hover:text-primary-light transition-colors font-semibold">Done</button>
                               </div>
@@ -261,66 +340,126 @@ export default function ExcelLedgerTable({
                         </div>
                       )}
                     </div>
-                  </th>
+                  </TableHead>
                 );
               })}
-              {showActions && <th className="px-4 py-2.5 w-20"></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {processedRows.map((r) => {
+              {showActions && <TableHead className="w-20 text-center trips-grid-th" style={{ background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}></TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {visibleRows.map((r) => {
               const isMissingRef = missingRefIds.has(r.id) && !fixedRefs[r.id];
               const isFixed = fixedRefs[r.id];
+              const hasInflow = Number(r.in) > 0;
+              const hasOutflow = Number(r.out) > 0;
               return (
-                <tr
+                <TableRow
                   key={r.id}
-                  className={`border-t border-white/5 hover:bg-white/[0.02] transition-colors ${isMissingRef ? 'bg-amber-500/[0.04]' : ''}`}
+                  className={cn(
+                    'transition-all duration-150 group',
+                    isMissingRef ? 'bg-amber-500/[0.06] hover:bg-amber-500/[0.10]' : 'hover:bg-primary/5',
+                    isFixed && 'bg-emerald-500/[0.04]'
+                  )}
                 >
                   {columns.map((col) => {
                     let val = col.key === refKey ? getDisplayRef(r) : r[col.key];
                     const isRefCol = col.key === refKey;
+                    const isInflowCol = col.key === 'in';
+                    const isOutflowCol = col.key === 'out';
+                    const isBalanceCol = col.key === 'running_balance';
+
                     return (
-                      <td
+                      <TableCell
                         key={col.key}
-                        className={`px-4 py-2.5 text-${col.align || 'left'} ${col.mono ? 'font-mono' : ''} ${col.numeric ? 'tabular-nums' : ''} text-xs whitespace-nowrap`}
+                        className={cn(
+                          'trips-grid-td align-middle',
+                          col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left',
+                          col.mono && 'font-mono',
+                          col.numeric && 'tabular-nums'
+                        )}
                       >
+                        {/* Reference column with missing/fixed indicators */}
                         {isRefCol && isMissingRef && (
-                          <span className="inline-flex items-center gap-1 text-amber-400">
+                          <span className="inline-flex items-center gap-1 text-amber-400 text-xs">
                             <AlertTriangle className="w-3 h-3" />
                             <span className="italic">missing</span>
                           </span>
                         )}
                         {isRefCol && isFixed && (
-                          <span className="inline-flex items-center gap-1 text-emerald-400">
+                          <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
                             <CheckCircle2 className="w-3 h-3" />
                             {val}
                           </span>
                         )}
-                        {(!isRefCol || (!isMissingRef && !isFixed)) && (
-                          col.numeric
-                            ? (val !== undefined && val !== null && val !== '' ? (typeof val === 'number' ? val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : val) : '—')
-                            : (val || '—')
+                        {isRefCol && !isMissingRef && !isFixed && (
+                          <span className="text-foreground font-mono text-xs">{val || '—'}</span>
                         )}
-                      </td>
+
+                        {/* Inflow column — green */}
+                        {isInflowCol && (
+                          <span className={cn('font-mono tabular-nums text-xs font-semibold', hasInflow ? 'text-emerald-400' : 'text-muted-foreground/40')}>
+                            {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                          </span>
+                        )}
+
+                        {/* Outflow column — red */}
+                        {isOutflowCol && (
+                          <span className={cn('font-mono tabular-nums text-xs font-semibold', hasOutflow ? 'text-rose-400' : 'text-muted-foreground/40')}>
+                            {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                          </span>
+                        )}
+
+                        {/* Running balance — blue accent */}
+                        {isBalanceCol && (
+                          <span className="font-mono tabular-nums text-xs font-semibold text-blue-400">
+                            {val !== undefined && val !== null && val !== '' ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                          </span>
+                        )}
+
+                        {/* Date column */}
+                        {col.key === 'date' && (
+                          <span className="text-foreground/90 font-mono text-xs whitespace-nowrap">{val || '—'}</span>
+                        )}
+
+                        {/* Description / recipient / other text columns */}
+                        {!isRefCol && !isInflowCol && !isOutflowCol && !isBalanceCol && col.key !== 'date' && (
+                          <span className="text-foreground/80 text-xs leading-tight">{val || '—'}</span>
+                        )}
+                      </TableCell>
                     );
                   })}
                   {showActions && (
-                    <td className="px-4 py-2.5 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => onEdit(r)} className="text-white/30 hover:text-amber-400 transition-colors" aria-label="Edit">
-                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <TableCell className="trips-grid-td text-center" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => onEdit?.(r)}
+                          className="rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 p-1.5 transition-colors"
+                          title="Edit"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => onDelete(r.id)} className="text-white/30 hover:text-rose-400 transition-colors" aria-label="Delete">
-                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <button
+                          onClick={() => onDelete?.(r.id)}
+                          className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+            {visibleCount < processedRows.length && (
+              <TableRow ref={sentinelRef} className="hover:bg-transparent">
+                <TableCell colSpan={columns.length + (showActions ? 1 : 0)} className="text-center text-xs text-muted-foreground py-3">
+                  Loading more… ({visibleCount.toLocaleString()}/{processedRows.length.toLocaleString()})
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
