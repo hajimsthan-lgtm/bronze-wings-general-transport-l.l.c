@@ -191,50 +191,41 @@ export default function Salary() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div>
-          
-          
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={exportColumns} />
-          <Button onClick={generatePayroll} disabled={generating} variant="outline" className="h-10 border-border">
-            <Sparkles className="w-4 h-4 mr-1.5 text-amber-400" />{generating ? 'Generating…' : 'Generate Payroll'}
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search driver…" className="bg-input border-border pl-9" />
+      {/* Sticky sub-header: filters + actions */}
+      <div className="sticky top-0 z-20 -mx-4 px-4 py-3 mb-4 glass-card rounded-2xl flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[140px] max-w-[220px]">
+          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-1/2 -translate-y-1/2" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search driver…" className="h-9 bg-input border-border pl-8 text-xs" />
         </div>
         <Select value={monthFilter} onValueChange={setMonthFilter}>
-          <SelectTrigger className="bg-input border-border w-[150px]"><SelectValue placeholder="Month" /></SelectTrigger>
+          <SelectTrigger className="h-9 bg-input border-border w-[130px] text-xs"><SelectValue placeholder="Month" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={null}>All Months</SelectItem>
             {MONTHS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger className="bg-input border-border w-[110px]"><SelectValue placeholder="Year" /></SelectTrigger>
+          <SelectTrigger className="h-9 bg-input border-border w-[100px] text-xs"><SelectValue placeholder="Year" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={null}>All Years</SelectItem>
             {years.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="bg-input border-border w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-9 bg-input border-border w-[120px] text-xs"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={null}>All Status</SelectItem>
             {['pending', 'paid', 'partial'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
         {(search || monthFilter || yearFilter || statusFilter) &&
-        <Button variant="ghost" size="sm" onClick={() => {setSearch('');setMonthFilter('');setYearFilter('');setStatusFilter('');}} className="text-muted-foreground">Clear</Button>
+        <Button variant="ghost" size="sm" onClick={() => {setSearch('');setMonthFilter('');setYearFilter('');setStatusFilter('');}} className="h-9 text-muted-foreground text-xs">Clear</Button>
         }
+        <div className="flex-1 min-w-0" />
+        <ExportButtons data={filtered} filename="salary_records" title="Salary Records" columns={exportColumns} />
+        <Button onClick={generatePayroll} disabled={generating} variant="outline" className="h-9 border-border text-xs">
+          <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-400" />{generating ? 'Generating…' : 'Generate Payroll'}
+        </Button>
       </div>
 
       {/* KPIs */}
