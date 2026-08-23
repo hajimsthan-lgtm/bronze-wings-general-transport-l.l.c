@@ -19,7 +19,7 @@ import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, c
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import ViewToggle from '@/components/common/ViewToggle';
-import { BarChart3, LayoutGrid, Plus, Building2, LayoutTemplate, X } from 'lucide-react';
+import { BarChart3, LayoutGrid, Plus, Building2, LayoutTemplate, X, Fuel as FuelIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export { hasSubNavForPath };
@@ -156,6 +156,14 @@ export default function TopBar() {
                   <button onClick={() => setMaintenanceMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${maintMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
                   <button onClick={() => setMaintenanceMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${maintMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
                 </div>
+                <button
+                  onClick={() => navigate('/fuel')}
+                  className="hidden md:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 text-xs font-semibold uppercase tracking-wider hover:bg-amber-500/20 hover:border-amber-500/60 transition-colors"
+                  title="Go to Fuel page"
+                >
+                  <FuelIcon className="w-3.5 h-3.5" />
+                  Fuel
+                </button>
                 <HeaderActionButton
                   label={t('add_new')}
                   variant="trip"
