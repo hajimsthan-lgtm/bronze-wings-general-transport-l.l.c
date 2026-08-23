@@ -1,24 +1,17 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import SubTabBar from '@/components/common/SubTabBar';
 import VendorsPanel from '@/components/admin/VendorsPanel';
 import ServiceProvidersPanel from '@/components/admin/ServiceProvidersPanel';
-import SubTabBar from '@/components/common/SubTabBar';
+import { useVendorsView, setVendorsView } from '@/lib/vendorsStore';
 
 export default function Vendors() {
-  const [view, setView] = useState('all');
-  const handleNew = () => {
-    if (view === 'all') window.dispatchEvent(new CustomEvent('vendors:new'));
-    else window.dispatchEvent(new CustomEvent('service-providers:new'));
-  };
+  const view = useVendorsView();
   return (
     <div>
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <SubTabBar value={view} onChange={setView} options={[
+      <div className="flex items-center gap-3 mb-5">
+        <SubTabBar value={view} onChange={setVendorsView} options={[
           { value: 'all', label: 'All Vendors' },
           { value: 'providers', label: 'Service Providers' },
         ]} />
-        <Button onClick={handleNew} className="h-9"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>
       </div>
       {view === 'all' ? <VendorsPanel /> : <ServiceProvidersPanel />}
     </div>
