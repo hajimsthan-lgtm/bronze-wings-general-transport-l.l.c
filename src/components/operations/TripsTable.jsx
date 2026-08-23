@@ -16,18 +16,19 @@ import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import BulkActionBar from '@/components/operations/BulkActionBar';
 
+// Column widths in mm — total = 247mm (landscape A4 usable width)
 const TRIP_EXPORT_COLUMNS = [
-  { label: 'Trip #', key: 'trip_number' },
-  { label: 'Date', key: 'trip_date' },
-  { label: 'Driver', key: 'driver_name' },
-  { label: 'Driver Phone', key: 'driver_phone' },
-  { label: 'Vehicle', key: 'vehicle_plate' },
-  { label: 'Client', key: 'client_name' },
-  { label: 'From', key: 'from_location' },
-  { label: 'To', key: 'to_location' },
-  { label: 'Revenue', key: 'revenue', numeric: true },
-  { label: 'Status', key: 'status' },
-  { label: 'Payment', key: 'payment_status' },
+  { label: 'Trip #',       key: 'trip_number',    w: 22, noWrap: true },
+  { label: 'Date',         key: 'trip_date',       w: 20 },
+  { label: 'Driver',       key: 'driver_name',     w: 28 },
+  { label: 'Driver Phone', key: 'driver_phone',    w: 24, noWrap: true },
+  { label: 'Vehicle',      key: 'vehicle_plate',   w: 22, noWrap: true },
+  { label: 'Client',       key: 'client_name',     w: 32 },
+  { label: 'From',         key: 'from_location',   w: 25 },
+  { label: 'To',           key: 'to_location',     w: 25 },
+  { label: 'Revenue',      key: 'revenue',         w: 20, numeric: true },
+  { label: 'Status',       key: 'status',          w: 20 },
+  { label: 'Payment',      key: 'payment_status',  w: 19 },
 ];
 
 const STATUS_HEX = {
@@ -183,7 +184,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const handleBulkExportPDF = () => {
     if (selectedTrips.length === 0) return;
     const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
-    exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips');
+    exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips', { landscape: true });
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };
 

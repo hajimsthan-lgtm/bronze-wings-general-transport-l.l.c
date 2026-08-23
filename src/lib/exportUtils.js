@@ -44,7 +44,8 @@ function shortLocation(val) {
 
 export async function exportToPDF(data, filename, columns, title, options = {}) {
   const settings = await getCompanySettings();
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const orientation = options.landscape ? 'landscape' : 'portrait';
+  const doc = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.width;
   const pageH = doc.internal.pageSize.height;
   const margin = 15;
