@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useProgressiveRender } from '@/hooks/useProgressiveRender';
-import { Plus, Trash2, Pencil, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
+import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
 import SmartCsvImporter from '@/components/common/SmartCsvImporter';
@@ -13,6 +12,7 @@ import EmptyState from '@/components/common/EmptyState';
 import ImportUndoBanner from '@/components/bank-rec/ImportUndoBanner';
 import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
+import ExcelLedgerTable from '@/components/cash/ExcelLedgerTable';
 import { useLedgerState, setLedgerMode, setLedgerView, initLedger } from '@/lib/ledgerStore';
 
 const PANEL = {
@@ -131,7 +131,6 @@ export default function LedgerPage({
   // latest transactions first
   const chronologicalDisplay = view === 'report' ? reportRows : statementRows;
   const display = chronologicalDisplay.slice().reverse();
-  const { visible: visibleRows, sentinelProps, hasMore: hasMoreRows, visibleCount: visR, totalCount: totalR } = useProgressiveRender(display, 50, null, [view, entityName, filterFrom, filterTo, q]);
   const totalIn = chronologicalDisplay.reduce((s, r) => s + (Number(r.in) || 0), 0);
   const totalOut = chronologicalDisplay.reduce((s, r) => s + (Number(r.out) || 0), 0);
   const closingBalance = chronologicalDisplay.length ? chronologicalDisplay[chronologicalDisplay.length - 1].running_balance : 0;
@@ -334,63 +333,33 @@ export default function LedgerPage({
             </div>
           )}
 
-          {/* table — scrollable with sticky header */}
-          <div className="overflow-auto thin-scroll" style={{ maxHeight: 'calc(100vh - 440px)' }}>
+          {/* Excel-like table with smart filters */}
+          <div style={PANEL}>
             {rows === null ? (
               <div className="p-10"><LoadingSpinner /></div>
-            ) : display.length === 0 ? (
-              <EmptyState
-                icon={view === 'report' ? Search : Plus}
-                title={view === 'report' ? 'No entries match your filters' : 'No entries yet'}
-                description={view === 'report' ? 'Try adjusting your date range or search query.' : 'Add your first transaction using the form above.'}
-              />
             ) : (
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10">
-                  <tr className="text-[10px] uppercase tracking-wider text-muted-foreground bg-background/95 backdrop-blur-sm border-b border-white/10">
-                    <th className="text-left font-semibold px-5 py-3 w-32 whitespace-nowrap">Date</th>
-                    {hasRecipient && <th className="text-left font-semibold px-5 py-3">Recipient</th>}
-                    <th className="text-left font-semibold px-5 py-3 w-36 whitespace-nowrap">{refLabel}</th>
-                    <th className="text-left font-semibold px-5 py-3">Description</th>
-                    <th className="text-right font-semibold px-5 py-3 text-emerald-400 w-40 whitespace-nowrap">{inflowLabel}</th>
-                    <th className="text-right font-semibold px-5 py-3 text-rose-400 w-40 whitespace-nowrap">{outflowLabel}</th>
-                    <th className="text-right font-semibold px-5 py-3 whitespace-nowrap" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>Running Balance</th>
-                    {view === 'statement' && <th className="px-5 py-3 w-10"></th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleRows.map((r) => (
-                    <tr key={r.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
-                      <td className="px-5 py-3 text-white/90 whitespace-nowrap tabular-nums text-xs">{fmtDate(r.date)}</td>
-                      {hasRecipient && <td className="px-5 py-3 text-white/80">{r.recipient || '—'}</td>}
-                      <td className="px-5 py-3 text-white/60 font-mono text-xs whitespace-nowrap">{r.ref || '—'}</td>
-                      <td className="px-5 py-3 text-white/80">{r.description || '—'}</td>
-                      <td className="px-5 py-3 text-right text-emerald-400 tabular-nums text-base font-semibold">{r.in ? fmt(r.in) : '—'}</td>
-                      <td className="px-5 py-3 text-right text-rose-400 tabular-nums text-base font-semibold">{r.out ? fmt(r.out) : '—'}</td>
-                      <td className="px-5 py-3 text-right font-semibold text-white tabular-nums">{fmt(r.running_balance)}</td>
-                      {view === 'statement' && (
-                        <td className="px-5 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <button onClick={() => startEdit(r)} className="text-white/30 hover:text-amber-400 transition-colors" aria-label="Edit entry">
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => remove(r.id)} className="text-white/30 hover:text-rose-400 transition-colors" aria-label="Delete entry">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                  {hasMoreRows && (
-                    <tr {...sentinelProps}>
-                      <td colSpan={hasRecipient ? 8 : 7} className="text-center text-xs text-muted-foreground py-3">
-                        Loading more… ({visR}/{totalR})
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+              <ExcelLedgerTable
+                rows={display}
+                refKey="ref"
+                columns={[
+                  { key: 'date', label: 'Date', align: 'left', width: '140px', mono: true, sortable: true, filterable: true },
+                  ...(hasRecipient ? [{ key: 'recipient', label: 'Recipient', align: 'left', sortable: true, filterable: true }] : []),
+                  { key: 'ref', label: refLabel, align: 'left', width: '150px', mono: true, sortable: true, filterable: true },
+                  { key: 'description', label: 'Description', align: 'left', sortable: true, filterable: true },
+                  { key: 'in', label: inflowLabel, align: 'right', width: '140px', numeric: true, sortable: true, filterable: true },
+                  { key: 'out', label: outflowLabel, align: 'right', width: '140px', numeric: true, sortable: true, filterable: true },
+                  { key: 'running_balance', label: 'Running Balance', align: 'right', width: '150px', numeric: true, sortable: true },
+                ]}
+                onEdit={view === 'statement' ? startEdit : undefined}
+                onDelete={view === 'statement' ? remove : undefined}
+                onFixMissingRef={async (row, generatedRef) => {
+                  await base44.entities[entityName].update(row.id, { [refKey]: generatedRef });
+                }}
+                showActions={view === 'statement'}
+                emptyIcon={view === 'report' ? Search : Plus}
+                emptyTitle={view === 'report' ? 'No entries match your filters' : 'No entries yet'}
+                emptyDescription={view === 'report' ? 'Try adjusting your date range or search query.' : 'Add your first transaction using the form above.'}
+              />
             )}
           </div>
         </>
