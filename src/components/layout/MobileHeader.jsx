@@ -1,11 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Settings, Sun, Moon, Bot } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
-import { useI18n } from '@/lib/i18n';
-import { useTheme } from '@/lib/theme';
 import BrandName from '@/components/layout/BrandName';
-import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
+import MobileMoreMenu from '@/components/layout/MobileMoreMenu';
 import { navItems, getIcon } from '@/lib/navConfig';
 import { getTabFromPath } from '@/lib/TabHistoryContext';
 
@@ -34,7 +31,6 @@ function getSubModules(activeTab) {
 }
 
 export default function MobileHeader() {
-  const { theme, toggleTheme, mode, toggleMode } = useTheme();
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
 
@@ -45,8 +41,6 @@ export default function MobileHeader() {
   const pageContext = useMemo(() => getPageContext(location.pathname), [location.pathname]);
   const activeTab = useMemo(() => getTabFromPath(location.pathname), [location.pathname]);
   const subModules = useMemo(() => getSubModules(activeTab), [activeTab]);
-
-  const iconBtnCls = 'w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0';
 
   return (
     <header className="md:hidden sticky top-0 z-50" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
@@ -105,36 +99,8 @@ export default function MobileHeader() {
           </Link>
         </div>
 
-        {/* Icon cluster — generous gaps, 40px touch targets */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <GlobalDateFilter className={iconBtnCls} />
-          <button
-            onClick={toggleMode}
-            className={iconBtnCls}
-            style={{
-              background: mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
-              border: `1px solid ${mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
-              color: 'hsl(var(--muted-foreground))',
-            }}
-            aria-label={mode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-          >
-            {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
-          <Link
-            to="/agents"
-            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70`}
-            aria-label="AI Agents"
-          >
-            <Bot className="w-5 h-5" />
-          </Link>
-          <Link
-            to="/settings"
-            className={`${iconBtnCls} bg-white/5 border border-white/10 text-foreground/70`}
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </Link>
-        </div>
+        {/* Single "more" button — opens bottom sheet with all quick actions */}
+        <MobileMoreMenu />
       </div>
 
       {/* Row 2: Sub-module pills — horizontal scroll, only when sub-modules exist */}

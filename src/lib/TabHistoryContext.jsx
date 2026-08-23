@@ -18,7 +18,18 @@ const TAB_ROOTS = {
  */
 export function getTabFromPath(pathname) {
   if (pathname === '/') return 'dashboard';
-  if (pathname.startsWith('/trips') || pathname.startsWith('/contracts') || pathname.startsWith('/expenses')) return 'operations';
+  // Operations: trips, contracts, expenses, maintenance, salary, fuel
+  if (
+    pathname.startsWith('/trips') ||
+    pathname.startsWith('/contracts') ||
+    pathname.startsWith('/expenses') ||
+    pathname.startsWith('/maintenance') ||
+    pathname.startsWith('/salary') ||
+    pathname.startsWith('/fuel')
+  ) return 'operations';
+  // Accounts: includes Bronze Docs (company-documents) which lives under /admin but
+  // is grouped with the Accounts/Documents tab on mobile
+  if (pathname.startsWith('/admin/company-documents')) return 'accounts';
   if (pathname.startsWith('/accounts')) return 'accounts';
   if (pathname.startsWith('/reports/bank-reconciliation')) return 'accounts';
   if (pathname.startsWith('/reports')) return 'reports';
