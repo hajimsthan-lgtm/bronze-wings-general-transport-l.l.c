@@ -45,25 +45,28 @@ export default function ShellSidebar({ query = '' }) {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[220px] flex-shrink-0 h-full border-r border-border/50"
-      style={{ background: 'hsl(var(--sidebar-background))' }}>
-      
+      className="hidden md:flex flex-col w-[224px] flex-shrink-0 h-full border-r border-border/40 relative"
+      style={{
+        background: 'linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--background)) 100%)',
+        boxShadow: 'inset -1px 0 0 rgba(var(--panel-accent-rgb),0.06)'
+      }}>
+
       {/* Brand / wordmark */}
       <div className="px-5 pt-5 pb-3 flex-shrink-0">
-        <Link to="/" className="flex items-center gap-3 group/brand cursor-pointer transition-opacity hover:opacity-80 active:scale-[0.98]">
+        <Link to="/" className="flex items-center gap-3 group/brand cursor-pointer transition-all duration-300 hover:opacity-90 active:scale-[0.98]">
           {logoUrl ?
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-border/60" style={{ boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45)' }}>
+          <div className="w-11 h-11 rounded-2xl overflow-hidden flex-shrink-0 border border-border/50" style={{ boxShadow: '0 0 18px -4px rgba(var(--panel-accent-rgb),0.5), inset 0 1px 0 rgba(255,255,255,0.08)' }}>
               <img src={logoUrl} alt="" className="w-full h-full object-contain" />
             </div> :
 
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(145deg, hsl(var(--card)), hsl(var(--background-elevated)))',
-              border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-              boxShadow: '0 0 14px -4px rgba(var(--panel-accent-rgb),0.45), inset 0 1px 0 rgba(255,255,255,0.06)'
+              background: 'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--background-elevated)) 100%)',
+              border: '1px solid rgba(var(--panel-accent-rgb),0.35)',
+              boxShadow: '0 0 18px -4px rgba(var(--panel-accent-rgb),0.5), inset 0 1px 0 rgba(255,255,255,0.08)'
             }}>
-              <span className="text-[13px] font-bold [font-family:'Abril_Fatface',_system-ui]" style={{ color: 'rgb(var(--panel-accent-rgb))', textShadow: '0 0 10px rgba(var(--panel-accent-rgb),0.55)' }}>BW</span>
+              <span className="text-[14px] font-bold [font-family:'Abril_Fatface',_system-ui] relative z-10" style={{ color: 'rgb(var(--panel-accent-rgb))', textShadow: '0 0 12px rgba(var(--panel-accent-rgb),0.6)' }}>BW</span>
             </div>
           }
           <div className="leading-tight">
@@ -83,10 +86,11 @@ export default function ShellSidebar({ query = '' }) {
       <nav className="flex-1 min-h-0 overflow-y-auto thin-scroll px-3 pb-3 flex flex-col gap-3.5">
         {sections.map((section) =>
         <div key={section.key} className="flex flex-col">
-            <p className="px-2 mb-1 text-[9.5px] font-bold tracking-[0.16em] uppercase text-muted-foreground/60">
-              {t(section.key) || section.label}
+            <p className="px-2.5 mb-1.5 text-[9.5px] font-bold tracking-[0.18em] uppercase text-muted-foreground/55 flex items-center gap-2">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+              <span>{t(section.key) || section.label}</span>
             </p>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-1">
               {section.children.map((child) => {
               const active = isChildActive(child);
               const Icon = getIcon(child.icon);
@@ -98,13 +102,14 @@ export default function ShellSidebar({ query = '' }) {
                   onClick={() => navigate(child.path)}
                   aria-label={label}
                   className={cn(
-                    'relative flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-200 select-none',
-                    active ? 'shadow-sm' : 'nav-text-fixed nav-glass-btn'
+                    'relative flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-300 select-none',
+                    active ? 'nav-active-row' : 'nav-text-fixed nav-glass-btn'
                   )}
-                  style={active ? { background: c, color: readableOn(c) } : undefined}>
+                  style={active ? { background: `linear-gradient(135deg, ${c}, ${c})`, color: readableOn(c), boxShadow: `0 4px 14px -4px ${c}, inset 0 1px 0 rgba(255,255,255,0.12)` } : undefined}>
 
-                    <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
-                    <span className={cn('truncate', active ? '' : 'nav-text-fixed')}>{label}</span>
+                    <Icon className="w-4 h-4 flex-shrink-0 relative z-10" style={{ color: active ? readableOn(c) : c }} />
+                    <span className={cn('truncate relative z-10', active ? '' : 'nav-text-fixed')}>{label}</span>
+                    {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-white/70" style={{ boxShadow: '0 0 8px rgba(255,255,255,0.6)' }} />}
                   </button>);
 
             })}
@@ -117,7 +122,7 @@ export default function ShellSidebar({ query = '' }) {
       </nav>
 
       {/* Secondary / support nav */}
-      <div className="px-3 pb-4 pt-2.5 border-t border-border/50 flex-shrink-0 flex flex-col gap-0.5">
+      <div className="px-3 pb-4 pt-3 border-t border-border/40 flex-shrink-0 flex flex-col gap-1">
         {secondaryNav.map((item) => {
           const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
           const Icon = getIcon(item.icon);
@@ -127,13 +132,14 @@ export default function ShellSidebar({ query = '' }) {
               key={item.key}
               to={item.path}
               className={cn(
-                'flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-200',
-                active ? 'shadow-sm' : 'nav-text-fixed nav-glass-btn'
+                'flex items-center gap-2.5 px-2.5 h-9 rounded-xl text-[13px] font-medium transition-all duration-300',
+                active ? 'nav-active-row' : 'nav-text-fixed nav-glass-btn'
               )}
-              style={active ? { background: c, color: readableOn(c) } : undefined}>
+              style={active ? { background: `linear-gradient(135deg, ${c}, ${c})`, color: readableOn(c), boxShadow: `0 4px 14px -4px ${c}, inset 0 1px 0 rgba(255,255,255,0.12)` } : undefined}>
 
-              <Icon className="w-4 h-4 flex-shrink-0" style={{ color: active ? readableOn(c) : c }} />
-              <span className={cn('truncate', active ? '' : 'nav-text-fixed')}>{item.label}</span>
+              <Icon className="w-4 h-4 flex-shrink-0 relative z-10" style={{ color: active ? readableOn(c) : c }} />
+              <span className={cn('truncate relative z-10', active ? '' : 'nav-text-fixed')}>{item.label}</span>
+              {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-white/70" style={{ boxShadow: '0 0 8px rgba(255,255,255,0.6)' }} />}
             </Link>);
 
         })}
