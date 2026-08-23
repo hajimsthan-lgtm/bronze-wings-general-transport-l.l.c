@@ -14,6 +14,9 @@ import SalarySummaryCard from '@/components/dashboard/SalarySummaryCard';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, Cell, Tooltip } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
+import MobileNeumorphicDashboard from '@/components/dashboard/MobileNeumorphicDashboard';
+import '@/lib/mobileNeumorphic.css';
 import PremiumCard from '@/components/dashboard/premium/PremiumCard';
 import HeroMetricCard from '@/components/dashboard/premium/HeroMetricCard';
 import StatTilesCard from '@/components/dashboard/premium/StatTilesCard';
@@ -53,6 +56,7 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const isMobile = useIsMobile();
   const [range, setRange] = useState('7D');
 
   const loadData = useCallback(async () => {
@@ -213,6 +217,29 @@ export default function Dashboard() {
 
   return (
     <PullToRefresh onRefresh={loadData}>
+      {isMobile ? (
+        <MobileNeumorphicDashboard
+          activeTrips={activeTrips}
+          completedTrips={completedTrips}
+          pendingInvoices={pendingInvoices}
+          dueAmount={dueAmount}
+          healthPct={healthPct}
+          activeVehicles={activeVehicles}
+          totalVehicles={totalVehicles}
+          avgTripValue={avgTripValue}
+          totalTrips={totalTrips}
+          totalRevenue={totalRevenue}
+          fleetUtil={fleetUtil}
+          assignedVehicles={assignedVehicles}
+          recentTrips={recentTrips}
+          recentInvoices={recentInvoices}
+          hasAlerts={hasAlerts}
+          overdueCount={overdueInvoices.length}
+          maintenanceCount={maintenanceVehicles.length}
+          expiringDocCount={expiringDocs.length}
+          onNewTrip={() => window.location.assign('/trips?new=1')}
+        />
+      ) : (
       <div className="space-y-6">
         <QuickActions />
 
@@ -377,6 +404,7 @@ export default function Dashboard() {
         </div>
 
       </div>
+      )}
     </PullToRefresh>
   );
 }
