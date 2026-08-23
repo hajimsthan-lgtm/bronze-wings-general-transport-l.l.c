@@ -14,11 +14,11 @@ export default function Vendors() {
   return (
     <div>
       <div className="flex items-center justify-between gap-3 mb-5">
-        <Button onClick={handleNew} className="h-9"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>
         <SubTabBar value={view} onChange={setView} options={[
           { value: 'all', label: 'All Vendors' },
           { value: 'providers', label: 'Service Providers' },
         ]} />
+        <Button onClick={handleNew} className="h-9"><Plus className="w-4 h-4 mr-1.5" />Add New</Button>
       </div>
       {view === 'all' ? <VendorsPanel /> : <ServiceProvidersPanel />}
     </div>
