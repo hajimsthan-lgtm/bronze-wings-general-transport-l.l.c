@@ -2,28 +2,53 @@
 .nav-text-fixed { color: #ffffff; }
 .theme-light .nav-text-fixed { color: #000000; }
 
-/* Glassmorphism nav button — beautiful inactive state */
+/* ───────────────────────────────────────────────────────────
+   PREMIUM GLASS NAV BUTTON — 2026 liquid-glass aesthetic
+   Inactive: subtle frosted pill with inner highlight
+   Hover: lifts, accent edge glow, soft sheen sweep
+   ─────────────────────────────────────────────────────────── */
 .nav-glass-btn {
-  background: linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
-  border: 1px solid rgba(255,255,255,0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  background: linear-gradient(165deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.015) 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 18px rgba(var(--panel-accent-rgb),0.025);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+/* Sheen sweep on hover */
+.nav-glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+  z-index: 1;
 }
 .nav-glass-btn:hover {
-  background: linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-  border-color: rgba(var(--panel-accent-rgb), 0.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 16px -6px rgba(var(--panel-accent-rgb), 0.3);
+  background: linear-gradient(165deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.025) 100%);
+  border-color: rgba(var(--panel-accent-rgb), 0.32);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 24px rgba(var(--panel-accent-rgb),0.06), 0 4px 14px -6px rgba(var(--panel-accent-rgb),0.4), 0 0 0 1px rgba(var(--panel-accent-rgb),0.08);
   transform: translateY(-1px);
 }
+.nav-glass-btn:hover::before { left: 160%; }
+.nav-glass-btn:active { transform: translateY(0) scale(0.985); }
+
+/* ── Light theme ── */
 .theme-light .nav-glass-btn {
-  background: linear-gradient(165deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.005) 100%);
+  background: linear-gradient(165deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.6) 100%);
   border-color: rgba(0,0,0,0.06);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.03);
+}
+.theme-light .nav-glass-btn::before {
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent);
 }
 .theme-light .nav-glass-btn:hover {
-  background: linear-gradient(165deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.01) 100%);
-  border-color: rgba(var(--panel-accent-rgb), 0.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 0 16px -6px rgba(var(--panel-accent-rgb), 0.25);
+  background: linear-gradient(165deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.8) 100%);
+  border-color: rgba(var(--panel-accent-rgb), 0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,1), 0 4px 14px -6px rgba(var(--panel-accent-rgb),0.3), 0 0 0 1px rgba(var(--panel-accent-rgb),0.06);
 }
