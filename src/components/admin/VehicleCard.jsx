@@ -3,12 +3,13 @@ import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock, ChevronDown, FileText } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock, ChevronDown, FileText, ArrowRight } from 'lucide-react';
 import CardChip from '@/components/admin/CardChip';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import VehicleCardLight from './VehicleCardLight';
 import { buildVehicleDisplayName } from '@/lib/vehicleLicenseNotes';
+import { useCardLock, useSpotlight, useScrollIntoViewWhenLocked } from '@/hooks/useCardLock';
 
 const ACCENT = '#1ED760';
 const STATUS_DOT = { active: '#34d399', maintenance: '#f59e0b', inactive: '#94a3b8' };
@@ -29,6 +30,9 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
   const [confirmDel, setConfirmDel] = useState(false);
   const [licenseOpen, setLicenseOpen] = useState(false);
   const dot = STATUS_DOT[v.status] || '#94a3b8';
+  const { locked, handleClick, handleRedirect } = useCardLock(() => onOpen?.(v));
+  const { onMouseMove } = useSpotlight();
+  const lockRef = useScrollIntoViewWhenLocked(locked);
 
   if (mode === 'light') {
     return <VehicleCardLight v={v} onOpen={onOpen} onEdit={onEdit} onDelete={onDelete} onOwnershipChange={onOwnershipChange} />;
@@ -36,9 +40,18 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
 
   return (
     <div
-      className="entity-card cursor-pointer animate-fade-in-up relative overflow-hidden group p-3.5"
-      onClick={() => onOpen?.(v)}
+      ref={lockRef}
+      className={`entity-card spotlight spotlight-glow cursor-pointer animate-fade-in-up relative overflow-hidden group p-3.5 ${locked ? 'card-locked' : ''}`}
+      style={{ '--card-accent': ACCENT }}
+      onMouseMove={onMouseMove}
+      onClick={handleClick}
     >
+      {/* Redirect overlay — appears when locked */}
+      <div className="card-redirect-overlay" onClick={(e) => e.stopPropagation()}>
+        <button className="card-redirect-btn" onClick={handleRedirect}>
+          Open Details <ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
       <div className="absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-15" style={{ background: ACCENT }} />
 
       <div className="relative flex items-start justify-between">

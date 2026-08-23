@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { MoreVertical, Pencil, Trash2, ExternalLink, Truck, CalendarClock, Phone } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, ExternalLink, Truck, CalendarClock, Phone, ArrowRight } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import CardChip from '@/components/admin/CardChip';
+import { useCardLock, useSpotlight, useScrollIntoViewWhenLocked } from '@/hooks/useCardLock';
 
 const ACCENT = '#a855f7';
 const STATUS_DOT = { active: '#34d399', on_leave: '#f59e0b', inactive: '#94a3b8' };

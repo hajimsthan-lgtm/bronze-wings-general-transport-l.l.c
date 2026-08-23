@@ -1,0 +1,149 @@
+/* ═══════════════════════════════════════════════════════
+   CARD INTERACTION SYSTEM
+   Cursor spotlight · hover glow · lock-on-click · flash
+   Uses --card-accent CSS var per card for accent color
+   ═══════════════════════════════════════════════════════ */
+
+/* ===== Cursor spotlight (entity-card only — ::before is free) ===== */
+.entity-card.spotlight {
+  position: relative;
+}
+.entity-card.spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle 200px at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 18%, transparent),
+    transparent 65%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+.entity-card.spotlight:hover::before { opacity: 1; }
+.entity-card.spotlight > * { position: relative; z-index: 1; }
+
+/* row-card spotlight — use box-shadow inset (pseudo-elements are taken) */
+.row-card.spotlight {
+  position: relative;
+}
+.row-card.spotlight:hover {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 30%, transparent),
+    inset 0 0 60px -10px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 20%, transparent),
+    0 8px 28px rgba(0,0,0,0.10) !important;
+}
+
+/* ===== Hover glow — brighten with accent color ===== */
+.spotlight-glow {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.entity-card.spotlight-glow:hover {
+  border-color: color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 45%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 0 0 1px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 25%, transparent),
+    0 0 32px -8px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 50%, transparent),
+    0 14px 36px rgba(0,0,0,0.12) !important;
+}
+
+/* ===== Lock state — persistent glow when card is locked ===== */
+.card-locked {
+  border-color: color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 55%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 0 0 2px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 40%, transparent),
+    0 0 40px -6px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 60%, transparent),
+    0 16px 40px rgba(0,0,0,0.14) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ===== Redirect overlay — appears when card is locked ===== */
+.card-redirect-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 10px;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.card-locked .card-redirect-overlay {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.card-redirect-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--card-accent, rgb(var(--panel-accent-rgb))), color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 65%, #000));
+  box-shadow: 0 4px 16px -2px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 55%, transparent), inset 0 1px 0 rgba(255,255,255,0.3);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  white-space: nowrap;
+}
+.card-redirect-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+.card-redirect-btn:active { transform: scale(0.96); }
+
+/* ===== Flash animation — one-time bright pulse ===== */
+@keyframes card-flash {
+  0%   { box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 0 0 0 transparent; }
+  15%  { box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 0 0 4px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 60%, transparent), 0 0 48px -4px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 80%, transparent); }
+  100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 0 0 0 transparent; }
+}
+.card-flash {
+  animation: card-flash 1.8s ease-out 1;
+  border-color: color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 60%, transparent) !important;
+}
+
+/* ===== Document row flash ===== */
+@keyframes doc-row-flash {
+  0%   { background: transparent; box-shadow: inset 3px 0 0 0 transparent; }
+  15%  { background: color-mix(in srgb, var(--doc-accent, #a855f7) 24%, transparent); box-shadow: inset 4px 0 0 0 var(--doc-accent, #a855f7); }
+  100% { background: transparent; box-shadow: inset 3px 0 0 0 transparent; }
+}
+.doc-row-flash {
+  animation: doc-row-flash 2.2s ease-out 1;
+}
+
+/* ===== Trip row flash (table) ===== */
+@keyframes trip-row-flash {
+  0%   { background: transparent; box-shadow: inset 0 0 0 0 transparent; }
+  15%  { background: color-mix(in srgb, var(--trip-accent, #1ED760) 22%, transparent); box-shadow: inset 4px 0 0 0 var(--trip-accent, #1ED760); }
+  100% { background: transparent; box-shadow: inset 0 0 0 0 transparent; }
+}
+.trip-row-flash {
+  animation: trip-row-flash 2.2s ease-out 1;
+}
+
+/* ===== Light theme adjustments ===== */
+.theme-light .entity-card.spotlight-glow:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 0 0 1px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 20%, transparent),
+    0 0 24px -6px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 30%, transparent),
+    0 8px 24px rgba(0,0,0,0.08) !important;
+}
+.theme-light .card-locked {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 0 0 2px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 35%, transparent),
+    0 0 32px -8px color-mix(in srgb, var(--card-accent, rgb(var(--panel-accent-rgb))) 40%, transparent),
+    0 12px 32px rgba(0,0,0,0.10) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-flash, .doc-row-flash, .trip-row-flash { animation: none !important; }
+}
