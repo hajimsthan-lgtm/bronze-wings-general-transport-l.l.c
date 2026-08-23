@@ -24,27 +24,24 @@ export default function AppFooter() {
   return (
     <footer className="hidden md:block fixed bottom-0 left-0 right-0 z-40 pointer-events-none" style={{ opacity, transition: 'opacity 10s linear' }}>
       <div
-        className="w-full flex items-center justify-center"
+        className="w-full flex items-center justify-between px-6"
         style={{
           height: 42,
-          background: 'hsl(var(--sidebar-background))',
-          backdropFilter: 'blur(18px) saturate(1.3)',
-          WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
-          borderTop: '1px solid hsl(var(--sidebar-border))',
-          boxShadow: '0 -4px 16px rgba(0,0,0,0.3)',
+          background: 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.72) 0%, rgba(var(--surf-2-rgb),0.88) 100%)',
+          backdropFilter: 'blur(22px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(22px) saturate(1.4)',
+          borderTop: '1px solid rgba(var(--panel-accent-rgb),0.14)',
+          boxShadow: '0 -6px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}
       >
-        <span
-          className="text-[15px] font-bold uppercase tracking-[0.18em] animate-gold-shine"
-          style={{
-            backgroundImage: 'linear-gradient(90deg, rgb(var(--panel-accent-rgb)) 0%, #ffffff 45%, rgb(var(--panel-accent2-rgb)) 55%, rgb(var(--panel-accent-rgb)) 100%)',
-            backgroundSize: '200% auto',
-            WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 10px rgba(var(--panel-accent-rgb),0.5))',
-          }}
-        >
-          {company}
-        </span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(145deg, rgba(var(--panel-accent-rgb),0.22), rgba(var(--panel-accent-rgb),0.08))', border: '1px solid rgba(var(--panel-accent-rgb),0.3)' }}>
+            <span className="text-[10px] font-bold" style={{ color: 'rgb(var(--panel-accent-rgb))' }}>BW</span>
+          </div>
+          <span className="text-xs font-semibold tracking-tight text-foreground/80 truncate">{company}</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 hidden lg:block">General Transport · Fleet & Finance</span>
+        <span className="text-[10px] text-muted-foreground/50 hidden sm:block">© {new Date().getFullYear()} · All rights reserved</span>
       </div>
     </footer>
   );

@@ -45,7 +45,7 @@ export default function ShellSidebar({ query = '' }) {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[224px] flex-shrink-0 h-full border-r border-border/40 relative"
+      className="hidden md:flex flex-col w-[200px] flex-shrink-0 h-full border-r border-border/40 relative"
       style={{
         background: 'linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--background)) 100%)',
         boxShadow: 'inset -1px 0 0 rgba(var(--panel-accent-rgb),0.06)'

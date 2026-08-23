@@ -323,11 +323,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="align-top trips-grid-td">
                   <button
                       onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                      className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block truncate leading-tight"
+                      className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block leading-tight whitespace-normal break-words"
                       title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
-                  <div className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">{trip.contact_person || ''}</div>
+                  <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
                 </TableCell>
                 {/* VEHICLE + DRIVER — both hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">

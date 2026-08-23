@@ -31,6 +31,8 @@ import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExpenseCard from '@/components/expenses/ExpenseCard';
 import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToRgba } from '@/components/expenses/expenseMeta';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
+import ExpensesAnalytics from '@/components/expenses/ExpensesAnalytics';
 
 // Category metadata imported from @/components/expenses/expenseMeta
 const EXPENSE_EXPORT_COLUMNS = [
@@ -51,6 +53,7 @@ export default function Expenses() {
   const [editItem, setEditItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const deleteExpense = useExpenseDelete();
+  const mode = useExpensesMode();
 
   useEffect(() => {
     const handler = () => { setEditItem(null); setFormOpen(true); };
@@ -127,23 +130,10 @@ export default function Expenses() {
       </div>
 
       <PullToRefresh onRefresh={() => refetch()}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          {analytics.map((a, i) => (
-            <ReportStatCard key={a.label} index={i + 1} label={a.label} value={a.value} format={a.format} icon={a.icon} color={a.color} />
-          ))}
-        </div>
-
-        {donutData.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <ReportSectionCard index={0} color="#a855f7" title="Expense Categories">
-              <div className="flex justify-center"><DonutChart data={donutData} total={formatCurrency(donutTotal)} height={200} /></div>
-            </ReportSectionCard>
-            <ReportSectionCard index={1} color="#f97316" title="Expense Trend">
-              <TrendChart data={trendData} series={[{ key: 'amount', name: 'Amount', color: '#f97316' }]} type="line" height={220} />
-            </ReportSectionCard>
-          </div>
-        )}
-
+        {mode === 'analytics' ? (
+          <ExpensesAnalytics expenses={filtered} loading={loading} onBrowse={() => setExpensesMode('browse')} />
+        ) : (
+          <>
         {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
           <EmptyState icon={Receipt} title={t('no_data')} description="Add your first expense" />
         ) : viewMode === 'card' ? (
@@ -215,9 +205,11 @@ export default function Expenses() {
             </div>
           </div>
         )}
+          </>
+        )}
       </PullToRefresh>
 
-      {subBar}
+      {mode === 'browse' && subBar}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <AlertDialogContent>

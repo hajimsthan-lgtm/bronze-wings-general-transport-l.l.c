@@ -10,6 +10,7 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
+import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
@@ -42,6 +43,8 @@ export default function TopBar() {
   const cliMode = useClientsMode();
   const isVendorsPage = location.pathname === '/admin/vendors';
   const venMode = useVendorsMode();
+  const isExpensesPage = location.pathname === '/expenses';
+  const expMode = useExpensesMode();
   const isCompanyDocsPage = location.pathname === '/admin/company-documents';
   const isInvoicesPage = location.pathname === '/accounts/invoices';
   const invFilters = useInvoicesFilters();
@@ -127,12 +130,18 @@ export default function TopBar() {
                 onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))}
               />
             )}
-            {location.pathname === '/expenses' && (
-              <HeaderActionButton
-                label={t('add_new')}
-                variant="expense"
-                onClick={() => window.dispatchEvent(new CustomEvent('expenses:new'))}
-              />
+            {isExpensesPage && (
+              <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setExpensesMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${expMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setExpensesMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${expMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                <HeaderActionButton
+                  label={t('add_new')}
+                  variant="expense"
+                  onClick={() => window.dispatchEvent(new CustomEvent('expenses:new'))}
+                />
+              </>
             )}
             {(location.pathname === '/admin/salary' || location.pathname === '/salary') && (
               <HeaderActionButton

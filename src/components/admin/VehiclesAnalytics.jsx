@@ -99,24 +99,24 @@ export default function VehiclesAnalytics({ vehicles = [], trips = [], fuelRecor
         {expiries.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">No upcoming expiries.</p>
         ) : (
-          <div className="space-y-1">
-            {expiries.slice(0, 7).map((e, i) => {
-              const isExp = e.d < today;
-              const tone = isExp ? '#ef4444' : '#f59e0b';
-              return (
-                <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.02] rounded-lg px-1 transition-colors" onClick={() => navigate(`/admin/vehicles/${e.id}`)}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
-                    {e.type === 'Registration' ? <CalendarClock className="w-4 h-4" style={{ color: tone }} /> : <ShieldCheck className="w-4 h-4" style={{ color: tone }} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{e.plate}</p>
-                    <p className="text-[11px] text-muted-foreground">{e.type} · {formatDate(e.date)}</p>
-                  </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isExp ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{isExp ? 'Expired' : 'Soon'}</span>
-                </div>
-              );
-            })}
-          </div>
+          <div className="space-y-1 max-h-[200px] overflow-y-auto thin-scroll pr-1">
+            {expiries.map((e, i) => {
+               const isExp = e.d < today;
+               const tone = isExp ? '#ef4444' : '#f59e0b';
+               return (
+                 <div key={i} className="flex items-center gap-3 py-2 border-b border-white/[0.04] cursor-pointer hover:bg-white/[0.02] rounded-lg px-1 transition-colors" onClick={() => navigate(`/admin/vehicles/${e.id}`)}>
+                   <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(tone, 0.12), border: `1px solid ${hexToRgba(tone, 0.3)}` }}>
+                     {e.type === 'Registration' ? <CalendarClock className="w-4 h-4" style={{ color: tone }} /> : <ShieldCheck className="w-4 h-4" style={{ color: tone }} />}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <p className="text-sm font-medium text-foreground truncate">{e.plate}</p>
+                     <p className="text-[11px] text-muted-foreground">{e.type} · {formatDate(e.date)}</p>
+                   </div>
+                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isExp ? 'bg-rose-500/15 text-rose-300' : 'bg-amber-500/15 text-amber-300'}`}>{isExp ? 'Expired' : 'Soon'}</span>
+                 </div>
+               );
+             })}
+           </div>
         )}
       </ReportSectionCard>
 

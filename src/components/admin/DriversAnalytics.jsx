@@ -40,7 +40,7 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
   const unassigned = drivers.length - assigned;
 
   const today = new Date(); const soon = new Date(); soon.setDate(today.getDate() + 30);
-  const expiring = drivers.filter((d) => d.license_expiry && new Date(d.license_expiry) <= soon).sort((a, b) => (a.license_expiry || '').localeCompare(b.license_expiry || '')).slice(0, 6);
+  const expiring = drivers.filter((d) => d.license_expiry && new Date(d.license_expiry) <= soon).sort((a, b) => (a.license_expiry || '').localeCompare(b.license_expiry || ''));
 
   const months = []; const now = new Date();
   for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: d.toLocaleString('en', { month: 'short' }) }); }
@@ -53,7 +53,7 @@ export default function DriversAnalytics({ drivers = [], trips = [], loading, on
       <ReportSectionCard index={0} color="#f59e0b" title="License Expiring Soon" className="mb-6"
         action={<button onClick={() => navigate('/admin/drivers')} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
         {expiring.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">All licenses valid.</p> : (
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-[200px] overflow-y-auto thin-scroll pr-1">
             {expiring.map((d) => {
               const expired = new Date(d.license_expiry) < today;
               const tone = expired ? '#ef4444' : '#f59e0b';
