@@ -5,7 +5,7 @@ import SearchableSelect from '@/components/common/SearchableSelect';
 
 const TYPES = [
   { key: 'clients', label: 'Client', path: '/admin/clients', nameKey: 'name', load: () => base44.entities.Client.list('-created_date', 200) },
-  { key: 'drivers', label: 'Driver', path: '/admin/drivers', nameKey: 'name', load: () => base44.entities.Driver.list('-created_date', 200) },
+  { key: 'drivers', label: 'Driver', path: '/admin/drivers', nameKey: 'name', load: () => base44.entities.Driver.list('-created_date', 200).then((r) => (r || []).filter((d) => !d.vendor_name)) },
   { key: 'vehicles', label: 'Vehicle', path: '/admin/vehicles', nameKey: 'plate_number', load: () => base44.entities.Vehicle.list('-created_date', 100) },
 ];
 
