@@ -2,7 +2,7 @@ import { useTabHistory } from '@/lib/TabHistoryContext';
 import { LayoutDashboard, Truck, Wallet, BarChart3, Shield } from 'lucide-react';
 
 const navItems = [
-  { key: 'dashboard', icon: LayoutDashboard, label: 'Home', color: '#6366f1', glow: '99, 102, 241' },
+  { key: 'dashboard', icon: LayoutDashboard, label: 'Home', color: 'rgb(var(--panel-accent-rgb))', glow: 'var(--panel-accent-rgb)' },
   { key: 'operations', icon: Truck, label: 'Trips', color: '#fb923c', glow: '251, 146, 60' },
   { key: 'accounts', icon: Wallet, label: 'Accounts', color: '#fbbf24', glow: '251, 191, 36' },
   { key: 'reports', icon: BarChart3, label: 'Reports', color: '#34d399', glow: '52, 211, 153' },

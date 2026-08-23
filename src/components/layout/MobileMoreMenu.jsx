@@ -28,10 +28,10 @@ export default function MobileMoreMenu() {
         onClick={() => setOpen(true)}
         className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
         style={{
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(168,85,247,0.10))',
-          border: '1px solid rgba(99,102,241,0.30)',
-          color: '#a5b4fc',
-          boxShadow: '0 0 14px -2px rgba(99,102,241,0.30), inset 0 1px 0 rgba(255,255,255,0.10)',
+          background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent2-rgb),0.10))',
+          border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+          color: 'rgb(var(--panel-accent2-rgb))',
+          boxShadow: '0 0 14px -2px rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.10)',
         }}
         aria-label="More options"
       >
@@ -50,7 +50,7 @@ export default function MobileMoreMenu() {
               background: 'linear-gradient(180deg, rgba(20,20,32,0.88) 0%, rgba(12,12,22,0.94) 100%)',
               backdropFilter: 'blur(28px) saturate(1.6)',
               WebkitBackdropFilter: 'blur(28px) saturate(1.6)',
-              borderTop: '1px solid rgba(99,102,241,0.25)',
+              borderTop: '1px solid rgba(var(--panel-accent-rgb),0.25)',
               boxShadow: '0 -12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.10)',
               paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)',
             }}
@@ -78,7 +78,7 @@ export default function MobileMoreMenu() {
               {/* Date Filter — label on left, GlobalDateFilter trigger on right */}
               <div className="w-full flex items-center justify-between h-14 px-4 rounded-2xl" style={rowStyle}>
                 <div className="flex items-center gap-3 text-sm font-semibold text-white/80">
-                  <Calendar className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                  <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
                   <span>Date Filter</span>
                 </div>
                 <GlobalDateFilter />
