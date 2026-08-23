@@ -71,8 +71,8 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
   }, [editItem, presetPlate, open]);
 
   useEffect(() => {
-    base44.entities.Vehicle.list('-created_date', 200).catch(() => []).then(setVehicles);
-    base44.entities.Driver.list('-created_date', 200).catch(() => []).then(setDrivers);
+    base44.entities.Vehicle.list('-created_date', 200).catch(() => []).then((v) => setVehicles((v || []).filter((x) => !x.vendor_name)));
+    base44.entities.Driver.list('-created_date', 200).catch(() => []).then((d) => setDrivers((d || []).filter((x) => !x.vendor_name)));
   }, []);
 
   const update = (f, v) => {
