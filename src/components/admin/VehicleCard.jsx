@@ -52,12 +52,12 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
           Open Details <ArrowRight className="w-3 h-3" />
         </button>
       </div>
-      <div className="absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-15" style={{ background: ACCENT }} />
+      <div className="entity-accent-blob absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-15" style={{ background: ACCENT }} />
 
       <div className="relative flex items-start justify-between">
         <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 truncate">{v.type || 'Vehicle'}</span>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium" style={{ background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
+          <span className="status-pill inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium" style={{ '--status-color': dot, background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
             {(v.status || '').replace(/_/g, ' ')}
           </span>

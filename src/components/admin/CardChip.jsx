@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 export default function CardChip({ icon: Icon, label, value, accent = '#1ED760' }) {
   return (
     <div
-      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md flex-shrink-0"
+      className="card-chip inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md flex-shrink-0"
+      style={{ '--chip-accent': accent }}
       title={`${label} / ${value || '—'}`}
     >
       {Icon && <Icon className="w-3 h-3 flex-shrink-0" style={{ color: accent }} />}

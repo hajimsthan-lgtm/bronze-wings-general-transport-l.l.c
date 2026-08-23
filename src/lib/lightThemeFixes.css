@@ -389,3 +389,86 @@
   border-color: rgba(59,130,246,0.15) !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06), 0 0 0 1px rgba(59,130,246,0.08), inset 0 1px 0 rgba(255,255,255,0.9) !important;
 }
+
+/* ═════════════════════════════════════════════════════════════════
+   LIGHT MODE COLOR ENHANCEMENT — Vehicle / Driver / Client cards
+   Makes accent colors vivid and perfectly visible on white backgrounds
+   ═════════════════════════════════════════════════════════════════ */
+
+/* Entity card — accent-tinted top border for instant color identity */
+.theme-light .entity-card {
+  border-top: 3px solid var(--card-accent, hsl(var(--primary))) !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 4%, white) 0%,
+    white 40%) !important;
+}
+
+/* Accent blur blob — boost opacity so the color glow is visible */
+.theme-light .entity-accent-blob {
+  opacity: 0.4 !important;
+}
+
+/* Status pill — stronger accent background + border for visibility */
+.theme-light .status-pill {
+  background: color-mix(in srgb, var(--status-color, #94a3b8) 14%, white) !important;
+  border-color: color-mix(in srgb, var(--status-color, #94a3b8) 30%, transparent) !important;
+  color: color-mix(in srgb, var(--status-color, #94a3b8) 85%, black) !important;
+  font-weight: 700 !important;
+}
+.theme-light .status-pill span {
+  box-shadow: 0 0 6px var(--status-color) !important;
+}
+
+/* CardChip — accent-tinted background instead of transparent grey */
+.theme-light .card-chip {
+  background-color: color-mix(in srgb, var(--chip-accent, hsl(var(--primary))) 10%, white) !important;
+  border-color: color-mix(in srgb, var(--chip-accent, hsl(var(--primary))) 22%, transparent) !important;
+}
+.theme-light .card-chip svg {
+  color: var(--chip-accent, hsl(var(--primary))) !important;
+}
+.theme-light .card-chip span:first-of-type {
+  color: color-mix(in srgb, var(--chip-accent, hsl(var(--primary))) 70%, black) !important;
+}
+
+/* Entity card avatar/image box — stronger accent gradient in light mode */
+.theme-light .entity-card .relative.mt-3.h-20,
+.theme-light .entity-card .relative.mt-3.h-28 {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--card-accent, #10b981) 18%, white) 0%,
+    color-mix(in srgb, var(--card-accent, #10b981) 6%, white) 70%) !important;
+  border-color: color-mix(in srgb, var(--card-accent, #10b981) 22%, transparent) !important;
+}
+
+/* Entity card avatar circle — accent-tinted fill */
+.theme-light .entity-card .rounded-full.overflow-hidden,
+.theme-light .entity-card .rounded-2xl.overflow-hidden {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--card-accent, #10b981) 30%, white) 0%,
+    color-mix(in srgb, var(--card-accent, #10b981) 12%, white) 100%) !important;
+  border-color: color-mix(in srgb, var(--card-accent, #10b981) 35%, transparent) !important;
+  box-shadow: 0 0 20px -6px var(--card-accent, #10b981), inset 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+
+/* VehicleCardLight — boost the type-themed tint for more vibrancy */
+.theme-light .entity-card .bg-white.rounded-2xl {
+  border-top: 3px solid var(--card-accent, #1ED760) !important;
+}
+
+/* Card-locked state in light mode — accent-colored ring */
+.theme-light .card-locked {
+  border-color: color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 50%, transparent) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 35%, transparent),
+    0 0 28px -6px color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 40%, transparent),
+    0 12px 32px rgba(0,0,0,0.10) !important;
+}
+
+/* Spotlight glow in light mode — accent-colored hover */
+.theme-light .entity-card.spotlight-glow:hover {
+  border-color: color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 40%, transparent) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 20%, transparent),
+    0 0 24px -6px color-mix(in srgb, var(--card-accent, hsl(var(--primary))) 35%, transparent),
+    0 8px 24px rgba(0,0,0,0.08) !important;
+}

@@ -43,12 +43,12 @@ export default function DriverCard({ d, onOpen, onEdit, onDelete }) {
           Open Details <ArrowRight className="w-3 h-3" />
         </button>
       </div>
-      <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-20" style={{ background: ACCENT }} />
+      <div className="entity-accent-blob absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-20" style={{ background: ACCENT }} />
 
       <div className="relative flex items-start justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60">Driver</span>
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium flex-shrink-0" style={{ background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
+          <span className="status-pill inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium flex-shrink-0" style={{ '--status-color': dot, background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />
             {(d.status || '').replace(/_/g, ' ')}
           </span>
