@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
@@ -26,7 +26,7 @@ import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit, Plus } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
-import { setOpsFilter, clearOpsFilter, useOpsFilter } from '@/lib/operationsFilterStore';
+import { setOpsFilter, clearOpsFilter, useOpsSearch } from '@/lib/operationsFilterStore';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -81,7 +81,7 @@ export default function Operations() {
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('table');
-  const { search } = useOpsFilter();
+  const search = useOpsSearch();
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
 
@@ -321,6 +321,11 @@ export default function Operations() {
   const onStatusChange = mode === 'contract' ? setContractFilter : setTripFilter;
   const statusCounts = mode === 'contract' ? contractCounts : tripCounts;
 
+  // Keep latest export data in a ref so the store-publish effect doesn't
+  // re-run on every data change (which caused an infinite update loop).
+  const exportDataRef = useRef(exportData);
+  exportDataRef.current = exportData;
+
   // Publish status-filter state to the shared store so the TopBar can render
   // the filter pills on the left edge of the sub-nav.
   useEffect(() => {
@@ -328,7 +333,7 @@ export default function Operations() {
       active: true, options: statusOptions, value: statusValue, onChange: onStatusChange, counts: statusCounts,
       mode,
       exportConfig: {
-        data: exportData,
+        get data() { return exportDataRef.current; },
         filename: isContractExport ? 'monthly-contracts' : 'trips',
         title: isContractExport ? 'Monthly Contracts' : 'Trips',
         columns: isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS,
@@ -336,7 +341,7 @@ export default function Operations() {
       onImported: () => { refetchTrips(); refetchInvoices(); },
     });
     return () => clearOpsFilter();
-  }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, exportData, isContractExport]);
+  }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
   const showTrips = mode === 'all' || mode === 'trip';

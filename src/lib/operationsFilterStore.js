@@ -39,3 +39,9 @@ export function subscribeOpsFilter(l) {
 export function useOpsFilter() {
   return useSyncExternalStore(subscribeOpsFilter, getOpsFilter, getOpsFilter);
 }
+
+// Selector that only re-renders when `search` changes — prevents infinite
+// update loops when Operations publishes filter config to the store.
+export function useOpsSearch() {
+  return useSyncExternalStore(subscribeOpsFilter, () => state.search, () => state.search);
+}
