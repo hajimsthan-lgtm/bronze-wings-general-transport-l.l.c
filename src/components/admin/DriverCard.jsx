@@ -9,6 +9,7 @@ import { useCardLock, useSpotlight, useScrollIntoViewWhenLocked } from '@/hooks/
 
 const ACCENT = '#a855f7';
 const STATUS_DOT = { active: '#34d399', on_leave: '#f59e0b', inactive: '#94a3b8' };
+export { ACCENT as DRIVER_ACCENT };
 
 function yearsLeft(dateStr) {
   if (!dateStr) return null;
@@ -24,12 +25,24 @@ export default function DriverCard({ d, onOpen, onEdit, onDelete }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
   const dot = STATUS_DOT[d.status] || '#94a3b8';
+  const { locked, handleClick, handleRedirect } = useCardLock(() => onOpen?.(d));
+  const { onMouseMove } = useSpotlight();
+  const lockRef = useScrollIntoViewWhenLocked(locked);
 
   return (
     <div
-      className="entity-card cursor-pointer animate-fade-in-up relative overflow-hidden group"
-      onClick={() => onOpen?.(d)}
+      ref={lockRef}
+      className={`entity-card spotlight spotlight-glow cursor-pointer animate-fade-in-up relative overflow-hidden group p-3.5 ${locked ? 'card-locked' : ''}`}
+      style={{ '--card-accent': ACCENT }}
+      onMouseMove={onMouseMove}
+      onClick={handleClick}
     >
+      {/* Redirect overlay — appears when locked */}
+      <div className="card-redirect-overlay" onClick={(e) => e.stopPropagation()}>
+        <button className="card-redirect-btn" onClick={handleRedirect}>
+          Open Details <ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
       <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-20" style={{ background: ACCENT }} />
 
       <div className="relative flex items-start justify-between">

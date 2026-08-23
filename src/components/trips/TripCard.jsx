@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { formatDate, formatCurrency } from '@/lib/formatters';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
+import { useCardLock, useSpotlight, useScrollIntoViewWhenLocked, shouldFlashNew } from '@/hooks/useCardLock';
 import { Truck, ArrowRight, Trash2, Check, Copy } from 'lucide-react';
 
 const STATUS = {
@@ -16,6 +17,10 @@ export default function TripCard({ trip, onClick, onDelete, driverMap, vehicleMa
 
   const st = STATUS[trip.status] || STATUS.scheduled;
   const revenue = Number(trip.revenue) || 0;
+  const { locked, handleClick, handleRedirect } = useCardLock(() => onClick?.(trip));
+  const { onMouseMove } = useSpotlight();
+  const lockRef = useScrollIntoViewWhenLocked(locked);
+  const isNew = shouldFlashNew(trip.id, trip.created_date);
 
   const handleLink = (e, map, name, path) => {
     e.stopPropagation();
@@ -40,15 +45,25 @@ export default function TripCard({ trip, onClick, onDelete, driverMap, vehicleMa
 
   return (
     <div
-      onClick={() => onClick?.(trip)}
-      className="group cursor-pointer rounded-2xl p-4 flex flex-col gap-3 relative"
+      ref={lockRef}
+      onMouseMove={onMouseMove}
+      onClick={handleClick}
+      className={`group card-spotlight card-spotlight-glow cursor-pointer rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden ${locked ? 'card-locked' : ''} ${isNew ? 'card-flash' : ''}`}
       style={{
+        '--card-accent': st.color,
+        '--trip-accent': st.color,
         background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.92) 0%, rgba(var(--surf-2-rgb),0.96) 100%)',
         border: `1px solid ${st.border}`,
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 24px rgba(0,0,0,0.08)',
         transition: 'transform .3s cubic-bezier(0.16,1,0.3,1), box-shadow .3s ease, border-color .3s ease',
       }}
     >
+      {/* Redirect overlay — appears when locked */}
+      <div className="card-redirect-overlay" onClick={(e) => e.stopPropagation()}>
+        <button className="card-redirect-btn" onClick={handleRedirect}>
+          Open Trip <ArrowRight className="w-3 h-3" />
+        </button>
+      </div>
       {/* ── Header: avatar + trip no + amount/status ── */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">

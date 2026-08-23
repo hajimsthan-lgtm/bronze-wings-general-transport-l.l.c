@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
@@ -28,6 +28,9 @@ import { safeAll } from '@/lib/safeRequest';
 export default function VehicleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const expandDocs = searchParams.get('expand') === 'documents';
+  const flashDocId = searchParams.get('doc');
   const { t } = useI18n();
   const [vehicle, setVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -247,9 +250,9 @@ export default function VehicleDetail() {
             {fTrips.map((trip) =>
               <div key={trip.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors">
                 <div className="col-span-2 text-muted-foreground truncate">{trip.trip_number || trip.id.slice(0, 6)}</div>
-                <div className="col-span-2 text-muted-foreground">{formatDate(trip.trip_date)}</div>
-                <div className="col-span-3 text-foreground truncate">{trip.from_location} → {trip.to_location}</div>
-                <div className="col-span-2 text-muted-foreground truncate">{trip.driver_name}</div>
+                <div className="col-span-2 text-muted-foreground whitespace-nowrap">{formatDate(trip.trip_date)}</div>
+                <div className="col-span-3 text-foreground whitespace-normal break-words leading-tight">{trip.from_location} → {trip.to_location}</div>
+                <div className="col-span-2 text-muted-foreground whitespace-normal break-words leading-tight">{trip.driver_name}</div>
                 <div className="col-span-2 text-right font-semibold text-foreground tabular-nums">{formatCurrency(trip.revenue)}</div>
                 <div className="col-span-1 text-right"><StatusBadge status={trip.status} /></div>
               </div>
@@ -309,7 +312,7 @@ export default function VehicleDetail() {
           </RecordSectionCard>
 
           {/* Documents — small card, collapsed by default */}
-          <DocumentsSection entityType="vehicle" entityId={vehicle.id} accent="#a855f7" defaultOpen={false} />
+          <DocumentsSection entityType="vehicle" entityId={vehicle.id} accent="#a855f7" defaultOpen={false} autoExpand={expandDocs} flashDocId={flashDocId} />
 
           {/* Profit summary */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

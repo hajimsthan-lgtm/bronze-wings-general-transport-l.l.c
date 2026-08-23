@@ -80,3 +80,20 @@ export function useScrollIntoViewWhenLocked(locked) {
   }, [locked]);
   return ref;
 }
+
+/**
+ * Tracks which entity IDs have already been flashed so a one-time
+ * brightening animation only plays once per item, even across re-renders.
+ * Returns true if the item was created within `threshold` ms and hasn't
+ * been flashed yet.
+ */
+const _flashedIds = new Set();
+export function shouldFlashNew(id, createdDate, threshold = 15000) {
+  if (!id || !createdDate || _flashedIds.has(id)) return false;
+  const age = Date.now() - new Date(createdDate).getTime();
+  if (age < threshold) {
+    _flashedIds.add(id);
+    return true;
+  }
+  return false;
+}

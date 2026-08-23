@@ -22,16 +22,17 @@ const HEALTH_DOT_STYLE = {
   empty: {},
 };
 
-export default function DocumentsSection({ entityType, entityId, accent = '#a855f7', defaultOpen = false }) {
+export default function DocumentsSection({ entityType, entityId, accent = '#a855f7', defaultOpen = false, autoExpand = false, flashDocId = null }) {
   const { t } = useI18n();
   const { toast } = useToast();
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(defaultOpen || autoExpand);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const sectionRef = useState({ current: null })[0];
 
   const load = () => {
     setLoading(true);
@@ -45,6 +46,17 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
     if (entityId) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityType, entityId]);
+
+  // Auto-expand: open the section and scroll it into view
+  useEffect(() => {
+    if (autoExpand && sectionRef.current) {
+      setOpen(true);
+      requestAnimationFrame(() => {
+        sectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoExpand, entityId]);
 
   const health = summarizeHealth(docs);
   const healthLevel = getHealthLevel(docs);
@@ -124,8 +136,9 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
 
   return (
     <div
+      ref={(el) => { sectionRef.current = el; }}
       className="glass-card rounded-2xl overflow-hidden transition-all duration-200 animate-fade-in-up"
-      style={{ borderLeft: `4px solid ${accent}` }}
+      style={{ borderLeft: `4px solid ${accent}`, '--doc-accent': accent }}
     >
       {/* Header */}
       <div
@@ -257,10 +270,11 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                   {docs.map((d) => {
                     const st = getDocStatus(d);
                     const subtext = getExpirySubtext(d.expiry_date);
+                    const isFlashing = flashDocId === d.id;
                     return (
                       <div
                         key={d.id}
-                        className="grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors"
+                        className={`grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors ${isFlashing ? 'doc-row-flash' : ''}`}
                       >
                         {/* Title + status dot */}
                         <div className="col-span-4 flex items-center gap-2 text-foreground font-medium truncate min-w-0">

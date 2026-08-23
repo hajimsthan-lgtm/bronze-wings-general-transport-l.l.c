@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import EntityDetailHeader from '@/components/admin/EntityDetailHeader';
@@ -37,6 +37,9 @@ const yearsSince = (d) =>
 
 export default function DriverDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const expandDocs = searchParams.get('expand') === 'documents';
+  const flashDocId = searchParams.get('doc');
   const { t } = useI18n();
   const { toast } = useToast();
   const [driver, setDriver] = useState(null);
