@@ -304,6 +304,15 @@ export default function LedgerPage({
               Clear Filters
             </button>
           )}
+          <div className="ml-auto">
+            <ExportButtons
+              data={chronologicalDisplay}
+              filename={exportFilename}
+              columns={exportColumns}
+              title={exportTitle}
+              options={{ dateRange: dateRangeLabel, landscape: true }}
+            />
+          </div>
         </div>
         <div className="h-px bg-white/5" />
 

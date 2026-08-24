@@ -2,13 +2,13 @@ import { Wallet } from 'lucide-react';
 import LedgerPage from '@/components/cash/LedgerPage';
 
 const EXPORT_COLS = [
-  { key: 'date', label: 'Date' },
-  { key: 'recipient', label: 'Recipient' },
-  { key: 'ref', label: 'Receipt #' },
-  { key: 'description', label: 'Description' },
-  { key: 'in', label: 'Inflow', numeric: true },
-  { key: 'out', label: 'Outflow', numeric: true },
-  { key: 'running_balance', label: 'Running Balance', numeric: true }
+  { key: 'date', label: 'Date', w: 30 },
+  { key: 'recipient', label: 'Recipient', w: 35 },
+  { key: 'ref', label: 'Receipt #', w: 25, noWrap: true },
+  { key: 'description', label: 'Description', w: 50 },
+  { key: 'in', label: 'Inflow', numeric: true, w: 28 },
+  { key: 'out', label: 'Outflow', numeric: true, w: 28 },
+  { key: 'running_balance', label: 'Running Balance', numeric: true, w: 34 }
 ];
 
 export default function Cash() {

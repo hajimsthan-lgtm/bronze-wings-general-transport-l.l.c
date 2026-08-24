@@ -2,12 +2,12 @@ import { Landmark } from 'lucide-react';
 import LedgerPage from '@/components/cash/LedgerPage';
 
 const EXPORT_COLS = [
-  { key: 'date', label: 'Date' },
-  { key: 'ref', label: 'Reference #' },
-  { key: 'description', label: 'Description' },
-  { key: 'in', label: 'Deposit', numeric: true },
-  { key: 'out', label: 'Withdrawal', numeric: true },
-  { key: 'running_balance', label: 'Running Balance', numeric: true }
+  { key: 'date', label: 'Date', w: 28 },
+  { key: 'ref', label: 'Reference #', w: 28, noWrap: true },
+  { key: 'description', label: 'Description', w: 60 },
+  { key: 'in', label: 'Deposit', numeric: true, w: 30 },
+  { key: 'out', label: 'Withdrawal', numeric: true, w: 30 },
+  { key: 'running_balance', label: 'Running Balance', numeric: true, w: 34 }
 ];
 
 export default function BankReconciliation() {
