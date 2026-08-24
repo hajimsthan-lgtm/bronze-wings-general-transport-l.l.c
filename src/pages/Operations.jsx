@@ -21,6 +21,9 @@ import TripDetailSheet from '@/components/trips/TripDetailSheet';
 import DraftsTable from '@/components/operations/DraftsTable';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsStats from '@/components/operations/OperationsStats';
+import MobileOperationsStats from '@/components/operations/MobileOperationsStats';
+import MobileTripsSection from '@/components/operations/MobileTripsSection';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -81,6 +84,7 @@ export default function Operations() {
   const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
 
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
+  const isMobile = useIsMobile();
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('table');
   const search = useOpsSearch();
@@ -391,14 +395,25 @@ export default function Operations() {
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
         <div className="mb-3">
-          <OperationsStats
-            mode={mode}
-            tripsCount={filteredTrips.length}
-            totalRevenue={totalRevenue}
-            tripCounts={tripCounts}
-            contractsCount={filteredContracts.length}
-            contractCounts={contractCounts}
-          />
+          {isMobile ? (
+            <MobileOperationsStats
+              mode={mode}
+              tripsCount={filteredTrips.length}
+              totalRevenue={totalRevenue}
+              tripCounts={tripCounts}
+              contractsCount={filteredContracts.length}
+              contractCounts={contractCounts}
+            />
+          ) : (
+            <OperationsStats
+              mode={mode}
+              tripsCount={filteredTrips.length}
+              totalRevenue={totalRevenue}
+              tripCounts={tripCounts}
+              contractsCount={filteredContracts.length}
+              contractCounts={contractCounts}
+            />
+          )}
         </div>
         {/* Search & filter controls moved to the sticky sub-header (TopBar) */}
 
@@ -430,19 +445,35 @@ export default function Operations() {
               />
             )}
             {showTrips && filteredTrips.length > 0 && (
-              <CollapsibleSection
-                icon={Landmark}
-                label={t('trips_section')}
-                count={filteredTrips.length}
-                accent="blue"
-                defaultCollapsed={false}
-              >
-                {viewMode === 'card'
-                  ? tripGrid(filteredTrips)
-                  : viewMode === 'table'
-                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
-                  : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
-              </CollapsibleSection>
+              isMobile ? (
+                <MobileTripsSection
+                  trips={filteredTrips}
+                  onOpenDetail={openDetailTrip}
+                  onEdit={openEditTrip}
+                  onDelete={handleDeleteTrip}
+                  onStatusUpdated={refetchTrips}
+                  driverMap={driverMap}
+                  vehicleMap={vehicleMap}
+                  clientMap={clientMap}
+                  invoiceMap={invoiceMap}
+                  onBulkStatus={handleBulkTripStatus}
+                  onBulkDelete={handleBulkTripDelete}
+                />
+              ) : (
+                <CollapsibleSection
+                  icon={Landmark}
+                  label={t('trips_section')}
+                  count={filteredTrips.length}
+                  accent="blue"
+                  defaultCollapsed={false}
+                >
+                  {viewMode === 'card'
+                    ? tripGrid(filteredTrips)
+                    : viewMode === 'table'
+                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                    : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
+                </CollapsibleSection>
+              )
             )}
             {showContracts && filteredContracts.length > 0 && (
               <CollapsibleSection
