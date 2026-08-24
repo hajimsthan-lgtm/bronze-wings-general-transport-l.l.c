@@ -44,6 +44,7 @@ export const navItems = [
     children: [
       { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: 'Landmark', color: '#6366f1' },
       { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: 'Wallet', color: '#f59e0b' },
+      { key: 'vat_corporate_tax', label: 'VAT & Corp Tax', path: '/accounts/vat-corporate-tax', icon: 'Landmark', color: '#ef4444' },
     ],
   },
   {

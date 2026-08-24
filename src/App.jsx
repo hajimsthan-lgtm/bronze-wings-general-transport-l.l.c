@@ -35,6 +35,7 @@ const ProfitLoss = lazy(() => import('@/pages/ProfitLoss'));
 const Soa = lazy(() => import('@/pages/Soa'));
 const BankReconciliation = lazy(() => import('@/pages/BankReconciliation'));
 const PettyCash = lazy(() => import('@/pages/Cash'));
+const VatCorporateTax = lazy(() => import('@/pages/VatCorporateTax'));
 const Fuel = lazy(() => import('@/pages/Fuel'));
 const Vehicles = lazy(() => import('@/pages/admin/Vehicles'));
 const Drivers = lazy(() => import('@/pages/admin/Drivers'));
@@ -97,6 +98,7 @@ const AuthenticatedApp = () => {
           <Route path="/reports/soa" element={<Soa />} />
           <Route path="/reports/bank-reconciliation" element={<BankReconciliation />} />
           <Route path="/accounts/petty-cash" element={<PettyCash />} />
+          <Route path="/accounts/vat-corporate-tax" element={<VatCorporateTax />} />
           <Route path="/fuel" element={<Fuel />} />
           <Route path="/accounts/quotations" element={<Quotations />} />
           <Route path="/accounts/agreements" element={<Agreements />} />

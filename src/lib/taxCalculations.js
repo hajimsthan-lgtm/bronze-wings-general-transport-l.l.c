@@ -1,5 +1,5 @@
 import { base44 } from '@/api/base44Client';
-import { withRetry, safeAll } from '@/lib/safeRequest';
+import { safeAll } from '@/lib/safeRequest';
 
 // UAE tax constants (current law)
 export const VAT_RATE = 0.05;
