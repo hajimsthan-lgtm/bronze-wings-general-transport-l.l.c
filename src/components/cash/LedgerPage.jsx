@@ -13,6 +13,7 @@ import ImportUndoBanner from '@/components/bank-rec/ImportUndoBanner';
 import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
 import ExcelLedgerTable from '@/components/cash/ExcelLedgerTable';
+import MobileLedgerList from '@/components/cash/MobileLedgerList';
 import { useLedgerState, setLedgerMode, setLedgerView, initLedger } from '@/lib/ledgerStore';
 
 const PANEL = {
@@ -269,14 +270,14 @@ export default function LedgerPage({
       )}
 
         {/* summary stat cards — always visible */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 px-3 py-3 sm:p-5">
           <ReportStatCard index={0} label={summaryLabels.inflow} value={totalIn} format={(v) => fmt(v)} icon={ArrowDownLeft} color="#34d399" />
           <ReportStatCard index={1} label={summaryLabels.outflow} value={totalOut} format={(v) => fmt(v)} icon={ArrowUpRight} color="#fb7185" />
           <ReportStatCard index={2} label={summaryLabels.balance} value={closingBalance} format={(v) => fmt(v)} icon={BalanceIcon} color="#3b82f6" />
         </div>
 
-        {/* date filter bar — always visible */}
-        <div className="p-5 flex flex-wrap items-end gap-3">
+        {/* date filter bar — desktop only (mobile uses TopBar search) */}
+        <div className="hidden md:flex p-5 flex-wrap items-end gap-3">
           <div>
             <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><CalendarRange className="w-3 h-3" /> From</label>
             <DatePicker value={filterFrom || ''} onChange={(v) => setFilterFrom(v)} />
@@ -317,7 +318,7 @@ export default function LedgerPage({
           {/* STATEMENT VIEW — inline add form */}
           {view === 'statement' && (
             <>
-              <form onSubmit={addEntry} className="p-5">
+              <form onSubmit={addEntry} className="px-3 py-3 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                  <h2 className="text-sm font-semibold text-white flex items-center gap-2">
                    <Plus className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent-rgb))' }} /> {editId ? 'Edit Entry' : 'Add Entry'}
@@ -398,8 +399,30 @@ export default function LedgerPage({
             </div>
           )}
 
-          {/* Excel-like table with smart filters */}
-          <div style={PANEL}>
+          {/* Mobile card list — breathable transaction cards */}
+          <div className="md:hidden" style={PANEL}>
+            {rows === null ? (
+              <div className="p-10"><LoadingSpinner /></div>
+            ) : (
+              <MobileLedgerList
+                rows={display}
+                refKey="ref"
+                refLabel={refLabel}
+                hasRecipient={hasRecipient}
+                inflowLabel={inflowLabel}
+                outflowLabel={outflowLabel}
+                onEdit={view === 'statement' ? startEdit : undefined}
+                onDelete={view === 'statement' ? remove : undefined}
+                showActions={view === 'statement'}
+                emptyIcon={view === 'report' ? Search : Plus}
+                emptyTitle={view === 'report' ? 'No entries match your filters' : 'No entries yet'}
+                emptyDescription={view === 'report' ? 'Try adjusting your date range or search query.' : 'Add your first transaction using the form above.'}
+              />
+            )}
+          </div>
+
+          {/* Desktop Excel-like table with smart filters */}
+          <div className="hidden md:block" style={PANEL}>
             {rows === null ? (
               <div className="p-10"><LoadingSpinner /></div>
             ) : (
