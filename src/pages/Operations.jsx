@@ -388,7 +388,7 @@ export default function Operations() {
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
-        <div className="mb-4">
+        <div className="mb-3">
           <OperationsStats
             mode={mode}
             tripsCount={filteredTrips.length}
@@ -403,7 +403,7 @@ export default function Operations() {
         {loading ? (
           <LoadingSpinner />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Drafts — only visible when drafts exist */}
             {showTrips && draftTrips.length > 0 && (
               <CollapsibleSection
@@ -433,7 +433,7 @@ export default function Operations() {
                 label={t('trips_section')}
                 count={filteredTrips.length}
                 accent="blue"
-                defaultCollapsed={true}
+                defaultCollapsed={false}
               >
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
@@ -448,7 +448,7 @@ export default function Operations() {
                 label={t('contracts_section')}
                 count={filteredContracts.length}
                 accent="violet"
-                defaultCollapsed={true}
+                defaultCollapsed={false}
               >
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
