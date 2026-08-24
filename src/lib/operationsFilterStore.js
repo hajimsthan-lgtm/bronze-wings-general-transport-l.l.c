@@ -53,3 +53,9 @@ export function useOpsFilter() {
 export function useOpsSearch() {
   return useSyncExternalStore(subscribeOpsFilter, () => state.search, () => state.search);
 }
+
+// Selector that only re-renders when `bulk` changes — lets the Operations
+// page feed bulk state to MobileBulkActionBar without triggering loops.
+export function useOpsBulk() {
+  return useSyncExternalStore(subscribeOpsFilter, () => state.bulk, () => state.bulk);
+}

@@ -26,7 +26,8 @@ import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit, Plus } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
-import { setOpsFilter, clearOpsFilter, useOpsSearch } from '@/lib/operationsFilterStore';
+import MobileBulkActionBar from '@/components/operations/MobileBulkActionBar';
+import { setOpsFilter, clearOpsFilter, useOpsSearch, useOpsBulk } from '@/lib/operationsFilterStore';
 import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
@@ -83,6 +84,7 @@ export default function Operations() {
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('table');
   const search = useOpsSearch();
+  const opsBulk = useOpsBulk();
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
 
@@ -488,6 +490,8 @@ export default function Operations() {
       />
 
       <MobileFAB icon={Plus} onClick={mode === 'contract' ? openNewContract : openNewTrip} label={mode === 'contract' ? 'New Contract' : 'New Trip'} />
+
+      <MobileBulkActionBar bulk={opsBulk} />
     </div>
   );
 }
