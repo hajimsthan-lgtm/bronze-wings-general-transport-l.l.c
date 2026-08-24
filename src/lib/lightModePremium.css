@@ -1,0 +1,1064 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT MODE PREMIUM DESIGN SYSTEM
+   Clean, modern, premium SaaS dashboard with excellent readability,
+   stronger visual hierarchy, subtle depth, and accessible contrast.
+   Applied globally via .theme-light scope.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═════ 1. PAGE BACKGROUND & CANVAS ═════ */
+.theme-light body {
+  background: #F5F7FA !important;
+  color: #172033 !important;
+}
+
+.theme-light #root {
+  background: #F5F7FA;
+}
+
+.theme-light .professional-page-bg {
+  background:
+    radial-gradient(ellipse 60% 50% at 82% 4%, rgba(59,130,246,0.04), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 18% 8%, rgba(147,197,253,0.03), transparent 50%),
+    linear-gradient(180deg, #F5F7FA 0%, #F1F5F9 100%) !important;
+}
+
+/* ═════ 2. HEADER / TOP NAVIGATION ═════ */
+.theme-light .obsidian-header,
+.theme-light header[class*="bg-"],
+.theme-light [class*="bg-card"][class*="border-b"] {
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Header inner rows */
+.theme-light .obsidian-header-row {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .obsidian-subnav-row {
+  background: #F8FAFC !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9) !important;
+}
+
+/* ═════ 3. SEARCH BOX ═════ */
+.theme-light .search-2026,
+.theme-light .industrial-search-input {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #172033 !important;
+}
+
+.theme-light .search-2026::placeholder,
+.theme-light .industrial-search-input::placeholder {
+  color: #7B8494 !important;
+}
+
+.theme-light .search-2026:focus,
+.theme-light .industrial-search:focus-within {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+}
+
+.theme-light .industrial-search-icon {
+  color: #64748B !important;
+}
+
+.theme-light .industrial-search-core {
+  background: #F5F7FA !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), inset 0 0 0 1px #D9E0EA !important;
+}
+
+.theme-light .industrial-search-cap {
+  background: linear-gradient(180deg, #F1F5F9, #E2E8F0) !important;
+  border-color: #D9E0EA !important;
+}
+
+/* ═════ 4. NOTIFICATION BELL BUTTON ═════ */
+.theme-light .alert-bell-btn {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .alert-bell-btn:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.4) !important;
+  color: #172033 !important;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.08) !important;
+}
+
+/* Bell icon — dark in light mode instead of gold */
+.theme-light .alert-bell-btn .bell-gold-swing {
+  color: #475569 !important;
+  filter: none !important;
+}
+
+/* Notification badge — stays red with white border for separation */
+.theme-light .alert-bell-btn [class*="absolute"][class*="rounded-full"][class*="text-white"] {
+  border: 1.5px solid #FFFFFF !important;
+  box-shadow: 0 0 6px rgba(239,68,68,0.4), 0 0 0 1px rgba(0,0,0,0.04) !important;
+}
+
+/* ═════ 5. NOTIFICATION PANEL — Premium Floating Panel ═════ */
+.theme-light .alert-bell-panel {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 35px rgba(15,23,42,0.14), 0 0 0 1px rgba(217,224,234,0.5) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Panel header text */
+.theme-light .alert-bell-panel .text-white {
+  color: #172033 !important;
+}
+
+.theme-light .alert-bell-panel .text-white\/45,
+.theme-light .alert-bell-panel .text-white\/40,
+.theme-light .alert-bell-panel .text-white\/35 {
+  color: #7B8494 !important;
+  opacity: 1 !important;
+}
+
+/* Panel close button */
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="hover\:bg-white"] {
+  background: #F1F5F9 !important;
+  color: #5B6577 !important;
+  border: 1px solid #D9E0EA;
+}
+
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="hover\:bg-white"]:hover {
+  background: #E2E8F0 !important;
+  color: #172033 !important;
+}
+
+/* Panel header border */
+.theme-light .alert-bell-panel .border-white\/\[0\.06\] {
+  border-color: #D9E0EA !important;
+}
+
+/* ═════ 6. NOTIFICATION FILTER PILLS ═════ */
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="uppercase"] {
+  height: 24px;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  transition: all 0.18s ease !important;
+}
+
+/* Active "All" filter — light blue */
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="uppercase"][style*="panel-accent"] {
+  background: rgba(59,130,246,0.10) !important;
+  border: 1px solid rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+}
+
+/* Inactive filter */
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="uppercase"][style*="rgba(255,255,255,0.04)"] {
+  background: #F1F5F9 !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .alert-bell-panel button[class*="rounded-full"][class*="uppercase"][style*="rgba(255,255,255,0.04)"]:hover {
+  background: #E2E8F0 !important;
+  border-color: rgba(59,130,246,0.25) !important;
+  color: #172033 !important;
+}
+
+/* Category count pills — soft orange/amber */
+.theme-light .alert-bell-panel button[style*="color"][style*="border"][style*="background"] {
+  font-weight: 600 !important;
+}
+
+/* ═════ 7. NOTIFICATION CATEGORY HEADERS (TripsOperationsSection) ═════ */
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.02\]"],
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.015\]"] {
+  background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02)) !important;
+  border: 1px solid rgba(16,185,129,0.15) !important;
+  border-radius: 10px;
+}
+
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.02\]"] .text-white,
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.015\]"] .text-white {
+  color: #172033 !important;
+}
+
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.02\]"] .text-white\/50,
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.015\]"] .text-white\/50,
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.02\]"] .text-white\/40,
+.theme-light .alert-bell-panel [class*="bg-white\/\[0\.015\]"] .text-white\/40 {
+  color: #5B6577 !important;
+  opacity: 1 !important;
+}
+
+/* ═════ 8. INDIVIDUAL NOTIFICATION CARDS ═════ */
+.theme-light .bell-perspective-item {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04) !important;
+  transition: all 0.18s ease !important;
+}
+
+.theme-light .bell-perspective-item.is-center {
+  background: #FFFFFF !important;
+  border-color: color-mix(in srgb, var(--sev-color, #3B82F6) 30%, #E2E8F0) !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.06), 0 0 0 1px color-mix(in srgb, var(--sev-color, #3B82F6) 12%, transparent) !important;
+}
+
+.theme-light .bell-perspective-item.is-center:hover {
+  background: #F8FAFC !important;
+  border-color: color-mix(in srgb, var(--sev-color, #3B82F6) 45%, transparent) !important;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08), 0 0 0 1px color-mix(in srgb, var(--sev-color, #3B82F6) 20%, transparent) !important;
+  transform: translateY(-1px);
+}
+
+/* Notification title */
+.theme-light .bell-perspective-title {
+  color: #172033 !important;
+  font-weight: 700 !important;
+}
+
+/* Notification subtext */
+.theme-light .bell-perspective-sub {
+  color: #5B6577 !important;
+}
+
+/* Notification meta (expiry info) */
+.theme-light .bell-perspective-meta {
+  color: #7B8494 !important;
+  font-weight: 600 !important;
+}
+
+/* Chevron arrow */
+.theme-light .bell-perspective-item .lucide {
+  color: #94A3B8 !important;
+}
+
+.theme-light .bell-perspective-item:hover .lucide {
+  color: #475569 !important;
+}
+
+/* ═════ 9. NOTIFICATION SEVERITY ICONS ═════ */
+.theme-light .bell-perspective-icon {
+  background: linear-gradient(145deg, #F8FAFC, #F1F5F9) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 3px rgba(15,23,42,0.06) !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+/* Severity-colored icon backgrounds */
+.theme-light .bell-perspective-item[data-severity="critical"] .bell-perspective-icon,
+.theme-light .bell-perspective-item.is-critical .bell-perspective-icon {
+  background: #FEF2F2 !important;
+  border-color: rgba(239,68,68,0.2) !important;
+}
+
+/* ═════ 10. NOTIFICATION REDIRECT BAR ═════ */
+.theme-light .bell-redirect-bar {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.02)) !important;
+  border: 1px solid rgba(59,130,246,0.18) !important;
+  border-radius: 10px !important;
+}
+
+.theme-light .bell-redirect-title {
+  color: #172033 !important;
+}
+
+.theme-light .bell-redirect-btn {
+  box-shadow: 0 2px 8px rgba(59,130,246,0.2) !important;
+}
+
+/* ═════ 11. HOVER INFO BAR ═════ */
+.theme-light .bell-hover-info {
+  background: #F8FAFC !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 10px !important;
+}
+
+.theme-light .bell-hover-info-title { color: #172033 !important; }
+.theme-light .bell-hover-info-desc { color: #5B6577 !important; }
+.theme-light .bell-hover-info-hint { color: #7B8494 !important; }
+
+/* ═════ 12. DASHBOARD CARDS — Global ═════ */
+.theme-light .glass-card,
+.theme-light .clay-card,
+.theme-light .entity-card,
+.theme-light .glass-card-hover,
+.theme-light .kpi-card,
+.theme-light .stat-tile,
+.theme-light .glass-panel,
+.theme-light .glass,
+.theme-light .glass-sm,
+.theme-light .detail-header-card {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 4px 12px rgba(15,23,42,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.theme-light .glass-card:hover,
+.theme-light .clay-card:hover,
+.theme-light .entity-card:hover,
+.theme-light .glass-card-hover:hover,
+.theme-light .kpi-card:hover,
+.theme-light .stat-tile:hover,
+.theme-light .glass-panel:hover,
+.theme-light .glass:hover {
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 4px 16px rgba(15,23,42,0.06), 0 0 0 1px rgba(59,130,246,0.06) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Card text */
+.theme-light .glass-card .text-white,
+.theme-light .entity-card .text-white,
+.theme-light .kpi-card .text-white,
+.theme-light .stat-tile .text-white,
+.theme-light .glass-panel .text-white {
+  color: #172033 !important;
+}
+
+/* ═════ 13. CARD HEADERS ═════ */
+.theme-light .glass-card [class*="border-b"],
+.theme-light .glass-panel [class*="border-b"],
+.theme-light [class*="border-white\/[0.06]"],
+.theme-light [class*="border-white\/\[0\.06\]"] {
+  border-color: #D9E0EA !important;
+}
+
+/* Card header action icons — visible contrast */
+.theme-light .glass-card button[class*="text-white"],
+.theme-light .glass-panel button[class*="text-white"],
+.theme-light .entity-card button[class*="text-white"] {
+  color: #5B6577 !important;
+}
+
+.theme-light .glass-card button[class*="text-white"]:hover,
+.theme-light .glass-panel button[class*="text-white"]:hover,
+.theme-light .entity-card button[class*="text-white"]:hover {
+  color: #172033 !important;
+  background: #F1F5F9 !important;
+}
+
+/* ═════ 14. EMPTY STATES ═════ */
+.theme-light .empty-orb {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(147,197,253,0.04)) !important;
+  border: 1px solid rgba(59,130,246,0.15) !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .empty-orb .lucide,
+.theme-light .empty-orb svg {
+  color: #2563EB !important;
+}
+
+/* ═════ 15. BUTTONS ═════ */
+.theme-light .clay-btn-ghost {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  color: #172033 !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .clay-btn-ghost:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06) !important;
+}
+
+/* shadcn Button outline variant */
+.theme-light .btn-outline,
+.theme-light button[class*="border"][class*="bg-card"] {
+  background: #FFFFFF !important;
+  border-color: #D9E0EA !important;
+  color: #172033 !important;
+}
+
+.theme-light .btn-outline:hover,
+.theme-light button[class*="border"][class*="bg-card"]:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #2563EB !important;
+}
+
+/* ═════ 16. ICON BUTTONS ═════ */
+.theme-light button[class*="rounded-full"][class*="bg-white\/5"],
+.theme-light button[class*="rounded-full"][class*="bg-white\/10"],
+.theme-light button[class*="rounded-lg"][class*="bg-white\/5"],
+.theme-light button[class*="rounded-lg"][class*="bg-white\/10"] {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light button[class*="rounded-full"][class*="bg-white\/5"]:hover,
+.theme-light button[class*="rounded-full"][class*="bg-white\/10"]:hover,
+.theme-light button[class*="rounded-lg"][class*="bg-white\/5"]:hover,
+.theme-light button[class*="rounded-lg"][class*="bg-white\/10"]:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #2563EB !important;
+}
+
+/* ═════ 17. TABLES ═════ */
+.theme-light table,
+.theme-light .trips-grid-table {
+  background: #FFFFFF !important;
+}
+
+.theme-light thead,
+.theme-light .trips-grid-th {
+  background: #F8FAFC !important;
+  color: #172033 !important;
+  font-weight: 600 !important;
+}
+
+.theme-light .trips-grid-th {
+  border-bottom: 1px solid #D9E0EA !important;
+  border-right: 1px solid #E2E8F0 !important;
+}
+
+.theme-light tbody tr,
+.theme-light .trips-grid-table tr {
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.theme-light tbody tr:hover,
+.theme-light .trips-grid-table tr:hover {
+  background: #F8FAFC !important;
+}
+
+.theme-light .trips-grid-td {
+  border-bottom: 1px solid #E2E8F0 !important;
+  border-right: 1px solid #E2E8F0 !important;
+  color: #172033 !important;
+}
+
+/* ═════ 18. STATUS BADGES ═════ */
+.theme-light .badge,
+.theme-light [class*="bg-emerald-500\/10"],
+.theme-light [class*="bg-red-500\/10"],
+.theme-light [class*="bg-amber-500\/10"],
+.theme-light [class*="bg-blue-500\/10"] {
+  font-weight: 600 !important;
+  border-radius: 9999px !important;
+}
+
+/* ═════ 19. FORMS AND INPUTS ═════ */
+.theme-light input[class*="bg-input"],
+.theme-light input[class*="bg-background"],
+.theme-light textarea[class*="bg-input"],
+.theme-light textarea[class*="bg-background"],
+.theme-light select[class*="bg-input"],
+.theme-light select[class*="bg-background"] {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  color: #172033 !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+
+.theme-light input[class*="bg-input"]:focus,
+.theme-light input[class*="bg-background"]:focus,
+.theme-light textarea[class*="bg-input"]:focus,
+.theme-light textarea[class*="bg-background"]:focus,
+.theme-light select[class*="bg-input"]:focus,
+.theme-light select[class*="bg-background"]:focus {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+}
+
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
+  color: #7B8494 !important;
+  opacity: 0.7 !important;
+}
+
+/* Select trigger */
+.theme-light [class*="bg-card"][class*="border"][role="combobox"],
+.theme-light [class*="bg-card"][class*="border"] button[role="combobox"] {
+  background: #FFFFFF !important;
+  border-color: #D9E0EA !important;
+  color: #172033 !important;
+}
+
+/* ═════ 20. DROPDOWNS AND MENUS ═════ */
+.theme-light [data-radix-popper-content-wrapper] > * {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.theme-light [role="menu"],
+.theme-light [role="listbox"],
+.theme-light .popover-content {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.12) !important;
+}
+
+.theme-light [role="menuitem"],
+.theme-light [role="option"] {
+  color: #172033 !important;
+}
+
+.theme-light [role="menuitem"]:hover,
+.theme-light [role="option"]:hover {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+.theme-light [role="menuitem"][data-highlighted],
+.theme-light [role="option"][data-highlighted] {
+  background: #F1F5F9 !important;
+  color: #172033 !important;
+}
+
+/* ═════ 21. MODALS ═════ */
+.theme-light [role="dialog"],
+.theme-light [data-state="open"][role="dialog"] {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.15) !important;
+}
+
+.theme-light .fixed.inset-0.bg-black\/85,
+.theme-light [class*="bg-black\/85"],
+.theme-light [class*="bg-black\/80"] {
+  background: rgba(15,23,42,0.35) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* Modal title */
+.theme-light [role="dialog"] [class*="text-lg"],
+.theme-light [role="dialog"] h2,
+.theme-light [role="dialog"] h3 {
+  color: #172033 !important;
+}
+
+/* Modal body text */
+.theme-light [role="dialog"] p,
+.theme-light [role="dialog"] span,
+.theme-light [role="dialog"] label {
+  color: #5B6577;
+}
+
+.theme-light [role="dialog"] [class*="text-white"] {
+  color: #172033 !important;
+}
+
+/* ═════ 22. TABS ═════ */
+.theme-light [role="tab"] {
+  color: #5B6577 !important;
+  border: 1px solid transparent !important;
+}
+
+.theme-light [role="tab"]:hover {
+  color: #172033 !important;
+  background: #F1F5F9 !important;
+}
+
+.theme-light [role="tab"][data-state="active"] {
+  background: rgba(59,130,246,0.08) !important;
+  border-color: rgba(59,130,246,0.25) !important;
+  color: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08) !important;
+}
+
+/* ═════ 23. SUB-TABS ═════ */
+.theme-light .sub-tab {
+  color: #5B6577 !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+.theme-light .sub-tab:hover {
+  color: #172033 !important;
+  background: #F1F5F9 !important;
+}
+
+.theme-light .sub-tab-active {
+  background: rgba(59,130,246,0.10) !important;
+  border-color: rgba(59,130,246,0.30) !important;
+  color: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08) !important;
+}
+
+/* ═════ 24. NAV PILLS ═════ */
+.theme-light .obsidian-nav-pill {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .obsidian-nav-pill:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #172033 !important;
+}
+
+.theme-light .obsidian-nav-pill-active {
+  background: rgba(59,130,246,0.10) !important;
+  border-color: rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08) !important;
+}
+
+.theme-light .obsidian-subnav-pill {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .obsidian-subnav-pill:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #172033 !important;
+}
+
+.theme-light .obsidian-subnav-pill-active {
+  background: rgba(59,130,246,0.10) !important;
+  border-color: rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+}
+
+.theme-light .subnav-pill {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .subnav-pill:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #172033 !important;
+}
+
+.theme-light .subnav-pill-active {
+  background: rgba(59,130,246,0.10) !important;
+  border-color: rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+}
+
+/* ═════ 25. FILTER CHIPS ═════ */
+.theme-light .filter-chip {
+  background: #F1F5F9 !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .filter-chip:hover {
+  background: #E2E8F0 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #172033 !important;
+}
+
+.theme-light .filter-chip-active {
+  background: rgba(59,130,246,0.10) !important;
+  border-color: rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+}
+
+/* ═════ 26. SIDEBAR ═════ */
+.theme-light .morph-sidebar,
+.theme-light .skeuo-sidebar {
+  background: #FFFFFF !important;
+  border-right: 1px solid #D9E0EA !important;
+  box-shadow: 4px 0 24px rgba(15,23,42,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.theme-light .morph-row,
+.theme-light .skeuo-nav-row {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: none !important;
+}
+
+.theme-light .morph-row:hover,
+.theme-light .skeuo-nav-row:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .morph-row-active,
+.theme-light .skeuo-nav-row-active {
+  background: rgba(59,130,246,0.08) !important;
+  border-color: rgba(59,130,246,0.25) !important;
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,0.1) !important;
+}
+
+/* Sidebar nav text */
+.theme-light .morph-row .text-white,
+.theme-light .skeuo-nav-row .text-white {
+  color: #172033 !important;
+}
+
+.theme-light .morph-row .text-white\/50,
+.theme-light .skeuo-nav-row .text-white\/50,
+.theme-light .morph-row .text-white\/40,
+.theme-light .skeuo-nav-row .text-white\/40 {
+  color: #7B8494 !important;
+  opacity: 1 !important;
+}
+
+/* ═════ 27. SCROLLBAR ═════ */
+.theme-light .trips-scroll::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+}
+
+.theme-light .trips-scroll::-webkit-scrollbar-thumb {
+  background: rgba(59,130,246,0.4) !important;
+  border-color: #F1F5F9 !important;
+}
+
+.theme-light .trips-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(59,130,246,0.6) !important;
+}
+
+/* ═════ 28. TOAST NOTIFICATIONS ═════ */
+.theme-light [data-sonner-toast],
+.theme-light [class*="bg-card"][class*="border"][class*="shadow"][role="status"] {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  color: #172033 !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.10) !important;
+}
+
+/* ═════ 29. ALERT/DIALOG BACKDROP ═════ */
+.theme-light [role="alertdialog"] {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.15) !important;
+}
+
+/* ═════ 30. PROGRESS BARS ═════ */
+.theme-light [class*="bg-white\/5"][class*="h-full"],
+.theme-light [class*="bg-white\/\[0\.04\]"][class*="h-full"] {
+  background: #E2E8F0 !important;
+}
+
+/* ═════ 31. DIVIDERS ═════ */
+.theme-light hr,
+.theme-light [class*="divide-white"],
+.theme-light [class*="border-t"][class*="border-white"] {
+  border-color: #D9E0EA !important;
+}
+
+/* ═════ 32. TEXT SELECTION ═════ */
+.theme-light ::selection {
+  background: rgba(59,130,246,0.15) !important;
+  color: #172033 !important;
+}
+
+/* ═════ 33. FOCUS RING ═════ */
+.theme-light button:focus-visible,
+.theme-light a:focus-visible,
+.theme-light input:focus-visible,
+.theme-light select:focus-visible,
+.theme-light textarea:focus-visible,
+.theme-light [role="button"]:focus-visible {
+  outline: 2px solid rgba(59,130,246,0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* ═════ 34. ROW CARDS (list items) ═════ */
+.theme-light .row-card {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.03) !important;
+}
+
+.theme-light .row-card:hover {
+  background: #F8FAFC !important;
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.06) !important;
+}
+
+.theme-light .row-card::before,
+.theme-light .row-card::after {
+  display: none !important;
+}
+
+/* ═════ 35. CLAY CARDS (legacy) ═════ */
+.theme-light .clay,
+.theme-light .clay-sm {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 4px 12px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .clay:hover,
+.theme-light .clay-sm:hover {
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 4px 16px rgba(15,23,42,0.06) !important;
+}
+
+/* ═════ 36. CLAY CHIPS ═════ */
+.theme-light .clay-chip,
+.theme-light .clay-nav-chip {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+}
+
+.theme-light .clay-chip:hover,
+.theme-light .clay-nav-chip:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+}
+
+/* ═════ 37. CLAY INPUT ═════ */
+.theme-light .clay-input {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  color: #172033 !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+
+.theme-light .clay-input:focus {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+}
+
+.theme-light .clay-input::placeholder {
+  color: #7B8494 !important;
+}
+
+/* ═════ 38. HUD ICON TILE ═════ */
+.theme-light .hud-icon-tile {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04) !important;
+}
+
+/* ═════ 39. SKEUO SEARCH ═════ */
+.theme-light .skeuo-search {
+  background: #F5F7FA !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), 0 0 0 1px #D9E0EA !important;
+}
+
+.theme-light .skeuo-search:focus-within {
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), 0 0 0 1px rgba(59,130,246,0.3), 0 0 0 3px rgba(59,130,246,0.08) !important;
+}
+
+/* ═════ 40. SKEUO TILES ═════ */
+.theme-light .skeuo-tile,
+.theme-light .morph-tile {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+}
+
+.theme-light .skeuo-tile-raised,
+.theme-light .morph-tile-raised {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.05) !important;
+}
+
+.theme-light .skeuo-tile-pressed,
+.theme-light .morph-tile-pressed {
+  background: #E2E8F0 !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06) !important;
+}
+
+/* ═════ 41. SKEUO BRAND FRAME ═════ */
+.theme-light .skeuo-brand-frame {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 2px 6px rgba(15,23,42,0.04) !important;
+}
+
+/* ═════ 42. SKEUO TOGGLE ═════ */
+.theme-light .skeuo-toggle,
+.theme-light .morph-toggle {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+}
+
+.theme-light .skeuo-toggle:hover,
+.theme-light .morph-toggle:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.2) !important;
+}
+
+/* ═════ 43. CLAY RAIL ═════ */
+.theme-light .clay-rail {
+  background: #FFFFFF !important;
+  border-right: 1px solid #D9E0EA !important;
+  box-shadow: 4px 0 24px rgba(15,23,42,0.04) !important;
+}
+
+/* ═════ 44. NAV PILL INNER ═════ */
+.theme-light .nav-pill-inner {
+  background: #F5F7FA !important;
+  color: #2563EB !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), 0 0 0 1px #D9E0EA !important;
+}
+
+/* ═════ 45. CALC TOTAL GLOW ═════ */
+.theme-light .calc-total-glow {
+  background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(59,130,246,0.02)) !important;
+  border: 1px solid rgba(59,130,246,0.15) !important;
+  box-shadow: 0 1px 4px rgba(15,23,42,0.04) !important;
+}
+
+/* ═════ 46. TRIP SECTION ═════ */
+.theme-light .trip-section {
+  background: #FFFFFF !important;
+  border: 1px solid #D9E0EA !important;
+  border-left: 3px solid rgb(var(--section-accent)) !important;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04) !important;
+}
+
+.theme-light .trip-section:hover {
+  border-color: rgba(var(--section-accent), 0.3) !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.06) !important;
+}
+
+.theme-light .trip-section-icon {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+}
+
+/* ═════ 47. TRIP TYPE CARDS ═════ */
+.theme-light .trip-type-card {
+  background: #F5F7FA !important;
+  border: 1px solid #D9E0EA !important;
+  color: #5B6577 !important;
+}
+
+.theme-light .trip-type-card:hover {
+  background: #F1F5F9 !important;
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #172033 !important;
+}
+
+.theme-light .trip-type-card-active {
+  background: rgba(59,130,246,0.08) !important;
+  border-color: rgba(59,130,246,0.35) !important;
+  color: #2563EB !important;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.08) !important;
+}
+
+/* ═════ 48. STATUS PILL ═════ */
+.theme-light .status-pill {
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+}
+
+/* ═════ 49. SHEET (mobile bottom sheet) ═════ */
+.theme-light [role="dialog"][data-vaul-drawer] {
+  background: #FFFFFF !important;
+  border-top: 1px solid #D9E0EA !important;
+  box-shadow: 0 -8px 32px rgba(15,23,42,0.10) !important;
+}
+
+/* ═════ 50. ACCORDION ═════ */
+.theme-light [data-state="open"] > [class*="border-b"],
+.theme-light [class*="border-b"][class*="border-white"] {
+  border-color: #D9E0EA !important;
+}
+
+/* ═════ 51. CHECKBOX ═════ */
+.theme-light [role="checkbox"],
+.theme-light input[type="checkbox"] {
+  border-color: #D9E0EA !important;
+  background: #FFFFFF !important;
+}
+
+.theme-light [role="checkbox"][data-state="checked"],
+.theme-light input[type="checkbox"]:checked {
+  background: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: #FFFFFF !important;
+}
+
+/* ═════ 52. SWITCH ═════ */
+.theme-light [role="switch"] {
+  background: #E2E8F0 !important;
+  border-color: #D9E0EA !important;
+}
+
+.theme-light [role="switch"][data-state="checked"] {
+  background: hsl(var(--primary)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* ═════ 53. TOOLTIP ═════ */
+.theme-light [role="tooltip"],
+.theme-light [data-radix-tooltip-content] {
+  background: #172033 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #172033 !important;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.15) !important;
+}
+
+/* ═════ 54. HOVER STATES — Universal ═════ */
+.theme-light button:hover,
+.theme-light a:hover,
+.theme-light [role="button"]:hover {
+  transition: all 0.18s ease !important;
+}
+
+/* ═════ 55. SCROLL REVEAL / ANIMATION RESET ═════ */
+.theme-light .animate-fade-in-up,
+.theme-light .animate-enter-up,
+.theme-light .animate-stagger-in {
+  animation-duration: 0.3s !important;
+}
+
+/* ═════ 56. SHELL SURFACES ═════ */
+.theme-light .surf-1,
+.theme-light [style*="surf-1"] {
+  background: #FFFFFF !important;
+}
+
+/* ═════ 57. PAGE HEADER ═════ */
+.theme-light .page-header,
+.theme-light [class*="text-white"][class*="text-2xl"],
+.theme-light [class*="text-white"][class*="text-3xl"] {
+  color: #172033 !important;
+}
+
+/* ═════ 58. EYEBROW / SECTION LABELS ═════ */
+.theme-light .eyebrow {
+  color: #7B8494 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+}
+
+/* ═════ 59. MUTED TEXT OVERRIDES ═════ */
+.theme-light .text-muted-foreground {
+  color: #5B6577 !important;
+}
+
+/* ═════ 60. LINKS ═════ */
+.theme-light a {
+  color: #2563EB;
+}
+
+.theme-light a:hover {
+  color: #1D4ED8;
+}
