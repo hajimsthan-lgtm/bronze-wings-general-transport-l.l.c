@@ -15,7 +15,7 @@ import moment from 'moment';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import { base44 } from '@/api/base44Client';
-import BulkActionBar from '@/components/operations/BulkActionBar';
+import { setOpsBulk } from '@/lib/operationsFilterStore';
 import TripStatusManager from '@/components/trips/TripStatusManager';
 import BulkEndTripDialog from '@/components/trips/BulkEndTripDialog';
 import BulkCancelDialog from '@/components/trips/BulkCancelDialog';
@@ -285,21 +285,26 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };
 
+  // Publish bulk-selection state to the shared store so the sub-header
+  // (OpsSubBar) can render the bulk-action controls.
+  useEffect(() => {
+    setOpsBulk({
+      selectedCount: selected.size,
+      totalCount: trips.length,
+      onSelectAll: toggleAll,
+      onClear: clearSelection,
+      onBulkStatus: handleBulkStatus,
+      onBulkDelete: handleBulkDelete,
+      onBulkExportCSV: handleBulkExportCSV,
+      onBulkExportPDF: handleBulkExportPDF,
+      selectedTrips,
+    });
+    return () => setOpsBulk(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, trips]);
+
   return (
     <div className="relative">
-      {/* Bulk action bar — sticky sub-header */}
-      <BulkActionBar
-        selectedCount={selected.size}
-        totalCount={trips.length}
-        onSelectAll={toggleAll}
-        onClear={clearSelection}
-        onBulkStatus={handleBulkStatus}
-        onBulkDelete={handleBulkDelete}
-        onBulkExportCSV={handleBulkExportCSV}
-        onBulkExportPDF={handleBulkExportPDF}
-        selectedTrips={selectedTrips}
-      />
-
       {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
       <div className="relative mb-1.5">
         <div

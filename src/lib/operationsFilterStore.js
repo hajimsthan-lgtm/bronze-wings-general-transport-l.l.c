@@ -9,6 +9,7 @@ let state = {
   search: '', mode: 'all',
   exportConfig: null,
   onImported: null,
+  bulk: null,
 };
 const listeners = new Set();
 
@@ -27,7 +28,14 @@ export function setOpsSearch(value) {
 }
 
 export function clearOpsFilter() {
-  state = { active: false, options: [], value: 'all', counts: {}, search: '', mode: 'all', exportConfig: null, onImported: null };
+  state = { active: false, options: [], value: 'all', counts: {}, search: '', mode: 'all', exportConfig: null, onImported: null, bulk: null };
+  emit();
+}
+
+// Bulk-selection state published by TripsTable so the sub-header (OpsSubBar)
+// can render the bulk-action controls without prop drilling.
+export function setOpsBulk(bulk) {
+  state = { ...state, bulk };
   emit();
 }
 

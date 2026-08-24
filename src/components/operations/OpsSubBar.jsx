@@ -3,11 +3,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
 import { useOpsFilter, setOpsSearch } from '@/lib/operationsFilterStore';
-import ExportButtons from '@/components/common/ExportButtons';
+import BulkActionBar from '@/components/operations/BulkActionBar';
 /**
- * Operations search + status filter + export/import controls.
+ * Operations search + status filter + bulk-action controls.
  * Rendered inside the sticky TopBar sub-header for /trips and /contracts.
- * Reads all state from the shared operationsFilterStore.
+ * Reads all state from the shared operationsFilterStore (search, status filter,
+ * and bulk-selection published by TripsTable).
  */
 export default function OpsSubBar() {
   const { t } = useI18n();
@@ -58,13 +59,18 @@ export default function OpsSubBar() {
 
       <div className="flex-1 min-w-0" />
 
-      {/* Export */}
-      {ops.exportConfig && (
-        <ExportButtons
-          data={ops.exportConfig.data}
-          filename={ops.exportConfig.filename}
-          title={ops.exportConfig.title}
-          columns={ops.exportConfig.columns}
+      {/* Bulk actions — published by TripsTable into the shared store */}
+      {ops.bulk && ops.bulk.selectedCount > 0 && (
+        <BulkActionBar
+          selectedCount={ops.bulk.selectedCount}
+          totalCount={ops.bulk.totalCount}
+          onSelectAll={ops.bulk.onSelectAll}
+          onClear={ops.bulk.onClear}
+          onBulkStatus={ops.bulk.onBulkStatus}
+          onBulkDelete={ops.bulk.onBulkDelete}
+          onBulkExportCSV={ops.bulk.onBulkExportCSV}
+          onBulkExportPDF={ops.bulk.onBulkExportPDF}
+          selectedTrips={ops.bulk.selectedTrips}
         />
       )}
 
