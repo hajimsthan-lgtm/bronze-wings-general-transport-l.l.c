@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, X, CheckCheck, ChevronDown, Lock } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
@@ -13,8 +14,11 @@ const STATUS_OPTIONS = [
   { value: 'cancelled',    label: 'Cancelled',     dot: 'bg-red-400' },
 ];
 
+const EASE = [0.16, 1, 0.3, 1];
+
 /**
  * Inline bulk-action controls, rendered inside the OpsSubBar sub-header.
+ * Icons are shown standalone (no panel wrapper) with enter/exit transitions.
  * Status transitions are enforced using the same canTransition() rules as the individual dropdown.
  * selectedTrips is the array of full trip objects for validation.
  */
@@ -25,8 +29,6 @@ export default function BulkActionBar({
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const allSelected = selectedCount === totalCount;
-
-  if (selectedCount === 0) return null;
 
   // For a given target status, count how many selected trips can and cannot transition
   const getTransitionCounts = (targetStatus) => {
@@ -44,107 +46,135 @@ export default function BulkActionBar({
 
   return (
     <>
-      <div
-        className="flex items-center gap-1.5 px-2 py-1 rounded-2xl animate-fade-in-up"
-        style={{
-          background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.22), rgba(var(--surf-2-rgb),0.92))',
-          border: '1px solid rgba(var(--panel-accent-rgb),0.40)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10)',
-          backdropFilter: 'blur(24px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
-        }}
-      >
-        {/* Count badge */}
-        <div className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-xl bg-white/10 border border-white/15">
-          <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold tabular-nums">
-            {selectedCount}
-          </span>
-          <span className="text-[11px] font-semibold text-white/90 uppercase tracking-wider hidden sm:inline">selected</span>
-        </div>
-
-        {/* Select all / clear */}
-        <button
-          onClick={() => (allSelected ? onClear() : onSelectAll())}
-          className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl bg-white/8 border border-white/12 text-white/80 hover:bg-white/15 hover:text-white transition-colors text-xs font-medium"
-        >
-          {allSelected ? <X className="w-3.5 h-3.5" /> : <CheckCheck className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">{allSelected ? 'Clear' : 'All'}</span>
-        </button>
-
-        {/* Bulk status update */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold text-white transition-colors"
-              style={{
-                background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.30), rgba(var(--panel-accent-rgb),0.18))',
-                border: '1px solid rgba(var(--panel-accent-rgb),0.45)',
-              }}
+      <AnimatePresence>
+        {selectedCount > 0 && (
+          <motion.div
+            key="bulk-bar"
+            initial={{ opacity: 0, x: 16, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 16, scale: 0.96 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="flex items-center gap-1.5"
+          >
+            {/* Count badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.2, ease: EASE }}
+              className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-xl bg-white/10 border border-white/15"
             >
-              Set Status
-              <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="min-w-[200px]">
-            <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {STATUS_OPTIONS.map((opt) => {
-              const { valid, invalid } = getTransitionCounts(opt.value);
-              const noneValid = valid === 0;
-              return (
-                <DropdownMenuItem
-                  key={opt.value}
-                  onClick={() => !noneValid && handleStatusClick(opt.value)}
-                  disabled={noneValid}
-                  className="text-xs cursor-pointer flex items-center gap-2"
+              <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-bold tabular-nums">
+                {selectedCount}
+              </span>
+              <span className="text-[11px] font-semibold text-white/90 uppercase tracking-wider hidden sm:inline">selected</span>
+            </motion.div>
+
+            {/* Select all / clear */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.2, ease: EASE, delay: 0.03 }}
+              onClick={() => (allSelected ? onClear() : onSelectAll())}
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl bg-white/8 border border-white/12 text-white/80 hover:bg-white/15 hover:text-white transition-colors text-xs font-medium"
+            >
+              {allSelected ? <X className="w-3.5 h-3.5" /> : <CheckCheck className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{allSelected ? 'Clear' : 'All'}</span>
+            </motion.button>
+
+            {/* Bulk status update */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.6 }}
+                  transition={{ duration: 0.2, ease: EASE, delay: 0.06 }}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold text-white transition-colors"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.30), rgba(var(--panel-accent-rgb),0.18))',
+                    border: '1px solid rgba(var(--panel-accent-rgb),0.45)',
+                  }}
                 >
-                  <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                  <span className="flex-1">{opt.label}</span>
-                  {noneValid
-                    ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
-                    : invalid > 0
-                      ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
-                      : null
-                  }
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                  Set Status
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </motion.button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="min-w-[200px]">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {STATUS_OPTIONS.map((opt) => {
+                  const { valid, invalid } = getTransitionCounts(opt.value);
+                  const noneValid = valid === 0;
+                  return (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onClick={() => !noneValid && handleStatusClick(opt.value)}
+                      disabled={noneValid}
+                      className="text-xs cursor-pointer flex items-center gap-2"
+                    >
+                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                      <span className="flex-1">{opt.label}</span>
+                      {noneValid
+                        ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
+                        : invalid > 0
+                          ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
+                          : null
+                      }
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-        {/* Export selected — CSV */}
-        {onBulkExportCSV && (
-          <button
-            onClick={onBulkExportCSV}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
-          >
-            <ExcelIcon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">CSV</span>
-          </button>
+            {/* Export selected — CSV */}
+            {onBulkExportCSV && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.2, ease: EASE, delay: 0.09 }}
+                onClick={onBulkExportCSV}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
+              >
+                <ExcelIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">CSV</span>
+              </motion.button>
+            )}
+
+            {/* Export selected — PDF */}
+            {onBulkExportPDF && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.2, ease: EASE, delay: 0.12 }}
+                onClick={onBulkExportPDF}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 hover:text-rose-200 transition-colors text-xs font-semibold"
+              >
+                <PdfIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">PDF</span>
+              </motion.button>
+            )}
+
+            {/* Bulk delete */}
+            <motion.button
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.2, ease: EASE, delay: 0.15 }}
+              onClick={() => setConfirmDelete(true)}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 hover:text-red-200 transition-colors text-xs font-semibold"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Delete</span>
+            </motion.button>
+          </motion.div>
         )}
-
-        {/* Export selected — PDF */}
-        {onBulkExportPDF && (
-          <button
-            onClick={onBulkExportPDF}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 hover:text-rose-200 transition-colors text-xs font-semibold"
-          >
-            <PdfIcon className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">PDF</span>
-          </button>
-        )}
-
-        {/* Bulk delete */}
-        <button
-          onClick={() => setConfirmDelete(true)}
-          className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 hover:text-red-200 transition-colors text-xs font-semibold"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Delete</span>
-        </button>
-      </div>
+      </AnimatePresence>
 
       {/* Delete confirmation */}
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>

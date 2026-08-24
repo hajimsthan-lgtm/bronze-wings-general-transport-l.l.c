@@ -59,8 +59,9 @@ export default function OpsSubBar() {
 
       <div className="flex-1 min-w-0" />
 
-      {/* Bulk actions — published by TripsTable into the shared store */}
-      {ops.bulk && ops.bulk.selectedCount > 0 && (
+      {/* Bulk actions — published by TripsTable into the shared store.
+          Always mounted so AnimatePresence can play the exit transition. */}
+      {ops.bulk && (
         <BulkActionBar
           selectedCount={ops.bulk.selectedCount}
           totalCount={ops.bulk.totalCount}
