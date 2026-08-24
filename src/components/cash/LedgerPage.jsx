@@ -164,7 +164,7 @@ export default function LedgerPage({
     return { id: r.id, date: r.date, recipient: a.recipient, ref: a.ref, description: r.description, in: a.in, out: a.out, running_balance: run };
   });
 
-  // apply date + search filter to both views
+  // apply date + search filter — only hides rows, does NOT recompute running balance
   const filtered = allStatementRows.filter((r) => {
     const rDate = (r.date || '').slice(0, 10);
     if (filterFrom && rDate < filterFrom) return false;
@@ -173,26 +173,19 @@ export default function LedgerPage({
     return true;
   });
 
-  // recompute running balance over filtered set (for report view)
-  let rb = 0;
-  const reportRows = filtered.map((r) => {
-    rb += (Number(r.in) || 0) - (Number(r.out) || 0);
-    return { ...r, date: fmtDate(r.date), running_balance: rb };
-  });
-
-  // statement view — same filtered set, keep raw date for editing
-  let sb = 0;
-  const statementRows = filtered.map((r) => {
-    sb += (Number(r.in) || 0) - (Number(r.out) || 0);
-    return { ...r, running_balance: sb };
-  });
+  // report view formats date for display; statement view keeps raw date for editing.
+  // running_balance is preserved from the full chronological set — never recomputed by filters.
+  const reportRows = filtered.map((r) => ({ ...r, date: fmtDate(r.date) }));
+  const statementRows = filtered;
 
   // latest transactions first
   const chronologicalDisplay = view === 'report' ? reportRows : statementRows;
   const display = chronologicalDisplay.slice().reverse();
-  const totalIn = chronologicalDisplay.reduce((s, r) => s + (Number(r.in) || 0), 0);
-  const totalOut = chronologicalDisplay.reduce((s, r) => s + (Number(r.out) || 0), 0);
-  const closingBalance = chronologicalDisplay.length ? chronologicalDisplay[chronologicalDisplay.length - 1].running_balance : 0;
+
+  // summary stats always reflect the FULL dataset — filters never change calculations
+  const totalIn = allStatementRows.reduce((s, r) => s + (Number(r.in) || 0), 0);
+  const totalOut = allStatementRows.reduce((s, r) => s + (Number(r.out) || 0), 0);
+  const closingBalance = allStatementRows.length ? allStatementRows[allStatementRows.length - 1].running_balance : 0;
 
   const dateRangeLabel = (filterFrom || filterTo) ? `${filterFrom || 'start'} → ${filterTo || 'today'}` : 'All dates';
 
