@@ -415,38 +415,42 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 </TableCell>
                 <TableCell className="text-xs font-mono text-foreground align-top whitespace-nowrap trips-grid-td">
                   {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] text-[#000000]">{trip.trip_date ? moment(trip.trip_date).format('HH:mm') : ''}</span>
+                  <span className="block text-[10px] text-muted-foreground/70 tabular-nums" title={trip.created_date ? `Created ${moment(trip.created_date).format('DD MMM YYYY, HH:mm')}` : ''}>
+                    {trip.created_date ? moment(trip.created_date).format('HH:mm') : ''}
+                  </span>
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top trips-grid-td">
                   <button
                       onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                      className="text-xs font-medium text-left text-foreground hover:text-primary transition-colors block leading-tight whitespace-normal break-words"
+                      className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
                       title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
                   </button>
                   <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
                 </TableCell>
-                {/* VEHICLE + DRIVER — both hyperlinks */}
+                {/* VEHICLE + DRIVER + VENDOR — all hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
                       onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                      className="text-foreground hover:text-primary transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
+                      className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
                       title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
-                  <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
                     <button
                         onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                        className="hover:text-primary transition-colors block text-left whitespace-normal break-words leading-tight text-[#000000] text-sm"
+                        className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block text-left whitespace-normal break-words leading-tight text-sm"
                         title="View driver">
                       {trip.driver_name || ''}
                     </button>
                     {trip.vendor_name && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                      <button
+                          onClick={(e) => { e.stopPropagation(); navigate('/admin/vendors'); }}
+                          className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors text-[10px] font-medium shrink-0"
+                          title={`Vendor: ${trip.vendor_name}`}>
                         {trip.vendor_name}
-                      </span>
+                      </button>
                     )}
                   </div>
                 </TableCell>
