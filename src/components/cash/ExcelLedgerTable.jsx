@@ -406,21 +406,21 @@ export default function ExcelLedgerTable({
                         {/* Inflow column — green */}
                         {isInflowCol && (
                           <span className={cn('font-mono tabular-nums text-sm font-bold', hasInflow ? 'text-emerald-400' : 'text-muted-foreground/40')}>
-                            {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                            {Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                           </span>
                         )}
 
                         {/* Outflow column — red */}
                         {isOutflowCol && (
                           <span className={cn('font-mono tabular-nums text-sm font-bold', hasOutflow ? 'text-rose-400' : 'text-muted-foreground/40')}>
-                            {val !== undefined && val !== null && val !== '' && Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                            {Number(val) > 0 ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                           </span>
                         )}
 
                         {/* Running balance — blue accent */}
                         {isBalanceCol && (
                           <span className="font-mono tabular-nums text-sm font-bold text-blue-400">
-                            {val !== undefined && val !== null && val !== '' ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                            {val !== undefined && val !== null && val !== '' ? Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
                           </span>
                         )}
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
@@ -50,7 +50,9 @@ export default function LedgerPage({
   rowToAmounts, buildCreate, dateHasTime,
   exportFilename, exportTitle, exportColumns,
   importConfig,
-  enableImportUndo
+  enableImportUndo,
+  autoRef = false,
+  refPrefix = 'REF'
 }) {
   const [rows, setRows] = useState(null);
   const ledgerState = useLedgerState();
@@ -71,22 +73,79 @@ export default function LedgerPage({
 
   useEffect(() => { initLedger(entityName, defaultMode, modeOptions, viewOptions); }, [entityName, defaultMode, modeOptions, viewOptions]);
 
-  const makeForm = useCallback(() => {
-    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
-    f[refKey] = '';
-    f[inflowKey] = '';
-    f[outflowKey] = '';
-    return f;
-  }, [dateHasTime, refKey, inflowKey, outflowKey]);
-
-  const [form, setForm] = useState(makeForm());
-
   const load = useCallback(async () => {
     const data = await base44.entities[entityName].list('-date', 5000).catch(() => []);
     setRows(data || []);
   }, [entityName]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Auto-generate sequential reference numbers (REF-0001, REF-0002, …) in chronological order
+  const didInitRef = useRef(false);
+  const ensureReferenceSequence = useCallback(async () => {
+    if (!autoRef) return;
+    const data = rows || [];
+    if (data.length === 0) return;
+    const sorted = data.slice().sort((a, b) => {
+      const d = (a.date || '').localeCompare(b.date || '');
+      if (d !== 0) return d;
+      return (a.created_date || '').localeCompare(b.created_date || '');
+    });
+    const updates = [];
+    sorted.forEach((r, idx) => {
+      const expected = `${refPrefix}-${String(idx + 1).padStart(4, '0')}`;
+      if ((r[refKey] || '') !== expected) updates.push({ id: r.id, [refKey]: expected });
+    });
+    if (updates.length === 0) return;
+    try {
+      for (let i = 0; i < updates.length; i += 500) {
+        await base44.entities[entityName].bulkUpdate(updates.slice(i, i + 500));
+      }
+      await load();
+    } catch {}
+  }, [autoRef, refPrefix, rows, refKey, entityName, load]);
+
+  useEffect(() => {
+    if (autoRef && rows && rows.length > 0 && !didInitRef.current) {
+      didInitRef.current = true;
+      ensureReferenceSequence();
+    }
+  }, [autoRef, rows, ensureReferenceSequence]);
+
+  // Next reference number for new entries
+  const nextRef = useMemo(() => {
+    if (!autoRef) return '';
+    const refRegex = new RegExp(`^${refPrefix}-(\\d+)$`);
+    let maxSeq = 0;
+    for (const r of (rows || [])) {
+      const match = (r[refKey] || '').match(refRegex);
+      if (match) maxSeq = Math.max(maxSeq, parseInt(match[1], 10));
+    }
+    return `${refPrefix}-${String(maxSeq + 1).padStart(4, '0')}`;
+  }, [autoRef, refPrefix, rows, refKey]);
+
+  // Pre-fill reference field when autoRef is enabled
+  useEffect(() => {
+    if (autoRef && nextRef && !editId) {
+      setForm((f) => (f[refKey] !== nextRef ? { ...f, [refKey]: nextRef } : f));
+    }
+  }, [autoRef, nextRef, editId, refKey]);
+
+  const makeForm = useCallback(() => {
+    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
+    f[refKey] = autoRef ? nextRef : '';
+    f[inflowKey] = '';
+    f[outflowKey] = '';
+    return f;
+  }, [dateHasTime, refKey, inflowKey, outflowKey, autoRef, nextRef]);
+
+  const [form, setForm] = useState(() => {
+    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
+    f[refKey] = '';
+    f[inflowKey] = '';
+    f[outflowKey] = '';
+    return f;
+  });
 
   // mode filter (e.g. cash/card, or all/deposits/withdrawals)
   const modeRows = modeOptions ? (rows || []).filter((r) => modeFilter(r, mode)) : (rows || []);
@@ -164,6 +223,10 @@ export default function LedgerPage({
     if (!inAmt && !outAmt) return;
     setSaving(true);
     try {
+      // Ensure auto-generated reference is set
+      if (autoRef && !form[refKey]) {
+        form[refKey] = nextRef;
+      }
       const payload = buildCreate(form, mode, { inAmt, outAmt });
       if (editId) {
         await base44.entities[entityName].update(editId, payload);
@@ -299,8 +362,8 @@ export default function LedgerPage({
                     </div>
                   )}
                   <div className="md:col-span-2">
-                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">{refLabel}</label>
-                    <input type="text" value={form[refKey]} onChange={(e) => setField(refKey, e.target.value)} placeholder={refLabel} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                    <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">{refLabel}{autoRef && <span className="text-primary/70 ml-1 normal-case">(auto)</span>}</label>
+                    <input type="text" value={form[refKey]} onChange={(e) => setField(refKey, e.target.value)} placeholder={refLabel} className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} readOnly={autoRef} />
                   </div>
                   <div className={descSpan}>
                     <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Description</label>
