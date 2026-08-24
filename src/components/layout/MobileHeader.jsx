@@ -126,16 +126,16 @@ export default function MobileHeader() {
                   to={mod.path}
                   className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
                     active
-                      ? 'text-foreground border'
+                      ? 'text-white border'
                       : 'bg-muted/50 text-muted-foreground border border-border'
                   }`}
                   style={active ? {
-                    background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}22, ${mod.color || 'rgb(var(--panel-accent-rgb))'}10)`,
-                    borderColor: `${mod.color || 'rgb(var(--panel-accent-rgb))'}50`,
-                    boxShadow: `0 0 14px -4px ${mod.color || 'rgb(var(--panel-accent-rgb))'}30`,
+                    background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}, ${mod.color || 'rgb(var(--panel-accent-rgb))'}dd)`,
+                    borderColor: `${mod.color || 'rgb(var(--panel-accent-rgb))'}99`,
+                    boxShadow: `0 4px 14px -3px ${mod.color || 'rgb(var(--panel-accent-rgb))'}66, inset 0 1px 0 rgba(255,255,255,0.15)`,
                   } : {}}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? (mod.color || 'rgb(var(--panel-accent-rgb))') : 'hsl(var(--muted-foreground))' }} />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#ffffff' : 'hsl(var(--muted-foreground))' }} />
                   {mod.label}
                 </Link>
               );
