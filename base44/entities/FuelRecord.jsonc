@@ -21,6 +21,18 @@
     "total_cost": {
       "type": "number"
     },
+    "vat_rate": {
+      "type": "number",
+      "default": 5
+    },
+    "vat_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total_with_vat": {
+      "type": "number",
+      "default": 0
+    },
     "odometer_reading": {
       "type": "number"
     },

@@ -7,7 +7,7 @@ import { VAT_RATE } from '@/lib/taxCalculations';
 
 const POSTED_INVOICE_STATUSES = ['unsigned', 'signed', 'sent', 'partially_paid', 'paid', 'overdue'];
 
-function buildTransactions(invoices, expenses) {
+function buildTransactions(invoices, expenses, maintenance, fuel) {
   const rows = [];
 
   // Output VAT from posted invoices
@@ -39,15 +39,49 @@ function buildTransactions(invoices, expenses) {
   (expenses || []).forEach((e) => {
     if (e.status !== 'approved') return;
     const amt = Number(e.amount) || 0;
+    const vatAmt = Number(e.vat_amount) || amt * VAT_RATE;
     rows.push({
       date: e.date || '',
       type: 'input',
       reference: e.reference_number || (e.id ? String(e.id).slice(0, 8).toUpperCase() : '-'),
       description: e.description || e.vendor_name || e.category || '-',
-      category: 'Input VAT (5%)',
+      category: 'Expense (5%)',
       amount: amt,
-      vat_rate: '5%',
-      vat_amount: amt * VAT_RATE,
+      vat_rate: (Number(e.vat_rate) || 5) + '%',
+      vat_amount: vatAmt,
+    });
+  });
+
+  // Input VAT from completed maintenance records
+  (maintenance || []).forEach((m) => {
+    if (m.status !== 'completed') return;
+    const cost = Number(m.cost) || 0;
+    const vatAmt = Number(m.vat_amount) || cost * VAT_RATE;
+    rows.push({
+      date: m.date || '',
+      type: 'input',
+      reference: m.maint_ref || (m.id ? String(m.id).slice(0, 8).toUpperCase() : '-'),
+      description: `Maintenance: ${m.vehicle_plate || '-'} · ${(m.service_type || '').replace(/_/g, ' ')}`,
+      category: 'Maintenance (5%)',
+      amount: cost,
+      vat_rate: (Number(m.vat_rate) || 5) + '%',
+      vat_amount: vatAmt,
+    });
+  });
+
+  // Input VAT from fuel records
+  (fuel || []).forEach((f) => {
+    const cost = Number(f.total_cost) || 0;
+    const vatAmt = Number(f.vat_amount) || cost * VAT_RATE;
+    rows.push({
+      date: f.date || '',
+      type: 'input',
+      reference: f.id ? String(f.id).slice(0, 8).toUpperCase() : '-',
+      description: `Fuel: ${f.vehicle_plate || '-'} · ${f.station_name || '-'}`,
+      category: 'Fuel (5%)',
+      amount: cost,
+      vat_rate: (Number(f.vat_rate) || 5) + '%',
+      vat_amount: vatAmt,
     });
   });
 
@@ -72,10 +106,10 @@ const FILTERS = [
   { value: 'input', label: 'Input VAT' },
 ];
 
-export default function VatTransactionsTable({ invoices, expenses, periodLabel }) {
+export default function VatTransactionsTable({ invoices, expenses, maintenance, fuel, periodLabel }) {
   const [filter, setFilter] = useState('all');
 
-  const allRows = useMemo(() => buildTransactions(invoices, expenses), [invoices, expenses]);
+  const allRows = useMemo(() => buildTransactions(invoices, expenses, maintenance, fuel), [invoices, expenses, maintenance, fuel]);
   const filteredRows = useMemo(
     () => (filter === 'all' ? allRows : allRows.filter((r) => r.type === filter)),
     [allRows, filter]
@@ -89,6 +123,9 @@ export default function VatTransactionsTable({ invoices, expenses, periodLabel }
       inputVat: input.reduce((s, r) => s + r.vat_amount, 0),
       outputCount: output.length,
       inputCount: input.length,
+      expenseCount: input.filter((r) => r.category?.startsWith('Expense')).length,
+      maintCount: input.filter((r) => r.category?.startsWith('Maintenance')).length,
+      fuelCount: input.filter((r) => r.category?.startsWith('Fuel')).length,
     };
   }, [allRows]);
 
@@ -212,7 +249,7 @@ export default function VatTransactionsTable({ invoices, expenses, periodLabel }
             <span className="text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Receipt className="w-3 h-3 text-amber-400" />
-                {totals.inputCount} expenses
+                {totals.inputCount} input ({totals.expenseCount} exp · {totals.maintCount} maint · {totals.fuelCount} fuel)
               </span>
               {' · '}
               <span className="text-amber-400 font-semibold">{formatCurrency(totals.inputVat)}</span>

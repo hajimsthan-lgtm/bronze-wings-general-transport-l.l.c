@@ -30,6 +30,8 @@ export default function VatCorporateTax() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [maintenance, setMaintenance] = useState([]);
+  const [fuel, setFuel] = useState([]);
   const [filedRecords, setFiledRecords] = useState([]);
   const [exporting, setExporting] = useState(null);
 
@@ -40,6 +42,8 @@ export default function VatCorporateTax() {
         if (!mounted) return;
         setInvoices(data.invoices);
         setExpenses(data.expenses);
+        setMaintenance(data.maintenance);
+        setFuel(data.fuel);
         setFiledRecords(filed);
       })
       .finally(() => mounted && setLoading(false));
@@ -50,18 +54,18 @@ export default function VatCorporateTax() {
   const fy = useMemo(() => getCurrentFiscalYear(), []);
 
   const vatData = useMemo(
-    () => computeVatForPeriod(invoices, expenses, vatPeriod.start, vatPeriod.end),
-    [invoices, expenses, vatPeriod]
+    () => computeVatForPeriod(invoices, expenses, vatPeriod.start, vatPeriod.end, maintenance, fuel),
+    [invoices, expenses, maintenance, fuel, vatPeriod]
   );
 
   const ctData = useMemo(
-    () => computeCorporateTax(invoices, expenses, fy.start, fy.end),
-    [invoices, expenses, fy]
+    () => computeCorporateTax(invoices, expenses, fy.start, fy.end, maintenance, fuel),
+    [invoices, expenses, maintenance, fuel, fy]
   );
 
   const trend = useMemo(
-    () => computeVatTrend(invoices, expenses),
-    [invoices, expenses]
+    () => computeVatTrend(invoices, expenses, maintenance, fuel),
+    [invoices, expenses, maintenance, fuel]
   );
 
   const filings = useMemo(() => {
@@ -169,6 +173,8 @@ export default function VatCorporateTax() {
           trend={trend}
           invoices={invoices}
           expenses={expenses}
+          maintenance={maintenance}
+          fuel={fuel}
           periodLabel={vatPeriod.label}
         />
       )}

@@ -6,7 +6,7 @@ import TrendChart from '@/components/reports/TrendChart';
 import VatTransactionsTable from '@/components/tax/VatTransactionsTable';
 import { formatCurrency } from '@/lib/formatters';
 
-export default function VatTab({ vatData, trend, invoices, expenses, periodLabel }) {
+export default function VatTab({ vatData, trend, invoices, expenses, maintenance, fuel, periodLabel }) {
   const donutData = [
     { name: 'Standard-rated (5%)', value: vatData.standardRatedSales, color: '#6366f1' },
     { name: 'Zero-rated', value: vatData.zeroRatedSales, color: '#22c55e' },
@@ -86,6 +86,8 @@ export default function VatTab({ vatData, trend, invoices, expenses, periodLabel
           <VatTransactionsTable
             invoices={invoices}
             expenses={expenses}
+            maintenance={maintenance}
+            fuel={fuel}
             periodLabel={periodLabel}
           />
         </ReportSectionCard>

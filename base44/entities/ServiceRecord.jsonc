@@ -30,6 +30,18 @@
       "type": "number",
       "default": 0
     },
+    "vat_rate": {
+      "type": "number",
+      "default": 5
+    },
+    "vat_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "total_with_vat": {
+      "type": "number",
+      "default": 0
+    },
     "vendor_name": {
       "type": "string"
     },

@@ -20,13 +20,17 @@ function inDateRange(date, start, end) {
  * Load all invoices and expenses for tax calculations.
  */
 export async function loadTaxData() {
-  const [invoices, expenses] = await safeAll([
+  const [invoices, expenses, maintenance, fuel] = await safeAll([
     () => base44.entities.Invoice.list('-created_date', 500),
     () => base44.entities.Expense.list('-created_date', 500),
+    () => base44.entities.ServiceRecord.list('-created_date', 500),
+    () => base44.entities.FuelRecord.list('-created_date', 500),
   ], 1);
   return {
     invoices: invoices || [],
     expenses: expenses || [],
+    maintenance: maintenance || [],
+    fuel: fuel || [],
   };
 }
 
@@ -45,7 +49,7 @@ export async function loadFiledRecords() {
 /**
  * Compute VAT metrics for a given period.
  */
-export function computeVatForPeriod(invoices, expenses, periodStart, periodEnd) {
+export function computeVatForPeriod(invoices, expenses, periodStart, periodEnd, maintenance = [], fuel = []) {
   const postedInvoices = invoices.filter(
     (inv) =>
       POSTED_INVOICE_STATUSES.includes(inv.status) &&
@@ -55,6 +59,14 @@ export function computeVatForPeriod(invoices, expenses, periodStart, periodEnd) 
 
   const postedExpenses = expenses.filter(
     (e) => e.status === 'approved' && inDateRange(e.date, periodStart, periodEnd)
+  );
+
+  const postedMaintenance = (maintenance || []).filter(
+    (m) => m.status === 'completed' && inDateRange(m.date, periodStart, periodEnd)
+  );
+
+  const postedFuel = (fuel || []).filter(
+    (f) => inDateRange(f.date, periodStart, periodEnd)
   );
 
   // Sales breakdown by rate category
@@ -83,11 +95,20 @@ export function computeVatForPeriod(invoices, expenses, periodStart, periodEnd) 
     }
   });
 
-  // Input VAT: 5% of approved expenses (standard-rated)
-  const inputVat = postedExpenses.reduce(
-    (s, e) => s + (Number(e.amount) || 0) * VAT_RATE,
+  // Input VAT: use stored vat_amount if available, otherwise compute 5% of amount
+  const expenseInputVat = postedExpenses.reduce(
+    (s, e) => s + (Number(e.vat_amount) || (Number(e.amount) || 0) * VAT_RATE),
     0
   );
+  const maintInputVat = postedMaintenance.reduce(
+    (s, m) => s + (Number(m.vat_amount) || (Number(m.cost) || 0) * VAT_RATE),
+    0
+  );
+  const fuelInputVat = postedFuel.reduce(
+    (s, f) => s + (Number(f.vat_amount) || (Number(f.total_cost) || 0) * VAT_RATE),
+    0
+  );
+  const inputVat = expenseInputVat + maintInputVat + fuelInputVat;
 
   const netVatPayable = outputVat - inputVat;
   const totalSales = standardRatedSales + zeroRatedSales + exemptSales;
@@ -102,20 +123,22 @@ export function computeVatForPeriod(invoices, expenses, periodStart, periodEnd) 
     netVatPayable,
     invoiceCount: postedInvoices.length,
     expenseCount: postedExpenses.length,
+    maintCount: postedMaintenance.length,
+    fuelCount: postedFuel.length,
   };
 }
 
 /**
  * Compute 6-month VAT trend.
  */
-export function computeVatTrend(invoices, expenses) {
+export function computeVatTrend(invoices, expenses, maintenance, fuel) {
   const months = [];
   const now = new Date();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
     const end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
-    const vat = computeVatForPeriod(invoices, expenses, start, end);
+    const vat = computeVatForPeriod(invoices, expenses, start, end, maintenance, fuel);
     months.push({
       label: d.toLocaleString('en', { month: 'short' }),
       outputVat: Math.round(vat.outputVat * 100) / 100,
@@ -128,7 +151,7 @@ export function computeVatTrend(invoices, expenses) {
 /**
  * Compute corporate tax metrics for a fiscal year.
  */
-export function computeCorporateTax(invoices, expenses, fyStart, fyEnd) {
+export function computeCorporateTax(invoices, expenses, fyStart, fyEnd, maintenance = [], fuel = []) {
   const postedInvoices = invoices.filter(
     (inv) =>
       POSTED_INVOICE_STATUSES.includes(inv.status) &&
@@ -140,6 +163,14 @@ export function computeCorporateTax(invoices, expenses, fyStart, fyEnd) {
     (e) => e.status === 'approved' && inDateRange(e.date, fyStart, fyEnd)
   );
 
+  const postedMaintenance = (maintenance || []).filter(
+    (m) => m.status === 'completed' && inDateRange(m.date, fyStart, fyEnd)
+  );
+
+  const postedFuel = (fuel || []).filter(
+    (f) => inDateRange(f.date, fyStart, fyEnd)
+  );
+
   // Revenue = subtotal (excluding VAT) from posted invoices
   const totalRevenue = postedInvoices.reduce(
     (s, inv) => s + (Number(inv.subtotal) || 0),
@@ -148,6 +179,12 @@ export function computeCorporateTax(invoices, expenses, fyStart, fyEnd) {
 
   const totalExpenses = postedExpenses.reduce(
     (s, e) => s + (Number(e.amount) || 0),
+    0
+  ) + postedMaintenance.reduce(
+    (s, m) => s + (Number(m.cost) || 0),
+    0
+  ) + postedFuel.reduce(
+    (s, f) => s + (Number(f.total_cost) || 0),
     0
   );
 

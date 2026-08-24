@@ -33,6 +33,7 @@ import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToR
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
 import ExpensesAnalytics from '@/components/expenses/ExpensesAnalytics';
+import TaxPreview from '@/components/common/TaxPreview';
 
 // Category metadata imported from @/components/expenses/expenseMeta
 const EXPENSE_EXPORT_COLUMNS = [
@@ -241,11 +242,11 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  const [form, setForm] = useState({ category: 'other', description: '', amount: '', date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
+  const [form, setForm] = useState({ category: 'other', description: '', amount: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
 
   useEffect(() => {
-    if (editItem) setForm({ ...form, ...editItem, amount: editItem.amount || '' });
-    else setForm({ category: 'other', description: '', amount: '', date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
+    if (editItem) setForm({ ...form, ...editItem, amount: editItem.amount || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0 });
+    else setForm({ category: 'other', description: '', amount: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
   }, [editItem, open]);
 
   useEffect(() => {
@@ -257,11 +258,22 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
     }
   }, [open]);
 
-  const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
+  const update = (f, v) => setForm(prev => {
+    const next = { ...prev, [f]: v };
+    const sub = Number(next.amount) || 0;
+    const rate = Number(next.vat_rate) || 0;
+    if (f === 'amount' || f === 'vat_rate') {
+      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
+      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
+    } else if (f === 'vat_amount') {
+      next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
+    }
+    return next;
+  });
 
   const handleSave = async () => {
     setSaving(true);
-    const data = { ...form, amount: Number(form.amount) || 0 };
+    const data = { ...form, amount: Number(form.amount) || 0, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0 };
     if (editItem) await updateExpense.mutateAsync({ id: editItem.id, data });
     else await createExpense.mutateAsync(data);
     setSaving(false); onSaved?.(); onOpenChange(false);
@@ -276,10 +288,20 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
               <SelectContent>{['toll','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Rate</Label>
+              <Select value={String(form.vat_rate ?? 5)} onValueChange={v => update('vat_rate', Number(v))}>
+                <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>{[0, 5].map(r => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
+              </Select></div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={e => update('vat_amount', e.target.value)} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold" /></div>
+          </div>
+          <TaxPreview subtotal={Number(form.amount) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input list="veh-suggestions" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" /><datalist id="veh-suggestions">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input list="drv-suggestions" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" /><datalist id="drv-suggestions">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>

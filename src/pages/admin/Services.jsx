@@ -24,6 +24,7 @@ import DatePicker from '@/components/common/DatePicker';
 import { withRetry, safeAll } from '@/lib/safeRequest';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import TaxPreview from '@/components/common/TaxPreview';
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -134,10 +135,21 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
     () => base44.entities.Vendor.list('-created_date', 200)],
     1).then(([v, vd]) => {setVehicles(v || []);setVendors(vd || []);}).catch(() => {});
   }, []);
-  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
-  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '' });else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
-  const update = (f, v) => setForm((prev) => ({ ...prev, [f]: v }));
-  const handle = async () => {setSaving(true);await onSave({ ...form, cost: Number(form.cost) || 0 });setSaving(false);};
+  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0 });else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
+  const update = (f, v) => setForm((prev) => {
+    const next = { ...prev, [f]: v };
+    const sub = Number(next.cost) || 0;
+    const rate = Number(next.vat_rate) || 0;
+    if (f === 'cost' || f === 'vat_rate') {
+      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
+      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
+    } else if (f === 'vat_amount') {
+      next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
+    }
+    return next;
+  });
+  const handle = async () => {setSaving(true);await onSave({ ...form, cost: Number(form.cost) || 0, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0 });setSaving(false);};
 
   return (
     <div className="space-y-4">
@@ -148,11 +160,17 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label><Select value={form.status} onValueChange={(v) => update('status', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['scheduled', 'in_progress', 'completed'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={2} className="bg-background border-border" /></div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><DatePicker value={form.date} onChange={(v) => update('date', v)} /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Cost</Label><Input type="number" value={form.cost} onChange={(e) => update('cost', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Cost (excl. VAT)</Label><Input type="number" value={form.cost} onChange={(e) => update('cost', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Rate</Label><Select value={String(form.vat_rate ?? 5)} onValueChange={(v) => update('vat_rate', Number(v))}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{[0, 5].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent></Select></div>
       </div>
-      <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input list="svc-vendors" value={form.vendor_name} onChange={(e) => update('vendor_name', e.target.value)} placeholder="Select or type vendor name" className="bg-background border-border" /><datalist id="svc-vendors">{vendors.map((v) => <option key={v.id} value={v.name}>{v.category}</option>)}</datalist></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={(e) => update('vat_amount', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold" /></div>
+      </div>
+      <TaxPreview subtotal={Number(form.cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Select value={form.vendor_name || ''} onValueChange={(v) => update('vendor_name', v)}><SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select vendor" /></SelectTrigger><SelectContent>{vendors.filter((v) => v.provider_type !== 'driver_supplier').map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}</SelectContent></Select></div>
       <ImageUpload value={form.attachment_url} onChange={(v) => update('attachment_url', v)} label="Vendor Receipt Attachment" />
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>
     </div>);
