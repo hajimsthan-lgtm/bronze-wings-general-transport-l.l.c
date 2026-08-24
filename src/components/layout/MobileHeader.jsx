@@ -127,7 +127,7 @@ export default function MobileHeader() {
                   className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
                     active
                       ? 'text-white border'
-                      : 'bg-muted/50 text-muted-foreground border border-border'
+                      : 'bg-muted/50 text-foreground border border-border'
                   }`}
                   style={active ? {
                     background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}, ${mod.color || 'rgb(var(--panel-accent-rgb))'}dd)`,
@@ -135,7 +135,7 @@ export default function MobileHeader() {
                     boxShadow: `0 4px 14px -3px ${mod.color || 'rgb(var(--panel-accent-rgb))'}66, inset 0 1px 0 rgba(255,255,255,0.15)`,
                   } : {}}
                 >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#ffffff' : 'hsl(var(--muted-foreground))' }} />
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#ffffff' : 'hsl(var(--foreground))' }} />
                   {mod.label}
                 </Link>
               );
