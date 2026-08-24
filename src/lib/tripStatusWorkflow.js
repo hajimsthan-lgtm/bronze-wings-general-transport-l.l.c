@@ -27,19 +27,53 @@ export const STATUS_REQUIRES_MODAL = {
   cancelled: 'cancel',
 };
 
-// Preferred transition workflow
+// ═══════════════════════════════════════════════════════
+// STRICT ONE-WAY TRANSITION TABLE
+// Rules: trips can only move FORWARD. No going back.
+// Cancellation is allowed from scheduled/started/ended.
+// ═══════════════════════════════════════════════════════
 export const VALID_TRANSITIONS = {
-  scheduled:     ['trip_started', 'trip_ended', 'completed', 'cancelled'],
-  trip_started:  ['trip_ended', 'completed', 'cancelled'],
-  trip_ended:    ['completed', 'cancelled', 'trip_started'],
-  completed:     ['cancelled'],
-  cancelled:     ['scheduled', 'trip_started', 'trip_ended', 'completed'],
+  scheduled:     ['trip_started', 'cancelled'],
+  trip_started:  ['trip_ended', 'cancelled'],
+  trip_ended:    ['completed', 'cancelled'],
+  completed:     [],          // completed is terminal — no normal transitions
+  cancelled:     [],          // cancelled is terminal — no normal transitions
 };
 
+/**
+ * Returns true if the transition from → to is allowed.
+ */
 export function canTransition(from, to) {
   if (!from || !to || from === to) return false;
   const allowed = VALID_TRANSITIONS[from] || [];
   return allowed.includes(to);
+}
+
+/**
+ * Returns a human-readable reason why a transition is blocked.
+ * Returns null if transition is allowed.
+ */
+export function getTransitionError(from, to) {
+  if (!from || !to) return 'Invalid status values.';
+  if (from === to) return null; // same status, no change needed
+
+  const FORWARD_ORDER = ['scheduled', 'trip_started', 'trip_ended', 'completed'];
+  const fromIdx = FORWARD_ORDER.indexOf(from);
+  const toIdx = FORWARD_ORDER.indexOf(to);
+
+  if (from === 'cancelled' || from === 'completed') {
+    return 'This status change is not allowed. Trip statuses cannot move backwards.';
+  }
+  if (to === 'scheduled' && from !== 'scheduled') {
+    return 'This status change is not allowed. Trip statuses cannot move backwards.';
+  }
+  if (fromIdx !== -1 && toIdx !== -1 && toIdx < fromIdx && to !== 'cancelled') {
+    return 'This status change is not allowed. Trip statuses cannot move backwards.';
+  }
+  if (!canTransition(from, to)) {
+    return 'This status change is not allowed. Trip statuses cannot move backwards.';
+  }
+  return null;
 }
 
 // Migration map for old statuses
@@ -62,8 +96,9 @@ export function getTripStartDateTime(trip) {
 }
 
 // Check if a trip should auto-transition from Scheduled → Trip Started
+// Auto-start ONLY applies to scheduled trips (never overrides a later status)
 export function shouldAutoStart(trip) {
-  if (trip.status !== 'scheduled') return false;
+  if (trip.status !== 'scheduled') return false; // NEVER override a later status
   if (trip.status_source === 'manual') return false;
   const startDT = getTripStartDateTime(trip);
   if (!startDT) return false;
@@ -71,7 +106,7 @@ export function shouldAutoStart(trip) {
 }
 
 // ═══════════════════════════════════════════════════════
-// CORE STATUS UPDATE — with audit trail
+// CORE STATUS UPDATE — with audit trail + strict validation
 // ═══════════════════════════════════════════════════════
 
 export async function updateTripStatus(trip, newStatus, options = {}) {
@@ -81,9 +116,17 @@ export async function updateTripStatus(trip, newStatus, options = {}) {
     extraData = {},
     reason = null,
     skipAudit = false,
+    skipValidation = false,
   } = options;
 
   const oldStatus = trip.status;
+
+  // Enforce strict transition rules (unless explicitly skipped for admin override)
+  if (!skipValidation) {
+    const error = getTransitionError(oldStatus, newStatus);
+    if (error) throw new Error(error);
+  }
+
   const now = new Date().toISOString();
   const actorName = user?.full_name || user?.email || (source === 'automatic' ? 'System' : 'User');
 
@@ -99,6 +142,7 @@ export async function updateTripStatus(trip, newStatus, options = {}) {
   if (newStatus === 'cancelled') {
     payload.cancelled_at = now;
     payload.cancelled_by = actorName;
+    if (reason) payload.cancellation_reason = reason;
   }
 
   await base44.entities.Trip.update(trip.id, payload);
@@ -124,6 +168,7 @@ export async function updateTripStatus(trip, newStatus, options = {}) {
 
 // ═══════════════════════════════════════════════════════
 // AUTO-CHECK: find scheduled trips that should be started
+// Only Scheduled → Trip Started. Never anything else.
 // ═══════════════════════════════════════════════════════
 
 export async function autoStartScheduledTrips(trips) {

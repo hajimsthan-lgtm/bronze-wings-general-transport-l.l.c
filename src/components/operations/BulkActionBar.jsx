@@ -1,32 +1,50 @@
 import { useState } from 'react';
-import { Trash2, X, CheckCheck, ChevronDown, Download } from 'lucide-react';
+import { Trash2, X, CheckCheck, ChevronDown, Lock } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
+import { canTransition } from '@/lib/tripStatusWorkflow';
 
 const STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
-  { value: 'trip_started', label: 'Trip Started', dot: 'bg-orange-400' },
-  { value: 'trip_ended', label: 'Trip Ended', dot: 'bg-purple-400' },
-  { value: 'completed', label: 'Completed', dot: 'bg-emerald-400' },
-  { value: 'cancelled', label: 'Cancelled', dot: 'bg-red-400' },
+  { value: 'scheduled',    label: 'Scheduled',    dot: 'bg-blue-400' },
+  { value: 'trip_started', label: 'Trip Started',  dot: 'bg-orange-400' },
+  { value: 'trip_ended',   label: 'Trip Ended',    dot: 'bg-purple-400' },
+  { value: 'completed',    label: 'Completed',     dot: 'bg-emerald-400' },
+  { value: 'cancelled',    label: 'Cancelled',     dot: 'bg-red-400' },
 ];
 
 /**
- * Floating bulk-action bar — appears when trips are selected.
- * Provides count, select-all, bulk status update, and bulk delete.
+ * Floating bulk-action bar.
+ * Status transitions are enforced using the same canTransition() rules as the individual dropdown.
+ * selectedTrips is the array of full trip objects for validation.
  */
-export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, onClear, onBulkStatus, onBulkDelete, onBulkExportCSV, onBulkExportPDF }) {
+export default function BulkActionBar({
+  selectedCount, totalCount, onSelectAll, onClear,
+  onBulkStatus, onBulkDelete, onBulkExportCSV, onBulkExportPDF,
+  selectedTrips = []
+}) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const allSelected = selectedCount === totalCount;
 
   if (selectedCount === 0) return null;
 
+  // For a given target status, count how many selected trips can and cannot transition
+  const getTransitionCounts = (targetStatus) => {
+    let valid = 0, invalid = 0;
+    selectedTrips.forEach((t) => {
+      if (canTransition(t.status, targetStatus)) valid++;
+      else invalid++;
+    });
+    return { valid, invalid };
+  };
+
+  const handleStatusClick = (targetStatus) => {
+    onBulkStatus(targetStatus);
+  };
+
   return (
     <>
-      <div
-        className="sticky top-0 z-30 animate-fade-in-up mb-3"
-      >
+      <div className="sticky top-0 z-30 animate-fade-in-up mb-3">
         <div
           className="flex items-center gap-2 px-3 py-2.5 rounded-2xl w-full"
           style={{
@@ -49,7 +67,6 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
           <button
             onClick={() => (allSelected ? onClear() : onSelectAll())}
             className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl bg-white/8 border border-white/12 text-white/80 hover:bg-white/15 hover:text-white transition-colors text-xs font-medium"
-            title={allSelected ? 'Clear selection' : 'Select all'}
           >
             {allSelected ? <X className="w-3.5 h-3.5" /> : <CheckCheck className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{allSelected ? 'Clear' : 'All'}</span>
@@ -69,21 +86,32 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
                 <ChevronDown className="w-3.5 h-3.5 opacity-70" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="min-w-[160px]">
+            <DropdownMenuContent align="center" className="min-w-[200px]">
               <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {STATUS_OPTIONS.map((opt) => (
-                <DropdownMenuItem
-                  key={opt.value}
-                  onClick={() => onBulkStatus(opt.value)}
-                  className="text-xs cursor-pointer flex items-center gap-2"
-                >
-                  <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                  {opt.label}
-                </DropdownMenuItem>
-              ))}
+              {STATUS_OPTIONS.map((opt) => {
+                const { valid, invalid } = getTransitionCounts(opt.value);
+                const noneValid = valid === 0;
+                return (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    onClick={() => !noneValid && handleStatusClick(opt.value)}
+                    disabled={noneValid}
+                    className="text-xs cursor-pointer flex items-center gap-2"
+                  >
+                    <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                    <span className="flex-1">{opt.label}</span>
+                    {noneValid
+                      ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
+                      : invalid > 0
+                        ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
+                        : null
+                    }
+                  </DropdownMenuItem>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -92,7 +120,6 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
             <button
               onClick={onBulkExportCSV}
               className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/30 hover:text-emerald-200 transition-colors text-xs font-semibold"
-              title="Export selected as CSV"
             >
               <ExcelIcon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">CSV</span>
@@ -104,7 +131,6 @@ export default function BulkActionBar({ selectedCount, totalCount, onSelectAll, 
             <button
               onClick={onBulkExportPDF}
               className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 hover:text-rose-200 transition-colors text-xs font-semibold"
-              title="Export selected as PDF"
             >
               <PdfIcon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">PDF</span>

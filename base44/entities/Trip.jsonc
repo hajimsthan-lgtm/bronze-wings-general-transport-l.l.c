@@ -64,6 +64,10 @@
     "offload_datetime": {
       "type": "string"
     },
+    "offload_date": {
+      "type": "string",
+      "format": "date"
+    },
     "duration_unit": {
       "type": "string",
       "enum": [

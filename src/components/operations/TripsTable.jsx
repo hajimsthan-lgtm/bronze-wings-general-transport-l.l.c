@@ -14,8 +14,13 @@ import { cn } from '@/lib/utils';
 import moment from 'moment';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
+import { base44 } from '@/api/base44Client';
 import BulkActionBar from '@/components/operations/BulkActionBar';
 import TripStatusManager from '@/components/trips/TripStatusManager';
+import BulkEndTripDialog from '@/components/trips/BulkEndTripDialog';
+import BulkCancelDialog from '@/components/trips/BulkCancelDialog';
+import { updateTripStatus, canTransition } from '@/lib/tripStatusWorkflow';
+import { useAuth } from '@/lib/AuthContext';
 
 // Column widths in mm — total = 247mm (landscape A4 usable width)
 const TRIP_EXPORT_COLUMNS = [
@@ -55,6 +60,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [bulkModal, setBulkModal] = useState(null); // 'end' | 'cancel' | null
+  const [bulkSelectedTrips, setBulkSelectedTrips] = useState([]);
   const [copiedId, setCopiedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -166,10 +174,98 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const allSelected = trips.length > 0 && selected.size === trips.length;
   const clearSelection = () => setSelected(new Set());
   const selectedIds = Array.from(selected);
-  const handleBulkStatus = async (status) => {
-    if (onBulkStatus) await onBulkStatus(selectedIds, status);
+  const handleBulkStatus = async (targetStatus) => {
+    const validTrips = selectedTrips.filter((t) => canTransition(t.status, targetStatus));
+    const invalidCount = selectedTrips.length - validTrips.length;
+
+    if (validTrips.length === 0) {
+      toast({ title: 'No valid trips', description: 'None of the selected trips can be moved to this status.', variant: 'destructive' });
+      return;
+    }
+
+    // Statuses requiring modal
+    if (targetStatus === 'trip_ended') {
+      setBulkSelectedTrips(validTrips);
+      setBulkModal('end');
+      return;
+    }
+    if (targetStatus === 'cancelled') {
+      setBulkSelectedTrips(validTrips);
+      setBulkModal('cancel');
+      return;
+    }
+
+    // Direct transitions (scheduled → trip_started only valid case now)
+    const now = new Date().toISOString();
+    const actorName = user?.full_name || user?.email || 'User';
+    const updates = validTrips.map((t) => ({
+      id: t.id,
+      status: targetStatus,
+      status_source: 'manual',
+      status_updated_at: now,
+      status_updated_by: actorName,
+    }));
+
+    try {
+      await base44.entities.Trip.bulkUpdate(updates);
+      let msg = `${validTrips.length} trip${validTrips.length !== 1 ? 's' : ''} updated successfully.`;
+      if (invalidCount > 0) msg += ` ${invalidCount} trip${invalidCount !== 1 ? 's' : ''} could not be updated because their current status does not allow this transition.`;
+      toast({ title: 'Bulk status updated', description: msg });
+      onStatusUpdated?.();
+    } catch {
+      toast({ title: 'Bulk update failed', variant: 'destructive' });
+    }
     clearSelection();
   };
+
+  const handleBulkEndConfirm = async (results) => {
+    const now = new Date().toISOString();
+    const actorName = user?.full_name || user?.email || 'User';
+    const updates = results.map(({ trip, offload_date, offload_time, offload_datetime }) => ({
+      id: trip.id,
+      status: 'trip_ended',
+      status_source: 'manual',
+      status_updated_at: now,
+      status_updated_by: actorName,
+      offload_date,
+      offload_time,
+      offload_datetime,
+    }));
+    try {
+      await base44.entities.Trip.bulkUpdate(updates);
+      toast({ title: `${results.length} trip${results.length !== 1 ? 's' : ''} marked as Trip Ended` });
+      onStatusUpdated?.();
+    } catch {
+      toast({ title: 'Bulk update failed', variant: 'destructive' });
+    }
+    setBulkModal(null);
+    clearSelection();
+  };
+
+  const handleBulkCancelConfirm = async ({ cancellation_reason }) => {
+    const now = new Date().toISOString();
+    const actorName = user?.full_name || user?.email || 'User';
+    const updates = bulkSelectedTrips.map((t) => ({
+      id: t.id,
+      status: 'cancelled',
+      status_source: 'manual',
+      status_updated_at: now,
+      status_updated_by: actorName,
+      cancellation_reason,
+      cancelled_at: now,
+      cancelled_by: actorName,
+    }));
+    try {
+      await base44.entities.Trip.bulkUpdate(updates);
+      toast({ title: `${bulkSelectedTrips.length} trip${bulkSelectedTrips.length !== 1 ? 's' : ''} cancelled` });
+      onStatusUpdated?.();
+    } catch {
+      toast({ title: 'Bulk cancel failed', variant: 'destructive' });
+    }
+    setBulkModal(null);
+    clearSelection();
+  };
+
   const handleBulkDelete = async () => {
     if (onBulkDelete) await onBulkDelete(selectedIds);
     clearSelection();
@@ -201,6 +297,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
         onBulkDelete={handleBulkDelete}
         onBulkExportCSV={handleBulkExportCSV}
         onBulkExportPDF={handleBulkExportPDF}
+        selectedTrips={selectedTrips}
       />
 
       {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
@@ -401,6 +498,21 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
             </TableBody>
             </Table>
             </div>
+
+      {/* Bulk End Trip modal */}
+      <BulkEndTripDialog
+        trips={bulkSelectedTrips}
+        open={bulkModal === 'end'}
+        onOpenChange={(v) => !v && setBulkModal(null)}
+        onConfirm={handleBulkEndConfirm}
+      />
+      {/* Bulk Cancel modal */}
+      <BulkCancelDialog
+        trips={bulkSelectedTrips}
+        open={bulkModal === 'cancel'}
+        onOpenChange={(v) => !v && setBulkModal(null)}
+        onConfirm={handleBulkCancelConfirm}
+      />
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
