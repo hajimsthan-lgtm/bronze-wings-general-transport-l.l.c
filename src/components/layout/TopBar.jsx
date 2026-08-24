@@ -9,6 +9,7 @@ import VehicleNavDropdown from './VehicleNavDropdown';
 import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
+import MobileSearchFilter from './MobileSearchFilter';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useFuelMode, setFuelMode } from '@/lib/fuelStore';
 import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
@@ -396,6 +397,8 @@ export default function TopBar() {
             )}
           </div>
         </div>
+        {/* Mobile search + filter bar */}
+        <MobileSearchFilter />
       </div>
     </div>
   );

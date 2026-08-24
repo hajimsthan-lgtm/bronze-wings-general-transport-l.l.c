@@ -641,6 +641,212 @@
   [role="alertdialog"][data-state="open"] label::after {
     color: #2196f3 !important;
   }
+
+  /* ═══════════════════════════════════════════════════════
+     MOBILE UI POLISH — universal touch targets, spacing, readability
+     ═══════════════════════════════════════════════════════ */
+
+  /* Page content — consistent horizontal padding */
+  .professional-page-bg > main,
+  main {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Cards — tighter radius, better touch padding */
+  .glass-card,
+  .clay-card,
+  .entity-card,
+  .glass-panel,
+  .detail-header-card {
+    border-radius: 1rem !important;
+    padding: 16px !important;
+  }
+  .glass-sm {
+    border-radius: 0.875rem !important;
+  }
+
+  /* KPI / stat tiles — compact, readable */
+  .kpi-card,
+  .stat-tile {
+    border-radius: 0.875rem !important;
+    padding: 14px !important;
+  }
+
+  /* Row cards — tighter, more scannable */
+  .row-card {
+    border-radius: 0.875rem !important;
+    padding: 12px 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Buttons — minimum 44px touch target */
+  button[class*="h-8"],
+  button[class*="h-9"] {
+    min-height: 40px !important;
+  }
+  .lightning-btn,
+  .clay-btn,
+  .clay-btn-ghost {
+    min-height: 44px !important;
+    padding: 10px 22px !important;
+    font-size: 14px !important;
+  }
+
+  /* Icon buttons — 40px minimum */
+  button.w-9.h-9,
+  button.w-10.h-10 {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+
+  /* Inputs — 44px touch target, 16px font (no zoom) */
+  input,
+  textarea,
+  select,
+  [role="combobox"] {
+    font-size: 16px !important;
+    min-height: 44px !important;
+  }
+  .clay-input {
+    min-height: 44px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+  }
+
+  /* Tables — readable text, proper horizontal scroll */
+  .trips-grid-table {
+    font-size: 12px !important;
+  }
+  .trips-grid-td {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+  }
+  .trips-grid-th {
+    padding: 10px 12px !important;
+    font-size: 10px !important;
+  }
+
+  /* Badges — slightly larger for readability */
+  .badge,
+  [class*="inline-flex"][class*="rounded-full"][class*="text-xs"] {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+
+  /* Sub-tabs — larger touch area */
+  .sub-tab {
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+    min-height: 36px !important;
+  }
+
+  /* Filter chips — 36px touch */
+  .filter-chip {
+    padding: 6px 12px !important;
+    font-size: 10px !important;
+    min-height: 32px !important;
+  }
+
+  /* Sub-nav pills in mobile header — 36px */
+  .premium-scroll a {
+    min-height: 36px !important;
+  }
+
+  /* Section headings — tighter on mobile */
+  h1 { font-size: 1.5rem !important; line-height: 1.2 !important; }
+  h2 { font-size: 1.25rem !important; line-height: 1.25 !important; }
+  h3 { font-size: 1.1rem !important; line-height: 1.3 !important; }
+
+  /* Page header area — reduce top padding */
+  .professional-page-bg > *:first-child {
+    padding-top: 8px !important;
+  }
+
+  /* Empty states — compact */
+  .empty-orb {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  /* Dropdown menus — wider, better touch */
+  [role="menu"] {
+    min-width: 180px !important;
+  }
+  [role="menuitem"] {
+    min-height: 44px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+  }
+
+  /* Select dropdown items — taller */
+  [role="option"] {
+    min-height: 44px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+  }
+
+  /* Scrollbars — visible but slim on mobile tables */
+  .trips-scroll::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+  }
+  .trips-scroll::-webkit-scrollbar-thumb {
+    border-width: 2px !important;
+    min-height: 48px !important;
+  }
+
+  /* Dialog content — max width for readability */
+  [role="dialog"][data-state="open"]:not(.fixed) {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  /* Tabs list — scrollable, compact */
+  [role="tablist"] {
+    gap: 4px !important;
+    min-height: 40px !important;
+  }
+  [role="tab"] {
+    min-height: 36px !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* Sticky table headers — stronger separation */
+  .trips-grid-table thead tr {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15), inset 0 -1px 0 rgba(var(--panel-accent-rgb),0.20) !important;
+  }
+
+  /* Selected row — clearer highlight */
+  .trips-grid-table tr[class*="bg-primary"] {
+    background: rgba(33, 150, 243, 0.10) !important;
+  }
+
+  /* Action icon buttons in tables — 36px */
+  .trips-grid-td button[class*="p-1.5"] {
+    padding: 8px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+
+  /* Links in tables — larger tap area */
+  .trips-grid-td button[class*="text-sky"] {
+    padding: 2px 0 !important;
+    min-height: 24px !important;
+  }
+
+  /* TopBar — tighter on mobile */
+  .sticky.top-0 > div > .flex.items-center.justify-between {
+    min-height: 48px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  /* Mobile search filter bar — glass surface */
+  .sticky.top-0 > div > div[class*="md:hidden"][class*="flex"][class*="items-center"][class*="gap-2"][class*="px-3"] {
+    background: var(--mobile-surface) !important;
+    border-top: 1px solid var(--mobile-surface-ring) !important;
+  }
 }
 
 /* ── Reduced motion: disable background animations ── */
