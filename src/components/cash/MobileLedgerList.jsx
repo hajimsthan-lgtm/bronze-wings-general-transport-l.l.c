@@ -1,11 +1,11 @@
-import { Pencil, Trash2, ArrowDownLeft, ArrowUpRight, Hash, Calendar } from 'lucide-react';
+import { Pencil, Trash2, ArrowDownLeft, ArrowUpRight, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
 
 /**
  * Mobile-only card list for ledger entries (petty cash + bank rec).
- * Replaces the horizontal-scroll table on mobile with breathable transaction cards.
+ * Clean, structured transaction cards with colored accent stripes.
  */
 export default function MobileLedgerList({
   rows,
@@ -34,71 +34,70 @@ export default function MobileLedgerList({
   }
 
   return (
-    <div className="space-y-3 px-3 py-3">
+    <div className="space-y-2.5 px-3 py-3">
       {rows.map((r, idx) => {
         const hasInflow = Number(r.in) > 0;
         const hasOutflow = Number(r.out) > 0;
         const isFlow = hasInflow ? 'in' : hasOutflow ? 'out' : 'neutral';
         const refVal = r[refKey] || r.ref || '';
 
+        const accentColor = isFlow === 'in' ? '#34d399' : isFlow === 'out' ? '#f43f5e' : '#64748b';
+        const accentBg = isFlow === 'in' ? 'rgba(52,211,153,0.12)' : isFlow === 'out' ? 'rgba(244,63,94,0.12)' : 'rgba(100,116,139,0.12)';
+        const accentBorder = isFlow === 'in' ? 'rgba(52,211,153,0.25)' : isFlow === 'out' ? 'rgba(244,63,94,0.25)' : 'rgba(100,116,139,0.20)';
+
         return (
           <div
             key={r.id || idx}
-            className={cn(
-              'relative rounded-2xl overflow-hidden border transition-all',
-              isFlow === 'in' && 'border-emerald-500/25',
-              isFlow === 'out' && 'border-rose-500/25',
-              isFlow === 'neutral' && 'border-border/50'
-            )}
+            className="relative rounded-2xl overflow-hidden border border-border/40"
             style={{
-              background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.55) 0%, rgba(var(--surf-2-rgb),0.70) 100%)',
-              backdropFilter: 'blur(20px) saturate(1.3)',
-              WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 14px rgba(0,0,0,0.15)',
+              background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.65) 0%, rgba(var(--surf-2-rgb),0.80) 100%)',
+              backdropFilter: 'blur(16px) saturate(1.2)',
+              WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 12px rgba(0,0,0,0.12)',
             }}
           >
             {/* Left accent stripe */}
             <div
-              className={cn(
-                'absolute left-0 top-0 bottom-0 w-1',
-                isFlow === 'in' && 'bg-emerald-500/60',
-                isFlow === 'out' && 'bg-rose-500/60',
-                isFlow === 'neutral' && 'bg-muted-foreground/30'
-              )}
+              className="absolute left-0 top-0 bottom-0 w-1.5"
+              style={{ background: accentColor, opacity: 0.7 }}
             />
 
-            <div className="p-4 pl-5">
-              {/* Top row: date + flow badge */}
-              <div className="flex items-start justify-between gap-2 mb-2.5">
-                <div className="flex items-center gap-2 min-w-0">
+            <div className="p-3.5 pl-5">
+              {/* Top row: icon + date/ref + amount */}
+              <div className="flex items-start justify-between gap-2.5 mb-2">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={cn(
-                      'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                      isFlow === 'in' && 'bg-emerald-500/15 text-emerald-400',
-                      isFlow === 'out' && 'bg-rose-500/15 text-rose-400',
-                      isFlow === 'neutral' && 'bg-muted/40 text-muted-foreground'
-                    )}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: accentBg, border: `1px solid ${accentBorder}` }}
                   >
-                    {hasInflow ? <ArrowDownLeft className="w-4 h-4" /> : hasOutflow ? <ArrowUpRight className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
+                    {hasInflow ? (
+                      <ArrowDownLeft className="w-4.5 h-4.5" style={{ color: accentColor }} />
+                    ) : hasOutflow ? (
+                      <ArrowUpRight className="w-4.5 h-4.5" style={{ color: accentColor }} />
+                    ) : (
+                      <Hash className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-mono font-semibold text-foreground/90 tabular-nums truncate">{r.date || '—'}</p>
+                    <p className="text-xs font-mono font-semibold text-foreground/90 tabular-nums truncate leading-tight">
+                      {r.date || '—'}
+                    </p>
                     {refVal && (
-                      <p className="text-[10px] text-muted-foreground/70 font-mono truncate flex items-center gap-1 mt-0.5">
-                        <Hash className="w-2.5 h-2.5" />{refVal}
+                      <p className="text-[10px] text-muted-foreground/60 font-mono truncate mt-0.5">
+                        #{refVal}
                       </p>
                     )}
                   </div>
                 </div>
-                {/* Amount badge */}
+                {/* Amount */}
                 <div className="text-right flex-shrink-0">
                   {hasInflow && (
-                    <p className="text-base font-bold font-mono tabular-nums text-emerald-400 leading-tight">
+                    <p className="text-lg font-bold font-mono tabular-nums leading-tight" style={{ color: accentColor }}>
                       +{fmt(r.in)}
                     </p>
                   )}
                   {hasOutflow && (
-                    <p className="text-base font-bold font-mono tabular-nums text-rose-400 leading-tight">
+                    <p className="text-lg font-bold font-mono tabular-nums leading-tight" style={{ color: accentColor }}>
                       −{fmt(r.out)}
                     </p>
                   )}
@@ -110,42 +109,52 @@ export default function MobileLedgerList({
 
               {/* Description */}
               {r.description && (
-                <p className="text-sm text-foreground/85 font-medium leading-snug mb-1.5 break-words">
+                <p className="text-sm text-foreground font-semibold leading-snug mb-1 break-words">
                   {r.description}
                 </p>
               )}
 
               {/* Recipient */}
               {hasRecipient && r.recipient && (
-                <p className="text-xs text-muted-foreground/80 mb-2 truncate">
+                <p className="text-xs text-muted-foreground/70 mb-2 truncate">
                   <span className="text-muted-foreground/50">To/From: </span>
                   {r.recipient}
                 </p>
               )}
 
-              {/* Bottom row: running balance + actions */}
-              <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-border/30">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">Balance</span>
-                  <span className="text-sm font-bold font-mono tabular-nums text-blue-400">
+              {/* Divider + Balance + Actions */}
+              <div className="flex items-center justify-between gap-2 mt-2.5 pt-2.5 border-t border-border/25">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-bold">Balance</span>
+                  <span className="text-sm font-bold font-mono tabular-nums text-primary truncate">
                     {fmt(r.running_balance)}
                   </span>
                 </div>
                 {showActions && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => onEdit?.(r)}
-                      className="w-9 h-9 rounded-lg flex items-center justify-center bg-amber-500/10 border border-amber-500/25 text-amber-400 active:scale-90 transition-transform"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform"
+                      style={{
+                        background: 'rgba(245,158,11,0.10)',
+                        border: '1px solid rgba(245,158,11,0.20)',
+                        color: '#f59e0b',
+                      }}
                       aria-label="Edit"
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onDelete?.(r.id)}
-                      className="w-9 h-9 rounded-lg flex items-center justify-center bg-red-500/10 border border-red-500/25 text-red-400 active:scale-90 transition-transform"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform"
+                      style={{
+                        background: 'rgba(244,63,94,0.10)',
+                        border: '1px solid rgba(244,63,94,0.20)',
+                        color: '#f43f5e',
+                      }}
                       aria-label="Delete"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}

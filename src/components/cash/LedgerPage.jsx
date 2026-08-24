@@ -399,8 +399,8 @@ export default function LedgerPage({
             </div>
           )}
 
-          {/* Mobile card list — breathable transaction cards */}
-          <div className="md:hidden" style={PANEL}>
+          {/* Mobile card list — clean transaction cards on page background */}
+          <div className="md:hidden">
             {rows === null ? (
               <div className="p-10"><LoadingSpinner /></div>
             ) : (
