@@ -121,11 +121,35 @@
       "type": "string",
       "enum": [
         "scheduled",
-        "in_transit",
+        "trip_started",
+        "trip_ended",
         "completed",
         "cancelled"
       ],
       "default": "scheduled"
+    },
+    "status_source": {
+      "type": "string",
+      "enum": [
+        "automatic",
+        "manual"
+      ],
+      "default": "automatic"
+    },
+    "status_updated_at": {
+      "type": "string"
+    },
+    "status_updated_by": {
+      "type": "string"
+    },
+    "cancellation_reason": {
+      "type": "string"
+    },
+    "cancelled_at": {
+      "type": "string"
+    },
+    "cancelled_by": {
+      "type": "string"
     },
     "trip_date": {
       "type": "string",
