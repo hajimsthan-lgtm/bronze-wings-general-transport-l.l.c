@@ -85,9 +85,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       ).then(([trips, vehs, drvs, clnts, vnds]) => {
         setTripsList(trips || []);
         setVehicles(vehs || []);
-        setDrivers((drvs || []).filter((d) => !d.vendor_name));
+        setDrivers(drvs || []);
         setClients(clnts || []);
-        setVendors((vnds || []).filter((v) => v.category === 'service_provider'));
+        setVendors((vnds || []).filter((v) => !v.provider_type || ['vehicle_supplier', 'driver_supplier', 'both'].includes(v.provider_type)));
       });
     }
   }, [open]);

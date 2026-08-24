@@ -445,12 +445,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                       {trip.driver_name || ''}
                     </button>
                     {trip.vendor_name && (
-                      <button
-                          onClick={(e) => { e.stopPropagation(); navigate('/admin/vendors'); }}
-                          className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors text-[10px] font-medium shrink-0"
-                          title={`Vendor: ${trip.vendor_name}`}>
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                         {trip.vendor_name}
-                      </button>
+                      </span>
                     )}
                   </div>
                 </TableCell>

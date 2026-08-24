@@ -279,15 +279,9 @@ export default function TripModeFields({ p }) {
 
       {/* Delivery */}
       <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
-            <IconInput icon={FileText} maxLength={50} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', sanitizePlain(e.target.value))} className={inputCls} />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('distance')}</Label>
-            <IconInput icon={Ruler} type="number" min="0" inputMode="decimal" value={form.distance_km} onChange={(e) => update('distance_km', sanitizeDistance(e.target.value))} className={inputCls} />
-          </div>
+        <div>
+          <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
+          <IconInput icon={FileText} maxLength={50} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', sanitizePlain(e.target.value))} className={inputCls} />
         </div>
         {form.trip_type === 'return' && (
           <div>

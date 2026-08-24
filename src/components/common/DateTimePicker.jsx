@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
-import { format, parse } from 'date-fns';
+import { format, parse, isValid } from 'date-fns';
 import TimeWheelPicker from './TimeWheelPicker';
 import AnalogClockPicker from './AnalogClockPicker';
 import { usePickerStyle } from '@/lib/dateTimePickerStyle';
@@ -11,10 +11,16 @@ import { usePickerStyle } from '@/lib/dateTimePickerStyle';
 const DATE_FMT = 'yyyy-MM-dd';
 const TIME_FMT = 'HH:mm';
 
-// value is a "YYYY-MM-DDTHH:mm" string (same format as datetime-local)
+// value is a "YYYY-MM-DDTHH:mm" string (same format as datetime-local),
+// but trips may store full ISO strings with seconds/timezone — handle both.
 function toDateTime(value) {
   if (!value) return null;
-  try { return parse(value, `yyyy-MM-dd'T'HH:mm`, new Date()); } catch { return null; }
+  try {
+    const d = parse(value, `yyyy-MM-dd'T'HH:mm`, new Date());
+    if (isValid(d)) return d;
+    const native = new Date(value);
+    return isValid(native) ? native : null;
+  } catch { return null; }
 }
 
 function toValue(date, time) {
@@ -28,7 +34,7 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
   const [step, setStep] = useState('date');
   const pickerStyle = usePickerStyle();
   const date = toDateTime(value);
-  const timeStr = value ? value.split('T')[1] || '00:00' : '00:00';
+  const timeStr = value ? (value.split('T')[1] || '00:00').slice(0, 5) || '00:00' : '00:00';
 
   const handleDaySelect = (day) => {
     if (!day) return;
