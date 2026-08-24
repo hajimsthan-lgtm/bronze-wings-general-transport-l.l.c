@@ -3,9 +3,10 @@ import ReportStatCard from '@/components/reports/ReportStatCard';
 import ReportSectionCard from '@/components/reports/ReportSectionCard';
 import DonutChart from '@/components/reports/DonutChart';
 import TrendChart from '@/components/reports/TrendChart';
+import VatTransactionsTable from '@/components/tax/VatTransactionsTable';
 import { formatCurrency } from '@/lib/formatters';
 
-export default function VatTab({ vatData, trend }) {
+export default function VatTab({ vatData, trend, invoices, expenses, periodLabel }) {
   const donutData = [
     { name: 'Standard-rated (5%)', value: vatData.standardRatedSales, color: '#6366f1' },
     { name: 'Zero-rated', value: vatData.zeroRatedSales, color: '#22c55e' },
@@ -75,6 +76,17 @@ export default function VatTab({ vatData, trend }) {
             ]}
             type="area"
             height={220}
+          />
+        </ReportSectionCard>
+      </div>
+
+      {/* Detailed transactions table */}
+      <div className="mt-4">
+        <ReportSectionCard index={6} color="#6366f1" title="VAT Transactions Detail">
+          <VatTransactionsTable
+            invoices={invoices}
+            expenses={expenses}
+            periodLabel={periodLabel}
           />
         </ReportSectionCard>
       </div>

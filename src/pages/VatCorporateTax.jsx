@@ -163,7 +163,15 @@ export default function VatCorporateTax() {
           daysUntilCtDue={daysUntilCtDue}
         />
       )}
-      {tab === 'vat' && <VatTab vatData={vatData} trend={trend} />}
+      {tab === 'vat' && (
+        <VatTab
+          vatData={vatData}
+          trend={trend}
+          invoices={invoices}
+          expenses={expenses}
+          periodLabel={vatPeriod.label}
+        />
+      )}
       {tab === 'corporate' && <CorporateTaxTab ctData={ctData} />}
     </div>
   );
