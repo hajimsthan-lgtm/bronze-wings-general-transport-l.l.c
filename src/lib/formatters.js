@@ -59,6 +59,8 @@ export function formatNumber(num) {
 export function getStatusColor(status) {
   const colors = {
     scheduled: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
+    trip_started: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
+    trip_ended: 'bg-purple-500/15 text-purple-400 border-purple-500/20',
     in_transit: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
     delivered: 'bg-[#01B574]/15 text-[#01B574] border-[#01B574]/30',
     completed: 'bg-[#01B574]/15 text-[#01B574] border-[#01B574]/30',

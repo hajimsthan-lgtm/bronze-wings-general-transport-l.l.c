@@ -3,6 +3,8 @@ const VARIANTS = {
   amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   red: 'bg-red-500/10 text-red-400 border-red-500/20',
+  purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  orange: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
   neutral: 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20',
 };
 
@@ -11,6 +13,8 @@ const DOTS = {
   amber: 'bg-amber-400',
   blue: 'bg-blue-400',
   red: 'bg-red-400',
+  purple: 'bg-purple-400',
+  orange: 'bg-orange-400',
   neutral: 'bg-zinc-400',
 };
 
@@ -30,7 +34,8 @@ export default function StatusPill({ children, variant = 'neutral', dot = false,
 export const statusVariant = (status) => {
   const map = {
     completed: 'green', active: 'green', paid: 'green',
-    in_transit: 'amber', pending: 'amber', partially_paid: 'amber', expiring_soon: 'amber',
+    trip_started: 'orange', in_transit: 'amber', pending: 'amber', partially_paid: 'amber', expiring_soon: 'amber',
+    trip_ended: 'purple',
     scheduled: 'blue', sent: 'blue',
     cancelled: 'red', expired: 'red', terminated: 'red', overdue: 'red',
   };

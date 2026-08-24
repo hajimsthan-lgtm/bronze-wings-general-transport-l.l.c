@@ -6,7 +6,8 @@ import { ExcelIcon, PdfIcon } from '@/components/common/BrandIcons';
 
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
-  { value: 'in_transit', label: 'In Transit', dot: 'bg-amber-400' },
+  { value: 'trip_started', label: 'Trip Started', dot: 'bg-orange-400' },
+  { value: 'trip_ended', label: 'Trip Ended', dot: 'bg-purple-400' },
   { value: 'completed', label: 'Completed', dot: 'bg-emerald-400' },
   { value: 'cancelled', label: 'Cancelled', dot: 'bg-red-400' },
 ];

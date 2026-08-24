@@ -3,15 +3,17 @@ import { formatDate, formatCurrency } from '@/lib/formatters';
 import { useTripUpdate } from '@/hooks/useEntityQueries';
 import { useCardLock, useSpotlight, useScrollIntoViewWhenLocked, shouldFlashNew } from '@/hooks/useCardLock';
 import { Truck, ArrowRight, Trash2, Check, Copy } from 'lucide-react';
+import TripStatusManager from './TripStatusManager';
 
 const STATUS = {
-  scheduled:  { label: 'Scheduled',   color: '#60a5fa', bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.40)' },
-  in_transit: { label: 'In Progress', color: '#fbbf24', bg: 'rgba(251,191,36,0.15)',  border: 'rgba(251,191,36,0.40)' },
-  completed:  { label: 'Completed',   color: '#34d399', bg: 'rgba(52,211,153,0.15)',  border: 'rgba(52,211,153,0.40)' },
-  cancelled:  { label: 'Cancelled',    color: '#f87171', bg: 'rgba(248,113,113,0.15)', border: 'rgba(248,113,113,0.40)' },
+  scheduled:    { label: 'Scheduled',    color: '#60a5fa', bg: 'rgba(96,165,250,0.15)',  border: 'rgba(96,165,250,0.40)' },
+  trip_started: { label: 'Trip Started', color: '#fb923c', bg: 'rgba(251,146,60,0.15)',  border: 'rgba(251,146,60,0.40)' },
+  trip_ended:   { label: 'Trip Ended',   color: '#c084fc', bg: 'rgba(192,132,252,0.15)', border: 'rgba(192,132,252,0.40)' },
+  completed:   { label: 'Completed',    color: '#34d399', bg: 'rgba(52,211,153,0.15)',  border: 'rgba(52,211,153,0.40)' },
+  cancelled:   { label: 'Cancelled',    color: '#f87171', bg: 'rgba(248,113,113,0.15)', border: 'rgba(248,113,113,0.40)' },
 };
 
-export default function TripCard({ trip, onClick, onDelete, driverMap, vehicleMap, clientMap }) {
+export default function TripCard({ trip, onClick, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap }) {
   const navigate = useNavigate();
   const updateTrip = useTripUpdate();
 
@@ -26,11 +28,6 @@ export default function TripCard({ trip, onClick, onDelete, driverMap, vehicleMa
     e.stopPropagation();
     const id = map?.[name];
     if (id) navigate(`${path}/${id}`);
-  };
-
-  const handleMarkCompleted = (e) => {
-    e.stopPropagation();
-    updateTrip.mutate({ id: trip.id, data: { status: 'completed' } });
   };
 
   const handleDelete = (e) => {
@@ -101,17 +98,11 @@ export default function TripCard({ trip, onClick, onDelete, driverMap, vehicleMa
         <button onClick={(e) => handleLink(e, driverMap, trip.driver_name, '/admin/drivers')} className="hover:text-primary transition-colors truncate">{trip.driver_name}</button>
       </div>
 
-      {/* ── Footer: mark completed + delete ── */}
+      {/* ── Footer: status workflow + delete ── */}
       <div className="flex items-center justify-between pt-2 border-t border-white/5">
-        {trip.status !== 'completed' && trip.status !== 'cancelled' ? (
-          <button onClick={handleMarkCompleted}
-            className="inline-flex items-center gap-1.5 px-3 h-7 rounded-full text-xs font-semibold transition-all hover:brightness-125"
-            style={{ border: '1px solid rgba(45,212,191,0.40)', color: '#2dd4bf', background: 'rgba(45,212,191,0.08)' }}>
-            <Check className="w-3.5 h-3.5" /> Mark completed
-          </button>
-        ) : (
-          <span className="text-[11px] text-white/30 uppercase tracking-wider">{st.label}</span>
-        )}
+        <div onClick={(e) => e.stopPropagation()}>
+          <TripStatusManager trip={trip} onUpdated={onStatusUpdated} />
+        </div>
         <button onClick={handleDelete}
           className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all"
           title="Delete trip">

@@ -8,6 +8,7 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Pencil, Trash2, MapPin, User, Truck, FileText, Calendar, Clock, RotateCcw, Paperclip, DollarSign, Receipt, Mail, Phone } from 'lucide-react';
 import TripProfitSummary from './TripProfitSummary';
 import QuickReceipt from './QuickReceipt';
+import TripStatusHistoryPanel from './TripStatusHistoryPanel';
 
 export default function TripDetailSheet({ trip, onClose, onEdit, onDelete, contactPersons }) {
   const { t } = useI18n();
@@ -89,6 +90,25 @@ export default function TripDetailSheet({ trip, onClose, onEdit, onDelete, conta
 
         {/* Profit Summary */}
         <TripProfitSummary trip={trip} />
+
+        {/* Cancellation Reason */}
+        {trip.cancellation_reason && (
+          <div className="glass-card p-4 mb-4">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Cancellation Reason</h3>
+            <p className="text-sm text-foreground">{trip.cancellation_reason}</p>
+            {trip.cancelled_at && (
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Cancelled on {formatDate(trip.cancelled_at)} by {trip.cancelled_by || '—'}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Status History */}
+        <div className="glass-card p-4 mb-6">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Status History</h3>
+          <TripStatusHistoryPanel tripId={trip.id} />
+        </div>
 
         {trip.delivery_note_url && (
           <div className="glass-card p-4 mb-6">

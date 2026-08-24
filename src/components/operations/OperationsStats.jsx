@@ -16,7 +16,7 @@ export default function OperationsStats({ mode, tripsCount, totalRevenue, tripCo
   ] : [
     { label: 'Total Trips', value: tripsCount, icon: Truck, accent: '#1ED760', sub: formatCurrency(totalRevenue) },
     { label: 'Completed', value: tripCounts.completed, icon: CheckCircle2, accent: '#34d399' },
-    { label: 'In Transit', value: tripCounts.in_transit, icon: Clock, accent: '#f59e0b' },
+    { label: 'Started', value: tripCounts.trip_started, icon: Clock, accent: '#fb923c' },
     { label: 'Scheduled', value: tripCounts.scheduled, icon: CalendarClock, accent: '#3b82f6' },
   ];
 

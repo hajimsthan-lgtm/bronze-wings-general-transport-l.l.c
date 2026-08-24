@@ -15,6 +15,7 @@ import moment from 'moment';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import BulkActionBar from '@/components/operations/BulkActionBar';
+import TripStatusManager from '@/components/trips/TripStatusManager';
 
 // Column widths in mm — total = 247mm (landscape A4 usable width)
 const TRIP_EXPORT_COLUMNS = [
@@ -50,7 +51,7 @@ const DEFAULT_WIDTHS = {
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
-export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusChange, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
+export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -186,11 +187,6 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
     exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips', { landscape: true });
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
-  };
-
-  const handleStatusChange = async (trip, newStatus) => {
-    if (newStatus === trip.status) return;
-    onStatusChange?.(trip, newStatus);
   };
 
   return (
@@ -366,43 +362,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 <TableCell className="text-left align-top trips-grid-td">
                    <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                  </TableCell>
-                  {/* STATUS — inline dropdown for direct change */}
+                  {/* STATUS — workflow dropdown with conditional modals */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                          className={cn(
-                            'text-[10px] font-bold px-2 py-1 rounded-full border inline-flex items-center gap-1 transition-colors hover:brightness-125',
-                            trip.status === 'completed' && 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
-                            trip.status === 'in_transit' && 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-                            trip.status === 'scheduled' && 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-                            trip.status === 'cancelled' && 'text-red-400 border-red-500/30 bg-red-500/10'
-                          )}>
-                        
-                        {trip.status === 'completed' ? '✓ Complete' : trip.status === 'in_transit' ? '⏳ Transit' : trip.status === 'cancelled' ? '✗ Cancel' : '◦ Sched'}
-                        <ChevronDown className="w-3 h-3 opacity-60" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">Set Status</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {['scheduled', 'in_transit', 'completed', 'cancelled'].map((st) =>
-                        <DropdownMenuItem
-                          key={st}
-                          onClick={() => handleStatusChange(trip, st)}
-                          className={cn(
-                            'gap-2 text-xs',
-                            trip.status === st && 'bg-primary/10 font-semibold'
-                          )}>
-                        
-                          <span className="w-2 h-2 rounded-full" style={{ background: STATUS_HEX[st] }} />
-                          {STATUS_LABELS[st]}
-                          {trip.status === st && <Check className="w-3 h-3 ml-auto" />}
-                        </DropdownMenuItem>
-                        )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                    <TripStatusManager trip={trip} onUpdated={onStatusUpdated} />
+                  </TableCell>
                 <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-center gap-1">
                     <button

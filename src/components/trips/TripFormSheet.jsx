@@ -26,7 +26,7 @@ const DEFAULT_FORM = {
   hours: '', return_trip_number: '', payment_status: 'corporate_credit',
   trip_date: new Date().toISOString().split('T')[0],
   load_datetime: '', offload_datetime: '', trip_number: '',
-  status: 'scheduled', revenue: '', distance_km: '', notes: '', contact_person: '',
+  status: 'scheduled', status_source: 'automatic', revenue: '', distance_km: '', notes: '', contact_person: '',
   duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50,
   assignment_mode: 'company',
   vendor_agreed_rate: '', vendor_payment_status: 'unpaid', vendor_due_date: '', vendor_payment_notes: ''

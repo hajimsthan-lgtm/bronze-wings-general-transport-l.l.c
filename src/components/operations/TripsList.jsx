@@ -13,6 +13,7 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import BulkActionBar from '@/components/operations/BulkActionBar';
+import TripStatusManager from '@/components/trips/TripStatusManager';
 
 const TRIP_EXPORT_COLUMNS = [
   { label: 'Trip #', key: 'trip_number' },
@@ -39,19 +40,21 @@ function dateBlock(dateStr) {
 
 const STATUS_OPTIONS = [
   { value: 'scheduled', label: 'Scheduled', dot: 'bg-blue-400' },
-  { value: 'in_transit', label: 'In Transit', dot: 'bg-amber-400' },
+  { value: 'trip_started', label: 'Trip Started', dot: 'bg-orange-400' },
+  { value: 'trip_ended', label: 'Trip Ended', dot: 'bg-purple-400' },
   { value: 'completed', label: 'Completed', dot: 'bg-emerald-400' },
-  { value: 'cancelled', label: 'Canceled', dot: 'bg-red-400' },
+  { value: 'cancelled', label: 'Cancelled', dot: 'bg-red-400' },
 ];
 
 const STATUS_HEX = {
-  scheduled: '#4ADE80',
-  in_transit: '#fbbf24',
+  scheduled: '#60a5fa',
+  trip_started: '#fb923c',
+  trip_ended: '#c084fc',
   completed: '#34d399',
   cancelled: '#f87171',
 };
 
-export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
+export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const updateTrip = useTripUpdate();
@@ -115,11 +118,6 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
     e.stopPropagation();
     const id = map?.[name];
     if (id) navigate(`${path}/${id}`);
-  };
-
-  const handleStatusChange = (e, trip, newStatus) => {
-    e.stopPropagation();
-    updateTrip.mutate({ id: trip.id, data: { status: newStatus } });
   };
 
   return (
@@ -247,22 +245,9 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, drive
               {/* Right — status + amount */}
               <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
                 <div className="w-[96px] sm:w-[160px] flex items-center justify-end gap-1.5">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                        <StatusPill as="span" variant={statusVariant(trip.status)} dot>{statusOpt.label}<ChevronDown className="w-2.5 h-2.5 ml-0.5" /></StatusPill>
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                      {STATUS_OPTIONS.map((opt) => (
-                        <DropdownMenuItem key={opt.value} onClick={(e) => handleStatusChange(e, trip, opt.value)} className="text-xs cursor-pointer flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                          {opt.label}
-                          {trip.status === opt.value && <Check className="w-3 h-3 ml-auto" />}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TripStatusManager trip={trip} onUpdated={onStatusUpdated} />
+                  </div>
 
                   {trip.status === 'completed' && (
                     <div className="hidden sm:block">

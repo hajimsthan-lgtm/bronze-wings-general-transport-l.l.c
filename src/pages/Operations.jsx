@@ -27,8 +27,9 @@ import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit, Plus } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { setOpsFilter, clearOpsFilter, useOpsSearch } from '@/lib/operationsFilterStore';
+import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
 
-const TRIP_STATUSES = ['all', 'scheduled', 'in_transit', 'completed', 'cancelled'];
+const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
 
 const TRIP_EXPORT_COLUMNS = [
@@ -150,6 +151,31 @@ export default function Operations() {
 
   useEffect(() => { (async () => { await loadContracts(); await loadMaps(); })(); }, [loadContracts, loadMaps]);
 
+  // One-time migration of old statuses (in_transit → trip_started)
+  const didMigration = useRef(false);
+  useEffect(() => {
+    if (didMigration.current || !trips || trips.length === 0) return;
+    didMigration.current = true;
+    migrateTripStatuses(trips).then((migrated) => {
+      if (migrated.length > 0) refetchTrips();
+    });
+  }, [trips, refetchTrips]);
+
+  // Auto-status: Scheduled → Trip Started when start time is reached
+  const tripsRef = useRef(trips);
+  tripsRef.current = trips;
+  useEffect(() => {
+    const check = () => {
+      if (!tripsRef.current || tripsRef.current.length === 0) return;
+      autoStartScheduledTrips(tripsRef.current).then((started) => {
+        if (started.length > 0) refetchTrips();
+      });
+    };
+    const t = setTimeout(check, 3000);
+    const interval = setInterval(check, 60000);
+    return () => { clearTimeout(t); clearInterval(interval); };
+  }, [refetchTrips]);
+
   const expensesByContract = useMemo(() => {
     const map = {};
     (allExpenses || []).forEach((e) => {
@@ -197,7 +223,7 @@ export default function Operations() {
   }), [contracts, contractFilter, search]);
 
   const tripCounts = useMemo(() => {
-    const c = { scheduled: 0, in_transit: 0, completed: 0, cancelled: 0 };
+    const c = { scheduled: 0, trip_started: 0, trip_ended: 0, completed: 0, cancelled: 0 };
     trips.forEach((tr) => { if (!tr.is_draft && c[tr.status] != null) c[tr.status]++; });
     return c;
   }, [trips]);
@@ -244,20 +270,11 @@ export default function Operations() {
     await deleteTrip.mutateAsync(trip.id);
     closeDetailTrip();
   };
-  const handleTripStatusChange = async (trip, newStatus) => {
-    try {
-      await base44.entities.Trip.update(trip.id, { status: newStatus });
-      toast({ title: 'Status updated', description: `${trip.trip_number || 'Trip'} → ${newStatus.replace('_', ' ')}` });
-      refetchTrips();
-    } catch {
-      toast({ title: 'Could not update status', variant: 'destructive' });
-    }
-  };
   const handleBulkTripStatus = async (ids, newStatus) => {
     if (!ids.length) return;
     try {
-      await base44.entities.Trip.updateMany({ id: { $in: ids } }, { $set: { status: newStatus } });
-      toast({ title: `${ids.length} trip${ids.length !== 1 ? 's' : ''} updated`, description: `Status → ${newStatus.replace('_', ' ')}` });
+      await base44.entities.Trip.updateMany({ id: { $in: ids } }, { $set: { status: newStatus, status_source: 'manual', status_updated_at: new Date().toISOString() } });
+      toast({ title: `${ids.length} trip${ids.length !== 1 ? 's' : ''} updated`, description: `Status → ${newStatus.replace(/_/g, ' ')}` });
       refetchTrips();
     } catch {
       toast({ title: 'Bulk update failed', variant: 'destructive' });
@@ -350,7 +367,7 @@ export default function Operations() {
   const tripGrid = (list) => (
     <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {list.map((trip) => (
-        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
+        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
       ))}
     </div>
   );
@@ -421,8 +438,8 @@ export default function Operations() {
                 {viewMode === 'card'
                   ? tripGrid(filteredTrips)
                   : viewMode === 'table'
-                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusChange={handleTripStatusChange} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
-                  : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
+                  ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                  : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
               </CollapsibleSection>
             )}
             {showContracts && filteredContracts.length > 0 && (
