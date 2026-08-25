@@ -20,8 +20,22 @@ import { disableNumberInputSpin } from '@/lib/disableNumberInputSpin'
 disableNumberInputSpin();
 
 // Suppress benign ResizeObserver loop warning (browser layout quirk, not an app bug)
-const _roErr = window.addEventListener('error', (e) => {
-  if (e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+// Patch ResizeObserver to wrap callbacks — catches the loop error at its source
+if (typeof ResizeObserver !== 'undefined') {
+  const _OrigRO = window.ResizeObserver;
+  window.ResizeObserver = function (cb) {
+    const wrapped = (entries, observer) => {
+      try { cb(entries, observer); }
+      catch (err) {
+        if (err?.message !== 'ResizeObserver loop completed with undelivered notifications.') throw err;
+      }
+    };
+    return new _OrigRO(wrapped);
+  };
+  window.ResizeObserver.prototype = _OrigRO.prototype;
+}
+window.addEventListener('error', (e) => {
+  if (e?.message === 'ResizeObserver loop completed with undelivered notifications.') {
     e.stopImmediatePropagation();
     e.preventDefault();
   }
