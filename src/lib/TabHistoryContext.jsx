@@ -6,10 +6,11 @@ const TabHistoryContext = createContext(null);
 const TAB_ROOTS = {
   dashboard: '/',
   operations: '/trips',
+  services: '/services',
+  settings: '/settings',
   accounts: '/accounts/petty-cash',
   reports: '/reports/daily',
   admin: '/admin/vehicles',
-  settings: '/settings',
   agents: '/agents',
 };
 
@@ -29,13 +30,16 @@ export function getTabFromPath(pathname) {
   ) return 'operations';
   // Accounts: includes Bronze Docs (company-documents) which lives under /admin but
   // is grouped with the Accounts/Documents tab on mobile
-  if (pathname.startsWith('/admin/company-documents')) return 'accounts';
-  if (pathname.startsWith('/accounts')) return 'accounts';
-  if (pathname.startsWith('/reports/bank-reconciliation')) return 'accounts';
-  if (pathname.startsWith('/reports')) return 'reports';
+  if (pathname === '/services' || pathname.startsWith('/services')) return 'services';
+  if (pathname.startsWith('/admin/company-documents')) return 'services';
+  if (pathname.startsWith('/accounts')) return 'services';
+  if (pathname.startsWith('/reports/bank-reconciliation')) return 'services';
+  if (pathname.startsWith('/reports')) return 'services';
   if (pathname.startsWith('/settings')) return 'settings';
-  if (pathname.startsWith('/agents')) return 'agents';
-  if (pathname.startsWith('/admin')) return 'admin';
+  if (pathname.startsWith('/agents')) return 'services';
+  if (pathname.startsWith('/prompt-generator')) return 'services';
+  if (pathname.startsWith('/fuel')) return 'services';
+  if (pathname.startsWith('/admin')) return 'services';
   return 'dashboard';
 }
 
