@@ -43,14 +43,14 @@ export default function ExpensesAnalytics({ expenses = [], loading, onBrowse }) 
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
         <ReportStatCard index={1} label="Total Spend" value={totalAmount} format={formatCurrency} icon={Wallet} color="#f97316" onClick={onBrowse} />
         <ReportStatCard index={2} label="Expenses" value={expenses.length} icon={Receipt} color="#00f2c3" onClick={onBrowse} />
         <ReportStatCard index={3} label="Pending" value={pendingCount} icon={Clock} color="#f59e0b" onClick={onBrowse} />
         <ReportStatCard index={4} label="Approved" value={approvedCount} icon={CheckCircle2} color="#22c55e" onClick={onBrowse} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
         <ReportSectionCard index={5} color="#a855f7" title="Expense Categories"
           action={<button onClick={onBrowse} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
           {donutData.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No data yet.</p> : (
@@ -74,7 +74,7 @@ export default function ExpensesAnalytics({ expenses = [], loading, onBrowse }) 
         </ReportSectionCard>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
         <ReportSectionCard index={7} color="#1ED760" title="Top Vendors by Spend"
           action={<button onClick={onBrowse} className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors">View All <ArrowRight className="w-3 h-3" /></button>}>
           {topVendors.length === 0 ? <p className="text-xs text-muted-foreground py-6 text-center">No vendor data yet.</p> : (

@@ -53,25 +53,27 @@
 
   /* ── Light mode mobile tokens ── */
   .theme-light {
-    --mobile-bg-canvas: #F4F6FB;
-    --mobile-surface: rgba(255, 255, 255, 0.55);
-    --mobile-surface-hover: rgba(255, 255, 255, 0.68);
+    --mobile-bg-canvas: #EDEFF4;
+    --mobile-surface: rgba(255, 255, 255, 0.65);
+    --mobile-surface-hover: rgba(255, 255, 255, 0.78);
     --mobile-surface-ring: rgba(0, 0, 0, 0.06);
     --mobile-text: rgba(10, 10, 24, 0.90);
     --mobile-text-2: rgba(10, 10, 24, 0.60);
     --mobile-text-3: rgba(10, 10, 24, 0.45);
     --mobile-text-4: rgba(10, 10, 24, 0.30);
     --mobile-hairline-via: rgba(0, 0, 0, 0.10);
-    --mobile-card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    --mobile-card-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.10);
     --mobile-card-glow: none;
     --mobile-chip-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    --mobile-neu-dark: rgba(0, 0, 0, 0.06);
+    --mobile-neu-light: rgba(255, 255, 255, 0.9);
 
     --app-bg: transparent;
     --bg-canvas: transparent;
     --panel-bg: transparent;
     --panel-drop-shadow: none;
-    --header-tint-1: rgba(244, 246, 251, 0.72);
-    --header-tint-2: rgba(244, 246, 251, 0.82);
+    --header-tint-1: rgba(237, 239, 244, 0.72);
+    --header-tint-2: rgba(237, 239, 244, 0.82);
     --nav-inactive: rgba(100, 100, 120, 0.5);
   }
 
@@ -83,7 +85,7 @@
     background: var(--mobile-bg-canvas) !important;
   }
 
-  /* ═══ Glass card surfaces ═══ */
+  /* ═══ Neumorphic-Glass hybrid card surfaces ═══ */
   .glass-card,
   .clay-card,
   .entity-card,
@@ -100,7 +102,14 @@
     backdrop-filter: blur(40px) saturate(1.5) !important;
     -webkit-backdrop-filter: blur(40px) saturate(1.5) !important;
     border: 1px solid var(--mobile-surface-ring) !important;
-    box-shadow: var(--mobile-card-shadow), var(--mobile-card-glow), inset 0 1px 0 0 var(--mobile-surface-ring) !important;
+    box-shadow:
+      var(--mobile-card-shadow),
+      var(--mobile-card-glow),
+      6px 6px 16px rgba(0, 0, 0, 0.35),
+      -3px -3px 12px rgba(255, 255, 255, 0.025),
+      inset 0 1px 0 0 var(--mobile-surface-ring),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.04),
+      inset -1px -1px 3px rgba(0, 0, 0, 0.15) !important;
   }
 
   /* Hairline gradient at top edge */
@@ -145,7 +154,7 @@
     display: none !important;
   }
 
-  /* Hover states */
+  /* Hover/active states — neumorphic press */
   .glass-card:hover,
   .clay-card:hover,
   .entity-card:hover,
@@ -156,7 +165,23 @@
     background: var(--mobile-surface-hover) !important;
     border-color: rgba(33, 150, 243, 0.30) !important;
     transform: none !important;
-    box-shadow: var(--mobile-card-shadow), 0 0 0 1px rgba(33, 150, 243, 0.12), inset 0 1px 0 0 var(--mobile-surface-ring) !important;
+    box-shadow:
+      var(--mobile-card-shadow),
+      4px 4px 12px rgba(0, 0, 0, 0.3),
+      -2px -2px 8px rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(33, 150, 243, 0.12),
+      inset 0 1px 0 0 var(--mobile-surface-ring) !important;
+  }
+  .glass-card:active,
+  .clay-card:active,
+  .entity-card:active,
+  .row-card:active,
+  .kpi-card:active,
+  .stat-tile:active {
+    box-shadow:
+      inset 3px 3px 8px rgba(0, 0, 0, 0.3),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.03),
+      var(--mobile-card-glow) !important;
   }
 
   /* ── Trip section cards — glass ── */
@@ -225,6 +250,89 @@
   /* ═══ Glow & shadow — light mode colored blooms ═══ */
   .theme-light .entity-avatar {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* ═══ Light mode neumorphic overrides — softer shadows ═══ */
+  .theme-light .glass-card,
+  .theme-light .clay-card,
+  .theme-light .entity-card,
+  .theme-light .row-card,
+  .theme-light .glass-card-hover,
+  .theme-light .kpi-card,
+  .theme-light .stat-tile,
+  .theme-light .glass,
+  .theme-light .glass-sm,
+  .theme-light .glass-panel,
+  .theme-light .detail-header-card {
+    box-shadow:
+      var(--mobile-card-shadow),
+      5px 5px 14px rgba(0, 0, 0, 0.06),
+      -3px -3px 10px rgba(255, 255, 255, 0.8),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.6),
+      inset -1px -1px 3px rgba(0, 0, 0, 0.03) !important;
+  }
+  .theme-light .glass-card:active,
+  .theme-light .clay-card:active,
+  .theme-light .entity-card:active,
+  .theme-light .row-card:active,
+  .theme-light .kpi-card:active,
+  .theme-light .stat-tile:active {
+    box-shadow:
+      inset 3px 3px 8px rgba(0, 0, 0, 0.08),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* ═══ Neumorphic inputs — inset pressed glass ═══ */
+  .clay-input,
+  input.bg-input,
+  input[class*="bg-input"],
+  .search-2026 {
+    box-shadow:
+      inset 2px 2px 5px rgba(0, 0, 0, 0.12),
+      inset -1px -1px 3px rgba(255, 255, 255, 0.03),
+      0 0 0 1px var(--mobile-surface-ring) !important;
+  }
+  .theme-light .clay-input,
+  .theme-light input.bg-input,
+  .theme-light input[class*="bg-input"],
+  .theme-light .search-2026 {
+    box-shadow:
+      inset 2px 2px 5px rgba(0, 0, 0, 0.05),
+      inset -1px -1px 3px rgba(255, 255, 255, 0.7),
+      0 0 0 1px var(--mobile-surface-ring) !important;
+  }
+
+  /* ═══ Neumorphic bottom nav — floating glass bar ═══ */
+  nav.md\:hidden.fixed.bottom-0 > div {
+    box-shadow:
+      0 -4px 20px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 0 var(--mobile-surface-ring),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.04) !important;
+  }
+  .theme-light nav.md\:hidden.fixed.bottom-0 > div {
+    box-shadow:
+      0 -4px 20px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* ═══ Neumorphic FAB — raised glass with depth ═══ */
+  .md\:hidden.fixed.bottom-0 button[class*="rounded-full"][class*="bg-"],
+  button[aria-label="Add Expense"],
+  button[aria-label="New Trip"],
+  button[aria-label="New Contract"] {
+    box-shadow:
+      4px 4px 14px rgba(0, 0, 0, 0.3),
+      -2px -2px 8px rgba(255, 255, 255, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* ═══ Fix bottom padding — prevent content overlap with bottom nav ═══ */
+  .professional-page-bg > main,
+  main {
+    padding-bottom: 100px !important;
   }
 
   /* ═══ Structural overrides (mode-independent) ═══ */
