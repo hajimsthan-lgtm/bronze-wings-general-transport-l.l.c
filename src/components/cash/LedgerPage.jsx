@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange } from 'lucide-react';
+import { Plus, Trash2, ArrowDownLeft, ArrowUpRight, Search, CalendarRange, Link2, User } from 'lucide-react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ExportButtons from '@/components/common/ExportButtons';
 import SmartCsvImporter from '@/components/common/SmartCsvImporter';
@@ -14,6 +15,7 @@ import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
 import ExcelLedgerTable from '@/components/cash/ExcelLedgerTable';
 import MobileLedgerList from '@/components/cash/MobileLedgerList';
+import DriverRecipientField from '@/components/cash/DriverRecipientField';
 import { useLedgerState, setLedgerMode, setLedgerView, initLedger } from '@/lib/ledgerStore';
 
 const PANEL = {
@@ -53,7 +55,8 @@ export default function LedgerPage({
   importConfig,
   enableImportUndo,
   autoRef = false,
-  refPrefix = 'REF'
+  refPrefix = 'REF',
+  enableDriverLink = false
 }) {
   const [rows, setRows] = useState(null);
   const ledgerState = useLedgerState();
@@ -68,6 +71,17 @@ export default function LedgerPage({
   const [lastBatch, setLastBatch] = useState(null);
   const [undoBatchId, setUndoBatchId] = useState(null);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [driverFilter, setDriverFilter] = useState('');
+  const [recipientTypeFilter, setRecipientTypeFilter] = useState('all');
+  const [drivers, setDrivers] = useState([]);
+  const [balanceError, setBalanceError] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (enableDriverLink) {
+      base44.entities.Driver.list('-created_date', 500).catch(() => []).then((d) => setDrivers(d || []));
+    }
+  }, [enableDriverLink]);
   const viewOptions = useMemo(() => enableImportUndo
     ? [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }, { value: 'history', label: 'Import History' }]
     : [{ value: 'statement', label: 'Statement' }, { value: 'report', label: 'Report' }], [enableImportUndo]);
@@ -133,7 +147,7 @@ export default function LedgerPage({
   }, [autoRef, nextRef, editId, refKey]);
 
   const makeForm = useCallback(() => {
-    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
+    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '', recipient_mode: 'manual', driver_id: '' };
     f[refKey] = autoRef ? nextRef : '';
     f[inflowKey] = '';
     f[outflowKey] = '';
@@ -141,7 +155,7 @@ export default function LedgerPage({
   }, [dateHasTime, refKey, inflowKey, outflowKey, autoRef, nextRef]);
 
   const [form, setForm] = useState(() => {
-    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '' };
+    const f = { date: dateHasTime ? nowLocal() : nowDate(), recipient: '', description: '', recipient_mode: 'manual', driver_id: '' };
     f[refKey] = '';
     f[inflowKey] = '';
     f[outflowKey] = '';
@@ -162,15 +176,20 @@ export default function LedgerPage({
   const allStatementRows = sorted.map((r) => {
     const a = rowToAmounts(r);
     run += a.in - a.out;
-    return { id: r.id, date: r.date, recipient: a.recipient, ref: a.ref, description: r.description, in: a.in, out: a.out, running_balance: run };
+    return { id: r.id, date: r.date, recipient: a.recipient, ref: a.ref, description: r.description, in: a.in, out: a.out, running_balance: run, driver_id: r.driver_id, recipient_type: r.recipient_type };
   });
 
-  // apply date + search filter — only hides rows, does NOT recompute running balance
+  // apply date + search + driver filters — only hides rows, does NOT recompute running balance
   const filtered = allStatementRows.filter((r) => {
     const rDate = (r.date || '').slice(0, 10);
     if (filterFrom && rDate < filterFrom) return false;
     if (filterTo && rDate > filterTo) return false;
-    if (q && !((r.description || '').toLowerCase().includes(q.toLowerCase()))) return false;
+    if (q && !((r.description || '').toLowerCase().includes(q.toLowerCase()) || (r.recipient || '').toLowerCase().includes(q.toLowerCase()))) return false;
+    if (enableDriverLink) {
+      if (recipientTypeFilter === 'driver' && r.recipient_type !== 'driver') return false;
+      if (recipientTypeFilter === 'manual' && r.recipient_type === 'driver') return false;
+      if (driverFilter && r.driver_id !== driverFilter) return false;
+    }
     return true;
   });
 
@@ -191,10 +210,13 @@ export default function LedgerPage({
   const dateRangeLabel = (filterFrom || filterTo) ? `${filterFrom || 'start'} → ${filterTo || 'today'}` : 'All dates';
 
   const startEdit = (r) => {
+    const rawRow = (rows || []).find((row) => row.id === r.id);
     const f = {
       date: dateHasTime ? (r.date || '').slice(0, 16) : (r.date || '').slice(0, 10),
       recipient: r.recipient || '',
       description: r.description || '',
+      recipient_mode: enableDriverLink ? (rawRow?.recipient_type === 'driver' ? 'driver' : 'manual') : 'manual',
+      driver_id: enableDriverLink ? (rawRow?.driver_id || '') : '',
     };
     f[refKey] = r.ref || '';
     f[inflowKey] = r.in ? String(r.in) : '';
@@ -215,6 +237,20 @@ export default function LedgerPage({
     const inAmt = Number(form[inflowKey]) || 0;
     const outAmt = Number(form[outflowKey]) || 0;
     if (!inAmt && !outAmt) return;
+    setBalanceError('');
+
+    // Driver balance validation: block expenses that would push balance below zero
+    if (enableDriverLink && form.recipient_mode === 'driver' && form.driver_id && outAmt > 0) {
+      const driverRows = (rows || []).filter((r) => r.driver_id === form.driver_id && r.id !== editId);
+      const drvIn = driverRows.filter((r) => r.type === 'inflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+      const drvOut = driverRows.filter((r) => r.type === 'outflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+      const currentBalance = drvIn - drvOut;
+      if (outAmt > currentBalance) {
+        setBalanceError(`Insufficient petty cash balance for this driver (available: ${fmt(currentBalance)})`);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       // Ensure auto-generated reference is set
@@ -244,7 +280,8 @@ export default function LedgerPage({
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
   // grid spans: with recipient → 2/2/2/3/1/1/1 ; without → 2/2/3/2/2/1
-  const descSpan = hasRecipient ? 'md:col-span-3' : 'md:col-span-3';
+  // with driver link → recipient takes 3, desc shrinks to 2
+  const descSpan = hasRecipient ? (enableDriverLink ? 'md:col-span-2' : 'md:col-span-3') : 'md:col-span-3';
   const inSpan = hasRecipient ? 'md:col-span-1' : 'md:col-span-2';
   const outSpan = hasRecipient ? 'md:col-span-1' : 'md:col-span-2';
 
@@ -286,13 +323,44 @@ export default function LedgerPage({
             <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">To</label>
             <DatePicker value={filterTo || ''} onChange={(v) => setFilterTo(v)} />
           </div>
+          {enableDriverLink && (
+            <>
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Type</label>
+                <select
+                  value={recipientTypeFilter}
+                  onChange={(e) => setRecipientTypeFilter(e.target.value)}
+                  className="clay-input"
+                  style={{ padding: '9px 12px', fontSize: 13, height: 38 }}
+                >
+                  <option value="all">All Recipients</option>
+                  <option value="driver">Driver-Linked</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Driver</label>
+                <select
+                  value={driverFilter}
+                  onChange={(e) => setDriverFilter(e.target.value)}
+                  className="clay-input"
+                  style={{ padding: '9px 12px', fontSize: 13, height: 38, minWidth: 160 }}
+                >
+                  <option value="">All Drivers</option>
+                  {drivers.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Search className="w-3 h-3" /> Search</label>
-            <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search description..." className="clay-input w-full" style={{ padding: '9px 12px', fontSize: 13 }} />
+            <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search description or recipient..." className="clay-input w-full" style={{ padding: '9px 12px', fontSize: 13 }} />
           </div>
-          {(filterFrom || filterTo || q) && (
+          {(filterFrom || filterTo || q || driverFilter || recipientTypeFilter !== 'all') && (
             <button
-              onClick={() => { setFilterFrom(''); setFilterTo(''); setQ(''); }}
+              onClick={() => { setFilterFrom(''); setFilterTo(''); setQ(''); setDriverFilter(''); setRecipientTypeFilter('all'); }}
               className="text-xs px-3 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               Clear Filters
@@ -359,9 +427,16 @@ export default function LedgerPage({
                     )}
                   </div>
                   {hasRecipient && (
-                    <div className="md:col-span-2">
+                    <div className={enableDriverLink ? 'md:col-span-3' : 'md:col-span-2'}>
                       <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Recipient</label>
-                      <input type="text" value={form.recipient} onChange={(e) => setField('recipient', e.target.value)} placeholder="Paid to / Received from" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                      {enableDriverLink ? (
+                        <DriverRecipientField
+                          value={{ mode: form.recipient_mode, recipient: form.recipient, driver_id: form.driver_id }}
+                          onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+                        />
+                      ) : (
+                        <input type="text" value={form.recipient} onChange={(e) => setField('recipient', e.target.value)} placeholder="Paid to / Received from" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
+                      )}
                     </div>
                   )}
                   <div className="md:col-span-2">
@@ -385,9 +460,14 @@ export default function LedgerPage({
                       <Plus className="w-4 h-4" /> {saving ? '...' : 'Add'}
                     </button>
                   </div>
-                </div>
-                </div>
-              </form>
+                  </div>
+                  {balanceError && (
+                  <div className="mt-3 px-3 py-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-medium">
+                    {balanceError}
+                  </div>
+                  )}
+                  </div>
+                  </form>
               <div className="h-px bg-white/5" />
             </>
           )}
@@ -431,7 +511,45 @@ export default function LedgerPage({
                 refKey="ref"
                 columns={[
                   { key: 'date', label: 'Date', align: 'left', width: '140px', mono: true, sortable: true, filterable: true },
-                  ...(hasRecipient ? [{ key: 'recipient', label: 'Recipient', align: 'left', sortable: true, filterable: true }] : []),
+                  ...(hasRecipient ? [{
+                    key: 'recipient',
+                    label: 'Recipient',
+                    align: 'left',
+                    sortable: true,
+                    filterable: true,
+                    ...(enableDriverLink ? {
+                      render: (row, val) => {
+                        if (row.recipient_type === 'driver' && row.driver_id) {
+                          return (
+                            <button
+                              onClick={() => navigate(`/admin/drivers/${row.driver_id}`)}
+                              className="inline-flex items-center gap-1.5 text-primary hover:text-primary-light hover:underline text-sm font-medium transition-colors"
+                              title="View driver profile"
+                            >
+                              <Link2 className="w-3 h-3 flex-shrink-0" />
+                              {val || '—'}
+                            </button>
+                          );
+                        }
+                        return (
+                          <span className="inline-flex items-center gap-1.5 text-foreground/80 text-sm font-medium">
+                            <User className="w-3 h-3 flex-shrink-0 text-muted-foreground" />
+                            {val || '—'}
+                          </span>
+                        );
+                      }
+                    } : {}),
+                  }] : []),
+                  ...(enableDriverLink ? [{ key: 'recipient_type', label: 'Type', align: 'left', width: '90px', sortable: true, filterable: true, render: (row) => (
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                      row.recipient_type === 'driver'
+                        ? 'bg-primary/15 text-primary border border-primary/25'
+                        : 'bg-muted text-muted-foreground border border-border'
+                    }`}>
+                      {row.recipient_type === 'driver' ? <Link2 className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
+                      {row.recipient_type === 'driver' ? 'Driver' : 'Manual'}
+                    </span>
+                  ) }] : []),
                   { key: 'ref', label: refLabel, align: 'left', width: '150px', mono: true, sortable: true, filterable: true },
                   { key: 'description', label: 'Description', align: 'left', sortable: true, filterable: true },
                   { key: 'in', label: inflowLabel, align: 'right', width: '140px', numeric: true, sortable: true, filterable: true },

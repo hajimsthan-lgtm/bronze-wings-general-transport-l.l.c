@@ -431,7 +431,7 @@ export default function ExcelLedgerTable({
 
                         {/* Description / recipient / other text columns */}
                         {!isRefCol && !isInflowCol && !isOutflowCol && !isBalanceCol && col.key !== 'date' && (
-                          <span className="text-foreground/90 text-sm font-medium leading-snug">{val || '—'}</span>
+                          col.render ? col.render(r, val) : <span className="text-foreground/90 text-sm font-medium leading-snug">{val || '—'}</span>
                         )}
                       </TableCell>
                     );

@@ -27,6 +27,7 @@ export default function Cash() {
       modeOptions={[{ value: 'cash', label: 'Cash' }, { value: 'card', label: 'Card' }]}
       defaultMode="cash"
       modeFilter={(r, m) => (r.category || 'cash') === m}
+      enableDriverLink
       rowToAmounts={(r) => ({
         in: r.type === 'inflow' ? (Number(r.amount) || 0) : 0,
         out: r.type === 'outflow' ? (Number(r.amount) || 0) : 0,
@@ -37,6 +38,7 @@ export default function Cash() {
         const inAmt = Number(form.inflow) || 0;
         const outAmt = Number(form.outflow) || 0;
         const isOut = outAmt > 0;
+        const isDriver = form.recipient_mode === 'driver' && !!form.driver_id;
         return {
           date: form.date,
           type: isOut ? 'outflow' : 'inflow',
@@ -45,7 +47,9 @@ export default function Cash() {
           receipt_number: form.receipt_number || '',
           category: mode,
           received_from: !isOut ? form.recipient : '',
-          paid_to: isOut ? form.recipient : ''
+          paid_to: isOut ? form.recipient : '',
+          recipient_type: isDriver ? 'driver' : 'manual',
+          driver_id: isDriver ? form.driver_id : ''
         };
       }}
       dateHasTime
@@ -75,6 +79,8 @@ export default function Cash() {
             category: 'cash',
             received_from: !isOut ? (r.recipient || '') : '',
             paid_to: isOut ? (r.recipient || '') : '',
+            recipient_type: 'manual',
+            driver_id: '',
           };
         },
       }}

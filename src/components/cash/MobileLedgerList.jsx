@@ -1,4 +1,4 @@
-import { Pencil, Trash2, ArrowDownLeft, ArrowUpRight, Hash } from 'lucide-react';
+import { Pencil, Trash2, ArrowDownLeft, ArrowUpRight, Hash, Link2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
@@ -116,10 +116,22 @@ export default function MobileLedgerList({
 
               {/* Recipient */}
               {hasRecipient && r.recipient && (
-                <p className="text-xs text-muted-foreground/70 mb-2 truncate">
-                  <span className="text-muted-foreground/50">To/From: </span>
-                  {r.recipient}
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-xs text-muted-foreground/70 truncate flex-1">
+                    <span className="text-muted-foreground/50">To/From: </span>
+                    {r.recipient}
+                  </p>
+                  {r.recipient_type && (
+                    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex-shrink-0 ${
+                      r.recipient_type === 'driver'
+                        ? 'bg-primary/15 text-primary border border-primary/25'
+                        : 'bg-muted text-muted-foreground border border-border'
+                    }`}>
+                      {r.recipient_type === 'driver' ? <Link2 className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
+                      {r.recipient_type === 'driver' ? 'Driver' : 'Manual'}
+                    </span>
+                  )}
+                </div>
               )}
 
               {/* Divider + Balance + Actions */}

@@ -37,6 +37,23 @@
     },
     "notes": {
       "type": "string"
+    },
+    "recipient_type": {
+      "type": "string",
+      "enum": [
+        "driver",
+        "manual"
+      ],
+      "default": "manual"
+    },
+    "driver_id": {
+      "type": "string"
+    },
+    "linked_trip_id": {
+      "type": "string"
+    },
+    "linked_trip_number": {
+      "type": "string"
     }
   },
   "required": [
