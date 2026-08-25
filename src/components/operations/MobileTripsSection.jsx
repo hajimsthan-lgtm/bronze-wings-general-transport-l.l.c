@@ -134,7 +134,7 @@ export default function MobileTripsSection({ trips, onOpenDetail, onEdit, onDele
         return (
           <div
             key={trip.id}
-            onClick={() => onOpenDetail?.(trip)}
+            onClick={() => toggleOne(trip.id)}
             className="rounded-2xl p-3 cursor-pointer relative overflow-hidden"
             style={{
               background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb),0.90) 0%, rgba(var(--surf-2-rgb),0.95) 100%)',
@@ -146,9 +146,9 @@ export default function MobileTripsSection({ trips, onOpenDetail, onEdit, onDele
             }}
           >
             <div className="flex items-start gap-2.5">
-              {/* Checkbox */}
-              <div onClick={(e) => { e.stopPropagation(); toggleOne(trip.id); }} className="pt-0.5">
-                <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
+              {/* Checkbox — visual indicator only (card click toggles) */}
+              <div className="pt-0.5 pointer-events-none">
+                <Checkbox checked={isSelected} className="border-border/60" />
               </div>
 
               {/* Content */}
