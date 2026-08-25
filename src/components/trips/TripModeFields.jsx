@@ -46,6 +46,8 @@ export default function TripModeFields({ p }) {
     return Number.isFinite(n) && n > 0 ? String(n) : '';
   };
 
+  const initials = (name) => (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
   const selectedVehicle = allVehicles?.find((v) => v.plate_number === form.vehicle_plate);
   const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
   const vehicleIsVendor = !!selectedVehicle?.vendor_name;
@@ -256,14 +258,45 @@ export default function TripModeFields({ p }) {
               onChange={handleDriverSelect}
               placeholder="Select driver"
               className={errCls('driver_name')}
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  {selectedDriver?.image_url ? (
+                    <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                      {initials(it.label)}
+                    </span>
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
               items={availableDrivers.map((d) => ({
                 value: d.name,
                 label: d.name,
                 search: d.phone ? ` ${d.phone}` : '',
                 content: (
-                  <span className="truncate">
-                    {d.name}{d.phone ? <span className="text-muted-foreground"> · {d.phone}</span> : ''}
-                  </span>
+                  <div className="flex items-center gap-2.5 w-full">
+                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
+                      {d.image_url ? (
+                        <img src={d.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        initials(d.name)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {d.phone || 'No phone'} · ID: {(d.id || '').slice(0, 8)}
+                      </p>
+                    </div>
+                    {d.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        d.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {d.status}
+                      </span>
+                    )}
+                  </div>
                 ),
               }))}
             />
@@ -283,14 +316,45 @@ export default function TripModeFields({ p }) {
               onChange={handleVehicleSelect}
               placeholder="Select vehicle"
               className={errCls('vehicle_plate')}
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  {selectedVehicle?.image_url ? (
+                    <img src={selectedVehicle.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                      <Truck className="w-3 h-3" />
+                    </span>
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
               items={availableVehicles.map((v) => ({
                 value: v.plate_number,
                 label: v.plate_number,
                 search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
                 content: (
-                  <span className="truncate">
-                    {v.plate_number}{v.make && v.model ? <span className="text-muted-foreground"> · {v.make} {v.model}</span> : ''}
-                  </span>
+                  <div className="flex items-center gap-2.5 w-full">
+                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
+                      {v.image_url ? (
+                        <img src={v.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <Truck className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{v.plate_number}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {[v.make, v.model].filter(Boolean).join(' ') || 'No model'} · ID: {(v.id || '').slice(0, 8)}
+                      </p>
+                    </div>
+                    {v.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        v.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {v.status}
+                      </span>
+                    )}
+                  </div>
                 ),
               }))}
             />
