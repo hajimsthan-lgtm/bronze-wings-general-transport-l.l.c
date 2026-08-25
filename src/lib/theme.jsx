@@ -16,8 +16,8 @@ export function ThemeProvider({ children }) {
     return localStorage.getItem('bw-theme-v7') || 'crimson';
   });
   const [mode, setModeState] = useState(() => {
-    if (typeof window === 'undefined') return 'dark';
-    return localStorage.getItem('bw-mode-v1') || 'dark';
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem('bw-mode-v1') || 'light';
   });
   const [isFullscreen, setIsFullscreen] = useState(() => typeof document !== 'undefined' && !!document.fullscreenElement);
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, Clock, ChevronLeft, Check } from 'lucide-react';
+import { CalendarIcon, Clock, ChevronLeft, Check, X } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import TimeWheelPicker from './TimeWheelPicker';
 import AnalogClockPicker from './AnalogClockPicker';
@@ -63,6 +63,12 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
     setOpen(false);
   };
 
+  const handleClear = () => {
+    onChange('');
+    setOpen(false);
+    setStep('date');
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
@@ -88,7 +94,10 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
       <PopoverContent className="w-auto p-3 bg-card/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl" align="start">
         {step === 'date' ? (
           <>
-            <div className="flex justify-end mb-2">
+            <div className="flex justify-between mb-2">
+              <Button type="button" variant="ghost" size="sm" onClick={handleClear} className="h-7 text-[11px] text-muted-foreground hover:text-red-500 gap-1">
+                <X className="w-3 h-3" /> Clear
+              </Button>
               <Button type="button" variant="ghost" size="sm" onClick={setNow} className="h-7 text-[11px] text-primary">
                 Now
               </Button>
