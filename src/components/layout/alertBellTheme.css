@@ -230,6 +230,45 @@
   text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* Status pill — compact severity badge on the right of each row */
+.bell-perspective-status {
+  flex-shrink: 0;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.3px;
+  padding: 3px 8px; border-radius: 9999px;
+  white-space: nowrap; text-transform: uppercase;
+  transition: transform 200ms ease, background 200ms ease;
+}
+.bell-status-critical {
+  background: rgba(239,68,68,0.18); color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+.bell-status-warning {
+  background: rgba(245,158,11,0.16); color: #fcd34d;
+  border: 1px solid rgba(245,158,11,0.28);
+}
+.bell-status-info {
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.bell-perspective-chevron { color: rgba(255,255,255,0.3); transition: transform 200ms ease, color 200ms ease; }
+.bell-perspective-item.is-center:hover .bell-perspective-chevron { color: rgba(255,255,255,0.6); transform: translateX(2px); }
+/* Row entrance stagger */
+@keyframes bell-row-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bell-row-enter { animation: bell-row-in 320ms cubic-bezier(0.22,1,0.36,1) backwards; }
+/* Light theme: status pills */
+.theme-light .bell-status-critical {
+  background: #FDECEC; color: #C0392B; border-color: #F8D2D2;
+}
+.theme-light .bell-status-warning {
+  background: #FFF4E5; color: #B7791F; border-color: #FFE3C2;
+}
+.theme-light .bell-status-info {
+  background: #F1F2F5; color: #8A8F98; border-color: #E7E9EE;
+}
+.theme-light .bell-perspective-chevron { color: #8A8F98; }
 .bell-perspective-dots { display: flex; gap: 4px; justify-content: center; padding: 8px 0 4px; }
 .bell-perspective-dot {
   width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.2);
@@ -256,42 +295,58 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--trip-color, rgba(59,130,246,1)) 20%, transparent) !important;
 }
 
-/* Light theme */
+/* Light theme — Apple-style clean rows */
 .theme-light .bell-perspective-item {
-  background: linear-gradient(135deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 100%);
-  border-color: rgba(0,0,0,0.06);
+  background: #FFFFFF !important;
+  border: 1.5px solid transparent !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.03) !important;
 }
 .theme-light .bell-perspective-item.is-center {
-  background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
-  box-shadow: 0 0 24px -4px rgba(var(--sev-glow, 59,130,246), 0.15), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 1px color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 18%, transparent);
+  background: #FFFFFF !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.03) !important;
+  transform: none !important;
 }
-/* Light theme: status-colored hover tint (mixed with white for soft pastel) */
+/* Light theme: hover — subtle tint + translateX */
 .theme-light .bell-perspective-item.is-center:hover {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 28%, white) 0%,
-    color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 14%, white) 100%) !important;
-  border-color: color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 60%, transparent) !important;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 0 1.5px color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 35%, transparent) !important;
-  transform: scale(1.03) !important;
+  background: color-mix(in srgb, var(--sev-color, #0A84FF) 8%, white) !important;
+  border-color: color-mix(in srgb, var(--sev-color, #0A84FF) 25%, transparent) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--sev-color, #0A84FF) 12%, transparent), 0 4px 14px -4px rgba(16,24,40,0.08) !important;
+  transform: translateX(2px) !important;
 }
 .theme-light .bell-perspective-item.is-center:hover::after {
-  opacity: 1;
-  animation: bell-edge-spin 2.4s linear infinite;
+  opacity: 0;
 }
+/* Light theme: selected — Apple blue accent */
+.theme-light .bell-perspective-item.is-selected {
+  background: #EAF3FF !important;
+  border-color: #0A84FF !important;
+  box-shadow: 0 0 0 4px rgba(10,132,255,0.12), 0 8px 20px -8px rgba(10,132,255,0.33) !important;
+  transform: none !important;
+}
+.theme-light .bell-perspective-item.is-selected:hover {
+  background: #EAF3FF !important;
+  transform: translateX(2px) !important;
+}
+/* Light theme: icon chip — filled glyph on tinted circular backdrop */
 .theme-light .bell-perspective-icon {
-  background: linear-gradient(145deg,
-    color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 85%, white),
-    color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 65%, white)) !important;
-  border-color: color-mix(in srgb, var(--sev-color, rgba(59,130,246,1)) 35%, transparent) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 2px 8px -2px rgba(var(--sev-glow, 59,130,246), 0.3) !important;
+  background: color-mix(in srgb, var(--sev-color, #0A84FF) 14%, white) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transition: transform 200ms cubic-bezier(0.22,1,0.36,1) !important;
 }
 .theme-light .bell-perspective-icon > svg {
-  color: #fff !important;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+  color: var(--sev-color, #0A84FF) !important;
+  fill: var(--sev-color, #0A84FF) !important;
+  filter: none !important;
+  stroke-width: 1.5 !important;
 }
 .theme-light .bell-perspective-item.is-center:hover .bell-perspective-icon {
-  filter: brightness(1.1) saturate(1.25);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 14px -2px rgba(var(--sev-glow, 59,130,246), 0.45) !important;
+  transform: scale(1.12) rotate(-4deg) !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+.theme-light .bell-perspective-item.is-selected .bell-perspective-icon {
+  background: color-mix(in srgb, var(--sev-color, #0A84FF) 18%, white) !important;
 }
 .theme-light .bell-perspective-item.is-critical .bell-perspective-icon {
   animation: bell-icon-red-blink-light 1.2s ease-in-out infinite;
@@ -354,10 +409,7 @@
   border-color: rgba(59,130,246,0.2) !important;
 }
 .theme-light .bell-redirect-title { color: hsl(var(--foreground)) !important; }
-.theme-light .bell-perspective-item.is-selected {
-  border-color: rgba(59,130,246,0.4) !important;
-  box-shadow: 0 0 0 1px rgba(59,130,246,0.2), 0 4px 16px rgba(0,0,0,0.08) !important;
-}
+/* (light selected already styled above) */
 
 @media (prefers-reduced-motion: reduce) {
   .bell-perspective-item { transition: opacity 0.3s ease !important; }

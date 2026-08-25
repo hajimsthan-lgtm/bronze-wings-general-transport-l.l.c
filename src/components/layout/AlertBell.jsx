@@ -418,8 +418,8 @@ export default function AlertBell() {
                           <div
                             key={a.id}
                             data-bell-item={i}
-                            className={`bell-perspective-item ${a.severity === 'critical' ? 'is-critical' : ''} ${selectedAlert?.id === a.id ? 'is-selected' : ''}`}
-                            style={{ '--sev-color': sev.color, '--sev-glow': sev.glow }}
+                            className={`bell-perspective-item bell-row-enter ${a.severity === 'critical' ? 'is-critical' : ''} ${selectedAlert?.id === a.id ? 'is-selected' : ''}`}
+                            style={{ '--sev-color': sev.color, '--sev-glow': sev.glow, animationDelay: `${i * 45}ms` }}
                             onClick={() => { setSelectedAlert(a); selectedAlertRef.current = a; autoScrollPaused.current = true; }}
                             onMouseEnter={() => setHoveredAlert(a)}
                             onMouseLeave={() => setHoveredAlert(null)}
@@ -433,9 +433,13 @@ export default function AlertBell() {
                             <div className="bell-perspective-text">
                               <p className="bell-perspective-title">{a.title}</p>
                               <p className="bell-perspective-sub">{a.sub}</p>
-                              {a.meta && <p className="bell-perspective-meta">{a.meta}</p>}
                             </div>
-                            <ChevronRight className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
+                            {a.meta && (
+                              <span className={`bell-perspective-status bell-status-${a.severity || 'info'}`}>
+                                {a.meta}
+                              </span>
+                            )}
+                            <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 bell-perspective-chevron" />
                           </div>
                         );
                       })}
