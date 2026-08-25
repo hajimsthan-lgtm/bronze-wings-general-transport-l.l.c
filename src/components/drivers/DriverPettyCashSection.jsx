@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
-import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, Link2, User, Fuel, Wrench, Truck, MoreHorizontal } from 'lucide-react';
+import { Wallet, Plus, ArrowDownLeft, ArrowUpRight, Link2, User, Fuel, Wrench, Truck, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,11 @@ export default function DriverPettyCashSection({ driver }) {
   const [topUpForm, setTopUpForm] = useState({ amount: '', date: new Date().toISOString().slice(0, 10), note: '' });
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [editForm, setEditForm] = useState({ amount: '', date: '', note: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
@@ -144,6 +150,57 @@ export default function DriverPettyCashSection({ driver }) {
     }
   };
 
+  const openEdit = (rec) => {
+    if (rec.source !== 'cash') return;
+    const rawId = rec.id.replace('cash-', '');
+    setEditTarget({ ...rec, rawId });
+    setEditForm({
+      amount: String(rec.amount || ''),
+      date: rec.date || new Date().toISOString().slice(0, 10),
+      note: rec.description || '',
+    });
+  };
+
+  const submitEdit = async (e) => {
+    e.preventDefault();
+    const amt = Number(editForm.amount) || 0;
+    if (amt <= 0) {
+      toast({ title: 'Enter a valid amount', variant: 'destructive' });
+      return;
+    }
+    setEditSaving(true);
+    try {
+      await base44.entities.CashTransaction.update(editTarget.rawId, {
+        amount: amt,
+        date: editForm.date,
+        description: editForm.note || 'Petty Cash to Driver',
+      });
+      setEditTarget(null);
+      await load();
+      toast({ title: 'Transaction updated' });
+    } catch {
+      toast({ title: 'Failed to update', variant: 'destructive' });
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const rawId = deleteTarget.id.replace('cash-', '');
+      await base44.entities.CashTransaction.delete(rawId);
+      setDeleteTarget(null);
+      await load();
+      toast({ title: 'Transaction deleted' });
+    } catch {
+      toast({ title: 'Failed to delete', variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const SOURCE_ICONS = {
     fuel: Fuel,
     maintenance: Wrench,
@@ -200,11 +257,21 @@ export default function DriverPettyCashSection({ driver }) {
         <EmptyState icon={Wallet} title="No wallet transactions" description="Send funds to this driver to start tracking." />
       ) : (
         <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
+          {isAdmin && (
+            <button
+              onClick={() => setTopUpOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-amber-500/30 text-amber-500 hover:bg-amber-500/10 hover:border-amber-500/50 transition-colors text-xs font-semibold"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Petty Cash
+            </button>
+          )}
           {historyRows.map((rec) => {
             const isCredit = rec.type === 'credit';
             const SrcIcon = SOURCE_ICONS[rec.source] || MoreHorizontal;
+            const canEdit = isAdmin && rec.source === 'cash';
             return (
-              <div key={rec.id} className="row-card flex items-center gap-3">
+              <div key={rec.id} className="row-card flex items-center gap-3 group">
                 <div
                   className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0"
                   style={{ boxShadow: `0 0 18px -6px ${isCredit ? 'rgba(16,185,129,0.35)' : 'rgba(244,63,94,0.35)'}` }}
@@ -227,11 +294,102 @@ export default function DriverPettyCashSection({ driver }) {
                   </p>
                   <p className="text-[10px] text-muted-foreground tabular-nums">{fmt(rec.running_balance)}</p>
                 </div>
+                {canEdit && (
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => openEdit(rec)}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(rec)}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Edit sheet */}
+      <Sheet open={!!editTarget} onOpenChange={(v) => !v && setEditTarget(null)}>
+        <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-display text-foreground flex items-center gap-2">
+              <Pencil className="w-4 h-4" style={{ color: PETTY_COLOR }} />
+              Edit Transaction
+            </SheetTitle>
+            <p className="text-xs text-muted-foreground">{driver.name}</p>
+          </SheetHeader>
+          <form onSubmit={submitEdit} className="space-y-4 px-1">
+            <div>
+              <Label className="mb-1.5 block">Amount (AED)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editForm.amount}
+                onChange={(e) => setEditForm((f) => ({ ...f, amount: e.target.value }))}
+                placeholder="0.00"
+                required
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Date</Label>
+              <Input
+                type="date"
+                value={editForm.date}
+                onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <Label className="mb-1.5 block">Note</Label>
+              <Input
+                type="text"
+                value={editForm.note}
+                onChange={(e) => setEditForm((f) => ({ ...f, note: e.target.value }))}
+                placeholder="Optional note"
+              />
+            </div>
+            <SheetFooter className="pt-4">
+              <Button type="submit" disabled={editSaving} className="w-full" style={{ background: PETTY_COLOR, borderColor: PETTY_COLOR }}>
+                {editSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the petty cash transaction "{deleteTarget?.description}" (AED {fmt(deleteTarget?.amount)}). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Top-up sheet */}
       <Sheet open={topUpOpen} onOpenChange={setTopUpOpen}>
