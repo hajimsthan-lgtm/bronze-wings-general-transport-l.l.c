@@ -40,6 +40,12 @@ window.addEventListener('error', (e) => {
     e.preventDefault();
   }
 }, true);
+// Also filter the console warning the browser emits directly
+const _origConsoleError = console.error.bind(console);
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) return;
+  _origConsoleError(...args);
+};
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
