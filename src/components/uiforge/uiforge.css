@@ -1,0 +1,72 @@
+/* UIForge — scoped theme system. Does NOT touch the host app's theme. */
+.uiforge-scope {
+  --uf-bg: 248 250 252;
+  --uf-bg-elev: 255 255 255;
+  --uf-card: 255 255 255;
+  --uf-foreground: 15 23 42;
+  --uf-muted: 100 116 139;
+  --uf-border: 226 232 240;
+  --uf-primary: 124 58 237;
+  --uf-primary-fg: 255 255 255;
+  --uf-accent: 168 85 247;
+  --uf-ring: 124 58 237;
+  --uf-shadow: 15 23 42;
+  --uf-glass: 255 255 255;
+  --uf-neu-bg: 241 245 249;
+  --uf-neu-dark: 203 213 225;
+  --uf-neu-light: 255 255 255;
+  --uf-radius: 0.85rem;
+}
+.uiforge-scope.uf-dark {
+  --uf-bg: 2 6 23;
+  --uf-bg-elev: 15 23 42;
+  --uf-card: 30 41 59;
+  --uf-foreground: 248 250 252;
+  --uf-muted: 148 163 184;
+  --uf-border: 51 65 85;
+  --uf-primary: 139 92 246;
+  --uf-primary-fg: 255 255 255;
+  --uf-accent: 192 132 252;
+  --uf-ring: 139 92 246;
+  --uf-shadow: 0 0 0;
+  --uf-glass: 30 41 59;
+  --uf-neu-bg: 30 41 59;
+  --uf-neu-dark: 2 6 23;
+  --uf-neu-light: 51 65 85;
+}
+
+/* Utilities */
+.uf-bg { background-color: rgb(var(--uf-bg)); }
+.uf-bg-elev { background-color: rgb(var(--uf-bg-elev)); }
+.uf-card { background-color: rgb(var(--uf-card)); }
+.uf-text { color: rgb(var(--uf-foreground)); }
+.uf-muted { color: rgb(var(--uf-muted)); }
+.uf-border { border-color: rgb(var(--uf-border)); }
+.uf-primary { color: rgb(var(--uf-primary)); }
+.uf-bg-primary { background-color: rgb(var(--uf-primary)); }
+.uf-ring { box-shadow: 0 0 0 3px rgba(var(--uf-ring), 0.25); }
+
+.uf-glass {
+  background: rgba(var(--uf-glass), 0.55);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(var(--uf-border), 0.5);
+}
+.uf-neu {
+  background: rgb(var(--uf-neu-bg));
+  box-shadow: 6px 6px 12px rgb(var(--uf-neu-dark) / 0.4), -6px -6px 12px rgb(var(--uf-neu-light) / 0.9);
+}
+.uf-neu-inset {
+  background: rgb(var(--uf-neu-bg));
+  box-shadow: inset 4px 4px 8px rgb(var(--uf-neu-dark) / 0.4), inset -4px -4px 8px rgb(var(--uf-neu-light) / 0.9);
+}
+.uf-shadow-soft { box-shadow: 0 4px 20px rgba(var(--uf-shadow), 0.08); }
+.uf-shadow-lg { box-shadow: 0 12px 40px rgba(var(--uf-shadow), 0.12); }
+
+.uf-gradient-aurora { background: linear-gradient(135deg, #8b5cf6, #ec4899, #f59e0b); }
+.uf-gradient-violet { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.uf-gradient-mesh { background: conic-gradient(from 180deg, #8b5cf6, #ec4899, #f59e0b, #06b6d4, #8b5cf6); }
+.uf-gradient-iridescent { background: linear-gradient(135deg, #a78bfa, #f0abfc, #67e8f9, #a78bfa); background-size: 200% 200%; }
+
+.uf-scroll::-webkit-scrollbar { display: none; }
+.uf-scroll { scrollbar-width: none; }
