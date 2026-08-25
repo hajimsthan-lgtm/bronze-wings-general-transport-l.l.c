@@ -54,6 +54,7 @@ const ServiceProviderDetail = lazy(() => import('@/pages/admin/ServiceProviderDe
 const Settings = lazy(() => import('@/pages/Settings'));
 const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
 const Agents = lazy(() => import('@/pages/Agents'));
+const Notifications = lazy(() => import('@/pages/Notifications'));
 const Quotations = lazy(() => import('@/pages/Quotations'));
 const Agreements = lazy(() => import('@/pages/Agreements'));
 const InvoicesPage = lazy(() => import('@/pages/InvoicesPage'));
@@ -120,6 +121,7 @@ const AuthenticatedApp = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/prompt-generator" element={<PromptGenerator />} />
           <Route path="/agents" element={<Agents />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Route>
 

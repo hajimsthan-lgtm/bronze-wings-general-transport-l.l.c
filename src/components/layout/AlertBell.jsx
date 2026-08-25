@@ -154,7 +154,7 @@ export default function AlertBell() {
           if (container.scrollTop >= maxScroll - 1) {
             container.scrollTop = 0;
           } else {
-            container.scrollTop += 0.6;
+            container.scrollTop += 0.3;
           }
         }
       }
@@ -263,8 +263,6 @@ export default function AlertBell() {
     <div
       ref={containerRef}
       className="relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <button
         aria-label="Alerts"
@@ -296,7 +294,7 @@ export default function AlertBell() {
             animation: closing ? 'notif-out 0.2s cubic-bezier(0.16,1,0.3,1) forwards' : 'notif-in 0.3s cubic-bezier(0.16,1,0.3,1) both',
           }}
           onMouseEnter={() => { pauseAutoClose(); clearTimeout(leaveTimer.current); }}
-          onMouseLeave={handleMouseLeave}
+          onMouseLeave={() => { pauseAutoClose(); }}
         >
           <div
             className="alert-bell-panel"
@@ -325,6 +323,13 @@ export default function AlertBell() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => { handleClose(); navigate('/notifications'); }}
+                    className="px-2 h-7 rounded-full flex items-center gap-1 text-[10px] font-semibold text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                    title="View all notifications"
+                  >
+                    View All
+                  </button>
                   <button
                     onClick={handleClose}
                     className="w-7 h-7 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all"
