@@ -13,6 +13,7 @@ import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
 import { Plus, Search, Receipt, MoreVertical, Pencil, Trash2, Wallet, Clock, CheckCircle2, LayoutGrid, List, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import '@/lib/expenseFormLight.css';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import ExportButtons from '@/components/common/ExportButtons';
 import { useSheetUrlState } from '@/hooks/useSheetUrlState';
@@ -281,38 +282,41 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
 
   return (
     <EntityFormDialog open={open} onOpenChange={onOpenChange} icon={Receipt} title={`${editItem ? t('edit') : t('add_new')} Expense`} subtitle="Record a new expense transaction">
-        <div className="space-y-4">
-          <div><Label className="text-xs text-muted-foreground mb-1.5">Category</Label>
+        <div className="space-y-4 expense-form-fields">
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Category</Label>
             <Select value={form.category} onValueChange={v => update('category', v)}>
-              <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
               <SelectContent>{['toll','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select></div>
-          <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border expense-form-input" /></div>
           <div className="grid grid-cols-3 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Rate</Label>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Rate</Label>
               <Select value={String(form.vat_rate ?? 5)} onValueChange={v => update('vat_rate', Number(v))}>
-                <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
                 <SelectContent>{[0, 5].map(r => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
               </Select></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={e => update('vat_amount', e.target.value)} className="bg-background border-border" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={e => update('vat_amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold expense-form-input" /></div>
           </div>
           <TaxPreview subtotal={Number(form.amount) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Input list="veh-suggestions" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" /><datalist id="veh-suggestions">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">{t('driver')}</Label><Input list="drv-suggestions" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" /><datalist id="drv-suggestions">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('vehicle')}</Label><Input list="veh-suggestions" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border expense-form-input" /><datalist id="veh-suggestions">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('driver')}</Label><Input list="drv-suggestions" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border expense-form-input" /><datalist id="drv-suggestions">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>
           </div>
-          <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Input value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} className="bg-background border-border" /></div>
-          <div><Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>
-            <Select value={form.status} onValueChange={v => update('status', v)}>
-              <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
-              <SelectContent>{['pending','approved','rejected'].map(s => <SelectItem key={s} value={s}>{t(s)}</SelectItem>)}</SelectContent>
-            </Select></div>
-          <div><Label className="text-xs text-muted-foreground mb-1.5">{t('notes')}</Label><Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} className="bg-background border-border" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Vendor</Label><Input value={form.vendor_name} onChange={e => update('vendor_name', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Payment Method</Label>
+              <Select value={form.payment_method} onValueChange={v => update('payment_method', v)}>
+                <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
+                <SelectContent>{['cash','bank_transfer','credit_card','cheque'].map(m => <SelectItem key={m} value={m}>{m.replace('_',' ')}</SelectItem>)}</SelectContent>
+              </Select></div>
+          </div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Reference #</Label><Input value={form.reference_number} onChange={e => update('reference_number', e.target.value)} placeholder="e.g. INV-2026-001" className="bg-background border-border expense-form-input" /></div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('notes')}</Label><Textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} className="bg-background border-border expense-form-input" /></div>
         </div>
         <div className="flex gap-3 mt-8">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 border-border">{t('cancel')}</Button>

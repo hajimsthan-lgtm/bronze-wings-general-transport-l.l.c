@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════
+   EXPENSE FORM — light-mode colored accents
+   Subtle blue-tinted inputs + colored labels in light mode only
+   ═══════════════════════════════════════════════════════ */
+.theme-light .expense-form-fields {
+  background: linear-gradient(180deg, rgba(239,246,255,0.5) 0%, rgba(248,250,252,0.3) 100%);
+  border: 1px solid rgba(147,197,253,0.25);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+.theme-light .expense-form-label {
+  color: #1d4ed8 !important;
+  font-weight: 600;
+}
+.theme-light .expense-form-input {
+  background-color: rgba(255,255,255,0.9) !important;
+  border-color: rgba(147,197,253,0.4) !important;
+  box-shadow: inset 0 1px 2px rgba(59,130,246,0.04) !important;
+}
+.theme-light .expense-form-input:focus,
+.theme-light .expense-form-input:focus-visible {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+}
+.theme-light .expense-form-input::placeholder {
+  color: #94a3b8;
+}
