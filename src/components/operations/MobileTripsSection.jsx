@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/components/ui/use-toast';
@@ -106,11 +107,22 @@ export default function MobileTripsSection({ trips, onOpenDetail, onEdit, onDele
         <span className="text-[11px] text-muted-foreground font-medium">
           {trips.length} trip{trips.length !== 1 ? 's' : ''}
         </span>
-        {selected.size > 0 && (
-          <span className="text-[11px] text-primary font-semibold ml-auto">
-            {selected.size} selected
-          </span>
-        )}
+        <AnimatePresence>
+          {selected.size > 0 && (
+            <motion.span
+              initial={{ opacity: 0, y: 8, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 8, scale: 0.9 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[11px] text-primary font-semibold ml-auto flex items-center gap-1.5"
+            >
+              <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[9px] font-bold tabular-nums">
+                {selected.size}
+              </span>
+              selected
+            </motion.span>
+          )}
+        </AnimatePresence>
       </div>
 
       {trips.map((trip) => {

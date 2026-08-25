@@ -29,10 +29,11 @@ const EASE = [0.16, 1, 0.3, 1];
 export default function MobileBulkActionBar({ bulk }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  if (!bulk || bulk.selectedCount === 0) return null;
+  const hasSelection = bulk && bulk.selectedCount > 0;
+  if (!bulk) return null;
 
   const { selectedCount, totalCount, onSelectAll, onClear, onBulkStatus, onBulkDelete, onBulkExportCSV, onBulkExportPDF, selectedTrips = [] } = bulk;
-  const allSelected = selectedCount === totalCount;
+  const allSelected = selectedCount === totalCount && selectedCount > 0;
 
   const getTransitionCounts = (targetStatus) => {
     let valid = 0, invalid = 0;
@@ -46,7 +47,9 @@ export default function MobileBulkActionBar({ bulk }) {
   return (
     <>
       <AnimatePresence>
+        {hasSelection && (
         <motion.div
+          key="bulk-bar"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
@@ -156,6 +159,7 @@ export default function MobileBulkActionBar({ bulk }) {
             </button>
           </div>
         </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Delete confirmation */}
