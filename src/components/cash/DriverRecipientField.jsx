@@ -37,15 +37,15 @@ export default function DriverRecipientField({ value, onChange }) {
   const setMode = (m) => {
     if (m === mode) return;
     if (m === 'driver') {
-      onChange({ mode: 'driver', recipient: '', driver_id: '' });
+      onChange({ recipient_mode: 'driver', recipient: '', driver_id: '' });
     } else {
-      onChange({ mode: 'manual', recipient: '', driver_id: '' });
+      onChange({ recipient_mode: 'manual', recipient: '', driver_id: '' });
     }
     setOpen(false);
   };
 
   const pickDriver = (d) => {
-    onChange({ mode: 'driver', recipient: d.name, driver_id: d.id });
+    onChange({ recipient_mode: 'driver', recipient: d.name, driver_id: d.id });
     setOpen(false);
     setQuery('');
   };
@@ -101,7 +101,7 @@ export default function DriverRecipientField({ value, onChange }) {
               </div>
               <button
                 type="button"
-                onClick={() => { onChange({ mode: 'driver', recipient: '', driver_id: '' }); setOpen(true); }}
+                onClick={() => { onChange({ recipient_mode: 'driver', recipient: '', driver_id: '' }); setOpen(true); }}
                 className="text-muted-foreground hover:text-primary p-1 rounded transition-colors"
                 title="Change driver"
               >
@@ -109,7 +109,7 @@ export default function DriverRecipientField({ value, onChange }) {
               </button>
               <button
                 type="button"
-                onClick={() => onChange({ mode: 'manual', recipient: '', driver_id: '' })}
+                onClick={() => onChange({ recipient_mode: 'manual', recipient: '', driver_id: '' })}
                 className="text-muted-foreground hover:text-rose-400 p-1 rounded transition-colors"
                 title="Clear"
               >
