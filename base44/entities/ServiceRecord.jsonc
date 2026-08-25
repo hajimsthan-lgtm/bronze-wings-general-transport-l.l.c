@@ -5,6 +5,9 @@
     "vehicle_plate": {
       "type": "string"
     },
+    "driver_name": {
+      "type": "string"
+    },
     "service_type": {
       "type": "string",
       "enum": [
@@ -60,6 +63,15 @@
         "completed"
       ],
       "default": "completed"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "card",
+        "petty_wallet"
+      ],
+      "default": "cash"
     },
     "notes": {
       "type": "string"

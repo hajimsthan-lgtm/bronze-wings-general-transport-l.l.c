@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileText, Truck, User } from 'lucide-react';
+import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileText } from 'lucide-react';
 import DatePicker from '@/components/common/DatePicker';
 import TaxPreview from '@/components/common/TaxPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DriverVehicleSelects, { PettyWalletBadge } from '@/components/common/DriverVehicleSelects';
 
 const FUEL_COLORS = {
   diesel: '#f97316',
@@ -18,7 +19,7 @@ const FUEL_COLORS = {
 const PAYMENT_LABELS = {
   cash: 'Cash',
   card: 'Card',
-  account: 'Account',
+  petty_wallet: 'Petty Wallet',
 };
 
 export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlate, onSave }) {
@@ -133,19 +134,13 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         </SheetHeader>
 
         <div className="space-y-4">
-          {/* Vehicle & Driver */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><Truck className="w-3 h-3" /> {t('vehicle')}</Label>
-              <Input list="fuel-vehicles" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border" placeholder="Select or type plate" />
-              <datalist id="fuel-vehicles">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><User className="w-3 h-3" /> {t('driver')}</Label>
-              <Input list="fuel-drivers" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border" placeholder="Select or type driver" />
-              <datalist id="fuel-drivers">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist>
-            </div>
-          </div>
+          {/* Vehicle & Driver — avatar-style searchable dropdowns */}
+          <DriverVehicleSelects
+            driverValue={form.driver_name}
+            vehicleValue={form.vehicle_plate}
+            onDriverChange={(name) => update('driver_name', name)}
+            onVehicleChange={(plate) => update('vehicle_plate', plate)}
+          />
 
           {/* Fuel Type & Payment Method */}
           <div className="grid grid-cols-2 gap-3">
