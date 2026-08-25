@@ -1649,6 +1649,7 @@
   /* ===== Trip form: color-coded sections ===== */
   .trip-section {
     position: relative;
+    z-index: 1;
     border-radius: 1rem;
     border: 1px solid rgba(var(--section-accent), 0.15);
     border-left: 3px solid rgb(var(--section-accent));
@@ -1658,6 +1659,10 @@
     padding: 0.95rem 1.05rem 1.1rem;
     transition: box-shadow .25s ease, border-color .25s ease, transform .25s ease;
     box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 rgba(var(--section-accent), 0.08);
+  }
+  .trip-section:focus-within,
+  .trip-section:has(.z-\[200\]) {
+    z-index: 50;
   }
   .trip-section:hover {
     border-color: rgba(var(--section-accent), 0.35);

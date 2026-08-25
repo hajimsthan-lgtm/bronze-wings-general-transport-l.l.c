@@ -2,7 +2,7 @@ export default function Section({ title, icon: Icon, accent = '148,163,184', del
   return (
     <div
       className="trip-section animate-stagger-in"
-      style={{ '--section-accent': accent, animationDelay: `${delay}ms` }}
+      style={{ '--section-accent': accent, animationDelay: `${delay}ms`, overflow: 'visible', zIndex: 1 }}
     >
       <div className="flex items-center gap-2.5 mb-3">
         {Icon && (

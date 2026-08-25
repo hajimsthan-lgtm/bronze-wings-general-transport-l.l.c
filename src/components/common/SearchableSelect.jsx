@@ -41,6 +41,14 @@ export default function SearchableSelect({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Boost closest trip-section z-index when dropdown is open
+  useEffect(() => {
+    const section = ref.current?.closest('.trip-section');
+    if (section) {
+      section.style.zIndex = open ? '50' : '';
+    }
+  }, [open]);
+
   // focus the search input when the popover opens
   useEffect(() => {
     if (open && inputRef.current) {
