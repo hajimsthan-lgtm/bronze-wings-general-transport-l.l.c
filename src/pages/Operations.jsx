@@ -403,6 +403,11 @@ export default function Operations() {
               tripCounts={tripCounts}
               contractsCount={filteredContracts.length}
               contractCounts={contractCounts}
+              activeFilter={mode === 'contract' ? contractFilter : tripFilter}
+              onStatClick={(filter) => {
+                if (mode === 'contract') setContractFilter(filter);
+                else setTripFilter(filter);
+              }}
             />
           ) : (
             <OperationsStats
