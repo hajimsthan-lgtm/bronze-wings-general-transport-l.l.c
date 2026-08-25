@@ -135,21 +135,21 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   <div style="position:absolute;top:48%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:72pt;color:${MAROON};opacity:0.03;font-weight:bold;font-family:Georgia,serif;pointer-events:none;z-index:0;white-space:nowrap;letter-spacing:8px;">BRONZEWINGS</div>
 
   <!-- Company Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-    <div style="flex-shrink:0;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+    <div style="flex-shrink:0;width:60px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="height:60px;width:60px;border-radius:50%;object-fit:cover;" />` : ''}
     </div>
-    <div style="flex:1;text-align:left;padding:2px 8px 0;">
-      <div style="font-size:12pt;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22pt;font-weight:bold;color:#633C1A;letter-spacing:2px;line-height:1.1;margin-top:1px;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10pt;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+    <div style="flex:1;min-width:0;text-align:left;padding:2px 8px 0;overflow:hidden;">
+      <div style="font-size:12pt;color:#633C1A;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:20pt;font-weight:bold;color:#633C1A;letter-spacing:1.5px;line-height:1.1;margin-top:1px;white-space:nowrap;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:10pt;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;white-space:nowrap;">GENERAL TRANSPORT - L.L.C</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:9.5pt;color:#633C1A;line-height:1.5;">
-      ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
-      ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
-      ${s.email ? `<div>${esc(s.email)}</div>` : ''}
-      ${s.address ? `<div>${esc(s.address)}</div>` : ''}
-      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
+    <div style="flex-shrink:0;width:170px;text-align:right;font-size:9.5pt;color:#633C1A;line-height:1.5;overflow:hidden;">
+      ${s.phone1 ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mob: ${esc(s.phone1)}</div>` : ''}
+      ${s.phone2 ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mob: ${esc(s.phone2)}</div>` : ''}
+      ${s.email ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.email)}</div>` : ''}
+      ${s.address ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.address)}</div>` : ''}
+      ${s.website ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.website)}</div>` : ''}
     </div>
   </div>
 
@@ -356,21 +356,21 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
   <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(139,58,46,0.025);letter-spacing:8px;pointer-events:none;z-index:0;white-space:nowrap;font-family:Georgia,serif;">BRONZEWINGS</div>
 
   <!-- Letterhead -->
-  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+  <div id="invoice-header" style="position:relative;z-index:1;border:2px solid #633C1A;background:#FDFBF0;padding:6px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
     <div style="flex-shrink:0;width:58px;height:58px;">
       ${s.logo_url ? `<img src="${esc(s.logo_url)}" style="width:100%;height:100%;object-fit:contain;" />` : logoSvg}
     </div>
-    <div style="flex:1;text-align:left;padding:2px 8px 0;">
-      <div style="font-size:12px;color:#633C1A;font-weight:600;line-height:1.3;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
-      <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#633C1A;letter-spacing:2px;line-height:1.1;margin-top:1px;">BRONZE WINGS</div>
-      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:11px;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;">GENERAL TRANSPORT - L.L.C</div>
+    <div style="flex:1;min-width:0;text-align:left;padding:2px 8px 0;overflow:hidden;">
+      <div style="font-size:12px;color:#633C1A;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">الاجنحه البرونزية للنقليات العامة - ذ.م.م</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;color:#633C1A;letter-spacing:1.5px;line-height:1.1;margin-top:1px;white-space:nowrap;">BRONZE WINGS</div>
+      <div style="font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,sans-serif;font-size:11px;font-weight:600;color:#633C1A;letter-spacing:1px;margin-top:1px;white-space:nowrap;">GENERAL TRANSPORT - L.L.C</div>
     </div>
-    <div style="flex-shrink:0;text-align:right;font-size:9.5px;color:#633C1A;line-height:1.5;">
-      ${s.phone1 ? `<div>Mob: ${esc(s.phone1)}</div>` : ''}
-      ${s.phone2 ? `<div>Mob: ${esc(s.phone2)}</div>` : ''}
-      ${s.email ? `<div>${esc(s.email)}</div>` : ''}
-      ${s.address ? `<div>${esc(s.address)}</div>` : ''}
-      ${s.website ? `<div>${esc(s.website)}</div>` : ''}
+    <div style="flex-shrink:0;width:170px;text-align:right;font-size:9.5px;color:#633C1A;line-height:1.5;overflow:hidden;">
+      ${s.phone1 ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mob: ${esc(s.phone1)}</div>` : ''}
+      ${s.phone2 ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mob: ${esc(s.phone2)}</div>` : ''}
+      ${s.email ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.email)}</div>` : ''}
+      ${s.address ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.address)}</div>` : ''}
+      ${s.website ? `<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.website)}</div>` : ''}
     </div>
   </div>
 

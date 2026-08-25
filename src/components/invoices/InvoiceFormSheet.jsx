@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { formatCurrency } from '@/lib/formatters';
-import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle, Users, Receipt, ListOrdered, Wallet } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
 import { persistManualInvoiceNumber } from '@/lib/invoiceSequence';
@@ -365,7 +365,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="w-full max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
+        className="w-full sm:max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
         <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-4">
           <div className="space-y-1">
             <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>
@@ -419,7 +419,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </div>
 
             {/* Client */}
-            <Section title="Client">
+            <Section title="Client" icon={Users} accent="16, 185, 129">
               <div>
                 <Label className="text-xs text-muted-foreground mb-1.5">{t('client')}</Label>
                 <Input list="invoice-clients" value={form.client_name} onChange={e => handleClientChange(e.target.value)} className={inputCls} placeholder="Select or type client name" />
@@ -528,7 +528,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Invoice Details */}
-            <Section title="Invoice Details">
+            <Section title="Invoice Details" icon={Receipt} accent="59, 130, 246">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Invoice #</Label>
@@ -586,7 +586,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Line Items */}
-            <Section title="Line Items">
+            <Section title="Line Items" icon={ListOrdered} accent="245, 158, 11">
               <div className="space-y-2.5">
                 {form.line_items.map((item, i) => (
                   <div key={i} className="glass-card p-3 space-y-2">
@@ -640,7 +640,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
 
             {/* Payment */}
-            <Section title="Payment">
+            <Section title="Payment" icon={Wallet} accent="139, 92, 246">
               <div className="glass-card p-3 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">Receive payment now</p>
@@ -719,11 +719,18 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   );
 }
 
-function Section({ title, icon: Icon, children }) {
+function Section({ title, icon: Icon, accent = '99, 102, 241', children }) {
   return (
-    <div className="border-t border-white/[0.04] pt-4 first:border-t-0 first:pt-0">
-      <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mb-3 flex items-center gap-1.5">
-        {Icon && <Icon className="w-3.5 h-3.5 text-primary/80" />}
+    <div
+      className="trip-section"
+      style={{ '--section-accent': accent }}
+    >
+      <p className="text-[11px] uppercase tracking-wider font-semibold mb-3 flex items-center gap-2" style={{ color: `rgb(${accent})` }}>
+        {Icon && (
+          <span className="trip-section-icon" style={{ '--section-accent': accent }}>
+            <Icon className="w-3.5 h-3.5" />
+          </span>
+        )}
         {title}
       </p>
       <div className="space-y-3">{children}</div>
