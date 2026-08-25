@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -12,6 +12,7 @@ import TripTypeSelector from './TripTypeSelector';
 import VendorPaymentFields from './VendorPaymentFields';
 import TripFinancialFields from './TripFinancialFields';
 import SearchableSelect from '@/components/common/SearchableSelect';
+import { Switch } from '@/components/ui/switch';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -112,6 +113,18 @@ export default function TripModeFields({ p }) {
 
       {/* Route */}
       <Section title="Route" icon={RouteIcon} accent="16,185,129" delay={60}>
+        {/* Trip Type — select first, at top */}
+        <div>
+          <Label className="text-xs text-white/60 mb-1.5">{t('trip_type')} <span className="text-red-400">*</span></Label>
+          <TripTypeSelector value={form.trip_type} onChange={(v) => update('trip_type', v)} t={t} />
+          {form.trip_type === 'contract' && (
+            <p className="text-[10px] text-amber-400/80 mt-1.5 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> Contract mode — duration & overtime fields are hidden
+            </p>
+          )}
+        </div>
+
+        {/* From / To — shown after type selection */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('from')} <span className="text-red-400">*</span></Label>
@@ -126,10 +139,43 @@ export default function TripModeFields({ p }) {
             {errors.to_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.to_location}</p>}
           </div>
         </div>
-        <div>
-          <Label className="text-xs text-white/60 mb-1.5">{t('trip_type')}</Label>
-          <TripTypeSelector value={form.trip_type} onChange={(v) => update('trip_type', v)} t={t} />
+
+        {/* Permitted Routes toggle */}
+        <div className="rounded-xl border border-border/50 bg-muted/20 p-3 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {form.permit_required ? (
+                <ShieldCheck className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Shield className="w-4 h-4 text-muted-foreground" />
+              )}
+              <div>
+                <Label className="text-xs text-white/70 font-semibold cursor-pointer">Permitted Route</Label>
+                <p className="text-[10px] text-muted-foreground">Toggle on if this route requires a special permit</p>
+              </div>
+            </div>
+            <Switch
+              checked={!!form.permit_required}
+              onCheckedChange={(v) => {
+                update('permit_required', v);
+                if (!v) update('permit_name', '');
+              }}
+            />
+          </div>
+          {form.permit_required && (
+            <div className="animate-fade-in">
+              <Label className="text-xs text-white/60 mb-1.5">Permit Name <span className="text-red-400">*</span></Label>
+              <IconInput
+                icon={Shield}
+                value={form.permit_name || ''}
+                onChange={(e) => update('permit_name', sanitizePlain(e.target.value))}
+                placeholder="e.g. Hazmat Pass, Over-dimensional, Cold Chain..."
+                className={inputCls}
+              />
+            </div>
+          )}
         </div>
+
         <div>
           <Label className="text-xs text-white/60 mb-1.5">Trip # <span className="text-white/30 font-normal">(max 20 chars)</span></Label>
           <IconInput icon={Hash} value={form.trip_number || autoTripNumber} onChange={(e) => update('trip_number', e.target.value.slice(0, 20))} maxLength={20} className={`${inputCls} font-mono text-xs`} />
@@ -154,6 +200,7 @@ export default function TripModeFields({ p }) {
             <DateTimePicker value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} placeholder="Offload time" />
           </div>
         </div>
+        {form.trip_type !== 'contract' && (
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Duration Unit</Label>
@@ -170,6 +217,7 @@ export default function TripModeFields({ p }) {
             <IconInput icon={Gauge} value={form.calculated_duration ? `${form.calculated_duration} ${form.duration_unit === 'days' ? 'Days' : 'Hours'}` : ''} readOnly className={`${inputCls} opacity-60 font-mono text-xs`} />
           </div>
         </div>
+        )}
       </Section>
 
       {/* Assignment */}

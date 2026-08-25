@@ -27,6 +27,7 @@ const DEFAULT_FORM = {
   trip_date: new Date().toISOString().split('T')[0],
   load_datetime: '', offload_datetime: '', trip_number: '',
   status: 'scheduled', status_source: 'automatic', revenue: '', distance_km: '', notes: '', contact_person: '',
+  permit_required: false, permit_name: '',
   duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50,
   assignment_mode: 'company',
   vendor_agreed_rate: '', vendor_payment_status: 'unpaid', vendor_due_date: '', vendor_payment_notes: ''
@@ -138,7 +139,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           vendor_agreed_rate: editTrip.vendor_agreed_rate || '',
           vendor_payment_status: editTrip.vendor_payment_status || 'unpaid',
           vendor_due_date: editTrip.vendor_due_date || '',
-          vendor_payment_notes: editTrip.vendor_payment_notes || ''
+          vendor_payment_notes: editTrip.vendor_payment_notes || '',
+          permit_required: !!editTrip.permit_required,
+          permit_name: editTrip.permit_name || ''
         });
       } else {
         setMode(initialMode || 'trip');
@@ -218,6 +221,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const autoRevenue = (() => {
     const baseFare = Number(form.base_fare) || 0;
+    if (form.trip_type === 'contract') return baseFare;
     let total = baseFare;
     if (form.load_datetime && form.offload_datetime) {
       const load = new Date(form.load_datetime).getTime();
@@ -298,6 +302,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     const { assignment_mode, ...rest } = form;
     return {
     ...rest,
+    permit_required: !!form.permit_required,
+    permit_name: form.permit_required ? (form.permit_name || '') : '',
     driver_phone: form.driver_phone || '',
     is_draft: isDraft,
     trip_number: isDraft ? '' : (form.trip_number || autoTripNumber || generateTripNumber()),
@@ -308,9 +314,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     revenue: Number(form.revenue) || 0,
     distance_km: Number(form.distance_km) || 0,
     base_fare: Number(form.base_fare) || 0,
-    max_allowed_duration: Number(form.max_allowed_duration) || 0,
-    overtime_rate: Number(form.overtime_rate) || 0,
-    calculated_duration: Number(form.calculated_duration) || 0,
+    max_allowed_duration: form.trip_type === 'contract' ? 0 : (Number(form.max_allowed_duration) || 0),
+    overtime_rate: form.trip_type === 'contract' ? 0 : (Number(form.overtime_rate) || 0),
+    calculated_duration: form.trip_type === 'contract' ? 0 : (Number(form.calculated_duration) || 0),
     vendor_name: form.assignment_mode === 'vendor' ? form.vendor_name : '',
     vendor_agreed_rate: Number(form.vendor_agreed_rate) || 0,
     vendor_payment_status: form.vendor_payment_status || 'unpaid',

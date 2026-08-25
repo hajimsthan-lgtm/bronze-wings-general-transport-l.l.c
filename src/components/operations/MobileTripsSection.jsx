@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowRight, Copy, Check, Trash2 } from 'lucide-react';
+import { ArrowRight, Copy, Check, Trash2, Shield } from 'lucide-react';
 import TripStatusManager from '@/components/trips/TripStatusManager';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
@@ -178,8 +178,14 @@ export default function MobileTripsSection({ trips, onOpenDetail, onEdit, onDele
                 </p>
 
                 {/* Route */}
-                <div className="flex items-center gap-1.5 text-[11px] text-foreground/80">
+                <div className="flex items-center gap-1.5 text-[11px] text-foreground/80 flex-wrap">
                   <span className="truncate font-medium">{trip.from_location || '—'}</span>
+                  {trip.permit_required && trip.permit_name && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Permit: ${trip.permit_name}`}>
+                      <Shield className="w-2.5 h-2.5" />
+                      {trip.permit_name}
+                    </span>
+                  )}
                   <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
                   <span className="truncate font-medium">{trip.to_location || '—'}</span>
                 </div>

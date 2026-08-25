@@ -182,6 +182,13 @@
     "notes": {
       "type": "string"
     },
+    "permit_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "permit_name": {
+      "type": "string"
+    },
     "distance_km": {
       "type": "number"
     },
