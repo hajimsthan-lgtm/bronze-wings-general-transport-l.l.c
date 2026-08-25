@@ -71,6 +71,17 @@ export default function MobileHomeScreen({
 
   return (
     <div className="px-3.5 pt-3 pb-2 space-y-3.5">
+      {/* ═══ Gradient heading ═══ */}
+      <div className="pt-1">
+        <h1 className="text-[26px] font-bold leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
+          <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
+            Fleet
+          </span>{' '}
+          <span className="text-foreground">Command</span>
+        </h1>
+        <p className="text-[12px] text-muted-foreground mt-0.5">Track every trip in real time.</p>
+      </div>
+
       {/* ═══ Hero balance — full-bleed gradient card ═══ */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
