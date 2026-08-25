@@ -18,14 +18,17 @@ const STATUS = {
 };
 
 const TRIP_EXPORT_COLUMNS = [
-  { label: 'Trip #', key: 'trip_number' },
-  { label: 'Date', key: 'trip_date' },
-  { label: 'Client', key: 'client_name' },
-  { label: 'Vehicle', key: 'vehicle_plate' },
-  { label: 'From', key: 'from_location' },
-  { label: 'To', key: 'to_location' },
-  { label: 'Revenue', key: 'revenue', numeric: true },
-  { label: 'Status', key: 'status' },
+  { label: 'Trip #',       key: 'trip_number',   w: 22, noWrap: true },
+  { label: 'Date',         key: 'trip_date',      w: 20 },
+  { label: 'Driver',       key: 'driver_name',    w: 28 },
+  { label: 'Driver Phone', key: 'driver_phone',   w: 24, noWrap: true },
+  { label: 'Vehicle',      key: 'vehicle_plate',  w: 22, noWrap: true },
+  { label: 'Client',       key: 'client_name',    w: 32 },
+  { label: 'From',         key: 'from_location',  w: 25 },
+  { label: 'To',           key: 'to_location',    w: 25 },
+  { label: 'Revenue',      key: 'revenue',        w: 20, numeric: true },
+  { label: 'Status',       key: 'status',         w: 20 },
+  { label: 'Payment',      key: 'payment_status', w: 19 },
 ];
 
 /**
