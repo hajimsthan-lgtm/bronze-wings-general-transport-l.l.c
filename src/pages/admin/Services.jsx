@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/formatters';
-import { Plus, Wrench, Search, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Wrench, Search, Pencil, Trash2, ChevronRight, CreditCard } from 'lucide-react';
 import ExportButtons from '@/components/common/ExportButtons';
 import ImageUpload from '@/components/common/ImageUpload';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
@@ -25,6 +25,13 @@ import { withRetry, safeAll } from '@/lib/safeRequest';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import TaxPreview from '@/components/common/TaxPreview';
+import DriverVehicleSelects, { PettyWalletBadge } from '@/components/common/DriverVehicleSelects';
+
+const PAYMENT_LABELS = {
+  cash: 'Cash',
+  card: 'Card',
+  petty_wallet: 'Petty Wallet',
+};
 
 const TYPE_TONE = {
   oil_change: '#f97316', tire: '#1ED760', brake: '#ef4444', engine: '#a855f7',
@@ -127,16 +134,16 @@ function ServiceRow({ r, onEdit, onDelete, onPdf }) {
 function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [vehicles, setVehicles] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   useEffect(() => {
     safeAll([
-    () => base44.entities.Vehicle.list('-created_date', 200),
-    () => base44.entities.Vendor.list('-created_date', 200)],
-    1).then(([v, vd]) => {setVehicles(v || []);setVendors(vd || []);}).catch(() => {});
+    () => base44.entities.Vendor.list('-created_date', 200),
+    () => base44.entities.Driver.list('-created_date', 200)],
+    1).then(([vd, d]) => {setVendors(vd || []);setDrivers(d || []);}).catch(() => {});
   }, []);
-  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });
-  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0 });else setForm({ vehicle_plate: presetPlate || '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
+  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0, payment_method: editItem.payment_method || 'cash' });else setForm({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: new Date().toISOString().split('T')[0], cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
   const update = (f, v) => setForm((prev) => {
     const next = { ...prev, [f]: v };
     const sub = Number(next.cost) || 0;
@@ -153,7 +160,15 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
 
   return (
     <div className="space-y-4">
-      <div><Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')}</Label><Select value={form.vehicle_plate || ''} onValueChange={(v) => update('vehicle_plate', v)}><SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select vehicle" /></SelectTrigger><SelectContent>{vehicles.filter((v) => !v.vendor_name && (v.status === 'active' || v.plate_number === form.vehicle_plate)).map((v) => <SelectItem key={v.id} value={v.plate_number}>{v.plate_number}{v.make && v.model ? ` · ${v.make} ${v.model}` : ''}</SelectItem>)}</SelectContent></Select></div>
+      <div>
+        <Label className="text-xs text-muted-foreground mb-1.5">{t('vehicle')} & {t('driver')}</Label>
+        <DriverVehicleSelects
+          driverValue={form.driver_name}
+          vehicleValue={form.vehicle_plate}
+          onDriverChange={(name) => update('driver_name', name)}
+          onVehicleChange={(plate) => update('vehicle_plate', plate)}
+        />
+      </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Maint. Ref #</Label><Input value={form.maint_ref} onChange={(e) => update('maint_ref', e.target.value)} placeholder="Enter reference number" className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">Type</Label><Select value={form.service_type} onValueChange={(v) => update('service_type', v)}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{['oil_change', 'tire', 'brake', 'engine', 'electrical', 'body', 'inspection', 'other'].map((t) => <SelectItem key={t} value={t}>{t.replace(/_/g, ' ')}</SelectItem>)}</SelectContent></Select></div>
@@ -170,6 +185,20 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
         <div><Label className="text-xs text-muted-foreground mb-1.5">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold" /></div>
       </div>
       <TaxPreview subtotal={Number(form.cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
+      <div>
+        <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><CreditCard className="w-3 h-3" /> Payment Method</Label>
+        <div className="flex gap-1.5">
+          {Object.entries(PAYMENT_LABELS).map(([method, label]) => (
+            <button key={method} type="button" onClick={() => update('payment_method', method)}
+              className={`flex-1 h-10 rounded-xl border text-xs font-semibold transition-all ${form.payment_method === method ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-background text-muted-foreground'}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+        {form.payment_method === 'petty_wallet' && form.driver_name && (
+          <PettyWalletBadge driverId={drivers.find(d => d.name === form.driver_name)?.id} />
+        )}
+      </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label><Select value={form.vendor_name || ''} onValueChange={(v) => update('vendor_name', v)}><SelectTrigger className="bg-background border-border"><SelectValue placeholder="Select vendor" /></SelectTrigger><SelectContent>{vendors.filter((v) => v.provider_type !== 'driver_supplier').map((v) => <SelectItem key={v.id} value={v.name}>{v.name}</SelectItem>)}</SelectContent></Select></div>
       <ImageUpload value={form.attachment_url} onChange={(v) => update('attachment_url', v)} label="Vendor Receipt Attachment" />
       <div className="flex gap-3 mt-6"><Button variant="outline" onClick={onCancel} className="flex-1 border-border">{t('cancel')}</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? t('loading') : t('save')}</Button></div>

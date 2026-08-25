@@ -25,7 +25,6 @@ const PAYMENT_LABELS = {
 export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlate, onSave }) {
   const { t } = useI18n();
   const [saving, setSaving] = useState(false);
-  const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [form, setForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -83,7 +82,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
   }, [editItem, presetPlate, open]);
 
   useEffect(() => {
-    base44.entities.Vehicle.list('-created_date', 200).catch(() => []).then((v) => setVehicles((v || []).filter((x) => !x.vendor_name)));
     base44.entities.Driver.list('-created_date', 200).catch(() => []).then((d) => setDrivers((d || []).filter((x) => !x.vendor_name)));
   }, []);
 
@@ -174,8 +172,11 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
                   </button>
                 ))}
               </div>
+              {form.payment_method === 'petty_wallet' && form.driver_name && (
+                <PettyWalletBadge driverId={drivers.find(d => d.name === form.driver_name)?.id} />
+              )}
             </div>
-          </div>
+            </div>
 
           {/* Liters, Price/L, Total */}
           <div className="grid grid-cols-3 gap-3">
