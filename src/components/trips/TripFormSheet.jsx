@@ -556,7 +556,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[96vw] sm:w-[92vw] max-w-4xl max-h-[88vh] sm:max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col p-0 gap-0">
+        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[96vw] sm:w-[94vw] sm:max-w-6xl max-h-[94vh] sm:max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col p-0 gap-0">
         <DialogHeader className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -589,7 +589,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Body: scrollable form with standalone floating calc panel in right column */}
         <div className="flex-1 overflow-y-auto premium-scroll">
-        <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_280px] gap-3 sm:gap-5 items-start">
+        <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_320px] gap-3 sm:gap-5 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
             <TripModeFields p={tripCtx} /> :
