@@ -10,6 +10,7 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
 import MobileSearchFilter from './MobileSearchFilter';
+import MobileBulkActionsInline from '@/components/operations/MobileBulkActionsInline';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useFuelMode, setFuelMode } from '@/lib/fuelStore';
 import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
@@ -187,6 +188,7 @@ export default function TopBar() {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
             <div className="md:hidden flex items-center gap-2">
+              {(location.pathname.startsWith('/trips') || location.pathname.startsWith('/contracts')) && <MobileBulkActionsInline />}
               {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}
               {location.pathname.startsWith('/admin/vehicles') && <VehicleNavDropdown />}
               {location.pathname.startsWith('/admin/drivers') && <DriverNavDropdown />}
