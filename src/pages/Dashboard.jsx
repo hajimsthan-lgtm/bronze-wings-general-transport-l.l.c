@@ -15,7 +15,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, Cell, Tooltip } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
-import MobileBankingDashboard from '@/components/dashboard/MobileBankingDashboard';
+import MobileHomeScreen from '@/components/dashboard/MobileHomeScreen';
 import '@/lib/mobileNeumorphic.css';
 import PremiumCard from '@/components/dashboard/premium/PremiumCard';
 import HeroMetricCard from '@/components/dashboard/premium/HeroMetricCard';
@@ -218,7 +218,7 @@ export default function Dashboard() {
   return (
     <PullToRefresh onRefresh={loadData}>
       {isMobile ? (
-        <MobileBankingDashboard
+        <MobileHomeScreen
           totalRevenue={totalRevenue}
           totalTrips={totalTrips}
           activeTrips={activeTrips}
