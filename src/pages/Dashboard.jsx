@@ -15,7 +15,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, Cell, Tooltip } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
-import MobileNeumorphicDashboard from '@/components/dashboard/MobileNeumorphicDashboard';
+import MobileBankingDashboard from '@/components/dashboard/MobileBankingDashboard';
 import '@/lib/mobileNeumorphic.css';
 import PremiumCard from '@/components/dashboard/premium/PremiumCard';
 import HeroMetricCard from '@/components/dashboard/premium/HeroMetricCard';
@@ -218,25 +218,20 @@ export default function Dashboard() {
   return (
     <PullToRefresh onRefresh={loadData}>
       {isMobile ? (
-        <MobileNeumorphicDashboard
+        <MobileBankingDashboard
+          totalRevenue={totalRevenue}
+          totalTrips={totalTrips}
           activeTrips={activeTrips}
           completedTrips={completedTrips}
           pendingInvoices={pendingInvoices}
           dueAmount={dueAmount}
-          healthPct={healthPct}
-          activeVehicles={activeVehicles}
-          totalVehicles={totalVehicles}
-          avgTripValue={avgTripValue}
-          totalTrips={totalTrips}
-          totalRevenue={totalRevenue}
-          fleetUtil={fleetUtil}
-          assignedVehicles={assignedVehicles}
-          recentTrips={recentTrips}
-          recentInvoices={recentInvoices}
-          hasAlerts={hasAlerts}
+          invoices={fInvoices}
+          expenses={fExpenses}
+          trips={fTrips}
           overdueCount={overdueInvoices.length}
           maintenanceCount={maintenanceVehicles.length}
           expiringDocCount={expiringDocs.length}
+          hasAlerts={hasAlerts}
           onNewTrip={() => window.location.assign('/trips?new=1')}
         />
       ) : (
