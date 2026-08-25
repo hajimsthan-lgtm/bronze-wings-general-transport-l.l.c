@@ -68,9 +68,9 @@ export default function MobileNav() {
             <NavButton key={item.key} item={item} active={activeTab === item.key} onClick={() => switchTab(item.key)} />
           ))}
 
-          {/* Center FAB slot with fan-out */}
-          <div className="flex-1 flex items-start justify-center" ref={fabRef}>
-            {/* Fan-out backdrop */}
+          {/* Center FAB slot */}
+          <div className="flex-1 flex items-start justify-center">
+            {/* Fan-out backdrop — outside fabRef so outside-click works */}
             <AnimatePresence>
               {fabOpen && (
                 <motion.div
@@ -88,7 +88,14 @@ export default function MobileNav() {
             {/* Fan-out standalone icons */}
             <AnimatePresence>
               {fabOpen && (
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[57] flex flex-col-reverse items-center gap-3">
+                <motion.div
+                  key="fan"
+                  className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[57] flex flex-col-reverse items-center gap-3"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
                   {FAB_ACTIONS.map((action, i) => {
                     const Icon = action.icon;
                     return (
@@ -104,7 +111,7 @@ export default function MobileNav() {
                           type: 'spring',
                           damping: 18,
                           stiffness: 380,
-                          delay: fabOpen ? i * 0.05 : 0,
+                          delay: i * 0.05,
                         }}
                         whileTap={{ scale: 0.88 }}
                       >
@@ -133,46 +140,48 @@ export default function MobileNav() {
                       </motion.button>
                     );
                   })}
-                </div>
+                </motion.div>
               )}
             </AnimatePresence>
 
             {/* FAB launcher */}
-            <motion.button
-              whileTap={{ scale: 0.88 }}
-              onClick={() => setFabOpen((v) => !v)}
-              className="relative -mt-7 w-14 h-14 rounded-full flex items-center justify-center z-[58]"
-              aria-label="Quick add"
-              style={{
-                background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))',
-                color: 'hsl(var(--primary-foreground))',
-                boxShadow: '0 8px 24px rgba(var(--panel-accent-rgb),0.45), 0 0 0 4px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)',
-              }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {fabOpen ? (
-                  <motion.span
-                    key="x"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="w-7 h-7" strokeWidth={2.6} />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="plus"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Plus className="w-7 h-7" strokeWidth={2.6} />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
+            <div ref={fabRef}>
+              <motion.button
+                whileTap={{ scale: 0.88 }}
+                onClick={() => setFabOpen((v) => !v)}
+                className="relative -mt-7 w-14 h-14 rounded-full flex items-center justify-center z-[58]"
+                aria-label="Quick add"
+                style={{
+                  background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))',
+                  color: 'hsl(var(--primary-foreground))',
+                  boxShadow: '0 8px 24px rgba(var(--panel-accent-rgb),0.45), 0 0 0 4px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)',
+                }}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {fabOpen ? (
+                    <motion.span
+                      key="x"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <X className="w-7 h-7" strokeWidth={2.6} />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="plus"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Plus className="w-7 h-7" strokeWidth={2.6} />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            </div>
           </div>
 
           {/* Right pair: Services + Settings */}
