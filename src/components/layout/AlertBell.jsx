@@ -9,10 +9,11 @@ import {
   Bell, X, ChevronRight, ChevronDown,
   FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
   CalendarClock, CheckCircle2, AlertTriangle,
+  OctagonAlert, Siren, ShieldAlert, BadgeAlert,
 } from 'lucide-react';
 import './alertBellTheme.css';
 
-const ICONS = { FileWarning, Receipt, Truck, Wrench, IdCard, FileText, CalendarClock, CheckCircle2 };
+const ICONS = { FileWarning, Receipt, Truck, Wrench, IdCard, FileText, CalendarClock, CheckCircle2, OctagonAlert, Siren, ShieldAlert, BadgeAlert };
 const AUTO_CLOSE_MS = 8000;
 
 export default function AlertBell() {
@@ -410,6 +411,9 @@ export default function AlertBell() {
                       {filteredAlerts.map((a, i) => {
                         const Icon = ICONS[a.icon] || AlertTriangle;
                         const sev = SEVERITY[a.severity] || SEVERITY.info;
+                        // Latest-model alert sign for critical/warning; fallback to category icon
+                        const AlertSign = a.severity === 'critical' ? Siren : a.severity === 'warning' ? OctagonAlert : null;
+                        const FinalIcon = AlertSign || Icon;
                         return (
                           <div
                             key={a.id}
@@ -421,7 +425,7 @@ export default function AlertBell() {
                             onMouseLeave={() => setHoveredAlert(null)}
                           >
                             <span className="bell-perspective-icon">
-                              <Icon className="w-4 h-4" style={{ color: sev.color }} />
+                              <FinalIcon className="w-4 h-4" style={{ color: sev.color }} />
                               {a.severity === 'critical' && (
                                 <span className="bell-perspective-pulse bell-red-blink" />
                               )}
