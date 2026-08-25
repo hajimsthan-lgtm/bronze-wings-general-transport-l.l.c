@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
-import { User, Link2, Search, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 /**
  * DriverRecipientField — dual-mode recipient input.
@@ -54,30 +54,23 @@ export default function DriverRecipientField({ value, onChange }) {
 
   return (
     <div>
-      {/* Mode toggle */}
-      <div className="flex gap-1 mb-1.5 p-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+      {/* Compact mode toggle */}
+      <div className="flex items-center gap-1.5 mb-1.5">
         <button
           type="button"
-          onClick={() => setMode('manual')}
-          className={`flex-1 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider py-1.5 rounded-md transition-all ${
-            mode === 'manual'
-              ? 'bg-primary/15 text-primary border border-primary/30'
-              : 'text-muted-foreground hover:text-foreground border border-transparent'
+          onClick={() => setMode(mode === 'driver' ? 'manual' : 'driver')}
+          className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors flex-shrink-0 ${
+            mode === 'driver' ? 'bg-primary' : 'bg-muted-foreground/30'
           }`}
+          title={mode === 'driver' ? 'Switch to manual entry' : 'Link to a driver'}
         >
-          <User className="w-3 h-3" /> Manual
+          <span className={`inline-block h-3 w-3 rounded-full bg-white transition-transform ${
+            mode === 'driver' ? 'translate-x-3.5' : 'translate-x-0.5'
+          }`} />
         </button>
-        <button
-          type="button"
-          onClick={() => setMode('driver')}
-          className={`flex-1 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider py-1.5 rounded-md transition-all ${
-            mode === 'driver'
-              ? 'bg-primary/15 text-primary border border-primary/30'
-              : 'text-muted-foreground hover:text-foreground border border-transparent'
-          }`}
-        >
-          <Link2 className="w-3 h-3" /> Select Driver
-        </button>
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {mode === 'driver' ? 'Driver-linked' : 'Manual entry'}
+        </span>
       </div>
 
       {mode === 'manual' ? (
