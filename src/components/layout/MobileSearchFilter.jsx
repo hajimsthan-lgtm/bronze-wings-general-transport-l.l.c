@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search, X } from 'lucide-react';
+import { Search, X, Plus } from 'lucide-react';
 import { useOpsFilter, setOpsSearch } from '@/lib/operationsFilterStore';
 import { useI18n } from '@/lib/i18n';
 
@@ -14,9 +14,15 @@ export default function MobileSearchFilter() {
   const { t } = useI18n();
   const ops = useOpsFilter();
 
-  const isOps = location.pathname === '/trips' || location.pathname === '/contracts';
+  const isTrips = location.pathname === '/trips';
+  const isContracts = location.pathname === '/contracts';
+  const isOps = isTrips || isContracts;
 
   const [localSearch, setLocalSearch] = useState('');
+
+  const openNewForm = () => {
+    window.dispatchEvent(new CustomEvent(isContracts ? 'ops:new-contract' : 'ops:new-trip'));
+  };
 
   // Generic search → dispatch global event
   useEffect(() => {
@@ -51,6 +57,17 @@ export default function MobileSearchFilter() {
           </button>
         )}
       </div>
+
+      {/* New Trip / Contract button */}
+      {isOps && (
+        <button
+          onClick={openNewForm}
+          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-primary text-primary-foreground active:scale-95 transition-transform shadow-lg shadow-primary/30"
+          aria-label={isContracts ? 'New Contract' : 'New Trip'}
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }

@@ -263,11 +263,16 @@ export default function Operations() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Open the new-trip form from the TopBar subnav "New Trip" button
+  // Open the new-trip / new-contract form from the TopBar subnav or mobile search bar button
   useEffect(() => {
-    const handler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
-    window.addEventListener('ops:new-trip', handler);
-    return () => window.removeEventListener('ops:new-trip', handler);
+    const tripHandler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
+    const contractHandler = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
+    window.addEventListener('ops:new-trip', tripHandler);
+    window.addEventListener('ops:new-contract', contractHandler);
+    return () => {
+      window.removeEventListener('ops:new-trip', tripHandler);
+      window.removeEventListener('ops:new-contract', contractHandler);
+    };
   }, []);
 
   const handleDeleteTrip = async (trip) => {
