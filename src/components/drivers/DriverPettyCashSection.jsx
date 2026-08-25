@@ -11,14 +11,7 @@ import EmptyState from '@/components/common/EmptyState';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
-const PETTY_COLOR = '#f59e0b'; // amber — distinct from cash (green) and card (blue)
-
-const CATEGORY_ICONS = {
-  fuel: Fuel,
-  maintenance: Wrench,
-  trip_fare: Truck,
-  other: MoreHorizontal,
-};
+const PETTY_COLOR = '#f59e0b';
 
 const fmt = (n) => new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
 
@@ -38,9 +31,58 @@ export default function DriverPettyCashSection({ driver }) {
   const load = async () => {
     setLoading(true);
     try {
-      const all = await base44.entities.CashTransaction.list('-date', 5000).catch(() => []);
-      const driverRows = (all || []).filter((r) => r.driver_id === driver.id);
-      setRows(driverRows);
+      // 1. CashTransactions linked to this driver
+      const allTxns = await base44.entities.CashTransaction.list('-date', 5000).catch(() => []);
+      const cashRows = (allTxns || []).filter((r) => r.driver_id === driver.id);
+
+      // 2. Fuel expenses paid via petty wallet (match by driver name)
+      const fuelRows = await base44.entities.FuelRecord.filter(
+        { payment_method: 'petty_wallet', driver_name: driver.name },
+        '-created_date', 500
+      ).catch(() => []);
+
+      // 3. Maintenance expenses paid via petty wallet (match by driver name)
+      const serviceRows = await base44.entities.ServiceRecord.filter(
+        { payment_method: 'petty_wallet', driver_name: driver.name },
+        '-created_date', 500
+      ).catch(() => []);
+
+      // Merge into unified transaction list
+      const merged = [
+        // Outflows from petty cash → credit to driver wallet
+        ...cashRows.map((r) => ({
+          id: `cash-${r.id}`,
+          date: r.date,
+          type: r.type === 'outflow' ? 'credit' : 'debit',
+          amount: Number(r.amount) || 0,
+          description: r.description || (r.type === 'outflow' ? 'Petty Cash Received' : 'Returned to Pool'),
+          category: r.category || 'cash',
+          source: 'cash',
+          linked_trip_number: r.linked_trip_number,
+        })),
+        // Fuel expenses → debit from driver wallet
+        ...(fuelRows || []).map((r) => ({
+          id: `fuel-${r.id}`,
+          date: r.date,
+          type: 'debit',
+          amount: Number(r.total_with_vat) || Number(r.total_cost) || 0,
+          description: `Fuel — ${r.station_name || r.vehicle_plate || ''}`.trim(),
+          category: 'fuel',
+          source: 'fuel',
+        })),
+        // Maintenance expenses → debit from driver wallet
+        ...(serviceRows || []).map((r) => ({
+          id: `svc-${r.id}`,
+          date: r.date,
+          type: 'debit',
+          amount: Number(r.total_with_vat) || Number(r.cost) || 0,
+          description: r.description || `Maintenance — ${r.service_type || ''}`.trim(),
+          category: 'maintenance',
+          source: 'maintenance',
+        })),
+      ];
+
+      setRows(merged);
     } finally {
       setLoading(false);
     }
@@ -52,18 +94,18 @@ export default function DriverPettyCashSection({ driver }) {
     return (rows || []).slice().sort((a, b) => {
       const d = (a.date || '').localeCompare(b.date || '');
       if (d !== 0) return d;
-      return (a.created_date || '').localeCompare(b.created_date || '');
+      return (a.id || '').localeCompare(b.id || '');
     });
   }, [rows]);
 
-  const totalIn = sorted.filter((r) => r.type === 'inflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
-  const totalOut = sorted.filter((r) => r.type === 'outflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+  const totalIn = sorted.filter((r) => r.type === 'credit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+  const totalOut = sorted.filter((r) => r.type === 'debit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const balance = totalIn - totalOut;
 
-  // running balance per driver
+  // running balance
   let run = 0;
   const historyRows = sorted.map((r) => {
-    run += (r.type === 'inflow' ? 1 : -1) * (Number(r.amount) || 0);
+    run += (r.type === 'credit' ? 1 : -1) * (Number(r.amount) || 0);
     return { ...r, running_balance: run };
   }).reverse();
 
@@ -78,14 +120,15 @@ export default function DriverPettyCashSection({ driver }) {
     }
     setSaving(true);
     try {
+      // Create an OUTFLOW from the petty cash pool → credit to driver's wallet
       await base44.entities.CashTransaction.create({
         date: topUpForm.date,
-        type: 'inflow',
+        type: 'outflow',
         amount: amt,
-        description: topUpForm.note || 'Petty Cash Top-Up',
+        description: topUpForm.note || 'Petty Cash to Driver',
         category: 'top_up',
-        received_from: driver.name,
-        paid_to: '',
+        received_from: '',
+        paid_to: driver.name,
         recipient_type: 'driver',
         driver_id: driver.id,
         receipt_number: '',
@@ -93,17 +136,24 @@ export default function DriverPettyCashSection({ driver }) {
       setTopUpForm({ amount: '', date: new Date().toISOString().slice(0, 10), note: '' });
       setTopUpOpen(false);
       await load();
-      toast({ title: 'Top-up added' });
+      toast({ title: 'Funds sent to driver wallet' });
     } catch {
-      toast({ title: 'Failed to add top-up', variant: 'destructive' });
+      toast({ title: 'Failed to send funds', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
   };
 
+  const SOURCE_ICONS = {
+    fuel: Fuel,
+    maintenance: Wrench,
+    cash: Wallet,
+    other: MoreHorizontal,
+  };
+
   return (
     <CollapsibleSection
-      title="Petty Cash"
+      title="Petty Wallet"
       icon={Wallet}
       accent={PETTY_COLOR}
       count={sorted.length}
@@ -112,7 +162,7 @@ export default function DriverPettyCashSection({ driver }) {
           <button
             onClick={() => setTopUpOpen(true)}
             className="text-muted-foreground hover:text-amber-400 p-1.5 rounded-lg hover:bg-amber-500/10 transition-colors"
-            title="Top-up petty cash"
+            title="Send funds to driver wallet"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
@@ -134,11 +184,11 @@ export default function DriverPettyCashSection({ driver }) {
           <Wallet className="w-5 h-5" style={{ color: PETTY_COLOR }} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Current Petty Cash Balance</p>
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Wallet Balance</p>
           <p className="text-2xl font-bold tabular-nums text-foreground">{formatCurrency(balance)}</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">
-            <span className="text-emerald-400">+{fmt(totalIn)}</span> top-ups ·
-            <span className="text-rose-400"> −{fmt(totalOut)}</span> expenses
+            <span className="text-emerald-400">+{fmt(totalIn)}</span> received ·
+            <span className="text-rose-400"> −{fmt(totalOut)}</span> spent
           </p>
         </div>
       </div>
@@ -147,33 +197,33 @@ export default function DriverPettyCashSection({ driver }) {
       {loading ? (
         <LoadingSpinner />
       ) : historyRows.length === 0 ? (
-        <EmptyState icon={Wallet} title="No petty cash transactions" description="Top-up this driver to start tracking." />
+        <EmptyState icon={Wallet} title="No wallet transactions" description="Send funds to this driver to start tracking." />
       ) : (
         <div className="space-y-2 max-h-[440px] overflow-y-auto thin-scroll pr-1">
           {historyRows.map((rec) => {
-            const isIn = rec.type === 'inflow';
-            const CatIcon = CATEGORY_ICONS[rec.category] || MoreHorizontal;
+            const isCredit = rec.type === 'credit';
+            const SrcIcon = SOURCE_ICONS[rec.source] || MoreHorizontal;
             return (
               <div key={rec.id} className="row-card flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-xl glass flex items-center justify-center flex-shrink-0"
-                  style={{ boxShadow: `0 0 18px -6px ${isIn ? 'rgba(16,185,129,0.35)' : 'rgba(244,63,94,0.35)'}` }}
+                  style={{ boxShadow: `0 0 18px -6px ${isCredit ? 'rgba(16,185,129,0.35)' : 'rgba(244,63,94,0.35)'}` }}
                 >
-                  {isIn ? <ArrowDownLeft className="w-4 h-4 text-emerald-400" /> : <ArrowUpRight className="w-4 h-4 text-rose-400" />}
+                  {isCredit ? <ArrowDownLeft className="w-4 h-4 text-emerald-400" /> : <SrcIcon className="w-4 h-4 text-rose-400" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {isIn ? 'Top-Up' : (rec.description || rec.category || 'Expense')}
+                    {rec.description}
                   </p>
                   <p className="text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
                     <span>{formatDate(rec.date)}</span>
-                    {rec.category && <span className="capitalize">· {rec.category.replace(/_/g, ' ')}</span>}
+                    <span className="capitalize">· {rec.source === 'cash' ? (isCredit ? 'Received' : 'Returned') : rec.source}</span>
                     {rec.linked_trip_number && <span className="flex items-center gap-0.5">· <Truck className="w-3 h-3" /> {rec.linked_trip_number}</span>}
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className={`text-sm font-semibold tabular-nums whitespace-nowrap ${isIn ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {isIn ? '+' : '−'}{fmt(rec.amount)}
+                  <p className={`text-sm font-semibold tabular-nums whitespace-nowrap ${isCredit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {isCredit ? '+' : '−'}{fmt(rec.amount)}
                   </p>
                   <p className="text-[10px] text-muted-foreground tabular-nums">{fmt(rec.running_balance)}</p>
                 </div>
@@ -189,7 +239,7 @@ export default function DriverPettyCashSection({ driver }) {
           <SheetHeader className="mb-6">
             <SheetTitle className="font-display text-foreground flex items-center gap-2">
               <Wallet className="w-4 h-4" style={{ color: PETTY_COLOR }} />
-              Petty Cash Top-Up
+              Send to Driver Wallet
             </SheetTitle>
             <p className="text-xs text-muted-foreground">{driver.name}</p>
           </SheetHeader>
@@ -227,7 +277,7 @@ export default function DriverPettyCashSection({ driver }) {
             </div>
             <SheetFooter className="pt-4">
               <Button type="submit" disabled={saving} className="w-full" style={{ background: PETTY_COLOR, borderColor: PETTY_COLOR }}>
-                {saving ? 'Saving...' : 'Add Top-Up'}
+                {saving ? 'Sending...' : 'Send to Wallet'}
               </Button>
             </SheetFooter>
           </form>

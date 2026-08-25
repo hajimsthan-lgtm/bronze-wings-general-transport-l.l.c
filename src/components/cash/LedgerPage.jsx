@@ -239,14 +239,12 @@ export default function LedgerPage({
     if (!inAmt && !outAmt) return;
     setBalanceError('');
 
-    // Driver balance validation: block expenses that would push balance below zero
-    if (enableDriverLink && form.recipient_mode === 'driver' && form.driver_id && outAmt > 0) {
-      const driverRows = (rows || []).filter((r) => r.driver_id === form.driver_id && r.id !== editId);
-      const drvIn = driverRows.filter((r) => r.type === 'inflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
-      const drvOut = driverRows.filter((r) => r.type === 'outflow').reduce((s, r) => s + (Number(r.amount) || 0), 0);
-      const currentBalance = drvIn - drvOut;
-      if (outAmt > currentBalance) {
-        setBalanceError(`Insufficient petty cash balance for this driver (available: ${fmt(currentBalance)})`);
+    // Petty cash pool validation: block outflows that exceed the pool's running balance
+    if (outAmt > 0) {
+      const poolBalance = allStatementRows.length ? allStatementRows[allStatementRows.length - 1].running_balance : 0;
+      const adjustedBalance = editId ? poolBalance + (Number(rows?.find((r) => r.id === editId)?.type === 'outflow' ? Number(rows.find((r) => r.id === editId)?.amount) || 0 : 0)) : poolBalance;
+      if (outAmt > adjustedBalance) {
+        setBalanceError(`Insufficient petty cash pool balance (available: ${fmt(adjustedBalance)})`);
         return;
       }
     }

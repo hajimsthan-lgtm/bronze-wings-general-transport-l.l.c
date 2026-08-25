@@ -52,7 +52,7 @@
       "enum": [
         "cash",
         "card",
-        "account"
+        "petty_wallet"
       ],
       "default": "cash"
     },
