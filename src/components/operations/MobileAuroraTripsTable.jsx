@@ -95,11 +95,9 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
 
   return (
     <div
-      className="md:hidden relative rounded-2xl overflow-hidden"
+      className="md:hidden relative rounded-2xl overflow-hidden bg-card border border-primary/15"
       style={{
-        background: 'linear-gradient(180deg, rgba(15,18,22,0.96) 0%, rgba(10,12,16,0.98) 100%)',
-        border: '1px solid rgba(52,211,153,0.15)',
-        boxShadow: '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       {/* Aurora glow — animated emerald aurora at top */}
@@ -120,14 +118,9 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
 
       {/* Sticky header */}
       <div
-        className="sticky top-0 z-10 grid items-center px-3 py-2.5"
+        className="sticky top-0 z-10 grid items-center px-3 py-2.5 bg-card/95 backdrop-blur-xl border-b border-primary/20"
         style={{
           gridTemplateColumns: '28px 52px 1fr 64px 64px',
-          background: 'rgba(15,18,22,0.92)',
-          backdropFilter: 'blur(16px) saturate(1.4)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
-          borderBottom: '1px solid rgba(52,211,153,0.18)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
         }}
       >
         <div className="flex justify-center">
@@ -140,8 +133,8 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
       </div>
 
       {/* Select-all count */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.04]">
-        <span className="text-[10px] text-white/40 font-medium tabular-nums">
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/40">
+        <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
           {trips.length} trip{trips.length !== 1 ? 's' : ''}
         </span>
         {selected.size > 0 && (
@@ -169,10 +162,10 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
       >
         {trips.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-xs text-white/30">No trips found</p>
+            <p className="text-xs text-muted-foreground">No trips found</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="divide-y divide-border/40">
             {trips.map((trip, i) => {
               const isSelected = selected.has(trip.id);
               const st = STATUS[trip.status] || STATUS.scheduled;
@@ -200,7 +193,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   </div>
 
                   {/* Date */}
-                  <span className="text-[10px] text-white/50 tabular-nums leading-tight">
+                  <span className="text-[10px] text-muted-foreground tabular-nums leading-tight">
                     {trip.trip_date ? formatDate(trip.trip_date).split('/')[0] + '/' + formatDate(trip.trip_date).split('/')[1] : '—'}
                   </span>
 
@@ -215,20 +208,20 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                         ? <Check className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
                         : <Copy className="w-2.5 h-2.5 opacity-30 shrink-0" />}
                     </button>
-                    <div className="flex items-center gap-1 text-[10px] text-white/60 leading-tight">
+                    <div className="flex items-center gap-1 text-[10px] text-foreground/70 leading-tight">
                       <span className="truncate font-medium">{trip.from_location || '—'}</span>
                       {trip.permit_required && trip.permit_name && (
                         <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Permit: ${trip.permit_name}`}>
                           <Shield className="w-2 h-2" />
                         </span>
                       )}
-                      <ArrowRight className="w-2.5 h-2.5 text-white/30 shrink-0" />
+                      <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0" />
                       <span className="truncate font-medium">{trip.to_location || '—'}</span>
                     </div>
                   </div>
 
                   {/* Revenue */}
-                  <span className="text-[11px] font-bold text-white tabular-nums text-right leading-tight">
+                  <span className="text-[11px] font-bold text-foreground tabular-nums text-right leading-tight">
                     {formatCurrency(revenue)}
                   </span>
 

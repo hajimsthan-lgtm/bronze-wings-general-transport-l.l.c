@@ -99,7 +99,7 @@ export default function VehicleDetail() {
   const totalFuel = fFuel.reduce((s, x) => s + (Number(x.total_cost) || 0), 0);
   const totalServices = fServices.reduce((s, x) => s + (Number(x.cost) || 0), 0);
   const totalExpenses = fExpenses.reduce((s, x) => s + (Number(x.amount) || 0), 0);
-  const netProfit = totalTrips - totalServices - totalFuel;
+  const netProfit = totalTrips - totalServices - totalFuel - totalExpenses;
 
   const saveOwnership = async (front, back) => {
     try {
@@ -344,11 +344,12 @@ export default function VehicleDetail() {
                 { label: 'Trip Revenue', value: totalTrips, tone: 'text-emerald-400' },
                 { label: 'Maintenance', value: totalServices, tone: 'text-amber-400' },
                 { label: 'Fuel', value: totalFuel, tone: 'text-sky-400' },
+                { label: 'Expenses', value: totalExpenses, tone: 'text-rose-400' },
               ]}
               netProfit={netProfit}
               filenameBase={`vehicle-${vehicle.plate_number}-profit`}
               dateRange={`${dateFrom} to ${dateTo}`}
-              onView={() => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fServices.map((r) => ({ label: r.service_type, sub: `Maintenance · ${formatDate(r.date)}`, amount: r.cost, tone: 'text-amber-400' }))] })}
+              onView={() => setBreakdown({ title: 'Transactions Breakdown', rows: [...fTrips.map((tt) => ({ label: `${tt.from_location || ''} → ${tt.to_location || ''}`, sub: `Trip · ${formatDate(tt.trip_date)}`, amount: tt.revenue, tone: 'text-emerald-400' })), ...fFuel.map((r) => ({ label: `${r.liters}L Fuel · ${r.station_name || ''}`, sub: `Fuel · ${formatDate(r.date)}`, amount: r.total_cost, tone: 'text-sky-400' })), ...fServices.map((r) => ({ label: r.service_type, sub: `Maintenance · ${formatDate(r.date)}`, amount: r.cost, tone: 'text-amber-400' })), ...fExpenses.map((r) => ({ label: r.description || r.category, sub: `Expense · ${formatDate(r.date)}`, amount: r.amount, tone: 'text-rose-400' }))] })}
             />
           </div>
         </div>
