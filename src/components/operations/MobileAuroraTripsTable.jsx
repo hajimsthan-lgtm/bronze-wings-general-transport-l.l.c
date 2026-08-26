@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -35,11 +34,12 @@ const ACCENT = '#34d399';
 const AUTO_VANISH_MS = 1500;
 
 /**
- * Compact long-press action overlay — portaled to body.
- * Full-viewport blurred backdrop, 3 small floating action chips centered on screen.
- * Auto-vanishes after 1.5s. Smooth spring transition in/out.
+ * Inline row action overlay — renders INSIDE the pressed row.
+ * Blurs only the pressed row (not full screen), small glassmorphic icons
+ * centered in the row, stays visible during horizontal scroll via sticky positioning.
+ * Auto-vanishes after 1.5s.
  */
-function LongPressOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
+function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
   const vanishTimer = useRef(null);
 
   useEffect(() => {
@@ -53,29 +53,32 @@ function LongPressOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
     { icon: Trash2, label: 'Delete', color: '#ef4444', onClick: () => { onDelete?.(trip); onClose(); } },
   ];
 
-  return createPortal(
-    <div className="fixed inset-0" style={{ zIndex: 9999 }} onClick={onClose}>
-      {/* Blurred backdrop — blurs the rows behind */}
+  return (
+    <>
+      {/* Blur layer — absolute, covers only this row, scrolls with it */}
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 z-20 pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
         style={{
-          background: 'rgba(0,0,0,0.35)',
-          backdropFilter: 'blur(12px) saturate(1.2)',
-          WebkitBackdropFilter: 'blur(12px) saturate(1.2)',
+          background: 'rgba(0,0,0,0.25)',
+          backdropFilter: 'blur(10px) saturate(1.2)',
+          WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
         }}
       />
-      {/* Centered action chips */}
+      {/* Icons — absolute, centered in the row, scrolls with row content */}
       <motion.div
-        className="absolute left-1/2 top-1/2 flex items-center gap-3"
-        style={{ transform: 'translate(-50%, -50%)' }}
-        initial={{ opacity: 0, scale: 0.6, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.6, y: 20 }}
-        transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.3 }}
+        className="absolute left-1/2 top-1/2 flex items-center justify-center gap-2"
+        style={{
+          transform: 'translate(-50%, -50%)',
+          zIndex: 30,
+        }}
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.7 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.25 }}
         onClick={(e) => e.stopPropagation()}
       >
         {actions.map((action, i) => {
@@ -83,41 +86,29 @@ function LongPressOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
           return (
             <motion.button
               key={action.label}
-              onClick={action.onClick}
-              className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
-              initial={{ opacity: 0, y: 12 }}
+              onClick={(e) => { e.stopPropagation(); action.onClick(); }}
+              className="flex items-center justify-center active:scale-90 transition-transform"
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.2 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ delay: i * 0.04, duration: 0.2 }}
             >
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
                 style={{
                   background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
-                  boxShadow: `0 6px 20px -4px ${action.color}80, 0 0 0 3px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                  boxShadow: `0 4px 14px -3px ${action.color}80, 0 0 0 2px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
                 }}
               >
-                <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+                <Icon className="w-4 h-4 text-white" strokeWidth={2.2} />
               </div>
-              <span
-                className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md"
-                style={{ color: action.color, background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}
-              >
-                {action.label}
-              </span>
             </motion.button>
           );
         })}
       </motion.div>
-      {/* Auto-vanish progress ring — subtle indicator */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 w-20 h-20 rounded-full"
-        style={{ transform: 'translate(-50%, -50%)', border: '2px solid rgba(255,255,255,0.15)' }}
-        initial={{ rotate: -90 }}
-        animate={{ rotate: 270 }}
-        transition={{ duration: AUTO_VANISH_MS / 1000, ease: 'linear' }}
-      />
-    </div>,
-    document.body
+    </>
   );
 }
 
@@ -328,6 +319,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                     gap: '8px',
                     background: isSelected ? 'rgba(52,211,153,0.06)' : 'transparent',
                     borderLeft: isSelected ? '2px solid #34d399' : '2px solid transparent',
+                    overflow: longPressTrip?.id === trip.id ? 'hidden' : 'visible',
                   }}
                 >
                   {/* Checkbox — toggles selection for bulk actions */}
@@ -387,6 +379,20 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
                     <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
                   </div>
+
+                  {/* Inline long-press action overlay — blurs only this row */}
+                  <AnimatePresence>
+                    {longPressTrip?.id === trip.id && (
+                      <RowActionOverlay
+                        key={`overlay-${trip.id}`}
+                        trip={trip}
+                        onOpenDetail={onOpenDetail}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onClose={() => setLongPressTrip(null)}
+                      />
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}
@@ -398,19 +404,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
 
         </div>
       </div>
-
-      {/* Long-press action overlay — portaled, compact, auto-vanish */}
-      <AnimatePresence>
-        {longPressTrip && (
-          <LongPressOverlay
-            trip={longPressTrip}
-            onOpenDetail={onOpenDetail}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onClose={() => setLongPressTrip(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
