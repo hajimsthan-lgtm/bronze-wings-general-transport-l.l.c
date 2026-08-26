@@ -145,11 +145,9 @@ function VehiclesTab() {
           </div>
 
           {/* Export sub-header — slides in with transition */}
-          <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2.5 rounded-xl bg-muted/30 border border-border/40 animate-fade-in-up">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{filtered.length} vehicles</span>
-            </div>
-            <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Category', key: 'category', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Category:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Type', key: 'type' }, { label: 'Vehicle Type', key: 'vehicleType', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Type:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-4 px-5 py-3 rounded-xl bg-muted/30 border border-border/40 animate-fade-in-up">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{filtered.length} vehicles</span>
+            <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Year', key: 'year' }, { label: 'Category', key: 'category', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Category:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Vehicle Type', key: 'vehicleType', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Type:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
           </div>
 
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
