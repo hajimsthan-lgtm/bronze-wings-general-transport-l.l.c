@@ -35,6 +35,7 @@ const ACCENT = '#34d399';
  * Aurora Pro — award-grade mobile vertical scroll table.
  * Monochrome dark surfaces, deep emerald glow, sticky header, row dividers,
  * framer-motion micro-interactions, safe-area aware, accessible.
+ * Horizontal scroll enabled — table is wider than viewport for full readability.
  */
 export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
@@ -100,6 +101,10 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
         boxShadow: '0 12px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
+      {/* Horizontal scroll wrapper — table is wider than viewport, scroll to see all columns */}
+      <div className="overflow-x-auto thin-scroll">
+        <div style={{ minWidth: 520 }}>
+
       {/* Aurora glow — animated emerald aurora at top */}
       <div
         className="absolute top-0 left-0 right-0 h-32 pointer-events-none overflow-hidden"
@@ -118,22 +123,23 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
 
       {/* Sticky header */}
       <div
-        className="sticky top-0 z-10 grid items-center px-3 py-2.5 bg-card/95 backdrop-blur-xl border-b border-primary/20"
+        className="sticky top-0 z-10 grid items-center px-4 py-3 bg-card/95 backdrop-blur-xl border-b border-primary/20"
         style={{
-          gridTemplateColumns: '28px 52px 1fr 64px 64px',
+          gridTemplateColumns: '36px 60px 1fr 88px 104px',
+          gap: '8px',
         }}
       >
         <div className="flex justify-center">
           <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-white/20 data-[state=checked]:bg-emerald-400 data-[state=checked]:border-emerald-400" />
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400/80">Date</span>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400/80">Trip / Route</span>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400/80 text-right">Revenue</span>
-        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400/80 text-right">Status</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">Date</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80">Trip / Route</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80 text-right">Revenue</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400/80 text-right">Status</span>
       </div>
 
       {/* Select-all count */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/40">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border/40">
         <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
           {trips.length} trip{trips.length !== 1 ? 's' : ''}
         </span>
@@ -179,54 +185,55 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   onClick={() => toggleOne(trip.id)}
-                  className="grid items-center px-3 py-2.5 cursor-pointer relative group"
+                  className="grid items-start px-4 py-3 cursor-pointer relative group"
                   style={{
-                    gridTemplateColumns: '28px 52px 1fr 64px 64px',
+                    gridTemplateColumns: '36px 60px 1fr 88px 104px',
+                    gap: '8px',
                     background: isSelected ? 'rgba(52,211,153,0.06)' : 'transparent',
                     borderLeft: isSelected ? '2px solid #34d399' : '2px solid transparent',
                   }}
                   whileTap={{ backgroundColor: 'rgba(52,211,153,0.04)' }}
                 >
                   {/* Checkbox */}
-                  <div className="flex justify-center pointer-events-none">
+                  <div className="flex justify-center pt-0.5 pointer-events-none">
                     <Checkbox checked={isSelected} className="border-white/20 data-[state=checked]:bg-emerald-400 data-[state=checked]:border-emerald-400" />
                   </div>
 
                   {/* Date */}
-                  <span className="text-[10px] text-muted-foreground tabular-nums leading-tight">
+                  <span className="text-[10px] text-muted-foreground tabular-nums leading-tight pt-0.5">
                     {trip.trip_date ? formatDate(trip.trip_date).split('/')[0] + '/' + formatDate(trip.trip_date).split('/')[1] : '—'}
                   </span>
 
-                  {/* Trip # + Route */}
+                  {/* Trip # + Route — wraps text instead of truncating */}
                   <div className="min-w-0 pr-1">
                     <button
                       onClick={(e) => copyRef(e, trip)}
-                      className="text-emerald-400 font-bold text-[10px] tracking-tight flex items-center gap-1 mb-0.5"
+                      className="text-emerald-400 font-bold text-[11px] tracking-tight flex items-center gap-1 mb-1"
                     >
-                      <span className="truncate">{ref}</span>
+                      <span className="break-all">{ref}</span>
                       {copiedId === trip.id
-                        ? <Check className="w-2.5 h-2.5 text-emerald-400 shrink-0" />
-                        : <Copy className="w-2.5 h-2.5 opacity-30 shrink-0" />}
+                        ? <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                        : <Copy className="w-3 h-3 opacity-30 shrink-0" />}
                     </button>
-                    <div className="flex items-center gap-1 text-[10px] text-foreground/70 leading-tight">
-                      <span className="truncate font-medium">{trip.from_location || '—'}</span>
+                    <div className="flex items-start gap-1 text-[10px] text-foreground/70 leading-snug">
+                      <span className="break-words font-medium">{trip.from_location || '—'}</span>
                       {trip.permit_required && trip.permit_name && (
-                        <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Permit: ${trip.permit_name}`}>
+                        <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0 mt-0.5" title={`Permit: ${trip.permit_name}`}>
                           <Shield className="w-2 h-2" />
                         </span>
                       )}
-                      <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0" />
-                      <span className="truncate font-medium">{trip.to_location || '—'}</span>
+                      <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0 mt-0.5" />
+                      <span className="break-words font-medium">{trip.to_location || '—'}</span>
                     </div>
                   </div>
 
                   {/* Revenue */}
-                  <span className="text-[11px] font-bold text-foreground tabular-nums text-right leading-tight">
+                  <span className="text-[11px] font-bold text-foreground tabular-nums text-right leading-tight pt-0.5 whitespace-nowrap">
                     {formatCurrency(revenue)}
                   </span>
 
                   {/* Status */}
-                  <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
                     <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
                   </div>
                 </motion.div>
@@ -236,6 +243,9 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
         )}
         {/* Safe-area bottom spacer */}
         <div style={{ height: 'env(safe-area-inset-bottom)' }} />
+      </div>
+
+        </div>
       </div>
     </div>
   );
