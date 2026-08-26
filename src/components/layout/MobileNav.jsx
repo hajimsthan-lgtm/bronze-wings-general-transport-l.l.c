@@ -73,10 +73,11 @@ export default function MobileNav() {
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div
-          className="relative flex items-stretch justify-around px-2 pt-2.5 pb-2 bg-background/90"
+          className="relative flex items-stretch justify-around px-2 pt-2.5 pb-2"
           style={{
-            backdropFilter: 'blur(24px) saturate(1.6)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+            backgroundColor: 'hsl(var(--background) / 0.97)',
+            backdropFilter: 'blur(12px) saturate(1.3)',
+            WebkitBackdropFilter: 'blur(12px) saturate(1.3)',
             borderTop: '1px solid hsl(var(--border))',
             boxShadow: '0 -8px 32px rgba(0,0,0,0.08)',
           }}
