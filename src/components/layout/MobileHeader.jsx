@@ -121,24 +121,24 @@ export default function MobileHeader() {
       </div>
 
       {/* Row 2: Global search (home) or page filter (other pages) */}
-      <div className="relative px-3 pb-2">
+      <div className="relative px-3 pb-1.5">
         {isHome ? (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border/40">
-            <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-2 px-2.5 h-8 rounded-lg bg-muted/40 border border-border/30">
+            <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
             <input
               placeholder="Search the whole app..."
-              className="flex-1 bg-transparent text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent text-xs focus:outline-none text-foreground placeholder:text-muted-foreground"
               onChange={(e) => window.dispatchEvent(new CustomEvent('mobile:global-search', { detail: e.target.value }))}
             />
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border/40">
-            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-2 px-2.5 h-8 rounded-lg bg-muted/40 border border-border/30">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
             <input
               placeholder="Filter results"
               value={filterValue}
               onChange={(e) => setMobileFilter(e.target.value)}
-              className="flex-1 bg-transparent text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              className="flex-1 bg-transparent text-xs focus:outline-none text-foreground placeholder:text-muted-foreground"
             />
           </div>
         )}
