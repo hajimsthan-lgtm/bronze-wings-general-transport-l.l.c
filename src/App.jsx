@@ -60,6 +60,7 @@ const Agreements = lazy(() => import('@/pages/Agreements'));
 const InvoicesPage = lazy(() => import('@/pages/InvoicesPage'));
 const UIForge = lazy(() => import('@/pages/UIForge'));
 const Services = lazy(() => import('@/pages/Services'));
+const Trash = lazy(() => import('@/pages/Trash'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -95,6 +96,7 @@ const AuthenticatedApp = () => {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/trash" element={<Trash />} />
           <Route path="/trips" element={<Operations />} />
           <Route path="/contracts" element={<Operations />} />
           <Route path="/expenses" element={<Expenses />} />

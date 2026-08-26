@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
@@ -21,6 +22,7 @@ const TRIP_EXPORT_COLUMNS = [
   { label: 'Trip #', key: 'trip_number', w: 22, noWrap: true },
   { label: 'Date', key: 'trip_date', w: 20 },
   { label: 'Driver', key: 'driver_name', w: 28 },
+  { label: 'Driver Phone', key: 'driver_phone', w: 24 },
   { label: 'Vehicle', key: 'vehicle_plate', w: 22, noWrap: true },
   { label: 'Client', key: 'client_name', w: 32 },
   { label: 'From', key: 'from_location', w: 25 },
@@ -30,46 +32,115 @@ const TRIP_EXPORT_COLUMNS = [
 ];
 
 const ACCENT = '#34d399';
+const AUTO_VANISH_MS = 1500;
+
+/**
+ * Compact long-press action overlay — portaled to body.
+ * Full-viewport blurred backdrop, 3 small floating action chips centered on screen.
+ * Auto-vanishes after 1.5s. Smooth spring transition in/out.
+ */
+function LongPressOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
+  const vanishTimer = useRef(null);
+
+  useEffect(() => {
+    vanishTimer.current = setTimeout(() => onClose(), AUTO_VANISH_MS);
+    return () => clearTimeout(vanishTimer.current);
+  }, [onClose]);
+
+  const actions = [
+    { icon: Eye, label: 'View', color: '#3b82f6', onClick: () => { onOpenDetail?.(trip); onClose(); } },
+    { icon: Pencil, label: 'Edit', color: '#fbbf24', onClick: () => { onEdit?.(trip); onClose(); } },
+    { icon: Trash2, label: 'Delete', color: '#ef4444', onClick: () => { onDelete?.(trip); onClose(); } },
+  ];
+
+  return createPortal(
+    <div className="fixed inset-0" style={{ zIndex: 9999 }} onClick={onClose}>
+      {/* Blurred backdrop — blurs the rows behind */}
+      <motion.div
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        style={{
+          background: 'rgba(0,0,0,0.35)',
+          backdropFilter: 'blur(12px) saturate(1.2)',
+          WebkitBackdropFilter: 'blur(12px) saturate(1.2)',
+        }}
+      />
+      {/* Centered action chips */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 flex items-center gap-3"
+        style={{ transform: 'translate(-50%, -50%)' }}
+        initial={{ opacity: 0, scale: 0.6, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.6, y: 20 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.3 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {actions.map((action, i) => {
+          const Icon = action.icon;
+          return (
+            <motion.button
+              key={action.label}
+              onClick={action.onClick}
+              className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.2 }}
+            >
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
+                  boxShadow: `0 6px 20px -4px ${action.color}80, 0 0 0 3px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                }}
+              >
+                <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+              </div>
+              <span
+                className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-md"
+                style={{ color: action.color, background: 'rgba(255,255,255,0.95)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}
+              >
+                {action.label}
+              </span>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+      {/* Auto-vanish progress ring — subtle indicator */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 w-20 h-20 rounded-full"
+        style={{ transform: 'translate(-50%, -50%)', border: '2px solid rgba(255,255,255,0.15)' }}
+        initial={{ rotate: -90 }}
+        animate={{ rotate: 270 }}
+        transition={{ duration: AUTO_VANISH_MS / 1000, ease: 'linear' }}
+      />
+    </div>,
+    document.body
+  );
+}
 
 /**
  * Aurora Pro — award-grade mobile vertical scroll table.
- * Monochrome dark surfaces, deep emerald glow, sticky header, row dividers,
- * framer-motion micro-interactions, safe-area aware, accessible.
- * Horizontal scroll enabled — table is wider than viewport for full readability.
  */
 export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [selected, setSelected] = useState(new Set());
   const [copiedId, setCopiedId] = useState(null);
-  const [longPressId, setLongPressId] = useState(null);
+  const [longPressTrip, setLongPressTrip] = useState(null);
   const scrollRef = useRef(null);
   const longPressTimer = useRef(null);
 
   // Long-press (0.7s) to reveal per-row action buttons
-  const startLongPress = (tripId) => {
+  const startLongPress = (trip) => {
     longPressTimer.current = setTimeout(() => {
-      setLongPressId((prev) => (prev === tripId ? null : tripId));
+      setLongPressTrip(trip);
       if (navigator.vibrate) navigator.vibrate(40);
     }, 700);
   };
   const cancelLongPress = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
-  const closeActions = () => setLongPressId(null);
-
-  // Close long-press overlay on outside click
-  useEffect(() => {
-    if (!longPressId) return;
-    const handler = (e) => {
-      const overlay = e.target.closest?.('[data-long-press-overlay]');
-      if (!overlay) setLongPressId(null);
-    };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler, { passive: true });
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
-    };
-  }, [longPressId]);
 
   const toggleOne = (id) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map((t) => t.id)));
@@ -84,12 +155,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
     navigator.clipboard?.writeText(ref);
     setCopiedId(trip.id);
     setTimeout(() => setCopiedId(null), 1500);
-  };
-
-  const goTo = (e, map, name, path) => {
-    e.stopPropagation();
-    const id = map?.[name];
-    if (id) navigate(`${path}/${id}`);
   };
 
   const handleBulkExportCSV = () => {
@@ -247,7 +312,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
               const st = STATUS[trip.status] || STATUS.scheduled;
               const revenue = Number(trip.revenue) || 0;
               const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
-              const showActions = longPressId === trip.id;
               return (
                 <motion.div
                   key={trip.id}
@@ -255,7 +319,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  onTouchStart={() => startLongPress(trip.id)}
+                  onTouchStart={() => startLongPress(trip)}
                   onTouchEnd={cancelLongPress}
                   onTouchMove={cancelLongPress}
                   className="grid items-start px-4 py-3 cursor-pointer relative group select-none"
@@ -323,73 +387,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
                     <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
                   </div>
-
-                  {/* Long-press action overlay — View / Edit / Delete */}
-                  {showActions && (
-                    <motion.div
-                      data-long-press-overlay
-                      initial={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
-                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
-                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute inset-0 z-20 flex items-center justify-center gap-2.5 backdrop-blur-xl"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(10,11,14,0.92), rgba(14,16,20,0.88))',
-                        borderRadius: 'inherit',
-                        boxShadow: 'inset 0 0 0 1px rgba(52,211,153,0.25), 0 8px 32px rgba(0,0,0,0.4)',
-                      }}
-                    >
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
-                        style={{
-                          background: 'linear-gradient(145deg, rgba(59,130,246,0.18), rgba(59,130,246,0.08))',
-                          border: '1px solid rgba(59,130,246,0.4)',
-                          boxShadow: '0 4px 14px -4px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.2)' }}>
-                          <Eye className="w-4 h-4 text-blue-400" />
-                        </div>
-                        <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wide">View</span>
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onEdit?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
-                        style={{
-                          background: 'linear-gradient(145deg, rgba(251,191,36,0.18), rgba(251,191,36,0.08))',
-                          border: '1px solid rgba(251,191,36,0.4)',
-                          boxShadow: '0 4px 14px -4px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(251,191,36,0.2)' }}>
-                          <Pencil className="w-4 h-4 text-amber-400" />
-                        </div>
-                        <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wide">Edit</span>
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDelete?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
-                        style={{
-                          background: 'linear-gradient(145deg, rgba(239,68,68,0.18), rgba(239,68,68,0.08))',
-                          border: '1px solid rgba(239,68,68,0.4)',
-                          boxShadow: '0 4px 14px -4px rgba(239,68,68,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
-                        }}
-                      >
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
-                          <Trash2 className="w-4 h-4 text-red-400" />
-                        </div>
-                        <span className="text-[9px] font-bold text-red-400 uppercase tracking-wide">Delete</span>
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); closeActions(); }}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition"
-                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
-                      >
-                        <X className="w-3 h-3 text-white/50" />
-                      </button>
-                    </motion.div>
-                  )}
                 </motion.div>
               );
             })}
@@ -401,6 +398,19 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
 
         </div>
       </div>
+
+      {/* Long-press action overlay — portaled, compact, auto-vanish */}
+      <AnimatePresence>
+        {longPressTrip && (
+          <LongPressOverlay
+            trip={longPressTrip}
+            onOpenDetail={onOpenDetail}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onClose={() => setLongPressTrip(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

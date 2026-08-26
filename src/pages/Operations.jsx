@@ -28,6 +28,7 @@ import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
 import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
@@ -108,6 +109,9 @@ export default function Operations() {
   const [editContract, setEditContract] = useState(null);
   const [detailContract, setDetailContract] = useState(null);
   const [prefill, setPrefill] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [pendingBulkIds, setPendingBulkIds] = useState([]);
 
   // Sync mobile header filter → ops search
   useEffect(() => { if (isMobile) setOpsSearch(mobileFilter); }, [mobileFilter, isMobile]);
@@ -197,6 +201,7 @@ export default function Operations() {
 
   const filteredTrips = useMemo(() => trips.filter((trip) => {
     if (trip.is_draft) return false;
+    if (trip.deleted_at) return false;
     if (!inGlobalDateRange(normalizeDate(trip.trip_date), dateFrom, dateTo)) return false;
     if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
     if (search) {
@@ -249,7 +254,7 @@ export default function Operations() {
   const openEditTrip = (trip) => { setFormMode('trip'); setEditTrip(trip); setEditContract(null); setFormOpen(true); };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
   const handleContinueDraft = (draft) => { openEditTrip(draft); };
-  const handleDeleteDraft = async (draft) => { await deleteTrip.mutateAsync(draft.id); };
+  const handleDeleteDraft = async (draft) => { await base44.entities.Trip.update(draft.id, { deleted_at: new Date().toISOString() }); refetchTrips(); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
@@ -279,9 +284,18 @@ export default function Operations() {
     };
   }, []);
 
+  const requestDeleteTrip = (trip) => setDeleteTarget(trip);
   const handleDeleteTrip = async (trip) => {
-    await deleteTrip.mutateAsync(trip.id);
+    // Soft-delete: set deleted_at instead of hard-deleting
+    try {
+      await base44.entities.Trip.update(trip.id, { deleted_at: new Date().toISOString() });
+      toast({ title: 'Trip moved to trash', description: 'Restore from Trash anytime' });
+      refetchTrips();
+    } catch {
+      toast({ title: 'Delete failed', variant: 'destructive' });
+    }
     closeDetailTrip();
+    setDeleteTarget(null);
   };
   const handleBulkTripStatus = async (ids, newStatus) => {
     if (!ids.length) return;
@@ -295,13 +309,21 @@ export default function Operations() {
   };
   const handleBulkTripDelete = async (ids) => {
     if (!ids.length) return;
+    setPendingBulkIds(ids);
+    setBulkDeleteOpen(true);
+  };
+  const confirmBulkTripDelete = async () => {
+    const ids = pendingBulkIds;
+    if (!ids.length) return;
     try {
-      await base44.entities.Trip.deleteMany({ id: { $in: ids } });
-      toast({ title: `${ids.length} trip${ids.length !== 1 ? 's' : ''} deleted` });
+      await base44.entities.Trip.updateMany({ id: { $in: ids } }, { $set: { deleted_at: new Date().toISOString() } });
+      toast({ title: `${ids.length} trip${ids.length !== 1 ? 's' : ''} moved to trash` });
       refetchTrips();
     } catch {
       toast({ title: 'Bulk delete failed', variant: 'destructive' });
     }
+    setBulkDeleteOpen(false);
+    setPendingBulkIds([]);
   };
   const deleteContractById = async (c) => {
     try {
@@ -380,7 +402,7 @@ export default function Operations() {
   const tripGrid = (list) => (
     <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {list.map((trip) => (
-        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
+        <TripCard key={trip.id} trip={trip} onClick={openDetailTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} />
       ))}
     </div>
   );
@@ -459,10 +481,10 @@ export default function Operations() {
             {showTrips && filteredTrips.length > 0 && (
               isMobile ? (
                 <MobileAuroraTripsTable
-                  trips={filteredTrips}
-                  onOpenDetail={openDetailTrip}
-                  onEdit={openEditTrip}
-                  onDelete={handleDeleteTrip}
+                 trips={filteredTrips}
+                 onOpenDetail={openDetailTrip}
+                 onEdit={openEditTrip}
+                 onDelete={requestDeleteTrip}
                   onStatusUpdated={refetchTrips}
                   driverMap={driverMap}
                   vehicleMap={vehicleMap}
@@ -482,8 +504,8 @@ export default function Operations() {
                   {viewMode === 'card'
                     ? tripGrid(filteredTrips)
                     : viewMode === 'table'
-                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
-                    : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={handleDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
+                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                    : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
                 </CollapsibleSection>
               )
             )}
@@ -521,7 +543,7 @@ export default function Operations() {
         contactPersons={clientsList.find((c) => c.name === detailTrip?.client_name)?.contact_persons}
         onClose={closeDetailTrip}
         onEdit={(trip) => { closeDetailTrip(); openEditTrip(trip); }}
-        onDelete={handleDeleteTrip}
+        onDelete={requestDeleteTrip}
       />
 
       <ContractDetailSheet
@@ -530,6 +552,27 @@ export default function Operations() {
         onClose={() => setDetailContract(null)}
         onEdit={(c) => { setDetailContract(null); openEditContract(c); }}
         onDelete={async (c) => { await deleteContractById(c); setDetailContract(null); }}
+      />
+
+      {/* Single trip delete confirmation */}
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && handleDeleteTrip(deleteTarget)}
+        title="Move to Trash"
+        description={`"${deleteTarget?.trip_number || deleteTarget?.from_location || 'This trip'}" will be moved to trash. You can restore it later.`}
+        confirmLabel="Move to Trash"
+      />
+
+      {/* Bulk trip delete confirmation */}
+      <DeleteConfirmDialog
+        open={bulkDeleteOpen}
+        onOpenChange={(o) => { if (!o) { setBulkDeleteOpen(false); setPendingBulkIds([]); } }}
+        onConfirm={confirmBulkTripDelete}
+        title="Move to Trash"
+        description={`${pendingBulkIds.length} trip${pendingBulkIds.length !== 1 ? 's' : ''} will be moved to trash. You can restore them later.`}
+        confirmLabel="Move to Trash"
+        count={pendingBulkIds.length}
       />
 
     </div>

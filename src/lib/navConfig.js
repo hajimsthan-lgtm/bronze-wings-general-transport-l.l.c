@@ -3,13 +3,13 @@
 import {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
-  Files, FilePlus2, FileSignature, Bot, Sparkles, Award,
+  Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 } from 'lucide-react';
 
 const ICONS = {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
-  Files, FilePlus2, FileSignature, Bot, Sparkles, Award,
+  Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 };
 
 export const navItems = [
@@ -60,6 +60,7 @@ export const navItems = [
 
 // Secondary / support nav (bottom of sidebar)
 export const secondaryNav = [
+  { key: 'trash', label: 'Trash', path: '/trash', icon: 'Trash2', color: '#ef4444' },
   { key: 'agents', label: 'AI Agents', path: '/agents', icon: 'Bot', color: '#a855f7' },
   { key: 'prompt_generator', label: 'Prompt Studio', path: '/prompt-generator', icon: 'Sparkles', color: '#ec4899' },
 ];

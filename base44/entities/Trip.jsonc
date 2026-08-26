@@ -223,6 +223,9 @@
         }
       },
       "default": []
+    },
+    "deleted_at": {
+      "type": "string"
     }
   },
   "required": [
