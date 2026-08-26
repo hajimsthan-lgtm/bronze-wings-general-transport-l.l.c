@@ -456,19 +456,19 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.from_location || ''}>
                      {trip.from_location || '—'}
                    </div>
+                   {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
+                   </TableCell>
+                   <TableCell className="text-xs align-top trips-grid-td">
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
+                     {trip.to_location || '—'}
+                   </div>
                    {trip.permit_required && trip.permit_name && (
-                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30" title={`Permit: ${trip.permit_name}`}>
+                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30" title={`Permit: ${trip.permit_name}`}>
                        <Shield className="w-2.5 h-2.5" />
                        {trip.permit_name}
                      </div>
                    )}
-                   {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
-                 </TableCell>
-                 <TableCell className="text-xs align-top trips-grid-td">
-                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
-                     {trip.to_location || '—'}
-                   </div>
-                 </TableCell>
+                   </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
                    <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                  </TableCell>
