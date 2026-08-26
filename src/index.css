@@ -363,18 +363,7 @@
     --surf-2: rgba(248,250,252,0.98);
   }
 
-  /* ===== Light theme: recolor green status badges to blue (no green touch) ===== */
-  .theme-light .bg-\[\#01B574\]\/15,
-  .theme-light .bg-\[\#01B574\]\/10 {
-    background-color: rgba(41, 98, 255, 0.12) !important;
-  }
-  .theme-light .text-\[\#01B574\] {
-    color: #2962FF !important;
-  }
-  .theme-light .border-\[\#01B574\]\/30,
-  .theme-light .border-\[\#01B574\]\/20 {
-    border-color: rgba(41, 98, 255, 0.3) !important;
-  }
+  /* ===== Light theme: keep green status badges green ===== */
 }
 
 @layer base {

@@ -4,13 +4,15 @@ import { Pencil, Trash2, ChevronRight, Truck as TruckIcon, Check } from 'lucide-
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import StatusBadge from '@/components/common/StatusBadge';
 import { formatDate } from '@/lib/formatters';
-import { buildVehicleSubtitle } from '@/lib/vehicleLicenseNotes';
+import { buildVehicleSubtitle, parseLicenseNotes } from '@/lib/vehicleLicenseNotes';
 
 export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected = false, onSelect }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
 
   const subtitle = buildVehicleSubtitle(v);
+  const lic = parseLicenseNotes(v.notes || '');
+  const category = lic.vehicleCategory || v.type || '';
 
   return (
     <>
@@ -19,21 +21,26 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
         onClick={() => onOpen?.(v)}
         style={{ ['--row-accent']: '#1ED760' }}
       >
-        <button
-          type="button"
+        {/* Select zone: checkbox + icon — clicking here toggles selection, not card open */}
+        <div
+          className="flex items-center gap-2.5 flex-shrink-0 pt-0.5 pr-1"
           onClick={(e) => { e.stopPropagation(); onSelect?.(!selected); }}
-          className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'bg-primary border-primary' : 'border-border hover:border-primary/60'}`}
-          aria-label={selected ? 'Deselect' : 'Select'}
         >
-          {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
-        </button>
-        <div className="w-10 h-10 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}><TruckIcon className="w-4 h-4 text-primary" /></div>
+          <button
+            type="button"
+            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${selected ? 'bg-primary border-primary' : 'border-border hover:border-primary/60'}`}
+            aria-label={selected ? 'Deselect' : 'Select'}
+          >
+            {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+          </button>
+          <div className="w-10 h-10 rounded-xl entity-avatar flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}><TruckIcon className="w-4 h-4 text-primary" /></div>
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
-            {v.type && (
+            {category && (
               <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-                {v.type}
+                {category}
               </span>
             )}
             <StatusBadge status={v.status} />
