@@ -39,7 +39,7 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
             {category && (
-              <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
                 {category}
               </span>
             )}
