@@ -29,10 +29,10 @@ export default function Settings() {
 
   useEffect(() => {
     let mounted = true;
-    base44.auth.me()
-      .then((u) => { if (mounted) { setUser(u); setLoading(false); } })
-      .catch(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
+    base44.auth.me().
+    then((u) => {if (mounted) {setUser(u);setLoading(false);}}).
+    catch(() => {if (mounted) setLoading(false);});
+    return () => {mounted = false;};
   }, []);
 
   /**
@@ -51,7 +51,7 @@ export default function Settings() {
     }
   };
 
-  const handleProfileUpdated = (patch) => setUser((prev) => (prev ? { ...prev, ...patch } : prev));
+  const handleProfileUpdated = (patch) => setUser((prev) => prev ? { ...prev, ...patch } : prev);
 
   const handleLanguageChange = (newLang) => {
     if (newLang !== language) {
@@ -74,22 +74,22 @@ export default function Settings() {
     agents: 'bg-emerald-500/15 text-emerald-400',
     manual: 'bg-slate-500/15 text-slate-400',
     logout: 'bg-rose-500/15 text-rose-400',
-    danger: 'bg-red-500/15 text-red-400',
+    danger: 'bg-red-500/15 text-red-400'
   };
 
   const sections = [
-    { key: 'company', label: 'Company', icon: Building2, render: () => <CompanySettingsSection /> },
-    { key: 'invoice', label: 'Invoice', icon: FileText, render: () => <InvoiceAppearanceCard /> },
-    { key: 'profile', label: 'Profile', icon: User, render: () => <ProfileHeader user={user} loading={loading} onUpdated={handleProfileUpdated} /> },
-    { key: 'localization', label: 'Localization', icon: Globe, render: () => <LocalizationCard language={language} onLanguageChange={handleLanguageChange} /> },
-    { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
-    { key: 'datetime', label: 'Date & Time', icon: Clock, render: () => <DateTimePickerStyleCard /> },
-    { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
-    { key: 'users', label: 'Users', icon: Users, render: () => <UsersManagementCard currentUser={user} /> },
-    { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
-    { key: 'storage', label: 'Storage', icon: Database, render: () => <StorageSettingsCard /> },
-    { key: 'agents', label: 'AI Agents', icon: Bot, render: () => (
-      <Link to="/agents" className="block p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/30 hover:bg-emerald-500/[0.06] transition-all">
+  { key: 'company', label: 'Company', icon: Building2, render: () => <CompanySettingsSection /> },
+  { key: 'invoice', label: 'Invoice', icon: FileText, render: () => <InvoiceAppearanceCard /> },
+  { key: 'profile', label: 'Profile', icon: User, render: () => <ProfileHeader user={user} loading={loading} onUpdated={handleProfileUpdated} /> },
+  { key: 'localization', label: 'Localization', icon: Globe, render: () => <LocalizationCard language={language} onLanguageChange={handleLanguageChange} /> },
+  { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },
+  { key: 'datetime', label: 'Date & Time', icon: Clock, render: () => <DateTimePickerStyleCard /> },
+  { key: 'sound', label: 'Sound', icon: Bell, render: () => <SoundSettingsCard /> },
+  { key: 'users', label: 'Users', icon: Users, render: () => <UsersManagementCard currentUser={user} /> },
+  { key: 'security', label: 'Security', icon: Shield, render: () => <SecurityCard /> },
+  { key: 'storage', label: 'Storage', icon: Database, render: () => <StorageSettingsCard /> },
+  { key: 'agents', label: 'AI Agents', icon: Bot, render: () =>
+    <Link to="/agents" className="block p-6 rounded-2xl border border-white/10 bg-white/[0.03] hover:border-emerald-500/30 hover:bg-emerald-500/[0.06] transition-all">
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(16,185,129,0.06))', border: '1px solid rgba(16,185,129,0.35)' }}>
             <Bot className="w-5 h-5" style={{ color: 'rgb(var(--panel-accent-rgb))' }} />
@@ -100,20 +100,20 @@ export default function Settings() {
           </div>
         </div>
       </Link>
-    ) },
-    { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
-    { key: 'logout', label: 'Log out', icon: LogOut, render: () => <LogoutCard /> },
-    { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () => (
-      <div className="space-y-6">
+  },
+  { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
+  { key: 'logout', label: 'Log out', icon: LogOut, render: () => <LogoutCard /> },
+  { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () =>
+    <div className="space-y-6">
         <DangerZone deleting={deleting} onDelete={handleDelete} user={user} />
         <FactoryResetCard user={user} />
       </div>
-    ) },
-  ];
+  }];
+
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
-      <header className="flex items-center gap-3 mb-6">
+      <header className="flex items-center gap-3 mb-6 hidden">
         <Link to="/" className="p-2 -ml-2 rounded-lg hover:bg-white/[0.06] transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
@@ -137,9 +137,9 @@ export default function Settings() {
                   key={s.key}
                   onClick={() => setActive(s.key)}
                   className={`w-full flex items-center gap-3 px-3 py-3 transition-colors duration-200 ${
-                    isActive ? 'bg-primary/10' : 'hover:bg-white/[0.04]'
-                  }`}
-                >
+                  isActive ? 'bg-primary/10' : 'hover:bg-white/[0.04]'}`
+                  }>
+                  
                   <span className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
                     <s.icon className="w-4 h-4" />
                   </span>
@@ -147,8 +147,8 @@ export default function Settings() {
                     {s.label}
                   </span>
                   <ChevronRight className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                </button>
-              );
+                </button>);
+
             })}
           </nav>
         </aside>
@@ -161,12 +161,12 @@ export default function Settings() {
           </div>
           {/* Mobile: all sections stacked */}
           <div className="md:hidden space-y-6">
-            {sections.map((s) => (
-              <div key={s.key} className="animate-enter-up">{s.render()}</div>
-            ))}
+            {sections.map((s) =>
+            <div key={s.key} className="animate-enter-up">{s.render()}</div>
+            )}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
