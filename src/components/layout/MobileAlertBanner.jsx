@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Clock, Award, Zap, ChevronRight } from 'lucide-react';
@@ -19,20 +18,17 @@ export default function MobileAlertBanner() {
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
-      if (triggerRef.current?.contains(e.target)) return;
-      if (panelRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
     const esc = (e) => { if (e.key === 'Escape') setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler, { passive: true });
     document.addEventListener('keydown', esc);
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
-      document.removeEventListener('keydown', esc);
-    };
+    return () => document.removeEventListener('keydown', esc);
+  }, [open]);
+
+  // Pull-to-refresh dismisses the alert panel
+  useEffect(() => {
+    if (!open) return;
+    const onRefresh = () => setOpen(false);
+    window.addEventListener('global:refresh', onRefresh);
+    return () => window.removeEventListener('global:refresh', onRefresh);
   }, [open]);
 
   const handleItem = (item) => {
@@ -57,16 +53,6 @@ export default function MobileAlertBanner() {
         <Bell className="w-[18px] h-[18px]" />
         <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
       </button>
-
-      {/* Backdrop — portaled to body, outside AnimatePresence so it unmounts instantly */}
-      {open && createPortal(
-        <div
-          className="fixed inset-0"
-          style={{ zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
-          onClick={() => setOpen(false)}
-        />,
-        document.body
-      )}
 
       <AnimatePresence>
         {open && (
