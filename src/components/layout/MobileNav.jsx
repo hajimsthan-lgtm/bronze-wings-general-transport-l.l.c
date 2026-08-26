@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Route, Settings, Plus, X, FileText, Receipt, FilePlus2, Truck, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Route, Settings, Plus, X, FileText, Receipt, FilePlus2, Truck, Sparkles, Droplets, FileSignature, CreditCard } from 'lucide-react';
 import { useTabHistory } from '@/lib/TabHistoryContext';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
 import QuotationFormSheet from '@/components/quotations/QuotationFormSheet';
+import FuelFormSheet from '@/components/fuel/FuelFormSheet';
+import AgreementFormSheet from '@/components/agreements/AgreementFormSheet';
+import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 
 const navItems = [
   { key: 'dashboard', icon: LayoutDashboard, label: 'Home', color: 'rgb(var(--panel-accent-rgb))', glow: 'var(--panel-accent-rgb)' },
@@ -19,6 +22,9 @@ const FAB_ACTIONS = [
   { key: 'expense', label: 'New Expense', icon: Receipt, color: '#f97316' },
   { key: 'invoice', label: 'New Invoice', icon: FileText, color: '#22c55e' },
   { key: 'quotation', label: 'New Quotation', icon: FilePlus2, color: '#06b6d4' },
+  { key: 'fuel', label: 'New Fuel', icon: Droplets, color: '#3b82f6' },
+  { key: 'agreement', label: 'New Agreement', icon: FileSignature, color: '#a855f7' },
+  { key: 'payment', label: 'New Payment', icon: CreditCard, color: '#ec4899' },
 ];
 
 export default function MobileNav() {
@@ -98,63 +104,51 @@ export default function MobileNav() {
               )}
             </AnimatePresence>
 
-            {/* Fan-out standalone icons */}
+            {/* Fan-out standalone icons — semi-circle arc */}
             <AnimatePresence>
-              {fabOpen && (
-                <motion.div
-                  key="fan"
-                  className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[57] flex flex-col-reverse items-center gap-2.5"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {FAB_ACTIONS.map((action, i) => {
-                    const Icon = action.icon;
-                    return (
-                      <motion.button
-                        key={action.label}
-                        type="button"
-                        onClick={() => handleAction(action.key)}
-                        className="flex flex-col items-center gap-1"
-                        initial={{ opacity: 0, scale: 0, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0, y: 30 }}
-                        transition={{
-                          type: 'spring',
-                          damping: 16,
-                          stiffness: 320,
-                          delay: i * 0.04,
-                        }}
-                        whileTap={{ scale: 0.86 }}
-                      >
-                        {/* Standalone icon orb — reduced size */}
-                        <div
-                          className="w-11 h-11 rounded-2xl flex items-center justify-center relative"
-                          style={{
-                            background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
-                            boxShadow: `0 6px 18px -3px ${action.color}80, 0 0 0 3px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)`,
-                          }}
-                        >
-                          <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
-                        </div>
-                        {/* Label pill */}
-                        <span
-                          className="text-[9px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
-                          style={{
-                            background: 'hsl(var(--background))',
-                            color: 'hsl(var(--foreground))',
-                            border: '1px solid hsl(var(--border))',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-                          }}
-                        >
-                          {action.label}
-                        </span>
-                      </motion.button>
-                    );
-                  })}
-                </motion.div>
-              )}
+              {fabOpen && FAB_ACTIONS.map((action, i) => {
+                const Icon = action.icon;
+                const n = FAB_ACTIONS.length;
+                const angle = 195 + (i / (n - 1)) * 150; // 195° to 345° arc
+                const rad = (angle * Math.PI) / 180;
+                const radius = 150;
+                const x = radius * Math.cos(rad);
+                const y = radius * Math.sin(rad); // negative = upward
+                return (
+                  <motion.button
+                    key={action.label}
+                    type="button"
+                    onClick={() => handleAction(action.key)}
+                    className="fixed flex flex-col items-center gap-1 w-11 z-[57]"
+                    style={{
+                      left: '50%',
+                      bottom: '4.5rem',
+                      marginLeft: '-22px',
+                    }}
+                    initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                    animate={{ opacity: 1, scale: 1, x, y }}
+                    exit={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                    transition={{
+                      type: 'spring',
+                      damping: 16,
+                      stiffness: 320,
+                      delay: i * 0.04,
+                    }}
+                    whileTap={{ scale: 0.86 }}
+                  >
+                    {/* Standalone icon orb with label tooltip on tap-hold */}
+                    <div
+                      className="w-11 h-11 rounded-2xl flex items-center justify-center relative"
+                      style={{
+                        background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
+                        boxShadow: `0 6px 18px -3px ${action.color}80, 0 0 0 3px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                      }}
+                    >
+                      <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+                    </div>
+                  </motion.button>
+                );
+              })}
             </AnimatePresence>
 
             {/* FAB launcher */}
@@ -209,6 +203,9 @@ export default function MobileNav() {
       <ExpenseFormSheet open={activeForm === 'expense'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
       <InvoiceFormSheet open={activeForm === 'invoice'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
       <QuotationFormSheet open={activeForm === 'quotation'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
+      <FuelFormSheet open={activeForm === 'fuel'} onOpenChange={(o) => !o && closeForm()} onSave={closeForm} />
+      <AgreementFormSheet open={activeForm === 'agreement'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
+      <PaymentFormSheet open={activeForm === 'payment'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
     </>
   );
 }
