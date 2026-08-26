@@ -136,10 +136,19 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
   const buildInvoice = (trip, number) => {
     const revenue = Number(trip.revenue) || 0;
     const vatRate = 5;
-    const vatAmount = Math.round(revenue * vatRate) / 100;
-    const total = Math.round((revenue + vatAmount) * 100) / 100;
     const extra = [trip.driver_name, trip.vehicle_plate].filter(Boolean).join(', ');
     const desc = extra ? `${trip.from_location} To ${trip.to_location} (${extra})` : `${trip.from_location} To ${trip.to_location}`;
+    const lineItems = [{ description: desc, date: trip.trip_date, quantity: 1, unit_price: revenue, amount: revenue, vat_excluded: false }];
+    const addOns = Array.isArray(trip.add_ons) ? trip.add_ons : [];
+    addOns.forEach((addon) => {
+      const amt = Number(addon.amount) || 0;
+      if (amt > 0) {
+        lineItems.push({ description: addon.description || 'Add-on charge', date: trip.trip_date, quantity: 1, unit_price: amt, amount: amt, vat_excluded: !addon.vat_included });
+      }
+    });
+    const subtotal = lineItems.reduce((s, i) => s + i.amount, 0);
+    const vatAmount = lineItems.reduce((s, i) => i.vat_excluded ? s : s + Math.round(i.amount * vatRate) / 100, 0);
+    const total = Math.round((subtotal + vatAmount) * 100) / 100;
     return {
       invoice_number: number, client_name: client.name,
       contact_person: trip.contact_person || client.contact_person || '',
@@ -147,26 +156,31 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       client_address: client.address || '', client_trn: client.trn || '',
       status: 'draft', issue_date: new Date().toISOString().split('T')[0],
       due_date: dueFromTerms(client.payment_terms),
-      subtotal: revenue, vat_rate: vatRate, vat_amount: vatAmount,
+      subtotal, vat_rate: vatRate, vat_amount: vatAmount,
       total_amount: total, paid_amount: 0, currency: 'AED',
-      line_items: [{ description: desc, date: trip.trip_date, quantity: 1, unit_price: revenue, amount: revenue }],
+      line_items: lineItems,
       trip_id: trip.id, notes: trip.trip_number ? `Trip ${trip.trip_number}` : '',
       payment_terms: client.payment_terms || 'Net 30',
     };
   };
 
   const buildBulkInvoice = (selected, number) => {
-    const items = selected.map((tr) => {
+    const items = [];
+    selected.forEach((tr) => {
       const extra = [tr.driver_name, tr.vehicle_plate].filter(Boolean).join(', ');
       const desc = extra ? `${tr.from_location} To ${tr.to_location} (${extra})` : `${tr.from_location} To ${tr.to_location}`;
-      return {
-        description: desc, date: tr.trip_date,
-        quantity: 1, unit_price: Number(tr.revenue) || 0, amount: Number(tr.revenue) || 0,
-      };
+      items.push({ description: desc, date: tr.trip_date, quantity: 1, unit_price: Number(tr.revenue) || 0, amount: Number(tr.revenue) || 0, vat_excluded: false });
+      const addOns = Array.isArray(tr.add_ons) ? tr.add_ons : [];
+      addOns.forEach((addon) => {
+        const amt = Number(addon.amount) || 0;
+        if (amt > 0) {
+          items.push({ description: addon.description || 'Add-on charge', date: tr.trip_date, quantity: 1, unit_price: amt, amount: amt, vat_excluded: !addon.vat_included });
+        }
+      });
     });
     const subtotal = items.reduce((s, i) => s + i.amount, 0);
     const vatRate = 5;
-    const vatAmount = Math.round(subtotal * vatRate) / 100;
+    const vatAmount = items.reduce((s, i) => i.vat_excluded ? s : s + Math.round(i.amount * vatRate) / 100, 0);
     const total = Math.round((subtotal + vatAmount) * 100) / 100;
     const tripNumbers = selected.map((tr) => tr.trip_number).filter(Boolean);
     return {

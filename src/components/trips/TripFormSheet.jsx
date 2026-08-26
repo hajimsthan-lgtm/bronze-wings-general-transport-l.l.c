@@ -18,6 +18,7 @@ import ContractProfitPanel from './contract/ContractProfitPanel';
 import TripMapPanel from './TripMapPanel';
 import TripFinancialFields from './TripFinancialFields';
 import VendorPaymentFields from './VendorPaymentFields';
+import TripAddOnsSection from './TripAddOnsSection';
 import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
@@ -30,7 +31,8 @@ const DEFAULT_FORM = {
   permit_required: false, permit_name: '',
   duration_unit: 'hours', calculated_duration: '', base_fare: '', max_allowed_duration: 6, overtime_rate: 50,
   assignment_mode: 'company',
-  vendor_agreed_rate: '', vendor_payment_status: 'unpaid', vendor_due_date: '', vendor_payment_notes: ''
+  vendor_agreed_rate: '', vendor_payment_status: 'unpaid', vendor_due_date: '', vendor_payment_notes: '',
+  add_ons: []
 };
 
 const DEFAULT_CONTRACT = {
@@ -67,6 +69,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
+  const [addOns, setAddOns] = useState([]);
 
   // Contract state
   const [contract, setContract] = useState({ ...DEFAULT_CONTRACT });
@@ -143,9 +146,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           permit_required: !!editTrip.permit_required,
           permit_name: editTrip.permit_name || ''
         });
+        setAddOns(Array.isArray(editTrip.add_ons) ? editTrip.add_ons : []);
       } else {
         setMode(initialMode || 'trip');
         setForm({ ...DEFAULT_FORM, trip_date: todayStr(), ...(prefill || {}) });
+        setAddOns([]);
         setContract({ ...DEFAULT_CONTRACT });
         setExpenses([]);
         setExpenseForm({ date: todayStr(), amount: '', description: '', liters: '', price_per_liter: '' });
@@ -321,7 +326,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     vendor_agreed_rate: Number(form.vendor_agreed_rate) || 0,
     vendor_payment_status: form.vendor_payment_status || 'unpaid',
     vendor_due_date: form.vendor_due_date || null,
-    vendor_payment_notes: form.vendor_payment_notes || ''
+    vendor_payment_notes: form.vendor_payment_notes || '',
+    add_ons: addOns || []
     };
   };
 
@@ -592,7 +598,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_260px] gap-3 sm:gap-4 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
-            <TripModeFields p={tripCtx} /> :
+            <>
+            <TripModeFields p={tripCtx} />
+            <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
+            </>
+            :
             <ContractModeFields p={contractCtx} />}
           </div>
 

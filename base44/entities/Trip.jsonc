@@ -203,6 +203,26 @@
         "ar"
       ],
       "default": "en"
+    },
+    "add_ons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "default": 0
+          },
+          "vat_included": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "default": []
     }
   },
   "required": [
