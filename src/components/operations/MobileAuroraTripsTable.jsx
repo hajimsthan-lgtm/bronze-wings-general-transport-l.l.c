@@ -34,48 +34,18 @@ const ACCENT = '#34d399';
 const AUTO_VANISH_MS = 1500;
 
 /**
- * Inline row action overlay — renders INSIDE the pressed row.
- * Blurs only the pressed row (not full screen), small glassmorphic icons
- * centered in the row, stays visible during horizontal scroll via sticky positioning.
+ * Inline row action overlay — renders INSIDE the pressed row (position: absolute).
+ * Uses left:50% / top:50% / translate(-50%,-50%) to center within the row.
+ * Icons follow the row naturally during horizontal scroll — no refs or calculations needed.
  * Auto-vanishes after 1.5s.
  */
-function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose, rowRef }) {
+function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
   const vanishTimer = useRef(null);
-  const overlayRef = useRef(null);
-  const [iconTop, setIconTop] = useState(0);
 
   useEffect(() => {
     vanishTimer.current = setTimeout(() => onClose(), AUTO_VANISH_MS);
     return () => clearTimeout(vanishTimer.current);
   }, [onClose]);
-
-  // Track the row's vertical position so icons stay aligned with the row.
-  // Horizontally, icons use position:fixed + left:50% to stay centered in the viewport.
-  useEffect(() => {
-    let cleanupFns = [];
-    // Poll for the row element — refs may not be ready immediately on mount
-    const poll = setInterval(() => {
-      const rowEl = rowRef?.current || overlayRef.current?.parentElement;
-      if (!rowEl) return;
-      clearInterval(poll);
-      const updatePosition = () => {
-        const rowRect = rowEl.getBoundingClientRect();
-        setIconTop(rowRect.top + rowRect.height / 2);
-      };
-      updatePosition();
-      const scrollEl = rowEl.closest('[class*="overflow-y-auto"]');
-      if (scrollEl) {
-        scrollEl.addEventListener('scroll', updatePosition, { passive: true });
-        cleanupFns.push(() => scrollEl.removeEventListener('scroll', updatePosition));
-      }
-      window.addEventListener('scroll', updatePosition, { passive: true });
-      cleanupFns.push(() => window.removeEventListener('scroll', updatePosition));
-    }, 50);
-    return () => {
-      clearInterval(poll);
-      cleanupFns.forEach(fn => fn());
-    };
-  }, [rowRef]);
 
   const actions = [
     { icon: Eye, label: 'View', color: '#3b82f6', onClick: () => { onOpenDetail?.(trip); onClose(); } },
@@ -85,19 +55,11 @@ function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose, rowRe
 
   return (
     <motion.div
-      ref={overlayRef}
-      className="fixed left-1/2 flex items-center justify-center gap-2"
-      style={{
-        top: `${iconTop}px`,
-        transform: 'translate(-50%, -50%)',
-        zIndex: 50,
-        filter: 'none',
-        backdropFilter: 'none',
-        WebkitBackdropFilter: 'none',
-      }}
-      initial={{ opacity: 0, scale: 0.7 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.7 }}
+      className="absolute left-1/2 top-1/2 flex items-center justify-center gap-2"
+      style={{ zIndex: 50 }}
+      initial={{ opacity: 0, scale: 0.7, x: '-50%', y: '-50%' }}
+      animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+      exit={{ opacity: 0, scale: 0.7, x: '-50%', y: '-50%' }}
       transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.25 }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -139,7 +101,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
   const [copiedId, setCopiedId] = useState(null);
   const [longPressTrip, setLongPressTrip] = useState(null);
   const scrollRef = useRef(null);
-  const longPressRowRef = useRef(null);
   const longPressTimer = useRef(null);
 
   // Long-press (0.7s) to reveal per-row action buttons
@@ -325,7 +286,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                 <motion.div
                   key={trip.id}
                   role="row"
-                  ref={(el) => { if (longPressTrip?.id === trip.id) longPressRowRef.current = el; }}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -422,7 +382,6 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onClose={() => setLongPressTrip(null)}
-                        rowRef={longPressRowRef}
                       />
                     )}
                   </AnimatePresence>
