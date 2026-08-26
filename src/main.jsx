@@ -19,16 +19,30 @@ import { disableNumberInputSpin } from '@/lib/disableNumberInputSpin'
 
 disableNumberInputSpin();
 
-// Suppress benign ResizeObserver loop warning (browser layout quirk, not an app bug)
-// Patch ResizeObserver to wrap callbacks — catches the loop error at its source
+// Suppress benign ResizeObserver loop warning (browser layout quirk, not an app bug).
+// Debounce the callback via requestAnimationFrame so notifications are delivered in
+// the next frame — this breaks the synchronous resize loop that triggers the warning.
 if (typeof ResizeObserver !== 'undefined') {
   const _OrigRO = window.ResizeObserver;
   window.ResizeObserver = function (cb) {
-    const wrapped = (entries, observer) => {
-      try { cb(entries, observer); }
+    let ticking = false;
+    let pendingEntries = [];
+    let pendingObserver = null;
+    const flush = () => {
+      ticking = false;
+      const entries = pendingEntries;
+      const obs = pendingObserver;
+      pendingEntries = [];
+      pendingObserver = null;
+      try { cb(entries, obs); }
       catch (err) {
         if (err?.message !== 'ResizeObserver loop completed with undelivered notifications.') throw err;
       }
+    };
+    const wrapped = (entries, observer) => {
+      pendingEntries = entries;
+      pendingObserver = observer;
+      if (!ticking) { ticking = true; requestAnimationFrame(flush); }
     };
     return new _OrigRO(wrapped);
   };
@@ -40,7 +54,6 @@ window.addEventListener('error', (e) => {
     e.preventDefault();
   }
 }, true);
-// Also filter the console warning the browser emits directly
 const _origConsoleError = console.error.bind(console);
 console.error = (...args) => {
   if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) return;
