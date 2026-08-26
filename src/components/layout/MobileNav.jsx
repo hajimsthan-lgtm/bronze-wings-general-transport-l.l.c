@@ -27,6 +27,13 @@ export default function MobileNav() {
   const [activeForm, setActiveForm] = useState(null);
   const fabRef = useRef(null);
 
+  // Open FAB when triggered by the alert banner's "Quick actions"
+  useEffect(() => {
+    const handler = () => setFabOpen(true);
+    window.addEventListener('mobile:open-fab', handler);
+    return () => window.removeEventListener('mobile:open-fab', handler);
+  }, []);
+
   // Close fan on outside click or Escape
   useEffect(() => {
     if (!fabOpen) return;

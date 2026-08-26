@@ -22,14 +22,15 @@ import DraftsTable from '@/components/operations/DraftsTable';
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsStats from '@/components/operations/OperationsStats';
 import MobileOperationsStats from '@/components/operations/MobileOperationsStats';
-import MobileTripsSection from '@/components/operations/MobileTripsSection';
+import MobileAuroraTripsTable from '@/components/operations/MobileAuroraTripsTable';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 
-import { setOpsFilter, clearOpsFilter, useOpsSearch } from '@/lib/operationsFilterStore';
+import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
+import { useMobileFilter } from '@/lib/mobileHeaderFilter';
 import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
@@ -87,6 +88,7 @@ export default function Operations() {
   const [mode, setMode] = useState(location.pathname === '/contracts' ? 'contract' : 'all');
   const [viewMode, setViewMode] = useState('table');
   const search = useOpsSearch();
+  const mobileFilter = useMobileFilter();
   const [tripFilter, setTripFilter] = useState('all');
   const [contractFilter, setContractFilter] = useState('all');
 
@@ -107,6 +109,8 @@ export default function Operations() {
   const [detailContract, setDetailContract] = useState(null);
   const [prefill, setPrefill] = useState(null);
 
+  // Sync mobile header filter → ops search
+  useEffect(() => { if (isMobile) setOpsSearch(mobileFilter); }, [mobileFilter, isMobile]);
 
   // Trip detail sheet is URL-backed so Android hardware back closes it.
   const detailTripId = searchParams.get('tripId');
@@ -454,7 +458,7 @@ export default function Operations() {
             )}
             {showTrips && filteredTrips.length > 0 && (
               isMobile ? (
-                <MobileTripsSection
+                <MobileAuroraTripsTable
                   trips={filteredTrips}
                   onOpenDetail={openDetailTrip}
                   onEdit={openEditTrip}

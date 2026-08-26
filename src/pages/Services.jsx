@@ -94,16 +94,22 @@ export default function Services() {
                   variants={{ hidden: { opacity: 0, y: 12, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1 } }}
                 >
                   <Link to={item.path} className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform">
-                    <div
-                      className="relative w-[58px] h-[58px] rounded-[18px] flex items-center justify-center overflow-hidden"
-                      style={{
-                        background: `linear-gradient(145deg, ${item.color}, ${item.color}bb)`,
-                        boxShadow: `0 6px 16px -4px ${item.color}66, inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.12)`,
-                      }}
-                    >
-                      {/* Glossy highlight */}
-                      <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-[18px]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.22), transparent)' }} />
-                      <Icon className="w-7 h-7 text-white relative z-10" strokeWidth={2} />
+                    <div className="relative">
+                      {/* Blur glow halo */}
+                      <div
+                        className="absolute inset-0 rounded-2xl blur-md opacity-50"
+                        style={{ background: item.color }}
+                      />
+                      <div
+                        className="relative h-12 w-12 rounded-2xl flex items-center justify-center text-white overflow-hidden"
+                        style={{
+                          background: `linear-gradient(to bottom right, ${item.color}, ${item.color}cc)`,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.12)`,
+                        }}
+                      >
+                        <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-2xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.22), transparent)' }} />
+                        <Icon className="w-6 h-6 relative z-10" strokeWidth={2} />
+                      </div>
                     </div>
                     <span className="text-[10px] font-semibold text-foreground/80 text-center leading-tight">{item.label}</span>
                   </Link>

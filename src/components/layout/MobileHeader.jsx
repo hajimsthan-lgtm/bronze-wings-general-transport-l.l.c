@@ -1,12 +1,13 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import BrandName from '@/components/layout/BrandName';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
-import { useTheme } from '@/lib/theme';
-import { Sun, Moon, Search } from 'lucide-react';
+import MobileAlertBanner from '@/components/layout/MobileAlertBanner';
+import { ArrowLeft, Search, Filter } from 'lucide-react';
 import '@/lib/solidIcons.css';
 import { navItems, getIcon } from '@/lib/navConfig';
+import { setMobileFilter, useMobileFilter } from '@/lib/mobileHeaderFilter';
 
 function getPageContext(pathname) {
   for (const item of navItems) {
@@ -26,14 +27,15 @@ function getPageContext(pathname) {
 export default function MobileHeader() {
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
-  const { mode, toggleMode } = useTheme();
+  const navigate = useNavigate();
+  const filterValue = useMobileFilter();
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     getCompanySettings().then((s) => setLogoUrl(s.logo_url));
   }, []);
 
   const pageContext = useMemo(() => getPageContext(location.pathname), [location.pathname]);
-
   const accentColor = pageContext.color || 'rgb(var(--panel-accent-rgb))';
 
   return (
@@ -46,7 +48,7 @@ export default function MobileHeader() {
           WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
         }}
       />
-      {/* Ambient color bloom — uses page accent (subtle) */}
+      {/* Ambient color bloom */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -55,10 +57,21 @@ export default function MobileHeader() {
       />
       <div className="absolute inset-x-0 bottom-0 h-px bg-border/60" />
 
-      {/* Row 1: Logo + Page context + Icon cluster */}
-      <div className="relative h-14 px-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <Link to="/" className="flex items-center gap-2.5 min-w-0">
+      {/* Row 1: Back arrow + Title + Date filter + Alert bell */}
+      <div className="relative h-14 px-3 flex items-center gap-2">
+        {/* Back arrow — all pages except home */}
+        {!isHome ? (
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-90"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        ) : null}
+
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Link to="/" className="flex items-center gap-2 min-w-0">
             {pageContext.isDashboard ? (
               <div className="relative flex-shrink-0">
                 <div
@@ -78,14 +91,13 @@ export default function MobileHeader() {
                 const PageIcon = pageContext.icon ? getIcon(pageContext.icon) : null;
                 return (
                   <div
-                    className="relative flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+                    className="relative flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"
                     style={{
                       background: `linear-gradient(135deg, ${pageContext.color || 'rgb(var(--panel-accent-rgb))'}30, ${pageContext.color || 'rgb(var(--panel-accent-rgb))'}10)`,
                       border: `1px solid ${pageContext.color || 'rgb(var(--panel-accent-rgb))'}50`,
-                      boxShadow: `0 4px 14px -4px ${pageContext.color || 'rgb(var(--panel-accent-rgb))'}50, inset 0 1px 0 rgba(255,255,255,0.12)`,
                     }}
                   >
-                    {PageIcon && <PageIcon className="w-4.5 h-4.5" style={{ color: pageContext.color || 'rgb(var(--panel-accent-rgb))' }} />}
+                    {PageIcon && <PageIcon className="w-4 h-4" style={{ color: pageContext.color || 'rgb(var(--panel-accent-rgb))' }} />}
                   </div>
                 );
               })()
@@ -101,25 +113,36 @@ export default function MobileHeader() {
           </Link>
         </div>
 
-        {/* Solid-fill circular icon buttons */}
+        {/* Right cluster: Date filter + Alert bell (no dark mode toggle) */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
-            className="w-10 h-10 rounded-full shadow-md solid-icon-blue flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
-            aria-label="Search"
-          >
-            <Search className="w-[18px] h-[18px]" />
-          </button>
           <GlobalDateFilter solid />
-          <button
-            onClick={toggleMode}
-            className="w-10 h-10 rounded-full shadow-md solid-icon-violet flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
-            aria-label="Toggle dark mode"
-          >
-            {mode === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-          </button>
+          <MobileAlertBanner />
         </div>
       </div>
 
+      {/* Row 2: Global search (home) or page filter (other pages) */}
+      <div className="relative px-3 pb-2">
+        {isHome ? (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border/40">
+            <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <input
+              placeholder="Search the whole app..."
+              className="flex-1 bg-transparent text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+              onChange={(e) => window.dispatchEvent(new CustomEvent('mobile:global-search', { detail: e.target.value }))}
+            />
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border/40">
+            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <input
+              placeholder="Filter results"
+              value={filterValue}
+              onChange={(e) => setMobileFilter(e.target.value)}
+              className="flex-1 bg-transparent text-sm focus:outline-none text-foreground placeholder:text-muted-foreground"
+            />
+          </div>
+        )}
+      </div>
     </header>
   );
 }
