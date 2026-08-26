@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Route, Settings, Plus, X, FileText, Receipt, FilePlus2, Truck, Sparkles } from 'lucide-react';
 import { useTabHistory } from '@/lib/TabHistoryContext';
+import TripFormSheet from '@/components/trips/TripFormSheet';
+import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
+import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
+import QuotationFormSheet from '@/components/quotations/QuotationFormSheet';
 
 const navItems = [
   { key: 'dashboard', icon: LayoutDashboard, label: 'Home', color: 'rgb(var(--panel-accent-rgb))', glow: 'var(--panel-accent-rgb)' },
@@ -12,16 +15,16 @@ const navItems = [
 ];
 
 const FAB_ACTIONS = [
-  { label: 'New Trip', icon: Truck, color: '#fb923c', path: '/trips?new=1' },
-  { label: 'New Expense', icon: Receipt, color: '#f97316', path: '/expenses?new=1' },
-  { label: 'New Invoice', icon: FileText, color: '#22c55e', path: '/accounts/invoices?new=1' },
-  { label: 'New Quotation', icon: FilePlus2, color: '#06b6d4', path: '/accounts/quotations?new=1' },
+  { key: 'trip', label: 'New Trip', icon: Truck, color: '#fb923c' },
+  { key: 'expense', label: 'New Expense', icon: Receipt, color: '#f97316' },
+  { key: 'invoice', label: 'New Invoice', icon: FileText, color: '#22c55e' },
+  { key: 'quotation', label: 'New Quotation', icon: FilePlus2, color: '#06b6d4' },
 ];
 
 export default function MobileNav() {
   const { activeTab, switchTab } = useTabHistory();
-  const navigate = useNavigate();
   const [fabOpen, setFabOpen] = useState(false);
+  const [activeForm, setActiveForm] = useState(null);
   const fabRef = useRef(null);
 
   // Close fan on outside click or Escape
@@ -41,10 +44,13 @@ export default function MobileNav() {
     };
   }, [fabOpen]);
 
-  const handleAction = (path) => {
+  const handleAction = (key) => {
     setFabOpen(false);
-    navigate(path);
+    // Slight delay so the fan collapse animation plays before the modal opens
+    setTimeout(() => setActiveForm(key), 180);
   };
+
+  const closeForm = () => setActiveForm(null);
 
   return (
     <>
@@ -78,7 +84,7 @@ export default function MobileNav() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
                   style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
                   onClick={() => setFabOpen(false)}
                 />
@@ -90,7 +96,7 @@ export default function MobileNav() {
               {fabOpen && (
                 <motion.div
                   key="fan"
-                  className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[57] flex flex-col-reverse items-center gap-3"
+                  className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[57] flex flex-col-reverse items-center gap-2.5"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -102,37 +108,37 @@ export default function MobileNav() {
                       <motion.button
                         key={action.label}
                         type="button"
-                        onClick={() => handleAction(action.path)}
-                        className="flex flex-col items-center gap-1.5"
-                        initial={{ opacity: 0, scale: 0, y: 40 }}
+                        onClick={() => handleAction(action.key)}
+                        className="flex flex-col items-center gap-1"
+                        initial={{ opacity: 0, scale: 0, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0, y: 40 }}
+                        exit={{ opacity: 0, scale: 0, y: 30 }}
                         transition={{
                           type: 'spring',
-                          damping: 18,
-                          stiffness: 380,
-                          delay: i * 0.05,
+                          damping: 16,
+                          stiffness: 320,
+                          delay: i * 0.04,
                         }}
-                        whileTap={{ scale: 0.88 }}
+                        whileTap={{ scale: 0.86 }}
                       >
-                        {/* Standalone icon orb */}
+                        {/* Standalone icon orb — reduced size */}
                         <div
-                          className="w-14 h-14 rounded-2xl flex items-center justify-center relative"
+                          className="w-11 h-11 rounded-2xl flex items-center justify-center relative"
                           style={{
                             background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
-                            boxShadow: `0 8px 24px -4px ${action.color}80, 0 0 0 4px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                            boxShadow: `0 6px 18px -3px ${action.color}80, 0 0 0 3px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)`,
                           }}
                         >
-                          <Icon className="w-6 h-6 text-white" strokeWidth={2.2} />
+                          <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
                         </div>
                         {/* Label pill */}
                         <span
-                          className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+                          className="text-[9px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
                           style={{
                             background: 'hsl(var(--background))',
                             color: 'hsl(var(--foreground))',
                             border: '1px solid hsl(var(--border))',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                           }}
                         >
                           {action.label}
@@ -190,6 +196,12 @@ export default function MobileNav() {
           ))}
         </div>
       </nav>
+
+      {/* Form modals — opened by FAB actions, rendered here so they work from any page */}
+      <TripFormSheet open={activeForm === 'trip'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
+      <ExpenseFormSheet open={activeForm === 'expense'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
+      <InvoiceFormSheet open={activeForm === 'invoice'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
+      <QuotationFormSheet open={activeForm === 'quotation'} onOpenChange={(o) => !o && closeForm()} onSaved={closeForm} />
     </>
   );
 }
