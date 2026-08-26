@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowRight, Copy, Check, Shield } from 'lucide-react';
+import { ArrowRight, Copy, Check, Shield, Eye, Pencil, Trash2, X } from 'lucide-react';
 import TripStatusManager from '@/components/trips/TripStatusManager';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
@@ -42,7 +42,19 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
   const { toast } = useToast();
   const [selected, setSelected] = useState(new Set());
   const [copiedId, setCopiedId] = useState(null);
+  const [longPressId, setLongPressId] = useState(null);
   const scrollRef = useRef(null);
+  const longPressTimer = useRef(null);
+
+  // Long-press (1s) to reveal per-row action buttons
+  const startLongPress = (tripId) => {
+    longPressTimer.current = setTimeout(() => {
+      setLongPressId((prev) => (prev === tripId ? null : tripId));
+      if (navigator.vibrate) navigator.vibrate(50);
+    }, 1000);
+  };
+  const cancelLongPress = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
+  const closeActions = () => setLongPressId(null);
 
   const toggleOne = (id) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map((t) => t.id)));
@@ -103,7 +115,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
     >
       {/* Horizontal scroll wrapper — table is wider than viewport, scroll to see all columns */}
       <div className="overflow-x-auto thin-scroll">
-        <div style={{ minWidth: 520 }}>
+        <div style={{ minWidth: 560 }}>
 
       {/* Aurora glow — animated emerald aurora at top */}
       <div
@@ -177,6 +189,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
               const st = STATUS[trip.status] || STATUS.scheduled;
               const revenue = Number(trip.revenue) || 0;
               const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
+              const showActions = longPressId === trip.id;
               return (
                 <motion.div
                   key={trip.id}
@@ -184,18 +197,19 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  onClick={() => toggleOne(trip.id)}
-                  className="grid items-start px-4 py-3 cursor-pointer relative group"
+                  onTouchStart={() => startLongPress(trip.id)}
+                  onTouchEnd={cancelLongPress}
+                  onTouchMove={cancelLongPress}
+                  className="grid items-start px-4 py-3 cursor-pointer relative group select-none"
                   style={{
                     gridTemplateColumns: '36px 60px 1fr 88px 104px',
                     gap: '8px',
                     background: isSelected ? 'rgba(52,211,153,0.06)' : 'transparent',
                     borderLeft: isSelected ? '2px solid #34d399' : '2px solid transparent',
                   }}
-                  whileTap={{ backgroundColor: 'rgba(52,211,153,0.04)' }}
                 >
-                  {/* Checkbox */}
-                  <div className="flex justify-center pt-0.5 pointer-events-none">
+                  {/* Checkbox — toggles selection for bulk actions */}
+                  <div className="flex justify-center pt-0.5" onClick={(e) => { e.stopPropagation(); toggleOne(trip.id); }}>
                     <Checkbox checked={isSelected} className="border-white/20 data-[state=checked]:bg-emerald-400 data-[state=checked]:border-emerald-400" />
                   </div>
 
@@ -204,7 +218,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                     {trip.trip_date ? formatDate(trip.trip_date).split('/')[0] + '/' + formatDate(trip.trip_date).split('/')[1] : '—'}
                   </span>
 
-                  {/* Trip # + Route — wraps text instead of truncating */}
+                  {/* Trip # + Route + Vehicle + Driver */}
                   <div className="min-w-0 pr-1">
                     <button
                       onClick={(e) => copyRef(e, trip)}
@@ -225,6 +239,21 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                       <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0 mt-0.5" />
                       <span className="break-words font-medium">{trip.to_location || '—'}</span>
                     </div>
+                    {/* Vehicle + Driver details */}
+                    <div className="flex flex-col gap-0.5 mt-1 text-[9px] text-muted-foreground/80 leading-snug">
+                      {trip.vehicle_plate && (
+                        <span className="flex items-center gap-1">
+                          <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">V</span>
+                          <span className="break-words">{trip.vehicle_plate}</span>
+                        </span>
+                      )}
+                      {trip.driver_name && (
+                        <span className="flex items-center gap-1">
+                          <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">D</span>
+                          <span className="break-words">{trip.driver_name}</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Revenue */}
@@ -236,6 +265,45 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
                     <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
                   </div>
+
+                  {/* Long-press action overlay — View / Edit / Delete */}
+                  {showActions && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute inset-0 z-20 flex items-center justify-center gap-2 backdrop-blur-md"
+                      style={{ background: 'rgba(10,11,14,0.85)', borderRadius: 'inherit' }}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); closeActions(); }}
+                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-blue-500/15 border border-blue-500/30 active:scale-95 transition"
+                      >
+                        <Eye className="w-4 h-4 text-blue-400" />
+                        <span className="text-[9px] font-semibold text-blue-400 uppercase">View</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onEdit?.(trip); closeActions(); }}
+                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 active:scale-95 transition"
+                      >
+                        <Pencil className="w-4 h-4 text-amber-400" />
+                        <span className="text-[9px] font-semibold text-amber-400 uppercase">Edit</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDelete?.(trip); closeActions(); }}
+                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-red-500/15 border border-red-500/30 active:scale-95 transition"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                        <span className="text-[9px] font-semibold text-red-400 uppercase">Delete</span>
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); closeActions(); }}
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/10 border border-white/15 flex items-center justify-center active:scale-95 transition"
+                      >
+                        <X className="w-3 h-3 text-white/60" />
+                      </button>
+                    </motion.div>
+                  )}
                 </motion.div>
               );
             })}
