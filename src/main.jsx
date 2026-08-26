@@ -48,16 +48,39 @@ if (typeof ResizeObserver !== 'undefined') {
   };
   window.ResizeObserver.prototype = _OrigRO.prototype;
 }
+const RO_LOOP_MSG = 'ResizeObserver loop completed with undelivered notifications.';
+const isRoLoopError = (arg) => {
+  if (!arg) return false;
+  if (typeof arg === 'string') return arg.includes(RO_LOOP_MSG);
+  if (arg instanceof Error) return arg.message === RO_LOOP_MSG;
+  if (typeof arg?.message === 'string') return arg.message.includes(RO_LOOP_MSG);
+  return false;
+};
+// Capture-phase listener: stops the error before app-level handlers see it.
 window.addEventListener('error', (e) => {
-  if (e?.message === 'ResizeObserver loop completed with undelivered notifications.') {
+  if (isRoLoopError(e?.error) || isRoLoopError(e?.message)) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    return false;
+  }
+}, true);
+// Some browsers surface it as an unhandled promise rejection.
+window.addEventListener('unhandledrejection', (e) => {
+  if (isRoLoopError(e?.reason)) {
     e.stopImmediatePropagation();
     e.preventDefault();
   }
 }, true);
+// Silence it in console.error too.
 const _origConsoleError = console.error.bind(console);
 console.error = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) return;
+  if (args.some(isRoLoopError)) return;
   _origConsoleError(...args);
+};
+const _origConsoleWarn = console.warn.bind(console);
+console.warn = (...args) => {
+  if (args.some(isRoLoopError)) return;
+  _origConsoleWarn(...args);
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(
