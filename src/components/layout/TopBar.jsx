@@ -59,7 +59,7 @@ export default function TopBar() {
   const ledgerState = useLedgerState();
 
   return (
-    <div className="sticky top-0 md:top-20 z-40">
+    <div className="hidden md:block sticky top-20 z-40">
       <div className="w-full px-4 md:px-6 bg-background/85 backdrop-blur-xl border-b border-border/50 shadow-[0_4px_16px_-8px_rgba(0,0,0,0.4)]">
         <div className="flex items-center justify-between py-2 gap-2 min-h-[54px]">
             {/* Status filter pills moved to OperationsToolbar (near search) */}
