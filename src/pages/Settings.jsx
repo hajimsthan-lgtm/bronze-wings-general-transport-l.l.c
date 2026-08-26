@@ -26,6 +26,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [active, setActive] = useState('company');
+  const [mobileView, setMobileView] = useState('categories'); // 'categories' | 'content'
 
   useEffect(() => {
     let mounted = true;
@@ -159,10 +160,34 @@ export default function Settings() {
           <div className="hidden md:block animate-enter-up" key={active}>
             {sections.find((s) => s.key === active)?.render()}
           </div>
-          {/* Mobile: all sections stacked */}
-          <div className="md:hidden space-y-6">
-            {sections.map((s) =>
-            <div key={s.key} className="animate-enter-up">{s.render()}</div>
+          {/* Mobile: categories list first, then selected content */}
+          <div className="md:hidden">
+            {mobileView === 'categories' ? (
+              <div className="grid grid-cols-2 gap-3 animate-enter-up">
+                {sections.map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => { setActive(s.key); setMobileView('content'); }}
+                    className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/60 glass-sm hover:border-primary/40 transition-all active:scale-95"
+                  >
+                    <span className={`h-11 w-11 rounded-xl flex items-center justify-center ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
+                      <s.icon className="w-5 h-5" />
+                    </span>
+                    <span className="text-sm font-medium text-foreground">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4 animate-enter-up">
+                <button
+                  onClick={() => setMobileView('categories')}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  All categories
+                </button>
+                {sections.find((s) => s.key === active)?.render()}
+              </div>
             )}
           </div>
         </div>

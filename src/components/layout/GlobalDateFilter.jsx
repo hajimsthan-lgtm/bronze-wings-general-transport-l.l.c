@@ -45,8 +45,8 @@ export default function GlobalDateFilter({ className = '', style, solid }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className={`relative ${solid ? 'w-10 h-10 rounded-full shadow-md solid-icon-amber flex items-center justify-center' : 'w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground'} transition-all duration-200 shrink-0 ${className}`}
-        style={!solid && !className ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } : !solid ? style : undefined}
+        className={`relative ${solid ? 'w-10 h-10 rounded-full flex items-center justify-center' : 'w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground'} transition-all duration-200 shrink-0 ${className}`}
+        style={solid ? { border: '1px solid hsl(var(--border))', color: 'hsl(var(--foreground))' } : !solid && !className ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } : !solid ? style : undefined}
         aria-label="Global date filter"
         title={isFiltered ? `${label}` : 'Filter all pages by date'}
       >

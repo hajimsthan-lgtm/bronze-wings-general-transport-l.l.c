@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Route, Settings, Plus, X, FileText, Receipt, FilePlus2, Truck, Sparkles, Droplets, FileSignature, CreditCard } from 'lucide-react';
 import { useTabHistory } from '@/lib/TabHistoryContext';
@@ -89,20 +90,16 @@ export default function MobileNav() {
 
           {/* Center FAB slot */}
           <div className="flex-1 flex items-start justify-center">
-            {/* Fan-out backdrop — outside fabRef so outside-click works */}
-            <AnimatePresence>
-              {fabOpen && (
-                <motion.div
-                  className="md:hidden fixed inset-0 z-[55]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
-                  onClick={() => setFabOpen(false)}
-                />
-              )}
-            </AnimatePresence>
+            {/* Fan-out backdrop — portaled to body so it escapes the nav's
+                backdropFilter containing block and covers the full viewport */}
+            {fabOpen && createPortal(
+              <div
+                className="md:hidden fixed inset-0"
+                style={{ zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+                onClick={() => setFabOpen(false)}
+              />,
+              document.body
+            )}
 
             {/* Fan-out standalone icons — semi-circle arc */}
             <AnimatePresence>
@@ -119,11 +116,12 @@ export default function MobileNav() {
                     key={action.label}
                     type="button"
                     onClick={() => handleAction(action.key)}
-                    className="fixed flex flex-col items-center gap-1 w-11 z-[57]"
+                    className="fixed flex flex-col items-center gap-1 w-11"
                     style={{
                       left: '50%',
                       bottom: '4.5rem',
                       marginLeft: '-22px',
+                      zIndex: 9999,
                     }}
                     initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                     animate={{ opacity: 1, scale: 1, x, y }}
@@ -166,12 +164,13 @@ export default function MobileNav() {
               <motion.button
                 whileTap={{ scale: 0.88 }}
                 onClick={() => setFabOpen((v) => !v)}
-                className="relative -mt-7 w-14 h-14 rounded-full flex items-center justify-center z-[58]"
+                className="relative -mt-7 w-14 h-14 rounded-full flex items-center justify-center"
                 aria-label="Quick add"
                 style={{
-                  background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))',
-                  color: 'hsl(var(--primary-foreground))',
-                  boxShadow: '0 8px 24px rgba(var(--panel-accent-rgb),0.45), 0 0 0 4px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)',
+                 background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))',
+                 color: 'hsl(var(--primary-foreground))',
+                 boxShadow: '0 8px 24px rgba(var(--panel-accent-rgb),0.45), 0 0 0 4px hsl(var(--background)), inset 0 1px 0 rgba(255,255,255,0.25)',
+                 zIndex: 9999,
                 }}
               >
                 <AnimatePresence mode="wait" initial={false}>

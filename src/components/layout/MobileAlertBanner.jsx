@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Clock, Award, Zap, ChevronRight } from 'lucide-react';
@@ -50,32 +51,35 @@ export default function MobileAlertBanner() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Alerts"
         aria-expanded={open}
-        className="w-10 h-10 rounded-full shadow-md solid-icon-rose flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
+        className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
+        style={{ border: '1px solid hsl(var(--border))', color: 'hsl(var(--foreground))' }}
       >
         <Bell className="w-[18px] h-[18px]" />
         <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
       </button>
 
+      {/* Backdrop — portaled to body, outside AnimatePresence so it unmounts instantly */}
+      {open && createPortal(
+        <div
+          className="fixed inset-0"
+          style={{ zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
+          onClick={() => setOpen(false)}
+        />,
+        document.body
+      )}
+
       <AnimatePresence>
         {open && (
           <>
             <motion.div
-              className="fixed inset-0 z-[70]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
               ref={panelRef}
-              className="absolute top-full right-0 mt-2 z-[71] w-[260px] overflow-hidden rounded-2xl"
+              className="absolute top-full right-0 mt-2 w-[260px] overflow-hidden rounded-2xl"
               initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.96 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               style={{
+                zIndex: 9999,
                 background: 'hsl(var(--popover))',
                 border: '1px solid hsl(var(--border))',
                 boxShadow: '0 16px 48px rgba(0,0,0,0.25)',
