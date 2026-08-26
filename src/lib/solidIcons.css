@@ -1,0 +1,7 @@
+/* Solid-fill circular icon buttons for mobile header */
+.solid-icon-blue { background-color: #3b82f6 !important; color: #fff !important; }
+.solid-icon-blue:hover { background-color: #2563eb !important; }
+.solid-icon-amber { background-color: #f59e0b !important; color: #fff !important; }
+.solid-icon-amber:hover { background-color: #d97706 !important; }
+.solid-icon-violet { background-color: #8b5cf6 !important; color: #fff !important; }
+.solid-icon-violet:hover { background-color: #7c3aed !important; }

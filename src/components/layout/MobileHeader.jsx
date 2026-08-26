@@ -5,8 +5,8 @@ import BrandName from '@/components/layout/BrandName';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
 import { useTheme } from '@/lib/theme';
 import { Sun, Moon, Search } from 'lucide-react';
+import '@/lib/solidIcons.css';
 import { navItems, getIcon } from '@/lib/navConfig';
-import { getTabFromPath } from '@/lib/TabHistoryContext';
 
 function getPageContext(pathname) {
   for (const item of navItems) {
@@ -23,15 +23,6 @@ function getPageContext(pathname) {
   return { parent: null, current: '', icon: null, color: null, isDashboard: true };
 }
 
-function getSubModules(activeTab) {
-  if (activeTab === 'accounts') {
-    const accounts = navItems.find((n) => n.key === 'accounts');
-    const documents = navItems.find((n) => n.key === 'documents');
-    return [...(accounts?.children || []), ...(documents?.children || [])];
-  }
-  return navItems.find((n) => n.key === activeTab)?.children || [];
-}
-
 export default function MobileHeader() {
   const [logoUrl, setLogoUrl] = useState('');
   const location = useLocation();
@@ -42,8 +33,6 @@ export default function MobileHeader() {
   }, []);
 
   const pageContext = useMemo(() => getPageContext(location.pathname), [location.pathname]);
-  const activeTab = useMemo(() => getTabFromPath(location.pathname), [location.pathname]);
-  const subModules = useMemo(() => getSubModules(activeTab), [activeTab]);
 
   const accentColor = pageContext.color || 'rgb(var(--panel-accent-rgb))';
 
@@ -112,65 +101,25 @@ export default function MobileHeader() {
           </Link>
         </div>
 
-        {/* Always-visible: animated search + date filter + dark mode toggle */}
-        <div className="flex items-center gap-1.5 flex-shrink-0">
+        {/* Solid-fill circular icon buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent2-rgb),0.10))',
-              border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-              color: 'rgb(var(--panel-accent2-rgb))',
-            }}
+            className="w-10 h-10 rounded-full shadow-md solid-icon-blue flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
             aria-label="Search"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-[18px] h-[18px]" />
           </button>
-          <GlobalDateFilter />
+          <GlobalDateFilter solid />
           <button
             onClick={toggleMode}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent2-rgb),0.10))',
-              border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-              color: 'rgb(var(--panel-accent2-rgb))',
-            }}
+            className="w-10 h-10 rounded-full shadow-md solid-icon-violet flex items-center justify-center transition-all active:scale-90 flex-shrink-0"
             aria-label="Toggle dark mode"
           >
-            {mode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            {mode === 'dark' ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
           </button>
         </div>
       </div>
 
-      {/* Row 2: Sub-module pills — horizontal scroll, only when sub-modules exist */}
-      {subModules.length > 0 && (
-        <div className="relative px-3.5 pb-2.5 overflow-x-auto no-scrollbar premium-scroll">
-          <div className="flex items-center gap-2 min-w-max">
-            {subModules.map((mod) => {
-              const Icon = getIcon(mod.icon);
-              const active = location.pathname === mod.path || location.pathname.startsWith(mod.path + '/');
-              return (
-                <Link
-                  key={mod.key}
-                  to={mod.path}
-                  className={`flex items-center gap-1.5 h-9 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                    active
-                      ? 'text-white border'
-                      : 'bg-muted/50 text-foreground border border-border'
-                  }`}
-                  style={active ? {
-                    background: `linear-gradient(135deg, ${mod.color || 'rgb(var(--panel-accent-rgb))'}, ${mod.color || 'rgb(var(--panel-accent-rgb))'}dd)`,
-                    borderColor: `${mod.color || 'rgb(var(--panel-accent-rgb))'}99`,
-                    boxShadow: `0 4px 14px -3px ${mod.color || 'rgb(var(--panel-accent-rgb))'}66, inset 0 1px 0 rgba(255,255,255,0.15)`,
-                  } : {}}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: active ? '#ffffff' : 'hsl(var(--foreground))' }} />
-                  {mod.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </header>
   );
 }

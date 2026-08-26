@@ -16,7 +16,7 @@ const PRESETS = [
 
 const toISO = (d) => (d ? format(d, 'yyyy-MM-dd') : '');
 
-export default function GlobalDateFilter({ className = '' }) {
+export default function GlobalDateFilter({ className = '', style, solid }) {
   const { dateFrom, dateTo, setDateFrom, setDateTo, setToday } = useGlobalDate();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState('range'); // 'range' | 'single'
@@ -44,18 +44,16 @@ export default function GlobalDateFilter({ className = '' }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          className={`relative w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-all duration-200 shrink-0 ${className}`}
-          style={!className ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } : undefined}
-          aria-label="Global date filter"
-          title={isFiltered ? `${label}` : 'Filter all pages by date'}
-        >
-          <CalendarIcon className="w-4 h-4" />
+      <PopoverTrigger
+        className={`relative ${solid ? 'w-10 h-10 rounded-full shadow-md solid-icon-amber flex items-center justify-center' : 'w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground'} transition-all duration-200 shrink-0 ${className}`}
+        style={!solid && !className ? { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' } : !solid ? style : undefined}
+        aria-label="Global date filter"
+        title={isFiltered ? `${label}` : 'Filter all pages by date'}
+      >
+          <CalendarIcon className="w-[18px] h-[18px]" />
           {isFiltered && (
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
           )}
-        </button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-popover border-border" align="center">
         <div className="flex flex-col sm:flex-row">
