@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock, ChevronRight } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -60,6 +60,23 @@ export default function Settings() {
     }
   };
 
+  const chipColors = {
+    company: 'bg-blue-500/15 text-blue-400',
+    invoice: 'bg-violet-500/15 text-violet-400',
+    profile: 'bg-blue-500/15 text-blue-400',
+    localization: 'bg-emerald-500/15 text-emerald-400',
+    display: 'bg-violet-500/15 text-violet-400',
+    datetime: 'bg-amber-500/15 text-amber-400',
+    sound: 'bg-amber-500/15 text-amber-400',
+    users: 'bg-blue-500/15 text-blue-400',
+    security: 'bg-rose-500/15 text-rose-400',
+    storage: 'bg-cyan-500/15 text-cyan-400',
+    agents: 'bg-emerald-500/15 text-emerald-400',
+    manual: 'bg-slate-500/15 text-slate-400',
+    logout: 'bg-rose-500/15 text-rose-400',
+    danger: 'bg-red-500/15 text-red-400',
+  };
+
   const sections = [
     { key: 'company', label: 'Company', icon: Building2, render: () => <CompanySettingsSection /> },
     { key: 'invoice', label: 'Invoice', icon: FileText, render: () => <InvoiceAppearanceCard /> },
@@ -112,25 +129,24 @@ export default function Settings() {
       <div className="md:grid md:grid-cols-[220px_1fr] md:gap-6">
         {/* Sidebar — desktop only */}
         <aside className="hidden md:block">
-          <nav className="sticky top-24 space-y-1">
+          <nav className="sticky top-24 rounded-2xl border border-border/60 divide-y divide-border/40 overflow-hidden glass-sm">
             {sections.map((s) => {
               const isActive = active === s.key;
               return (
                 <button
                   key={s.key}
                   onClick={() => setActive(s.key)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${
-                    isActive
-                      ? s.danger
-                        ? 'bg-destructive/10 border-destructive/30 text-rose-300'
-                        : 'bg-blue-500/10 border-blue-500/30 text-white'
-                      : s.danger
-                        ? 'text-white/50 hover:text-rose-300/80 hover:bg-destructive/[0.06] border-transparent'
-                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border-transparent'
+                  className={`w-full flex items-center gap-3 px-3 py-3 transition-colors duration-200 ${
+                    isActive ? 'bg-primary/10' : 'hover:bg-white/[0.04]'
                   }`}
                 >
-                  <s.icon className="w-4 h-4" />
-                  {s.label}
+                  <span className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
+                    <s.icon className="w-4 h-4" />
+                  </span>
+                  <span className={`text-sm flex-1 text-left font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {s.label}
+                  </span>
+                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground/50'}`} />
                 </button>
               );
             })}
