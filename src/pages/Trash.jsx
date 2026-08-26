@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
+import { useTrips, useTripDelete } from '@/hooks/useEntityQueries';
+import { useQueryClient } from '@tanstack/react-query';
 import PageHeader from '@/components/common/PageHeader';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
@@ -20,31 +22,26 @@ const STATUS = {
 export default function Trash() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [trips, setTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
+  const { data: allTrips, isLoading } = useTrips();
+  const tripDelete = useTripDelete();
   const [restoreTarget, setRestoreTarget] = useState(null);
   const [purgeTarget, setPurgeTarget] = useState(null);
   const [purgeAllOpen, setPurgeAllOpen] = useState(false);
 
-  const loadTrash = async () => {
-    setLoading(true);
-    try {
-      const all = await base44.entities.Trip.list('-updated_date', 500);
-      setTrips((all || []).filter((t) => t.deleted_at));
-    } catch {
-      toast({ title: 'Failed to load trash', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const trips = useMemo(
+    () => (allTrips || []).filter((t) => t.deleted_at).sort((a, b) => new Date(b.deleted_at) - new Date(a.deleted_at)),
+    [allTrips]
+  );
+  const loading = isLoading;
 
-  useEffect(() => { loadTrash(); }, []);
+  const refresh = () => qc.invalidateQueries(['trips']);
 
   const handleRestore = async (trip) => {
     try {
       await base44.entities.Trip.update(trip.id, { deleted_at: null });
       toast({ title: 'Trip restored', description: trip.trip_number || '' });
-      loadTrash();
+      refresh();
     } catch {
       toast({ title: 'Restore failed', variant: 'destructive' });
     }
@@ -53,9 +50,8 @@ export default function Trash() {
 
   const handlePurge = async (trip) => {
     try {
-      await base44.entities.Trip.delete(trip.id);
+      await tripDelete.mutateAsync(trip.id);
       toast({ title: 'Trip permanently deleted' });
-      loadTrash();
     } catch {
       toast({ title: 'Delete failed', variant: 'destructive' });
     }
@@ -69,7 +65,7 @@ export default function Trash() {
         await base44.entities.Trip.deleteMany({ id: { $in: ids } });
       }
       toast({ title: `${ids.length} trip${ids.length !== 1 ? 's' : ''} permanently deleted` });
-      loadTrash();
+      refresh();
     } catch {
       toast({ title: 'Bulk delete failed', variant: 'destructive' });
     }
