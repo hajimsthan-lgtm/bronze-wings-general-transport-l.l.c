@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import CalculatorModal from '@/components/dashboard/CalculatorModal';
@@ -10,6 +10,7 @@ export default function QuickFanMenu() {
   const [open, setOpen] = useState(false);
   const [calcOpen, setCalcOpen] = useState(false);
   const timer = useRef(null);
+  const containerRef = useRef(null);
   const navigate = useNavigate();
 
   // hover reveals the fan; it auto-hides SHOW_MS after the last interaction
@@ -18,6 +19,26 @@ export default function QuickFanMenu() {
     setOpen(true);
     timer.current = setTimeout(() => setOpen(false), SHOW_MS);
   };
+
+  // Close on click outside or Escape — fixes the "stuck open" bug on touch devices
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        clearTimeout(timer.current);
+        setOpen(false);
+      }
+    };
+    const handleEsc = (e) => { if (e.key === 'Escape') { clearTimeout(timer.current); setOpen(false); } };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [open]);
 
   const handleAction = (a) => {
     clearTimeout(timer.current);
@@ -34,7 +55,15 @@ export default function QuickFanMenu() {
 
   return (
     <>
+      {/* Mobile backdrop — closes fan on outside tap */}
+      {open && (
+        <div
+          className="md:hidden fixed inset-0 z-30"
+          onClick={() => { clearTimeout(timer.current); setOpen(false); }}
+        />
+      )}
       <div
+        ref={containerRef}
         className="relative flex justify-center"
         onMouseEnter={poke}
         onMouseLeave={poke}

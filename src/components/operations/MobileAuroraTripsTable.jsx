@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowRight, Copy, Check, Shield, Eye, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowRight, Copy, Check, Shield, Eye, Pencil, Trash2, X, FileSpreadsheet, FileText, CheckSquare, Square } from 'lucide-react';
 import TripStatusManager from '@/components/trips/TripStatusManager';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
@@ -46,15 +46,30 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
   const scrollRef = useRef(null);
   const longPressTimer = useRef(null);
 
-  // Long-press (1s) to reveal per-row action buttons
+  // Long-press (0.7s) to reveal per-row action buttons
   const startLongPress = (tripId) => {
     longPressTimer.current = setTimeout(() => {
       setLongPressId((prev) => (prev === tripId ? null : tripId));
-      if (navigator.vibrate) navigator.vibrate(50);
-    }, 1000);
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, 700);
   };
   const cancelLongPress = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
   const closeActions = () => setLongPressId(null);
+
+  // Close long-press overlay on outside click
+  useEffect(() => {
+    if (!longPressId) return;
+    const handler = (e) => {
+      const overlay = e.target.closest?.('[data-long-press-overlay]');
+      if (!overlay) setLongPressId(null);
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [longPressId]);
 
   const toggleOne = (id) => setSelected((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const toggleAll = () => setSelected((s) => s.size === trips.length ? new Set() : new Set(trips.map((t) => t.id)));
@@ -116,6 +131,49 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
       {/* Horizontal scroll wrapper — table is wider than viewport, scroll to see all columns */}
       <div className="overflow-x-auto thin-scroll">
         <div style={{ minWidth: 560 }}>
+
+      {/* Bulk action bar — appears when trips are selected */}
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="sticky top-0 z-30 flex items-center gap-2 px-3 py-2.5 border-b border-emerald-500/25"
+            style={{
+              background: 'linear-gradient(135deg, rgba(52,211,153,0.12), rgba(16,185,129,0.06))',
+              backdropFilter: 'blur(16px) saturate(1.4)',
+              WebkitBackdropFilter: 'blur(16px) saturate(1.4)',
+            }}
+          >
+            <span
+              className="flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold text-black tabular-nums shrink-0"
+              style={{ background: ACCENT, boxShadow: `0 0 12px -2px ${ACCENT}80` }}
+            >
+              {selected.size}
+            </span>
+            <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider shrink-0">selected</span>
+            <div className="flex-1" />
+            <button onClick={toggleAll} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold uppercase tracking-wide active:scale-95 transition">
+              {allSelected ? <Square className="w-3 h-3" /> : <CheckSquare className="w-3 h-3" />}
+              {allSelected ? 'Deselect' : 'All'}
+            </button>
+            <button onClick={handleBulkExportCSV} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-semibold uppercase tracking-wide active:scale-95 transition">
+              <FileSpreadsheet className="w-3 h-3" /> CSV
+            </button>
+            <button onClick={handleBulkExportPDF} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 text-[10px] font-semibold uppercase tracking-wide active:scale-95 transition">
+              <FileText className="w-3 h-3" /> PDF
+            </button>
+            <button onClick={handleBulkDelete} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[10px] font-semibold uppercase tracking-wide active:scale-95 transition">
+              <Trash2 className="w-3 h-3" /> Del
+            </button>
+            <button onClick={clearSelection} className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/8 border border-white/15 text-muted-foreground active:scale-95 transition shrink-0">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Aurora glow — animated emerald aurora at top */}
       <div
@@ -269,38 +327,66 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                   {/* Long-press action overlay — View / Edit / Delete */}
                   {showActions && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute inset-0 z-20 flex items-center justify-center gap-2 backdrop-blur-md"
-                      style={{ background: 'rgba(10,11,14,0.85)', borderRadius: 'inherit' }}
+                      data-long-press-overlay
+                      initial={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, scale: 0.92, filter: 'blur(4px)' }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute inset-0 z-20 flex items-center justify-center gap-2.5 backdrop-blur-xl"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(10,11,14,0.92), rgba(14,16,20,0.88))',
+                        borderRadius: 'inherit',
+                        boxShadow: 'inset 0 0 0 1px rgba(52,211,153,0.25), 0 8px 32px rgba(0,0,0,0.4)',
+                      }}
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); onOpenDetail?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-blue-500/15 border border-blue-500/30 active:scale-95 transition"
+                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
+                        style={{
+                          background: 'linear-gradient(145deg, rgba(59,130,246,0.18), rgba(59,130,246,0.08))',
+                          border: '1px solid rgba(59,130,246,0.4)',
+                          boxShadow: '0 4px 14px -4px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        }}
                       >
-                        <Eye className="w-4 h-4 text-blue-400" />
-                        <span className="text-[9px] font-semibold text-blue-400 uppercase">View</span>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.2)' }}>
+                          <Eye className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <span className="text-[9px] font-bold text-blue-400 uppercase tracking-wide">View</span>
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); onEdit?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 active:scale-95 transition"
+                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
+                        style={{
+                          background: 'linear-gradient(145deg, rgba(251,191,36,0.18), rgba(251,191,36,0.08))',
+                          border: '1px solid rgba(251,191,36,0.4)',
+                          boxShadow: '0 4px 14px -4px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        }}
                       >
-                        <Pencil className="w-4 h-4 text-amber-400" />
-                        <span className="text-[9px] font-semibold text-amber-400 uppercase">Edit</span>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(251,191,36,0.2)' }}>
+                          <Pencil className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wide">Edit</span>
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); onDelete?.(trip); closeActions(); }}
-                        className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl bg-red-500/15 border border-red-500/30 active:scale-95 transition"
+                        className="flex flex-col items-center gap-1.5 px-4 py-2.5 rounded-2xl active:scale-90 transition-all"
+                        style={{
+                          background: 'linear-gradient(145deg, rgba(239,68,68,0.18), rgba(239,68,68,0.08))',
+                          border: '1px solid rgba(239,68,68,0.4)',
+                          boxShadow: '0 4px 14px -4px rgba(239,68,68,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                        }}
                       >
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                        <span className="text-[9px] font-semibold text-red-400 uppercase">Delete</span>
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </div>
+                        <span className="text-[9px] font-bold text-red-400 uppercase tracking-wide">Delete</span>
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); closeActions(); }}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/10 border border-white/15 flex items-center justify-center active:scale-95 transition"
+                        className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center active:scale-90 transition"
+                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
                       >
-                        <X className="w-3 h-3 text-white/60" />
+                        <X className="w-3 h-3 text-white/50" />
                       </button>
                     </motion.div>
                   )}

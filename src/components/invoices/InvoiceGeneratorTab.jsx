@@ -89,14 +89,15 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     if (!propSettings) getCompanySettings().then(setCompanySettings).catch(() => {});
   }, [propSettings]);
 
-  // tripInvoiceMap uses ALL invoices (not date-filtered) to know which trips are already invoiced
+  // tripInvoiceMap uses ALL invoices (loaded fresh, not date-filtered) to know which trips are already invoiced
   const tripInvoiceMap = useMemo(() => {
     const m = {};
-    (invoices || []).forEach((inv) => {
+    const source = (allInvoices && allInvoices.length > 0) ? allInvoices : (invoices || []);
+    source.forEach((inv) => {
       if (inv.trip_id) String(inv.trip_id).split(',').forEach((tid) => { const id = tid.trim(); if (id) m[id] = inv.id; });
     });
     return m;
-  }, [invoices]);
+  }, [allInvoices, invoices]);
 
   const billableTrips = useMemo(
     () => (trips || []).filter((tr) => tr.status === 'completed' && !tripInvoiceMap[tr.id])

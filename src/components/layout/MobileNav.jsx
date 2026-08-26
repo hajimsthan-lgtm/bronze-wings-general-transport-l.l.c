@@ -136,7 +136,7 @@ export default function MobileNav() {
                     }}
                     whileTap={{ scale: 0.86 }}
                   >
-                    {/* Standalone icon orb with label tooltip on tap-hold */}
+                    {/* Standalone icon orb with label */}
                     <div
                       className="w-11 h-11 rounded-2xl flex items-center justify-center relative"
                       style={{
@@ -146,6 +146,16 @@ export default function MobileNav() {
                     >
                       <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
                     </div>
+                    <span
+                      className="text-[9px] font-semibold leading-none px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                      style={{
+                        color: action.color,
+                        background: `rgba(255,255,255,0.92)`,
+                        boxShadow: `0 2px 8px rgba(0,0,0,0.18)`,
+                      }}
+                    >
+                      {action.label}
+                    </span>
                   </motion.button>
                 );
               })}

@@ -590,7 +590,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Mobile calc bar — trip mode only, non-scrolling */}
         {mode === 'trip' && (
-          <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+          <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} addOns={addOns} />
         )}
 
         {/* Body: scrollable form with standalone floating calc panel in right column */}
@@ -610,7 +610,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           <div className={cn("flex flex-col gap-5 lg:sticky lg:top-4", !mapCollapsed && "lg:max-h-[calc(82vh-170px)] lg:overflow-y-auto premium-scroll")}>
             {mode === 'trip' && (
               <div className="flex-shrink-0">
-                <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} />
+                <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} addOns={addOns} />
               </div>
             )}
             {mode === 'trip' && (

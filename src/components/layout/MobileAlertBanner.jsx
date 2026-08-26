@@ -12,12 +12,17 @@ const ITEMS = [
 
 export default function MobileAlertBanner() {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const triggerRef = useRef(null);
+  const panelRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e) => {
+      if (triggerRef.current?.contains(e.target)) return;
+      if (panelRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
     const esc = (e) => { if (e.key === 'Escape') setOpen(false); };
     document.addEventListener('mousedown', handler);
     document.addEventListener('touchstart', handler, { passive: true });
@@ -39,8 +44,9 @@ export default function MobileAlertBanner() {
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
+        ref={triggerRef}
         onClick={() => setOpen((v) => !v)}
         aria-label="Alerts"
         aria-expanded={open}
@@ -63,6 +69,7 @@ export default function MobileAlertBanner() {
               onClick={() => setOpen(false)}
             />
             <motion.div
+              ref={panelRef}
               className="absolute top-full right-0 mt-2 z-[71] w-[260px] overflow-hidden rounded-2xl"
               initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

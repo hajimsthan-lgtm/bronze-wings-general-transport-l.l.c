@@ -9,10 +9,14 @@ function CalcRow({ label, value, tone = 'text-foreground' }) {
   );
 }
 
-export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraCharges, revenueOverridden }) {
+export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraCharges, revenueOverridden, addOns }) {
   const revenue = Number(form.revenue) || 0;
+  const addOnList = Array.isArray(addOns) ? addOns : [];
+  const addOnTotal = addOnList.reduce((s, a) => s + (Number(a.amount) || 0), 0);
+  const addOnVat = addOnList.reduce((s, a) => a.vat_included ? s + Math.round((Number(a.amount) || 0) * 0.05 * 100) / 100 : s, 0);
+  const grandTotal = Math.round((revenue + addOnTotal + (Math.round(revenue * 0.05 * 100) / 100) + addOnVat) * 100) / 100;
   const vat = Math.round(revenue * 0.05 * 100) / 100;
-  const total = Math.round((revenue + vat) * 100) / 100;
+  const total = grandTotal;
   const vendorCost = form.assignment_mode === 'vendor' && form.vendor_name ? (Number(form.vendor_agreed_rate) || 0) : 0;
   const netMargin = Math.round((total - vendorCost) * 100) / 100;
 
@@ -38,6 +42,19 @@ export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraC
           <CalcRow label="Revenue (excl. VAT)" value={formatCurrency(revenue)} tone={revenueOverridden ? 'text-red-400' : 'text-primary'} />
           <CalcRow label="VAT (5%)" value={formatCurrency(vat)} tone="text-muted-foreground" />
         </div>
+        {addOnList.length > 0 && (
+          <div className="border-t border-white/10 pt-2 space-y-1.5">
+            {addOnList.map((a, i) => (
+              <CalcRow
+                key={i}
+                label={`${a.description || 'Add-on'}${a.vat_included ? '' : ' · no VAT'}`}
+                value={`+${formatCurrency(Number(a.amount) || 0)}`}
+                tone="text-amber-300"
+              />
+            ))}
+            {addOnVat > 0 && <CalcRow label="Add-on VAT" value={`+${formatCurrency(addOnVat)}`} tone="text-muted-foreground" />}
+          </div>
+        )}
         <div className="calc-total-glow flex items-baseline justify-between px-2 py-1.5">
           <span className="text-xs font-semibold text-foreground">Total Revenue</span>
           <span className="text-xl font-bold tabular-nums font-display text-gradient animate-glow-pulse">{formatCurrency(total)}</span>
