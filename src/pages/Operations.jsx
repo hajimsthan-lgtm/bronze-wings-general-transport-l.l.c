@@ -458,7 +458,7 @@ export default function Operations() {
             )}
             {showTrips && filteredTrips.length > 0 && (
               isMobile ? (
-                <MobileAuroraTripsTable
+                <TripsList
                   trips={filteredTrips}
                   onOpenDetail={openDetailTrip}
                   onEdit={openEditTrip}
@@ -468,6 +468,7 @@ export default function Operations() {
                   vehicleMap={vehicleMap}
                   clientMap={clientMap}
                   invoiceMap={invoiceMap}
+                  onInvoicesChanged={() => refetchInvoices()}
                   onBulkStatus={handleBulkTripStatus}
                   onBulkDelete={handleBulkTripDelete}
                 />
