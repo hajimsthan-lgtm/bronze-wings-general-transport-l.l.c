@@ -2,7 +2,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { getCompanySettings } from '@/lib/companySettings';
 import BrandName from '@/components/layout/BrandName';
-import MobileMoreMenu from '@/components/layout/MobileMoreMenu';
+import AnimatedInput from '@/components/ui/animated-input';
+import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
+import { useTheme } from '@/lib/theme';
+import { Sun, Moon } from 'lucide-react';
 import { navItems, getIcon } from '@/lib/navConfig';
 import { getTabFromPath } from '@/lib/TabHistoryContext';
 
@@ -32,7 +35,9 @@ function getSubModules(activeTab) {
 
 export default function MobileHeader() {
   const [logoUrl, setLogoUrl] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const { mode, toggleMode } = useTheme();
 
   useEffect(() => {
     getCompanySettings().then((s) => setLogoUrl(s.logo_url));
@@ -109,8 +114,29 @@ export default function MobileHeader() {
           </Link>
         </div>
 
-        {/* Single "more" button — opens bottom sheet with all quick actions */}
-        <MobileMoreMenu />
+        {/* Always-visible: animated search + date filter + dark mode toggle */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <AnimatedInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search..."
+            openWidth={180}
+            closedWidth={36}
+          />
+          <GlobalDateFilter />
+          <button
+            onClick={toggleMode}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent2-rgb),0.10))',
+              border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
+              color: 'rgb(var(--panel-accent2-rgb))',
+            }}
+            aria-label="Toggle dark mode"
+          >
+            {mode === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+          </button>
+        </div>
       </div>
 
       {/* Row 2: Sub-module pills — horizontal scroll, only when sub-modules exist */}
