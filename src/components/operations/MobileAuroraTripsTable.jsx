@@ -39,13 +39,43 @@ const AUTO_VANISH_MS = 1500;
  * centered in the row, stays visible during horizontal scroll via sticky positioning.
  * Auto-vanishes after 1.5s.
  */
-function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
+function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose, rowRef }) {
   const vanishTimer = useRef(null);
+  const overlayRef = useRef(null);
+  const [iconTop, setIconTop] = useState(0);
 
   useEffect(() => {
     vanishTimer.current = setTimeout(() => onClose(), AUTO_VANISH_MS);
     return () => clearTimeout(vanishTimer.current);
   }, [onClose]);
+
+  // Track the row's vertical position so icons stay aligned with the row.
+  // Horizontally, icons use position:fixed + left:50% to stay centered in the viewport.
+  useEffect(() => {
+    let cleanupFns = [];
+    // Poll for the row element — refs may not be ready immediately on mount
+    const poll = setInterval(() => {
+      const rowEl = rowRef?.current || overlayRef.current?.parentElement;
+      if (!rowEl) return;
+      clearInterval(poll);
+      const updatePosition = () => {
+        const rowRect = rowEl.getBoundingClientRect();
+        setIconTop(rowRect.top + rowRect.height / 2);
+      };
+      updatePosition();
+      const scrollEl = rowEl.closest('[class*="overflow-y-auto"]');
+      if (scrollEl) {
+        scrollEl.addEventListener('scroll', updatePosition, { passive: true });
+        cleanupFns.push(() => scrollEl.removeEventListener('scroll', updatePosition));
+      }
+      window.addEventListener('scroll', updatePosition, { passive: true });
+      cleanupFns.push(() => window.removeEventListener('scroll', updatePosition));
+    }, 50);
+    return () => {
+      clearInterval(poll);
+      cleanupFns.forEach(fn => fn());
+    };
+  }, [rowRef]);
 
   const actions = [
     { icon: Eye, label: 'View', color: '#3b82f6', onClick: () => { onOpenDetail?.(trip); onClose(); } },
@@ -54,61 +84,48 @@ function RowActionOverlay({ trip, onOpenDetail, onEdit, onDelete, onClose }) {
   ];
 
   return (
-    <>
-      {/* Blur layer — absolute, covers only this row, scrolls with it */}
-      <motion.div
-        className="absolute inset-0 z-20 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        style={{
-          background: 'rgba(0,0,0,0.25)',
-          backdropFilter: 'blur(10px) saturate(1.2)',
-          WebkitBackdropFilter: 'blur(10px) saturate(1.2)',
-        }}
-      />
-      {/* Icons — absolute, centered in the row, scrolls with row content */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 flex items-center justify-center gap-2"
-        style={{
-          transform: 'translate(-50%, -50%)',
-          zIndex: 30,
-        }}
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.7 }}
-        transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.25 }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {actions.map((action, i) => {
-          const Icon = action.icon;
-          return (
-            <motion.button
-              key={action.label}
-              onClick={(e) => { e.stopPropagation(); action.onClick(); }}
-              className="flex items-center justify-center active:scale-90 transition-transform"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ delay: i * 0.04, duration: 0.2 }}
+    <motion.div
+      ref={overlayRef}
+      className="fixed left-1/2 flex items-center justify-center gap-2"
+      style={{
+        top: `${iconTop}px`,
+        transform: 'translate(-50%, -50%)',
+        zIndex: 50,
+        filter: 'none',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+      }}
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.7 }}
+      transition={{ type: 'spring', damping: 18, stiffness: 300, duration: 0.25 }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {actions.map((action, i) => {
+        const Icon = action.icon;
+        return (
+          <motion.button
+            key={action.label}
+            onClick={(e) => { e.stopPropagation(); action.onClick(); }}
+            className="flex items-center justify-center active:scale-90 transition-transform"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ delay: i * 0.04, duration: 0.2 }}
+          >
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{
+                background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
+                boxShadow: `0 4px 14px -3px ${action.color}80, 0 0 0 2px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.25)`,
+              }}
             >
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(145deg, ${action.color}, ${action.color}cc)`,
-                  boxShadow: `0 4px 14px -3px ${action.color}80, 0 0 0 2px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.25)`,
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                }}
-              >
-                <Icon className="w-4 h-4 text-white" strokeWidth={2.2} />
-              </div>
-            </motion.button>
-          );
-        })}
-      </motion.div>
-    </>
+              <Icon className="w-4 h-4 text-white" strokeWidth={2.2} />
+            </div>
+          </motion.button>
+        );
+      })}
+    </motion.div>
   );
 }
 
@@ -122,6 +139,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
   const [copiedId, setCopiedId] = useState(null);
   const [longPressTrip, setLongPressTrip] = useState(null);
   const scrollRef = useRef(null);
+  const longPressRowRef = useRef(null);
   const longPressTimer = useRef(null);
 
   // Long-press (0.7s) to reveal per-row action buttons
@@ -307,80 +325,94 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                 <motion.div
                   key={trip.id}
                   role="row"
+                  ref={(el) => { if (longPressTrip?.id === trip.id) longPressRowRef.current = el; }}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.3), duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   onTouchStart={() => startLongPress(trip)}
                   onTouchEnd={cancelLongPress}
                   onTouchMove={cancelLongPress}
-                  className="grid items-start px-4 py-3 cursor-pointer relative group select-none"
+                  className="relative cursor-pointer group select-none px-4 py-3"
                   style={{
-                    gridTemplateColumns: '36px 60px 1fr 88px 104px',
-                    gap: '8px',
                     background: isSelected ? 'rgba(52,211,153,0.06)' : 'transparent',
                     borderLeft: isSelected ? '2px solid #34d399' : '2px solid transparent',
                     overflow: longPressTrip?.id === trip.id ? 'hidden' : 'visible',
                   }}
                 >
-                  {/* Checkbox — toggles selection for bulk actions */}
-                  <div className="flex justify-center pt-0.5" onClick={(e) => { e.stopPropagation(); toggleOne(trip.id); }}>
-                    <Checkbox checked={isSelected} className="border-white/20 data-[state=checked]:bg-emerald-400 data-[state=checked]:border-emerald-400" />
-                  </div>
-
-                  {/* Date */}
-                  <span className="text-[10px] text-muted-foreground tabular-nums leading-tight pt-0.5">
-                    {trip.trip_date ? formatDate(trip.trip_date).split('/')[0] + '/' + formatDate(trip.trip_date).split('/')[1] : '—'}
-                  </span>
-
-                  {/* Trip # + Route + Vehicle + Driver */}
-                  <div className="min-w-0 pr-1">
-                    <button
-                      onClick={(e) => copyRef(e, trip)}
-                      className="text-emerald-400 font-bold text-[11px] tracking-tight flex items-center gap-1 mb-1"
-                    >
-                      <span className="break-all">{ref}</span>
-                      {copiedId === trip.id
-                        ? <Check className="w-3 h-3 text-emerald-400 shrink-0" />
-                        : <Copy className="w-3 h-3 opacity-30 shrink-0" />}
-                    </button>
-                    <div className="flex items-start gap-1 text-[10px] text-foreground/70 leading-snug">
-                      <span className="break-words font-medium">{trip.from_location || '—'}</span>
-                      {trip.permit_required && trip.permit_name && (
-                        <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0 mt-0.5" title={`Permit: ${trip.permit_name}`}>
-                          <Shield className="w-2 h-2" />
-                        </span>
-                      )}
-                      <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                      <span className="break-words font-medium">{trip.to_location || '—'}</span>
+                  {/* LAYER 1 — Row content (BLURRED on long-press). filter:blur only
+                      affects THIS element's children, NOT the sibling icon overlay. */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '36px 60px 1fr 88px 104px',
+                      gap: '8px',
+                      alignItems: 'start',
+                      filter: longPressTrip?.id === trip.id ? 'blur(8px)' : 'none',
+                      opacity: longPressTrip?.id === trip.id ? 0.8 : 1,
+                      transition: 'filter 0.2s ease, opacity 0.2s ease',
+                    }}
+                  >
+                    {/* Checkbox — toggles selection for bulk actions */}
+                    <div className="flex justify-center pt-0.5" onClick={(e) => { e.stopPropagation(); toggleOne(trip.id); }}>
+                      <Checkbox checked={isSelected} className="border-white/20 data-[state=checked]:bg-emerald-400 data-[state=checked]:border-emerald-400" />
                     </div>
-                    {/* Vehicle + Driver details */}
-                    <div className="flex flex-col gap-0.5 mt-1 text-[9px] text-muted-foreground/80 leading-snug">
-                      {trip.vehicle_plate && (
-                        <span className="flex items-center gap-1">
-                          <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">V</span>
-                          <span className="break-words">{trip.vehicle_plate}</span>
-                        </span>
-                      )}
-                      {trip.driver_name && (
-                        <span className="flex items-center gap-1">
-                          <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">D</span>
-                          <span className="break-words">{trip.driver_name}</span>
-                        </span>
-                      )}
+
+                    {/* Date */}
+                    <span className="text-[10px] text-muted-foreground tabular-nums leading-tight pt-0.5">
+                      {trip.trip_date ? formatDate(trip.trip_date).split('/')[0] + '/' + formatDate(trip.trip_date).split('/')[1] : '—'}
+                    </span>
+
+                    {/* Trip # + Route + Vehicle + Driver */}
+                    <div className="min-w-0 pr-1">
+                      <button
+                        onClick={(e) => copyRef(e, trip)}
+                        className="text-emerald-400 font-bold text-[11px] tracking-tight flex items-center gap-1 mb-1"
+                      >
+                        <span className="break-all">{ref}</span>
+                        {copiedId === trip.id
+                          ? <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                          : <Copy className="w-3 h-3 opacity-30 shrink-0" />}
+                      </button>
+                      <div className="flex items-start gap-1 text-[10px] text-foreground/70 leading-snug">
+                        <span className="break-words font-medium">{trip.from_location || '—'}</span>
+                        {trip.permit_required && trip.permit_name && (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[7px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0 mt-0.5" title={`Permit: ${trip.permit_name}`}>
+                            <Shield className="w-2 h-2" />
+                          </span>
+                        )}
+                        <ArrowRight className="w-2.5 h-2.5 text-muted-foreground/50 shrink-0 mt-0.5" />
+                        <span className="break-words font-medium">{trip.to_location || '—'}</span>
+                      </div>
+                      {/* Vehicle + Driver details */}
+                      <div className="flex flex-col gap-0.5 mt-1 text-[9px] text-muted-foreground/80 leading-snug">
+                        {trip.vehicle_plate && (
+                          <span className="flex items-center gap-1">
+                            <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">V</span>
+                            <span className="break-words">{trip.vehicle_plate}</span>
+                          </span>
+                        )}
+                        {trip.driver_name && (
+                          <span className="flex items-center gap-1">
+                            <span className="text-emerald-400/60 font-semibold uppercase tracking-wide">D</span>
+                            <span className="break-words">{trip.driver_name}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Revenue */}
+                    <span className="text-[11px] font-bold text-foreground tabular-nums text-right leading-tight pt-0.5 whitespace-nowrap">
+                      {formatCurrency(revenue)}
+                    </span>
+
+                    {/* Status */}
+                    <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
+                      <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
                     </div>
                   </div>
 
-                  {/* Revenue */}
-                  <span className="text-[11px] font-bold text-foreground tabular-nums text-right leading-tight pt-0.5 whitespace-nowrap">
-                    {formatCurrency(revenue)}
-                  </span>
-
-                  {/* Status */}
-                  <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
-                    <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
-                  </div>
-
-                  {/* Inline long-press action overlay — blurs only this row */}
+                  {/* LAYER 2 — Sharp action icons overlay (NO blur). Sibling of content,
+                      so filter:blur on content does NOT affect these icons. */}
                   <AnimatePresence>
                     {longPressTrip?.id === trip.id && (
                       <RowActionOverlay
@@ -390,6 +422,7 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onClose={() => setLongPressTrip(null)}
+                        rowRef={longPressRowRef}
                       />
                     )}
                   </AnimatePresence>
