@@ -51,14 +51,20 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   const doc = new jsPDF({ orientation, unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.width;
   const pageH = doc.internal.pageSize.height;
-  const margin = 15;
+  const margin = 8;
   const tableW = pageW - margin * 2;
 
   // Compute per-column widths: honour column.w if provided, otherwise equal-split
   const totalFixed = columns.reduce((s, c) => s + (c.w || 0), 0);
   const flexCount = columns.filter((c) => !c.w).length;
   const flexW = flexCount > 0 ? (tableW - totalFixed) / flexCount : 0;
-  const colWidths = columns.map((c) => c.w || flexW);
+  let colWidths = columns.map((c) => c.w || flexW);
+  // Scale columns proportionally if their total exceeds the available table width
+  const totalColW = colWidths.reduce((s, w) => s + w, 0);
+  if (totalColW > tableW) {
+    const scale = tableW / totalColW;
+    colWidths = colWidths.map((w) => w * scale);
+  }
   // Backward-compat alias used below
   const colW = tableW / columns.length;
 
