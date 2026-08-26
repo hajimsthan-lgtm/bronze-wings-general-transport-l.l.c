@@ -26,6 +26,7 @@ import MobileFAB from '@/components/mobile/MobileFAB';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, setVehiclesData } from '@/lib/vehiclesStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import VehicleCatalogBuilder from '@/components/admin/VehicleCatalogBuilder';
+import ExportButtons from '@/components/common/ExportButtons';
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -141,6 +142,14 @@ function VehiclesTab() {
           <div data-tour data-tour-title="Search Fleet" data-tour-en="Type a plate number or make here to instantly filter your vehicles. The list below updates as you type." data-tour-ur="اپنی گاڑیوں کو فوری طور پر فلٹر کرنے کے لیے یہاں پلیٹ نمبر یا برانڈ درج کریں۔ نیچے دی گئی فہرست آپ کی ٹائپ کے مطابق اپڈیٹ ہوتی ہے۔" data-tour-ml="നിങ്ങളുടെ വാഹനങ്ങൾ ഉടൻ ഫിൽട്ടർ ചെയ്യാൻ ഇവിടെ പ്ലേറ്റ് നമ്പർ അല്ലെങ്കിൽ മേക്ക് ടൈപ്പ് ചെയ്യുക. താഴെയുള്ള പട്ടിക ടൈപ്പ് ചെയ്യുമ്പോൾ അപ്ഡേറ്റ് ചെയ്യും." className="relative mb-5">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          </div>
+
+          {/* Export sub-header — slides in with transition */}
+          <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2.5 rounded-xl bg-muted/30 border border-border/40 animate-fade-in-up">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{filtered.length} vehicles</span>
+            </div>
+            <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number' }, { label: 'Make', key: 'make' }, { label: 'Model', key: 'model' }, { label: 'Year', key: 'year' }, { label: 'Category', key: 'category', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Category:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Type', key: 'type' }, { label: 'Vehicle Type', key: 'vehicleType', transform: (v) => { const m = (v.notes || '').match(/^Vehicle Type:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Status', key: 'status' }, { label: 'Driver', key: 'assigned_driver' }, { label: 'Reg Expiry', key: 'registration_expiry' }, { label: 'Ins Expiry', key: 'insurance_expiry' }, { label: 'Fuel', key: 'fuel_type' }]} />
           </div>
 
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
