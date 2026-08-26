@@ -113,18 +113,18 @@ export default function Settings() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8">
-      <header className="flex items-center gap-3 mb-6 hidden">
-        <Link to="/" className="p-2 -ml-2 rounded-lg hover:bg-white/[0.06] transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div className="hud-icon-tile w-12 h-12">
-          <Building2 className="w-6 h-6" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-display font-semibold tracking-tight text-white">Settings</h1>
-          <p className="text-sm text-muted-foreground">Manage your account and organization</p>
-        </div>
-      </header>
+      
+
+
+
+
+
+
+
+
+
+
+      
 
       <div className="md:grid md:grid-cols-[220px_1fr] md:gap-6">
         {/* Sidebar — desktop only */}
