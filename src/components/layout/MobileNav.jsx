@@ -102,8 +102,10 @@ export default function MobileNav() {
               document.body
             )}
 
-            {/* Fan-out standalone icons — semi-circle arc */}
-            <AnimatePresence>
+            {/* Fan-out standalone icons — portaled to body so they escape the nav's
+                backdrop-filter stacking context and render ABOVE the blur backdrop */}
+            {createPortal(
+              <AnimatePresence>
               {fabOpen && FAB_ACTIONS.map((action, i) => {
                 const Icon = action.icon;
                 const n = FAB_ACTIONS.length;
@@ -158,7 +160,9 @@ export default function MobileNav() {
                   </motion.button>
                 );
               })}
-            </AnimatePresence>
+              </AnimatePresence>,
+              document.body
+            )}
 
             {/* FAB launcher */}
             <div ref={fabRef}>
