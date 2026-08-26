@@ -15,7 +15,10 @@ export function exportToCSV(data, filename, columns) {
     return val;
   };
   const headers = columns.map(c => escape(c.label)).join(',');
-  const rows = data.map(item => columns.map(c => escape(item[c.key], c.numeric)).join(','));
+  const rows = data.map(item => columns.map(c => {
+    const val = c.transform ? c.transform(item) : item[c.key];
+    return escape(val, c.numeric);
+  }).join(','));
   const csv = [headers, ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
