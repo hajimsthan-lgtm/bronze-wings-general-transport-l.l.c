@@ -27,10 +27,15 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
         >
           {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
         </button>
-        <div className="w-10 h-10 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0"><TruckIcon className="w-4 h-4" /></div>
+        <div className="w-10 h-10 rounded-xl entity-avatar flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}><TruckIcon className="w-4 h-4 text-primary" /></div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground truncate">{v.plate_number}</p>
+            {v.type && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                {v.type}
+              </span>
+            )}
             <StatusBadge status={v.status} />
           </div>
           <p className="text-xs text-muted-foreground truncate">{subtitle}</p>

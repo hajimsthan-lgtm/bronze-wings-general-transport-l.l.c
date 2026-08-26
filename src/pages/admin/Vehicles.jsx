@@ -20,11 +20,12 @@ import { saveOwnershipDocument } from '@/lib/vehicleOwnershipDoc';
 import { useToast } from '@/components/ui/use-toast';
 import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Plus, Search, Truck, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Search, Truck, Trash2, Sparkles, BookOpen } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, setVehiclesData } from '@/lib/vehiclesStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import VehicleCatalogBuilder from '@/components/admin/VehicleCatalogBuilder';
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -48,6 +49,7 @@ function VehiclesTab() {
   const [fuelRecords, setFuelRecords] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [selected, setSelected] = useState(new Set());
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const { dateFrom, dateTo } = useGlobalDate();
 
   const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -117,6 +119,18 @@ function VehiclesTab() {
   return (
     <div>
       <MobileFAB icon={Plus} onClick={openNew} label="Add Vehicle" />
+
+      {/* Catalog Builder button — floating, top-right of browse mode */}
+      {mode !== 'analytics' && (
+        <button
+          onClick={() => setCatalogOpen(true)}
+          className="hidden md:flex fixed right-6 bottom-6 z-40 items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+          style={{ background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))' }}
+        >
+          <BookOpen className="w-4 h-4" />
+          Catalog Builder
+        </button>
+      )}
 
       {mode === 'analytics' ? (
         <div data-tour data-tour-title="Fleet Analytics" data-tour-en="This panel summarizes fleet performance — active vs maintenance counts, trip activity, fuel cost trends, and vehicle utilization. Use it to spot issues at a glance." data-tour-ur="یہ پینل فلیٹ کی کارکردگی کا خلاصہ پیش کرتا ہے — فعال بمقابلہ دیکھ بھال کے حسابات، ٹرپ سرگرمی، ایندھن لاگت کے رجحانات، اور گاڑی کا استعمال۔" data-tour-ml="ഈ പാനൽ ഫ്ലീറ്റ് പ്രകടനം സംഗ്രഹിക്കുന്നു — സജീവവും പരിപാലനവുമായ എണ്ണം, യാത്രാ പ്രവർത്തനം, ഇന്ധന ചെലവ് പ്രവണത.">
@@ -238,6 +252,8 @@ function VehiclesTab() {
           }}
         />
       </EntityFormDialog>
+
+      <VehicleCatalogBuilder vehicles={filtered} open={catalogOpen} onOpenChange={setCatalogOpen} />
 
     </div>
   );
