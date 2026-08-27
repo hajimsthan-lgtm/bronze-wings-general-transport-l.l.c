@@ -495,7 +495,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     form, update, setRevenueOverride, t, inputCls, errors,
     fromSuggestions, toSuggestions, vehicleSuggestions, driverSuggestions, clientSuggestions,
     serviceProviderVendors: vendors,
-    allVehicles: vehicles, allDrivers: drivers,
+    allVehicles: vehicles, allDrivers: drivers, allClients: clients,
     isNewClient, isNewVehicle, isNewDriver,
     createdFlags, creating, createEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, false),
     fixedCharges, autoFilled,
@@ -513,7 +513,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     isNewClient: cIsNewClient, isNewVehicle: cIsNewVehicle, isNewDriver: cIsNewDriver,
     cCreatedFlags, cCreating, createContractEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, true),
     addOns: contractAddOns, setAddOns: setContractAddOns,
-    allVehicles: vehicles, allDrivers: drivers
+    allVehicles: vehicles, allDrivers: drivers, allClients: clients
   };
 
   return (

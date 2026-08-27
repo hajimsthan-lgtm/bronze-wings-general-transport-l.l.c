@@ -1,14 +1,17 @@
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt } from 'lucide-react';
+import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from '../CreateNewCard';
 import Section from '../Section';
 import TripAddOnsSection from '../TripAddOnsSection';
 import { Upload } from 'lucide-react';
 import SearchableSelect from '@/components/common/SearchableSelect';
+
+const initials = (name) => (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 const DOC_PLACEHOLDERS = [
   { key: 'doc_contract_agreement' },
@@ -33,8 +36,10 @@ export default function ContractModeFields({ p }) {
     isNewClient, isNewVehicle, isNewDriver,
     cCreatedFlags, cCreating, createContractEntity,
     addOns, setAddOns,
-    allVehicles, allDrivers,
+    allVehicles, allDrivers, allClients,
   } = p;
+
+  const [manualCompanyMode, setManualCompanyMode] = useState(false);
 
   // Company fleet only — strict separation from vendor vehicles/drivers
   const availableVehicles = (allVehicles || [])
@@ -42,14 +47,77 @@ export default function ContractModeFields({ p }) {
   const availableDrivers = (allDrivers || [])
     .filter((d) => !d.vendor_name && (d.status === 'active' || d.name === contract.driver_name));
 
+  const selectedVehicle = allVehicles?.find((v) => v.plate_number === contract.vehicle_plate);
+  const selectedDriver = allDrivers?.find((d) => d.name === contract.driver_name);
+  const selectedCompany = allClients?.find((c) => c.name === contract.company_name);
+
   return (
     <>
       {/* Contract Details — Indigo */}
       <Section title={t('contract_period')} icon={CalendarClock} accent={ACCENT.contract}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
-          <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} />
-          <datalist id="contract-company-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
+          {manualCompanyMode ? (
+            <>
+              <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} placeholder="Type company name" />
+              <datalist id="contract-company-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
+              <button type="button" onClick={() => setManualCompanyMode(false)} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
+                ← Select from list
+              </button>
+            </>
+          ) : (
+            <>
+              <SearchableSelect
+                value={contract.company_name || ''}
+                onChange={(v) => updateContract('company_name', v)}
+                placeholder="Select company"
+                renderLabel={(it) => (
+                  <span className="flex items-center gap-2 truncate">
+                    {selectedCompany?.image_url ? (
+                      <img src={selectedCompany.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                        {initials(it.label)}
+                      </span>
+                    )}
+                    <span className="truncate">{it.label}</span>
+                  </span>
+                )}
+                items={(allClients || []).filter((c) => c.status === 'active' || c.name === contract.company_name).map((c) => ({
+                  value: c.name,
+                  label: c.name,
+                  search: c.contact_person ? ` ${c.contact_person}` : '',
+                  content: (
+                    <div className="flex items-center gap-2.5 w-full">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          initials(c.name)
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {c.contact_person || 'No contact'} · ID: {(c.id || '').slice(0, 8)}
+                        </p>
+                      </div>
+                      {c.status && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                          c.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {c.status}
+                        </span>
+                      )}
+                    </div>
+                  ),
+                }))}
+              />
+              <button type="button" onClick={() => { setManualCompanyMode(true); updateContract('company_name', ''); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
+                <Plus className="w-3 h-3" /> New company not in list? Type manually
+              </button>
+            </>
+          )}
           {isNewClient && (
             <CreateNewCard label="client" value={contract.company_name} created={cCreatedFlags.company} loading={cCreating === 'company'}
               onCreate={() => createContractEntity('Client', { name: contract.company_name }, 'company')} />
@@ -148,14 +216,45 @@ export default function ContractModeFields({ p }) {
               value={contract.vehicle_plate || ''}
               onChange={(v) => updateContract('vehicle_plate', v)}
               placeholder="Select vehicle"
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  {selectedVehicle?.image_url ? (
+                    <img src={selectedVehicle.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                      <Truck className="w-3 h-3" />
+                    </span>
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
               items={availableVehicles.map((v) => ({
                 value: v.plate_number,
                 label: v.plate_number,
                 search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
                 content: (
-                  <span className="truncate">
-                    {v.plate_number}{v.make && v.model ? <span className="text-muted-foreground"> · {v.make} {v.model}</span> : ''}
-                  </span>
+                  <div className="flex items-center gap-2.5 w-full">
+                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                      {v.image_url ? (
+                        <img src={v.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <Truck className="w-3.5 h-3.5" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{v.plate_number}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {[v.make, v.model].filter(Boolean).join(' ') || 'No model'} · ID: {(v.id || '').slice(0, 8)}
+                      </p>
+                    </div>
+                    {v.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        v.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {v.status}
+                      </span>
+                    )}
+                  </div>
                 ),
               }))}
             />
@@ -166,14 +265,45 @@ export default function ContractModeFields({ p }) {
               value={contract.driver_name || ''}
               onChange={(v) => updateContract('driver_name', v)}
               placeholder="Select driver"
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  {selectedDriver?.image_url ? (
+                    <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                      {initials(it.label)}
+                    </span>
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
               items={availableDrivers.map((d) => ({
                 value: d.name,
                 label: d.name,
                 search: d.phone ? ` ${d.phone}` : '',
                 content: (
-                  <span className="truncate">
-                    {d.name}{d.phone ? <span className="text-muted-foreground"> · {d.phone}</span> : ''}
-                  </span>
+                  <div className="flex items-center gap-2.5 w-full">
+                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                      {d.image_url ? (
+                        <img src={d.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        initials(d.name)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {d.phone || 'No phone'} · ID: {(d.id || '').slice(0, 8)}
+                      </p>
+                    </div>
+                    {d.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        d.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {d.status}
+                      </span>
+                    )}
+                  </div>
                 ),
               }))}
             />

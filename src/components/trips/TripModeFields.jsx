@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck, Plus } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -29,9 +30,11 @@ export default function TripModeFields({ p }) {
     isOvertime, overtimeMetric, extraCharges,
     revenueOverridden, autoRevenue,
     serviceProviderVendors,
-    allVehicles, allDrivers,
+    allVehicles, allDrivers, allClients,
     errors = {},
   } = p;
+
+  const [manualClientMode, setManualClientMode] = useState(false);
 
   const errCls = (field) => errors[field] ? ' !border-red-500/70 !ring-2 !ring-red-500/30' : '';
   const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
@@ -50,6 +53,7 @@ export default function TripModeFields({ p }) {
 
   const selectedVehicle = allVehicles?.find((v) => v.plate_number === form.vehicle_plate);
   const selectedDriver = allDrivers?.find((d) => d.name === form.driver_name);
+  const selectedClient = allClients?.find((c) => c.name === form.client_name);
   const vehicleIsVendor = !!selectedVehicle?.vendor_name;
   const driverIsVendor = !!selectedDriver?.vendor_name;
 
@@ -87,9 +91,69 @@ export default function TripModeFields({ p }) {
       <Section title={t('client')} icon={Building2} accent="30,215,96" delay={0}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('client')} <span className="text-red-400">*</span></Label>
-          <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={`${inputCls}${errCls('client_name')}`} />
+          {manualClientMode ? (
+            <>
+              <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={`${inputCls}${errCls('client_name')}`} placeholder="Type client name" />
+              <datalist id="client-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
+              <button type="button" onClick={() => { setManualClientMode(false); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
+                ← Select from list
+              </button>
+            </>
+          ) : (
+            <>
+              <SearchableSelect
+                value={form.client_name || ''}
+                onChange={(v) => update('client_name', v)}
+                placeholder="Select client"
+                className={errCls('client_name')}
+                renderLabel={(it) => (
+                  <span className="flex items-center gap-2 truncate">
+                    {selectedClient?.image_url ? (
+                      <img src={selectedClient.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
+                        {initials(it.label)}
+                      </span>
+                    )}
+                    <span className="truncate">{it.label}</span>
+                  </span>
+                )}
+                items={(allClients || []).filter((c) => c.status === 'active' || c.name === form.client_name).map((c) => ({
+                  value: c.name,
+                  label: c.name,
+                  search: c.contact_person ? ` ${c.contact_person}` : '',
+                  content: (
+                    <div className="flex items-center gap-2.5 w-full">
+                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          initials(c.name)
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {c.contact_person || 'No contact'} · ID: {(c.id || '').slice(0, 8)}
+                        </p>
+                      </div>
+                      {c.status && (
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                          c.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {c.status}
+                        </span>
+                      )}
+                    </div>
+                  ),
+                }))}
+              />
+              <button type="button" onClick={() => { setManualClientMode(true); update('client_name', ''); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
+                <Plus className="w-3 h-3" /> New client not in list? Type manually
+              </button>
+            </>
+          )}
           {errors.client_name && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.client_name}</p>}
-          <datalist id="client-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
           {isNewClient && (
             <CreateNewCard label="client" value={form.client_name} created={createdFlags.client} loading={creating === 'client'}
               onCreate={() => createEntity('Client', { name: form.client_name }, 'client')} />
