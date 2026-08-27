@@ -19,7 +19,6 @@ import TripMapPanel from './TripMapPanel';
 import TripFinancialFields from './TripFinancialFields';
 import VendorPaymentFields from './VendorPaymentFields';
 import TripAddOnsSection from './TripAddOnsSection';
-import { CONTRACT_CATS } from './contract/contractCats';
 
 const DEFAULT_FORM = {
   from_location: '', to_location: '', vehicle_plate: '', driver_name: '', driver_phone: '', vendor_name: '',
@@ -73,9 +72,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   // Contract state
   const [contract, setContract] = useState({ ...DEFAULT_CONTRACT });
-  const [expenses, setExpenses] = useState([]);
-  const [expenseForm, setExpenseForm] = useState({ date: todayStr(), amount: '', description: '', liters: '', price_per_liter: '' });
-  const [activeCat, setActiveCat] = useState('fuel');
+  const [contractAddOns, setContractAddOns] = useState([]);
 
   useEffect(() => {
     if (open) {
@@ -120,9 +117,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           per_day_rate: editContract.per_day_rate || ''
         });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
-        base44.entities.ContractExpense.filter({ contract_id: editContract.id }).
-        then((rows) => setExpenses((rows || []).map((r) => ({ ...r, id: r.id })))).
-        catch(() => setExpenses([]));
+        setContractAddOns(Array.isArray(editContract.add_ons) ? editContract.add_ons : []);
       } else if (editTrip) {
         setMode('trip');
         setForm({
@@ -152,9 +147,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         setForm({ ...DEFAULT_FORM, trip_date: todayStr(), ...(prefill || {}) });
         setAddOns([]);
         setContract({ ...DEFAULT_CONTRACT });
-        setExpenses([]);
-        setExpenseForm({ date: todayStr(), amount: '', description: '', liters: '', price_per_liter: '' });
-        setActiveCat('fuel');
+        setContractAddOns([]);
         setCreatedFlags({ client: false, vehicle: false, driver: false });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
       }
@@ -345,34 +338,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } catch (e) {} finally {setter(null);}
   };
 
-  // Expense tracker
-  const addExpense = () => {
-    const amt = Number(expenseForm.amount) || 0;
-    if (!amt && !expenseForm.description) return;
-    setExpenses((prev) => [
-    ...prev,
-    {
-      id: `local-${Date.now()}`,
-      category: activeCat,
-      date: expenseForm.date || todayStr(),
-      amount: amt,
-      description: expenseForm.description,
-      liters: activeCat === 'fuel' ? Number(expenseForm.liters) || 0 : 0,
-      price_per_liter: activeCat === 'fuel' ? Number(expenseForm.price_per_liter) || 0 : 0
-    }]
-    );
-    setExpenseForm({ date: todayStr(), amount: '', description: '', liters: '', price_per_liter: '' });
-  };
-  const removeExpense = (id) => setExpenses((prev) => prev.filter((e) => e.id !== id));
-
-  const catTotals = CONTRACT_CATS.map((c) => ({
-    ...c,
-    label: t(c.labelKey),
-    amount: expenses.filter((e) => e.category === c.key).reduce((s, e) => s + (Number(e.amount) || 0), 0)
-  }));
-  const totalExpenses = catTotals.reduce((s, c) => s + c.amount, 0);
   const monthlyRate = Number(contract.monthly_rate) || 0;
-  const totalBillable = monthlyRate + totalExpenses;
 
   const handleSaveDraft = async () => {
     setSaving(true);
@@ -470,21 +436,16 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           usage_hours: Number(contract.usage_hours) || 0,
           usage_days: Number(contract.usage_days) || 0,
           per_hour_rate: Number(contract.per_hour_rate) || 0,
-          per_day_rate: Number(contract.per_day_rate) || 0
+          per_day_rate: Number(contract.per_day_rate) || 0,
+          add_ons: contractAddOns || []
         };
         let recordId;
         if (editContract) {
           await base44.entities.MonthlyContract.update(editContract.id, payload);
           recordId = editContract.id;
-          await base44.entities.ContractExpense.deleteMany({ contract_id: recordId }).catch(() => {});
         } else {
           const created = await base44.entities.MonthlyContract.create(payload);
           recordId = created.id;
-        }
-        if (expenses.length) {
-          await base44.entities.ContractExpense.bulkCreate(
-            expenses.map((e) => ({ category: e.category, date: e.date, amount: e.amount, description: e.description, liters: e.liters, price_per_liter: e.price_per_liter, contract_id: recordId }))
-          );
         }
       }
       onOpenChange(false);
@@ -551,8 +512,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     vehicleSuggestions, driverSuggestions, clientSuggestions,
     isNewClient: cIsNewClient, isNewVehicle: cIsNewVehicle, isNewDriver: cIsNewDriver,
     cCreatedFlags, cCreating, createContractEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, true),
-    expenses, expenseForm, setExpenseForm, addExpense, removeExpense,
-    activeCat, setActiveCat, catTotals,
+    addOns: contractAddOns, setAddOns: setContractAddOns,
     allVehicles: vehicles, allDrivers: drivers
   };
 
@@ -628,7 +588,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               </div>
             )}
             {mode === 'contract' &&
-            <ContractProfitPanel monthlyRate={monthlyRate} totalExpenses={totalExpenses} catTotals={catTotals} expenses={expenses} endDate={contract.end_date} t={t} />
+            <ContractProfitPanel monthlyRate={monthlyRate} addOns={contractAddOns} endDate={contract.end_date} t={t} />
             }
             {mode === 'trip' && !mapCollapsed && (
               <div className="text-center text-[9px] opacity-20 select-none" aria-hidden>🚚</div>
@@ -638,18 +598,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
         {/* Contract mode mobile condensed bar */}
         {mode === 'contract' && (
-        <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-3 gap-3 text-center">
+        <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="eyebrow mb-1">{t('monthly_rental')}</p>
               <p className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(monthlyRate)}</p>
             </div>
             <div>
-              <p className="eyebrow mb-1">{t('total_expenses')}</p>
-              <p className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalExpenses)}</p>
-            </div>
-            <div>
               <p className="eyebrow mb-1">{t('total')}</p>
-              <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(totalBillable)}</p>
+              <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(monthlyRate)}</p>
             </div>
           </div>
         )}

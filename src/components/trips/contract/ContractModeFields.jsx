@@ -2,12 +2,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from '../CreateNewCard';
 import Section from '../Section';
-import { CONTRACT_CATS } from './contractCats';
+import TripAddOnsSection from '../TripAddOnsSection';
+import { Upload } from 'lucide-react';
 import SearchableSelect from '@/components/common/SearchableSelect';
 
 const DOC_PLACEHOLDERS = [
@@ -17,18 +17,24 @@ const DOC_PLACEHOLDERS = [
   { key: 'doc_vehicle_photos' },
 ];
 
+// Light professional accent colors per section
+const ACCENT = {
+  contract: '99, 102, 241',    // indigo
+  usage: '16, 185, 129',       // emerald
+  assignment: '139, 92, 246',  // violet
+  addons: '245, 158, 11',     // amber
+  docs: '100, 116, 139',      // slate
+};
+
 export default function ContractModeFields({ p }) {
   const {
     contract, updateContract, t, inputCls,
     vehicleSuggestions, driverSuggestions, clientSuggestions,
     isNewClient, isNewVehicle, isNewDriver,
     cCreatedFlags, cCreating, createContractEntity,
-    expenses, expenseForm, setExpenseForm, addExpense, removeExpense,
-    activeCat, setActiveCat, catTotals,
+    addOns, setAddOns,
     allVehicles, allDrivers,
   } = p;
-
-  const activeMeta = CONTRACT_CATS.find((c) => c.key === activeCat) || CONTRACT_CATS[0];
 
   // Company fleet only — strict separation from vendor vehicles/drivers
   const availableVehicles = (allVehicles || [])
@@ -38,8 +44,8 @@ export default function ContractModeFields({ p }) {
 
   return (
     <>
-      {/* Contract Details */}
-      <Section title={t('contract_period')}>
+      {/* Contract Details — Indigo */}
+      <Section title={t('contract_period')} icon={CalendarClock} accent={ACCENT.contract}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
           <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} />
@@ -85,8 +91,8 @@ export default function ContractModeFields({ p }) {
         </div>
       </Section>
 
-      {/* Usage & Pricing */}
-      <Section title={t('usage_pricing') || 'Usage & Pricing'}>
+      {/* Usage & Pricing — Emerald */}
+      <Section title={t('usage_pricing') || 'Usage & Pricing'} icon={TrendingUp} accent={ACCENT.usage}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('usage_date') || 'Usage Date'}</Label>
@@ -133,8 +139,8 @@ export default function ContractModeFields({ p }) {
         })()}
       </Section>
 
-      {/* Assignment */}
-      <Section title="Assignment">
+      {/* Assignment — Violet */}
+      <Section title="Assignment" icon={UserCheck} accent={ACCENT.assignment}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('chiller_van')}</Label>
@@ -175,93 +181,13 @@ export default function ContractModeFields({ p }) {
         </div>
       </Section>
 
-      {/* Expense Tracker */}
-      <Section title={t('expense_tracker')}>
-        <div className="flex flex-wrap gap-1.5">
-          {CONTRACT_CATS.map((c) => {
-            const total = catTotals.find((ct) => ct.key === c.key)?.amount || 0;
-            const isActive = activeCat === c.key;
-            return (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => setActiveCat(c.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 border ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60 bg-white/[0.03] border-white/[0.06]'}`}
-                style={isActive
-                  ? { background: `${c.color}22`, borderColor: `${c.color}55`, boxShadow: `0 0 10px ${c.color}22` }
-                  : undefined
-                }>
-                <c.icon className="w-3.5 h-3.5" style={{ color: c.color }} />
-                {t(c.labelKey)}
-                {total > 0 && <span className="opacity-70">{formatCurrency(total)}</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="glass-card p-3 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs text-white/60 mb-1.5">{t('date')}</Label>
-              <Input type="date" value={expenseForm.date} onChange={(e) => setExpenseForm((f) => ({ ...f, date: e.target.value }))} className={`${inputCls} date-input-clean`} />
-            </div>
-            <div>
-              <Label className="text-xs text-white/60 mb-1.5">{t('amount')} (AED)</Label>
-              <Input type="number" value={expenseForm.amount} onChange={(e) => setExpenseForm((f) => ({ ...f, amount: e.target.value }))} className={inputCls} />
-            </div>
-          </div>
-          {activeCat === 'fuel' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-white/60 mb-1.5">{t('liters')}</Label>
-                <Input type="number" value={expenseForm.liters} onChange={(e) => setExpenseForm((f) => ({ ...f, liters: e.target.value }))} className={inputCls} />
-              </div>
-              <div>
-                <Label className="text-xs text-white/60 mb-1.5">{t('price_per_liter')}</Label>
-                <Input type="number" value={expenseForm.price_per_liter} onChange={(e) => setExpenseForm((f) => ({ ...f, price_per_liter: e.target.value }))} className={inputCls} />
-              </div>
-            </div>
-          )}
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('description')}</Label>
-            <Input value={expenseForm.description} onChange={(e) => setExpenseForm((f) => ({ ...f, description: e.target.value }))} className={inputCls} />
-          </div>
-          <Button type="button" variant="outline" onClick={addExpense} className="w-full border-border border-dashed">
-            <Plus className="w-4 h-4 mr-1.5" /> {activeMeta.labelKey ? `${t(activeMeta.labelKey)} — ${t('add_expense')}` : t('add_expense')}
-          </Button>
-        </div>
-
-        {expenses.length > 0 && (
-          <div className="space-y-2">
-            {expenses.map((e) => {
-              const meta = CONTRACT_CATS.find((c) => c.key === e.category) || CONTRACT_CATS[0];
-              return (
-                <div key={e.id} className="group flex items-center gap-3 glass-card p-2.5">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${meta.color}1a`, border: `1px solid ${meta.color}33` }}>
-                    <meta.icon className="w-4 h-4" style={{ color: meta.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-foreground truncate">{e.description || t(meta.labelKey)}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {t(meta.labelKey)} · {e.date}
-                      {e.category === 'fuel' && (Number(e.liters) > 0 || Number(e.price_per_liter) > 0) && (
-                        <span className="opacity-70"> · {e.liters}L × {formatCurrency(Number(e.price_per_liter) || 0)}</span>
-                      )}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold tabular-nums text-foreground flex-shrink-0">{formatCurrency(Number(e.amount) || 0)}</span>
-                  <button type="button" onClick={() => removeExpense(e.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-400 p-1">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
+      {/* Add-on Payments — Amber (same as per-trip) */}
+      <Section title="Add-on Payments" icon={Receipt} accent={ACCENT.addons}>
+        <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
       </Section>
 
-      {/* Document Vault */}
-      <Section title={t('document_vault')}>
+      {/* Document Vault — Slate */}
+      <Section title={t('document_vault')} icon={FolderLock} accent={ACCENT.docs}>
         <div className="grid grid-cols-2 gap-3">
           {DOC_PLACEHOLDERS.map((d) => (
             <button
