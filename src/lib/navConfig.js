@@ -62,7 +62,7 @@ export const navItems = [
 export const secondaryNav = [
   { key: 'trash', label: 'Trash', path: '/trash', icon: 'Trash2', color: '#ef4444' },
   { key: 'agents', label: 'AI Agents', path: '/agents', icon: 'Bot', color: '#a855f7' },
-  { key: 'prompt_generator', label: 'Prompt Studio', path: '/prompt-generator', icon: 'Sparkles', color: '#ec4899' },
+  { key: 'vehicle_icon_creator', label: 'Icon Creator', path: '/vehicle-icon-creator', icon: 'Truck', color: '#3b82f6' },
 ];
 
 export function getIcon(name) {

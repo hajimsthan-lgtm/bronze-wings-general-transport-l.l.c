@@ -52,7 +52,7 @@ const Vendors = lazy(() => import('@/pages/admin/Vendors'));
 const CompanyDocuments = lazy(() => import('@/pages/admin/CompanyDocuments'));
 const ServiceProviderDetail = lazy(() => import('@/pages/admin/ServiceProviderDetail'));
 const Settings = lazy(() => import('@/pages/Settings'));
-const PromptGenerator = lazy(() => import('@/pages/PromptGenerator'));
+const VehicleIconCreator = lazy(() => import('@/pages/VehicleIconCreator'));
 const Agents = lazy(() => import('@/pages/Agents'));
 const Notifications = lazy(() => import('@/pages/Notifications'));
 const Quotations = lazy(() => import('@/pages/Quotations'));
@@ -125,7 +125,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/vendors/:id" element={<VendorDetail />} />
           <Route path="/admin/service-providers/:id" element={<ServiceProviderDetail />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/prompt-generator" element={<PromptGenerator />} />
+          <Route path="/vehicle-icon-creator" element={<VehicleIconCreator />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/notifications" element={<Notifications />} />
         </Route>

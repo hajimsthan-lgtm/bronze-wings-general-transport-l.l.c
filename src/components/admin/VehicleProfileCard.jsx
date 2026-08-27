@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Truck, Fuel as FuelIcon, MessageCircle, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, ChevronDown, Pencil, Phone, Mail, IdCard, User } from 'lucide-react';
+import { Truck, Fuel as FuelIcon, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, Pencil, Phone, Mail, IdCard, User, BadgeCheck, Hash, Gauge, Cog, UserCheck } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -29,10 +29,9 @@ const CARD_BASE = {
 };
 
 export default function VehicleProfileCard({ vehicle, license, driver, stats, onSaveOwnership, onSaved }) {
-  // vehicleType (e.g. "TOYOTA HI ACE") lives on the VehicleLicense record
   const vehicleType = license?.vehicleType || [vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle';
-  const [expanded, setExpanded] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [showOwnership, setShowOwnership] = useState(false);
 
   const statsList = [
     { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#4ADE80' },
@@ -41,36 +40,24 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
     { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
   ];
 
-  const detailTiles = [
-    { label: 'Registration', value: formatDate(vehicle.registration_expiry), icon: CalendarClock, accent: '#4ADE80', tone: expiryTone(vehicle.registration_expiry) },
-    { label: 'Insurance', value: formatDate(vehicle.insurance_expiry), icon: ShieldCheck, accent: '#34d399', tone: expiryTone(vehicle.insurance_expiry) },
-    { label: 'Last Service', value: formatDate(vehicle.last_service_date), icon: Wrench, accent: '#f59e0b', tone: 'text-foreground' },
-    { label: 'Next Service', value: formatDate(vehicle.next_service_date), icon: CalendarDays, accent: '#a855f7', tone: expiryTone(vehicle.next_service_date) },
-  ];
-
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
-      {/* edit pencil — top corner */}
-      <button
-        onClick={() => setEditOpen(true)}
-        aria-label="Edit vehicle"
-        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-      >
-        <Pencil className="w-3.5 h-3.5" />
-      </button>
       {/* header band */}
       <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#1ED760', 0.10)} 0%, transparent 100%)` }}>
         <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#1ED760', 0.5)} 0%, transparent 70%)` }} />
         <div className="relative flex items-center gap-3">
           <div className="relative flex-shrink-0">
             <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.40) 0%, transparent 70%)' }} />
-            <div className="relative w-14 h-14 rounded-xl flex items-center justify-center border border-white/10" style={{ background: hexToRgba('#1ED760', 0.14) }}>
-              <Truck className="w-7 h-7" style={{ color: '#1ED760' }} />
+            <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
+              {vehicle.image_url
+                ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" />
+                : <Truck className="w-7 h-7 text-primary" />}
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-base font-bold text-foreground leading-tight truncate">{vehicleType}</h2>
+              <h2 className="text-base font-bold text-foreground leading-tight break-words">{vehicleType}</h2>
+              <BadgeCheck className="w-4 h-4 text-primary flex-shrink-0" />
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="relative flex w-2 h-2">
@@ -80,102 +67,180 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
               <span className="text-xs text-muted-foreground capitalize">{vehicle.type} Transport Vehicle{vehicle.year ? ` · ${vehicle.year}` : ''}</span>
             </div>
           </div>
+          <button onClick={() => setEditOpen(true)} className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Edit vehicle">
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
           <StatusBadge status={vehicle.status} />
-
         </div>
       </div>
 
-      {/* plate badge */}
-      <div className="px-5 pt-4">
-        <PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} />
-      </div>
-
       {/* inline stats strip */}
-      <div className="grid grid-cols-4 divide-x divide-white/[0.06] mt-4">
+      <div className="grid grid-cols-4 divide-x divide-white/[0.06]">
         {statsList.map((s) => (
           <div key={s.label} className="px-1.5 py-3 text-center">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">{s.label}</p>
-            <p className="text-xs font-semibold tabular-nums truncate" style={{ color: s.accent }}>{s.value}</p>
+            <p className="text-sm font-semibold tabular-nums truncate" style={{ color: s.accent }}>{s.value}</p>
           </div>
         ))}
       </div>
 
-      {/* expandable details button */}
-      <div className="px-5 pb-5">
-        <button onClick={() => setExpanded((e) => !e)} className="w-full inline-flex items-center justify-center gap-1.5 h-9 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-foreground hover:bg-white/10 transition-colors">
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
-          {expanded ? 'Hide Details & Ownership' : 'View Details & Ownership Card'}
-        </button>
+      {/* info rows */}
+      <div className="px-5 py-4 space-y-2.5">
+        {/* Plate badge */}
+        <div className="flex items-center gap-2.5 text-xs">
+          <Hash className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+          <span className="text-muted-foreground">Plate</span>
+          <span className="ml-auto"><PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} /></span>
+        </div>
+
+        {/* Make / Model */}
+        <div className="flex items-center gap-2.5 text-xs">
+          <Truck className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+          <span className="text-muted-foreground">Make / Model</span>
+          <span className="ml-auto font-semibold text-foreground truncate">{[vehicle.make, vehicle.model].filter(Boolean).join(' ') || '—'}</span>
+        </div>
+
+        {/* Year */}
+        {vehicle.year && (
+          <div className="flex items-center gap-2.5 text-xs">
+            <CalendarDays className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+            <span className="text-muted-foreground">Year</span>
+            <span className="ml-auto font-semibold text-foreground tabular-nums">{vehicle.year}</span>
+          </div>
+        )}
+
+        {/* Fuel type */}
+        <div className="flex items-center gap-2.5 text-xs">
+          <FuelIcon className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+          <span className="text-muted-foreground">Fuel Type</span>
+          <span className="ml-auto font-semibold text-foreground capitalize">{vehicle.fuel_type || '—'}</span>
+        </div>
+
+        {/* Odometer */}
+        <div className="flex items-center gap-2.5 text-xs">
+          <Gauge className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+          <span className="text-muted-foreground">Odometer</span>
+          <span className="ml-auto font-semibold text-foreground tabular-nums">{Number(vehicle.odometer_km || 0).toLocaleString()} km</span>
+        </div>
+
+        {/* Assigned driver */}
+        {vehicle.assigned_driver && (
+          <div className="flex items-center gap-2.5 text-xs">
+            <UserCheck className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+            <span className="text-muted-foreground">Assigned Driver</span>
+            <span className="ml-auto font-semibold text-foreground truncate">{vehicle.assigned_driver}</span>
+          </div>
+        )}
+
+        {/* Vendor */}
+        {vehicle.vendor_name && (
+          <div className="flex items-center gap-2.5 text-xs">
+            <User className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+            <span className="text-muted-foreground">Vendor</span>
+            <span className="ml-auto font-semibold text-foreground truncate">{vehicle.vendor_name}</span>
+          </div>
+        )}
+
+        {/* Compliance Dates sub-section */}
+        <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Compliance & Service</span>
+          </div>
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2.5 text-xs">
+              <CalendarClock className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+              <span className="text-muted-foreground">Registration</span>
+              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.registration_expiry)}`}>{formatDate(vehicle.registration_expiry) || '—'}</span>
+            </div>
+            <div className="flex items-center gap-2.5 text-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+              <span className="text-muted-foreground">Insurance</span>
+              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.insurance_expiry)}`}>{formatDate(vehicle.insurance_expiry) || '—'}</span>
+            </div>
+            <div className="flex items-center gap-2.5 text-xs">
+              <Wrench className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+              <span className="text-muted-foreground">Last Service</span>
+              <span className="ml-auto font-semibold text-foreground tabular-nums truncate">{formatDate(vehicle.last_service_date) || '—'}</span>
+            </div>
+            <div className="flex items-center gap-2.5 text-xs">
+              <CalendarDays className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+              <span className="text-muted-foreground">Next Service</span>
+              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.next_service_date)}`}>{formatDate(vehicle.next_service_date) || '—'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Ownership Card sub-section */}
+        <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2 mb-2">
+            <CreditCard className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Ownership Card</span>
+            <button
+              onClick={() => setShowOwnership((s) => !s)}
+              className="ml-auto text-[10px] text-primary hover:underline"
+            >
+              {showOwnership ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {showOwnership && (
+            <div className="animate-fade-in">
+              <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
+              <p className="text-[10px] text-muted-foreground mt-2">Attach front &amp; back (JPG/PNG). Use the flip icon to switch sides.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Driver Details sub-section */}
+        {driver && (driver.phone || driver.email || driver.license_number) && (
+          <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-2">
+              <User className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Driver Details</span>
+              {driver.name && <span className="text-xs text-muted-foreground truncate ml-1">· {driver.name}</span>}
+            </div>
+            <div className="space-y-2.5">
+              {driver.phone && (
+                <a href={`tel:${driver.phone}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
+                  <Phone className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span className="text-muted-foreground">Phone</span>
+                  <span className="ml-auto font-semibold text-foreground truncate">{driver.phone}</span>
+                </a>
+              )}
+              {driver.email && (
+                <a href={`mailto:${driver.email}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
+                  <Mail className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="ml-auto font-semibold text-foreground truncate">{driver.email}</span>
+                </a>
+              )}
+              {driver.license_number && (
+                <div className="flex items-center gap-2.5 text-xs">
+                  <IdCard className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+                  <span className="text-muted-foreground">License #</span>
+                  <span className="ml-auto font-semibold text-foreground truncate">{driver.license_number}</span>
+                </div>
+              )}
+              {driver.license_expiry && (
+                <div className="flex items-center gap-2.5 text-xs">
+                  <CalendarClock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                  <span className="text-muted-foreground">License Expiry</span>
+                  <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(driver.license_expiry)}`}>{formatDate(driver.license_expiry)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {expanded && (
-        <div className="px-5 pb-5 border-t border-white/[0.06] animate-fade-in">
-          <div className="flex items-center gap-2 mb-3 mt-4">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#a855f7', 0.14), border: `1px solid ${hexToRgba('#a855f7', 0.3)}` }}>
-              <CreditCard className="w-4 h-4" style={{ color: '#a855f7' }} />
-            </div>
-            <h3 className="text-sm font-semibold text-foreground">Ownership Card</h3>
+      {/* Scanned license data footer */}
+      {vehicle.notes && (
+        <div className="mx-5 mb-5 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.06) }}>
+          <div className="flex items-center gap-2 mb-2">
+            <StickyNote className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Scanned License Data</span>
           </div>
-          <div className="w-full">
-            <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-3 mb-4">Attach front &amp; back (JPG/PNG). Use the flip icon on the card to switch sides.</p>
-
-          {driver && (driver.phone || driver.email || driver.license_number) && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: hexToRgba('#3b82f6', 0.14), border: `1px solid ${hexToRgba('#3b82f6', 0.3)}` }}>
-                  <User className="w-4 h-4" style={{ color: '#3b82f6' }} />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">Driver Details</h3>
-                {driver.name && <span className="text-xs text-muted-foreground truncate ml-1">· {driver.name}</span>}
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
-                {driver.phone && (
-                  <a href={`tel:${driver.phone}`} className="rounded-xl p-2.5 border border-white/[0.06] hover:border-white/[0.12] transition-colors" style={{ background: hexToRgba('#22c55e', 0.05) }}>
-                    <div className="flex items-center gap-1.5 mb-1"><Phone className="w-3.5 h-3.5" style={{ color: '#22c55e' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Phone</p></div>
-                    <p className="text-sm font-semibold text-foreground truncate">{driver.phone}</p>
-                  </a>
-                )}
-                {driver.email && (
-                  <a href={`mailto:${driver.email}`} className="rounded-xl p-2.5 border border-white/[0.06] hover:border-white/[0.12] transition-colors" style={{ background: hexToRgba('#3b82f6', 0.05) }}>
-                    <div className="flex items-center gap-1.5 mb-1"><Mail className="w-3.5 h-3.5" style={{ color: '#3b82f6' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Email</p></div>
-                    <p className="text-sm font-semibold text-foreground truncate">{driver.email}</p>
-                  </a>
-                )}
-                {driver.license_number && (
-                  <div className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.05) }}>
-                    <div className="flex items-center gap-1.5 mb-1"><IdCard className="w-3.5 h-3.5" style={{ color: '#a855f7' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">License #</p></div>
-                    <p className="text-sm font-semibold text-foreground truncate">{driver.license_number}</p>
-                  </div>
-                )}
-                {driver.license_expiry && (
-                  <div className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba('#f59e0b', 0.05) }}>
-                    <div className="flex items-center gap-1.5 mb-1"><CalendarClock className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">License Expiry</p></div>
-                    <p className={`text-sm font-semibold tabular-nums truncate ${expiryTone(driver.license_expiry)}`}>{formatDate(driver.license_expiry)}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2.5">
-            {detailTiles.map((d) => { const I = d.icon; return (
-              <div key={d.label} className="rounded-xl p-2.5 border border-white/[0.06]" style={{ background: hexToRgba(d.accent, 0.05) }}>
-                <div className="flex items-center gap-1.5 mb-1"><I className="w-3.5 h-3.5" style={{ color: d.accent }} /><p className="text-[10px] uppercase tracking-wider text-muted-foreground">{d.label}</p></div>
-                <p className={`text-sm font-semibold tabular-nums truncate ${d.tone}`}>{d.value || '—'}</p>
-              </div>
-            );})}
-          </div>
-          {vehicle.notes && (
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <StickyNote className="w-4 h-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">Scanned License Data</h3>
-              </div>
-              <VehicleLicenseInfo notes={vehicle.notes} />
-            </div>
-          )}
+          <VehicleLicenseInfo notes={vehicle.notes} />
         </div>
       )}
 
