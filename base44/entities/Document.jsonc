@@ -24,12 +24,26 @@
     "related_id": {
       "type": "string"
     },
+    "reference_number": {
+      "type": "string"
+    },
+    "issuing_authority": {
+      "type": "string"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
     "file_url": {
       "type": "string"
     },
     "expiry_date": {
       "type": "string",
       "format": "date"
+    },
+    "alert_days": {
+      "type": "number",
+      "default": 30
     },
     "status": {
       "type": "string",
@@ -42,6 +56,35 @@
     },
     "notes": {
       "type": "string"
+    },
+    "renewal_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "old_expiry": {
+            "type": "string",
+            "format": "date"
+          },
+          "new_expiry": {
+            "type": "string",
+            "format": "date"
+          },
+          "renewed_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "old_file_url": {
+            "type": "string"
+          },
+          "new_file_url": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "required": [
