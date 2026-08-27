@@ -95,20 +95,15 @@ export default function Services() {
                 >
                   <Link to={item.path} className="flex flex-col items-center gap-1.5 active:scale-90 transition-transform">
                     <div className="relative">
-                      {/* Blur glow halo */}
                       <div
                         className="absolute inset-0 rounded-2xl blur-md opacity-50"
                         style={{ background: item.color }}
                       />
                       <div
-                        className="relative h-12 w-12 rounded-2xl flex items-center justify-center text-white overflow-hidden"
-                        style={{
-                          background: `linear-gradient(to bottom right, ${item.color}, ${item.color}cc)`,
-                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.12)`,
-                        }}
+                        className="relative h-12 w-12 rounded-2xl flex items-center justify-center text-white"
+                        style={{ background: `linear-gradient(135deg, ${item.color}, ${item.color}aa)` }}
                       >
-                        <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-2xl" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.22), transparent)' }} />
-                        <Icon className="w-6 h-6 relative z-10" strokeWidth={2} />
+                        <Icon className="w-6 h-6" strokeWidth={2} />
                       </div>
                     </div>
                     <span className="text-[10px] font-semibold text-foreground/80 text-center leading-tight">{item.label}</span>

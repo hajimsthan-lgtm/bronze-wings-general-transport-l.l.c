@@ -138,7 +138,7 @@ export default function SearchableSelect({
                     setOpen(false);
                   }}
                   className={cn(
-                    'relative flex w-full cursor-default select-none items-center rounded-lg py-2 pl-2.5 pr-8 text-sm outline-none transition-colors hover:bg-primary/15',
+                    'relative flex w-full cursor-default select-none items-center text-left rounded-lg py-2 pl-2.5 pr-8 text-sm outline-none transition-colors hover:bg-primary/15',
                     it.value === value && 'bg-primary/10'
                   )}
                 >

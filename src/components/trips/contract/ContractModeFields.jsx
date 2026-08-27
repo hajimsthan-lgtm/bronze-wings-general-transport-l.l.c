@@ -10,6 +10,7 @@ import Section from '../Section';
 import TripAddOnsSection from '../TripAddOnsSection';
 import { Upload } from 'lucide-react';
 import SearchableSelect from '@/components/common/SearchableSelect';
+import GradientAvatar from '@/components/common/GradientAvatar';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -76,9 +77,7 @@ export default function ContractModeFields({ p }) {
                     {selectedCompany?.image_url ? (
                       <img src={selectedCompany.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                     ) : (
-                      <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
-                        {initials(it.label)}
-                      </span>
+                      <GradientAvatar name={it.label} size="xs" />
                     )}
                     <span className="truncate">{it.label}</span>
                   </span>
@@ -88,14 +87,12 @@ export default function ContractModeFields({ p }) {
                   label: c.name,
                   search: c.contact_person ? ` ${c.contact_person}` : '',
                   content: (
-                    <div className="flex items-center gap-2.5 w-full">
-                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
-                        {c.image_url ? (
-                          <img src={c.image_url} alt="" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          initials(c.name)
-                        )}
-                      </div>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {c.image_url ? (
+                        <img src={c.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <GradientAvatar name={c.name} size="md" />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
                         <p className="text-[10px] text-muted-foreground truncate">
@@ -233,7 +230,7 @@ export default function ContractModeFields({ p }) {
                 label: v.plate_number,
                 search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
                 content: (
-                  <div className="flex items-center gap-2.5 w-full">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
                       {v.image_url ? (
                         <img src={v.image_url} alt="" className="w-full h-full rounded-full object-cover" />
@@ -270,9 +267,7 @@ export default function ContractModeFields({ p }) {
                   {selectedDriver?.image_url ? (
                     <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                   ) : (
-                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
-                      {initials(it.label)}
-                    </span>
+                    <GradientAvatar name={it.label} size="xs" />
                   )}
                   <span className="truncate">{it.label}</span>
                 </span>
@@ -282,14 +277,12 @@ export default function ContractModeFields({ p }) {
                 label: d.name,
                 search: d.phone ? ` ${d.phone}` : '',
                 content: (
-                  <div className="flex items-center gap-2.5 w-full">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
-                      {d.image_url ? (
-                        <img src={d.image_url} alt="" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        initials(d.name)
-                      )}
-                    </div>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {d.image_url ? (
+                      <img src={d.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <GradientAvatar name={d.name} size="md" />
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">

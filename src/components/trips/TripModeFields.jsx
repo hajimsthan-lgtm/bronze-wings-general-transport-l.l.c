@@ -14,6 +14,7 @@ import VendorPaymentFields from './VendorPaymentFields';
 import TripFinancialFields from './TripFinancialFields';
 import SearchableSelect from '@/components/common/SearchableSelect';
 import { Switch } from '@/components/ui/switch';
+import GradientAvatar from '@/components/common/GradientAvatar';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -111,9 +112,7 @@ export default function TripModeFields({ p }) {
                     {selectedClient?.image_url ? (
                       <img src={selectedClient.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                     ) : (
-                      <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
-                        {initials(it.label)}
-                      </span>
+                      <GradientAvatar name={it.label} size="xs" />
                     )}
                     <span className="truncate">{it.label}</span>
                   </span>
@@ -123,14 +122,12 @@ export default function TripModeFields({ p }) {
                   label: c.name,
                   search: c.contact_person ? ` ${c.contact_person}` : '',
                   content: (
-                    <div className="flex items-center gap-2.5 w-full">
-                      <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0 overflow-hidden">
-                        {c.image_url ? (
-                          <img src={c.image_url} alt="" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          initials(c.name)
-                        )}
-                      </div>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {c.image_url ? (
+                        <img src={c.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <GradientAvatar name={c.name} size="md" />
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
                         <p className="text-[10px] text-muted-foreground truncate">
@@ -327,9 +324,7 @@ export default function TripModeFields({ p }) {
                   {selectedDriver?.image_url ? (
                     <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
                   ) : (
-                    <span className="w-5 h-5 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[8px] font-bold text-primary flex-shrink-0">
-                      {initials(it.label)}
-                    </span>
+                    <GradientAvatar name={it.label} size="xs" />
                   )}
                   <span className="truncate">{it.label}</span>
                 </span>
@@ -339,14 +334,12 @@ export default function TripModeFields({ p }) {
                 label: d.name,
                 search: d.phone ? ` ${d.phone}` : '',
                 content: (
-                  <div className="flex items-center gap-2.5 w-full">
-                    <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
-                      {d.image_url ? (
-                        <img src={d.image_url} alt="" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        initials(d.name)
-                      )}
-                    </div>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {d.image_url ? (
+                      <img src={d.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <GradientAvatar name={d.name} size="md" />
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">
@@ -397,7 +390,7 @@ export default function TripModeFields({ p }) {
                 label: v.plate_number,
                 search: v.make && v.model ? ` ${v.make} ${v.model}` : (v.make ? ` ${v.make}` : ''),
                 content: (
-                  <div className="flex items-center gap-2.5 w-full">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
                       {v.image_url ? (
                         <img src={v.image_url} alt="" className="w-full h-full rounded-full object-cover" />

@@ -58,9 +58,16 @@ export default function GlobalDateFilter({ className = '', style, solid }) {
       <PopoverContent className="w-auto p-0 bg-popover border-border" align="center">
         <div className="flex flex-col sm:flex-row">
           <div className="p-3 sm:border-r border-border bg-muted/30 flex flex-col gap-1">
-            <div className="inline-flex p-0.5 rounded-lg bg-background/40 border border-white/10 mb-2 self-start">
-              <button type="button" onClick={() => setMode('range')} className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors', mode === 'range' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}>Range</button>
-              <button type="button" onClick={() => setMode('single')} className={cn('px-2.5 h-7 rounded-md text-[11px] font-medium transition-colors', mode === 'single' ? 'bg-primary/20 text-foreground border border-primary/40' : 'text-muted-foreground hover:text-foreground')}>Single</button>
+            <div className="flex items-center justify-center gap-3 mb-3 self-start py-1">
+              <span className={cn('text-xs font-medium transition-colors', mode === 'range' ? 'text-foreground' : 'text-muted-foreground')}>Range</span>
+              <button
+                type="button"
+                onClick={() => setMode(mode === 'range' ? 'single' : 'range')}
+                className="relative h-7 w-12 rounded-full bg-white/20 p-1 transition-colors"
+              >
+                <div className={cn('h-5 w-5 rounded-full bg-white transition-transform duration-200', mode === 'single' ? 'ml-auto' : 'mr-auto')} />
+              </button>
+              <span className={cn('text-xs font-medium transition-colors', mode === 'single' ? 'text-foreground' : 'text-muted-foreground')}>Single</span>
             </div>
             {mode === 'range' ? (
               <>
