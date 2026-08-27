@@ -208,6 +208,51 @@ export default function ContractModeFields({ p }) {
       <Section title="Assignment" icon={UserCheck} accent={ACCENT.assignment}>
         <div className="grid grid-cols-2 gap-3">
           <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('assigned_driver')}</Label>
+            <SearchableSelect
+              value={contract.driver_name || ''}
+              onChange={(v) => updateContract('driver_name', v)}
+              placeholder="Select driver"
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  {selectedDriver?.image_url ? (
+                    <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                  ) : (
+                    <GradientAvatar name={it.label} size="xs" />
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
+              items={availableDrivers.map((d) => ({
+                value: d.name,
+                label: d.name,
+                search: d.phone ? ` ${d.phone}` : '',
+                content: (
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {d.image_url ? (
+                      <img src={d.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <GradientAvatar name={d.name} size="md" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {d.phone || 'No phone'} · ID: {(d.id || '').slice(0, 8)}
+                      </p>
+                    </div>
+                    {d.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        d.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {d.status}
+                      </span>
+                    )}
+                  </div>
+                ),
+              }))}
+            />
+          </div>
+          <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('chiller_van')}</Label>
             <SearchableSelect
               value={contract.vehicle_plate || ''}
@@ -249,51 +294,6 @@ export default function ContractModeFields({ p }) {
                         v.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
                       }`}>
                         {v.status}
-                      </span>
-                    )}
-                  </div>
-                ),
-              }))}
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('assigned_driver')}</Label>
-            <SearchableSelect
-              value={contract.driver_name || ''}
-              onChange={(v) => updateContract('driver_name', v)}
-              placeholder="Select driver"
-              renderLabel={(it) => (
-                <span className="flex items-center gap-2 truncate">
-                  {selectedDriver?.image_url ? (
-                    <img src={selectedDriver.image_url} alt="" className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
-                  ) : (
-                    <GradientAvatar name={it.label} size="xs" />
-                  )}
-                  <span className="truncate">{it.label}</span>
-                </span>
-              )}
-              items={availableDrivers.map((d) => ({
-                value: d.name,
-                label: d.name,
-                search: d.phone ? ` ${d.phone}` : '',
-                content: (
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {d.image_url ? (
-                      <img src={d.image_url} alt="" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <GradientAvatar name={d.name} size="md" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">
-                        {d.phone || 'No phone'} · ID: {(d.id || '').slice(0, 8)}
-                      </p>
-                    </div>
-                    {d.status && (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
-                        d.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        {d.status}
                       </span>
                     )}
                   </div>
