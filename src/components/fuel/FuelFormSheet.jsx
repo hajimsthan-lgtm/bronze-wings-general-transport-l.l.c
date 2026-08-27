@@ -9,7 +9,7 @@ import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileTe
 import DatePicker from '@/components/common/DatePicker';
 import TaxPreview from '@/components/common/TaxPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import DriverVehicleSelects, { PettyWalletBadge } from '@/components/common/DriverVehicleSelects';
+import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
 
 const FUEL_COLORS = {
   diesel: '#f97316',
@@ -19,7 +19,6 @@ const FUEL_COLORS = {
 const PAYMENT_LABELS = {
   cash: 'Cash',
   card: 'Card',
-  petty_wallet: 'Petty Wallet',
 };
 
 export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlate, onSave }) {
@@ -172,9 +171,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
                   </button>
                 ))}
               </div>
-              {form.payment_method === 'petty_wallet' && form.driver_name && (
-                <PettyWalletBadge driverId={drivers.find(d => d.name === form.driver_name)?.id} />
-              )}
             </div>
             </div>
 

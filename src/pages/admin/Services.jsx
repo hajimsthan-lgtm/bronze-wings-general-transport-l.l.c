@@ -25,12 +25,11 @@ import { withRetry, safeAll } from '@/lib/safeRequest';
 import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import TaxPreview from '@/components/common/TaxPreview';
-import DriverVehicleSelects, { PettyWalletBadge } from '@/components/common/DriverVehicleSelects';
+import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
 
 const PAYMENT_LABELS = {
   cash: 'Cash',
   card: 'Card',
-  petty_wallet: 'Petty Wallet',
 };
 
 const TYPE_TONE = {
@@ -204,9 +203,6 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
             </button>
           ))}
         </div>
-        {form.payment_method === 'petty_wallet' && form.driver_name && (
-          <PettyWalletBadge driverId={drivers.find(d => d.name === form.driver_name)?.id} />
-        )}
       </div>
       <div>
         <Label className="text-xs text-muted-foreground mb-1.5">Vendor</Label>

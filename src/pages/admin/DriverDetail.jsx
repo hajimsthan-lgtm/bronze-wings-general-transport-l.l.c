@@ -32,7 +32,7 @@ import HoursGauge from '@/components/drivers/HoursGauge';
 import DriverOvertimeCard from '@/components/drivers/DriverOvertimeCard';
 import DriverOutstandingPayments from '@/components/drivers/DriverOutstandingPayments';
 import DriverDeductionsSection from '@/components/drivers/DriverDeductionsSection';
-import DriverPettyCashSection from '@/components/drivers/DriverPettyCashSection';
+
 import { formatCurrency, formatDate } from '@/lib/formatters';
 
 const yearsSince = (d) =>
@@ -219,8 +219,7 @@ export default function DriverDetail() {
           {/* Contracts */}
           <ContractsSection filter={{ driver_name: driver.name }} />
 
-          {/* Petty Cash — driver-linked ledger */}
-          <DriverPettyCashSection driver={driver} />
+
 
           {/* Outstanding Payments */}
           <CollapsibleSection title="Outstanding Payments" icon={WalletIcon} accent="#f59e0b" count={salaries.filter(s => s.status !== 'paid').length}>

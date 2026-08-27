@@ -15,7 +15,6 @@ import ImportHistoryPanel from '@/components/bank-rec/ImportHistoryPanel';
 import UndoImportDialog from '@/components/bank-rec/UndoImportDialog';
 import ExcelLedgerTable from '@/components/cash/ExcelLedgerTable';
 import MobileLedgerList from '@/components/cash/MobileLedgerList';
-import DriverRecipientField from '@/components/cash/DriverRecipientField';
 import { useLedgerState, setLedgerMode, setLedgerView, initLedger } from '@/lib/ledgerStore';
 
 const PANEL = {
@@ -277,9 +276,18 @@ export default function LedgerPage({
 
   const setField = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
-  // grid spans: with recipient → 2/2/2/3/1/1/1 ; without → 2/2/3/2/2/1
-  // with driver link → recipient takes 3, desc shrinks to 2
-  const descSpan = hasRecipient ? (enableDriverLink ? 'md:col-span-2' : 'md:col-span-3') : 'md:col-span-3';
+  // Unique recipient suggestions from existing records (previously written)
+  const recipientSuggestions = useMemo(() => {
+    const names = new Set();
+    for (const r of (rows || [])) {
+      if (r.received_from) names.add(r.received_from);
+      if (r.paid_to) names.add(r.paid_to);
+    }
+    return Array.from(names).sort();
+  }, [rows]);
+
+  // grid spans: with recipient → 2/2/3/1/1/1 ; without → 2/2/3/2/2/1
+  const descSpan = hasRecipient ? 'md:col-span-3' : 'md:col-span-3';
   const inSpan = hasRecipient ? 'md:col-span-1' : 'md:col-span-2';
   const outSpan = hasRecipient ? 'md:col-span-1' : 'md:col-span-2';
 
@@ -425,16 +433,23 @@ export default function LedgerPage({
                     )}
                   </div>
                   {hasRecipient && (
-                    <div className={enableDriverLink ? 'md:col-span-3' : 'md:col-span-2'}>
+                    <div className="md:col-span-2">
                       <label className="block text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Recipient</label>
-                      {enableDriverLink ? (
-                        <DriverRecipientField
-                          value={{ mode: form.recipient_mode, recipient: form.recipient, driver_id: form.driver_id }}
-                          onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
-                        />
-                      ) : (
-                        <input type="text" value={form.recipient} onChange={(e) => setField('recipient', e.target.value)} placeholder="Paid to / Received from" className="clay-input w-full" style={{ padding: '10px 14px', fontSize: 13 }} />
-                      )}
+                      <input
+                        type="text"
+                        value={form.recipient}
+                        onChange={(e) => setField('recipient', e.target.value)}
+                        placeholder="Paid to / Received from"
+                        list="recipient-suggestions"
+                        className="clay-input w-full"
+                        style={{ padding: '10px 14px', fontSize: 13 }}
+                        autoComplete="off"
+                      />
+                      <datalist id="recipient-suggestions">
+                        {recipientSuggestions.map((name) => (
+                          <option key={name} value={name} />
+                        ))}
+                      </datalist>
                     </div>
                   )}
                   <div className="md:col-span-2">
