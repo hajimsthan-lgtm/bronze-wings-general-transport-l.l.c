@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, ChevronRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,7 +15,6 @@ const ROUTE_MAP = (() => {
   secondaryNav.forEach(item => {
     if (item.path) map[item.path] = item.label;
   });
-  // Extra routes not in nav
   map['/fuel'] = 'Fuel';
   map['/services'] = 'Services';
   map['/admin/documents'] = 'Documents';
@@ -27,8 +27,8 @@ const ROUTE_MAP = (() => {
 
 // Match a path to its label, supporting dynamic routes like /admin/vehicles/:id
 function resolveLabel(pathname) {
+  if (!pathname) return null;
   if (ROUTE_MAP[pathname]) return ROUTE_MAP[pathname];
-  // Try parent path for detail pages (e.g. /admin/vehicles/123 → Vehicles)
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length >= 3) {
     const parentPath = '/' + parts.slice(0, 2).join('/');
@@ -44,7 +44,19 @@ function resolveLabel(pathname) {
 export default function BreadcrumbBack({ disabled }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const currentRef = useRef(location.pathname);
+  const [prevPath, setPrevPath] = useState(null);
+
+  // Track previous page on route change
+  useEffect(() => {
+    if (currentRef.current !== location.pathname) {
+      setPrevPath(currentRef.current);
+      currentRef.current = location.pathname;
+    }
+  }, [location.pathname]);
+
   const currentLabel = resolveLabel(location.pathname);
+  const prevLabel = resolveLabel(prevPath);
 
   const handleBack = () => {
     if (disabled) return;
@@ -54,6 +66,12 @@ export default function BreadcrumbBack({ disabled }) {
   const handleHome = (e) => {
     e.stopPropagation();
     navigate('/');
+  };
+
+  const handlePrev = (e) => {
+    e.stopPropagation();
+    if (prevPath) navigate(prevPath);
+    else navigate(-1);
   };
 
   return (
@@ -71,7 +89,7 @@ export default function BreadcrumbBack({ disabled }) {
         <Home className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
       </button>
 
-      {/* Breadcrumb trail — clickable to go back */}
+      {/* Breadcrumb trail — back arrow + previous page + current page */}
       <button
         onClick={handleBack}
         disabled={disabled}
@@ -85,13 +103,19 @@ export default function BreadcrumbBack({ disabled }) {
         )}
       >
         <ArrowLeft className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-        <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
-        <span className="text-xs font-medium text-muted-foreground">Apps</span>
-        {currentLabel && (
+        {prevLabel ? (
           <>
+            <span
+              onClick={handlePrev}
+              className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            >
+              {prevLabel}
+            </span>
             <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
-            <span className="text-xs font-bold text-foreground">{currentLabel}</span>
+            <span className="text-xs font-bold text-foreground">{currentLabel || 'Current'}</span>
           </>
+        ) : (
+          <span className="text-xs font-bold text-foreground">{currentLabel || 'Dashboard'}</span>
         )}
       </button>
     </div>
