@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n';
-import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BreadcrumbBack from './BreadcrumbBack';
 import HeaderActionButton from './HeaderActionButton';
 import ClientNavDropdown from './ClientNavDropdown';
 import DriverNavDropdown from './DriverNavDropdown';
@@ -65,22 +65,7 @@ export default function TopBar() {
             {/* Status filter pills moved to OperationsToolbar (near search) */}
           {/* Left: back button + mobile sub-nav tiles */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <button
-              onClick={() => navigate(-1)}
-              disabled={isHome}
-              aria-label="Go back"
-              title="Go back"
-              className={cn(
-                'group relative hidden md:flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0 transition-all duration-300 border border-transparent',
-                isHome ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105 active:scale-95 hover:border-[rgba(var(--panel-accent-rgb),0.45)]'
-              )}
-              style={{
-                background: 'transparent',
-                boxShadow: 'none',
-              }}
-            >
-              <ArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-0.5" style={{ color: isHome ? 'hsl(var(--muted-foreground))' : 'rgb(var(--panel-accent-rgb))', filter: isHome ? 'none' : 'drop-shadow(0 0 5px rgba(var(--panel-accent-rgb),0.7))' }} />
-            </button>
+            <BreadcrumbBack disabled={isHome} />
             <HeaderSubNav className="flex md:hidden overflow-x-auto no-scrollbar flex-1 min-w-0 py-1" />
             {(isMaintenancePage || isFuelPage) && (
               <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5 ml-2">

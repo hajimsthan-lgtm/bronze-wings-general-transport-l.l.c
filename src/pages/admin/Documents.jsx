@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import PageHeader from '@/components/common/PageHeader';
@@ -14,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate } from '@/lib/formatters';
 import { daysUntil } from '@/lib/alertEngine';
-import { Plus, Search, FileText, Pencil, Trash2, Upload, ExternalLink, RefreshCw, History, Eye, Loader2, Car, ShieldCheck, IdCard, Truck, Receipt, CheckCircle2, CalendarClock, CalendarX } from 'lucide-react';
+import { Plus, Search, FileText, Pencil, Trash2, Upload, ExternalLink, RefreshCw, History, Eye, Loader2, Car, ShieldCheck, IdCard, Truck, Receipt, CheckCircle2, CalendarClock, CalendarX, ArrowUpRight, Building2 } from 'lucide-react';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ExportButtons from '@/components/common/ExportButtons';
 import DocumentRenewDialog from '@/components/documents/DocumentRenewDialog';
@@ -42,19 +43,26 @@ const TYPE_VISUALS = {
 };
 
 const DOC_CATEGORIES = [
-  { key: 'all', label: 'All' },
-  { key: 'compliance', label: 'Compliance' },
-  { key: 'insurance', label: 'Insurance' },
-  { key: 'contract', label: 'Contracts' },
-  { key: 'invoice', label: 'Invoices' },
-  { key: 'other', label: 'Other' },
+  { key: 'all', label: 'All', redirect: null },
+  { key: 'vehicle', label: 'Vehicle Docs', redirect: '/admin/vehicles' },
+  { key: 'driver', label: 'Driver Docs', redirect: '/admin/drivers' },
+  { key: 'client', label: 'Client Docs', redirect: '/admin/clients' },
+  { key: 'vendor', label: 'Vendor Docs', redirect: '/admin/vendors' },
+  { key: 'company', label: 'Company Docs', redirect: '/admin/company-documents' },
+  { key: 'other', label: 'Other', redirect: null },
 ];
 
-function getDocCategory(type) {
-  if (['registration', 'license', 'permit'].includes(type)) return 'compliance';
-  if (type === 'insurance') return 'insurance';
-  if (type === 'contract') return 'contract';
-  if (type === 'invoice') return 'invoice';
+function getEntityCategory(doc) {
+  const re = (doc.related_entity || '').toLowerCase().trim();
+  if (re.includes('vehicle') || re.includes('plate') || re.includes('mulkiya')) return 'vehicle';
+  if (re.includes('driver')) return 'driver';
+  if (re.includes('client')) return 'client';
+  if (re.includes('vendor')) return 'vendor';
+  if (re.includes('company') || re.includes('bronze')) return 'company';
+  const type = doc.type || '';
+  if (type === 'registration' || type === 'permit' || type === 'insurance') return 'vehicle';
+  if (type === 'license') return 'driver';
+  if (type === 'invoice' || type === 'contract') return 'client';
   return 'other';
 }
 
@@ -91,8 +99,10 @@ function StatusBadge({ expiry, alertDays = 30 }) {
 
 export default function Documents() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
+  const [entityNames, setEntityNames] = useState({});
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -108,6 +118,27 @@ export default function Documents() {
     base44.entities.Document.list('-created_date', 200).then(setItems).finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
+
+  // Resolve entity names for richer descriptions (plate numbers, driver names, etc.)
+  useEffect(() => {
+    const loadEntities = async () => {
+      try {
+        const [vehicles, drivers, clients, vendors] = await Promise.all([
+          base44.entities.Vehicle.list().catch(() => []),
+          base44.entities.Driver.list().catch(() => []),
+          base44.entities.Client.list().catch(() => []),
+          base44.entities.Vendor.list().catch(() => []),
+        ]);
+        const names = {};
+        (vehicles || []).forEach(v => { names[`vehicle_${v.id}`] = v.plate_number || v.make || ''; });
+        (drivers || []).forEach(d => { names[`driver_${d.id}`] = d.name || ''; });
+        (clients || []).forEach(c => { names[`client_${c.id}`] = c.name || ''; });
+        (vendors || []).forEach(v => { names[`vendor_${v.id}`] = v.name || ''; });
+        setEntityNames(names);
+      } catch {}
+    };
+    loadEntities();
+  }, []);
 
   // Sort: expired first, then expiring soon, then valid, no-expiry last
   const sorted = useMemo(() => {
@@ -129,7 +160,7 @@ export default function Documents() {
       d.related_entity?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || docStatus(d.expiry_date, d.alert_days || 30) === statusFilter;
     const matchType = typeFilter === 'all' || d.type === typeFilter;
-    const matchCategory = categoryFilter === 'all' || getDocCategory(d.type) === categoryFilter;
+    const matchCategory = categoryFilter === 'all' || getEntityCategory(d) === categoryFilter;
     return matchSearch && matchStatus && matchType && matchCategory;
   });
 
@@ -137,7 +168,7 @@ export default function Documents() {
     const counts = { all: items.length };
     DOC_CATEGORIES.forEach(c => { if (c.key !== 'all') counts[c.key] = 0; });
     items.forEach(d => {
-      const cat = getDocCategory(d.type);
+      const cat = getEntityCategory(d);
       counts[cat] = (counts[cat] || 0) + 1;
     });
     return counts;
@@ -165,16 +196,26 @@ export default function Documents() {
       {/* Category filter tabs */}
       <div className="flex items-center gap-1.5 mb-4 flex-wrap">
         {DOC_CATEGORIES.map(cat => (
-          <button
-            key={cat.key}
-            onClick={() => setCategoryFilter(cat.key)}
-            className={`sub-tab ${categoryFilter === cat.key ? 'sub-tab-active' : ''}`}
-          >
-            {cat.label}
-            {categoryCounts[cat.key] > 0 && (
-              <span className="ml-1.5 text-[10px] font-bold opacity-70">{categoryCounts[cat.key]}</span>
+          <div key={cat.key} className="inline-flex items-center">
+            <button
+              onClick={() => setCategoryFilter(cat.key)}
+              className={`sub-tab ${categoryFilter === cat.key ? 'sub-tab-active' : ''}`}
+            >
+              {cat.label}
+              {categoryCounts[cat.key] > 0 && (
+                <span className="ml-1.5 text-[10px] font-bold opacity-70">{categoryCounts[cat.key]}</span>
+              )}
+            </button>
+            {cat.redirect && (
+              <button
+                onClick={() => navigate(cat.redirect)}
+                className="ml-0.5 w-5 h-5 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title={`Go to ${cat.label}`}
+              >
+                <ArrowUpRight className="w-3 h-3" />
+              </button>
             )}
-          </button>
+          </div>
         ))}
       </div>
 
@@ -229,6 +270,18 @@ export default function Documents() {
                     {doc.issuing_authority && ` · ${doc.issuing_authority}`}
                     {doc.related_entity && ` · ${doc.related_entity}`}
                   </p>
+                  {(() => {
+                    const cat = getEntityCategory(doc);
+                    const entityName = doc.related_id ? entityNames[`${cat}_${doc.related_id}`] : null;
+                    const desc = entityName || (doc.related_entity && !['vehicle', 'driver', 'client', 'vendor', 'company'].includes(doc.related_entity.toLowerCase()) ? doc.related_entity : '');
+                    if (!desc && !doc.notes) return null;
+                    return (
+                      <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5 flex items-center gap-1">
+                        {desc && <><span className="text-primary/80 font-medium">{desc}</span><span className="text-muted-foreground/30">·</span></>}
+                        {doc.notes && <span className="truncate">{doc.notes}</span>}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div className="hidden sm:block text-right flex-shrink-0">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Expiry</p>
