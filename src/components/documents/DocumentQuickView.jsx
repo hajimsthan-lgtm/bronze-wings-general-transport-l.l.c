@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, ExternalLink, FileText, Calendar, User, Hash, Building2 } from 'lucide-react';
+import { Download, FileText, Calendar, User, Hash, Building2, ZoomIn, ZoomOut, RotateCcw, ExternalLink } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { daysUntil } from '@/lib/alertEngine';
 
@@ -19,6 +20,8 @@ function getStatus(expiry, alertDays = 30) {
 }
 
 export default function DocumentQuickView({ doc, open, onOpenChange, typeVisuals }) {
+  const [zoom, setZoom] = useState(1);
+
   if (!doc) return null;
 
   const visuals = typeVisuals || { icon: FileText, color: '#6b7280' };
@@ -32,9 +35,20 @@ export default function DocumentQuickView({ doc, open, onOpenChange, typeVisuals
 
   const isImage = doc.file_url && /\.(jpg|jpeg|png|webp|gif)$/i.test(doc.file_url);
 
+  const handleDownload = () => {
+    if (!doc.file_url) return;
+    const a = document.createElement('a');
+    a.href = doc.file_url;
+    a.download = doc.title || 'document';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border sm:max-w-4xl max-h-[92vh] overflow-y-auto">
         <DialogHeader className="mb-4">
           <DialogTitle className="font-display text-foreground flex items-center gap-2.5">
             <span
@@ -43,24 +57,58 @@ export default function DocumentQuickView({ doc, open, onOpenChange, typeVisuals
             >
               <Icon className="w-4 h-4" style={{ color: visuals.color }} />
             </span>
-            <span className="truncate">{doc.title}</span>
+            <span className="truncate flex-1 text-base">{doc.title}</span>
+            {doc.file_url && (
+              <Button onClick={handleDownload} size="sm" className="gap-1.5 ml-auto flex-shrink-0">
+                <Download className="w-3.5 h-3.5" /> Download
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 
-        {/* File preview */}
+        {/* File preview with zoom controls */}
         {doc.file_url ? (
           <div className="rounded-xl overflow-hidden border border-border mb-4 bg-background/50">
-            {isImage ? (
-              <img src={doc.file_url} alt={doc.title} className="w-full max-h-[400px] object-contain" />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 px-4">
-                <FileText className="w-12 h-12 text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground mb-3">PDF document</p>
-                <Button onClick={() => window.open(doc.file_url, '_blank')} variant="outline" className="gap-2">
-                  <ExternalLink className="w-4 h-4" /> Open in new tab
+            {/* Zoom toolbar */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/30 flex-shrink-0">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">
+                {isImage ? 'Image Preview' : 'PDF Preview'} · {Math.round(zoom * 100)}%
+              </span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" onClick={() => setZoom(z => Math.max(0.25, +(z - 0.25).toFixed(2)))} className="h-7 w-7 p-0" title="Zoom out">
+                  <ZoomOut className="w-3.5 h-3.5" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setZoom(1)} className="h-7 w-7 p-0" title="Reset zoom">
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setZoom(z => Math.min(3, +(z + 0.25).toFixed(2)))} className="h-7 w-7 p-0" title="Zoom in">
+                  <ZoomIn className="w-3.5 h-3.5" />
+                </Button>
+                <span className="text-[10px] text-muted-foreground mx-1">|</span>
+                <Button variant="ghost" size="sm" onClick={() => window.open(doc.file_url, '_blank')} className="h-7 w-7 p-0" title="Open in new tab">
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </Button>
               </div>
-            )}
+            </div>
+            {/* Preview content — inline, no redirect */}
+            <div className="overflow-auto bg-muted/10" style={{ maxHeight: '520px' }}>
+              {isImage ? (
+                <div className="flex items-center justify-center p-4" style={{ minHeight: '300px' }}>
+                  <img
+                    src={doc.file_url}
+                    alt={doc.title}
+                    style={{ transform: `scale(${zoom})`, transformOrigin: 'center', maxWidth: '100%' }}
+                    className="transition-transform duration-200"
+                  />
+                </div>
+              ) : (
+                <iframe
+                  src={doc.file_url}
+                  title={doc.title}
+                  style={{ width: '100%', height: '520px', border: 'none', zoom: zoom, transformOrigin: 'top left' }}
+                />
+              )}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 border border-dashed border-border rounded-xl mb-4">
@@ -70,13 +118,14 @@ export default function DocumentQuickView({ doc, open, onOpenChange, typeVisuals
         )}
 
         {/* Metadata grid */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
           <MetaItem icon={FileText} label="Type" value={doc.type?.replace(/_/g, ' ')} />
           {doc.related_entity && <MetaItem icon={User} label="Related To" value={doc.related_entity} />}
           {doc.reference_number && <MetaItem icon={Hash} label="Reference #" value={doc.reference_number} />}
           {doc.issuing_authority && <MetaItem icon={Building2} label="Issuing Authority" value={doc.issuing_authority} />}
           {doc.issue_date && <MetaItem icon={Calendar} label="Issue Date" value={formatDate(doc.issue_date)} />}
           {doc.expiry_date && <MetaItem icon={Calendar} label="Expiry Date" value={formatDate(doc.expiry_date)} />}
+          {doc.notes && <MetaItem icon={FileText} label="Notes" value={doc.notes} />}
         </div>
 
         {/* Status + countdown */}
@@ -111,15 +160,6 @@ export default function DocumentQuickView({ doc, open, onOpenChange, typeVisuals
             </div>
           </div>
         )}
-
-        {/* Actions */}
-        {doc.file_url && (
-          <div className="flex items-center gap-2 pt-2">
-            <Button onClick={() => window.open(doc.file_url, '_blank')} className="flex-1 gap-2">
-              <Download className="w-4 h-4" /> Download
-            </Button>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -131,7 +171,7 @@ function MetaItem({ icon: Icon, label, value }) {
       <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
       <div className="min-w-0">
         <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-        <p className="text-xs text-foreground font-medium truncate">{value || '—'}</p>
+        <p className="text-xs text-foreground font-medium break-words">{value || '—'}</p>
       </div>
     </div>
   );
