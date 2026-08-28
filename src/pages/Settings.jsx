@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -25,8 +25,7 @@ export default function Settings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const [active, setActive] = useState('company');
-  const [mobileView, setMobileView] = useState('categories'); // 'categories' | 'content'
+  const [active, setActive] = useState(null); // null = categories grid, key = content
 
   useEffect(() => {
     let mounted = true;
@@ -111,87 +110,35 @@ export default function Settings() {
       </div>
   }];
 
-
   return (
     <div className="max-w-6xl mx-auto p-4 md:px-2 md:py-4">
-      
-
-
-
-
-
-
-
-
-
-
-      
-
-      <div className="md:grid md:grid-cols-[220px_1fr] md:gap-6">
-        {/* Sidebar — desktop only */}
-        <aside className="hidden md:block">
-          <nav className="sticky top-24 rounded-2xl border border-border/60 divide-y divide-border/40 overflow-hidden glass-sm">
-            {sections.map((s) => {
-              const isActive = active === s.key;
-              return (
-                <button
-                  key={s.key}
-                  onClick={() => setActive(s.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 transition-colors duration-200 ${
-                  isActive ? 'bg-primary/10' : 'hover:bg-white/[0.04]'}`
-                  }>
-                  
-                  <span className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
-                    <s.icon className="w-4 h-4" />
-                  </span>
-                  <span className={`text-sm flex-1 text-left font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {s.label}
-                  </span>
-                  <ChevronRight className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                </button>);
-
-            })}
-          </nav>
-        </aside>
-
-        {/* Content */}
-        <div className="space-y-6">
-          {/* Desktop: active section only */}
-          <div className="hidden md:block animate-enter-up" key={active}>
-            {sections.find((s) => s.key === active)?.render()}
-          </div>
-          {/* Mobile: categories list first, then selected content */}
-          <div className="md:hidden">
-            {mobileView === 'categories' ? (
-              <div className="grid grid-cols-2 gap-3 animate-enter-up">
-                {sections.map((s) => (
-                  <button
-                    key={s.key}
-                    onClick={() => { setActive(s.key); setMobileView('content'); }}
-                    className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/60 glass-sm hover:border-primary/40 transition-all active:scale-95"
-                  >
-                    <span className={`h-11 w-11 rounded-xl flex items-center justify-center ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
-                      <s.icon className="w-5 h-5" />
-                    </span>
-                    <span className="text-sm font-medium text-foreground">{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4 animate-enter-up">
-                <button
-                  onClick={() => setMobileView('categories')}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  All categories
-                </button>
-                {sections.find((s) => s.key === active)?.render()}
-              </div>
-            )}
-          </div>
+      {active === null ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 animate-enter-up">
+          {sections.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setActive(s.key)}
+              className="flex flex-col items-center gap-3 p-5 rounded-2xl border border-border/60 glass-sm hover:border-primary/40 hover:-translate-y-0.5 transition-all active:scale-95"
+            >
+              <span className={`h-12 w-12 rounded-xl flex items-center justify-center ${chipColors[s.key] || 'bg-slate-500/15 text-slate-400'}`}>
+                <s.icon className="w-5 h-5" />
+              </span>
+              <span className="text-sm font-medium text-foreground">{s.label}</span>
+            </button>
+          ))}
         </div>
-      </div>
-    </div>);
-
+      ) : (
+        <div className="space-y-4 md:space-y-6 animate-enter-up" key={active}>
+          <button
+            onClick={() => setActive(null)}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            All categories
+          </button>
+          {sections.find((s) => s.key === active)?.render()}
+        </div>
+      )}
+    </div>
+  );
 }
