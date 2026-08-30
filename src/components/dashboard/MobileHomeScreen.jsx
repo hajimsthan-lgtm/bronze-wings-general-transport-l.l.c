@@ -2,23 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Wallet, TrendingUp, TrendingDown, ArrowDownLeft, ArrowUpRight,
-  Plus, FileText, Truck, ChevronRight, Receipt, Building2,
-  AlertTriangle, Wrench, FileWarning, Route, Users, Gauge,
+  Truck, FileText, Receipt, ChevronRight,
+  FileWarning, Wrench, Route, Gauge, Cloud, Plus,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { formatCurrency } from '@/lib/formatters';
 import { safeListAll } from '@/lib/safeRequest';
 import BuildFutureCard from '@/components/common/BuildFutureCard';
-import WeatherCard from '@/components/common/WeatherCard';
-import MiniCalendar from '@/components/common/MiniCalendar';
-import NeumorphicToggle from '@/components/common/NeumorphicToggle';
 import FloatingActionButton from '@/components/common/FloatingActionButton';
-import GradientDivider from '@/components/common/GradientDivider';
 
 /**
- * New mobile-native home screen — full-bleed, screen-optimized cards.
- * Dark glassmorphism theme preserved. No web-app grid patterns.
+ * Mobile-native home — clean vertical stack, full-screen, aligned.
  */
 export default function MobileHomeScreen({
   totalRevenue, totalTrips, activeTrips, completedTrips,
@@ -30,36 +24,24 @@ export default function MobileHomeScreen({
   const [clientPayments, setClientPayments] = useState([]);
   const [cashTxns, setCashTxns] = useState([]);
   const [bankRecs, setBankRecs] = useState([]);
-  const [vendorTxns, setVendorTxns] = useState([]);
 
   const loadData = useCallback(async () => {
-    const [cp, ct, br, vt] = await safeListAll([
+    const [cp, ct, br] = await safeListAll([
       () => base44.entities.ClientPayment.list('-created_date', 20).catch(() => []),
       () => base44.entities.CashTransaction.list('-created_date', 20).catch(() => []),
       () => base44.entities.BankReconciliation.list('-created_date', 20).catch(() => []),
-      () => base44.entities.VendorTransaction.list('-created_date', 20).catch(() => []),
     ]);
-    setClientPayments(cp); setCashTxns(ct); setBankRecs(br); setVendorTxns(vt);
+    setClientPayments(cp); setCashTxns(ct); setBankRecs(br);
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Financial aggregates
-  const deposits = clientPayments.reduce((s, p) => s + (Number(p.amount) || 0), 0)
-    + bankRecs.reduce((s, r) => s + (Number(r.deposit) || 0), 0)
-    + cashTxns.filter((t) => t.type === 'inflow').reduce((s, t) => s + (Number(t.amount) || 0), 0);
-  const withdrawals = expenses.reduce((s, e) => s + (Number(e.total_with_vat) || Number(e.amount) || 0), 0)
-    + bankRecs.reduce((s, r) => s + (Number(r.withdrawal) || 0), 0)
-    + cashTxns.filter((t) => t.type === 'outflow').reduce((s, t) => s + (Number(t.amount) || 0), 0)
-    + vendorTxns.reduce((s, v) => s + (Number(v.amount) || 0), 0);
-  const netBalance = deposits - withdrawals;
-
-  // Merge all recent transactions for the feed
+  // Recent transactions feed
   const allTxns = [
     ...bankRecs.map((r) => ({ id: 'b' + r.id, date: r.date, desc: r.description || 'Bank', amt: (Number(r.deposit) || 0) - (Number(r.withdrawal) || 0), ref: r.reference })),
     ...cashTxns.map((t) => ({ id: 'c' + t.id, date: t.date, desc: t.description || t.category || 'Cash', amt: t.type === 'inflow' ? Number(t.amount) || 0 : -(Number(t.amount) || 0), ref: t.receipt_number })),
     ...clientPayments.map((p) => ({ id: 'p' + p.id, date: p.date, desc: p.description || 'Client Payment', amt: Number(p.amount) || 0, ref: '' })),
-  ].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 8);
+  ].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 6);
 
   // Quick action tiles
   const quickTiles = [
@@ -69,55 +51,60 @@ export default function MobileHomeScreen({
     { label: 'Quotation', icon: FileText, color: '#06b6d4', path: '/accounts/quotations?new=1' },
   ];
 
-  // Alert items
+  // Alerts
   const alerts = [];
   if (overdueCount > 0) alerts.push({ icon: FileWarning, label: `${overdueCount} overdue invoice${overdueCount !== 1 ? 's' : ''}`, color: '#ef4444', path: '/accounts/invoices' });
   if (maintenanceCount > 0) alerts.push({ icon: Wrench, label: `${maintenanceCount} vehicle${maintenanceCount !== 1 ? 's' : ''} in maintenance`, color: '#f59e0b', path: '/admin/vehicles' });
   if (expiringDocCount > 0) alerts.push({ icon: FileWarning, label: `${expiringDocCount} expiring document${expiringDocCount !== 1 ? 's' : ''}`, color: '#f59e0b', path: '/admin/documents' });
 
+  const today = new Date().toLocaleDateString('en', { weekday: 'long', month: 'short', day: 'numeric' });
+
   return (
-    <div className="px-3.5 pt-3 pb-2 space-y-3.5">
-      {/* ═══ Gradient heading ═══ */}
-      <div className="pt-1 flex items-center justify-between">
-        <div>
-          <h1 className="text-[26px] font-bold leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
-            <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-              Fleet
-            </span>{' '}
-            <span className="text-foreground">Command</span>
-          </h1>
-          <p className="text-[12px] text-muted-foreground mt-0.5">Track every trip in real time.</p>
-        </div>
-        <NeumorphicToggle on={true} />
+    <div className="px-4 pt-2 pb-4 space-y-4">
+      {/* ═══ Greeting + date ═══ */}
+      <div className="pt-1">
+        <h1 className="text-[24px] font-bold leading-tight text-foreground" style={{ fontFamily: 'var(--font-display)' }}>
+          Fleet Command
+        </h1>
+        <p className="text-[12px] text-muted-foreground mt-0.5">{today}</p>
       </div>
 
-      <GradientDivider />
-
-      {/* ═══ Build the future card ═══ */}
+      {/* ═══ Hero — Build the future ═══ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
         <BuildFutureCard onGetStarted={() => navigate('/trips?new=1')} />
       </motion.div>
 
-      {/* ═══ Weather + Calendar row ═══ */}
+      {/* ═══ Weather strip — full width, slim ═══ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-        className="grid grid-cols-2 gap-3"
+        transition={{ duration: 0.35, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+        style={{
+          background: 'linear-gradient(135deg, rgba(96,165,250,0.12) 0%, rgba(167,139,250,0.10) 100%)',
+          border: '1px solid rgba(96,165,250,0.18)',
+        }}
       >
-        <WeatherCard />
-        <MiniCalendar />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: 'linear-gradient(145deg, rgba(96,165,250,0.25), rgba(167,139,250,0.20))' }}>
+          <Cloud className="w-5 h-5 text-blue-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold text-foreground">Partly cloudy</p>
+          <p className="text-[11px] text-muted-foreground">Dubai · Updated now</p>
+        </div>
+        <p className="text-[22px] font-bold text-foreground tabular-nums">21°</p>
       </motion.div>
 
-      {/* ═══ Quick action tiles — 4-up row, full width ═══ */}
+      {/* ═══ Quick actions — 4-up ═══ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.35, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
         className="grid grid-cols-4 gap-2.5"
       >
         {quickTiles.map((tile) => {
@@ -129,10 +116,10 @@ export default function MobileHomeScreen({
               className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
             >
               <div
-                className="w-[52px] h-[52px] rounded-2xl flex items-center justify-center"
+                className="w-[50px] h-[50px] rounded-2xl flex items-center justify-center"
                 style={{
                   background: `linear-gradient(145deg, ${tile.color}, ${tile.color}bb)`,
-                  boxShadow: `0 6px 16px -4px ${tile.color}66, inset 0 1px 0 rgba(255,255,255,0.20)`,
+                  boxShadow: `0 4px 14px -3px ${tile.color}55, inset 0 1px 0 rgba(255,255,255,0.20)`,
                 }}
               >
                 <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
@@ -143,11 +130,11 @@ export default function MobileHomeScreen({
         })}
       </motion.div>
 
-      {/* ═══ Stats strip — 3 columns edge-to-edge ═══ */}
+      {/* ═══ Stats — 3 columns ═══ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.35, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         className="grid grid-cols-3 gap-2.5"
       >
         <StatBlock icon={Route} value={totalTrips} label="Trips" color="#fb923c" />
@@ -155,12 +142,12 @@ export default function MobileHomeScreen({
         <StatBlock icon={Gauge} value={completedTrips} label="Done" color="#22c55e" />
       </motion.div>
 
-      {/* ═══ Alerts — compact strip ═══ */}
+      {/* ═══ Alerts ═══ */}
       {alerts.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.35, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="space-y-2"
         >
           {alerts.map((alert, i) => {
@@ -188,11 +175,11 @@ export default function MobileHomeScreen({
         </motion.div>
       )}
 
-      {/* ═══ Recent transactions — full-width list ═══ */}
+      {/* ═══ Recent transactions ═══ */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.35, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="flex items-center justify-between mb-2.5 px-1">
           <p className="text-[14px] font-bold text-foreground">Recent Transactions</p>
@@ -224,9 +211,9 @@ export default function MobileHomeScreen({
                   border: `1px solid ${txn.amt >= 0 ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
                 }}
               >
-                {txn.amt >= 0
-                  ? <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
-                  : <ArrowUpRight className="w-4 h-4 text-red-400" />}
+                <span className="text-[14px] font-bold" style={{ color: txn.amt >= 0 ? '#22c55e' : '#ef4444' }}>
+                  {txn.amt >= 0 ? '↓' : '↑'}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[12px] font-semibold text-foreground truncate">{txn.desc || '—'}</p>
@@ -242,7 +229,7 @@ export default function MobileHomeScreen({
         </div>
       </motion.div>
 
-      {/* ═══ Floating Action Button ═══ */}
+      {/* ═══ FAB ═══ */}
       <FloatingActionButton
         onNewTrip={() => navigate('/trips?new=1')}
         onInvoice={() => navigate('/accounts/invoices?new=1')}
