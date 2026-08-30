@@ -135,9 +135,21 @@
     --clay-shadow-dark: 220 14% 80%;
     --clay-shadow-light: 0 0% 100%;
 
-    --app-bg: #f5f7fc;
-    --bg-canvas: #eef1f8;
-    --panel-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --app-bg:
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.80) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.60) 0%, transparent 55%),
+      #f0f8ff;
+    --bg-canvas:
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.80) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.60) 0%, transparent 55%),
+      #f0f8ff;
+    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.82) 100%);
     --panel-border-color: rgba(96,67,239,0.12);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.9);
     --panel-drop-shadow: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
@@ -168,6 +180,18 @@
       radial-gradient(1000px 520px at 105% 0%, rgba(var(--panel-accent2-rgb), 0.12), transparent 55%),
       radial-gradient(950px 560px at 50% 120%, rgba(var(--panel-accent-rgb), 0.08), transparent 60%),
       hsl(var(--background));
+    background-attachment: fixed;
+  }
+
+  /* Soft blue/white mesh gradient background — light mode */
+  .theme-light body {
+    background:
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.55) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.85) 0%, transparent 45%),
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.50) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.40) 0%, transparent 55%),
+      #f0f8ff;
     background-attachment: fixed;
   }
   #root { overscroll-behavior: none; }
