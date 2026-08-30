@@ -219,7 +219,6 @@ export default function Dashboard() {
     <PullToRefresh onRefresh={loadData}>
       {isMobile ? (
         <MobileHomeScreen
-          totalRevenue={totalRevenue}
           totalTrips={totalTrips}
           activeTrips={activeTrips}
           completedTrips={completedTrips}
@@ -231,8 +230,10 @@ export default function Dashboard() {
           overdueCount={overdueInvoices.length}
           maintenanceCount={maintenanceVehicles.length}
           expiringDocCount={expiringDocs.length}
-          hasAlerts={hasAlerts}
-          onNewTrip={() => window.location.assign('/trips?new=1')}
+          serviceDueCount={serviceDueVehicles.length}
+          driverDocAlertCount={driverDocAlerts.length}
+          vehicles={vehicles}
+          documents={documents}
         />
       ) : (
       <div className="space-y-6">
