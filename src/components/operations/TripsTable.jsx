@@ -401,7 +401,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
                 </TableCell>
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
-                  <div className="flex items-center gap-1.5 overflow-hidden">
+                  <div className="flex items-center gap-1.5 overflow-hidden flex-wrap">
                     <button
                         onClick={(e) => {e.stopPropagation();copyRef(trip);}}
                         className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 whitespace-normal break-words"
@@ -411,6 +411,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                         <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
                         <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
                     </button>
+                    {(trip.trip_type === 'contract' || (Number(trip.revenue) || 0) >= 1000) && (
+                      <span className="px-2.5 py-1 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shrink-0">PRO</span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-xs font-mono text-foreground align-top whitespace-nowrap trips-grid-td">
@@ -419,15 +422,22 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     {trip.created_date ? moment(trip.created_date).format('HH:mm') : ''}
                   </span>
                 </TableCell>
-                {/* CLIENT — hyperlink to client detail */}
+                {/* CLIENT — hyperlink to client detail with C avatar */}
                 <TableCell className="align-top trips-grid-td">
-                  <button
-                      onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                      className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
-                      title={trip.client_name}>
-                    {trip.client_name?.toUpperCase() || '—'}
-                  </button>
-                  <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
+                  <div className="flex items-start gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      C
+                    </span>
+                    <div className="min-w-0">
+                      <button
+                          onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
+                          className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
+                          title={trip.client_name}>
+                        {trip.client_name?.toUpperCase() || '—'}
+                      </button>
+                      <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
+                    </div>
+                  </div>
                 </TableCell>
                 {/* VEHICLE + DRIVER + VENDOR — all hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">

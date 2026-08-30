@@ -163,6 +163,13 @@ export async function updateTripStatus(trip, newStatus, options = {}) {
     } catch {}
   }
 
+  // Send client notification email when trip is marked completed
+  if (newStatus === 'completed' && oldStatus !== 'completed') {
+    try {
+      await sendTripCompletionEmail(trip);
+    } catch {}
+  }
+
   return { ...trip, ...payload };
 }
 
@@ -201,6 +208,61 @@ export async function migrateTripStatuses(trips) {
     await base44.entities.Trip.bulkUpdate(updates);
   } catch {}
   return toMigrate;
+}
+
+// ═══════════════════════════════════════════════════════
+// CLIENT NOTIFICATION — send completion summary email
+// ═══════════════════════════════════════════════════════
+
+async function sendTripCompletionEmail(trip) {
+  // Fetch the client linked to this booking
+  let client = null;
+  if (trip.client_name) {
+    try {
+      const clients = await base44.entities.Client.filter({ name: trip.client_name });
+      client = clients && clients.length > 0 ? clients[0] : null;
+    } catch {}
+  }
+
+  const recipientEmail = client?.email || trip.client_email || "";
+  if (!recipientEmail) return; // no email to send to
+
+  const tripNumber = trip.trip_number || `#${(trip.id || '').slice(-6).toUpperCase()}`;
+  const tripDate = trip.trip_date || "—";
+  const fromLocation = trip.from_location || "—";
+  const toLocation = trip.to_location || "—";
+  const driverName = trip.driver_name || "—";
+  const vehiclePlate = trip.vehicle_plate || "—";
+  const revenue = (Number(trip.revenue) || 0).toFixed(2);
+  const clientName = trip.client_name || client?.name || "Valued Client";
+
+  const subject = `Trip Completed — ${tripNumber} | Bronze Wings General Transport`;
+  const body = [
+    `Dear ${clientName},`,
+    "",
+    "Your trip has been completed successfully. Here is your trip summary:",
+    "",
+    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "  TRIP COMPLETION SUMMARY",
+    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "",
+    `  Trip Number:    ${tripNumber}`,
+    `  Date:           ${tripDate}`,
+    `  Route:          ${fromLocation} → ${toLocation}`,
+    `  Driver:         ${driverName}`,
+    `  Vehicle:        ${vehiclePlate}`,
+    `  Total Amount:   AED ${revenue}`,
+    "",
+    "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "",
+    "Thank you for choosing Bronze Wings General Transport L.L.C.",
+    "We appreciate your business and look forward to serving you again.",
+    "",
+    "Best regards,",
+    "Bronze Wings General Transport L.L.C",
+  ].join("\n");
+
+  await base44.integrations.Core.SendEmail({ to: recipientEmail, subject, body });
 }
 
 // ═══════════════════════════════════════════════════════

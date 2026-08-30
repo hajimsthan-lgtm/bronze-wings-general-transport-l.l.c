@@ -9,6 +9,12 @@ import {
 import { base44 } from '@/api/base44Client';
 import { formatCurrency } from '@/lib/formatters';
 import { safeListAll } from '@/lib/safeRequest';
+import BuildFutureCard from '@/components/common/BuildFutureCard';
+import WeatherCard from '@/components/common/WeatherCard';
+import MiniCalendar from '@/components/common/MiniCalendar';
+import NeumorphicToggle from '@/components/common/NeumorphicToggle';
+import FloatingActionButton from '@/components/common/FloatingActionButton';
+import GradientDivider from '@/components/common/GradientDivider';
 
 /**
  * New mobile-native home screen — full-bleed, screen-optimized cards.
@@ -72,76 +78,39 @@ export default function MobileHomeScreen({
   return (
     <div className="px-3.5 pt-3 pb-2 space-y-3.5">
       {/* ═══ Gradient heading ═══ */}
-      <div className="pt-1">
-        <h1 className="text-[26px] font-bold leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
-          <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-            Fleet
-          </span>{' '}
-          <span className="text-foreground">Command</span>
-        </h1>
-        <p className="text-[12px] text-muted-foreground mt-0.5">Track every trip in real time.</p>
+      <div className="pt-1 flex items-center justify-between">
+        <div>
+          <h1 className="text-[26px] font-bold leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
+            <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
+              Fleet
+            </span>{' '}
+            <span className="text-foreground">Command</span>
+          </h1>
+          <p className="text-[12px] text-muted-foreground mt-0.5">Track every trip in real time.</p>
+        </div>
+        <NeumorphicToggle on={true} />
       </div>
 
-      {/* ═══ Hero balance — full-bleed gradient card ═══ */}
+      <GradientDivider />
+
+      {/* ═══ Build the future card ═══ */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-[20px] p-5 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(140deg, rgba(var(--panel-accent-rgb),0.28) 0%, rgba(var(--surf-2-rgb),0.92) 55%)',
-          border: '1px solid rgba(var(--panel-accent-rgb),0.30)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), 0 12px 36px rgba(0,0,0,0.30)',
-        }}
       >
-        {/* Ambient glow */}
-        <div className="absolute -top-12 -right-8 w-40 h-40 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(var(--panel-accent-rgb),0.20), transparent 70%)' }} />
+        <BuildFutureCard onGetStarted={() => navigate('/trips?new=1')} />
+      </motion.div>
 
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(145deg, rgba(var(--panel-accent-rgb),0.35), rgba(var(--panel-accent-rgb),0.12))', border: '1px solid rgba(var(--panel-accent-rgb),0.35)' }}>
-              <Wallet className="w-4 h-4" style={{ color: 'rgb(var(--panel-accent2-rgb))' }} />
-            </div>
-            <div>
-              <p className="text-[9px] uppercase tracking-[0.14em] font-bold text-white/45">Fleet Account</p>
-              <p className="text-[11px] font-medium text-white/75">Net Cash Balance</p>
-            </div>
-          </div>
-        </div>
-
-        <p className="relative text-[32px] font-bold text-white tabular-nums mt-3 leading-none"
-          style={{ fontFamily: 'var(--font-display)' }}>
-          {formatCurrency(netBalance)}
-        </p>
-
-        <div className="relative flex items-center gap-4 mt-2.5">
-          <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> {formatCurrency(deposits)}
-          </span>
-          <span className="text-[11px] text-red-400 font-semibold flex items-center gap-1">
-            <TrendingDown className="w-3 h-3" /> {formatCurrency(withdrawals)}
-          </span>
-        </div>
-
-        {/* Action row */}
-        <div className="relative flex gap-2 mt-4">
-          <button
-            onClick={() => navigate('/accounts/invoices')}
-            className="flex-1 h-11 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-bold text-white active:scale-95 transition-transform"
-            style={{ background: 'linear-gradient(135deg, rgb(var(--panel-accent-rgb)), rgb(var(--panel-accent2-rgb)))', boxShadow: '0 4px 14px -4px rgba(var(--panel-accent-rgb),0.5)' }}
-          >
-            <ArrowDownLeft className="w-4 h-4" /> Receive
-          </button>
-          <button
-            onClick={() => navigate('/expenses')}
-            className="flex-1 h-11 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-bold text-white active:scale-95 transition-transform border"
-            style={{ background: 'rgba(239,68,68,0.18)', borderColor: 'rgba(239,68,68,0.35)' }}
-          >
-            <ArrowUpRight className="w-4 h-4" /> Pay
-          </button>
-        </div>
+      {/* ═══ Weather + Calendar row ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="grid grid-cols-2 gap-3"
+      >
+        <WeatherCard />
+        <MiniCalendar />
       </motion.div>
 
       {/* ═══ Quick action tiles — 4-up row, full width ═══ */}
@@ -272,6 +241,13 @@ export default function MobileHomeScreen({
           ))}
         </div>
       </motion.div>
+
+      {/* ═══ Floating Action Button ═══ */}
+      <FloatingActionButton
+        onNewTrip={() => navigate('/trips?new=1')}
+        onInvoice={() => navigate('/accounts/invoices?new=1')}
+        onExpense={() => navigate('/expenses?new=1')}
+      />
     </div>
   );
 }

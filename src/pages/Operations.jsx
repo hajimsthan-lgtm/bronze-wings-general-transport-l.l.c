@@ -29,6 +29,8 @@ import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
+import OperationsTabSeparator from '@/components/operations/OperationsTabSeparator';
+import GradientDivider from '@/components/common/GradientDivider';
 
 import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
@@ -423,6 +425,11 @@ export default function Operations() {
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
+        {/* Operations tab separator — Trips / Maintenance / Fuel / Expenses / Salary */}
+        <div className="mb-3">
+          <OperationsTabSeparator />
+        </div>
+        <GradientDivider className="mb-3" />
         <div className="mb-3">
           {isMobile ? (
             <MobileOperationsStats

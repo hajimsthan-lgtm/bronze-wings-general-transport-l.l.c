@@ -4,12 +4,14 @@ import {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
+  Fuel as FuelIcon, Gauge,
 } from 'lucide-react';
 
 const ICONS = {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
+  FuelIcon, Gauge,
 };
 
 export const navItems = [
@@ -17,18 +19,33 @@ export const navItems = [
     key: 'operations', label: 'Operations', icon: 'Route', color: '#00f2c3',
     children: [
       { key: 'trips', label: 'Trips', path: '/trips', icon: 'Route', color: '#00f2c3' },
-      { key: 'expenses', label: 'Expenses', path: '/expenses', icon: 'Receipt', color: '#f97316' },
       { key: 'maintenance', label: 'Maintenance', path: '/maintenance', icon: 'Wrench', color: '#a855f7' },
+      { key: 'fuel', label: 'Fuel', path: '/fuel', icon: 'FuelIcon', color: '#f97316' },
+      { key: 'expenses', label: 'Expenses', path: '/expenses', icon: 'Receipt', color: '#fb923c' },
       { key: 'salary', label: 'Salary', path: '/salary', icon: 'Wallet', color: '#22c55e' },
     ],
   },
   {
-    key: 'admin', label: 'Admin', icon: 'Shield', color: '#3b82f6',
+    key: 'finance', label: 'Finance', icon: 'Wallet', color: '#6366f1',
+    children: [
+      { key: 'invoices', label: 'Invoices', path: '/accounts/invoices', icon: 'FileText', color: '#22c55e' },
+      { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: 'FilePlus2', color: '#06b6d4' },
+      { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: 'FileSignature', color: '#eab308' },
+      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: 'Landmark', color: '#6366f1' },
+      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: 'Wallet', color: '#f59e0b' },
+      { key: 'vat_corporate_tax', label: 'VAT & Corp Tax', path: '/accounts/vat-corporate-tax', icon: 'Landmark', color: '#ef4444' },
+      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: 'FileText', color: '#ec4899' },
+    ],
+  },
+  {
+    key: 'fleet', label: 'Fleet', icon: 'Truck', color: '#3b82f6',
     children: [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: 'Truck', color: '#3b82f6' },
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
       { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
+      { key: 'documents', label: 'Documents', path: '/admin/documents', icon: 'Files', color: '#06b6d4' },
+      { key: 'company_documents', label: 'Bronze Docs', path: '/admin/company-documents', icon: 'Award', color: '#f59e0b' },
     ],
   },
   {
@@ -36,24 +53,6 @@ export const navItems = [
     children: [
       { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: 'ClipboardList', color: '#fbbf24' },
       { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: 'TrendingUp', color: '#22c55e' },
-      { key: 'soa', label: 'SOA', path: '/reports/soa', icon: 'FileText', color: '#ef4444' },
-    ],
-  },
-  {
-    key: 'accounts', label: 'Accounts', icon: 'Wallet', color: '#6366f1',
-    children: [
-      { key: 'bank_reconciliation', label: 'Bank Rec', path: '/reports/bank-reconciliation', icon: 'Landmark', color: '#6366f1' },
-      { key: 'petty_cash', label: 'Petty Cash', path: '/accounts/petty-cash', icon: 'Wallet', color: '#f59e0b' },
-      { key: 'vat_corporate_tax', label: 'VAT & Corp Tax', path: '/accounts/vat-corporate-tax', icon: 'Landmark', color: '#ef4444' },
-    ],
-  },
-  {
-    key: 'documents', label: 'Documents', icon: 'Files', color: '#06b6d4',
-    children: [
-      { key: 'invoices', label: 'Invoices', path: '/accounts/invoices', icon: 'FileText', color: '#22c55e' },
-      { key: 'quotations', label: 'Quotations', path: '/accounts/quotations', icon: 'FilePlus2', color: '#06b6d4' },
-      { key: 'agreements', label: 'Agreements', path: '/accounts/agreements', icon: 'FileSignature', color: '#eab308' },
-      { key: 'company_documents', label: 'Bronze Docs', path: '/admin/company-documents', icon: 'Award', color: '#f59e0b' },
     ],
   },
 ];
