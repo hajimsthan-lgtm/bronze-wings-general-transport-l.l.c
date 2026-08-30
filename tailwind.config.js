@@ -11,6 +11,17 @@ module.exports = {
                 display: ['var(--font-display)'],
                 heading: ['var(--font-heading)'],
             },
+            animation: {
+                'accordion-down': 'accordion-down 0.2s ease-out',
+                'accordion-up': 'accordion-up 0.2s ease-out',
+                'shimmer': 'shimmer 1.8s ease-in-out infinite',
+                'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+                'fade-in-up': 'fade-in-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                'float': 'float 8s ease-in-out infinite',
+                'floaty': 'floaty 5s ease-in-out infinite',
+                'glow': 'glowpulse 3.5s ease-in-out infinite',
+                'shine': 'shine 3.4s ease-in-out infinite',
+            },
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
@@ -112,15 +123,6 @@ module.exports = {
                     '50%': { transform: 'translateY(-20px) scale(1.05)' }
                 },
                 /* ── NEW: Subtle border glow pulse ── */
-            },
-            animation: {
-                'accordion-down': 'accordion-down 0.2s ease-out',
-                'accordion-up': 'accordion-up 0.2s ease-out',
-                'shimmer': 'shimmer 1.8s ease-in-out infinite',
-                'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-                /* ── NEW ── */
-                'fade-in-up': 'fade-in-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-                'float': 'float 8s ease-in-out infinite'
             }
         }
     },
