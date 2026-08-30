@@ -224,7 +224,7 @@ export default function ProfitLoss() {
       {/* Comparison mini-cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         {[{ label: 'vs Last Week', pct: cmpWeek }, { label: 'vs Last Month', pct: cmpMonth }, { label: 'vs Last Year', pct: cmpYear }].map((c, i) => (
-          <div key={c.label} className="rounded-2xl p-4 animate-fade-in-up bg-card border border-border shadow-sm" style={{ animationDelay: `${0.4 + i * 0.08}s` }}>
+          <div key={c.label} className="neon-edge kpi-card rounded-2xl p-4 animate-fade-in-up" style={{ animationDelay: `${0.4 + i * 0.08}s` }}>
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</p>
             <p className="text-lg font-bold mt-1 tabular-nums" style={{ color: c.pct == null ? 'hsl(var(--muted-foreground))' : c.pct >= 0 ? '#16a34a' : '#dc2626' }}>
               {c.pct == null ? '—' : `${c.pct >= 0 ? '↑' : '↓'} ${Math.abs(c.pct).toFixed(1)}%`}

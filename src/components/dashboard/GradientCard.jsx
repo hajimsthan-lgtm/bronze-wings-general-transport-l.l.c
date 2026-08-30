@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import CountUp from '@/components/common/CountUp';
 
 const VARIANTS = {
-  green:  { gradient: 'linear-gradient(135deg, rgba(74,222,128,0.25) 0%, rgba(34,197,94,0.10) 50%, hsl(var(--card)) 100%)', rgb: '74,222,128', glow: '#22c55e' },
-  purple: { gradient: 'linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(147,51,234,0.08) 50%, hsl(var(--card)) 100%)', rgb: '168,85,247', glow: '#a855f7' },
-  teal:   { gradient: 'linear-gradient(135deg, rgba(45,212,191,0.20) 0%, rgba(20,184,166,0.08) 50%, hsl(var(--card)) 100%)', rgb: '45,212,191', glow: '#14b8a6' },
-  orange: { gradient: 'linear-gradient(135deg, rgba(251,146,60,0.20) 0%, rgba(249,115,22,0.08) 50%, hsl(var(--card)) 100%)', rgb: '251,146,60', glow: '#f97316' },
-  blue:   { gradient: 'linear-gradient(135deg, rgba(30,215,96,0.22) 0%, rgba(37,99,235,0.08) 50%, hsl(var(--card)) 100%)', rgb: '30,215,96', glow: '#1ED760' },
-  red:    { gradient: 'linear-gradient(135deg, rgba(239,68,68,0.20) 0%, rgba(220,38,38,0.08) 50%, hsl(var(--card)) 100%)', rgb: '239,68,68', glow: '#ef4444' },
-  pink:   { gradient: 'linear-gradient(135deg, rgba(236,72,153,0.20) 0%, rgba(217,70,239,0.08) 50%, hsl(var(--card)) 100%)', rgb: '236,72,153', glow: '#ec4899' },
-  yellow: { gradient: 'linear-gradient(135deg, rgba(245,158,11,0.20) 0%, rgba(217,119,6,0.08) 50%, hsl(var(--card)) 100%)', rgb: '245,158,11', glow: '#f59e0b' },
+  green:  { gradient: 'linear-gradient(135deg, rgba(74,222,128,0.22) 0%, rgba(34,197,94,0.08) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '74,222,128', glow: '#22c55e' },
+  purple: { gradient: 'linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(147,51,234,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '168,85,247', glow: '#a855f7' },
+  teal:   { gradient: 'linear-gradient(135deg, rgba(45,212,191,0.18) 0%, rgba(20,184,166,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '45,212,191', glow: '#14b8a6' },
+  orange: { gradient: 'linear-gradient(135deg, rgba(251,146,60,0.18) 0%, rgba(249,115,22,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '251,146,60', glow: '#f97316' },
+  blue:   { gradient: 'linear-gradient(135deg, rgba(30,215,96,0.20) 0%, rgba(37,99,235,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '30,215,96', glow: '#1ED760' },
+  red:    { gradient: 'linear-gradient(135deg, rgba(239,68,68,0.18) 0%, rgba(220,38,38,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '239,68,68', glow: '#ef4444' },
+  pink:   { gradient: 'linear-gradient(135deg, rgba(236,72,153,0.18) 0%, rgba(217,70,239,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '236,72,153', glow: '#ec4899' },
+  yellow: { gradient: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(217,119,6,0.06) 50%, rgba(var(--surf-2-rgb), 0.50) 100%)', rgb: '245,158,11', glow: '#f59e0b' },
 };
 
 export default function GradientCard({ variant = 'blue', icon: Icon, label, title, subtitle, to, index = 0 }) {
@@ -17,13 +17,13 @@ export default function GradientCard({ variant = 'blue', icon: Icon, label, titl
 
   const inner = (
     <div
-      className="group relative overflow-hidden rounded-3xl p-5 min-h-[140px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+      className="neon-edge group relative overflow-hidden rounded-3xl p-5 min-h-[140px] flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 cursor-pointer"
       style={{
         background: v.gradient,
-        backdropFilter: 'blur(16px) saturate(1.1)',
-        WebkitBackdropFilter: 'blur(16px) saturate(1.1)',
-        border: `1px solid rgba(${v.rgb},0.15)`,
-        boxShadow: `0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8)`,
+        backdropFilter: 'blur(28px) saturate(1.5)',
+        WebkitBackdropFilter: 'blur(28px) saturate(1.5)',
+        border: `1px solid rgba(${v.rgb},0.18)`,
+        boxShadow: `0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 32px -8px rgba(${v.rgb},0.20)`,
       }}
     >
       {/* hover glow intensifier */}
