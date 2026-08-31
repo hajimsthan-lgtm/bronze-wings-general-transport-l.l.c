@@ -459,8 +459,8 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
                    {trip.delivery_note_number && (
-                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold font-mono tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30" title={`Delivery Note: DN#${trip.delivery_note_number}`}>
-                       <FileText className="w-2.5 h-2.5" />
+                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold font-mono tracking-wider text-white border border-transparent" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.85), rgba(var(--panel-accent2-rgb),0.85))', boxShadow: '0 2px 8px -2px rgba(var(--panel-accent-rgb),0.4)' }} title={`Delivery Note: DN#${trip.delivery_note_number}`}>
+                       <FileText className="w-3 h-3" />
                        DN#{trip.delivery_note_number}
                      </div>
                    )}
