@@ -83,14 +83,6 @@ export default function MobileFleetDashboard() {
 
   const recentTrips = trips.slice(0, 6);
 
-  const navItems = [
-  { label: 'Home', icon: Home, path: '/', active: true },
-  { label: 'Operations', icon: Layers, path: '/trips' },
-  { label: 'Map', icon: MapPin, path: '/trips' },
-  { label: 'Alerts', icon: Bell, path: '/notifications', badge: alertsCount },
-  { label: 'Settings', icon: Settings, path: '/settings' }];
-
-
   return (
     <div className="min-h-screen" style={{ background: '#ffffff' }}>
       {/* ═══════ HERO ═══════ */}
@@ -289,35 +281,6 @@ export default function MobileFleetDashboard() {
         </div>
       </div>
 
-      {/* ═══════ BOTTOM NAV — 5 items with pill active ═══════ */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-4 py-2"
-        style={{
-          background: '#ffffff',
-          borderTop: '1px solid #f1f5f9',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
-          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))'
-        }}>
-        
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = item.active;
-          return (
-            <button
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-full relative"
-              style={active ? { background: '#f4f4f5' } : {}}>
-              
-              <Icon className={`w-5 h-5 ${active ? 'text-black fill-black' : 'text-slate-400'}`} strokeWidth={active ? 2.4 : 2} />
-              <span className={`text-[9px] font-semibold ${active ? 'text-black' : 'text-slate-400'}`}>{item.label}</span>
-              {item.badge > 0 &&
-              <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
-              }
-            </button>);
-
-        })}
-      </div>
-    </div>);
-
+    </div>
+  );
 }

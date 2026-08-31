@@ -5,7 +5,7 @@ import ShellSidebar from '@/components/layout/ShellSidebar';
 import ShellNavbar from '@/components/layout/ShellNavbar';
 import TopBar from '@/components/layout/TopBar';
 import MobileHeader from '@/components/layout/MobileHeader';
-import MobileNav from '@/components/layout/MobileNav';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MobileCanvasBackground from '@/components/mobile/MobileCanvasBackground';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
@@ -69,9 +69,9 @@ export default function AppLayout() {
         </div>
       </div>
 
-      {/* Floating / mobile-only layers — MobileNav hidden on dashboard (has its own bottom nav) */}
+      {/* Floating / mobile-only layers */}
       <EdgeQuickRail />
-      {location.pathname !== '/' && <MobileNav />}
+      <MobileBottomNav />
     </div>
   );
 }
