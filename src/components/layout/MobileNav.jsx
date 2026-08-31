@@ -36,9 +36,6 @@ export default function MobileNav() {
   const [activeForm, setActiveForm] = useState(null);
   const fabRef = useRef(null);
 
-  // Dashboard has its own bottom nav — hide the global MobileNav there
-  if (location.pathname === '/') return null;
-
   // Open FAB when triggered by the alert banner's "Quick actions"
   useEffect(() => {
     const handler = () => setFabOpen(true);
@@ -62,6 +59,9 @@ export default function MobileNav() {
       document.removeEventListener('keydown', esc);
     };
   }, [fabOpen]);
+
+  // Dashboard has its own bottom nav — hide the global MobileNav there
+  if (location.pathname === '/') return null;
 
   const handleAction = (key) => {
     setFabOpen(false);
