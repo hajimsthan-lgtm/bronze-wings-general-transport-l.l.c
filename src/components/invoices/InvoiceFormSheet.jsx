@@ -155,21 +155,6 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     setContractsOpen(false);
   };
 
-  // Auto-select contact person when only one contact is available
-  useEffect(() => {
-    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
-      setForm(prev => ({ ...prev, contact_person: availableContacts[0].name }));
-    }
-  }, [form.client_name, availableContacts.length]);
-
-  const invoicedTripNumbers = useMemo(() => {
-    const set = new Set();
-    (invoices || []).forEach(inv => {
-      if (inv.trip_id) String(inv.trip_id).split(',').forEach(t => { const v = t.trim(); if (v) set.add(v); });
-    });
-    return set;
-  }, [invoices]);
-
   const selectedClient = clients.find(c => c.name === form.client_name);
   const availableContacts = useMemo(() => {
     if (!selectedClient) return [];
@@ -184,6 +169,21 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     }
     return contacts;
   }, [selectedClient]);
+
+  // Auto-select contact person when only one contact is available
+  useEffect(() => {
+    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
+      setForm(prev => ({ ...prev, contact_person: availableContacts[0].name }));
+    }
+  }, [form.client_name, availableContacts.length]);
+
+  const invoicedTripNumbers = useMemo(() => {
+    const set = new Set();
+    (invoices || []).forEach(inv => {
+      if (inv.trip_id) String(inv.trip_id).split(',').forEach(t => { const v = t.trim(); if (v) set.add(v); });
+    });
+    return set;
+  }, [invoices]);
 
   const clientCompletedTrips = (trips || []).filter(tr => {
     if (tr.client_name !== form.client_name || tr.status !== 'completed' || invoicedTripNumbers.has(tr.trip_number)) return false;
