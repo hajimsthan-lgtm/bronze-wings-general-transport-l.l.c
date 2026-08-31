@@ -156,7 +156,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+    if (errors[field]) setErrors((prev) => {const n = { ...prev };delete n[field];return n;});
     if (field === 'client_name') setCreatedFlags((prev) => ({ ...prev, client: false }));
     if (field === 'vehicle_plate') setCreatedFlags((prev) => ({ ...prev, vehicle: false }));
     if (field === 'driver_name') {
@@ -299,28 +299,28 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const buildData = (isDraft = false) => {
     const { assignment_mode, ...rest } = form;
     return {
-    ...rest,
-    permit_required: !!form.permit_required,
-    permit_name: form.permit_required ? (form.permit_name || '') : '',
-    driver_phone: form.driver_phone || '',
-    is_draft: isDraft,
-    trip_number: isDraft ? '' : (form.trip_number || autoTripNumber || generateTripNumber()),
-    trip_date: form.load_datetime ?
-    form.load_datetime.split('T')[0] :
-    form.offload_datetime ? form.offload_datetime.split('T')[0] : todayStr(),
-    hours: form.trip_type === 'hourly' ? Number(form.hours) || 0 : 0,
-    revenue: Number(form.revenue) || 0,
-    distance_km: Number(form.distance_km) || 0,
-    base_fare: Number(form.base_fare) || 0,
-    max_allowed_duration: form.trip_type === 'contract' ? 0 : (Number(form.max_allowed_duration) || 0),
-    overtime_rate: form.trip_type === 'contract' ? 0 : (Number(form.overtime_rate) || 0),
-    calculated_duration: form.trip_type === 'contract' ? 0 : (Number(form.calculated_duration) || 0),
-    vendor_name: form.assignment_mode === 'vendor' ? form.vendor_name : '',
-    vendor_agreed_rate: Number(form.vendor_agreed_rate) || 0,
-    vendor_payment_status: form.vendor_payment_status || 'unpaid',
-    vendor_due_date: form.vendor_due_date || null,
-    vendor_payment_notes: form.vendor_payment_notes || '',
-    add_ons: addOns || []
+      ...rest,
+      permit_required: !!form.permit_required,
+      permit_name: form.permit_required ? form.permit_name || '' : '',
+      driver_phone: form.driver_phone || '',
+      is_draft: isDraft,
+      trip_number: isDraft ? '' : form.trip_number || autoTripNumber || generateTripNumber(),
+      trip_date: form.load_datetime ?
+      form.load_datetime.split('T')[0] :
+      form.offload_datetime ? form.offload_datetime.split('T')[0] : todayStr(),
+      hours: form.trip_type === 'hourly' ? Number(form.hours) || 0 : 0,
+      revenue: Number(form.revenue) || 0,
+      distance_km: Number(form.distance_km) || 0,
+      base_fare: Number(form.base_fare) || 0,
+      max_allowed_duration: form.trip_type === 'contract' ? 0 : Number(form.max_allowed_duration) || 0,
+      overtime_rate: form.trip_type === 'contract' ? 0 : Number(form.overtime_rate) || 0,
+      calculated_duration: form.trip_type === 'contract' ? 0 : Number(form.calculated_duration) || 0,
+      vendor_name: form.assignment_mode === 'vendor' ? form.vendor_name : '',
+      vendor_agreed_rate: Number(form.vendor_agreed_rate) || 0,
+      vendor_payment_status: form.vendor_payment_status || 'unpaid',
+      vendor_due_date: form.vendor_due_date || null,
+      vendor_payment_notes: form.vendor_payment_notes || '',
+      add_ons: addOns || []
     };
   };
 
@@ -355,17 +355,17 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         onOpenChange(false);
         onSaved?.();
       }
-    } finally { setSaving(false); }
+    } finally {setSaving(false);}
   };
 
   const validateTrip = () => {
     const e = {};
     const hasAlphaNum = (s) => /[a-zA-Z0-9\u0600-\u06FF]/.test(s || '');
     if (!form.client_name?.trim()) e.client_name = 'Client is required';
-    if (!form.from_location?.trim()) e.from_location = 'From location is required';
-    else if (!hasAlphaNum(form.from_location)) e.from_location = 'Enter a valid location name';
-    if (!form.to_location?.trim()) e.to_location = 'To location is required';
-    else if (!hasAlphaNum(form.to_location)) e.to_location = 'Enter a valid location name';
+    if (!form.from_location?.trim()) e.from_location = 'From location is required';else
+    if (!hasAlphaNum(form.from_location)) e.from_location = 'Enter a valid location name';
+    if (!form.to_location?.trim()) e.to_location = 'To location is required';else
+    if (!hasAlphaNum(form.to_location)) e.to_location = 'Enter a valid location name';
     if (!form.vehicle_plate?.trim()) e.vehicle_plate = 'Vehicle is required';
     if (!form.driver_name?.trim()) e.driver_name = 'Driver is required';
     if (!form.trip_date) e.trip_date = 'Trip date is required';
@@ -388,8 +388,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           data.trip_number = generateTripNumber();
         }
         let savedTrip;
-        if (editTrip) { savedTrip = await updateTrip.mutateAsync({ id: editTrip.id, data }); }
-        else { savedTrip = await createTrip.mutateAsync(data); }
+        if (editTrip) {savedTrip = await updateTrip.mutateAsync({ id: editTrip.id, data });} else
+        {savedTrip = await createTrip.mutateAsync(data);}
         const tripId = savedTrip?.id || editTrip?.id;
         // Auto-create/update linked vendor transaction
         if (form.assignment_mode === 'vendor' && form.vendor_name && tripId) {
@@ -520,9 +520,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[96vw] sm:w-[92vw] sm:max-w-4xl max-h-[88vh] sm:max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col p-0 gap-0">
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="bg-card/90 backdrop-blur-2xl border border-primary/25 w-[96vw] sm:w-[92vw] sm:max-w-4xl max-h-[88vh] sm:max-h-[82vh] overflow-hidden rounded-2xl shadow-2xl !top-[50%] !translate-y-[-50%] !left-[50%] !translate-x-[-50%] flex flex-col p-0 gap-0">
         <DialogHeader className="px-3 sm:px-5 pt-3 sm:pt-4 pb-2 sm:pb-3 border-b border-border/50 flex-shrink-0 sticky top-0 z-20 bg-card/90 backdrop-blur-2xl">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
@@ -539,9 +539,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <ModeToggle mode={mode} onChange={setMode} t={t} />
               <DialogClose
-                aria-label="Close"
-                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
-              >
+                  aria-label="Close"
+                  className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted/60 hover:bg-primary/15 border border-border/60 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all">
+                  
                 <X className="w-4 h-4" />
               </DialogClose>
             </div>
@@ -549,56 +549,56 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         </DialogHeader>
 
         {/* Mobile calc bar — trip mode only, non-scrolling */}
-        {mode === 'trip' && (
+        {mode === 'trip' &&
           <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} addOns={addOns} />
-        )}
+          }
 
         {/* Body: scrollable form with standalone floating calc panel in right column */}
         <div className="flex-1 overflow-y-auto premium-scroll">
         <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_260px] gap-3 sm:gap-4 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
-            <>
+                <>
             <TripModeFields p={tripCtx} />
             <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
-            </>
-            :
-            <ContractModeFields p={contractCtx} />}
+            </> :
+
+                <ContractModeFields p={contractCtx} />}
           </div>
 
           {/* Right column — frozen/sticky: Live Calculation + collapsible Location Picker */}
           <div className={cn("flex flex-col gap-5 lg:sticky lg:top-4", !mapCollapsed && "lg:max-h-[calc(82vh-170px)] lg:overflow-y-auto premium-scroll")}>
-            {mode === 'trip' && (
-              <div className="flex-shrink-0">
+            {mode === 'trip' &&
+                <div className="flex-shrink-0">
                 <TripCalcPanel form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} addOns={addOns} />
               </div>
-            )}
-            {mode === 'trip' && (
-              <div className="flex-shrink-0">
+                }
+            {mode === 'trip' &&
+                <div className="flex-shrink-0">
                 <TripMapPanel
-                  from={form.from_location}
-                  to={form.to_location}
-                  onSelectFrom={handleSelectFrom}
-                  onSelectTo={handleSelectTo}
-                  onRouteInfo={handleRouteInfo}
-                  tripType={form.trip_type}
-                  collapsed={mapCollapsed}
-                  onToggleCollapse={handleToggleMapCollapse}
-                />
+                    from={form.from_location}
+                    to={form.to_location}
+                    onSelectFrom={handleSelectFrom}
+                    onSelectTo={handleSelectTo}
+                    onRouteInfo={handleRouteInfo}
+                    tripType={form.trip_type}
+                    collapsed={mapCollapsed}
+                    onToggleCollapse={handleToggleMapCollapse} />
+                  
               </div>
-            )}
+                }
             {mode === 'contract' &&
-            <ContractProfitPanel monthlyRate={monthlyRate} addOns={contractAddOns} endDate={contract.end_date} t={t} />
-            }
-            {mode === 'trip' && !mapCollapsed && (
-              <div className="text-center text-[9px] opacity-20 select-none" aria-hidden>🚚</div>
-            )}
+                <ContractProfitPanel monthlyRate={monthlyRate} addOns={contractAddOns} endDate={contract.end_date} t={t} />
+                }
+            {mode === 'trip' && !mapCollapsed &&
+                <div className="text-center text-[9px] opacity-20 select-none" aria-hidden>🚚</div>
+                }
           </div>
         </div>
 
         {/* Contract mode mobile condensed bar */}
-        {mode === 'contract' && (
-        <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-2 gap-3 text-center">
+        {mode === 'contract' &&
+            <div className="lg:hidden glass-card p-3 mb-4 grid grid-cols-2 gap-3 text-center">
             <div>
               <p className="eyebrow mb-1">{t('monthly_rental')}</p>
               <p className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(monthlyRate)}</p>
@@ -608,7 +608,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(monthlyRate)}</p>
             </div>
           </div>
-        )}
+            }
         </div>
 
         {/* Footer */}
@@ -618,22 +618,22 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             <span className="hidden sm:inline">{t('cancel')}</span>
           </DialogClose>
           <div className="flex-1" />
-          {mode === 'trip' && (
+          {mode === 'trip' &&
             <Button variant="outline" onClick={handleSaveDraft} disabled={saving} className="border-primary/30 text-primary hover:bg-primary/10 gap-2 h-9">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               <span className="hidden sm:inline">Save Draft</span>
               <span className="sm:hidden">Draft</span>
             </Button>
-          )}
+            }
           <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90 gap-2 h-9 min-w-[100px] sm:min-w-[120px]">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            <span className="hidden sm:inline">{saving ? t('loading') : t('submit')}</span>
+            <span className="hidden sm:inline text-[hsl(var(--background))]">{saving ? t('loading') : t('submit')}</span>
             <span className="sm:hidden">{saving ? '...' : 'Submit'}</span>
           </Button>
         </div>
       </DialogContent>
       </Dialog>
-      </>
-      );
+      </>);
 
-      }
+
+}
