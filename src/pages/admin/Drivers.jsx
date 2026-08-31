@@ -65,6 +65,12 @@ function DriversTab() {
 
   return (
     <div>
+      {/* Driver Profiles — contact, vehicle, salary summary */}
+      <div className="mb-5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Driver Profiles</p>
+        <DriverProfilesSection />
+      </div>
+
       {mode === 'analytics' ? (
         <DriversAnalytics drivers={filtered} trips={fTrips} loading={loading} onBrowseDrivers={() => setDriversMode('browse')} />
       ) : (
@@ -72,12 +78,6 @@ function DriversTab() {
           <div className="relative mb-5">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
-          </div>
-
-          {/* Driver Profiles — contact, vehicle, salary summary */}
-          <div className="mb-5">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Driver Profiles</p>
-            <DriverProfilesSection />
           </div>
 
           {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> :
