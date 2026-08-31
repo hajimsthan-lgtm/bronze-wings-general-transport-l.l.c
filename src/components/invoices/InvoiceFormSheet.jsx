@@ -178,7 +178,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
   const clientCompletedTrips = (trips || []).filter(tr => {
     if (tr.client_name !== form.client_name || tr.status !== 'completed' || invoicedTripNumbers.has(tr.trip_number)) return false;
-    if (form.contact_person && availableContacts.length > 1) return tr.contact_person === form.contact_person;
+    if (form.contact_person) return tr.contact_person === form.contact_person;
     return true;
   });
   const selectedTripNumbers = [...new Set(form.line_items.filter(i => i._trip_number && !i._is_addon).map(i => i._trip_number))];
@@ -529,7 +529,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 <datalist id="invoice-contacts">
                   {availableContacts.map((cp, i) => <option key={i} value={cp.name} />)}
                 </datalist>
-                {availableContacts.length > 1 && (
+                {form.contact_person && (
                   <p className="text-[10px] text-muted-foreground mt-1">Trips are filtered by the selected contact person.</p>
                 )}
               </div>
