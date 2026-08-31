@@ -16,6 +16,7 @@ import TripFinancialFields from './TripFinancialFields';
 import SearchableSelect from '@/components/common/SearchableSelect';
 import { Switch } from '@/components/ui/switch';
 import GradientAvatar from '@/components/common/GradientAvatar';
+import ContactPersonSelect from './ContactPersonSelect';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -159,17 +160,14 @@ export default function TripModeFields({ p }) {
           {form.client_name && fixedCharges.length > 0 && (
             <p className="text-[10px] text-blue-400 mt-1.5">{fixedCharges.length} fixed charge(s) loaded — matching routes auto-fill amount</p>
           )}
-          {availableContacts.length > 1 && (
+          {availableContacts.length > 0 && (
             <div className="mt-2">
-              <Label className="text-xs text-white/60 mb-1.5">Contact Person</Label>
-              <Select value={form.contact_person} onValueChange={(v) => update('contact_person', v)}>
-                <SelectTrigger className={inputCls}><SelectValue placeholder="Select contact person" /></SelectTrigger>
-                <SelectContent>
-                  {availableContacts.map((cp, i) => (
-                    <SelectItem key={i} value={cp.name}>{cp.name}{cp.department ? ` — ${cp.department}` : ''}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-xs text-white/60 mb-1.5">Contact Person {availableContacts.length === 1 && <span className="text-emerald-400/70 text-[9px]">· auto-selected</span>}</Label>
+              <ContactPersonSelect
+                contacts={availableContacts}
+                value={form.contact_person}
+                onChange={(v) => update('contact_person', v)}
+              />
             </div>
           )}
         </div>

@@ -194,6 +194,13 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } else {setFixedCharges([]);}
   }, [form.client_name]);
 
+  // Auto-select contact person when only one contact is available
+  useEffect(() => {
+    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
+      setForm((prev) => ({ ...prev, contact_person: availableContacts[0].name }));
+    }
+  }, [form.client_name, availableContacts.length]);
+
   useEffect(() => {
     if (form.client_name && form.from_location && form.to_location && fixedCharges.length > 0) {
       const routeDesc = `${form.from_location} → ${form.to_location}`;
