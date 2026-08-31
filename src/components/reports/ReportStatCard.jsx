@@ -69,13 +69,13 @@ export default function ReportStatCard({ label, value, format, icon: Icon, color
   );
 
   const clickable = to || onClick;
-  const cls = `neon-edge report-stat-card relative overflow-hidden ${padCls} animate-fade-in-up transition-all duration-400 group rounded-2xl ${
+  const cls = `relative overflow-hidden ${padCls} animate-fade-in-up transition-all duration-400 group bg-card rounded-2xl ${
     clickable ? 'hover:-translate-y-[3px] cursor-pointer' : 'hover:-translate-y-[3px]'
   }`;
   const style = {
     animationDelay: `${index * 0.08}s`,
-    border: `1px solid ${rgba(0.22)}`,
-    boxShadow: `0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 28px ${rgba(0.10)}`,
+    border: `1px solid ${rgba(0.25)}`,
+    boxShadow: `0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 24px ${rgba(0.08)}`,
   };
 
   if (to) {

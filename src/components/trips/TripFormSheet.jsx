@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Truck, FileText, X, Check, Loader2, Save, AlertCircle, Activity } from 'lucide-react';
+import { Truck, FileText, X, Check, Loader2, Save, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency } from '@/lib/formatters';
-import { TRIP_STATUSES, STATUS_META } from '@/lib/tripStatusWorkflow';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -65,7 +63,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [cCreating, setCCreating] = useState(null);
   const [revenueOverride, setRevenueOverride] = useState(false);
   const [vendorRateOverride, setVendorRateOverride] = useState(false);
-  const [statusManuallyChanged, setStatusManuallyChanged] = useState(false);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [mapCollapsed, setMapCollapsed] = useState(true);
   const [errors, setErrors] = useState({});
@@ -99,9 +96,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   useEffect(() => {
     if (open) {
       setMapCollapsed(true);
-       setRevenueOverride(false);
-       setStatusManuallyChanged(false);
-       if (editContract) {
+      setRevenueOverride(false);
+      if (editContract) {
         setMode('contract');
         setContract({
           ...DEFAULT_CONTRACT,
@@ -304,9 +300,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     const { assignment_mode, ...rest } = form;
     return {
     ...rest,
-    status: form.status || 'scheduled',
-    status_source: statusManuallyChanged ? 'manual' : (form.status_source || 'automatic'),
-    status_updated_at: statusManuallyChanged ? new Date().toISOString() : (form.status_updated_at || null),
     permit_required: !!form.permit_required,
     permit_name: form.permit_required ? (form.permit_name || '') : '',
     driver_phone: form.driver_phone || '',
@@ -566,48 +559,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           <div className="space-y-5">
             {mode === 'trip' ?
             <>
-            {/* Status changer — non-restricted, shows "Manually Modified" badge */}
-            {editTrip && (
-              <div className="trip-section" style={{ '--section-accent': '250 90% 68%' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="trip-section-icon">
-                    <Activity className="w-4 h-4" />
-                  </div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Trip Status</p>
-                  {statusManuallyChanged && (
-                    <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                      <AlertCircle className="w-2.5 h-2.5" /> Manually Modified
-                    </span>
-                  )}
-                </div>
-                <Select
-                  value={form.status || 'scheduled'}
-                  onValueChange={(v) => { update('status', v); setStatusManuallyChanged(true); }}
-                >
-                  <SelectTrigger className="bg-input border-border text-sm font-semibold h-9">
-                    <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ background: STATUS_META[form.status]?.color || '#60a5fa' }} />
-                      {STATUS_META[form.status]?.label || 'Scheduled'}
-                    </span>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TRIP_STATUSES.map((st) => (
-                      <SelectItem key={st} value={st}>
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full" style={{ background: STATUS_META[st].color }} />
-                          {STATUS_META[st].label}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-[10px] text-muted-foreground mt-1.5">
-                  {statusManuallyChanged
-                    ? 'Status will be saved as manually modified — this overrides the automatic workflow.'
-                    : 'Change the trip status manually if needed. The workflow audit trail will record this change.'}
-                </p>
-              </div>
-            )}
             <TripModeFields p={tripCtx} />
             <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
             </>

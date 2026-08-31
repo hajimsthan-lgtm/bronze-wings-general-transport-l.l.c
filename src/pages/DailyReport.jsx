@@ -17,12 +17,10 @@ import { useReportClient } from '@/lib/reportClientFilter';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 
 const contentCardStyle = {
-  background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb), 0.50) 0%, rgba(var(--surf-2-rgb), 0.62) 100%)',
+  background: 'hsl(var(--card))',
   border: '1px solid hsl(var(--border))',
   borderRadius: '24px',
   boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
-  backdropFilter: 'blur(28px) saturate(1.5)',
-  WebkitBackdropFilter: 'blur(28px) saturate(1.5)',
 };
 
 const topHighlight = 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(30,215,96,0.04) 0%, transparent 60%)';
@@ -158,7 +156,7 @@ export default function DailyReport() {
           </div>
 
           {/* Trips section */}
-          <div className="neon-edge relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(6,182,212,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 32px rgba(6,182,212,0.10)' }}>
+          <div className="relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(6,182,212,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 28px rgba(6,182,212,0.06)' }}>
             <div className="absolute inset-x-0 top-0 h-[2px] opacity-60" style={{ background: 'linear-gradient(90deg, transparent, #06b6d4, transparent)', boxShadow: '0 0 10px rgba(6,182,212,0.7)' }} />
             <h3 className="relative text-sm font-semibold mb-3" style={{ color: 'rgba(34,211,238,0.85)' }}>{t('trips')} ({trips.length})</h3>
             {trips.length === 0 ? <p className="relative text-sm text-white/40">{t('no_data')}</p> : (
@@ -197,7 +195,7 @@ export default function DailyReport() {
           </div>
 
           {/* Summary */}
-          <div className="neon-edge relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(34,197,94,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 32px rgba(34,197,94,0.10)' }}>
+          <div className="relative overflow-hidden p-5" style={{ ...contentCardStyle, border: '1px solid rgba(34,197,94,0.22)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), 0 0 28px rgba(34,197,94,0.06)' }}>
             <div className="absolute inset-x-0 top-0 h-[2px] opacity-60" style={{ background: 'linear-gradient(90deg, transparent, #22c55e, transparent)', boxShadow: '0 0 10px rgba(34,197,94,0.7)' }} />
             <h3 className="relative text-sm font-semibold mb-3" style={{ color: 'rgba(74,222,128,0.85)' }}>Day Summary</h3>
             <div className="relative space-y-2.5">

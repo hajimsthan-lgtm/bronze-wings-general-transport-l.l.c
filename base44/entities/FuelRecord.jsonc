@@ -21,10 +21,6 @@
     "total_cost": {
       "type": "number"
     },
-    "vat_included": {
-      "type": "boolean",
-      "default": false
-    },
     "vat_rate": {
       "type": "number",
       "default": 5

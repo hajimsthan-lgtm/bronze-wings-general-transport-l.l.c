@@ -4,13 +4,11 @@ export default function ReportRowCard({ icon: Icon, iconColor = '#1ED760', title
   return (
     <div
       onClick={onClick}
-      className={`neon-edge group relative rounded-2xl mb-2 transition-all duration-200 hover:-translate-y-px ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      className={`group relative rounded-2xl mb-2 transition-all duration-200 hover:-translate-y-px ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={{
-        background: 'linear-gradient(165deg, rgba(var(--surf-1-rgb), 0.45) 0%, rgba(var(--surf-2-rgb), 0.55) 100%)',
+        background: 'hsl(var(--card))',
         border: '1px solid hsl(var(--border))',
         boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
-        backdropFilter: 'blur(24px) saturate(1.4)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
       }}
     >
       <span

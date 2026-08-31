@@ -22,7 +22,7 @@ import { useLedgerState, setLedgerMode, setLedgerView } from '@/lib/ledgerStore'
 import ExportButtons from '@/components/common/ExportButtons';
 import CsvImportButton from '@/components/common/CsvImportButton';
 import ViewToggle from '@/components/common/ViewToggle';
-import { BarChart3, LayoutGrid, Plus, Building2, LayoutTemplate, X, Fuel as FuelIcon, Wrench, Settings } from 'lucide-react';
+import { BarChart3, LayoutGrid, Plus, Building2, LayoutTemplate, X, Fuel as FuelIcon, Wrench } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export { hasSubNavForPath };
@@ -171,13 +171,6 @@ export default function TopBar() {
             )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-            <button
-              onClick={() => navigate('/settings')}
-              className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-              title="Settings"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
             <div className="md:hidden flex items-center gap-2">
               {(location.pathname.startsWith('/trips') || location.pathname.startsWith('/contracts')) && <MobileBulkActionsInline />}
               {(location.pathname.startsWith('/admin/clients') || location.pathname.startsWith('/admin/vendors')) && <ClientNavDropdown />}

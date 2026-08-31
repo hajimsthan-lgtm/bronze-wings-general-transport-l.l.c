@@ -541,23 +541,13 @@ export default function InvoicesPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto">
-      {/* Page header — InvoiceFlow style */}
-      <div className="mb-5">
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-primary mb-1 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
-              Invoices
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
-              Invoice Management
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">Bill clients, track signatures & payments</p>
-          </div>
-        </div>
+      {/* Page header */}
+      <div className="mb-4">
+        
+        
       </div>
 
-      {/* Stat cards — edge-glow KPI strip */}
+      {/* Stat cards */}
       <div className="mb-5">
         {loading ?
         <div className="flex items-center justify-center py-10">
@@ -568,17 +558,17 @@ export default function InvoicesPage() {
         }
       </div>
 
-      {/* Bulk action bar — edge-panel */}
-      <div className={`edge-panel flex items-center gap-2 mb-4 p-3 rounded-xl transition-all duration-300 ${selected.size > 0 ? 'edge-glow' : ''}`}>
+      {/* Bulk action bar — always visible, active only after selection */}
+      <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl border transition-all duration-300 ${selected.size > 0 ? 'bg-primary/10 border-primary/30' : 'bg-muted/20 border-border/40'}`}>
           <span className={`text-sm font-semibold ${selected.size > 0 ? 'text-primary' : 'text-muted-foreground'}`}>{selected.size} selected</span>
-           <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed">
-             <Send className="w-3.5 h-3.5 mr-1.5" /> Send for Signature
-           </Button>
-           <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('cancel')} className="h-8 border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed">
-             <Ban className="w-3.5 h-3.5 mr-1.5" /> Cancel
-           </Button>
-           <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => setSelected(new Set())} className="h-8 disabled:opacity-40 disabled:cursor-not-allowed">Clear</Button>
-         </div>
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('sendForSignature')} className="h-8 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed">
+            <Send className="w-3.5 h-3.5 mr-1.5" /> Send for Signature
+          </Button>
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => handleBulkAction('cancel')} className="h-8 border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed">
+            <Ban className="w-3.5 h-3.5 mr-1.5" /> Cancel
+          </Button>
+          <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => setSelected(new Set())} className="h-8 disabled:opacity-40 disabled:cursor-not-allowed">Clear</Button>
+        </div>
 
       {/* Two-pane layout */}
       {loading ?
@@ -586,7 +576,7 @@ export default function InvoicesPage() {
           <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div> :
       baseFiltered.length === 0 ?
-      <div className="edge-panel edge-glow rounded-2xl flex flex-col items-center justify-center py-20 text-center">
+      <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full empty-orb flex items-center justify-center mb-4">
             <FileText className="w-7 h-7 text-primary" />
           </div>
