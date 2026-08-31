@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Layers, Wrench, Settings, Plus, X, Truck, Receipt, FileText, FilePlus2, Droplets, FileSignature, CreditCard } from 'lucide-react';
+import { Home, Layers, Wallet, Truck, Plus, X, Receipt, FileText, FilePlus2, Droplets, FileSignature, CreditCard } from 'lucide-react';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
@@ -13,9 +13,9 @@ import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 
 const NAV_ITEMS = [
   { label: 'Home', icon: Home, path: '/', match: ['/'] },
-  { label: 'Operations', icon: Layers, path: '/trips', match: ['/trips', '/contracts', '/expenses', '/fuel', '/maintenance'] },
-  { label: 'Service', icon: Wrench, path: '/maintenance', match: ['/maintenance', '/services'] },
-  { label: 'Settings', icon: Settings, path: '/settings', match: ['/settings'] },
+  { label: 'Operations', icon: Layers, path: '/trips', match: ['/trips', '/contracts', '/expenses', '/fuel', '/maintenance', '/salary'] },
+  { label: 'Finance', icon: Wallet, path: '/finance', match: ['/finance', '/accounts', '/reports/bank-reconciliation', '/reports/soa'] },
+  { label: 'Fleet', icon: Truck, path: '/fleet', match: ['/fleet', '/admin/vehicles', '/admin/drivers', '/admin/clients', '/admin/vendors', '/admin/documents', '/admin/company-documents'] },
 ];
 
 const FAB_ACTIONS = [
