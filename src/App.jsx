@@ -61,6 +61,9 @@ const InvoicesPage = lazy(() => import('@/pages/InvoicesPage'));
 const UIForge = lazy(() => import('@/pages/UIForge'));
 const Services = lazy(() => import('@/pages/Services'));
 const Trash = lazy(() => import('@/pages/Trash'));
+const OperationsExpenseLedger = lazy(() => import('@/pages/OperationsExpenseLedger'));
+const Finance = lazy(() => import('@/pages/Finance'));
+const Fleet = lazy(() => import('@/pages/Fleet'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -97,6 +100,9 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/services" element={<Services />} />
           <Route path="/trash" element={<Trash />} />
+          <Route path="/operations-ledger" element={<OperationsExpenseLedger />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/fleet" element={<Fleet />} />
           <Route path="/trips" element={<Operations />} />
           <Route path="/contracts" element={<Operations />} />
           <Route path="/expenses" element={<Expenses />} />

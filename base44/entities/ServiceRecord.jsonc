@@ -33,6 +33,10 @@
       "type": "number",
       "default": 0
     },
+    "vat_included": {
+      "type": "boolean",
+      "default": false
+    },
     "vat_rate": {
       "type": "number",
       "default": 5

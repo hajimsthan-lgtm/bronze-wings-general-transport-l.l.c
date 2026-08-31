@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText } from 'lucide-react';
-import TripRevenueCell from './TripRevenueCell';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield } from 'lucide-react';
+import TripProfileCell from '@/components/trips/TripProfileCell';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -57,7 +57,7 @@ const DEFAULT_WIDTHS = {
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
-export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
+export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onStatusUpdated, driverMap, vehicleMap, clientMap, driverRecords, vehicleRecords, clientRecords, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -402,7 +402,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                   <Checkbox checked={isSelected} onCheckedChange={() => toggleOne(trip.id)} className="border-border/60" />
                 </TableCell>
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
-                  <div className="flex items-center gap-1.5 overflow-hidden">
+                  <div className="flex items-center gap-1.5 overflow-hidden flex-wrap">
                     <button
                         onClick={(e) => {e.stopPropagation();copyRef(trip);}}
                         className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 whitespace-normal break-words"
@@ -412,6 +412,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                         <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
                         <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
                     </button>
+                    {(trip.trip_type === 'contract' || (Number(trip.revenue) || 0) >= 1000) && (
+                      <span className="px-2.5 py-1 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shrink-0">PRO</span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-xs font-mono text-foreground align-top whitespace-nowrap trips-grid-td">
@@ -420,50 +423,52 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     {trip.created_date ? moment(trip.created_date).format('HH:mm') : ''}
                   </span>
                 </TableCell>
-                {/* CLIENT — hyperlink to client detail */}
+                {/* CLIENT — profile card with avatar */}
                 <TableCell className="align-top trips-grid-td">
-                  <button
-                      onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
-                      className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
-                      title={trip.client_name}>
-                    {trip.client_name?.toUpperCase() || '—'}
-                  </button>
-                  <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
+                  <TripProfileCell
+                    name={trip.client_name}
+                    subtitle={trip.contact_person}
+                    avatarUrl={clientRecords?.[trip.client_name]?.image_url}
+                    initial="C"
+                    gradient="linear-gradient(135deg, #8b5cf6, #d946ef)"
+                    path="/admin/clients"
+                    id={clientMap?.[trip.client_name]}
+                  />
                 </TableCell>
-                {/* VEHICLE + DRIVER + VENDOR — all hyperlinks */}
-                <TableCell className="text-xs font-mono align-top trips-grid-td">
-                  <button
-                      onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
-                      className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
-                      title="View vehicle">
-                    {trip.vehicle_plate || '—'}
-                  </button>
-                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
-                    <button
-                        onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
-                        className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block text-left whitespace-normal break-words leading-tight text-sm"
-                        title="View driver">
-                      {trip.driver_name || ''}
-                    </button>
-                    {trip.vendor_name && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                        {trip.vendor_name}
-                      </span>
-                    )}
+                {/* VEHICLE + DRIVER — profile cards */}
+                <TableCell className="text-xs align-top trips-grid-td">
+                  <TripProfileCell
+                    name={trip.vehicle_plate}
+                    subtitle={vehicleRecords?.[trip.vehicle_plate]?.model || vehicleRecords?.[trip.vehicle_plate]?.vehicle_type}
+                    avatarUrl={vehicleRecords?.[trip.vehicle_plate]?.image_url}
+                    initial={trip.vehicle_plate?.charAt(0) || 'V'}
+                    gradient="linear-gradient(135deg, #0ea5e9, #06b6d4)"
+                    path="/admin/vehicles"
+                    id={vehicleMap?.[trip.vehicle_plate]}
+                  />
+                  <div className="mt-1.5">
+                    <TripProfileCell
+                      name={trip.driver_name}
+                      subtitle={driverRecords?.[trip.driver_name]?.phone}
+                      avatarUrl={driverRecords?.[trip.driver_name]?.image_url}
+                      initial={trip.driver_name?.charAt(0) || 'D'}
+                      gradient="linear-gradient(135deg, #14b8a6, #06b6d4)"
+                      path="/admin/drivers"
+                      id={driverMap?.[trip.driver_name]}
+                    />
                   </div>
+                  {trip.vendor_name && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0 mt-1" title={`Vendor: ${trip.vendor_name}`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                      {trip.vendor_name}
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.from_location || ''}>
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
-                   {trip.delivery_note_number && (
-                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold font-mono tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30" title={`Delivery Note: DN#${trip.delivery_note_number}`}>
-                       <FileText className="w-2.5 h-2.5" />
-                       DN#{trip.delivery_note_number}
-                     </div>
-                   )}
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
@@ -477,7 +482,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    )}
                    </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
-                   <TripRevenueCell trip={trip} />
+                   <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
                  </TableCell>
                   {/* STATUS — workflow dropdown with conditional modals */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">

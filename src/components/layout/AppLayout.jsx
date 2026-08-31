@@ -5,7 +5,7 @@ import ShellSidebar from '@/components/layout/ShellSidebar';
 import ShellNavbar from '@/components/layout/ShellNavbar';
 import TopBar from '@/components/layout/TopBar';
 import MobileHeader from '@/components/layout/MobileHeader';
-import MobileNav from '@/components/layout/MobileNav';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MobileCanvasBackground from '@/components/mobile/MobileCanvasBackground';
 import EdgeQuickRail from '@/components/dashboard/EdgeQuickRail';
 import AppFooter from '@/components/layout/AppFooter';
@@ -22,8 +22,8 @@ export default function AppLayout() {
     >
       <MobileCanvasBackground />
 
-      {/* Mobile header — full-bleed on small screens */}
-      <MobileHeader />
+      {/* Mobile header — hidden on dashboard (hero has its own brand bar) */}
+      {location.pathname !== '/' && <MobileHeader />}
 
       {/* Rounded outer shell — desktop only gets the card container */}
       <div className="flex-1 min-h-0 md:p-4 relative z-10 flex">
@@ -71,7 +71,7 @@ export default function AppLayout() {
 
       {/* Floating / mobile-only layers */}
       <EdgeQuickRail />
-      <MobileNav />
+      <MobileBottomNav />
     </div>
   );
 }

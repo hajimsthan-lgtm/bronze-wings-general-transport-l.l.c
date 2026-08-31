@@ -1,12 +1,9 @@
 import { formatCurrency } from '@/lib/formatters';
 
-function CalcRow({ label, value, tone = 'text-foreground', dot }) {
+function CalcRow({ label, value, tone = 'text-foreground' }) {
   return (
-    <div className="flex justify-between text-xs items-center">
-      <span className="text-muted-foreground flex items-center gap-1.5">
-        {dot && <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />}
-        {label}
-      </span>
+    <div className="flex justify-between text-xs">
+      <span className="text-muted-foreground">{label}</span>
       <span className={`font-medium tabular-nums ${tone}`}>{value}</span>
     </div>
   );
@@ -42,8 +39,8 @@ export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraC
           <p className="text-[10px] text-muted-foreground italic">{form.load_datetime && form.offload_datetime ? 'Within allowed duration — no overtime' : 'Enter load & offload times'}</p>
         )}
         <div className="border-t border-white/10 pt-2 space-y-1.5">
-          <CalcRow label="Revenue (excl. VAT)" value={formatCurrency(revenue)} tone={revenueOverridden ? 'text-red-400' : 'text-primary'} dot="rgb(var(--panel-accent-rgb))" />
-          <CalcRow label="VAT (5%)" value={formatCurrency(vat)} tone="text-amber-300" dot="#f59e0b" />
+          <CalcRow label="Revenue (excl. VAT)" value={formatCurrency(revenue)} tone={revenueOverridden ? 'text-red-400' : 'text-primary'} />
+          <CalcRow label="VAT (5%)" value={formatCurrency(vat)} tone="text-muted-foreground" />
         </div>
         {addOnList.length > 0 && (
           <div className="border-t border-white/10 pt-2 space-y-1.5">
@@ -52,11 +49,10 @@ export default function TripCalcPanel({ form, isOvertime, overtimeMetric, extraC
                 key={i}
                 label={`${a.description || 'Add-on'}${a.vat_included ? '' : ' · no VAT'}`}
                 value={`+${formatCurrency(Number(a.amount) || 0)}`}
-                tone="text-emerald-300"
-                dot="#34d399"
+                tone="text-amber-300"
               />
             ))}
-            {addOnVat > 0 && <CalcRow label="Add-on VAT" value={`+${formatCurrency(addOnVat)}`} tone="text-amber-300" dot="#f59e0b" />}
+            {addOnVat > 0 && <CalcRow label="Add-on VAT" value={`+${formatCurrency(addOnVat)}`} tone="text-muted-foreground" />}
           </div>
         )}
         <div className="calc-total-glow flex items-baseline justify-between px-2 py-1.5">

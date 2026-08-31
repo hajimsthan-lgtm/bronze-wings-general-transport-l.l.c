@@ -14,6 +14,7 @@ import { safeListAll } from '@/lib/safeRequest';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Plus, Search, Users } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
+import DriverProfilesSection from '@/components/drivers/DriverProfilesSection';
 import { useDriversMode, setDriversMode, setDriversData, getDriversView } from '@/lib/driversStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 
@@ -64,6 +65,12 @@ function DriversTab() {
 
   return (
     <div>
+      {/* Driver Profiles — contact, vehicle, salary summary */}
+      <div className="mb-5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Driver Profiles</p>
+        <DriverProfilesSection />
+      </div>
+
       {mode === 'analytics' ? (
         <DriversAnalytics drivers={filtered} trips={fTrips} loading={loading} onBrowseDrivers={() => setDriversMode('browse')} />
       ) : (
