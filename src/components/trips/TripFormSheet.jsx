@@ -627,7 +627,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             }
           <Button onClick={handleSubmit} disabled={saving} className="bg-primary hover:bg-primary/90 gap-2 h-9 min-w-[100px] sm:min-w-[120px]">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            <span className="hidden sm:inline text-[hsl(var(--secondary-foreground))] bg-[hsl(var(--accent))]">{saving ? t('loading') : t('submit')}</span>
+            <span className="hidden sm:inline text-[hsl(var(--secondary-foreground))] bg-[hsl(var(--sidebar-border))]">{saving ? t('loading') : t('submit')}</span>
             <span className="sm:hidden">{saving ? '...' : 'Submit'}</span>
           </Button>
         </div>
