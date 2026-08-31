@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, Route, Settings, Plus, X, FileText, Receipt, FilePlus2, Truck, Sparkles, Droplets, FileSignature, CreditCard } from 'lucide-react';
 import { useTabHistory } from '@/lib/TabHistoryContext';
@@ -30,7 +29,6 @@ const FAB_ACTIONS = [
 ];
 
 export default function MobileNav() {
-  const location = useLocation();
   const { activeTab, switchTab } = useTabHistory();
   const [fabOpen, setFabOpen] = useState(false);
   const [activeForm, setActiveForm] = useState(null);
@@ -59,9 +57,6 @@ export default function MobileNav() {
       document.removeEventListener('keydown', esc);
     };
   }, [fabOpen]);
-
-  // Dashboard has its own bottom nav — hide the global MobileNav there
-  if (location.pathname === '/') return null;
 
   const handleAction = (key) => {
     setFabOpen(false);

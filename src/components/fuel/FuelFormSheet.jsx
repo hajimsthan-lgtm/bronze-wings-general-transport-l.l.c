@@ -8,8 +8,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileText } from 'lucide-react';
 import DatePicker from '@/components/common/DatePicker';
 import TaxPreview from '@/components/common/TaxPreview';
-import VatModeToggle from '@/components/common/VatModeToggle';
-import { calcVat } from '@/lib/vatCalc';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
 
@@ -38,7 +36,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
     station_name: '',
     fuel_type: 'diesel',
     payment_method: 'cash',
-    vat_included: false,
     vat_rate: 5,
     vat_amount: 0,
     total_with_vat: 0,
@@ -58,7 +55,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         station_name: editItem.station_name || '',
         fuel_type: editItem.fuel_type || 'diesel',
         payment_method: editItem.payment_method || 'cash',
-        vat_included: editItem.vat_included ?? false,
         vat_rate: editItem.vat_rate ?? 5,
         vat_amount: editItem.vat_amount || 0,
         total_with_vat: editItem.total_with_vat || 0,
@@ -76,7 +72,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         station_name: '',
         fuel_type: 'diesel',
         payment_method: 'cash',
-        vat_included: false,
         vat_rate: 5,
         vat_amount: 0,
         total_with_vat: 0,
@@ -94,11 +89,12 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
     if (f === 'liters' || f === 'price_per_liter') {
       next.total_cost = (Number(next.liters) || 0) * (Number(next.price_per_liter) || 0);
     }
-    // Auto-calc VAT when total_cost or vat_rate or vat_included changes
-    if (f === 'liters' || f === 'price_per_liter' || f === 'total_cost' || f === 'vat_rate' || f === 'vat_included') {
-      const { subtotal, vatAmount, total } = calcVat(next.total_cost, next.vat_rate, next.vat_included);
-      next.vat_amount = vatAmount;
-      next.total_with_vat = total;
+    // Auto-calc VAT when total_cost or vat_rate changes
+    if (f === 'liters' || f === 'price_per_liter' || f === 'total_cost' || f === 'vat_rate') {
+      const sub = Number(next.total_cost) || 0;
+      const rate = Number(next.vat_rate) || 0;
+      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
+      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
     } else if (f === 'vat_amount') {
       const sub = Number(next.total_cost) || 0;
       next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
@@ -115,7 +111,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         price_per_liter: Number(form.price_per_liter) || 0,
         total_cost: Number(form.total_cost) || 0,
         odometer_reading: Number(form.odometer_reading) || 0,
-        vat_included: !!form.vat_included,
         vat_rate: Number(form.vat_rate) || 0,
         vat_amount: Number(form.vat_amount) || 0,
         total_with_vat: Number(form.total_with_vat) || 0,
@@ -195,9 +190,6 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
             </div>
           </div>
 
-          {/* VAT Mode Toggle */}
-          <VatModeToggle included={form.vat_included} onChange={(v) => update('vat_included', v)} />
-
           {/* VAT Fields */}
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -218,7 +210,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
           </div>
 
           {/* Live Tax Preview */}
-          <TaxPreview subtotal={form.vat_included ? (Number(form.total_with_vat) - Number(form.vat_amount)) : Number(form.total_cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} included={form.vat_included} />
+          <TaxPreview subtotal={Number(form.total_cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
 
           {/* Date & Odometer */}
           <div className="grid grid-cols-2 gap-3">

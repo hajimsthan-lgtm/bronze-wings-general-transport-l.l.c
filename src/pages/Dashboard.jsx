@@ -16,7 +16,6 @@ import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, Cell, Tooltip } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import MobileHomeScreen from '@/components/dashboard/MobileHomeScreen';
-import MobileFleetDashboard from '@/components/dashboard/MobileFleetDashboard';
 import '@/lib/mobileNeumorphic.css';
 import PremiumCard from '@/components/dashboard/premium/PremiumCard';
 import HeroMetricCard from '@/components/dashboard/premium/HeroMetricCard';
@@ -219,7 +218,22 @@ export default function Dashboard() {
   return (
     <PullToRefresh onRefresh={loadData}>
       {isMobile ? (
-        <MobileFleetDashboard />
+        <MobileHomeScreen
+          totalRevenue={totalRevenue}
+          totalTrips={totalTrips}
+          activeTrips={activeTrips}
+          completedTrips={completedTrips}
+          pendingInvoices={pendingInvoices}
+          dueAmount={dueAmount}
+          invoices={fInvoices}
+          expenses={fExpenses}
+          trips={fTrips}
+          overdueCount={overdueInvoices.length}
+          maintenanceCount={maintenanceVehicles.length}
+          expiringDocCount={expiringDocs.length}
+          hasAlerts={hasAlerts}
+          onNewTrip={() => window.location.assign('/trips?new=1')}
+        />
       ) : (
       <div className="space-y-6">
         <QuickActions />

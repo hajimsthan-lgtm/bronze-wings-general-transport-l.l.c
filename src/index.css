@@ -13,68 +13,68 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --background: 215 32% 12%;
-    --background-elevated: 215 30% 17%;
-    --card: 215 30% 15%;
-    --card-foreground: 210 40% 95%;
-    --foreground: 210 40% 96%;
-    --muted: 215 25% 22%;
-    --muted-foreground: 214 20% 65%;
-    --popover: 215 30% 15%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 204 57% 52%;
-    --primary-light: 204 57% 60%;
-    --primary-foreground: 215 32% 12%;
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 210 40% 96%;
-    --accent: 222 82% 35%;
-    --accent-foreground: 210 40% 98%;
+    --background: 224 34% 8%;
+    --background-elevated: 224 30% 14%;
+    --card: 224 30% 11%;
+    --card-foreground: 210 30% 96%;
+    --foreground: 210 30% 96%;
+    --muted: 220 20% 16%;
+    --muted-foreground: 215 18% 65%;
+    --popover: 224 30% 11%;
+    --popover-foreground: 210 30% 96%;
+    --primary: 250 90% 68%;
+    --primary-light: 250 90% 74%;
+    --primary-foreground: 224 34% 10%;
+    --secondary: 220 20% 16%;
+    --secondary-foreground: 210 30% 96%;
+    --accent: 199 92% 60%;
+    --accent-foreground: 224 34% 10%;
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 204 57% 52%;
-    --magenta: 222 82% 45%;
+    --neon: 250 90% 68%;
+    --magenta: 199 92% 60%;
     --success: 160 70% 52%;
     --success-light: 160 70% 60%;
     --warning: 38 95% 60%;
     --danger: 0 84% 66%;
-    --border: 215 25% 24%;
-    --input: 215 25% 24%;
-    --ring: 204 57% 52%;
-    --panel-accent-rgb: 62, 146, 204;
-    --panel-accent2-rgb: 10, 36, 99;
-    --surf-1-rgb: 30, 41, 59;
-    --surf-2-rgb: 22, 30, 43;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 250 90% 68%;
+    --panel-accent-rgb: 146, 132, 215;
+    --panel-accent2-rgb: 59, 187, 247;
+    --surf-1-rgb: 20, 24, 37;
+    --surf-2-rgb: 14, 17, 27;
     --radius: 1rem;
-    --chart-1: 204 57% 52%;
+    --chart-1: 250 84% 66%;
     --chart-2: 160 70% 52%;
-    --chart-3: 222 82% 45%;
+    --chart-3: 199 92% 60%;
     --chart-4: 38 95% 60%;
     --chart-5: 0 84% 66%;
-    --sidebar-background: 215 32% 10%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 204 57% 52%;
-    --sidebar-primary-foreground: 215 32% 12%;
-    --sidebar-accent: 215 25% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 25% 20%;
-    --sidebar-ring: 204 57% 52%;
-    --clay-bg: 215 30% 15%;
-    --clay-border: 215 25% 22%;
-    --clay-shadow-dark: 215 32% 6%;
-    --clay-shadow-light: 215 25% 20%;
+    --sidebar-background: 224 34% 10%;
+    --sidebar-foreground: 210 30% 96%;
+    --sidebar-primary: 250 90% 68%;
+    --sidebar-primary-foreground: 224 34% 10%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 210 30% 96%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 250 90% 68%;
+    --clay-bg: 224 30% 11%;
+    --clay-border: 220 20% 20%;
+    --clay-shadow-dark: 224 34% 4%;
+    --clay-shadow-light: 220 20% 16%;
 
-    --app-bg: #1e293b;
-    --bg-canvas: #1e293b;
-    --panel-bg: linear-gradient(180deg, rgba(30,41,59,0.85) 0%, rgba(22,30,43,0.92) 100%);
-    --panel-border-color: rgba(62,146,204,0.18);
+    --app-bg: #0e111b;
+    --bg-canvas: #0e111b;
+    --panel-bg: linear-gradient(180deg, rgba(20,24,37,0.85) 0%, rgba(14,17,27,0.92) 100%);
+    --panel-border-color: rgba(146,132,215,0.18);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
     --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
     --panel-blur: blur(20px) saturate(1.4);
-    --header-tint-1: rgba(22,30,43,0.12);
-    --header-tint-2: rgba(22,30,43,0.05);
+    --header-tint-1: rgba(14,17,27,0.12);
+    --header-tint-2: rgba(14,17,27,0.05);
     --nav-inactive: rgba(180,190,210,0.55);
-    --surf-1: rgba(30,41,59,0.85);
-    --surf-2: rgba(22,30,43,0.95);
+    --surf-1: rgba(20,24,37,0.85);
+    --surf-2: rgba(14,17,27,0.95);
     }
 
     .theme-light {
@@ -85,72 +85,60 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --background: 210 40% 98%;
-    --background-elevated: 214 32% 93%;
+    --background: 230 60% 98%;
+    --background-elevated: 230 40% 95%;
     --card: 0 0% 100%;
-    --card-foreground: 215 32% 17%;
-    --foreground: 215 32% 17%;
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
+    --card-foreground: 224 34% 14%;
+    --foreground: 224 34% 14%;
+    --muted: 230 40% 95%;
+    --muted-foreground: 220 14% 42%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 32% 17%;
-    --primary: 222 82% 21%;
-    --primary-light: 222 70% 30%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 215 32% 17%;
-    --accent: 204 57% 52%;
-    --accent-foreground: 210 40% 98%;
+    --popover-foreground: 224 34% 14%;
+    --primary: 250 84% 60%;
+    --primary-light: 250 84% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 40% 96%;
+    --secondary-foreground: 224 34% 14%;
+    --accent: 199 92% 56%;
+    --accent-foreground: 224 34% 14%;
     --destructive: 0 84% 62%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 222 82% 35%;
-    --magenta: 204 57% 52%;
+    --neon: 250 84% 60%;
+    --magenta: 199 92% 56%;
     --success: 160 70% 45%;
     --success-light: 160 70% 52%;
     --warning: 38 95% 55%;
     --danger: 0 84% 62%;
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 222 82% 21%;
-    --panel-accent-rgb: 10, 36, 99;
-    --panel-accent2-rgb: 62, 146, 204;
+    --border: 220 30% 90%;
+    --input: 220 30% 90%;
+    --ring: 250 84% 60%;
+    --panel-accent-rgb: 96, 67, 239;
+    --panel-accent2-rgb: 40, 181, 246;
     --surf-1-rgb: 255, 255, 255;
     --surf-2-rgb: 248, 250, 252;
     --radius: 1rem;
-    --chart-1: 222 82% 35%;
+    --chart-1: 250 84% 60%;
     --chart-2: 160 70% 45%;
-    --chart-3: 204 57% 52%;
+    --chart-3: 199 92% 56%;
     --chart-4: 38 95% 55%;
     --chart-5: 0 84% 62%;
-    --sidebar-background: 210 40% 99%;
-    --sidebar-foreground: 215 32% 17%;
-    --sidebar-primary: 222 82% 21%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 214 32% 93%;
-    --sidebar-accent-foreground: 215 32% 17%;
-    --sidebar-border: 214 32% 88%;
-    --sidebar-ring: 222 82% 21%;
+    --sidebar-background: 230 50% 99%;
+    --sidebar-foreground: 224 34% 14%;
+    --sidebar-primary: 250 84% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 40% 95%;
+    --sidebar-accent-foreground: 224 34% 14%;
+    --sidebar-border: 220 30% 90%;
+    --sidebar-ring: 250 84% 60%;
     --clay-bg: 0 0% 100%;
-    --clay-border: 214 32% 88%;
-    --clay-shadow-dark: 214 20% 80%;
+    --clay-border: 220 30% 90%;
+    --clay-shadow-dark: 220 14% 80%;
     --clay-shadow-light: 0 0% 100%;
 
-    --app-bg:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.12) 0%, transparent 55%),
-      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.10) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
-      #f8fafc;
-    --bg-canvas:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.12) 0%, transparent 55%),
-      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.08) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.10) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
-      #f8fafc;
-    --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.82) 100%);
-    --panel-border-color: rgba(10,36,99,0.12);
+    --app-bg: #f5f7fc;
+    --bg-canvas: #eef1f8;
+    --panel-bg: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --panel-border-color: rgba(96,67,239,0.12);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.9);
     --panel-drop-shadow: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
     --panel-blur: blur(20px) saturate(1.6);
@@ -182,18 +170,6 @@
       hsl(var(--background));
     background-attachment: fixed;
   }
-
-  /* Soft navy/sky mesh gradient background — light mode */
-  .theme-light body {
-    background:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.10) 0%, transparent 55%),
-      radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.85) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.04) 0%, transparent 55%),
-      #f8fafc;
-    background-attachment: fixed;
-  }
   #root { overscroll-behavior: none; }
 
   h1, h2, h3, h4, h5, h6 {
@@ -220,7 +196,7 @@
   .clay-card {
     background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.78) 0%, rgba(var(--surf-1-rgb),0.86) 55%, rgba(var(--surf-2-rgb),0.92) 100%);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 0.85rem;
+    border-radius: 1.25rem;
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -279,8 +255,8 @@
   /* ========== 2026 Entity Card (grid) ========== */
   .entity-card {
     position: relative;
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 20px;
+    padding: 20px;
     background: linear-gradient(165deg, rgba(var(--panel-accent-rgb),0.08) 0%, rgba(var(--surf-2-rgb),0.60) 100%);
     backdrop-filter: blur(28px) saturate(1.4);
     -webkit-backdrop-filter: blur(28px) saturate(1.4);
@@ -302,7 +278,7 @@
 
   /* ========== 2026 Row Card (liquid glass list row) ========== */
   .row-card {
-    position: relative; border-radius: 12px; padding: 10px 14px; margin-bottom: 6px; overflow: hidden;
+    position: relative; border-radius: 16px; padding: 14px 18px; margin-bottom: 8px; overflow: hidden;
     background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.55) 0%, rgba(var(--surf-2-rgb),0.66) 100%);
     backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(0,0,0,0.05);
@@ -740,8 +716,8 @@
 
   /* ========== 2026 Detail Header Card ========== */
   .detail-header-card {
-    border-radius: 14px;
-    padding: 16px;
+    border-radius: 20px;
+    padding: 24px;
     background: linear-gradient(165deg, rgba(var(--panel-accent-rgb),0.12) 0%, rgba(var(--surf-1-rgb),0.78) 55%, rgba(var(--surf-2-rgb),0.88) 100%);
     backdrop-filter: blur(26px) saturate(1.3);
     -webkit-backdrop-filter: blur(26px) saturate(1.3);
@@ -802,7 +778,7 @@
     backdrop-filter: blur(28px) saturate(1.3);
     -webkit-backdrop-filter: blur(28px) saturate(1.3);
     border: 1px solid rgba(var(--panel-accent-rgb),0.12);
-    border-radius: var(--radius);
+    border-radius: calc(var(--radius) + 4px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 16px 44px -14px rgba(0,0,0,0.1);
   }
 
@@ -874,7 +850,7 @@
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1911,17 +1887,14 @@
   .lightning-btn::after, .clay-btn::after {
     content: '';
     position: absolute;
-    top: 0; left: -150%;
-    width: 50%; height: 100%;
-    background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
-    transform: skewX(-18deg);
-    animation: btn-shine-sweep 3s ease-in-out infinite;
+    top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
     pointer-events: none;
   }
-  @keyframes btn-shine-sweep {
-    0% { left: -150%; }
-    65%, 100% { left: 150%; }
-  }
+  .lightning-btn:hover::after, .clay-btn:hover::after { left: 160%; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2346,88 +2319,5 @@
   --tw-gradient-from: rgba(248, 250, 252, 1) var(--tw-gradient-from-position) !important;
 }
 .theme-light [class*="to-white/"] {
-    --tw-gradient-to: rgba(248, 250, 252, 1) var(--tw-gradient-to-position) !important;
-  }
-
-  /* ═══════════════════════════════════════════════════════
-     UNIFIED NEON-EDGE LIGHTNING — applied to every data card
-     across all pages for a consistent dashboard-grade look.
-     ═══════════════════════════════════════════════════════ */
-  @property --card-edge-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-  @keyframes card-edge-spin { to { --card-edge-angle: 360deg; } }
-
-  /* Cards without ::after — get the animated conic lightning border */
-  .entity-card, .kpi-card, .detail-header-card {
-    position: relative;
-  }
-  .entity-card::after, .kpi-card::after, .detail-header-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1.5px;
-    background: conic-gradient(from var(--card-edge-angle, 0deg),
-      transparent 0deg,
-      rgb(var(--panel-accent-rgb)) 40deg,
-      transparent 95deg,
-      transparent 180deg,
-      rgb(var(--panel-accent2-rgb)) 220deg,
-      transparent 275deg);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity .35s ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .entity-card:hover::after, .kpi-card:hover::after, .detail-header-card:hover::after {
-    opacity: 1;
-    animation: card-edge-spin 3s linear infinite;
-  }
-
-  /* stat-tile uses ::after for radial glow — use ::before for the lightning border */
-  .stat-tile::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1.5px;
-    background: conic-gradient(from var(--card-edge-angle, 0deg),
-      transparent 0deg,
-      rgb(var(--panel-accent-rgb)) 40deg,
-      transparent 95deg,
-      transparent 180deg,
-      rgb(var(--panel-accent2-rgb)) 220deg,
-      transparent 275deg);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity .35s ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .stat-tile:hover::before {
-    opacity: 1;
-    animation: card-edge-spin 3s linear infinite;
-  }
-
-  /* Unified neon-edge box-shadow glow on hover for ALL card classes */
-  .entity-card:hover, .kpi-card:hover, .stat-tile:hover,
-  .glass-card:hover, .clay-card:hover, .row-card:hover,
-  .detail-header-card:hover, .glass-panel:hover, .glass-card-hover:hover {
-    border-color: rgba(var(--panel-accent-rgb), 0.35) !important;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.8),
-      0 0 0 1px rgba(var(--panel-accent-rgb), 0.18),
-      0 0 24px -6px rgba(var(--panel-accent-rgb), 0.40),
-      0 0 48px -10px rgba(var(--panel-accent2-rgb), 0.22),
-      0 14px 36px rgba(0,0,0,0.10) !important;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .entity-card:hover::after, .kpi-card:hover::after, .detail-header-card:hover::after,
-    .stat-tile:hover::before { animation: none !important; }
-  }
+  --tw-gradient-to: rgba(248, 250, 252, 1) var(--tw-gradient-to-position) !important;
+}

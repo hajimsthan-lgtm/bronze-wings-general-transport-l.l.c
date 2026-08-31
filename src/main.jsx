@@ -15,8 +15,6 @@ import '@/lib/numberInputFix.css'
 import '@/lib/cardInteractions.css'
 import '@/lib/liquidGlass.css'
 import '@/lib/lightFormEnhancements.css'
-import '@/lib/neonCards.css'
-import '@/lib/fintechEdge.css'
 import { disableNumberInputSpin } from '@/lib/disableNumberInputSpin'
 
 disableNumberInputSpin();

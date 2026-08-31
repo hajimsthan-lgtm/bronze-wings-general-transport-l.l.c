@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { withRetry } from '@/lib/safeRequest';
 
 const KEYS = {
   trips: ['trips'],
@@ -53,30 +52,30 @@ function deleteOpts(qc, key) {
 }
 
 /* Trips */
-export const useTrips = () => useQuery({ queryKey: KEYS.trips, queryFn: () => withRetry(() => base44.entities.Trip.list('-created_date', 500)) });
+export const useTrips = () => useQuery({ queryKey: KEYS.trips, queryFn: () => base44.entities.Trip.list('-created_date', 500) });
 export const useTripCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.Trip.create(data), ...createOpts(qc, KEYS.trips) }); };
 export const useTripUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Trip.update(id, data), ...updateOpts(qc, KEYS.trips) }); };
 export const useTripDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => base44.entities.Trip.delete(id), ...deleteOpts(qc, KEYS.trips) }); };
 
 /* Expenses */
-export const useExpenses = () => useQuery({ queryKey: KEYS.expenses, queryFn: () => withRetry(() => base44.entities.Expense.list('-created_date', 500)) });
+export const useExpenses = () => useQuery({ queryKey: KEYS.expenses, queryFn: () => base44.entities.Expense.list('-created_date', 500) });
 export const useExpenseCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.Expense.create(data), ...createOpts(qc, KEYS.expenses) }); };
 export const useExpenseUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Expense.update(id, data), ...updateOpts(qc, KEYS.expenses) }); };
 export const useExpenseDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => base44.entities.Expense.delete(id), ...deleteOpts(qc, KEYS.expenses) }); };
 
 /* Transactions */
-export const useTransactions = () => useQuery({ queryKey: KEYS.transactions, queryFn: () => withRetry(() => base44.entities.Transaction.list('-created_date', 500)) });
+export const useTransactions = () => useQuery({ queryKey: KEYS.transactions, queryFn: () => base44.entities.Transaction.list('-created_date', 500) });
 export const useTransactionCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.Transaction.create(data), ...createOpts(qc, KEYS.transactions) }); };
 export const useTransactionUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Transaction.update(id, data), ...updateOpts(qc, KEYS.transactions) }); };
 
 /* Invoices */
-export const useInvoices = () => useQuery({ queryKey: KEYS.invoices, queryFn: () => withRetry(() => base44.entities.Invoice.list('-created_date', 500)) });
+export const useInvoices = () => useQuery({ queryKey: KEYS.invoices, queryFn: () => base44.entities.Invoice.list('-created_date', 500) });
 export const useInvoiceCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.Invoice.create(data), ...createOpts(qc, KEYS.invoices) }); };
 export const useInvoiceUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Invoice.update(id, data), ...updateOpts(qc, KEYS.invoices) }); };
 export const useInvoiceDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => base44.entities.Invoice.delete(id), ...deleteOpts(qc, KEYS.invoices) }); };
 
 /* Client Payments */
-export const useClientPayments = () => useQuery({ queryKey: KEYS.clientPayments, queryFn: () => withRetry(() => base44.entities.ClientPayment.list('-created_date', 500)) });
+export const useClientPayments = () => useQuery({ queryKey: KEYS.clientPayments, queryFn: () => base44.entities.ClientPayment.list('-created_date', 500) });
 export const useClientPaymentCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.ClientPayment.create(data), ...createOpts(qc, KEYS.clientPayments) }); };
 export const useClientPaymentUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.ClientPayment.update(id, data), ...updateOpts(qc, KEYS.clientPayments) }); };
 export const useClientPaymentDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => base44.entities.ClientPayment.delete(id), ...deleteOpts(qc, KEYS.clientPayments) }); };
