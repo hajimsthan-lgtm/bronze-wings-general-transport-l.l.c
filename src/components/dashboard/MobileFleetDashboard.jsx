@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import {
   Truck, Fuel, ClipboardList, Users, ShieldAlert, Wrench,
   Search, Sun, Moon, ArrowRight, Sparkles, MapPin, Bell, Home,
-  Settings, Layers,
-} from 'lucide-react';
+  Settings, Layers } from
+'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { safeListAll } from '@/lib/safeRequest';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell,
-} from 'recharts';
+  ResponsiveContainer, Cell } from
+'recharts';
 
 const HERO_BG = 'linear-gradient(180deg, #161331 0%, #1f1740 45%, #33256a 100%)';
 
@@ -22,7 +22,7 @@ const scatterTooltip = {
   color: '#fff',
   fontSize: 11,
   boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-  padding: '8px 10px',
+  padding: '8px 10px'
 };
 
 const STATUS_PILL = {
@@ -30,7 +30,7 @@ const STATUS_PILL = {
   trip_started: { bg: '#dbeafe', fg: '#2563eb', label: 'In Transit' },
   scheduled: { bg: '#fef3c7', fg: '#d97706', label: 'Pending' },
   cancelled: { bg: '#fee2e2', fg: '#dc2626', label: 'Cancelled' },
-  trip_ended: { bg: '#e0e7ff', fg: '#4f46e5', label: 'Ended' },
+  trip_ended: { bg: '#e0e7ff', fg: '#4f46e5', label: 'Ended' }
 };
 
 export default function MobileFleetDashboard() {
@@ -44,16 +44,16 @@ export default function MobileFleetDashboard() {
 
   const loadData = useCallback(async () => {
     const [v, dr, tr, fr, d] = await safeListAll([
-      () => base44.entities.Vehicle.list().catch(() => []),
-      () => base44.entities.Driver.list().catch(() => []),
-      () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
-      () => base44.entities.FuelRecord.list('-created_date', 50).catch(() => []),
-      () => base44.entities.Document.list().catch(() => []),
-    ]);
-    setVehicles(v); setDrivers(dr); setTrips(tr); setFuelRecords(fr); setDocuments(d);
+    () => base44.entities.Vehicle.list().catch(() => []),
+    () => base44.entities.Driver.list().catch(() => []),
+    () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
+    () => base44.entities.FuelRecord.list('-created_date', 50).catch(() => []),
+    () => base44.entities.Document.list().catch(() => [])]
+    );
+    setVehicles(v);setDrivers(dr);setTrips(tr);setFuelRecords(fr);setDocuments(d);
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {loadData();}, [loadData]);
 
   const activeVehicles = vehicles.filter((v) => v.status === 'active').length;
   const totalVehicles = vehicles.length;
@@ -61,59 +61,59 @@ export default function MobileFleetDashboard() {
   const totalLiters = fuelRecords.reduce((s, f) => s + (Number(f.liters) || 0), 0);
   const pendingTrips = trips.filter((t) => t.status === 'scheduled').length;
   const activeDrivers = drivers.length;
-  const alertsCount = documents.filter((doc) => doc.status === 'expiring_soon' || doc.status === 'expired').length
-    + vehicles.filter((v) => v.status === 'maintenance').length;
+  const alertsCount = documents.filter((doc) => doc.status === 'expiring_soon' || doc.status === 'expired').length +
+  vehicles.filter((v) => v.status === 'maintenance').length;
   const maintenanceCount = vehicles.filter((v) => v.status === 'maintenance').length;
 
   const cards = [
-    { label: 'Active Vehicles', sub: `${activeVehicles} of ${totalVehicles} fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6' },
-    { label: 'Total Fuel', sub: `${Math.round(totalLiters)} L · ${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316' },
-    { label: 'Pending', sub: `${pendingTrips} trips scheduled`, icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4' },
-    { label: 'Drivers', sub: `${activeDrivers} in your roster`, icon: Users, from: '#06b6d4', to: '#14b8a6' },
-    { label: 'Alerts', sub: `${alertsCount} need attention`, icon: ShieldAlert, from: '#f43f5e', to: '#ec4899' },
-    { label: 'Maintenance', sub: `${maintenanceCount} in workshop`, icon: Wrench, from: '#8b5cf6', to: '#d946ef' },
-  ];
+  { label: 'Active Vehicles', sub: `${activeVehicles} of ${totalVehicles} fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6' },
+  { label: 'Total Fuel', sub: `${Math.round(totalLiters)} L · ${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316' },
+  { label: 'Pending', sub: `${pendingTrips} trips scheduled`, icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4' },
+  { label: 'Drivers', sub: `${activeDrivers} in your roster`, icon: Users, from: '#06b6d4', to: '#14b8a6' },
+  { label: 'Alerts', sub: `${alertsCount} need attention`, icon: ShieldAlert, from: '#f43f5e', to: '#ec4899' },
+  { label: 'Maintenance', sub: `${maintenanceCount} in workshop`, icon: Wrench, from: '#8b5cf6', to: '#d946ef' }];
+
 
   const scatterData = fuelRecords.slice(0, 30).map((f) => ({
     x: Number(f.liters) || 0,
     y: Number(f.price_per_liter) || 0,
     z: Number(f.total_cost) || 0,
-    plate: f.vehicle_plate,
+    plate: f.vehicle_plate
   }));
 
   const recentTrips = trips.slice(0, 6);
 
   const navItems = [
-    { label: 'Home', icon: Home, path: '/', active: true },
-    { label: 'Operations', icon: Layers, path: '/trips' },
-    { label: 'Map', icon: MapPin, path: '/trips' },
-    { label: 'Alerts', icon: Bell, path: '/notifications', badge: alertsCount },
-    { label: 'Settings', icon: Settings, path: '/settings' },
-  ];
+  { label: 'Home', icon: Home, path: '/', active: true },
+  { label: 'Operations', icon: Layers, path: '/trips' },
+  { label: 'Map', icon: MapPin, path: '/trips' },
+  { label: 'Alerts', icon: Bell, path: '/notifications', badge: alertsCount },
+  { label: 'Settings', icon: Settings, path: '/settings' }];
+
 
   return (
     <div className="min-h-screen" style={{ background: '#ffffff' }}>
       {/* ═══════ HERO ═══════ */}
       <div
         className="relative px-5 pt-5 pb-7 overflow-hidden"
-        style={{ background: HERO_BG }}
-      >
+        style={{ background: HERO_BG }}>
+        
         <div
           className="absolute pointer-events-none"
           style={{
             top: '-60px', right: '-40px', width: '260px', height: '260px',
             background: 'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 60%)',
-            filter: 'blur(8px)',
-          }}
-        />
+            filter: 'blur(8px)'
+          }} />
+        
 
         {/* top bar */}
         <div className="relative flex items-center justify-between mb-7">
           <div className="flex items-center gap-2.5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #d946ef)', boxShadow: '0 4px 14px -4px rgba(99,102,241,0.6)' }}
-            >
+              style={{ background: 'linear-gradient(135deg, #6366f1, #d946ef)', boxShadow: '0 4px 14px -4px rgba(99,102,241,0.6)' }}>
+              
               <Sparkles className="w-4.5 h-4.5 text-white" strokeWidth={2.2} />
             </div>
             <span className="text-[15px] font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
@@ -125,15 +125,15 @@ export default function MobileFleetDashboard() {
             <button
               onClick={() => setIsDark((d) => !d)}
               className="flex items-center gap-1.5 pl-1.5 pr-2 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}
-            >
+              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}>
+              
               <span
                 className="w-5 h-5 rounded-full flex items-center justify-center"
                 style={{
                   background: isDark ? '#ffcd50' : '#e5e7eb',
-                  boxShadow: isDark ? '0 0 10px rgba(255,205,80,0.6)' : 'none',
-                }}
-              >
+                  boxShadow: isDark ? '0 0 10px rgba(255,205,80,0.6)' : 'none'
+                }}>
+                
                 {isDark ? <Sun className="w-3 h-3 text-white" /> : <Moon className="w-3 h-3 text-slate-600" />}
               </span>
             </button>
@@ -141,8 +141,8 @@ export default function MobileFleetDashboard() {
             <button
               onClick={() => navigate('/trips')}
               className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}
-            >
+              style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}>
+              
               <Search className="w-4 h-4 text-white" strokeWidth={2} />
             </button>
           </div>
@@ -150,17 +150,17 @@ export default function MobileFleetDashboard() {
 
         {/* headline */}
         <h1
-          className="relative text-white font-bold leading-[1.08] tracking-tight"
-          style={{ fontFamily: 'var(--font-display)', fontSize: '34px' }}
-        >
+          className="relative font-bold leading-[1.08] tracking-tight text-[hsl(var(--background))]"
+          style={{ fontFamily: 'var(--font-display)', fontSize: '34px' }}>
+          
           Fleet Command<br />Center
         </h1>
 
         {/* sub-description */}
         <p
-          className="relative mt-3 text-white/70 leading-relaxed"
-          style={{ fontSize: '13px', maxWidth: '310px' }}
-        >
+          className="relative mt-3 leading-relaxed text-[hsl(var(--background))]"
+          style={{ fontSize: '13px', maxWidth: '310px' }}>
+          
           A real-time view of your vehicles, drivers, and trips — monitor performance and status in one breathable workspace.
         </p>
 
@@ -168,8 +168,8 @@ export default function MobileFleetDashboard() {
         <button
           onClick={() => navigate('/trips')}
           className="relative mt-4 inline-flex items-center gap-1.5 pl-4 pr-3 py-2.5 rounded-full bg-white font-semibold active:scale-95 transition-transform"
-          style={{ fontSize: '13px', border: '1px solid #00000015', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
-        >
+          style={{ fontSize: '13px', border: '1px solid #00000015', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
+          
           Start exploring
           <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
         </button>
@@ -194,12 +194,12 @@ export default function MobileFleetDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
                 className="bg-white rounded-[22px] p-4 flex flex-col items-center text-center gap-2.5"
-                style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}
-              >
+                style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
+                
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ background: `linear-gradient(135deg, ${card.from}, ${card.to})`, boxShadow: `0 4px 14px -4px ${card.from}66` }}
-                >
+                  style={{ background: `linear-gradient(135deg, ${card.from}, ${card.to})`, boxShadow: `0 4px 14px -4px ${card.from}66` }}>
+                  
                   <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
                 </div>
                 <div className="w-full">
@@ -208,8 +208,8 @@ export default function MobileFleetDashboard() {
                   </p>
                   <p className="text-[11px] text-slate-400 mt-1">{card.sub}</p>
                 </div>
-              </motion.div>
-            );
+              </motion.div>);
+
           })}
         </div>
       </div>
@@ -225,12 +225,12 @@ export default function MobileFleetDashboard() {
             <Fuel className="w-4 h-4 text-slate-300" />
           </div>
           <div style={{ width: '100%', height: 180 }}>
-            {scatterData.length === 0 ? (
-              <div className="h-full flex items-center justify-center">
+            {scatterData.length === 0 ?
+            <div className="h-full flex items-center justify-center">
                 <p className="text-[12px] text-slate-400">No fuel data yet</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              </div> :
+
+            <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 8, right: 8, bottom: 18, left: -18 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis type="number" dataKey="x" name="Liters" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} label={{ value: 'Liters', position: 'bottom', offset: 4, style: { fontSize: 10, fill: '#94a3b8' } }} />
@@ -247,7 +247,7 @@ export default function MobileFleetDashboard() {
                   </defs>
                 </ScatterChart>
               </ResponsiveContainer>
-            )}
+            }
           </div>
         </div>
       </div>
@@ -262,17 +262,17 @@ export default function MobileFleetDashboard() {
             </Link>
           </div>
 
-          {recentTrips.length === 0 ? (
-            <div className="py-10 text-center">
+          {recentTrips.length === 0 ?
+          <div className="py-10 text-center">
               <Truck className="w-6 h-6 text-slate-300 mx-auto mb-2" />
               <p className="text-[12px] text-slate-400">No trips yet</p>
-            </div>
-          ) : (
-            <div>
+            </div> :
+
+          <div>
               {recentTrips.map((trip, i) => {
-                const pill = STATUS_PILL[trip.status] || STATUS_PILL.scheduled;
-                return (
-                  <div key={trip.id} className={`flex items-center gap-3 px-4 py-3 ${i < recentTrips.length - 1 ? 'border-b border-slate-50' : ''}`}>
+              const pill = STATUS_PILL[trip.status] || STATUS_PILL.scheduled;
+              return (
+                <div key={trip.id} className={`flex items-center gap-3 px-4 py-3 ${i < recentTrips.length - 1 ? 'border-b border-slate-50' : ''}`}>
                     <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4 text-slate-500" />
                     </div>
@@ -281,11 +281,11 @@ export default function MobileFleetDashboard() {
                       <p className="text-[10px] text-slate-400 mt-0.5 truncate">{trip.vehicle_plate || '—'} · {trip.driver_name || '—'}</p>
                     </div>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: pill.bg, color: pill.fg }}>{pill.label}</span>
-                  </div>
-                );
-              })}
+                  </div>);
+
+            })}
             </div>
-          )}
+          }
         </div>
       </div>
 
@@ -296,9 +296,9 @@ export default function MobileFleetDashboard() {
           background: '#ffffff',
           borderTop: '1px solid #f1f5f9',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
-          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
-        }}
-      >
+          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))'
+        }}>
+        
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = item.active;
@@ -307,17 +307,17 @@ export default function MobileFleetDashboard() {
               key={item.label}
               onClick={() => navigate(item.path)}
               className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-full relative"
-              style={active ? { background: '#f4f4f5' } : {}}
-            >
+              style={active ? { background: '#f4f4f5' } : {}}>
+              
               <Icon className={`w-5 h-5 ${active ? 'text-black fill-black' : 'text-slate-400'}`} strokeWidth={active ? 2.4 : 2} />
               <span className={`text-[9px] font-semibold ${active ? 'text-black' : 'text-slate-400'}`}>{item.label}</span>
-              {item.badge > 0 && (
-                <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
-              )}
-            </button>
-          );
+              {item.badge > 0 &&
+              <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+              }
+            </button>);
+
         })}
       </div>
-    </div>
-  );
+    </div>);
+
 }
