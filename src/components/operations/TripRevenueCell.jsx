@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 
 /**
- * Trip revenue cell — total always visible; click the chevron to expand
- * a breakdown of Base Fare, VAT (5%), and Add-on payments.
+ * Trip revenue cell — total always visible; hover for an automatic
+ * breakdown preview, or click to pin it open. No chevron button.
  */
 export default function TripRevenueCell({ trip }) {
-  const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const revenue = Number(trip.revenue) || 0;
   const baseFare = Number(trip.base_fare) || 0;
   const vat = Math.round(revenue * 0.05 * 100) / 100;
@@ -22,22 +22,22 @@ export default function TripRevenueCell({ trip }) {
   const total = Math.round((revenue + vat + addOnTotal + addOnVat) * 100) / 100;
 
   const hasBreakdown = baseFare > 0 || vat > 0 || addOnTotal > 0;
+  const show = hasBreakdown && (pinned || hovered);
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onMouseEnter={() => hasBreakdown && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <button
-        onClick={(e) => { e.stopPropagation(); if (hasBreakdown) setOpen((v) => !v); }}
+        onClick={(e) => { e.stopPropagation(); if (hasBreakdown) setPinned((v) => !v); }}
         className="inline-flex items-center gap-1.5 text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words transition-colors hover:text-[rgb(var(--panel-accent2-rgb))]"
-        title={hasBreakdown ? (open ? 'Hide breakdown' : 'Show breakdown') : ''}
+        title={hasBreakdown ? (pinned ? 'Click to hide breakdown' : 'Hover or click to view breakdown') : ''}
       >
         {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-        {hasBreakdown && (
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-md border border-border/60 bg-muted/40 hover:border-[rgba(var(--panel-accent-rgb),0.4)] hover:bg-[rgba(var(--panel-accent-rgb),0.12)] transition-all">
-            {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </span>
-        )}
       </button>
-      {hasBreakdown && open && (
+      {show && (
         <div className="absolute z-50 right-0 top-full mt-1 w-48 p-2.5 rounded-xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl animate-fade-in">
           <div className="flex justify-between text-[10px] items-center mb-1.5">
             <span className="text-muted-foreground flex items-center gap-1.5">
