@@ -67,7 +67,7 @@ export default function Services() {
   const { visible: visSvc, sentinelProps: svcSentinel, hasMore: hasMoreSvc, visibleCount: visM, totalCount: totalM } = useProgressiveRender(searched);
 
   return (
-    <div>
+    <div className="fintech-page p-4 sm:p-6 rounded-3xl">
       {mode === 'analytics' ?
       <MaintenanceAnalytics records={filtered} loading={loading} onBrowse={() => setMaintenanceMode('browse')} /> :
 
