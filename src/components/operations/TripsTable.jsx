@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield } from 'lucide-react';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText } from 'lucide-react';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -457,6 +457,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
+                   {trip.delivery_note_number && (
+                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold font-mono tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30" title={`Delivery Note: DN#${trip.delivery_note_number}`}>
+                       <FileText className="w-2.5 h-2.5" />
+                       DN#{trip.delivery_note_number}
+                     </div>
+                   )}
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
