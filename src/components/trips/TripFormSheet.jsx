@@ -194,13 +194,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } else {setFixedCharges([]);}
   }, [form.client_name]);
 
-  // Auto-select contact person when only one contact is available
-  useEffect(() => {
-    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
-      setForm((prev) => ({ ...prev, contact_person: availableContacts[0].name }));
-    }
-  }, [form.client_name, availableContacts.length]);
-
   useEffect(() => {
     if (form.client_name && form.from_location && form.to_location && fixedCharges.length > 0) {
       const routeDesc = `${form.from_location} → ${form.to_location}`;
@@ -475,6 +468,13 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   selectedClientData.contact_persons :
   selectedClientData.contact_person ? [{ name: selectedClientData.contact_person }] : [] :
   [];
+
+  // Auto-select contact person when only one contact is available
+  useEffect(() => {
+    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
+      setForm((prev) => ({ ...prev, contact_person: availableContacts[0].name }));
+    }
+  }, [form.client_name, availableContacts.length]);
 
   const isNewClient = form.client_name && !clientSuggestions.some((c) => c.toLowerCase() === form.client_name.toLowerCase());
   const isNewVehicle = form.vehicle_plate && !vehicleSuggestions.some((v) => v.toLowerCase() === form.vehicle_plate.toLowerCase());
