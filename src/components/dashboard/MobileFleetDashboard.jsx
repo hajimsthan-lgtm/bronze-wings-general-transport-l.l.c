@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import {
   Truck, Fuel, ClipboardList, Users, ShieldAlert, Wrench,
   Search, Sun, Moon, ArrowRight, Sparkles, MapPin, Bell, Home,
+  Settings, Layers,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { formatCurrency } from '@/lib/formatters';
 import { safeListAll } from '@/lib/safeRequest';
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip,
@@ -55,7 +55,6 @@ export default function MobileFleetDashboard() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Metrics
   const activeVehicles = vehicles.filter((v) => v.status === 'active').length;
   const totalVehicles = vehicles.length;
   const onRoad = vehicles.filter((v) => v.status === 'on_road' || v.status === 'in_transit').length;
@@ -75,7 +74,6 @@ export default function MobileFleetDashboard() {
     { label: 'Maintenance', value: maintenanceCount, sub: 'in workshop', icon: Wrench, from: '#8b5cf6', to: '#d946ef' },
   ];
 
-  // Fuel efficiency scatter — liters vs cost per fill
   const scatterData = fuelRecords.slice(0, 30).map((f) => ({
     x: Number(f.liters) || 0,
     y: Number(f.price_per_liter) || 0,
@@ -83,17 +81,23 @@ export default function MobileFleetDashboard() {
     plate: f.vehicle_plate,
   }));
 
-  // Recent trips
   const recentTrips = trips.slice(0, 6);
 
+  const navItems = [
+    { label: 'Home', icon: Home, path: '/', active: true },
+    { label: 'Operations', icon: Layers, path: '/trips' },
+    { label: 'Map', icon: MapPin, path: '/trips' },
+    { label: 'Alerts', icon: Bell, path: '/notifications', badge: alertsCount },
+    { label: 'Settings', icon: Settings, path: '/settings' },
+  ];
+
   return (
-    <div className="min-h-screen" style={{ background: '#f7f7f9' }}>
+    <div className="min-h-screen" style={{ background: '#ffffff' }}>
       {/* ═══════ HERO ═══════ */}
       <div
         className="relative px-5 pt-5 pb-7 overflow-hidden"
         style={{ background: HERO_BG }}
       >
-        {/* radial white glow top-right */}
         <div
           className="absolute pointer-events-none"
           style={{
@@ -118,17 +122,15 @@ export default function MobileFleetDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* day/night toggle */}
             <button
               onClick={() => setIsDark((d) => !d)}
               className="flex items-center gap-1.5 pl-1.5 pr-2 py-1.5 rounded-full"
               style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.14)' }}
             >
               <span
-                className="w-5 h-5 rounded-full flex items-center justify-center transition-transform"
+                className="w-5 h-5 rounded-full flex items-center justify-center"
                 style={{
                   background: isDark ? '#ffcd50' : '#e5e7eb',
-                  transform: isDark ? 'translateX(0)' : 'translateX(0)',
                   boxShadow: isDark ? '0 0 10px rgba(255,205,80,0.6)' : 'none',
                 }}
               >
@@ -136,7 +138,6 @@ export default function MobileFleetDashboard() {
               </span>
             </button>
 
-            {/* search */}
             <button
               onClick={() => navigate('/trips')}
               className="w-9 h-9 rounded-full flex items-center justify-center"
@@ -150,7 +151,7 @@ export default function MobileFleetDashboard() {
         {/* headline */}
         <h1
           className="relative text-white font-bold leading-[1.08] tracking-tight"
-          style={{ fontFamily: 'var(--font-display)', fontSize: '32px' }}
+          style={{ fontFamily: 'var(--font-display)', fontSize: '34px' }}
         >
           Fleet Command<br />Center
         </h1>
@@ -158,16 +159,16 @@ export default function MobileFleetDashboard() {
         {/* sub-description */}
         <p
           className="relative mt-3 text-white/70 leading-relaxed"
-          style={{ fontSize: '13px', maxWidth: '300px' }}
+          style={{ fontSize: '13px', maxWidth: '310px' }}
         >
           A real-time view of your vehicles, drivers, and trips — monitor performance and status in one breathable workspace.
         </p>
 
-        {/* CTA */}
+        {/* CTA — white pill with thin border */}
         <button
           onClick={() => navigate('/trips')}
-          className="relative mt-4 inline-flex items-center gap-1.5 pl-4 pr-3 py-2.5 rounded-full bg-white text-black font-semibold active:scale-95 transition-transform"
-          style={{ fontSize: '13px' }}
+          className="relative mt-4 inline-flex items-center gap-1.5 pl-4 pr-3 py-2.5 rounded-full bg-white font-semibold active:scale-95 transition-transform"
+          style={{ fontSize: '13px', border: '1px solid #00000015', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
         >
           Start exploring
           <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -181,8 +182,8 @@ export default function MobileFleetDashboard() {
         </div>
       </div>
 
-      {/* ═══════ CARD GRID ═══════ */}
-      <div className="px-4 -mt-4 pb-4">
+      {/* ═══════ CARD GRID — icon centered top ═══════ */}
+      <div className="px-4 pt-5 pb-4">
         <div className="grid grid-cols-2 gap-4">
           {cards.map((card, i) => {
             const Icon = card.icon;
@@ -192,8 +193,8 @@ export default function MobileFleetDashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-white rounded-[22px] p-4 flex flex-col gap-2.5"
-                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}
+                className="bg-white rounded-[22px] p-4 flex flex-col items-center text-center gap-2.5"
+                style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}
               >
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -201,11 +202,11 @@ export default function MobileFleetDashboard() {
                 >
                   <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
                 </div>
-                <div>
+                <div className="w-full">
                   <p className="text-[13px] font-bold text-black leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                     {card.label}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-400 mt-1">
                     <span className="font-semibold text-slate-700">{card.value}</span>{card.unit ? ` ${card.unit}` : ''} · {card.sub}
                   </p>
                 </div>
@@ -217,7 +218,7 @@ export default function MobileFleetDashboard() {
 
       {/* ═══════ FUEL EFFICIENCY CHART ═══════ */}
       <div className="px-4 pb-4">
-        <div className="bg-white rounded-[22px] p-4" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+        <div className="bg-white rounded-[22px] p-4" style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="text-[14px] font-bold text-black" style={{ fontFamily: 'var(--font-display)' }}>Fuel Efficiency</h3>
@@ -234,47 +235,17 @@ export default function MobileFleetDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 8, right: 8, bottom: 18, left: -18 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis
-                    type="number"
-                    dataKey="x"
-                    name="Liters"
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
-                    axisLine={{ stroke: '#e2e8f0' }}
-                    tickLine={false}
-                    label={{ value: 'Liters', position: 'bottom', offset: 4, style: { fontSize: 10, fill: '#94a3b8' } }}
-                  />
-                  <YAxis
-                    type="number"
-                    dataKey="y"
-                    name="Price/L"
-                    tick={{ fontSize: 10, fill: '#94a3b8' }}
-                    axisLine={{ stroke: '#e2e8f0' }}
-                    tickLine={false}
-                    tickFormatter={(v) => `₹${v.toFixed(1)}`}
-                  />
+                  <XAxis type="number" dataKey="x" name="Liters" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} label={{ value: 'Liters', position: 'bottom', offset: 4, style: { fontSize: 10, fill: '#94a3b8' } }} />
+                  <YAxis type="number" dataKey="y" name="Price/L" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} tickFormatter={(v) => `${v.toFixed(1)}`} />
                   <ZAxis type="number" dataKey="z" range={[40, 220]} />
-                  <Tooltip
-                    contentStyle={scatterTooltip}
-                    formatter={(v, n) => [n === 'x' ? `${v} L` : n === 'y' ? `₹${v}/L` : `₹${v}`, n]}
-                  />
+                  <Tooltip contentStyle={scatterTooltip} formatter={(v, n) => [n === 'x' ? `${v} L` : n === 'y' ? `${v}/L` : `${v}`, n]} />
                   <Scatter data={scatterData}>
-                    {scatterData.map((d, i) => (
-                      <Cell key={i} fill={`url(#fuelGrad${i % 3})`} />
-                    ))}
+                    {scatterData.map((d, i) => <Cell key={i} fill={`url(#fuelGrad${i % 3})`} />)}
                   </Scatter>
                   <defs>
-                    <linearGradient id="fuelGrad0" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#f59e0b" />
-                      <stop offset="100%" stopColor="#f97316" />
-                    </linearGradient>
-                    <linearGradient id="fuelGrad1" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" />
-                      <stop offset="100%" stopColor="#8b5cf6" />
-                    </linearGradient>
-                    <linearGradient id="fuelGrad2" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#06b6d4" />
-                      <stop offset="100%" stopColor="#14b8a6" />
-                    </linearGradient>
+                    <linearGradient id="fuelGrad0" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#f97316" /></linearGradient>
+                    <linearGradient id="fuelGrad1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#6366f1" /><stop offset="100%" stopColor="#8b5cf6" /></linearGradient>
+                    <linearGradient id="fuelGrad2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#06b6d4" /><stop offset="100%" stopColor="#14b8a6" /></linearGradient>
                   </defs>
                 </ScatterChart>
               </ResponsiveContainer>
@@ -284,8 +255,8 @@ export default function MobileFleetDashboard() {
       </div>
 
       {/* ═══════ RECENT TRIPS ═══════ */}
-      <div className="px-4 pb-24">
-        <div className="bg-white rounded-[22px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+      <div className="px-4 pb-28">
+        <div className="bg-white rounded-[22px] overflow-hidden" style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
             <h3 className="text-[14px] font-bold text-black" style={{ fontFamily: 'var(--font-display)' }}>Recent Trips</h3>
             <Link to="/trips" className="text-[11px] font-semibold text-indigo-600 flex items-center gap-0.5">
@@ -303,27 +274,15 @@ export default function MobileFleetDashboard() {
               {recentTrips.map((trip, i) => {
                 const pill = STATUS_PILL[trip.status] || STATUS_PILL.scheduled;
                 return (
-                  <div
-                    key={trip.id}
-                    className={`flex items-center gap-3 px-4 py-3 ${i < recentTrips.length - 1 ? 'border-b border-slate-50' : ''}`}
-                  >
+                  <div key={trip.id} className={`flex items-center gap-3 px-4 py-3 ${i < recentTrips.length - 1 ? 'border-b border-slate-50' : ''}`}>
                     <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4 text-slate-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-black truncate">
-                        {trip.from_location || '—'} → {trip.to_location || '—'}
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                        {trip.vehicle_plate || '—'} · {trip.driver_name || '—'}
-                      </p>
+                      <p className="text-[12px] font-semibold text-black truncate">{trip.from_location || '—'} → {trip.to_location || '—'}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">{trip.vehicle_plate || '—'} · {trip.driver_name || '—'}</p>
                     </div>
-                    <span
-                      className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                      style={{ background: pill.bg, color: pill.fg }}
-                    >
-                      {pill.label}
-                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ background: pill.bg, color: pill.fg }}>{pill.label}</span>
                   </div>
                 );
               })}
@@ -332,31 +291,34 @@ export default function MobileFleetDashboard() {
         </div>
       </div>
 
-      {/* ═══════ BOTTOM NAV ═══════ */}
+      {/* ═══════ BOTTOM NAV — 5 items with pill active ═══════ */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-2.5 px-6"
+        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-4 py-2"
         style={{
           background: '#ffffff',
           borderTop: '1px solid #f1f5f9',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
-          paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom))',
+          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))',
         }}
       >
-        <button onClick={() => navigate('/')} className="flex flex-col items-center gap-0.5">
-          <Home className="w-5 h-5 text-black fill-black" strokeWidth={2} />
-          <span className="text-[9px] font-bold text-black">Home</span>
-        </button>
-        <button onClick={() => navigate('/trips')} className="flex flex-col items-center gap-0.5">
-          <MapPin className="w-5 h-5 text-slate-400" strokeWidth={2} />
-          <span className="text-[9px] font-medium text-slate-400">Live Map</span>
-        </button>
-        <button onClick={() => navigate('/notifications')} className="flex flex-col items-center gap-0.5 relative">
-          <Bell className="w-5 h-5 text-slate-400" strokeWidth={2} />
-          {alertsCount > 0 && (
-            <span className="absolute top-0 right-1 w-1.5 h-1.5 rounded-full bg-rose-500" />
-          )}
-          <span className="text-[9px] font-medium text-slate-400">Alerts</span>
-        </button>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = item.active;
+          return (
+            <button
+              key={item.label}
+              onClick={() => navigate(item.path)}
+              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-full relative"
+              style={active ? { background: '#f4f4f5' } : {}}
+            >
+              <Icon className={`w-5 h-5 ${active ? 'text-black fill-black' : 'text-slate-400'}`} strokeWidth={active ? 2.4 : 2} />
+              <span className={`text-[9px] font-semibold ${active ? 'text-black' : 'text-slate-400'}`}>{item.label}</span>
+              {item.badge > 0 && (
+                <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
