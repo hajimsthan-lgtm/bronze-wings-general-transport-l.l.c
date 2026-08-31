@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Truck, Fuel, ClipboardList, Users, ShieldAlert, Wrench,
-  Search, Sun, Moon, ArrowRight, Sparkles, MapPin, Bell, Home,
-  Settings, Layers, Wallet } from
+  Search, Sun, Moon, ArrowRight, Sparkles, MapPin } from
 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { safeListAll } from '@/lib/safeRequest';
@@ -14,6 +13,7 @@ import {
 'recharts';
 import FleetAnalyticsCard from '@/components/dashboard/FleetAnalyticsCard';
 import TripProgressTracker from '@/components/dashboard/TripProgressTracker';
+import TripStatusChart from '@/components/dashboard/TripStatusChart';
 
 const HERO_BG = 'linear-gradient(180deg, #161331 0%, #1f1740 45%, #33256a 100%)';
 
@@ -68,12 +68,12 @@ export default function MobileFleetDashboard() {
   const maintenanceCount = vehicles.filter((v) => v.status === 'maintenance').length;
 
   const cards = [
-  { label: 'Active Vehicles', sub: `${activeVehicles} of ${totalVehicles} fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6' },
-  { label: 'Total Fuel', sub: `${Math.round(totalLiters)} L · ${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316' },
-  { label: 'Pending', sub: `${pendingTrips} trips scheduled`, icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4' },
-  { label: 'Drivers', sub: `${activeDrivers} in your roster`, icon: Users, from: '#06b6d4', to: '#14b8a6' },
-  { label: 'Alerts', sub: `${alertsCount} need attention`, icon: ShieldAlert, from: '#f43f5e', to: '#ec4899' },
-  { label: 'Maintenance', sub: `${maintenanceCount} in workshop`, icon: Wrench, from: '#8b5cf6', to: '#d946ef' }];
+  { label: 'Active Vehicles', sub: `${activeVehicles} of ${totalVehicles} fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6', path: '/admin/vehicles' },
+  { label: 'Total Fuel', sub: `${Math.round(totalLiters)} L · ${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316', path: '/fuel' },
+  { label: 'Pending', sub: `${pendingTrips} trips scheduled`, icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4', path: '/trips' },
+  { label: 'Drivers', sub: `${activeDrivers} in your roster`, icon: Users, from: '#06b6d4', to: '#14b8a6', path: '/admin/drivers' },
+  { label: 'Alerts', sub: `${alertsCount} need attention`, icon: ShieldAlert, from: '#f43f5e', to: '#ec4899', path: '/notifications' },
+  { label: 'Maintenance', sub: `${maintenanceCount} in workshop`, icon: Wrench, from: '#8b5cf6', to: '#d946ef', path: '/maintenance' }];
 
 
   const scatterData = fuelRecords.slice(0, 30).map((f) => ({
@@ -84,13 +84,6 @@ export default function MobileFleetDashboard() {
   }));
 
   const recentTrips = trips.slice(0, 6);
-
-  const navItems = [
-  { label: 'Home', icon: Home, path: '/', active: true },
-  { label: 'Operations', icon: Layers, path: '/trips' },
-  { label: 'Ledger', icon: Wallet, path: '/operations-ledger' },
-  { label: 'Alerts', icon: Bell, path: '/notifications', badge: alertsCount },
-  { label: 'Settings', icon: Settings, path: '/settings' }];
 
 
   return (
@@ -195,7 +188,8 @@ export default function MobileFleetDashboard() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-white rounded-[22px] p-4 flex flex-col items-center text-center gap-2.5"
+                onClick={() => navigate(card.path)}
+                className="bg-white rounded-[22px] p-4 flex flex-col items-center text-center gap-2.5 cursor-pointer active:scale-95 transition-transform"
                 style={{ border: '1px solid #ececf0', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
                 
                 <div
@@ -224,6 +218,11 @@ export default function MobileFleetDashboard() {
       {/* ═══════ TRIP PROGRESS TRACKER — step-by-step workflow (neon edge) ═══════ */}
       <div className="px-4 pb-4">
         <TripProgressTracker />
+      </div>
+
+      {/* ═══════ FLEET ACTIVITY — trip status distribution chart ═══════ */}
+      <div className="px-4 pb-4">
+        <TripStatusChart />
       </div>
 
       {/* ═══════ FUEL EFFICIENCY CHART ═══════ */}
@@ -301,35 +300,6 @@ export default function MobileFleetDashboard() {
         </div>
       </div>
 
-      {/* ═══════ BOTTOM NAV — 5 items with pill active ═══════ */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-4 py-2"
-        style={{
-          background: '#ffffff',
-          borderTop: '1px solid #f1f5f9',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
-          paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))'
-        }}>
-        
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = item.active;
-          return (
-            <button
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-full relative"
-              style={active ? { background: '#f4f4f5' } : {}}>
-              
-              <Icon className={`w-5 h-5 ${active ? 'text-black fill-black' : 'text-slate-400'}`} strokeWidth={active ? 2.4 : 2} />
-              <span className={`text-[9px] font-semibold ${active ? 'text-black' : 'text-slate-400'}`}>{item.label}</span>
-              {item.badge > 0 &&
-              <span className="absolute top-0 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
-              }
-            </button>);
-
-        })}
-      </div>
-    </div>);
-
+    </div>
+  );
 }

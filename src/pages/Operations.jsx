@@ -31,6 +31,7 @@ import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import OperationsTabSeparator from '@/components/operations/OperationsTabSeparator';
 import GradientDivider from '@/components/common/GradientDivider';
+import OperationsAnalytics from '@/components/operations/OperationsAnalytics';
 
 import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
@@ -425,6 +426,12 @@ export default function Operations() {
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
+        {/* Operational analytics overview — buttons for Trips, Maintenance, Fuel, Salary */}
+        {isMobile && (
+          <div className="mb-4">
+            <OperationsAnalytics />
+          </div>
+        )}
         {/* Operations tab separator — Trips / Maintenance / Fuel / Expenses / Salary */}
         <div className="mb-3">
           <OperationsTabSeparator />
