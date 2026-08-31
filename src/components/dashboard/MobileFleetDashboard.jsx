@@ -176,9 +176,9 @@ export default function MobileFleetDashboard() {
 
         {/* stats row */}
         <div className="relative mt-4 flex items-center gap-3 text-[hsl(var(--background))]">
-          <span className="text-white/55 text-[11px] font-medium">{totalVehicles} vehicles</span>
+          <span className="text-[11px] font-medium text-[hsl(var(--background))]">{totalVehicles} vehicles</span>
           <span className="w-px h-3 bg-white/20" />
-          <span className="text-white/55 text-[11px] font-medium">{onRoad} on the road</span>
+          <span className="text-[11px] font-medium text-[hsl(var(--background))]">{onRoad} on the road</span>
         </div>
       </div>
 
