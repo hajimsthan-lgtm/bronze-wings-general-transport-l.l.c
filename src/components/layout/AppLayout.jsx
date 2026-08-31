@@ -22,8 +22,8 @@ export default function AppLayout() {
     >
       <MobileCanvasBackground />
 
-      {/* Mobile header — full-bleed on small screens */}
-      <MobileHeader />
+      {/* Mobile header — hidden on dashboard (hero has its own brand bar) */}
+      {location.pathname !== '/' && <MobileHeader />}
 
       {/* Rounded outer shell — desktop only gets the card container */}
       <div className="flex-1 min-h-0 md:p-4 relative z-10 flex">
