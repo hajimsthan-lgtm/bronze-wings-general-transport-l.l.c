@@ -11,8 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { formatCurrency, formatDate, formatDateShort } from '@/lib/formatters';
+import { cn } from '@/lib/utils';
 import { Plus, Search, Receipt, MoreVertical, Pencil, Trash2, Wallet, Clock, CheckCircle2, LayoutGrid, List, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import '@/lib/expenseFormLight.css';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -32,7 +34,7 @@ import SegmentedToggle from '@/components/operations/SegmentedToggle';
 import ExpenseCard from '@/components/expenses/ExpenseCard';
 import { EXPENSE_CATEGORIES as CATEGORIES, categoryIcons, categoryColors, hexToRgba } from '@/components/expenses/expenseMeta';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
-import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
+import { useExpensesMode, setExpensesMode, setExpensesData, setExpensesSelected, clearExpensesSelected } from '@/lib/expensesStore';
 import ExpensesAnalytics from '@/components/expenses/ExpensesAnalytics';
 import TaxPreview from '@/components/common/TaxPreview';
 
@@ -56,6 +58,11 @@ export default function Expenses() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const deleteExpense = useExpenseDelete();
   const mode = useExpensesMode();
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleOne = (id) => setSelected(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleAll = () => setSelected(s => s.size === filtered.length ? new Set() : new Set(filtered.map(e => e.id)));
+  const clearSelection = () => { setSelected(new Set()); clearExpensesSelected(); };
 
   useEffect(() => {
     const handler = () => { setEditItem(null); setFormOpen(true); };
@@ -69,6 +76,9 @@ export default function Expenses() {
     if (search) { const q = search.toLowerCase(); return e.description?.toLowerCase().includes(q) || e.vendor_name?.toLowerCase().includes(q); }
     return true;
   });
+
+  useEffect(() => { setExpensesData(filtered); }, [filtered]);
+  useEffect(() => { setExpensesSelected(Array.from(selected)); }, [selected]);
 
   const { visible: visExp, sentinelProps: expSentinel, hasMore: hasMoreExp, visibleCount: visE, totalCount: totalE } = useProgressiveRender(filtered);
   const totalAmount = filtered.reduce((s, e) => s + (e.amount || 0), 0);
@@ -109,7 +119,13 @@ export default function Expenses() {
         </div>
         <div className="flex-1" />
         <SegmentedToggle value={viewMode} onChange={setViewMode} options={[{ value: 'card', label: t('cards_view'), icon: LayoutGrid }, { value: 'list', label: t('list_view'), icon: List }]} />
-        <ExportButtons data={filtered} filename="expenses" title="Expenses" columns={EXPENSE_EXPORT_COLUMNS} />
+        {selected.size > 0 && (
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20">
+            <span className="text-xs font-semibold text-primary">{selected.size} selected</span>
+            <button onClick={clearSelection} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+          </div>
+        )}
+        <ExportButtons data={selected.size > 0 ? filtered.filter(e => selected.has(e.id)) : filtered} filename="expenses" title="Expenses" columns={EXPENSE_EXPORT_COLUMNS} />
         <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-11 px-4"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
       </div>
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
@@ -141,7 +157,12 @@ export default function Expenses() {
         ) : viewMode === 'card' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {visExp.map(exp => (
-              <ExpenseCard key={exp.id} exp={exp} onEdit={(e) => { setEditItem(e); setFormOpen(true); }} onDelete={setDeleteTarget} />
+              <div key={exp.id} className="relative">
+                <div className={cn('absolute top-2 left-2 z-10 rounded p-0.5 transition-opacity', selected.has(exp.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')} onClick={(e) => e.stopPropagation()}>
+                  <Checkbox checked={selected.has(exp.id)} onCheckedChange={() => toggleOne(exp.id)} className="border-border/60 bg-background/80 backdrop-blur-sm" />
+                </div>
+                <ExpenseCard exp={exp} onEdit={(e) => { setEditItem(e); setFormOpen(true); }} onDelete={setDeleteTarget} />
+              </div>
             ))}
             {hasMoreExp && (
               <div {...expSentinel} className="col-span-full text-center text-xs text-muted-foreground py-4">
@@ -155,6 +176,7 @@ export default function Expenses() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-primary/5 text-left text-muted-foreground">
+                    <th className="px-4 py-3 w-10"><Checkbox checked={filtered.length > 0 && selected.size === filtered.length} onCheckedChange={toggleAll} className="border-border/60" /></th>
                     <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Description</th>
                     <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Category</th>
                     <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Date</th>
@@ -167,7 +189,8 @@ export default function Expenses() {
                     const Icon = categoryIcons[exp.category] || categoryIcons.other;
                     const color = categoryColors[exp.category] || '#94a3b8';
                     return (
-                      <tr key={exp.id} className="border-t border-border group hover:bg-primary/5 transition-colors">
+                      <tr key={exp.id} className={cn('border-t border-border group hover:bg-primary/5 transition-colors', selected.has(exp.id) && 'bg-primary/[0.07]')}>
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}><Checkbox checked={selected.has(exp.id)} onCheckedChange={() => toggleOne(exp.id)} className="border-border/60" /></td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0" style={{ background: hexToRgba(color, 0.14), border: `1px solid ${hexToRgba(color, 0.3)}`, color }}>

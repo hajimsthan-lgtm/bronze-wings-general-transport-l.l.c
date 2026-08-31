@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Plus, Fuel as FuelIcon, Droplets, Gauge, Truck, Trash2, Pencil, Search } from 'lucide-react';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
-import { useFuelMode } from '@/lib/fuelStore';
+import { useFuelMode, setFuelData, setFuelSelected, clearFuelSelected } from '@/lib/fuelStore';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 import ExportButtons from '@/components/common/ExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import FuelAnalytics from '@/components/fuel/FuelAnalytics';
@@ -27,6 +29,14 @@ export default function Fuel() {
   const [search, setSearch] = useState('');
   const { dateFrom, dateTo } = useGlobalDate();
   const fuelMode = useFuelMode();
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleOne = (id) => setSelected(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleAll = () => setSelected(s => s.size === searched.length ? new Set() : new Set(searched.map(r => r.id)));
+  const clearSelection = () => { setSelected(new Set()); clearFuelSelected(); };
+
+  useEffect(() => { setFuelData(searched); }, [searched]);
+  useEffect(() => { setFuelSelected(Array.from(selected)); }, [selected]);
 
   const load = () => {
     setLoading(true);
@@ -134,14 +144,26 @@ export default function Fuel() {
         <EmptyState icon={Droplets} title="No fuel records" description="Add your first fuel record to start tracking consumption" />
       ) : (
         <div className="glass-card rounded-2xl p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-3 px-1">Recent Records</h3>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <div className="flex items-center gap-2">
+              <Checkbox checked={searched.length > 0 && selected.size === searched.length} onCheckedChange={toggleAll} className="border-border/60" />
+              <h3 className="text-sm font-semibold text-foreground">Recent Records</h3>
+            </div>
+            {selected.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-primary">{selected.size} selected</span>
+                <button onClick={clearSelection} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+              </div>
+            )}
+          </div>
           <div className="space-y-1.5">
             {searched.slice(0, 50).map((rec, i) => (
               <div
                 key={rec.id}
-                className="group flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors cursor-pointer"
+                className={cn('group flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors cursor-pointer', selected.has(rec.id) && 'bg-primary/[0.07]')}
                 onClick={() => { setEditItem(rec); setFormOpen(true); }}
               >
+                <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0"><Checkbox checked={selected.has(rec.id)} onCheckedChange={() => toggleOne(rec.id)} className="border-border/60" /></div>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${rec.fuel_type === 'petrol' ? '#14b8a6' : '#f97316'}20`, border: `1px solid ${rec.fuel_type === 'petrol' ? '#14b8a6' : '#f97316'}30` }}>
                   <FuelIcon className="w-4 h-4" style={{ color: rec.fuel_type === 'petrol' ? '#14b8a6' : '#f97316' }} />
                 </div>

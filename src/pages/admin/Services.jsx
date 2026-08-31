@@ -22,7 +22,9 @@ import { Download } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import DatePicker from '@/components/common/DatePicker';
 import { withRetry, safeAll } from '@/lib/safeRequest';
-import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
+import { useMaintenanceMode, setMaintenanceMode, setMaintenanceData, setMaintenanceSelected, clearMaintenanceSelected } from '@/lib/maintenanceStore';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import TaxPreview from '@/components/common/TaxPreview';
 import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
@@ -47,7 +49,15 @@ export default function Services() {
   const [presetPlate, setPresetPlate] = useState('');
   const mode = useMaintenanceMode();
   const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(new Set());
   const { dateFrom, dateTo } = useGlobalDate();
+
+  const toggleOne = (id) => setSelected(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleAll = () => setSelected(s => s.size === searched.length ? new Set() : new Set(searched.map(r => r.id)));
+  const clearSelection = () => { setSelected(new Set()); clearMaintenanceSelected(); };
+
+  useEffect(() => { setMaintenanceData(searched); }, [searched]);
+  useEffect(() => { setMaintenanceSelected(Array.from(selected)); }, [selected]);
 
   const load = () => {setLoading(true);withRetry(() => base44.entities.ServiceRecord.list('-created_date', 200)).then(setRecords).finally(() => setLoading(false));};
   useEffect(() => {load();}, []);
@@ -77,9 +87,19 @@ export default function Services() {
 
           {loading ? <LoadingSpinner /> : searched.length === 0 ? <EmptyState icon={Wrench} title={t('no_data')} /> :
         <div className="space-y-2">
+               {selected.size > 0 && (
+                 <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20">
+                   <span className="text-xs font-semibold text-primary">{selected.size} selected</span>
+                   <button onClick={clearSelection} className="text-xs text-muted-foreground hover:text-foreground">Clear</button>
+                 </div>
+               )}
+               <div className="flex items-center gap-2 px-1 pb-1">
+                 <Checkbox checked={searched.length > 0 && selected.size === searched.length} onCheckedChange={toggleAll} className="border-border/60" />
+                 <span className="text-xs text-muted-foreground">Select All</span>
+               </div>
                {visSvc.map((r) =>
-           <ServiceRow key={r.id} r={r} onEdit={() => {setEditItem(r);setFormOpen(true);}} onDelete={async () => {await base44.entities.ServiceRecord.delete(r.id);load();}} onPdf={async () => {const s = await getCompanySettings();await downloadMaintenancePDF(r, s);}} />
-           )}
+            <ServiceRow key={r.id} r={r} isSelected={selected.has(r.id)} onToggleSelect={() => toggleOne(r.id)} onEdit={() => {setEditItem(r);setFormOpen(true);}} onDelete={async () => {await base44.entities.ServiceRecord.delete(r.id);load();}} onPdf={async () => {const s = await getCompanySettings();await downloadMaintenancePDF(r, s);}} />
+            )}
               {hasMoreSvc && (
                 <div {...svcSentinel} className="text-center text-xs text-muted-foreground py-4">
                   Loading more… ({visM}/{totalM})
@@ -98,12 +118,13 @@ export default function Services() {
 
 }
 
-function ServiceRow({ r, onEdit, onDelete, onPdf }) {
+function ServiceRow({ r, isSelected, onToggleSelect, onEdit, onDelete, onPdf }) {
   const [confirmDel, setConfirmDel] = useState(false);
   const tone = TYPE_TONE[r.service_type] || '#94a3b8';
   return (
     <>
-      <div className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={onEdit} style={{ ['--row-accent']: tone }}>
+      <div className={cn('row-card row-edge-glow flex items-center gap-3 cursor-pointer group', isSelected && 'ring-1 ring-primary/40')} onClick={onEdit} style={{ ['--row-accent']: tone }}>
+        <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0"><Checkbox checked={!!isSelected} onCheckedChange={onToggleSelect} className="border-border/60" /></div>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}><Wrench className="w-4 h-4" style={{ color: tone }} /></div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground capitalize truncate">{TYPE_LABEL(r.service_type)}</p>

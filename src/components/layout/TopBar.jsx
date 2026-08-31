@@ -10,9 +10,9 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
 import MobileBulkActionsInline from '@/components/operations/MobileBulkActionsInline';
-import { useMaintenanceMode, setMaintenanceMode } from '@/lib/maintenanceStore';
-import { useFuelMode, setFuelMode } from '@/lib/fuelStore';
-import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
+import { useMaintenanceMode, setMaintenanceMode, getMaintenanceData, useMaintenanceSelected, clearMaintenanceSelected } from '@/lib/maintenanceStore';
+import { useFuelMode, setFuelMode, getFuelData, useFuelSelected, clearFuelSelected } from '@/lib/fuelStore';
+import { useExpensesMode, setExpensesMode, getExpensesData, useExpensesSelected, clearExpensesSelected } from '@/lib/expensesStore';
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
@@ -40,6 +40,9 @@ export default function TopBar() {
   const isFuelPage = location.pathname === '/fuel';
   const maintMode = useMaintenanceMode();
   const fuelMode = useFuelMode();
+  const maintSelected = useMaintenanceSelected();
+  const fuelSelected = useFuelSelected();
+  const expSelected = useExpensesSelected();
   const isVehiclesPage = location.pathname === '/admin/vehicles';
   const vehMode = useVehiclesMode();
   const isDriversPage = location.pathname === '/admin/drivers';
@@ -191,6 +194,13 @@ export default function TopBar() {
                   <button onClick={() => setExpensesMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${expMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
                   <button onClick={() => setExpensesMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${expMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
                 </div>
+                {expSelected.length > 0 && (
+                  <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                    <span className="text-xs font-semibold text-primary">{expSelected.length} selected</span>
+                    <button onClick={clearExpensesSelected} className="text-xs text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <ExportButtons data={expSelected.length > 0 ? getExpensesData().filter(e => expSelected.includes(e.id)) : getExpensesData()} filename="expenses" title="Expenses" columns={[{ label: 'Date', key: 'date' }, { label: 'Category', key: 'category' }, { label: 'Description', key: 'description' }, { label: 'Amount', key: 'amount' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Status', key: 'status' }]} />
                 <HeaderActionButton
                   label={t('add_new')}
                   variant="expense"
@@ -211,6 +221,13 @@ export default function TopBar() {
                   <button onClick={() => setFuelMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${fuelMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
                   <button onClick={() => setFuelMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${fuelMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
                 </div>
+                {fuelSelected.length > 0 && (
+                  <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                    <span className="text-xs font-semibold text-primary">{fuelSelected.length} selected</span>
+                    <button onClick={clearFuelSelected} className="text-xs text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <ExportButtons data={fuelSelected.length > 0 ? getFuelData().filter(r => fuelSelected.includes(r.id)) : getFuelData()} filename="fuel_records" title="Fuel Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Liters', key: 'liters' }, { label: 'Price/L', key: 'price_per_liter' }, { label: 'Total', key: 'total_cost' }, { label: 'Fuel Type', key: 'fuel_type' }, { label: 'Payment', key: 'payment_method' }, { label: 'Station', key: 'station_name' }, { label: 'Odometer', key: 'odometer_reading' }]} />
                 <HeaderActionButton
                   label={t('add_new')}
                   variant="trip"
@@ -224,6 +241,13 @@ export default function TopBar() {
                   <button onClick={() => setMaintenanceMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${maintMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
                   <button onClick={() => setMaintenanceMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${maintMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
                 </div>
+                {maintSelected.length > 0 && (
+                  <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                    <span className="text-xs font-semibold text-primary">{maintSelected.length} selected</span>
+                    <button onClick={clearMaintenanceSelected} className="text-xs text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                  </div>
+                )}
+                <ExportButtons data={maintSelected.length > 0 ? getMaintenanceData().filter(r => maintSelected.includes(r.id)) : getMaintenanceData()} filename="maintenance" title="Maintenance Records" columns={[{ label: 'Date', key: 'date' }, { label: 'Type', key: 'service_type' }, { label: 'Vehicle', key: 'vehicle_plate' }, { label: 'Driver', key: 'driver_name' }, { label: 'Vendor', key: 'vendor_name' }, { label: 'Cost', key: 'cost', numeric: true }, { label: 'VAT', key: 'vat_amount', numeric: true }, { label: 'Total', key: 'total_with_vat', numeric: true }, { label: 'Status', key: 'status' }]} />
                 <HeaderActionButton
                   label={t('add_new')}
                   variant="trip"
