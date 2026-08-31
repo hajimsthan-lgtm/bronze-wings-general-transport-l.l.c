@@ -17,6 +17,7 @@ import SearchableSelect from '@/components/common/SearchableSelect';
 import { Switch } from '@/components/ui/switch';
 import GradientAvatar from '@/components/common/GradientAvatar';
 import ContactPersonSelect from './ContactPersonSelect';
+import { autoCap } from '@/lib/formEnhancements';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -190,13 +191,13 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('from')} <span className="text-red-400">*</span></Label>
-            <IconInput icon={MapPin} list="from-suggestions" dir="auto" value={form.from_location} onChange={(e) => update('from_location', sanitizePlain(e.target.value))} placeholder="Dubai" className={`${inputCls}${errCls('from_location')}`} />
+            <IconInput icon={MapPin} list="from-suggestions" dir="auto" value={form.from_location} onChange={(e) => update('from_location', autoCap(sanitizePlain(e.target.value)))} placeholder="Dubai" className={`${inputCls}${errCls('from_location')}`} />
             <datalist id="from-suggestions">{fromSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
             {errors.from_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.from_location}</p>}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('to')} <span className="text-red-400">*</span></Label>
-            <IconInput icon={Flag} list="to-suggestions" dir="auto" value={form.to_location} onChange={(e) => update('to_location', sanitizePlain(e.target.value))} placeholder="Abu Dhabi" className={`${inputCls}${errCls('to_location')}`} />
+            <IconInput icon={Flag} list="to-suggestions" dir="auto" value={form.to_location} onChange={(e) => update('to_location', autoCap(sanitizePlain(e.target.value)))} placeholder="Abu Dhabi" className={`${inputCls}${errCls('to_location')}`} />
             <datalist id="to-suggestions">{toSuggestions.map((loc) => <option key={loc} value={loc} />)}</datalist>
             {errors.to_location && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.to_location}</p>}
           </div>
@@ -230,7 +231,7 @@ export default function TripModeFields({ p }) {
               <IconInput
                 icon={Shield}
                 value={form.permit_name || ''}
-                onChange={(e) => update('permit_name', sanitizePlain(e.target.value))}
+                onChange={(e) => update('permit_name', autoCap(sanitizePlain(e.target.value)))}
                 placeholder="e.g. Hazmat Pass, Over-dimensional, Cold Chain..."
                 className={inputCls}
               />

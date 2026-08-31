@@ -18,6 +18,9 @@ import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePD
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import DatePicker from '@/components/common/DatePicker';
+import ClientSelect from '@/components/common/ClientSelect';
+import ContactPersonSelect from '@/components/trips/ContactPersonSelect';
+import { autoCap } from '@/lib/formEnhancements';
 import { cn } from '@/lib/utils';
 
 const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0, vat_excluded: false };
@@ -139,19 +142,25 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const handleClientChange = (value) => {
     const client = clients.find(c => c.name === value);
     setForm(prev => {
-      const base = { ...prev, client_name: value, line_items: prev.line_items.filter(i => !i._trip_number) };
+      const base = { ...prev, client_name: value, contact_person: '', line_items: prev.line_items.filter(i => !i._trip_number) };
       if (client) {
         base.client_email = client.email || '';
         base.client_phone = client.phone || '';
         base.client_address = client.address || '';
         base.client_trn = client.trn || '';
-        base.contact_person = client.contact_person || '';
       }
       return base;
     });
     setTripsOpen(false);
     setContractsOpen(false);
   };
+
+  // Auto-select contact person when only one contact is available
+  useEffect(() => {
+    if (form.client_name && availableContacts.length === 1 && form.contact_person !== availableContacts[0].name) {
+      setForm(prev => ({ ...prev, contact_person: availableContacts[0].name }));
+    }
+  }, [form.client_name, availableContacts.length]);
 
   const invoicedTripNumbers = useMemo(() => {
     const set = new Set();
@@ -450,11 +459,36 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
             {/* Client */}
             <Section title="Client" icon={Users} accent="16, 185, 129">
+              {/* 1. Client — profile-view dropdown */}
               <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">{t('client')}</Label>
-                <Input list="invoice-clients" value={form.client_name} onChange={e => handleClientChange(e.target.value)} className={inputCls} placeholder="Select or type client name" />
-                <datalist id="invoice-clients">{clients.map(c => <option key={c.id} value={c.name} />)}</datalist>
+                <Label className="text-xs text-muted-foreground mb-1.5">{t('client')} <span className="text-red-400">*</span></Label>
+                <ClientSelect
+                  clients={clients}
+                  value={form.client_name}
+                  onChange={handleClientChange}
+                  placeholder="Select client"
+                />
               </div>
+
+              {/* 2. Contact Person — profile-view dropdown (auto-selects if only one) */}
+              {form.client_name && availableContacts.length > 0 && (
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1.5">
+                    Contact Person {availableContacts.length === 1 && <span className="text-emerald-400/70 text-[9px]">· auto-selected</span>}
+                  </Label>
+                  <ContactPersonSelect
+                    contacts={availableContacts}
+                    value={form.contact_person}
+                    onChange={(v) => update('contact_person', v)}
+                    placeholder="Select contact person"
+                  />
+                  {form.contact_person && (
+                    <p className="text-[10px] text-muted-foreground mt-1">Trips are filtered by the selected contact person.</p>
+                  )}
+                </div>
+              )}
+
+              {/* 3. Trip / Contract selection — appears after client & contact */}
               {form.client_name && invoiceMode === 'trip' && (
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Completed Trips — multi-select (auto-fills items)</Label>
@@ -467,7 +501,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                       <>
                         <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
                           {clientCompletedTrips.length === 0 ? (
-                            <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced completed trips for this client.</p>
+                            <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced completed trips{form.contact_person ? ' for this contact' : ''}.</p>
                           ) : clientCompletedTrips.map(tr => {
                             const checked = selectedTripNumbers.includes(tr.trip_number);
                             const route = [tr.from_location, tr.to_location].filter(Boolean).join(' To ');
@@ -523,20 +557,12 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                   </div>
                 </div>
               )}
-              <div>
-                <Label className="text-xs text-muted-foreground mb-1.5">Contact Person</Label>
-                <Input list="invoice-contacts" value={form.contact_person} onChange={e => update('contact_person', e.target.value)} className={inputCls} placeholder="Select or type contact name" />
-                <datalist id="invoice-contacts">
-                  {availableContacts.map((cp, i) => <option key={i} value={cp.name} />)}
-                </datalist>
-                {form.contact_person && (
-                  <p className="text-[10px] text-muted-foreground mt-1">Trips are filtered by the selected contact person.</p>
-                )}
-              </div>
+
+              {/* 4. Client details — email, phone, address, TRN */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Email</Label>
-                  <Input type="email" value={form.client_email} onChange={e => update('client_email', e.target.value)} className={inputCls} />
+                  <Input type="email" value={form.client_email} onChange={e => update('client_email', autoCap(e.target.value))} className={inputCls} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Phone</Label>
@@ -546,11 +572,11 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Address</Label>
-                  <Input value={form.client_address} onChange={e => update('client_address', e.target.value)} className={inputCls} />
+                  <Input value={form.client_address} onChange={e => update('client_address', autoCap(e.target.value))} className={inputCls} />
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">TRN</Label>
-                  <Input value={form.client_trn} onChange={e => update('client_trn', e.target.value)} className={inputCls} />
+                  <Input value={form.client_trn} onChange={e => update('client_trn', e.target.value.toUpperCase())} className={inputCls} />
                 </div>
               </div>
             </Section>
@@ -608,7 +634,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                 </div>
                 <div className="col-span-2">
                   <Label className="text-xs text-muted-foreground mb-1.5">LPO Ref #</Label>
-                  <Input value={form.lpo_ref} onChange={e => update('lpo_ref', e.target.value)} placeholder="Enter LPO reference number" className={inputCls} />
+                  <Input value={form.lpo_ref} onChange={e => update('lpo_ref', autoCap(e.target.value))} placeholder="Enter LPO reference number" className={inputCls} />
                 </div>
               </div>
             </Section>
@@ -626,7 +652,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                         </button>
                       )}
                     </div>
-                    <Input value={item.description} onChange={e => updateItem(i, 'description', e.target.value)} placeholder={t('description')} className={`${inputCls} text-sm`} />
+                    <Input value={item.description} onChange={e => updateItem(i, 'description', autoCap(e.target.value))} placeholder={t('description')} className={`${inputCls} text-sm`} />
                     <div className="grid grid-cols-3 gap-2">
                       <div>
                         <Label className="text-[10px] text-muted-foreground">{t('quantity')}</Label>

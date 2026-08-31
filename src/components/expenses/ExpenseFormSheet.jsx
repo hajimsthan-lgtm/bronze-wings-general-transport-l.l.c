@@ -12,6 +12,7 @@ import DatePicker from '@/components/common/DatePicker';
 import TaxPreview from '@/components/common/TaxPreview';
 import TaxModeToggle from '@/components/common/TaxModeToggle';
 import { calcTaxBreakdown } from '@/lib/taxCalc';
+import { autoCap } from '@/lib/formEnhancements';
 import { useExpenseCreate, useExpenseUpdate } from '@/hooks/useEntityQueries';
 
 export default function ExpenseFormSheet({ open, onOpenChange, editItem, prefillDriver, onSaved }) {
