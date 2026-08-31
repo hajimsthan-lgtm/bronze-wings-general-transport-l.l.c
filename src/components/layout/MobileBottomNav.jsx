@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Layers, Wallet, Truck, Plus, X, Receipt, FileText, FilePlus2, Droplets, FileSignature, CreditCard } from 'lucide-react';
+import { Home, Route, Landmark, Truck, Plus, X, Receipt, FileText, FilePlus2, Droplets, FileSignature, CreditCard } from 'lucide-react';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import ExpenseFormSheet from '@/components/expenses/ExpenseFormSheet';
 import InvoiceFormSheet from '@/components/invoices/InvoiceFormSheet';
@@ -12,10 +12,10 @@ import AgreementFormSheet from '@/components/agreements/AgreementFormSheet';
 import PaymentFormSheet from '@/components/payments/PaymentFormSheet';
 
 const NAV_ITEMS = [
-  { label: 'Home', icon: Home, path: '/', match: ['/'] },
-  { label: 'Operations', icon: Layers, path: '/trips', match: ['/trips', '/contracts', '/expenses', '/fuel', '/maintenance', '/salary'] },
-  { label: 'Finance', icon: Wallet, path: '/finance', match: ['/finance', '/accounts', '/reports/bank-reconciliation', '/reports/soa'] },
-  { label: 'Fleet', icon: Truck, path: '/fleet', match: ['/fleet', '/admin/vehicles', '/admin/drivers', '/admin/clients', '/admin/vendors', '/admin/documents', '/admin/company-documents'] },
+  { label: 'Home', icon: Home, path: '/', match: ['/'], group: 'left' },
+  { label: 'Operations', icon: Route, path: '/trips', match: ['/trips', '/contracts', '/expenses', '/fuel', '/maintenance', '/salary'], group: 'left', color: '#00f2c3' },
+  { label: 'Finance', icon: Landmark, path: '/finance', match: ['/finance', '/accounts', '/reports/bank-reconciliation', '/reports/soa'], group: 'right', color: '#6366f1' },
+  { label: 'Fleet', icon: Truck, path: '/fleet', match: ['/fleet', '/admin/vehicles', '/admin/drivers', '/admin/clients', '/admin/vendors', '/admin/documents', '/admin/company-documents'], group: 'right', color: '#3b82f6' },
 ];
 
 const FAB_ACTIONS = [
@@ -68,9 +68,9 @@ export default function MobileBottomNav() {
 
   const closeForm = () => setActiveForm(null);
 
-  // Left pair: Home + Operations; Right pair: Alerts + Settings
-  const leftItems = NAV_ITEMS.slice(0, 2);
-  const rightItems = NAV_ITEMS.slice(2);
+  // Left pair: Home + Operations; Right pair: Finance + Fleet
+  const leftItems = NAV_ITEMS.filter((i) => i.group === 'left');
+  const rightItems = NAV_ITEMS.filter((i) => i.group === 'right');
 
   return (
     <>
@@ -144,6 +144,9 @@ export default function MobileBottomNav() {
           <NavButton key={item.label} item={item} active={isActive(item.match)} onClick={() => navigate(item.path)} />
         ))}
 
+        {/* Hub separator */}
+        <div className="w-px h-7 bg-border/60 mx-0.5 flex-shrink-0" />
+
         {/* Center FAB */}
         <div ref={fabRef} className="flex items-center justify-center">
           <motion.button
@@ -171,6 +174,9 @@ export default function MobileBottomNav() {
           </motion.button>
         </div>
 
+        {/* Hub separator */}
+        <div className="w-px h-7 bg-border/60 mx-0.5 flex-shrink-0" />
+
         {/* Right nav items */}
         {rightItems.map((item) => (
           <NavButton key={item.label} item={item} active={isActive(item.match)} onClick={() => navigate(item.path)} />
@@ -191,14 +197,24 @@ export default function MobileBottomNav() {
 
 function NavButton({ item, active, onClick }) {
   const Icon = item.icon;
+  const color = item.color || '#6366f1';
   return (
     <button
       onClick={onClick}
       className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-full transition-all active:scale-90"
-      style={active ? { background: '#f4f4f5' } : {}}
+      style={active ? { background: `${color}14` } : {}}
     >
-      <Icon className={`w-5 h-5 ${active ? 'text-black' : 'text-slate-400'}`} strokeWidth={active ? 2.4 : 2} />
-      <span className={`text-[9px] font-semibold ${active ? 'text-black' : 'text-slate-400'}`}>{item.label}</span>
+      <Icon
+        className="w-5 h-5 transition-colors"
+        style={{ color: active ? color : '#94a3b8' }}
+        strokeWidth={active ? 2.4 : 2}
+      />
+      <span
+        className="text-[9px] font-semibold transition-colors"
+        style={{ color: active ? color : '#94a3b8' }}
+      >
+        {item.label}
+      </span>
     </button>
   );
 }

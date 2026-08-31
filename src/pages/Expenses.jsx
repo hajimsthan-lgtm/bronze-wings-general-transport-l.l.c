@@ -35,6 +35,8 @@ import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import { useExpensesMode, setExpensesMode } from '@/lib/expensesStore';
 import ExpensesAnalytics from '@/components/expenses/ExpensesAnalytics';
 import TaxPreview from '@/components/common/TaxPreview';
+import VatModeToggle from '@/components/common/VatModeToggle';
+import { calcVat } from '@/lib/vatCalc';
 
 // Category metadata imported from @/components/expenses/expenseMeta
 const EXPENSE_EXPORT_COLUMNS = [
@@ -150,61 +152,43 @@ export default function Expenses() {
             )}
           </div>
         ) : (
-          <div className="rounded-xl border border-border overflow-hidden bg-background/40">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-primary/5 text-left text-muted-foreground">
-                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Description</th>
-                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Category</th>
-                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider">Date</th>
-                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider text-right">Amount</th>
-                    <th className="px-4 py-3 font-medium text-xs uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visExp.map((exp) => {
-                    const Icon = categoryIcons[exp.category] || categoryIcons.other;
-                    const color = categoryColors[exp.category] || '#94a3b8';
-                    return (
-                      <tr key={exp.id} className="border-t border-border group hover:bg-primary/5 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0" style={{ background: hexToRgba(color, 0.14), border: `1px solid ${hexToRgba(color, 0.3)}`, color }}>
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-medium truncate">{exp.description || exp.category}</p>
-                              {exp.vendor_name && <p className="text-xs text-muted-foreground truncate">{exp.vendor_name}</p>}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 capitalize text-muted-foreground">{exp.category?.replace(/_/g, ' ')}</td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatDate(exp.date)}</td>
-                        <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap" style={{ color: '#f97316' }}>- {formatCurrency(exp.amount).replace(/^AED\s*/, '')}</td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditItem(exp); setFormOpen(true); }} className="text-muted-foreground hover:text-primary p-1.5 rounded-lg transition-colors" title="Edit">
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => setDeleteTarget(exp)} className="text-muted-foreground hover:text-red-400 p-1.5 rounded-lg transition-colors" title="Delete">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {hasMoreExp && (
-                   <tr {...expSentinel}>
-                     <td colSpan={5} className="text-center text-xs text-muted-foreground py-3">
-                       Loading more… ({visE}/{totalE})
-                     </td>
-                   </tr>
-                  )}
-                  </tbody>
-                  </table>
-            </div>
+          <div className="space-y-2">
+            {visExp.map((exp) => {
+              const Icon = categoryIcons[exp.category] || categoryIcons.other;
+              const color = categoryColors[exp.category] || '#94a3b8';
+              return (
+                <div key={exp.id} className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={() => { setEditItem(exp); setFormOpen(true); }} style={{ ['--row-accent']: color }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: hexToRgba(color, 0.14), border: `1px solid ${hexToRgba(color, 0.3)}`, color }}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{exp.description || exp.category?.replace(/_/g, ' ')}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {exp.category?.replace(/_/g, ' ')} · {formatDate(exp.date)}
+                      {exp.vendor_name && ` · ${exp.vendor_name}`}
+                      {exp.vat_included && <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 text-[9px] font-semibold uppercase">Incl. VAT</span>}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-semibold text-foreground tabular-nums">{formatCurrency(exp.total_with_vat || exp.amount)}</p>
+                    <p className="text-[10px] text-muted-foreground tabular-nums">{exp.vat_included ? 'gross' : 'net'} {formatCurrency(exp.amount).replace(/^AED\s*/, '')}</p>
+                  </div>
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => { setEditItem(exp); setFormOpen(true); }} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-primary hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100" title="Edit">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => setDeleteTarget(exp)} className="w-7 h-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-white/5 transition-colors opacity-0 group-hover:opacity-100" title="Delete">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {hasMoreExp && (
+              <div {...expSentinel} className="text-center text-xs text-muted-foreground py-4">
+                Loading more… ({visE}/{totalE})
+              </div>
+            )}
           </div>
         )}
           </>
@@ -243,11 +227,11 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  const [form, setForm] = useState({ category: 'other', description: '', amount: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
+  const [form, setForm] = useState({ category: 'other', description: '', amount: '', vat_included: false, vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
 
   useEffect(() => {
-    if (editItem) setForm({ ...form, ...editItem, amount: editItem.amount || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0 });
-    else setForm({ category: 'other', description: '', amount: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
+    if (editItem) setForm({ ...form, ...editItem, amount: editItem.amount || '', vat_included: editItem.vat_included ?? false, vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0 });
+    else setForm({ category: 'other', description: '', amount: '', vat_included: false, vat_rate: 5, vat_amount: 0, total_with_vat: 0, date: new Date().toISOString().split('T')[0], vehicle_plate: '', driver_name: '', payment_method: 'cash', vendor_name: '', reference_number: '', notes: '', status: 'pending' });
   }, [editItem, open]);
 
   useEffect(() => {
@@ -261,20 +245,19 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
 
   const update = (f, v) => setForm(prev => {
     const next = { ...prev, [f]: v };
-    const sub = Number(next.amount) || 0;
-    const rate = Number(next.vat_rate) || 0;
-    if (f === 'amount' || f === 'vat_rate') {
-      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
-      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
+    if (f === 'amount' || f === 'vat_rate' || f === 'vat_included') {
+      const { subtotal, vatAmount, total } = calcVat(next.amount, next.vat_rate, next.vat_included);
+      next.vat_amount = vatAmount;
+      next.total_with_vat = total;
     } else if (f === 'vat_amount') {
-      next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
+      next.total_with_vat = Math.round((Number(next.amount) + (Number(v) || 0)) * 100) / 100;
     }
     return next;
   });
 
   const handleSave = async () => {
     setSaving(true);
-    const data = { ...form, amount: Number(form.amount) || 0, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0 };
+    const data = { ...form, amount: Number(form.amount) || 0, vat_included: !!form.vat_included, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0 };
     if (editItem) await updateExpense.mutateAsync({ id: editItem.id, data });
     else await createExpense.mutateAsync(data);
     setSaving(false); onSaved?.(); onOpenChange(false);
@@ -289,20 +272,19 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
               <SelectContent>{['toll','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('amount')} <span className="text-primary/70">({form.vat_included ? 'incl. VAT' : 'excl. VAT'})</span></Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+          <VatModeToggle included={form.vat_included} onChange={(v) => update('vat_included', v)} />
           <div className="grid grid-cols-3 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border expense-form-input" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Rate</Label>
               <Select value={String(form.vat_rate ?? 5)} onValueChange={v => update('vat_rate', Number(v))}>
                 <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
                 <SelectContent>{[0, 5].map(r => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
               </Select></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={e => update('vat_amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold expense-form-input" /></div>
           </div>
-          <TaxPreview subtotal={Number(form.amount) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
+          <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold expense-form-input" /></div>
+          <TaxPreview subtotal={form.vat_included ? (Number(form.total_with_vat) - Number(form.vat_amount)) : Number(form.amount) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} included={form.vat_included} />
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('vehicle')}</Label><Input list="veh-suggestions" value={form.vehicle_plate} onChange={e => update('vehicle_plate', e.target.value)} className="bg-background border-border expense-form-input" /><datalist id="veh-suggestions">{vehicles.map(v => <option key={v.id} value={v.plate_number} />)}</datalist></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('driver')}</Label><Input list="drv-suggestions" value={form.driver_name} onChange={e => update('driver_name', e.target.value)} className="bg-background border-border expense-form-input" /><datalist id="drv-suggestions">{drivers.map(d => <option key={d.id} value={d.name} />)}</datalist></div>
