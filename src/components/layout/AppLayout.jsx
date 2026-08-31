@@ -69,9 +69,9 @@ export default function AppLayout() {
         </div>
       </div>
 
-      {/* Floating / mobile-only layers */}
+      {/* Floating / mobile-only layers — MobileNav hidden on dashboard (has its own bottom nav) */}
       <EdgeQuickRail />
-      <MobileNav />
+      {location.pathname !== '/' && <MobileNav />}
     </div>
   );
 }

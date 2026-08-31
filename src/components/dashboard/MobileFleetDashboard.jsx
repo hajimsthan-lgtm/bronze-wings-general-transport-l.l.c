@@ -66,12 +66,12 @@ export default function MobileFleetDashboard() {
   const maintenanceCount = vehicles.filter((v) => v.status === 'maintenance').length;
 
   const cards = [
-    { label: 'Active Vehicles', value: activeVehicles, sub: `${totalVehicles} total fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6' },
-    { label: 'Total Fuel', value: `${Math.round(totalLiters)}`, unit: 'L', sub: `${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316' },
-    { label: 'Pending', value: pendingTrips, sub: 'trips scheduled', icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4' },
-    { label: 'Drivers', value: activeDrivers, sub: 'in your roster', icon: Users, from: '#06b6d4', to: '#14b8a6' },
-    { label: 'Alerts', value: alertsCount, sub: 'need attention', icon: ShieldAlert, from: '#f43f5e', to: '#ec4899' },
-    { label: 'Maintenance', value: maintenanceCount, sub: 'in workshop', icon: Wrench, from: '#8b5cf6', to: '#d946ef' },
+    { label: 'Active Vehicles', sub: `${activeVehicles} of ${totalVehicles} fleet`, icon: Truck, from: '#6366f1', to: '#8b5cf6' },
+    { label: 'Total Fuel', sub: `${Math.round(totalLiters)} L · ${fuelRecords.length} fills`, icon: Fuel, from: '#f59e0b', to: '#f97316' },
+    { label: 'Pending', sub: `${pendingTrips} trips scheduled`, icon: ClipboardList, from: '#0ea5e9', to: '#06b6d4' },
+    { label: 'Drivers', sub: `${activeDrivers} in your roster`, icon: Users, from: '#06b6d4', to: '#14b8a6' },
+    { label: 'Alerts', sub: `${alertsCount} need attention`, icon: ShieldAlert, from: '#f43f5e', to: '#ec4899' },
+    { label: 'Maintenance', sub: `${maintenanceCount} in workshop`, icon: Wrench, from: '#8b5cf6', to: '#d946ef' },
   ];
 
   const scatterData = fuelRecords.slice(0, 30).map((f) => ({
@@ -206,9 +206,7 @@ export default function MobileFleetDashboard() {
                   <p className="text-[13px] font-bold text-black leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                     {card.label}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    <span className="font-semibold text-slate-700">{card.value}</span>{card.unit ? ` ${card.unit}` : ''} · {card.sub}
-                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">{card.sub}</p>
                 </div>
               </motion.div>
             );
