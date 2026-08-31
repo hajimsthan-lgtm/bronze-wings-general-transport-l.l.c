@@ -29,7 +29,6 @@ import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
-import OperationsTabSeparator from '@/components/operations/OperationsTabSeparator';
 import GradientDivider from '@/components/common/GradientDivider';
 import OperationsAnalytics from '@/components/operations/OperationsAnalytics';
 
@@ -104,6 +103,9 @@ export default function Operations() {
   const [vehicleMap, setVehicleMap] = useState({});
   const [clientMap, setClientMap] = useState({});
   const [clientsList, setClientsList] = useState([]);
+  const [driverRecords, setDriverRecords] = useState({});
+  const [vehicleRecords, setVehicleRecords] = useState({});
+  const [clientRecords, setClientRecords] = useState({});
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
@@ -161,6 +163,9 @@ export default function Operations() {
       setVehicleMap(Object.fromEntries((vehicles || []).map((v) => [v.plate_number, v.id])));
       setClientMap(Object.fromEntries((clients || []).map((c) => [c.name, c.id])));
       setClientsList(clients || []);
+      setDriverRecords(Object.fromEntries((drivers || []).map((d) => [d.name, d])));
+      setVehicleRecords(Object.fromEntries((vehicles || []).map((v) => [v.plate_number, v])));
+      setClientRecords(Object.fromEntries((clients || []).map((c) => [c.name, c])));
     } catch {}
   }, []);
 
@@ -432,10 +437,6 @@ export default function Operations() {
             <OperationsAnalytics />
           </div>
         )}
-        {/* Operations tab separator — Trips / Maintenance / Fuel / Expenses / Salary */}
-        <div className="mb-3">
-          <OperationsTabSeparator />
-        </div>
         <GradientDivider className="mb-3" />
         <div className="mb-3">
           {isMobile ? (
@@ -518,7 +519,7 @@ export default function Operations() {
                   {viewMode === 'card'
                     ? tripGrid(filteredTrips)
                     : viewMode === 'table'
-                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} driverRecords={driverRecords} vehicleRecords={vehicleRecords} clientRecords={clientRecords} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
                     : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
                 </CollapsibleSection>
               )
