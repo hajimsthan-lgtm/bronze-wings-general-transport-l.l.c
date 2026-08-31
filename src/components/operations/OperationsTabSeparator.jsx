@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const TABS = [
-  { label: 'Trips', path: '/trips' },
-  { label: 'Maintenance', path: '/maintenance' },
-  { label: 'Fuel', path: '/fuel' },
-  { label: 'Expenses', path: '/expenses' },
-  { label: 'Salary', path: '/salary' },
-];
+{ label: 'Trips', path: '/trips' },
+{ label: 'Maintenance', path: '/maintenance' },
+{ label: 'Fuel', path: '/fuel' },
+{ label: 'Expenses', path: '/expenses' },
+{ label: 'Salary', path: '/salary' }];
+
 
 export default function OperationsTabSeparator({ activePath }) {
   const navigate = useNavigate();
@@ -22,21 +22,21 @@ export default function OperationsTabSeparator({ activePath }) {
           <button
             key={t.path}
             onClick={() => navigate(t.path)}
-            className="relative px-4 py-2 text-sm font-medium whitespace-nowrap flex-1 min-w-[80px]"
-          >
-            {isActive && (
-              <motion.span
-                layoutId="ops-tab"
-                className="absolute inset-0 rounded-xl bg-white dark:bg-slate-700 shadow"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
-            )}
+            className="relative px-4 py-2 text-sm font-medium whitespace-nowrap flex-1 min-w-[80px] hidden">
+            
+            {isActive &&
+            <motion.span
+              layoutId="ops-tab"
+              className="absolute inset-0 rounded-xl bg-white dark:bg-slate-700 shadow"
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
+
+            }
             <span className={`relative ${isActive ? 'text-violet-600 dark:text-violet-300' : 'text-slate-500 dark:text-slate-400'}`}>
               {t.label}
             </span>
-          </button>
-        );
+          </button>);
+
       })}
-    </div>
-  );
+    </div>);
+
 }
