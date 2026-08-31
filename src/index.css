@@ -220,7 +220,7 @@
   .clay-card {
     background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.78) 0%, rgba(var(--surf-1-rgb),0.86) 55%, rgba(var(--surf-2-rgb),0.92) 100%);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 1.25rem;
+    border-radius: 0.85rem;
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -279,8 +279,8 @@
   /* ========== 2026 Entity Card (grid) ========== */
   .entity-card {
     position: relative;
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 14px;
     background: linear-gradient(165deg, rgba(var(--panel-accent-rgb),0.08) 0%, rgba(var(--surf-2-rgb),0.60) 100%);
     backdrop-filter: blur(28px) saturate(1.4);
     -webkit-backdrop-filter: blur(28px) saturate(1.4);
@@ -302,7 +302,7 @@
 
   /* ========== 2026 Row Card (liquid glass list row) ========== */
   .row-card {
-    position: relative; border-radius: 16px; padding: 14px 18px; margin-bottom: 8px; overflow: hidden;
+    position: relative; border-radius: 12px; padding: 10px 14px; margin-bottom: 6px; overflow: hidden;
     background: linear-gradient(165deg, rgba(var(--surf-1-rgb),0.55) 0%, rgba(var(--surf-2-rgb),0.66) 100%);
     backdrop-filter: blur(20px) saturate(1.3); -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(0,0,0,0.05);
@@ -740,8 +740,8 @@
 
   /* ========== 2026 Detail Header Card ========== */
   .detail-header-card {
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 14px;
+    padding: 16px;
     background: linear-gradient(165deg, rgba(var(--panel-accent-rgb),0.12) 0%, rgba(var(--surf-1-rgb),0.78) 55%, rgba(var(--surf-2-rgb),0.88) 100%);
     backdrop-filter: blur(26px) saturate(1.3);
     -webkit-backdrop-filter: blur(26px) saturate(1.3);
@@ -802,7 +802,7 @@
     backdrop-filter: blur(28px) saturate(1.3);
     -webkit-backdrop-filter: blur(28px) saturate(1.3);
     border: 1px solid rgba(var(--panel-accent-rgb),0.12);
-    border-radius: calc(var(--radius) + 4px);
+    border-radius: var(--radius);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 0 50px rgba(var(--panel-accent-rgb),0.03), 0 16px 44px -14px rgba(0,0,0,0.1);
   }
 
@@ -874,7 +874,7 @@
     backdrop-filter: blur(20px) saturate(1.3);
     -webkit-backdrop-filter: blur(20px) saturate(1.3);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
