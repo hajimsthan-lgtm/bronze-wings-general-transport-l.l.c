@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
@@ -57,6 +57,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const [vehicles, setVehicles] = useState([]);
   const [tripsOpen, setTripsOpen] = useState(false);
   const [contractsOpen, setContractsOpen] = useState(false);
+  const tripsDropdownRef = useRef(null);
+  const contractsDropdownRef = useRef(null);
   const [invoiceMode, setInvoiceMode] = useState('trip'); // 'trip' | 'monthly'
   const [mobileView, setMobileView] = useState('form'); // 'form' | 'preview' — mobile only
   const [receivePayment, setReceivePayment] = useState(false);
@@ -121,6 +123,16 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     }
   }, [open, defaultClientName, editInvoice]);
 
+  useEffect(() => {
+    if (!tripsOpen && !contractsOpen) return;
+    const onDown = (e) => {
+      if (tripsOpen && tripsDropdownRef.current && !tripsDropdownRef.current.contains(e.target)) setTripsOpen(false);
+      if (contractsOpen && contractsDropdownRef.current && !contractsDropdownRef.current.contains(e.target)) setContractsOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [tripsOpen, contractsOpen]);
+
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const updatePayment = (field, value) => setPayment(prev => ({ ...prev, [field]: value }));
 
@@ -169,29 +181,47 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     if (form.contact_person && availableContacts.length > 1) return tr.contact_person === form.contact_person;
     return true;
   });
-  const selectedTripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
+  const selectedTripNumbers = [...new Set(form.line_items.filter(i => i._trip_number && !i._is_addon).map(i => i._trip_number))];
 
   const toggleTrip = (trip) => {
     setForm(prev => {
       const items = [...prev.line_items];
-      const idx = items.findIndex(i => i._trip_number === trip.trip_number);
-      if (idx >= 0) {
-        items.splice(idx, 1);
-      } else {
-        const route = [trip.from_location, trip.to_location].filter(Boolean).join(' To ');
-        items.push({
+      const exists = items.some(i => i._trip_number === trip.trip_number && !i._is_addon);
+      if (exists) {
+        // remove the trip and all its add-on line items
+        const filtered = items.filter(i => i._trip_number !== trip.trip_number);
+        return { ...prev, line_items: filtered };
+      }
+      const route = [trip.from_location, trip.to_location].filter(Boolean).join(' To ');
+      const newItems = [{
+        _trip_number: trip.trip_number,
+        description: route || trip.trip_number,
+        date: trip.trip_date,
+        quantity: 1,
+        unit_price: Number(trip.revenue || trip.base_fare || 0),
+        amount: Number(trip.revenue || trip.base_fare || 0),
+        service: 'TRIP',
+        uom: 'TRIP',
+        vat_excluded: false,
+      }];
+      // add each add-on as a separate line item; without-tax add-ons are VAT-excluded (VAT 0, shown separately)
+      (Array.isArray(trip.add_ons) ? trip.add_ons : []).forEach((a, ai) => {
+        const amt = Number(a.amount) || 0;
+        if (amt <= 0 && !a.description) return;
+        newItems.push({
           _trip_number: trip.trip_number,
-          description: route || trip.trip_number,
+          _is_addon: true,
+          description: a.description || `Add-on ${ai + 1}`,
           date: trip.trip_date,
           quantity: 1,
-          unit_price: Number(trip.revenue || trip.base_fare || 0),
-          amount: Number(trip.revenue || trip.base_fare || 0),
-          service: 'TRIP',
-          uom: 'TRIP',
-          vat_excluded: false,
+          unit_price: amt,
+          amount: amt,
+          service: 'ADDON',
+          uom: 'LS',
+          vat_excluded: !a.vat_included,
         });
-      }
-      return { ...prev, line_items: items };
+      });
+      return { ...prev, line_items: [...items, ...newItems] };
     });
   };
 
@@ -277,7 +307,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       const tripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
       const data = {
         ...form,
-        line_items: form.line_items.map(({ _trip_number, _contract_id, ...rest }) => rest),
+        line_items: form.line_items.map(({ _trip_number, _contract_id, _is_addon, ...rest }) => rest),
         trip_id: tripNumbers.length > 0 ? tripNumbers.join(',') : form.trip_id,
         subtotal, vat_amount: vatAmount, total_amount: total,
         vat_rate: Number(form.vat_rate),
@@ -348,7 +378,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     setDownloading(true);
     try {
       const s = await getCompanySettings();
-      const payload = { ...form, line_items: form.line_items.map(({ _trip_number, _contract_id, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
+      const payload = { ...form, line_items: form.line_items.map(({ _trip_number, _contract_id, _is_addon, ...rest }) => rest), subtotal, vat_amount: vatAmount, total_amount: total, status: resultingStatus, paid_amount: payAmount };
       if (invoiceMode === 'monthly') {
         await downloadMonthlyInvoicePDF(payload, form.client_name, s, undefined, true);
       } else {
@@ -428,14 +458,13 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               {form.client_name && invoiceMode === 'trip' && (
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Completed Trips — multi-select (auto-fills items)</Label>
-                  <div className="relative">
+                  <div className="relative" ref={tripsDropdownRef}>
                     <button type="button" onClick={() => setTripsOpen(v => !v)} className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
                       <span className="text-sm font-medium truncate">{selectedTripNumbers.length} trip(s) selected — click to {tripsOpen ? 'close' : 'select'}</span>
                       <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', tripsOpen && 'rotate-180')} />
                     </button>
                     {tripsOpen && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setTripsOpen(false)} />
                         <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
                           {clientCompletedTrips.length === 0 ? (
                             <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced completed trips for this client.</p>
@@ -464,14 +493,13 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               {form.client_name && invoiceMode === 'monthly' && (
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Monthly Contracts — non-invoiced (auto-fills items)</Label>
-                  <div className="relative">
+                  <div className="relative" ref={contractsDropdownRef}>
                     <button type="button" onClick={() => setContractsOpen(v => !v)} className="flex items-center justify-between w-full h-10 px-3 rounded-lg border border-border bg-background/50 backdrop-blur-sm hover:border-primary/40 transition-colors">
                       <span className="text-sm font-medium truncate">{selectedContractIds.length} contract(s) selected — click to {contractsOpen ? 'close' : 'select'}</span>
                       <ChevronDown className={cn('w-4 h-4 text-muted-foreground transition-transform', contractsOpen && 'rotate-180')} />
                     </button>
                     {contractsOpen && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setContractsOpen(false)} />
                         <div className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto thin-scroll glass-card p-1.5 shadow-2xl">
                           {availableContracts.length === 0 ? (
                             <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced active monthly contracts for this client.</p>

@@ -114,20 +114,10 @@ export default function InvoicesPage() {
     return linked.length;
   };
 
-  const handleNew = async () => {
+  const handleNew = () => {
     setEditing(null);
-    try {
-      const customTpls = await base44.entities.CustomTemplate.filter({ document_type: 'invoice' }, '-updated_date', 100).catch(() => []);
-      if (customTpls.length > 0) {
-        setTemplateSelectorOpen(true);
-      } else {
-        setSelectedTemplateId(null);
-        setSheetOpen(true);
-      }
-    } catch {
-      setSelectedTemplateId(null);
-      setSheetOpen(true);
-    }
+    setSelectedTemplateId(null);
+    setSheetOpen(true);
   };
 
   const handleTemplateSelect = (templateId) => {
