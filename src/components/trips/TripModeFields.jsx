@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck, Plus } from 'lucide-react';
+import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck, Plus, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
@@ -450,7 +451,13 @@ export default function TripModeFields({ p }) {
       <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
-          <IconInput icon={FileText} maxLength={50} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', sanitizePlain(e.target.value))} className={inputCls} />
+          <div className="relative">
+            <span className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 inline-flex items-center px-1.5 h-6 rounded-md bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold font-mono tracking-wider pointer-events-none select-none">DN#</span>
+            <Input maxLength={50} value={form.delivery_note_number} onChange={(e) => update('delivery_note_number', sanitizePlain(e.target.value))} className={`${inputCls} pl-14 font-mono text-sm tracking-wider`} placeholder="000000" />
+          </div>
+          {form.delivery_note_number && (
+            <p className="text-[10px] text-cyan-400/70 mt-1 font-mono">Bubble: DN#{form.delivery_note_number}</p>
+          )}
         </div>
         {form.trip_type === 'return' && (
           <div>
@@ -465,7 +472,10 @@ export default function TripModeFields({ p }) {
             <div className="flex items-center gap-2 glass-card p-2.5">
               <FileText className="w-4 h-4 text-primary flex-shrink-0" />
               <a href={form.delivery_note_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate flex-1">View attachment</a>
-              <Button type="button" variant="ghost" size="sm" onClick={() => update('delivery_note_url', '')} className="h-6 w-6 p-0 text-muted-foreground hover:text-red-400">
+              <a href={form.delivery_note_url} target="_blank" rel="noopener noreferrer" className="h-7 w-7 p-0 inline-flex items-center justify-center text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-md transition-colors flex-shrink-0" title="View document">
+                <Eye className="w-3.5 h-3.5" />
+              </a>
+              <Button type="button" variant="ghost" size="sm" onClick={() => update('delivery_note_url', '')} className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400">
                 <X className="w-3.5 h-3.5" />
               </Button>
             </div>
