@@ -4,10 +4,12 @@ import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Fuel as FuelIcon, Droplets, Calendar, Gauge, MapPin, CreditCard, FileText } from 'lucide-react';
 import DatePicker from '@/components/common/DatePicker';
 import TaxPreview from '@/components/common/TaxPreview';
+import TaxModeToggle from '@/components/common/TaxModeToggle';
+import { calcTaxBreakdown } from '@/lib/taxCalc';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
 
@@ -39,6 +41,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
     vat_rate: 5,
     vat_amount: 0,
     total_with_vat: 0,
+    tax_inclusive: false,
     notes: '',
   });
 
@@ -58,6 +61,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         vat_rate: editItem.vat_rate ?? 5,
         vat_amount: editItem.vat_amount || 0,
         total_with_vat: editItem.total_with_vat || 0,
+        tax_inclusive: editItem.tax_inclusive ?? false,
         notes: editItem.notes || '',
       });
     } else {
@@ -75,6 +79,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         vat_rate: 5,
         vat_amount: 0,
         total_with_vat: 0,
+        tax_inclusive: false,
         notes: '',
       });
     }
@@ -89,15 +94,13 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
     if (f === 'liters' || f === 'price_per_liter') {
       next.total_cost = (Number(next.liters) || 0) * (Number(next.price_per_liter) || 0);
     }
-    // Auto-calc VAT when total_cost or vat_rate changes
-    if (f === 'liters' || f === 'price_per_liter' || f === 'total_cost' || f === 'vat_rate') {
-      const sub = Number(next.total_cost) || 0;
-      const rate = Number(next.vat_rate) || 0;
-      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
-      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
+    // Auto-calc VAT based on tax_inclusive mode
+    if (f === 'liters' || f === 'price_per_liter' || f === 'total_cost' || f === 'vat_rate' || f === 'tax_inclusive') {
+      const breakdown = calcTaxBreakdown(next.total_cost, next.vat_rate, next.tax_inclusive);
+      next.vat_amount = breakdown.vatAmount;
+      next.total_with_vat = breakdown.total;
     } else if (f === 'vat_amount') {
-      const sub = Number(next.total_cost) || 0;
-      next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
+      next.total_with_vat = Math.round((Number(next.total_cost) + (Number(v) || 0)) * 100) / 100;
     }
     setForm(next);
   };
@@ -114,6 +117,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
         vat_rate: Number(form.vat_rate) || 0,
         vat_amount: Number(form.vat_amount) || 0,
         total_with_vat: Number(form.total_with_vat) || 0,
+        tax_inclusive: form.tax_inclusive,
       });
     } finally {
       setSaving(false);
@@ -121,17 +125,18 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto" side="right">
-        <SheetHeader className="mb-6">
-          <SheetTitle className="font-display text-foreground flex items-center gap-2">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-card border-border w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-display text-foreground flex items-center gap-2">
             <FuelIcon className="w-5 h-5 text-primary" />
             {editItem ? 'Edit' : 'New'} Fuel Record
-          </SheetTitle>
-        </SheetHeader>
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-xs">Record a fuel transaction with VAT calculation</DialogDescription>
+        </DialogHeader>
 
         <div className="space-y-4">
-          {/* Vehicle & Driver — avatar-style searchable dropdowns */}
+          {/* Vehicle & Driver */}
           <DriverVehicleSelects
             driverValue={form.driver_name}
             vehicleValue={form.vehicle_plate}
@@ -172,7 +177,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
                 ))}
               </div>
             </div>
-            </div>
+          </div>
 
           {/* Liters, Price/L, Total */}
           <div className="grid grid-cols-3 gap-3">
@@ -185,9 +190,15 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
               <Input type="number" step="0.01" value={form.price_per_liter} onChange={e => update('price_per_liter', e.target.value)} className="bg-background border-border" placeholder="0" />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground mb-1.5">{t('total')}</Label>
+              <Label className="text-xs text-muted-foreground mb-1.5">{form.tax_inclusive ? 'Total (incl)' : 'Total (excl)'}</Label>
               <Input type="number" step="0.01" value={form.total_cost} onChange={e => update('total_cost', e.target.value)} className="bg-background border-border" placeholder="0" />
             </div>
+          </div>
+
+          {/* Tax Mode Toggle */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1.5">Tax Mode</Label>
+            <TaxModeToggle inclusive={form.tax_inclusive} onChange={(v) => update('tax_inclusive', v)} />
           </div>
 
           {/* VAT Fields */}
@@ -210,7 +221,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
           </div>
 
           {/* Live Tax Preview */}
-          <TaxPreview subtotal={Number(form.total_cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
+          <TaxPreview subtotal={calcTaxBreakdown(form.total_cost, form.vat_rate, form.tax_inclusive).subtotal} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
 
           {/* Date & Odometer */}
           <div className="grid grid-cols-2 gap-3">
@@ -244,7 +255,7 @@ export default function FuelFormSheet({ open, onOpenChange, editItem, presetPlat
             </Button>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

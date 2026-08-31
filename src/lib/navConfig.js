@@ -2,13 +2,13 @@
 // Single source of truth — imported by ShellSidebar.
 import {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
-  ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
+  ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench, Fuel as FuelIcon,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 } from 'lucide-react';
 
 const ICONS = {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
-  ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench,
+  ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench, Fuel: FuelIcon,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 };
 
@@ -18,6 +18,7 @@ export const navItems = [
     children: [
       { key: 'trips', label: 'Trips', path: '/trips', icon: 'Route', color: '#00f2c3' },
       { key: 'expenses', label: 'Expenses', path: '/expenses', icon: 'Receipt', color: '#f97316' },
+      { key: 'fuel', label: 'Fuel', path: '/fuel', icon: 'Fuel', color: '#14b8a6' },
       { key: 'maintenance', label: 'Maintenance', path: '/maintenance', icon: 'Wrench', color: '#a855f7' },
       { key: 'salary', label: 'Salary', path: '/salary', icon: 'Wallet', color: '#22c55e' },
     ],

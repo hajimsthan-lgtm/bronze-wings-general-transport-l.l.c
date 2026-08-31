@@ -152,6 +152,15 @@ export default function Expenses() {
           <ExpensesAnalytics expenses={filtered} loading={loading} onBrowse={() => setExpensesMode('browse')} />
         ) : (
           <>
+        <div className="relative mb-5">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
         {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
           <EmptyState icon={Receipt} title={t('no_data')} description="Add your first expense" />
         ) : viewMode === 'card' ? (

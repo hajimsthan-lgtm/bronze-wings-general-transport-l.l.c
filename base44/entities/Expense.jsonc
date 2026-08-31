@@ -34,6 +34,10 @@
       "type": "number",
       "default": 0
     },
+    "tax_inclusive": {
+      "type": "boolean",
+      "default": false
+    },
     "date": {
       "type": "string",
       "format": "date"

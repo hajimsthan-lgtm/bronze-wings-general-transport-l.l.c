@@ -27,6 +27,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import TaxPreview from '@/components/common/TaxPreview';
+import TaxModeToggle from '@/components/common/TaxModeToggle';
+import { calcTaxBreakdown } from '@/lib/taxCalc';
 import DriverVehicleSelects from '@/components/common/DriverVehicleSelects';
 
 const PAYMENT_LABELS = {
@@ -162,17 +164,16 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
     () => base44.entities.Driver.list('-created_date', 200)],
     1).then(([vd, d]) => {setVendors(vd || []);setDrivers(d || []);}).catch(() => {});
   }, []);
-  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: '', cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });
-  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0, payment_method: editItem.payment_method || 'cash' });else setForm({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: '', cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
+  const [form, setForm] = useState({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: '', cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, tax_inclusive: false, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });
+  useEffect(() => {if (editItem) setForm({ ...form, ...editItem, cost: editItem.cost || '', vat_rate: editItem.vat_rate ?? 5, vat_amount: editItem.vat_amount || 0, total_with_vat: editItem.total_with_vat || 0, tax_inclusive: editItem.tax_inclusive ?? false, payment_method: editItem.payment_method || 'cash' });else setForm({ vehicle_plate: presetPlate || '', driver_name: '', service_type: 'other', description: '', date: '', cost: '', vat_rate: 5, vat_amount: 0, total_with_vat: 0, tax_inclusive: false, vendor_name: '', status: 'completed', payment_method: 'cash', notes: '', maint_ref: '', attachment_url: '' });}, [editItem, presetPlate]);
   const update = (f, v) => setForm((prev) => {
     const next = { ...prev, [f]: v };
-    const sub = Number(next.cost) || 0;
-    const rate = Number(next.vat_rate) || 0;
-    if (f === 'cost' || f === 'vat_rate') {
-      next.vat_amount = Math.round(sub * (rate / 100) * 100) / 100;
-      next.total_with_vat = Math.round((sub + next.vat_amount) * 100) / 100;
+    if (f === 'cost' || f === 'vat_rate' || f === 'tax_inclusive') {
+      const breakdown = calcTaxBreakdown(next.cost, next.vat_rate, next.tax_inclusive);
+      next.vat_amount = breakdown.vatAmount;
+      next.total_with_vat = breakdown.total;
     } else if (f === 'vat_amount') {
-      next.total_with_vat = Math.round((sub + (Number(v) || 0)) * 100) / 100;
+      next.total_with_vat = Math.round((Number(next.cost) + (Number(v) || 0)) * 100) / 100;
     }
     return next;
   });
@@ -183,7 +184,7 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
     if (trimmedVendor && !vendorNames.some((n) => n.toLowerCase() === trimmedVendor.toLowerCase())) {
       try { await base44.entities.Vendor.create({ name: trimmedVendor, provider_type: 'vehicle_supplier', category: 'maintenance', status: 'active' }); } catch (e) {}
     }
-    await onSave({ ...form, vendor_name: trimmedVendor, cost: Number(form.cost) || 0, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0 });
+    await onSave({ ...form, vendor_name: trimmedVendor, cost: Number(form.cost) || 0, vat_rate: Number(form.vat_rate) || 0, vat_amount: Number(form.vat_amount) || 0, total_with_vat: Number(form.total_with_vat) || 0, tax_inclusive: form.tax_inclusive });
     setSaving(false);
   };
 
@@ -206,14 +207,15 @@ function ServiceForm({ editItem, presetPlate, onSave, onCancel }) {
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Textarea value={form.description} onChange={(e) => update('description', e.target.value)} rows={2} className="bg-background border-border" /></div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><DatePicker value={form.date} onChange={(v) => update('date', v)} placeholder="Pick a date" /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Cost (excl. VAT)</Label><Input type="number" value={form.cost} onChange={(e) => update('cost', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{form.tax_inclusive ? 'Cost (incl. VAT)' : 'Cost (excl. VAT)'}</Label><Input type="number" value={form.cost} onChange={(e) => update('cost', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Rate</Label><Select value={String(form.vat_rate ?? 5)} onValueChange={(v) => update('vat_rate', Number(v))}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>{[0, 5].map((r) => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent></Select></div>
       </div>
+      <div><Label className="text-xs text-muted-foreground mb-1.5">Tax Mode</Label><TaxModeToggle inclusive={form.tax_inclusive} onChange={(v) => update('tax_inclusive', v)} /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><Label className="text-xs text-muted-foreground mb-1.5">VAT Amount</Label><Input type="number" step="0.01" value={form.vat_amount} onChange={(e) => update('vat_amount', e.target.value)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Total (incl. VAT)</Label><Input type="number" step="0.01" value={form.total_with_vat} readOnly className="bg-background border-border font-semibold" /></div>
       </div>
-      <TaxPreview subtotal={Number(form.cost) || 0} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
+      <TaxPreview subtotal={calcTaxBreakdown(form.cost, form.vat_rate, form.tax_inclusive).subtotal} vatRate={form.vat_rate ?? 5} vatAmount={form.vat_amount || 0} total={form.total_with_vat || 0} />
       <div>
         <Label className="text-xs text-muted-foreground mb-1.5 flex items-center gap-1"><CreditCard className="w-3 h-3" /> Payment Method</Label>
         <div className="flex gap-1.5">

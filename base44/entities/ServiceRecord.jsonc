@@ -45,6 +45,10 @@
       "type": "number",
       "default": 0
     },
+    "tax_inclusive": {
+      "type": "boolean",
+      "default": false
+    },
     "vendor_name": {
       "type": "string"
     },
