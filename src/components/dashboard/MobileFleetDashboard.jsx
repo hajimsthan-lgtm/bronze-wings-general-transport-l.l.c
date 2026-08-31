@@ -108,7 +108,7 @@ export default function MobileFleetDashboard() {
         
 
         {/* top bar */}
-        <div className="relative flex items-center justify-between mb-7">
+        <div className="relative flex items-center justify-between mb-7 text-[hsl(var(--background-elevated))]">
           <div className="flex items-center gap-2.5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -116,7 +116,7 @@ export default function MobileFleetDashboard() {
               
               <Sparkles className="w-4.5 h-4.5 text-white" strokeWidth={2.2} />
             </div>
-            <span className="text-[15px] font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+            <span className="text-[15px] font-bold tracking-tight text-[hsl(var(--background))]" style={{ fontFamily: 'var(--font-display)' }}>
               Bronze Wings
             </span>
           </div>
@@ -175,7 +175,7 @@ export default function MobileFleetDashboard() {
         </button>
 
         {/* stats row */}
-        <div className="relative mt-4 flex items-center gap-3">
+        <div className="relative mt-4 flex items-center gap-3 text-[hsl(var(--background))]">
           <span className="text-white/55 text-[11px] font-medium">{totalVehicles} vehicles</span>
           <span className="w-px h-3 bg-white/20" />
           <span className="text-white/55 text-[11px] font-medium">{onRoad} on the road</span>
