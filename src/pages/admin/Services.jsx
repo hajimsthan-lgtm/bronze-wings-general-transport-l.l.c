@@ -56,9 +56,6 @@ export default function Services() {
   const toggleAll = () => setSelected(s => s.size === searched.length ? new Set() : new Set(searched.map(r => r.id)));
   const clearSelection = () => { setSelected(new Set()); clearMaintenanceSelected(); };
 
-  useEffect(() => { setMaintenanceData(searched); }, [searched]);
-  useEffect(() => { setMaintenanceSelected(Array.from(selected)); }, [selected]);
-
   const load = () => {setLoading(true);withRetry(() => base44.entities.ServiceRecord.list('-created_date', 200)).then(setRecords).finally(() => setLoading(false));};
   useEffect(() => {load();}, []);
   useEffect(() => {
@@ -73,6 +70,9 @@ export default function Services() {
   const filtered = records.filter((r) => inGlobalDateRange(r.date, dateFrom, dateTo));
   const searched = filtered.filter((r) => !search || r.vehicle_plate?.toLowerCase().includes(search.toLowerCase()) || (r.service_type || '').includes(search.toLowerCase()));
   const { visible: visSvc, sentinelProps: svcSentinel, hasMore: hasMoreSvc, visibleCount: visM, totalCount: totalM } = useProgressiveRender(searched);
+
+  useEffect(() => { setMaintenanceData(searched); }, [searched]);
+  useEffect(() => { setMaintenanceSelected(Array.from(selected)); }, [selected]);
 
   return (
     <div>

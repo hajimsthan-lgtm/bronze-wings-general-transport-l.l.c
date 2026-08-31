@@ -35,9 +35,6 @@ export default function Fuel() {
   const toggleAll = () => setSelected(s => s.size === searched.length ? new Set() : new Set(searched.map(r => r.id)));
   const clearSelection = () => { setSelected(new Set()); clearFuelSelected(); };
 
-  useEffect(() => { setFuelData(searched); }, [searched]);
-  useEffect(() => { setFuelSelected(Array.from(selected)); }, [selected]);
-
   const load = () => {
     setLoading(true);
     base44.entities.FuelRecord.list('-date', 500)
@@ -61,6 +58,9 @@ export default function Fuel() {
 
   const filtered = records.filter(r => !r.date || ((!dateFrom || r.date >= dateFrom) && (!dateTo || r.date <= dateTo)));
   const searched = filtered.filter(r => !search || (r.vehicle_plate || '').toLowerCase().includes(search.toLowerCase()) || (r.driver_name || '').toLowerCase().includes(search.toLowerCase()) || (r.station_name || '').toLowerCase().includes(search.toLowerCase()) || (r.fuel_type || '').toLowerCase().includes(search.toLowerCase()));
+
+  useEffect(() => { setFuelData(searched); }, [searched]);
+  useEffect(() => { setFuelSelected(Array.from(selected)); }, [selected]);
 
   const totalCost = filtered.reduce((s, r) => s + (r.total_cost || 0), 0);
   const totalLiters = filtered.reduce((s, r) => s + (r.liters || 0), 0);
