@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText } from 'lucide-react';
+import TripRevenueCell from './TripRevenueCell';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -476,7 +477,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    )}
                    </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
-                   <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                   <TripRevenueCell trip={trip} />
                  </TableCell>
                   {/* STATUS — workflow dropdown with conditional modals */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
