@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield } from 'lucide-react';
-import TripProfileCell from '@/components/trips/TripProfileCell';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, Search, FileText } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
@@ -73,8 +73,9 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   // all operate on the full `trips` array, so nothing is lost.
   const PAGE = 50;
   const [visibleCount, setVisibleCount] = useState(PAGE);
+  const [localSearch, setLocalSearch] = useState('');
   const sentinelRef = useRef(null);
-  useEffect(() => { setVisibleCount(PAGE); }, [trips]);
+  useEffect(() => { setVisibleCount(PAGE); }, [trips, localSearch]);
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -84,7 +85,22 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     io.observe(el);
     return () => io.disconnect();
   }, [trips]);
-  const visibleTrips = trips.slice(0, visibleCount);
+  const searchedTrips = useMemo(() => {
+    if (!localSearch.trim()) return trips;
+    const q = localSearch.toLowerCase();
+    return trips.filter((trip) =>
+      trip.trip_number?.toLowerCase().includes(q) ||
+      trip.from_location?.toLowerCase().includes(q) ||
+      trip.to_location?.toLowerCase().includes(q) ||
+      trip.driver_name?.toLowerCase().includes(q) ||
+      trip.vehicle_plate?.toLowerCase().includes(q) ||
+      trip.client_name?.toLowerCase().includes(q) ||
+      trip.delivery_note_number?.toLowerCase().includes(q) ||
+      (trip.id || '').toLowerCase().slice(-6).includes(q)
+    );
+  }, [trips, localSearch]);
+
+  const visibleTrips = searchedTrips.slice(0, visibleCount);
 
   // Column widths (resizable) — all columns always visible, text wraps
   const [widths, setWidths] = useState(() => {
@@ -306,6 +322,25 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
 
   return (
     <div className="relative">
+      {/* Search bar on top of the trip table */}
+      <div className="mb-2 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+          placeholder="Search trips by number, route, driver, vehicle, client, delivery note…"
+          className="pl-9 h-10 bg-white border-border text-sm"
+        />
+        {localSearch && (
+          <button
+            onClick={() => setLocalSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            title="Clear search"
+          >
+            <span className="text-lg leading-none">×</span>
+          </button>
+        )}
+      </div>
       {/* Top horizontal scrollbar — stays fixed, doesn't scroll with vertical */}
       <div className="relative mb-1.5">
         <div
@@ -331,13 +366,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
       <div
         ref={tableScrollRef}
         onScroll={() => syncScroll(tableScrollRef.current, topScrollRef.current)}
-        className="rounded-xl border border-border shadow-sm bg-background/40 overflow-auto max-h-[70vh] trips-scroll trips-grid">
+        className="rounded-xl border border-border shadow-sm bg-white overflow-auto max-h-[70vh] trips-scroll trips-grid">
         
       <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
           {(() => {
-            const headerBg = 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.96) 0%, rgba(var(--surf-2-rgb),0.99) 100%)';
-            const headerShadow = 'inset 0 -1.5px 0 rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.06)';
+            const headerBg = '#ffffff';
+            const headerShadow = 'inset 0 -1px 0 rgba(0,0,0,0.08)';
             return (
             <TableRow
               className="hover:bg-transparent"
@@ -423,39 +458,42 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                     {trip.created_date ? moment(trip.created_date).format('HH:mm') : ''}
                   </span>
                 </TableCell>
-                {/* CLIENT — profile card with avatar */}
-                <TableCell className="align-top trips-grid-td">
-                  <TripProfileCell
-                    name={trip.client_name}
-                    subtitle={trip.contact_person}
-                    avatarUrl={clientRecords?.[trip.client_name]?.image_url}
-                    initial="C"
-                    gradient="linear-gradient(135deg, #8b5cf6, #d946ef)"
-                    path="/admin/clients"
-                    id={clientMap?.[trip.client_name]}
-                  />
-                </TableCell>
-                {/* VEHICLE + DRIVER — profile cards */}
+                {/* CLIENT — plain text */}
                 <TableCell className="text-xs align-top trips-grid-td">
-                  <TripProfileCell
-                    name={trip.vehicle_plate}
-                    subtitle={vehicleRecords?.[trip.vehicle_plate]?.model || vehicleRecords?.[trip.vehicle_plate]?.vehicle_type}
-                    avatarUrl={vehicleRecords?.[trip.vehicle_plate]?.image_url}
-                    initial={trip.vehicle_plate?.charAt(0) || 'V'}
-                    gradient="linear-gradient(135deg, #0ea5e9, #06b6d4)"
-                    path="/admin/vehicles"
-                    id={vehicleMap?.[trip.vehicle_plate]}
-                  />
-                  <div className="mt-1.5">
-                    <TripProfileCell
-                      name={trip.driver_name}
-                      subtitle={driverRecords?.[trip.driver_name]?.phone}
-                      avatarUrl={driverRecords?.[trip.driver_name]?.image_url}
-                      initial={trip.driver_name?.charAt(0) || 'D'}
-                      gradient="linear-gradient(135deg, #14b8a6, #06b6d4)"
-                      path="/admin/drivers"
-                      id={driverMap?.[trip.driver_name]}
-                    />
+                  <button
+                    onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
+                    className="text-left text-foreground font-medium hover:text-primary transition-colors whitespace-normal break-words"
+                    title={trip.client_name || ''}
+                  >
+                    {trip.client_name || '—'}
+                  </button>
+                  {trip.contact_person && (
+                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{trip.contact_person}</div>
+                  )}
+                </TableCell>
+                {/* VEHICLE + DRIVER — plain text */}
+                <TableCell className="text-xs align-top trips-grid-td">
+                  <button
+                    onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
+                    className="text-left text-foreground font-medium hover:text-primary transition-colors whitespace-normal break-words"
+                    title={trip.vehicle_plate || ''}
+                  >
+                    {trip.vehicle_plate || '—'}
+                  </button>
+                  {(vehicleRecords?.[trip.vehicle_plate]?.model || vehicleRecords?.[trip.vehicle_plate]?.vehicle_type) && (
+                    <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{vehicleRecords[trip.vehicle_plate].model || vehicleRecords[trip.vehicle_plate].vehicle_type}</div>
+                  )}
+                  <div className="mt-1.5 pt-1.5 border-t border-border/40">
+                    <button
+                      onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
+                      className="text-left text-foreground font-medium hover:text-primary transition-colors whitespace-normal break-words"
+                      title={trip.driver_name || ''}
+                    >
+                      {trip.driver_name || '—'}
+                    </button>
+                    {driverRecords?.[trip.driver_name]?.phone && (
+                      <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{driverRecords[trip.driver_name].phone}</div>
+                    )}
                   </div>
                   {trip.vendor_name && (
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0 mt-1" title={`Vendor: ${trip.vendor_name}`}>
@@ -469,6 +507,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
+                   {trip.delivery_note_number && (
+                     <div className="text-[10px] text-cyan-600 font-medium mt-0.5 flex items-center gap-1" title={`Delivery Note: ${trip.delivery_note_number}`}>
+                       <FileText className="w-2.5 h-2.5 shrink-0" />
+                       <span className="truncate">{trip.delivery_note_number}</span>
+                     </div>
+                   )}
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
@@ -482,7 +526,29 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    )}
                    </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
-                   <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                   <div className="relative group/fare inline-block">
+                     <div className="text-xs font-semibold font-mono tabular-nums text-foreground whitespace-normal break-words cursor-help">{trip.revenue != null ? Number(trip.revenue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}</div>
+                     {/* Fare breakdown hover preview */}
+                     <div className="invisible opacity-0 group-hover/fare:visible group-hover/fare:opacity-100 transition-all duration-200 absolute left-0 top-full mt-1 z-50 min-w-[180px] bg-white border border-border rounded-lg shadow-xl p-3 text-left">
+                       <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Fare Breakdown</div>
+                       <div className="space-y-1 text-[11px]">
+                         <div className="flex justify-between">
+                           <span className="text-muted-foreground">Base Fare</span>
+                           <span className="font-mono tabular-nums text-foreground">{Number(trip.base_fare || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                         </div>
+                         {(trip.add_ons || []).map((addon, i) => (
+                           <div key={i} className="flex justify-between">
+                             <span className="text-muted-foreground truncate max-w-[100px]">{addon.description || 'Add-on'}</span>
+                             <span className="font-mono tabular-nums text-foreground">+{Number(addon.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           </div>
+                         ))}
+                         <div className="border-t border-border/60 pt-1.5 mt-1.5 flex justify-between">
+                           <span className="font-semibold text-foreground">Total</span>
+                           <span className="font-mono tabular-nums font-bold text-primary">{Number(trip.revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
                  </TableCell>
                   {/* STATUS — workflow dropdown with conditional modals */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
@@ -513,11 +579,11 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               </TableRow>);
 
             })}
-            {visibleCount < trips.length && (
+            {visibleCount < searchedTrips.length && (
             <TableRow ref={sentinelRef} className="hover:bg-transparent">
              <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-3">
-               Loading more… ({visibleCount}/{trips.length})
-             </TableCell>
+                Loading more… ({visibleCount}/{searchedTrips.length})
+              </TableCell>
             </TableRow>
             )}
             </TableBody>
