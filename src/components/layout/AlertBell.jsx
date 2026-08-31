@@ -46,7 +46,7 @@ export default function AlertBell() {
 
   useEffect(() => {
     (async () => {
-      const [invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, settings] = await safeAll([
+      const [invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, vendorTransactions, settings] = await safeAll([
         () => base44.entities.Invoice.list('-created_date', 80).catch(() => []),
         () => base44.entities.Vehicle.list().catch(() => []),
         () => base44.entities.Document.list().catch(() => []),
@@ -54,9 +54,10 @@ export default function AlertBell() {
         () => base44.entities.Trip.list('-trip_date', 50).catch(() => []),
         () => base44.entities.ClientPayment.list('-created_date', 50).catch(() => []),
         () => base44.entities.CompanyDocument.list().catch(() => []),
+        () => base44.entities.VendorTransaction.list('-created_date', 50).catch(() => []),
         () => getCompanySettings().catch(() => ({})),
       ], 1);
-      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, companyName: settings?.company_name || 'Company' }));
+      setRawAlerts(buildAlerts({ invoices, vehicles, documents, drivers, trips, clientPayments, companyDocuments, vendorTransactions, companyName: settings?.company_name || 'Company' }));
     })();
   }, []);
 

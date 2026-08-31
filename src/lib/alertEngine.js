@@ -68,7 +68,7 @@ function docStatus(expiry) {
  * @returns {{alerts: [], byCategory: {}}}
  */
 export function buildAlerts(data) {
-  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [], companyDocuments = [], companyName = 'Company' } = data;
+  const { invoices = [], vehicles = [], documents = [], drivers = [], trips = [], clientPayments = [], companyDocuments = [], companyName = 'Company', vendorTransactions = [] } = data;
   const items = [];
 
   // ── Documents & Expiry ──────────────────────────────────────
@@ -254,6 +254,26 @@ export function buildAlerts(data) {
         to: '/accounts/invoices',
       })
     );
+
+  // Pending vendor payments (unpaid or partially paid)
+  vendorTransactions
+    .filter((vt) => vt.payment_status === 'unpaid' || vt.payment_status === 'partially_paid')
+    .forEach((vt) => {
+      const balance = (vt.amount || 0) - (vt.paid_amount || 0);
+      const days = daysUntil(vt.due_date);
+      const isOverdue = days !== null && days < 0;
+      const isDueSoon = days !== null && days >= 0 && days <= 7;
+      items.push({
+        id: `vpay-${vt.id}`,
+        category: 'payments',
+        icon: 'Receipt',
+        severity: isOverdue ? 'critical' : isDueSoon ? 'warning' : 'info',
+        title: isOverdue ? 'Vendor Payment Overdue' : 'Vendor Payment Pending',
+        sub: vt.vendor_name || '—',
+        meta: `${vt.trip_number || vt.description || ''} · ${balance.toFixed(0)} due${days !== null ? (days < 0 ? ` · ${Math.abs(days)}d ago` : ` · ${days}d left`) : ''}`,
+        to: '/admin/vendors',
+      });
+    });
 
   // ── Trips & Operations ──────────────────────────────────────
   const today = new Date();
