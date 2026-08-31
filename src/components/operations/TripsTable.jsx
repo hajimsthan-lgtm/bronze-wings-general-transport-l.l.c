@@ -67,6 +67,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
   const [copiedId, setCopiedId] = useState(null);
   const [selected, setSelected] = useState(new Set());
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [navConfirm, setNavConfirm] = useState(null);
 
   // Progressive rendering — only render a window of rows to keep the DOM
   // small when the transaction count grows. Selection / bulk actions / export
@@ -160,10 +161,10 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const goTo = (e, map, name, path) => {
+  const goTo = (e, map, name, path, label) => {
     e.stopPropagation();
     const id = map?.[name];
-    if (id) navigate(`${path}/${id}`);
+    if (id) setNavConfirm({ path: `${path}/${id}`, label: label || 'record' });
   };
 
   const toggleOne = (id) => {
@@ -423,7 +424,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top trips-grid-td">
                   <button
-                      onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients')}
+                      onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients', 'client')}
                       className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
                       title={trip.client_name}>
                     {trip.client_name?.toUpperCase() || '—'}
@@ -433,14 +434,14 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                 {/* VEHICLE + DRIVER + VENDOR — all hyperlinks */}
                 <TableCell className="text-xs font-mono align-top trips-grid-td">
                   <button
-                      onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles')}
+                      onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles', 'vehicle')}
                       className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
                       title="View vehicle">
                     {trip.vehicle_plate || '—'}
                   </button>
                   <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
                     <button
-                        onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers')}
+                        onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers', 'driver')}
                         className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block text-left whitespace-normal break-words leading-tight text-sm"
                         title="View driver">
                       {trip.driver_name || ''}
@@ -459,7 +460,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
                    {trip.delivery_note_number && (
-                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider text-white" style={{ background: 'rgb(var(--panel-accent2-rgb))', boxShadow: '0 0 12px -2px rgba(var(--panel-accent2-rgb),0.55)' }} title={`Delivery Note: DN#${trip.delivery_note_number}`}>
+                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/40" style={{ boxShadow: '0 0 10px -2px rgba(var(--panel-accent2-rgb),0.45)' }} title={`Delivery Note: DN#${trip.delivery_note_number}`}>
                        <FileText className="w-3 h-3" />
                        DN#{trip.delivery_note_number}
                      </div>
@@ -470,8 +471,8 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
                      {trip.to_location || '—'}
                    </div>
                    {trip.permit_required && trip.permit_name && (
-                     <div className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-red-500/15 text-red-400 border border-red-500/30" title={`Permit: ${trip.permit_name}`}>
-                       <Shield className="w-2.5 h-2.5" />
+                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40" title={`Permit: ${trip.permit_name}`}>
+                       <Shield className="w-3 h-3" />
                        {trip.permit_name}
                      </div>
                    )}
@@ -549,6 +550,24 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onSt
               onClick={() => {onDelete?.(deleteTarget);setDeleteTarget(null);}}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Navigation confirmation — don't leave the trips table without asking */}
+      <AlertDialog open={!!navConfirm} onOpenChange={(open) => !open && setNavConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Open {navConfirm?.label} page?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will leave the trips table and navigate to the {navConfirm?.label} detail page.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (navConfirm) navigate(navConfirm.path); setNavConfirm(null); }}>
+              Open
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
