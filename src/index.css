@@ -13,68 +13,68 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --background: 224 34% 8%;
-    --background-elevated: 224 30% 14%;
-    --card: 224 30% 11%;
-    --card-foreground: 210 30% 96%;
-    --foreground: 210 30% 96%;
-    --muted: 220 20% 16%;
-    --muted-foreground: 215 18% 65%;
-    --popover: 224 30% 11%;
-    --popover-foreground: 210 30% 96%;
-    --primary: 250 90% 68%;
-    --primary-light: 250 90% 74%;
-    --primary-foreground: 224 34% 10%;
-    --secondary: 220 20% 16%;
-    --secondary-foreground: 210 30% 96%;
-    --accent: 199 92% 60%;
-    --accent-foreground: 224 34% 10%;
+    --background: 215 32% 12%;
+    --background-elevated: 215 30% 17%;
+    --card: 215 30% 15%;
+    --card-foreground: 210 40% 95%;
+    --foreground: 210 40% 96%;
+    --muted: 215 25% 22%;
+    --muted-foreground: 214 20% 65%;
+    --popover: 215 30% 15%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 204 57% 52%;
+    --primary-light: 204 57% 60%;
+    --primary-foreground: 215 32% 12%;
+    --secondary: 215 25% 20%;
+    --secondary-foreground: 210 40% 96%;
+    --accent: 222 82% 35%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 250 90% 68%;
-    --magenta: 199 92% 60%;
+    --neon: 204 57% 52%;
+    --magenta: 222 82% 45%;
     --success: 160 70% 52%;
     --success-light: 160 70% 60%;
     --warning: 38 95% 60%;
     --danger: 0 84% 66%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 250 90% 68%;
-    --panel-accent-rgb: 146, 132, 215;
-    --panel-accent2-rgb: 59, 187, 247;
-    --surf-1-rgb: 20, 24, 37;
-    --surf-2-rgb: 14, 17, 27;
+    --border: 215 25% 24%;
+    --input: 215 25% 24%;
+    --ring: 204 57% 52%;
+    --panel-accent-rgb: 62, 146, 204;
+    --panel-accent2-rgb: 10, 36, 99;
+    --surf-1-rgb: 30, 41, 59;
+    --surf-2-rgb: 22, 30, 43;
     --radius: 1rem;
-    --chart-1: 250 84% 66%;
+    --chart-1: 204 57% 52%;
     --chart-2: 160 70% 52%;
-    --chart-3: 199 92% 60%;
+    --chart-3: 222 82% 45%;
     --chart-4: 38 95% 60%;
     --chart-5: 0 84% 66%;
-    --sidebar-background: 224 34% 10%;
-    --sidebar-foreground: 210 30% 96%;
-    --sidebar-primary: 250 90% 68%;
-    --sidebar-primary-foreground: 224 34% 10%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 30% 96%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 250 90% 68%;
-    --clay-bg: 224 30% 11%;
-    --clay-border: 220 20% 20%;
-    --clay-shadow-dark: 224 34% 4%;
-    --clay-shadow-light: 220 20% 16%;
+    --sidebar-background: 215 32% 10%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 204 57% 52%;
+    --sidebar-primary-foreground: 215 32% 12%;
+    --sidebar-accent: 215 25% 18%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 25% 20%;
+    --sidebar-ring: 204 57% 52%;
+    --clay-bg: 215 30% 15%;
+    --clay-border: 215 25% 22%;
+    --clay-shadow-dark: 215 32% 6%;
+    --clay-shadow-light: 215 25% 20%;
 
-    --app-bg: #0e111b;
-    --bg-canvas: #0e111b;
-    --panel-bg: linear-gradient(180deg, rgba(20,24,37,0.85) 0%, rgba(14,17,27,0.92) 100%);
-    --panel-border-color: rgba(146,132,215,0.18);
+    --app-bg: #1e293b;
+    --bg-canvas: #1e293b;
+    --panel-bg: linear-gradient(180deg, rgba(30,41,59,0.85) 0%, rgba(22,30,43,0.92) 100%);
+    --panel-border-color: rgba(62,146,204,0.18);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
     --panel-drop-shadow: 0 20px 60px rgba(0,0,0,0.55);
     --panel-blur: blur(20px) saturate(1.4);
-    --header-tint-1: rgba(14,17,27,0.12);
-    --header-tint-2: rgba(14,17,27,0.05);
+    --header-tint-1: rgba(22,30,43,0.12);
+    --header-tint-2: rgba(22,30,43,0.05);
     --nav-inactive: rgba(180,190,210,0.55);
-    --surf-1: rgba(20,24,37,0.85);
-    --surf-2: rgba(14,17,27,0.95);
+    --surf-1: rgba(30,41,59,0.85);
+    --surf-2: rgba(22,30,43,0.95);
     }
 
     .theme-light {
@@ -85,72 +85,72 @@
     --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    --background: 230 60% 98%;
-    --background-elevated: 230 40% 95%;
+    --background: 210 40% 98%;
+    --background-elevated: 214 32% 93%;
     --card: 0 0% 100%;
-    --card-foreground: 224 34% 14%;
-    --foreground: 224 34% 14%;
-    --muted: 230 40% 95%;
-    --muted-foreground: 220 14% 42%;
+    --card-foreground: 215 32% 17%;
+    --foreground: 215 32% 17%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 34% 14%;
-    --primary: 250 84% 60%;
-    --primary-light: 250 84% 66%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 40% 96%;
-    --secondary-foreground: 224 34% 14%;
-    --accent: 199 92% 56%;
-    --accent-foreground: 224 34% 14%;
+    --popover-foreground: 215 32% 17%;
+    --primary: 222 82% 21%;
+    --primary-light: 222 70% 30%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 215 32% 17%;
+    --accent: 204 57% 52%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 62%;
     --destructive-foreground: 0 0% 100%;
-    --neon: 250 84% 60%;
-    --magenta: 199 92% 56%;
+    --neon: 222 82% 35%;
+    --magenta: 204 57% 52%;
     --success: 160 70% 45%;
     --success-light: 160 70% 52%;
     --warning: 38 95% 55%;
     --danger: 0 84% 62%;
-    --border: 220 30% 90%;
-    --input: 220 30% 90%;
-    --ring: 250 84% 60%;
-    --panel-accent-rgb: 96, 67, 239;
-    --panel-accent2-rgb: 40, 181, 246;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 222 82% 21%;
+    --panel-accent-rgb: 10, 36, 99;
+    --panel-accent2-rgb: 62, 146, 204;
     --surf-1-rgb: 255, 255, 255;
     --surf-2-rgb: 248, 250, 252;
     --radius: 1rem;
-    --chart-1: 250 84% 60%;
+    --chart-1: 222 82% 35%;
     --chart-2: 160 70% 45%;
-    --chart-3: 199 92% 56%;
+    --chart-3: 204 57% 52%;
     --chart-4: 38 95% 55%;
     --chart-5: 0 84% 62%;
-    --sidebar-background: 230 50% 99%;
-    --sidebar-foreground: 224 34% 14%;
-    --sidebar-primary: 250 84% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 40% 95%;
-    --sidebar-accent-foreground: 224 34% 14%;
-    --sidebar-border: 220 30% 90%;
-    --sidebar-ring: 250 84% 60%;
+    --sidebar-background: 210 40% 99%;
+    --sidebar-foreground: 215 32% 17%;
+    --sidebar-primary: 222 82% 21%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 214 32% 93%;
+    --sidebar-accent-foreground: 215 32% 17%;
+    --sidebar-border: 214 32% 88%;
+    --sidebar-ring: 222 82% 21%;
     --clay-bg: 0 0% 100%;
-    --clay-border: 220 30% 90%;
-    --clay-shadow-dark: 220 14% 80%;
+    --clay-border: 214 32% 88%;
+    --clay-shadow-dark: 214 20% 80%;
     --clay-shadow-light: 0 0% 100%;
 
     --app-bg:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.12) 0%, transparent 55%),
       radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.80) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.55) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.60) 0%, transparent 55%),
-      #f0f8ff;
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
+      #f8fafc;
     --bg-canvas:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.85) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.12) 0%, transparent 55%),
       radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.90) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.80) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.55) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.60) 0%, transparent 55%),
-      #f0f8ff;
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
+      #f8fafc;
     --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(248, 250, 252, 0.82) 100%);
-    --panel-border-color: rgba(96,67,239,0.12);
+    --panel-border-color: rgba(10,36,99,0.12);
     --panel-inner-highlight: inset 0 1px 0 rgba(255,255,255,0.9);
     --panel-drop-shadow: 0 4px 16px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
     --panel-blur: blur(20px) saturate(1.6);
@@ -183,15 +183,15 @@
     background-attachment: fixed;
   }
 
-  /* Soft blue/white mesh gradient background — light mode */
+  /* Soft navy/sky mesh gradient background — light mode */
   .theme-light body {
     background:
-      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(174, 227, 248, 0.55) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 55% at 12% 35%, rgba(62, 146, 204, 0.10) 0%, transparent 55%),
       radial-gradient(ellipse 45% 75% at 50% 50%, rgba(255, 255, 255, 0.85) 0%, transparent 45%),
-      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(146, 212, 239, 0.50) 0%, transparent 55%),
-      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(188, 229, 245, 0.35) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(206, 234, 250, 0.40) 0%, transparent 55%),
-      #f0f8ff;
+      radial-gradient(ellipse 65% 55% at 88% 60%, rgba(10, 36, 99, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 120% 70% at 50% 110%, rgba(62, 146, 204, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 80% -5%, rgba(10, 36, 99, 0.04) 0%, transparent 55%),
+      #f8fafc;
     background-attachment: fixed;
   }
   #root { overscroll-behavior: none; }
