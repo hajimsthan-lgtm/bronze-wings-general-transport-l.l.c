@@ -57,8 +57,9 @@ export default function AppLayout() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                    className="p-0 pb-32 md:p-8 md:pb-16"
+                    className="relative p-0 pb-32 md:p-8 md:pb-16"
                   >
+                    <div className="page-shine-overlay" />
                     <Outlet />
                   </motion.div>
                 </AnimatePresence>

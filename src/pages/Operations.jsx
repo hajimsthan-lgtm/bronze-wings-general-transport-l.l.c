@@ -33,6 +33,7 @@ import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
 import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
+import { useAuth } from '@/lib/AuthContext';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -81,6 +82,7 @@ export default function Operations() {
 
   const { data: trips = [], isLoading: tripsLoading, refetch: refetchTrips } = useTrips();
   const deleteTrip = useTripDelete();
+  const { user } = useAuth();
   const { data: invoices = [], refetch: refetchInvoices } = useInvoices();
   const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
 
@@ -252,6 +254,24 @@ export default function Operations() {
   const openNewTrip = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
   const openNewContract = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
   const openEditTrip = (trip) => { setFormMode('trip'); setEditTrip(trip); setEditContract(null); setFormOpen(true); };
+  const handleDuplicateTrip = async (trip) => {
+    try {
+      const { id, created_date, updated_date, created_by_id, trip_number, status, status_source, status_updated_at, status_updated_by, cancellation_reason, cancelled_at, cancelled_by, deleted_at, ...rest } = trip;
+      const payload = {
+        ...rest,
+        status: 'scheduled',
+        status_source: 'manual',
+        status_updated_at: new Date().toISOString(),
+        status_updated_by: user?.full_name || user?.email || 'User',
+        is_draft: true,
+      };
+      await base44.entities.Trip.create(payload);
+      toast({ title: 'Trip duplicated', description: 'A draft copy has been created — edit and publish it.' });
+      refetchTrips();
+    } catch {
+      toast({ title: 'Duplicate failed', variant: 'destructive' });
+    }
+  };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
   const handleContinueDraft = (draft) => { openEditTrip(draft); };
   const handleDeleteDraft = async (draft) => { await base44.entities.Trip.update(draft.id, { deleted_at: new Date().toISOString() }); refetchTrips(); };
@@ -504,7 +524,7 @@ export default function Operations() {
                   {viewMode === 'card'
                     ? tripGrid(filteredTrips)
                     : viewMode === 'table'
-                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDuplicate={handleDuplicateTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
                     : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
                 </CollapsibleSection>
               )

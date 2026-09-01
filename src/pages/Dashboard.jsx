@@ -21,6 +21,7 @@ import PremiumCard from '@/components/dashboard/premium/PremiumCard';
 import HeroMetricCard from '@/components/dashboard/premium/HeroMetricCard';
 import StatTilesCard from '@/components/dashboard/premium/StatTilesCard';
 import PerformanceChart from '@/components/dashboard/premium/PerformanceChart';
+import RevenueExpenseChart from '@/components/dashboard/premium/RevenueExpenseChart';
 import TripsTableCard from '@/components/dashboard/premium/TripsTableCard';
 import InvoicesListCard from '@/components/dashboard/premium/InvoicesListCard';
 import TripsStatusCard from '@/components/dashboard/TripsStatusCard';
@@ -308,6 +309,9 @@ export default function Dashboard() {
 
         {/* Performance chart — full width */}
         <PerformanceChart data={revData} range={range} setRange={setRange} />
+
+        {/* Revenue vs Expenses — monthly comparison */}
+        <RevenueExpenseChart trips={trips} expenses={expenses} />
 
         {/* Fleet status breakdown — full width */}
         <FleetStatusBreakdown vehicles={vehicles} />
