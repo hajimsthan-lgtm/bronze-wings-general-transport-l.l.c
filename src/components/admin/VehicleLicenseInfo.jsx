@@ -5,7 +5,7 @@ import { hexToRgba } from '@/components/reports/ReportStatCard';
  * Parses the vehicle `notes` field (a "Label: value" text block generated
  * from the AI license scan) into a structured key→value object.
  */
-function parseLicenseNotes(notes = '') {
+export function parseLicenseNotes(notes = '') {
   const map = {};
   notes.split('\n').forEach((line) => {
     const idx = line.indexOf(':');
@@ -17,7 +17,7 @@ function parseLicenseNotes(notes = '') {
   return map;
 }
 
-const SECTIONS = [
+export const LICENSE_SECTIONS = [
   {
     id: 'registration', icon: FileText, title: 'Registration', accent: '#0ea5e9',
     fields: [
@@ -106,7 +106,7 @@ export default function VehicleLicenseInfo({ notes }) {
 
   return (
     <div className="space-y-3">
-      {SECTIONS.map((s) => (
+      {LICENSE_SECTIONS.map((s) => (
         <SectionBlock key={s.id} icon={s.icon} title={s.title} accent={s.accent} fields={s.fields} data={data} />
       ))}
     </div>

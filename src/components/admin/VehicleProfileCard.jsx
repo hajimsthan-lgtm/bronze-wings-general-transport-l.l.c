@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import {
   Truck, Fuel as FuelIcon, CreditCard, CalendarClock, ShieldCheck, Wrench,
-  CalendarDays, StickyNote, Pencil, Phone, Mail, IdCard, User, BadgeCheck,
+  CalendarDays, Pencil, Phone, Mail, IdCard, User, BadgeCheck,
   Hash, Gauge, UserCheck,
 } from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
 import VehicleEditModal from '@/components/admin/VehicleEditModal';
-import VehicleLicenseInfo from '@/components/admin/VehicleLicenseInfo';
+import { parseLicenseNotes, LICENSE_SECTIONS } from '@/components/admin/VehicleLicenseInfo';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
@@ -97,6 +97,19 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
     driver?.license_expiry && { icon: CalendarClock, tone: 'text-amber-400', label: 'License Expiry', value: formatDate(driver.license_expiry), toneValue: expiryTone(driver.license_expiry) },
   ].filter(Boolean);
 
+  const licenseGroups = (() => {
+    if (!vehicle.notes) return [];
+    const data = parseLicenseNotes(vehicle.notes);
+    if (!Object.keys(data).length) return [];
+    return LICENSE_SECTIONS.map((sec) => {
+      const rows = sec.fields
+        .filter((f) => data[f.key])
+        .map((f) => ({ icon: Hash, tone: 'text-violet-400', label: f.label, value: data[f.key] }));
+      if (!rows.length) return null;
+      return { id: sec.id, icon: sec.icon, title: sec.title, rows };
+    }).filter(Boolean);
+  })();
+
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
       {/* header band */}
@@ -172,18 +185,13 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
             {driverRows.map((r, i) => <Row key={i} {...r} />)}
           </Group>
         )}
-      </div>
 
-      {/* scanned license data footer */}
-      {vehicle.notes && (
-        <div className="mx-5 mb-5 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.06) }}>
-          <div className="flex items-center gap-2 mb-2">
-            <StickyNote className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Scanned License Data</span>
-          </div>
-          <VehicleLicenseInfo notes={vehicle.notes} />
-        </div>
-      )}
+        {licenseGroups.map((g) => (
+          <Group key={g.id} icon={g.icon} tone="text-violet-400" title={g.title}>
+            {g.rows.map((r, i) => <Row key={i} {...r} />)}
+          </Group>
+        ))}
+      </div>
 
       <VehicleEditModal open={editOpen} onOpenChange={setEditOpen} vehicle={vehicle} onSaved={onSaved} />
     </div>
