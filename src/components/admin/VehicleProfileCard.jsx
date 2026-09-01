@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Truck, Fuel as FuelIcon, CreditCard, CalendarClock, ShieldCheck, Wrench, CalendarDays, StickyNote, Pencil, Phone, Mail, IdCard, User, BadgeCheck, Hash, Gauge, Cog, UserCheck } from 'lucide-react';
+import {
+  Truck, Fuel as FuelIcon, CreditCard, CalendarClock, ShieldCheck, Wrench,
+  CalendarDays, StickyNote, Pencil, Phone, Mail, IdCard, User, BadgeCheck,
+  Hash, Gauge, UserCheck,
+} from 'lucide-react';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -8,8 +12,12 @@ import VehicleLicenseInfo from '@/components/admin/VehicleLicenseInfo';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 
-const initialsOf = (name = '') =>
-  name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?';
+const ACCENT = '#1ED760';
+const CARD_BASE = {
+  ['--row-accent']: ACCENT,
+  borderTop: `3px solid ${ACCENT}`,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
+};
 
 const expiryTone = (d) => {
   if (!d) return 'text-muted-foreground';
@@ -19,19 +27,44 @@ const expiryTone = (d) => {
   return d <= soon ? 'text-amber-400' : 'text-foreground';
 };
 
-const statusDot = (status) =>
-  status === 'active' ? '#34d399' : status === 'maintenance' ? '#f59e0b' : '#94a3b8';
+const statusDot = (s) => (s === 'active' ? '#34d399' : s === 'maintenance' ? '#f59e0b' : '#94a3b8');
 
-const CARD_BASE = {
-  ['--row-accent']: '#1ED760',
-  borderTop: '3px solid #1ED760',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 18px rgba(0,0,0,0.3)',
-};
+/* ── Reusable info row ── */
+function Row({ icon: Icon, tone, label, value, toneValue, href }) {
+  const body = (
+    <>
+      <Icon className={`w-3.5 h-3.5 ${tone} flex-shrink-0`} />
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`ml-auto font-semibold tabular-nums truncate ${toneValue || 'text-foreground'}`}>{value}</span>
+    </>
+  );
+  const cls = 'flex items-center gap-2.5 text-xs';
+  return href ? (
+    <a href={href} className={`${cls} hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors`}>{body}</a>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
+}
+
+/* ── Sub-section header ── */
+function Group({ icon: Icon, tone, title, action, children }) {
+  return (
+    <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className={`w-3.5 h-3.5 ${tone} flex-shrink-0`} />
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{title}</span>
+        {action}
+      </div>
+      <div className="space-y-2.5">{children}</div>
+    </div>
+  );
+}
 
 export default function VehicleProfileCard({ vehicle, license, driver, stats, onSaveOwnership, onSaved }) {
-  const vehicleType = license?.vehicleType || [vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle';
   const [editOpen, setEditOpen] = useState(false);
   const [showOwnership, setShowOwnership] = useState(false);
+
+  const vehicleType = license?.vehicleType || [vehicle.make, vehicle.model].filter(Boolean).join(' ') || 'Vehicle';
 
   const statsList = [
     { label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km`, accent: '#4ADE80' },
@@ -40,14 +73,38 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
     { label: 'Revenue', value: formatCurrency(stats?.revenue ?? 0), accent: '#34d399' },
   ];
 
+  const baseRows = [
+    { icon: Hash, tone: 'text-primary', label: 'Plate', value: <PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} />, toneValue: '' },
+    { icon: Truck, tone: 'text-sky-400', label: 'Make / Model', value: [vehicle.make, vehicle.model].filter(Boolean).join(' ') || '—' },
+    vehicle.year && { icon: CalendarDays, tone: 'text-violet-400', label: 'Year', value: vehicle.year },
+    { icon: FuelIcon, tone: 'text-amber-400', label: 'Fuel Type', value: vehicle.fuel_type || '—' },
+    { icon: Gauge, tone: 'text-emerald-400', label: 'Odometer', value: `${Number(vehicle.odometer_km || 0).toLocaleString()} km` },
+    vehicle.assigned_driver && { icon: UserCheck, tone: 'text-sky-400', label: 'Assigned Driver', value: vehicle.assigned_driver },
+    vehicle.vendor_name && { icon: User, tone: 'text-rose-400', label: 'Vendor', value: vehicle.vendor_name },
+  ].filter(Boolean);
+
+  const complianceRows = [
+    { icon: CalendarClock, tone: 'text-emerald-400', label: 'Registration', value: formatDate(vehicle.registration_expiry) || '—', toneValue: expiryTone(vehicle.registration_expiry) },
+    { icon: ShieldCheck, tone: 'text-emerald-400', label: 'Insurance', value: formatDate(vehicle.insurance_expiry) || '—', toneValue: expiryTone(vehicle.insurance_expiry) },
+    { icon: Wrench, tone: 'text-amber-400', label: 'Last Service', value: formatDate(vehicle.last_service_date) || '—' },
+    { icon: CalendarDays, tone: 'text-violet-400', label: 'Next Service', value: formatDate(vehicle.next_service_date) || '—', toneValue: expiryTone(vehicle.next_service_date) },
+  ];
+
+  const driverRows = [
+    driver?.phone && { icon: Phone, tone: 'text-emerald-400', label: 'Phone', value: driver.phone, href: `tel:${driver.phone}` },
+    driver?.email && { icon: Mail, tone: 'text-sky-400', label: 'Email', value: driver.email, href: `mailto:${driver.email}` },
+    driver?.license_number && { icon: IdCard, tone: 'text-violet-400', label: 'License #', value: driver.license_number },
+    driver?.license_expiry && { icon: CalendarClock, tone: 'text-amber-400', label: 'License Expiry', value: formatDate(driver.license_expiry), toneValue: expiryTone(driver.license_expiry) },
+  ].filter(Boolean);
+
   return (
     <div className="glass-card relative overflow-hidden row-edge-glow animate-fade-in-up" style={CARD_BASE}>
       {/* header band */}
-      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba('#1ED760', 0.10)} 0%, transparent 100%)` }}>
-        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba('#1ED760', 0.5)} 0%, transparent 70%)` }} />
+      <div className="relative px-5 pt-5 pb-4 border-b border-white/[0.06]" style={{ background: `linear-gradient(135deg, ${hexToRgba(ACCENT, 0.10)} 0%, transparent 100%)` }}>
+        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full pointer-events-none opacity-25" style={{ background: `radial-gradient(circle, ${hexToRgba(ACCENT, 0.5)} 0%, transparent 70%)` }} />
         <div className="relative flex items-center gap-3">
           <div className="relative flex-shrink-0">
-            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(30,215,96,0.40) 0%, transparent 70%)' }} />
+            <div className="absolute -inset-1 rounded-xl animate-halo pointer-events-none" style={{ background: `radial-gradient(circle, ${hexToRgba(ACCENT, 0.40)} 0%, transparent 70%)` }} />
             <div className="relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 bg-muted/40 flex items-center justify-center">
               {vehicle.image_url
                 ? <img src={vehicle.image_url} alt="" className="w-full h-full object-cover" />
@@ -86,154 +143,38 @@ export default function VehicleProfileCard({ vehicle, license, driver, stats, on
 
       {/* info rows */}
       <div className="px-5 py-4 space-y-2.5">
-        {/* Plate badge */}
-        <div className="flex items-center gap-2.5 text-xs">
-          <Hash className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-          <span className="text-muted-foreground">Plate</span>
-          <span className="ml-auto"><PlateBadge plate={vehicle.plate_number} holder={vehicle.assigned_driver} /></span>
-        </div>
+        {baseRows.map((r, i) => <Row key={i} {...r} />)}
 
-        {/* Make / Model */}
-        <div className="flex items-center gap-2.5 text-xs">
-          <Truck className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-          <span className="text-muted-foreground">Make / Model</span>
-          <span className="ml-auto font-semibold text-foreground truncate">{[vehicle.make, vehicle.model].filter(Boolean).join(' ') || '—'}</span>
-        </div>
+        <Group icon={ShieldCheck} tone="text-emerald-400" title="Compliance & Service">
+          {complianceRows.map((r, i) => <Row key={i} {...r} />)}
+        </Group>
 
-        {/* Year */}
-        {vehicle.year && (
-          <div className="flex items-center gap-2.5 text-xs">
-            <CalendarDays className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-            <span className="text-muted-foreground">Year</span>
-            <span className="ml-auto font-semibold text-foreground tabular-nums">{vehicle.year}</span>
-          </div>
-        )}
-
-        {/* Fuel type */}
-        <div className="flex items-center gap-2.5 text-xs">
-          <FuelIcon className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-          <span className="text-muted-foreground">Fuel Type</span>
-          <span className="ml-auto font-semibold text-foreground capitalize">{vehicle.fuel_type || '—'}</span>
-        </div>
-
-        {/* Odometer */}
-        <div className="flex items-center gap-2.5 text-xs">
-          <Gauge className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-          <span className="text-muted-foreground">Odometer</span>
-          <span className="ml-auto font-semibold text-foreground tabular-nums">{Number(vehicle.odometer_km || 0).toLocaleString()} km</span>
-        </div>
-
-        {/* Assigned driver */}
-        {vehicle.assigned_driver && (
-          <div className="flex items-center gap-2.5 text-xs">
-            <UserCheck className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-            <span className="text-muted-foreground">Assigned Driver</span>
-            <span className="ml-auto font-semibold text-foreground truncate">{vehicle.assigned_driver}</span>
-          </div>
-        )}
-
-        {/* Vendor */}
-        {vehicle.vendor_name && (
-          <div className="flex items-center gap-2.5 text-xs">
-            <User className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
-            <span className="text-muted-foreground">Vendor</span>
-            <span className="ml-auto font-semibold text-foreground truncate">{vehicle.vendor_name}</span>
-          </div>
-        )}
-
-        {/* Compliance Dates sub-section */}
-        <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
-          <div className="flex items-center gap-2 mb-2">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Compliance & Service</span>
-          </div>
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-2.5 text-xs">
-              <CalendarClock className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-              <span className="text-muted-foreground">Registration</span>
-              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.registration_expiry)}`}>{formatDate(vehicle.registration_expiry) || '—'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-xs">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-              <span className="text-muted-foreground">Insurance</span>
-              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.insurance_expiry)}`}>{formatDate(vehicle.insurance_expiry) || '—'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-xs">
-              <Wrench className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-              <span className="text-muted-foreground">Last Service</span>
-              <span className="ml-auto font-semibold text-foreground tabular-nums truncate">{formatDate(vehicle.last_service_date) || '—'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-xs">
-              <CalendarDays className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-              <span className="text-muted-foreground">Next Service</span>
-              <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(vehicle.next_service_date)}`}>{formatDate(vehicle.next_service_date) || '—'}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Ownership Card sub-section */}
-        <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
-          <div className="flex items-center gap-2 mb-2">
-            <CreditCard className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Ownership Card</span>
-            <button
-              onClick={() => setShowOwnership((s) => !s)}
-              className="ml-auto text-[10px] text-primary hover:underline"
-            >
+        <Group
+          icon={CreditCard}
+          tone="text-violet-400"
+          title="Ownership Card"
+          action={
+            <button onClick={() => setShowOwnership((s) => !s)} className="ml-auto text-[10px] text-primary hover:underline">
               {showOwnership ? 'Hide' : 'Show'}
             </button>
-          </div>
+          }
+        >
           {showOwnership && (
             <div className="animate-fade-in">
               <OwnershipCard front={vehicle.ownership_front_url} back={vehicle.ownership_back_url} onChange={onSaveOwnership} />
               <p className="text-[10px] text-muted-foreground mt-2">Attach front &amp; back (JPG/PNG). Use the flip icon to switch sides.</p>
             </div>
           )}
-        </div>
+        </Group>
 
-        {/* Driver Details sub-section */}
-        {driver && (driver.phone || driver.email || driver.license_number) && (
-          <div className="pt-2.5 mt-1 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2 mb-2">
-              <User className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Driver Details</span>
-              {driver.name && <span className="text-xs text-muted-foreground truncate ml-1">· {driver.name}</span>}
-            </div>
-            <div className="space-y-2.5">
-              {driver.phone && (
-                <a href={`tel:${driver.phone}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
-                  <Phone className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                  <span className="text-muted-foreground">Phone</span>
-                  <span className="ml-auto font-semibold text-foreground truncate">{driver.phone}</span>
-                </a>
-              )}
-              {driver.email && (
-                <a href={`mailto:${driver.email}`} className="flex items-center gap-2.5 text-xs hover:bg-white/[0.03] -mx-1 px-1 py-1 rounded-lg transition-colors">
-                  <Mail className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
-                  <span className="text-muted-foreground">Email</span>
-                  <span className="ml-auto font-semibold text-foreground truncate">{driver.email}</span>
-                </a>
-              )}
-              {driver.license_number && (
-                <div className="flex items-center gap-2.5 text-xs">
-                  <IdCard className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-                  <span className="text-muted-foreground">License #</span>
-                  <span className="ml-auto font-semibold text-foreground truncate">{driver.license_number}</span>
-                </div>
-              )}
-              {driver.license_expiry && (
-                <div className="flex items-center gap-2.5 text-xs">
-                  <CalendarClock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                  <span className="text-muted-foreground">License Expiry</span>
-                  <span className={`ml-auto font-semibold tabular-nums truncate ${expiryTone(driver.license_expiry)}`}>{formatDate(driver.license_expiry)}</span>
-                </div>
-              )}
-            </div>
-          </div>
+        {driverRows.length > 0 && (
+          <Group icon={User} tone="text-sky-400" title="Driver Details" action={driver?.name && <span className="text-xs text-muted-foreground truncate ml-1">· {driver.name}</span>}>
+            {driverRows.map((r, i) => <Row key={i} {...r} />)}
+          </Group>
         )}
       </div>
 
-      {/* Scanned license data footer */}
+      {/* scanned license data footer */}
       {vehicle.notes && (
         <div className="mx-5 mb-5 rounded-xl p-3 border border-white/[0.06]" style={{ background: hexToRgba('#a855f7', 0.06) }}>
           <div className="flex items-center gap-2 mb-2">
