@@ -49,7 +49,7 @@ export default function QuickActions() {
             transition={{ duration: 0.4, delay: 0.55 + i * 0.05 }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+            className="shine-sweep group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
             style={CARD}
           >
             <IconBox a={a} />
@@ -67,7 +67,7 @@ export default function QuickActions() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 sm:py-4 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+                className="shine-sweep group relative flex items-center gap-2.5 sm:gap-3 px-3 sm:px-5 py-3 sm:py-4 rounded-2xl w-full overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
                 style={CARD}
               >
                 <IconBox a={INVOICE} />

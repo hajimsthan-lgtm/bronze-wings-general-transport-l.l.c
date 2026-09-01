@@ -30,10 +30,12 @@ import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
-import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch } from '@/lib/operationsFilterStore';
+import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
 import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
+import { getCompanySettings } from '@/lib/companySettings';
 import { useAuth } from '@/lib/AuthContext';
+import TripDebuggerModal from '@/components/operations/TripDebuggerModal';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -103,6 +105,9 @@ export default function Operations() {
   const [vehicleMap, setVehicleMap] = useState({});
   const [clientMap, setClientMap] = useState({});
   const [clientsList, setClientsList] = useState([]);
+  const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
+  const [debuggerOpen, setDebuggerOpen] = useState(false);
+  const opsBulk = useOpsBulk();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [formOpen, setFormOpen] = useState(false);
@@ -164,6 +169,9 @@ export default function Operations() {
   }, []);
 
   useEffect(() => { (async () => { await loadContracts(); await loadMaps(); })(); }, [loadContracts, loadMaps]);
+
+  // Load company settings once (needed for vendor-rate validation in debugger)
+  useEffect(() => { getCompanySettings().then(setCompanySettings); }, []);
 
   // One-time migration of old statuses (in_transit → trip_started)
   const didMigration = useRef(false);
@@ -412,7 +420,9 @@ export default function Operations() {
       },
       onImported: () => { refetchTrips(); refetchInvoices(); },
     });
-    return () => clearOpsFilter();
+    // Debugger is only relevant for trips (not contracts)
+    setOpsDebug(mode !== 'contract' ? { onRun: () => setDebuggerOpen(true) } : null);
+    return () => { clearOpsFilter(); setOpsDebug(null); };
   }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
@@ -593,6 +603,20 @@ export default function Operations() {
         description={`${pendingBulkIds.length} trip${pendingBulkIds.length !== 1 ? 's' : ''} will be moved to trash. You can restore them later.`}
         confirmLabel="Move to Trash"
         count={pendingBulkIds.length}
+      />
+
+      {/* Data-integrity Debugger */}
+      <TripDebuggerModal
+        open={debuggerOpen}
+        onOpenChange={setDebuggerOpen}
+        allTrips={filteredTrips}
+        selectedTrips={opsBulk?.selectedTrips || []}
+        driverMap={driverMap}
+        vehicleMap={vehicleMap}
+        clientMap={clientMap}
+        companySettings={companySettings}
+        onOpenTrip={openDetailTrip}
+        onFixed={refetchTrips}
       />
 
     </div>

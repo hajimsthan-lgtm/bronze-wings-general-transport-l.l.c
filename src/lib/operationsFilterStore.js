@@ -10,6 +10,7 @@ let state = {
   exportConfig: null,
   onImported: null,
   bulk: null,
+  debug: null,
 };
 const listeners = new Set();
 
@@ -28,7 +29,14 @@ export function setOpsSearch(value) {
 }
 
 export function clearOpsFilter() {
-  state = { active: false, options: [], value: 'all', counts: {}, search: '', mode: 'all', exportConfig: null, onImported: null, bulk: null };
+  state = { active: false, options: [], value: 'all', counts: {}, search: '', mode: 'all', exportConfig: null, onImported: null, bulk: null, debug: null };
+  emit();
+}
+
+// Debugger trigger — published by the Operations page so the OpsSubBar
+// toolbar can open the data-integrity scanner without prop drilling.
+export function setOpsDebug(debug) {
+  state = { ...state, debug };
   emit();
 }
 
