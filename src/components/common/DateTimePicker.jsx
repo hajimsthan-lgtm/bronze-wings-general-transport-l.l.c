@@ -140,6 +140,9 @@ export default function DateTimePicker({
   disabled,
   className,
   placeholder: _placeholder, // mask replaces placeholder
+  required,
+  id,
+  name,
 }) {
   const { dir } = useI18n();
   const cfg = MODE_CFG[mode];
@@ -507,6 +510,9 @@ export default function DateTimePicker({
             aria-label={mode === 'date' ? 'Date' : 'Date and time'}
             spellCheck={false}
             autoComplete="off"
+            id={id}
+            name={name}
+            required={required}
             className={cn(
               'w-full h-10 rounded-xl border bg-input px-3 py-1 text-sm font-mono tabular-nums leading-none transition-all duration-200',
               'text-transparent caret-foreground',

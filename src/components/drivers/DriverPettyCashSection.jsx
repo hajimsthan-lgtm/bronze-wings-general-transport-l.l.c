@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import CollapsibleSection from '@/components/common/CollapsibleSection';
 import EmptyState from '@/components/common/EmptyState';
@@ -344,10 +345,9 @@ export default function DriverPettyCashSection({ driver }) {
             </div>
             <div>
               <Label className="mb-1.5 block">Date</Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={editForm.date}
-                onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))}
+                onChange={(v) => setEditForm((f) => ({ ...f, date: v }))}
                 required
               />
             </div>
@@ -417,10 +417,9 @@ export default function DriverPettyCashSection({ driver }) {
             </div>
             <div>
               <Label className="mb-1.5 block">Date</Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={topUpForm.date}
-                onChange={(e) => setTopUpForm((f) => ({ ...f, date: e.target.value }))}
+                onChange={(v) => setTopUpForm((f) => ({ ...f, date: v }))}
                 required
               />
             </div>

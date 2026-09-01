@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Clock, Loader2 } from 'lucide-react';
 
@@ -88,10 +89,9 @@ export default function EndTripDialog({ trip, open, onOpenChange, onConfirm }) {
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">
                 Offload Date <span className="text-red-400">*</span>
               </Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={offloadDate}
-                onChange={(e) => { setOffloadDate(e.target.value); setError(''); }}
+                onChange={(v) => { setOffloadDate(v); setError(''); }}
                 className="bg-input border-border"
                 autoFocus
               />

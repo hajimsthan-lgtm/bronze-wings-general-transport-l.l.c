@@ -1,6 +1,7 @@
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { DollarSign, CalendarClock, StickyNote, CreditCard } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
@@ -42,7 +43,7 @@ export default function VendorPaymentFields({ p }) {
       </div>
       <div>
         <Label className="text-xs text-white/60 mb-1.5">Due Date (optional)</Label>
-        <IconInput icon={CalendarClock} type="date" value={form.vendor_due_date} onChange={(e) => update('vendor_due_date', e.target.value)} className={inputCls} />
+        <DatePicker value={form.vendor_due_date} onChange={(v) => update('vendor_due_date', v)} className={inputCls} />
       </div>
       <div>
         <Label className="text-xs text-white/60 mb-1.5">Notes / Reference</Label>

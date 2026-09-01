@@ -3,6 +3,7 @@ import { Loader2, Receipt, Layers, RefreshCw, PencilLine } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency } from '@/lib/formatters';
@@ -271,7 +272,7 @@ export default function BulkPaymentModal({ invoices, open, onOpenChange, onConfi
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Payment Date</Label>
-              <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1" />
+              <DatePicker value={date} onChange={v => setDate(v)} className="mt-1" />
             </div>
             <div>
               <Label className="text-xs">Payment Mode</Label>

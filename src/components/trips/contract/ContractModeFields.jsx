@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -123,11 +124,11 @@ export default function ContractModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('start_date')}</Label>
-            <Input type="date" value={contract.start_date} onChange={(e) => updateContract('start_date', e.target.value)} className={`${inputCls} date-input-clean`} />
+            <DatePicker value={contract.start_date} onChange={(v) => updateContract('start_date', v)} className={`${inputCls} date-input-clean`} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('end_date')}</Label>
-            <Input type="date" value={contract.end_date} onChange={(e) => updateContract('end_date', e.target.value)} className={`${inputCls} date-input-clean`} />
+            <DatePicker value={contract.end_date} onChange={(v) => updateContract('end_date', v)} className={`${inputCls} date-input-clean`} />
           </div>
         </div>
         <div className="flex items-center justify-between glass-card p-3">
@@ -161,7 +162,7 @@ export default function ContractModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('usage_date') || 'Usage Date'}</Label>
-            <Input type="date" value={contract.usage_date || ''} onChange={(e) => updateContract('usage_date', e.target.value)} className={`${inputCls} date-input-clean`} />
+            <DatePicker value={contract.usage_date || ''} onChange={(v) => updateContract('usage_date', v)} className={`${inputCls} date-input-clean`} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('usage_hours') || 'Hours'}</Label>

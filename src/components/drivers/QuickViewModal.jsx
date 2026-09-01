@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { Table, FileText, Calendar } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import DatePicker from '@/components/common/DatePicker';
 
 function startOfWeek() {
   const d = new Date();
@@ -76,9 +77,9 @@ export default function QuickViewModal({
         <div className="px-5 py-3 flex flex-wrap items-center gap-2 border-b border-border bg-muted/20 flex-shrink-0">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-            <input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPreset('Custom'); }} className="bg-transparent text-xs text-foreground border border-border rounded-lg px-2 py-1" />
+            <DatePicker value={from} onChange={(v) => { setFrom(v); setPreset('Custom'); }} className="text-xs" />
             <span className="text-muted-foreground text-xs">→</span>
-            <input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPreset('Custom'); }} className="bg-transparent text-xs text-foreground border border-border rounded-lg px-2 py-1" />
+            <DatePicker value={to} onChange={(v) => { setTo(v); setPreset('Custom'); }} className="text-xs" />
           </div>
           <div className="flex gap-1">
             {PRESETS.map((p) => (

@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { Table, FileText, Calendar } from 'lucide-react';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import DatePicker from '@/components/common/DatePicker';
 
 export default function RecordsViewerSheet({ open, onOpenChange, title, icon: Icon, accent = '#1ED760', records = [], columns = [], renderRow, dateField = 'date', filename = 'records', onPdfExport }) {
   const [from, setFrom] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0]; });
@@ -44,9 +45,9 @@ export default function RecordsViewerSheet({ open, onOpenChange, title, icon: Ic
         <div className="px-5 py-3 flex flex-wrap items-center gap-2 border-b border-border bg-muted/20">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="bg-transparent text-xs text-foreground border border-border rounded-lg px-2 py-1" />
+            <DatePicker value={from} onChange={(v) => setFrom(v)} className="text-xs" />
             <span className="text-muted-foreground text-xs">→</span>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="bg-transparent text-xs text-foreground border border-border rounded-lg px-2 py-1" />
+            <DatePicker value={to} onChange={(v) => setTo(v)} className="text-xs" />
           </div>
           <div className="ml-auto flex gap-1.5">
             <button onClick={handleCsv} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-medium text-foreground hover:bg-white/10 transition-colors"><Table className="w-3 h-3" /> CSV</button>
