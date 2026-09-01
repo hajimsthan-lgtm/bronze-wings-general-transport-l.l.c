@@ -49,6 +49,7 @@ export const navItems = [
       { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: 'ClipboardList', color: '#fbbf24' },
       { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: 'TrendingUp', color: '#22c55e' },
       { key: 'soa', label: 'SOA', path: '/reports/soa', icon: 'FileText', color: '#ef4444' },
+      { key: 'documents', label: 'Documents', path: '/admin/documents', icon: 'Files', color: '#0ea5e9' },
       { key: 'company_documents', label: 'Bronze Docs', path: '/admin/company-documents', icon: 'Award', color: '#f59e0b' },
     ],
   },

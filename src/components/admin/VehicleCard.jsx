@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock, ChevronDown, FileText, ArrowRight } from 'lucide-react';
+import { MoreVertical, Pencil, Trash2, ExternalLink, Tag, Fuel as FuelIcon, CalendarClock, ChevronDown, FileText, ArrowRight, Truck } from 'lucide-react';
 import CardChip from '@/components/admin/CardChip';
 import PlateBadge from '@/components/common/PlateBadge';
 import OwnershipCard from '@/components/common/OwnershipCard';
@@ -54,8 +54,13 @@ export default function VehicleCard({ v, onOpen, onEdit, onDelete, onOwnershipCh
       </div>
       <div className="entity-accent-blob absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-15" style={{ background: ACCENT }} />
 
-      <div className="relative flex items-start justify-between">
-        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 truncate">{v.type || 'Vehicle'}</span>
+      <div className="relative flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--panel-accent-rgb),0.10)', border: '1px solid rgba(var(--panel-accent-rgb),0.18)' }}>
+            {v.image_url ? <img src={v.image_url} alt="" className="w-full h-full object-cover" /> : <Truck className="w-4 h-4 text-muted-foreground" />}
+          </div>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 truncate">{v.type || 'Vehicle'}</span>
+        </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <span className="status-pill inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-medium" style={{ '--status-color': dot, background: `${dot}1a`, border: `1px solid ${dot}40`, color: dot }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot, boxShadow: `0 0 6px ${dot}` }} />

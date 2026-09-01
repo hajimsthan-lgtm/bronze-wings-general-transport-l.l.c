@@ -18,13 +18,13 @@ const ICONS = {
 
 // Compliance / KYC items (always present, mixed with live fleet alerts)
 const COMPLIANCE_ITEMS = [
-  { id: 'comp-bank', icon: 'Building2', severity: 'info', title: 'Bank Account', sub: 'Verify bank details', meta: 'KYC', to: '/settings', color: '#E8C0C0' },
-  { id: 'comp-own', icon: 'ShieldCheck', severity: 'info', title: 'Ownership', sub: 'Vehicle ownership docs', meta: 'Due', to: '/admin/vehicles', color: '#6B9BD9' },
-  { id: 'comp-sof', icon: 'Banknote', severity: 'info', title: 'Source of Funds', sub: 'Payment verification', meta: 'KYC', to: '/accounts/invoices', color: '#D1A687' },
-  { id: 'comp-idv', icon: 'UserCheck', severity: 'info', title: 'Identity Verification', sub: 'Driver ID & visa check', meta: 'Due', to: '/admin/drivers', color: '#8A56E0' },
-  { id: 'comp-rep', icon: 'Users', severity: 'info', title: 'Representatives', sub: 'Authorized signatories', meta: 'KYC', to: '/admin/clients', color: '#78B1CA' },
-  { id: 'comp-ubo', icon: 'Users', severity: 'info', title: 'UBO', sub: 'Ultimate beneficial owner', meta: 'KYC', to: '/admin/clients', color: '#98C988' },
-  { id: 'comp-aml', icon: 'ScanLine', severity: 'info', title: 'AML Screening', sub: 'Anti-money laundering check', meta: 'Due', to: '/settings', color: '#E6B9B9' },
+  { id: 'comp-bank', icon: 'Building2', severity: 'info', title: 'Bank Account Verified', sub: 'Confirm company bank details on file', meta: 'KYC', to: '/settings', color: '#E8C0C0' },
+  { id: 'comp-own', icon: 'ShieldCheck', severity: 'info', title: 'Vehicle Ownership', sub: 'Upload ownership docs for each vehicle', meta: 'Due', to: '/admin/vehicles', color: '#6B9BD9' },
+  { id: 'comp-sof', icon: 'Banknote', severity: 'info', title: 'Source of Funds', sub: 'Verify payment origin for large invoices', meta: 'KYC', to: '/accounts/invoices', color: '#D1A687' },
+  { id: 'comp-idv', icon: 'UserCheck', severity: 'info', title: 'Driver Identity', sub: 'Check driver ID & visa validity', meta: 'Due', to: '/admin/drivers', color: '#8A56E0' },
+  { id: 'comp-rep', icon: 'Users', severity: 'info', title: 'Authorised Representatives', sub: 'Keep signatory list current', meta: 'KYC', to: '/admin/clients', color: '#78B1CA' },
+  { id: 'comp-ubo', icon: 'Users', severity: 'info', title: 'UBO Declaration', sub: 'Confirm ultimate beneficial owner', meta: 'KYC', to: '/admin/clients', color: '#98C988' },
+  { id: 'comp-aml', icon: 'ScanLine', severity: 'info', title: 'AML Screening', sub: 'Run anti-money-laundering checks', meta: 'Due', to: '/settings', color: '#E6B9B9' },
 ];
 
 const SEVERITY_ORDER = { critical: 0, warning: 1, info: 2, success: 3 };

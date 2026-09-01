@@ -33,7 +33,9 @@ export default function VehicleListRow({ v, onOpen, onEdit, onDelete, selected =
           >
             {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
           </button>
-          <div className="w-10 h-10 rounded-xl entity-avatar flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}><TruckIcon className="w-4 h-4 text-primary" /></div>
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.18), rgba(var(--panel-accent-rgb),0.06))', border: '1px solid rgba(var(--panel-accent-rgb),0.25)' }}>
+            {v.image_url ? <img src={v.image_url} alt="" className="w-full h-full object-cover" /> : <TruckIcon className="w-4 h-4 text-primary" />}
+          </div>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
