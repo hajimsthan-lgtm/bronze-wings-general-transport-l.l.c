@@ -88,7 +88,7 @@ export default function ShellSidebar({ query = '' }) {
         <div key={section.key} className="flex flex-col">
             <p className="px-2.5 mb-1.5 text-[9.5px] font-bold tracking-[0.18em] uppercase text-muted-foreground/55 flex items-center gap-2">
               <span className="h-px flex-1 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-              <span>{t(section.key) || section.label}</span>
+              <span>{(t(section.key) && t(section.key) !== section.key) ? t(section.key) : section.label}</span>
             </p>
             <div className="flex flex-col gap-1">
               {section.children.map((child) => {

@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CalendarIcon, Clock, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
+import { CalendarDays, Clock, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 import { format, parse, isValid, startOfMonth, isSameMonth, setYear as dfSetYear, setMonth as dfSetMonth } from 'date-fns';
 import TimeWheelPicker from './TimeWheelPicker';
 import AnalogClockPicker from './AnalogClockPicker';
@@ -467,10 +467,17 @@ export default function DateTimePicker({
   };
 
   // Allow digits, colon, and AM/PM letters only; uppercase for consistency
-  const autoFormatTime = (s) => s.toUpperCase().replace(/[^0-9:APM]/g, '');
+  const autoFormatTime = (s) => {
+    const up = s.toUpperCase();
+    const ap = up.match(/[AP]M/)?.[0] || '';
+    const digits = up.replace(/[^0-9]/g, '').slice(0, 4);
+    let out = digits.length >= 3 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+    if (ap) out += ` ${ap}`;
+    return out;
+  };
 
-  const commitManualTime = () => {
-    const t = manualTime.trim().toUpperCase();
+  const commitManualTime = (override) => {
+    const t = (override !== undefined ? override : manualTime).trim().toUpperCase();
     if (!t) return;
     const m = t.match(/^(\d{1,2}):?(\d{2})\s*([AP]M)?$/);
     if (!m) return;
@@ -515,6 +522,7 @@ export default function DateTimePicker({
             required={required}
             className={cn(
               'w-full h-10 rounded-xl border bg-input px-3 py-1 text-sm font-mono tabular-nums leading-none transition-all duration-200',
+              hasValue && !disabled && 'pr-9',
               'text-transparent caret-foreground',
               'shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.03)]',
               'placeholder:text-muted-foreground',
@@ -539,24 +547,21 @@ export default function DateTimePicker({
               </span>
             ))}
           </div>
+          {hasValue && !disabled && (
+            <button
+              type="button"
+              onClick={handleClear}
+              aria-label="Clear"
+              title="Clear"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition-colors z-10"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
           {error && (
             <p className="absolute -bottom-4 left-0 text-[10px] text-destructive">Invalid date</p>
           )}
         </div>
-
-        {/* Clear */}
-        {hasValue && !disabled && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleClear}
-            className="h-10 w-9 p-0 flex-shrink-0 text-muted-foreground hover:text-destructive"
-            aria-label="Clear"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
 
         {/* Calendar popover trigger */}
         <Popover open={open} onOpenChange={openPopover}>
@@ -568,7 +573,7 @@ export default function DateTimePicker({
               className="h-10 w-10 p-0 flex-shrink-0 justify-center bg-background/50 border-border backdrop-blur-sm hover:bg-white/[0.06]"
               aria-label="Open calendar"
             >
-              <CalendarIcon className="w-4 h-4 text-primary/80" />
+              <CalendarDays className="w-4 h-4 text-primary/80" />
             </Button>
           </PopoverTrigger>
           <PopoverContent
@@ -733,7 +738,11 @@ export default function DateTimePicker({
                       ref={timeInputRef}
                       type="text"
                       value={manualTime}
-                      onChange={(e) => setManualTime(autoFormatTime(e.target.value))}
+                      onChange={(e) => {
+                        const v = autoFormatTime(e.target.value);
+                        setManualTime(v);
+                        if (/^\d{2}:\d{2}([AP]M)?$/.test(v)) commitManualTime(v);
+                      }}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualTime(); } }}
                       placeholder="Type HH:MM AM/PM"
                       className="h-8 text-sm tabular-nums font-mono"

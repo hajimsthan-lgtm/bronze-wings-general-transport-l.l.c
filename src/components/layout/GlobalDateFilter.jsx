@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
+import { CalendarRange, ChevronDown } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -50,7 +50,7 @@ export default function GlobalDateFilter({ className = '', style, solid }) {
         aria-label="Global date filter"
         title={isFiltered ? `${label}` : 'Filter all pages by date'}
       >
-          <CalendarIcon className="w-[18px] h-[18px]" />
+          <CalendarRange className="w-[18px] h-[18px]" />
           {isFiltered && (
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-500 ring-2 ring-background" />
           )}

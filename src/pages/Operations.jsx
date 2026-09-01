@@ -304,11 +304,14 @@ export default function Operations() {
   useEffect(() => {
     const tripHandler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
     const contractHandler = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
+    const debugHandler = () => setDebuggerOpen(true);
     window.addEventListener('ops:new-trip', tripHandler);
     window.addEventListener('ops:new-contract', contractHandler);
+    window.addEventListener('ops:debug', debugHandler);
     return () => {
       window.removeEventListener('ops:new-trip', tripHandler);
       window.removeEventListener('ops:new-contract', contractHandler);
+      window.removeEventListener('ops:debug', debugHandler);
     };
   }, []);
 

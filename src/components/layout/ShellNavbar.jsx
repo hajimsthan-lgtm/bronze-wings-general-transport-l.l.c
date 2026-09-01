@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Settings as SettingsIcon, Sun, Moon } from 'lucide-react';
+import { Settings as SettingsIcon, Sun, Moon, Bug } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/theme';
 import AlertBell from '@/components/layout/AlertBell';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
+import HeaderRoundButton from '@/components/layout/HeaderRoundButton';
 import GlobalSearch from '@/components/layout/GlobalSearch';
 import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
@@ -42,6 +43,9 @@ export default function ShellNavbar({ query, setQuery }) {
       {/* Right cluster */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <GlobalDateFilter />
+        {location.pathname.startsWith('/trips') && (
+          <HeaderRoundButton icon={Bug} label="Trip Data Debugger" onClick={() => window.dispatchEvent(new CustomEvent('ops:debug'))} />
+        )}
         <AlertBell />
         <Link
           to="/settings"
