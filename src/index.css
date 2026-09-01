@@ -1070,6 +1070,34 @@
   }
   .btn-lightning:active { transform: translateY(0) scale(0.98); }
 
+  /* ========== Shine Sweep (global glint for buttons & cards) ========== */
+  .shine-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine-sweep::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    transform: rotate(25deg);
+    animation: shine-sweep 2.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Keep button/card content above the sweep */
+  .shine-sweep > * { position: relative; z-index: 1; }
+  @keyframes shine-sweep {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shine-sweep::after { animation: none !important; }
+  }
+
   /* ========== Professional Page BG (blue gradient) ========== */
   .professional-page-bg {
     background:

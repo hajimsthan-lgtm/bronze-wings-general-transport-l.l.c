@@ -10,10 +10,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "relative overflow-hidden text-primary-foreground shadow-[0_4px_14px_-4px_rgba(var(--panel-accent-rgb),0.55)] hover:shadow-[0_8px_24px_-6px_rgba(var(--panel-accent-rgb),0.7)] hover:-translate-y-0.5 " +
+          "shine-sweep relative overflow-hidden text-primary-foreground shadow-[0_4px_14px_-4px_rgba(var(--panel-accent-rgb),0.55)] hover:shadow-[0_8px_24px_-6px_rgba(var(--panel-accent-rgb),0.7)] hover:-translate-y-0.5 " +
           "bg-[linear-gradient(135deg,rgb(var(--panel-accent-rgb))_0%,rgb(var(--panel-accent2-rgb))_100%)] hover:brightness-110",
         destructive:
-          "relative overflow-hidden text-destructive-foreground shadow-[0_4px_14px_-4px_hsl(var(--destructive)/0.55)] hover:shadow-[0_8px_24px_-6px_hsl(var(--destructive)/0.7)] hover:-translate-y-0.5 " +
+          "shine-sweep relative overflow-hidden text-destructive-foreground shadow-[0_4px_14px_-4px_hsl(var(--destructive)/0.55)] hover:shadow-[0_8px_24px_-6px_hsl(var(--destructive)/0.7)] hover:-translate-y-0.5 " +
           "bg-[linear-gradient(135deg,hsl(var(--destructive))_0%,hsl(var(--destructive)/0.85)_100%)] hover:brightness-110",
         outline:
           "border border-border/70 bg-card/40 backdrop-blur-sm text-foreground shadow-sm hover:bg-card/70 hover:border-[rgb(var(--panel-accent-rgb))]/45 hover:-translate-y-0.5 hover:shadow-[0_6px_18px_-6px_rgba(var(--panel-accent-rgb),0.35)]",
