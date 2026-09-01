@@ -131,18 +131,19 @@ export default function MaskedInput({
         name={name}
         required={required}
         className={cn(
-          'w-full h-10 px-3 py-1 pl-9 text-sm font-mono tabular-nums leading-none transition-all duration-200 text-transparent caret-transparent placeholder:text-muted-foreground focus-visible:outline-none',
+          'w-full h-10 px-3 py-1 text-sm font-mono tabular-nums leading-none transition-all duration-200 text-transparent caret-transparent placeholder:text-muted-foreground focus-visible:outline-none',
+          bare ? 'pl-9' : 'pl-3',
           hasValue && !disabled && 'pr-8',
           bare
             ? 'bg-transparent border-0 shadow-none'
-            : 'rounded-xl border border-input bg-input shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.03)]',
+            : 'rounded-full border border-[#6b3fa0]/60 bg-gradient-to-b from-[#1a1329] to-[#282040] shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(255,255,255,0.05),0_0_16px_-4px_rgba(107,63,160,0.5)]',
           !bare && (error
             ? 'border-destructive/70'
-            : 'focus-visible:border-primary/40 focus-visible:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.03),0_0_0_3px_rgba(var(--panel-accent-rgb),0.15)]'),
+            : 'focus-visible:border-[#6b3fa0] focus-visible:shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),0_0_20px_-2px_rgba(107,63,160,0.7)]'),
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       />
-      <div aria-hidden className="absolute inset-0 flex items-center pl-9 pr-3 py-1 text-sm font-mono tabular-nums leading-none pointer-events-none select-none gap-1">
+      <div aria-hidden className={cn('absolute inset-0 flex items-center py-1 text-sm font-mono tabular-nums leading-none pointer-events-none select-none gap-1', bare ? 'pl-9 pr-3' : 'pl-3 pr-3')}>
         {segs.map((seg, i) => {
           const val = raw[seg.key] || '';
           const isActive = editing && seg.key === activeSeg;
@@ -155,13 +156,12 @@ export default function MaskedInput({
           return (
             <Fragment key={seg.key}>
               <span className={cn(
-                'flex items-center justify-center rounded-md h-7 px-1.5 transition-all duration-200',
-                isActive
-                  ? 'bg-white ring-2 ring-primary shadow-[0_0_12px_-2px_rgba(var(--panel-accent-rgb),0.5)]'
-                  : 'bg-white/70'
+                'relative flex items-center justify-center rounded-lg h-7 px-2 transition-all duration-200 bg-[#0f0b1a] border border-white/5',
+                isActive && 'border-[#00e5ff]/40 shadow-[0_0_12px_-2px_rgba(0,229,255,0.4)]'
               )}>
+                {isActive && <span className="absolute bottom-0 left-1 right-1 h-px bg-[#00e5ff] shadow-[0_0_6px_rgba(0,229,255,0.8)]" />}
                 {cells.map((c, ci) => (
-                  <span key={ci} className={c.typed ? 'text-black' : 'text-black/30'}>{c.ch}</span>
+                  <span key={ci} className={cn(c.typed ? 'text-white' : 'text-[#483f60]', 'transition-colors')}>{c.ch}</span>
                 ))}
               </span>
               {i < segs.length - 1 && <span className="text-muted-foreground/50 px-0.5">{seps[i]}</span>}
@@ -170,7 +170,7 @@ export default function MaskedInput({
         })}
       </div>
       {hasValue && !disabled && (
-        <button type="button" onClick={onClear} aria-label="Clear" title="Clear" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground hover:text-background transition-colors z-10">
+        <button type="button" onClick={onClear} aria-label="Clear" title="Clear" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#0f0b1a] border border-[#00d4ff]/30 text-[#00d4ff] hover:bg-[#00d4ff]/15 hover:border-[#00d4ff]/60 shadow-[0_0_10px_-2px_rgba(0,212,255,0.5)] transition-all z-10">
           <X className="w-3 h-3" />
         </button>
       )}
