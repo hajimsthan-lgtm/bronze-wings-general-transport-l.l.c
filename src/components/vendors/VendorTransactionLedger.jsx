@@ -5,6 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -256,7 +257,7 @@ function AddTransactionSheet({ open, onOpenChange, onSubmit }) {
           <div><Label className="text-xs text-muted-foreground mb-1.5">Description</Label><Input value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Lump-sum settlement, adjustment, etc." className="bg-background border-border" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">Amount (AED)</Label><Input type="number" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} className="bg-background border-border" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">Date</Label><Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Date</Label><DatePicker value={form.date} onChange={(v) => setForm((f) => ({ ...f, date: v }))} className="bg-background border-border" /></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5">Payment Status</Label>
@@ -264,7 +265,7 @@ function AddTransactionSheet({ open, onOpenChange, onSubmit }) {
                 <SelectItem value="unpaid">Unpaid</SelectItem><SelectItem value="paid">Paid</SelectItem><SelectItem value="partially_paid">Partially Paid</SelectItem>
               </SelectContent></Select>
             </div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5">Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value }))} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Due Date</Label><DatePicker value={form.due_date} onChange={(v) => setForm((f) => ({ ...f, due_date: v }))} className="bg-background border-border" /></div>
           </div>
           <div><Label className="text-xs text-muted-foreground mb-1.5">Notes</Label><Textarea value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} rows={2} className="bg-background border-border" /></div>
           <div className="flex gap-3 mt-6"><Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1 border-border">Cancel</Button><Button onClick={handle} disabled={saving} className="flex-1 bg-primary hover:bg-primary/90">{saving ? 'Saving...' : 'Save'}</Button></div>
@@ -292,7 +293,7 @@ function PayModal({ tx, onClose, onConfirm }) {
           </div>
           <div><Label className="text-xs text-muted-foreground mb-1.5">Payment Amount (AED)</Label><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-background border-border" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs text-muted-foreground mb-1.5">Payment Date</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-background border-border" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5">Payment Date</Label><DatePicker value={date} onChange={(v) => setDate(v)} className="bg-background border-border" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Method</Label>
               <Select value={method} onValueChange={setMethod}><SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger><SelectContent>
                 <SelectItem value="cash">Cash</SelectItem><SelectItem value="bank_transfer">Bank Transfer</SelectItem><SelectItem value="cheque">Cheque</SelectItem>

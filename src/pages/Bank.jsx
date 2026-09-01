@@ -7,6 +7,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -115,7 +116,7 @@ function BankForm({ editItem, onSave, onCancel }) {
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">{t('date')}</Label><DatePicker value={form.date} onChange={v => update('date', v)} className="bg-background border-border" /></div>
         <div><Label className="text-xs text-muted-foreground mb-1.5">Reference</Label><Input value={form.reference} onChange={e => update('reference', e.target.value)} className="bg-background border-border" /></div>
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Bank</Label><Input value={form.bank_name} onChange={e => update('bank_name', e.target.value)} className="bg-background border-border" /></div>

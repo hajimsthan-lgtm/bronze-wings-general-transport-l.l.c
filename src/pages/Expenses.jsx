@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -323,7 +324,7 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
           <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border expense-form-input" /></div>
           <div className="grid grid-cols-3 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('date')}</Label><Input type="date" value={form.date} onChange={e => update('date', e.target.value)} className="bg-background border-border expense-form-input" /></div>
+            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('date')}</Label><DatePicker value={form.date} onChange={v => update('date', v)} className="bg-background border-border expense-form-input" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Rate</Label>
               <Select value={String(form.vat_rate ?? 5)} onValueChange={v => update('vat_rate', Number(v))}>
                 <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
