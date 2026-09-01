@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/theme';
 import AlertBell from '@/components/layout/AlertBell';
 import GlobalDateFilter from '@/components/layout/GlobalDateFilter';
-import DebuggerMenu from '@/components/layout/DebuggerMenu';
+import DebuggerPopover from '@/components/layout/DebuggerPopover';
 import GlobalSearch from '@/components/layout/GlobalSearch';
 import PageTitleIndicator from '@/components/layout/PageTitleIndicator';
 
@@ -43,7 +43,7 @@ export default function ShellNavbar({ query, setQuery }) {
       {/* Right cluster */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <GlobalDateFilter />
-        {location.pathname.startsWith('/trips') && <DebuggerMenu />}
+        <DebuggerPopover />
         <AlertBell />
         <Link
           to="/settings"
