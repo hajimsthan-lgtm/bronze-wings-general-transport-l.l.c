@@ -69,7 +69,7 @@ function fromCanonical(value, mode) {
     const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
     raw.hour = pad2(h12);
     raw.minute = pad2(d.getMinutes());
-    raw.meridiem = h24 >= 12 ? 'P' : 'A';
+    raw.meridiem = h24 >= 12 ? 'PM' : 'AM';
   }
   return raw;
 }
@@ -102,7 +102,7 @@ function buildSentinel(raw, mode) {
 // Validate a single segment's filled value.
 function segValid(seg, val) {
   if (!val || val.length < seg.len) return false;
-  if (seg.kind === 'ampm') return val === 'A' || val === 'P';
+  if (seg.kind === 'ampm') return val === 'AM' || val === 'PM';
   const n = parseInt(val, 10);
   if (seg.key === 'day') return n >= 1 && n <= 31;
   if (seg.key === 'month') return n >= 1 && n <= 12;
@@ -125,7 +125,7 @@ function rawToDate(raw, mode) {
   if (mode === 'datetime') {
     const h12 = parseInt(raw.hour, 10);
     min = parseInt(raw.minute, 10);
-    h24 = raw.meridiem === 'P' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
+    h24 = raw.meridiem === 'PM' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
   }
   const d = new Date(year, month - 1, day, h24, min, 0, 0);
   // reject overflow (e.g. 31 Feb)
@@ -151,8 +151,11 @@ export default function DateTimePicker({
   const [calView, setCalView] = useState('days'); // days | months | years
   const [displayMonth, setDisplayMonth] = useState(() => startOfMonth(toDate(value) || new Date()));
   const [manualText, setManualText] = useState('');
+  const [manualTime, setManualTime] = useState('');
   const [decade, setDecade] = useState(() => Math.floor((toDate(value) || new Date()).getFullYear() / 10) * 10);
   const inputRef = useRef(null);
+  const dateInputRef = useRef(null);
+  const timeInputRef = useRef(null);
   const editingRef = useRef(false);
   const rawRef = useRef(raw);
   rawRef.current = raw;
@@ -322,10 +325,17 @@ export default function DateTimePicker({
     let invalidFull = false;
 
     if (seg.kind === 'ampm') {
+      if (cur.length >= seg.len) return; // segment full
       const up = key.toUpperCase();
-      if (up !== 'A' && up !== 'P') return;
-      nextVal = up;
-      nextActive = advanceToNext(seg.key, r0);
+      if (cur.length === 0) {
+        if (up !== 'A' && up !== 'P') return;
+        nextVal = up;
+        nextActive = seg.key; // wait for 'M' to complete AM/PM
+      } else {
+        if (up !== 'M') return;
+        nextVal = cur + up;
+        nextActive = advanceToNext(seg.key, { ...r0, [seg.key]: nextVal });
+      }
     } else if (seg.kind === 'num' || seg.kind === 'hour') {
       if (!/\d/.test(key)) return;
       if (cur.length >= seg.len) return; // segment full
@@ -407,6 +417,7 @@ export default function DateTimePicker({
       setDisplayMonth(startOfMonth(d));
       setDecade(Math.floor(d.getFullYear() / 10) * 10);
       setManualText('');
+      setManualTime('');
     }
   };
 
@@ -433,8 +444,8 @@ export default function DateTimePicker({
     if (d.length > 2) return `${d.slice(0, 2)}-${d.slice(2)}`;
     return d;
   };
-  const commitManual = () => {
-    const t = manualText.trim();
+  const commitManual = (override) => {
+    const t = (override !== undefined ? override : manualText).trim();
     if (!t) return;
     let d = parse(t, 'dd-MM-yyyy', new Date());
     if (!isValid(d)) d = parse(t, 'yyyy-MM-dd', new Date());
@@ -449,6 +460,25 @@ export default function DateTimePicker({
       onChange(toCanonical(out, mode));
       setRaw(fromCanonical(toCanonical(out, mode), mode));
       setCalView('days');
+    }
+  };
+
+  // Allow digits, colon, and AM/PM letters only; uppercase for consistency
+  const autoFormatTime = (s) => s.toUpperCase().replace(/[^0-9:APM]/g, '');
+
+  const commitManualTime = () => {
+    const t = manualTime.trim().toUpperCase();
+    if (!t) return;
+    const m = t.match(/^(\d{1,2}):?(\d{2})\s*([AP]M)?$/);
+    if (!m) return;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const ap = m[3];
+    if (ap === 'PM' && h !== 12) h += 12;
+    else if (ap === 'AM' && h === 12) h = 0;
+    if (h >= 0 && h <= 23 && min >= 0 && min <= 59) {
+      handleTime(`${pad2(h)}:${pad2(min)}`);
+      setManualTime('');
     }
   };
 
@@ -550,139 +580,163 @@ export default function DateTimePicker({
               </Button>
             </div>
 
-            {calView === 'days' && (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between px-1">
-                  <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCalView('months')}
-                    className="text-sm font-semibold px-2 py-1 rounded-md hover:bg-white/[0.06] text-foreground transition-colors"
-                    title="Pick month & year"
-                  >
-                    {format(displayMonth, 'MMMM yyyy')}
-                  </button>
-                  <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
-                </div>
-                <Calendar
-                  mode="single"
-                  dir={dir}
-                  month={displayMonth}
-                  onMonthChange={setDisplayMonth}
-                  selected={date || undefined}
-                  onSelect={handleDaySelect}
-                  autoFocus
-                  classNames={{ caption: 'hidden', nav: 'hidden' }}
-                  className="rounded-lg"
-                />
+            <div className={cn('flex gap-3', mode === 'datetime' ? 'flex-col md:flex-row' : 'flex-col')}>
+              {/* Left column: calendar + manual date entry */}
+              <div className="flex flex-col gap-2 w-full md:w-[17rem]">
+                {calView === 'days' && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between px-1">
+                      <button type="button" aria-label="Previous month" onClick={() => shiftMonth(-1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalView('months')}
+                        className="text-sm font-semibold px-2 py-1 rounded-md hover:bg-white/[0.06] text-foreground transition-colors"
+                        title="Pick month & year"
+                      >
+                        {format(displayMonth, 'MMMM yyyy')}
+                      </button>
+                      <button type="button" aria-label="Next month" onClick={() => shiftMonth(1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <Calendar
+                      mode="single"
+                      dir={dir}
+                      month={displayMonth}
+                      onMonthChange={setDisplayMonth}
+                      selected={date || undefined}
+                      onSelect={handleDaySelect}
+                      autoFocus
+                      classNames={{ caption: 'hidden', nav: 'hidden' }}
+                      className="rounded-lg"
+                    />
+                  </div>
+                )}
+
+                {calView === 'months' && (
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex items-center justify-between px-1">
+                      <button type="button" aria-label="Previous year" onClick={() => shiftYear(-1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalView('years')}
+                        className="text-sm font-semibold px-2 py-1 rounded-md hover:bg-white/[0.06] text-foreground transition-colors"
+                        title="Pick year"
+                      >
+                        {displayMonth.getFullYear()}
+                      </button>
+                      <button type="button" aria-label="Next year" onClick={() => shiftYear(1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {MONTHS.map((m, i) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => pickMonth(i)}
+                          className={cn(
+                            'px-1 py-2 rounded-md text-xs font-medium transition-colors border',
+                            isSameMonth(displayMonth, new Date(displayMonth.getFullYear(), i, 1))
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-transparent text-muted-foreground border-transparent hover:bg-white/[0.06] hover:text-foreground'
+                          )}
+                        >
+                          {m}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {calView === 'years' && (
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex items-center justify-between px-1">
+                      <button type="button" aria-label="Previous decade" onClick={() => shiftDecade(-1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                      </button>
+                      <span className="text-sm font-semibold px-2 py-1 text-foreground">{decade}–{decade + 11}</span>
+                      <button type="button" aria-label="Next decade" onClick={() => shiftDecade(1)} className={navBtn}>
+                        {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1">
+                      {Array.from({ length: 12 }, (_, i) => decade + i).map((y) => (
+                        <button
+                          key={y}
+                          type="button"
+                          onClick={() => pickYear(y)}
+                          className={cn(
+                            'px-1 py-2 rounded-md text-xs font-medium transition-colors border',
+                            displayMonth.getFullYear() === y
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-transparent text-muted-foreground border-transparent hover:bg-white/[0.06] hover:text-foreground'
+                          )}
+                        >
+                          {y}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Manual date entry — no Go button; auto-jumps to time on complete */}
                 <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
                   <Input
+                    ref={dateInputRef}
                     type="text"
                     inputMode="numeric"
                     value={manualText}
-                    onChange={(e) => setManualText(autoFormat(e.target.value))}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManual(); } }}
+                    onChange={(e) => {
+                      const v = autoFormat(e.target.value);
+                      setManualText(v);
+                      if (v.length === 10) { commitManual(v); timeInputRef.current?.focus(); }
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManual(); timeInputRef.current?.focus(); } }}
                     placeholder="Type DD-MM-YYYY"
                     className="h-8 text-sm tabular-nums font-mono"
                   />
-                  <Button type="button" size="sm" onClick={commitManual} className="h-8 px-3">Go</Button>
                 </div>
               </div>
-            )}
 
-            {calView === 'months' && (
-              <div className="flex flex-col gap-2 w-[17rem]">
-                <div className="flex items-center justify-between px-1">
-                  <button type="button" aria-label="Previous year" onClick={() => shiftYear(-1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCalView('years')}
-                    className="text-sm font-semibold px-2 py-1 rounded-md hover:bg-white/[0.06] text-foreground transition-colors"
-                    title="Pick year"
-                  >
-                    {displayMonth.getFullYear()}
-                  </button>
-                  <button type="button" aria-label="Next year" onClick={() => shiftYear(1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
+              {/* Right column: time picker + manual time entry — datetime only */}
+              {mode === 'datetime' && (
+                <div className="flex flex-col gap-2 w-full md:w-[15rem] md:border-l md:border-white/[0.06] md:pl-3">
+                  <div className="flex items-center justify-between mb-1 px-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Pick Time
+                    </span>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)} className="h-7 text-[11px] text-primary gap-1">
+                      <Check className="w-3.5 h-3.5" /> Done
+                    </Button>
+                  </div>
+                  {pickerStyle === 'analog_custom' ? (
+                    <AnalogClockPicker value={timeStr} onChange={handleTime} variant="custom" />
+                  ) : pickerStyle === 'analog_library' ? (
+                    <AnalogClockPicker value={timeStr} onChange={handleTime} variant="library" />
+                  ) : (
+                    <TimeWheelPicker value={timeStr} onChange={handleTime} />
+                  )}
+                  {/* Manual time entry + Go button */}
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/[0.06]">
+                    <Input
+                      ref={timeInputRef}
+                      type="text"
+                      value={manualTime}
+                      onChange={(e) => setManualTime(autoFormatTime(e.target.value))}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualTime(); } }}
+                      placeholder="Type HH:MM AM/PM"
+                      className="h-8 text-sm tabular-nums font-mono"
+                    />
+                    <Button type="button" size="sm" onClick={commitManualTime} className="h-8 px-3">Go</Button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-1">
-                  {MONTHS.map((m, i) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => pickMonth(i)}
-                      className={cn(
-                        'px-1 py-2 rounded-md text-xs font-medium transition-colors border',
-                        isSameMonth(displayMonth, new Date(displayMonth.getFullYear(), i, 1))
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-transparent text-muted-foreground border-transparent hover:bg-white/[0.06] hover:text-foreground'
-                      )}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {calView === 'years' && (
-              <div className="flex flex-col gap-2 w-[17rem]">
-                <div className="flex items-center justify-between px-1">
-                  <button type="button" aria-label="Previous decade" onClick={() => shiftDecade(-1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                  </button>
-                  <span className="text-sm font-semibold px-2 py-1 text-foreground">{decade}–{decade + 11}</span>
-                  <button type="button" aria-label="Next decade" onClick={() => shiftDecade(1)} className={navBtn}>
-                    {dir === 'rtl' ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-1">
-                  {Array.from({ length: 12 }, (_, i) => decade + i).map((y) => (
-                    <button
-                      key={y}
-                      type="button"
-                      onClick={() => pickYear(y)}
-                      className={cn(
-                        'px-1 py-2 rounded-md text-xs font-medium transition-colors border',
-                        displayMonth.getFullYear() === y
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-transparent text-muted-foreground border-transparent hover:bg-white/[0.06] hover:text-foreground'
-                      )}
-                    >
-                      {y}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Time section — datetime only */}
-            {mode === 'datetime' && (
-              <div className="mt-2 pt-2 border-t border-white/[0.06]">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80 flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Pick Time
-                  </span>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)} className="h-7 text-[11px] text-primary gap-1">
-                    <Check className="w-3.5 h-3.5" /> Done
-                  </Button>
-                </div>
-                {pickerStyle === 'analog_custom' ? (
-                  <AnalogClockPicker value={timeStr} onChange={handleTime} variant="custom" />
-                ) : pickerStyle === 'analog_library' ? (
-                  <AnalogClockPicker value={timeStr} onChange={handleTime} variant="library" />
-                ) : (
-                  <TimeWheelPicker value={timeStr} onChange={handleTime} />
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </PopoverContent>
         </Popover>
       </div>
