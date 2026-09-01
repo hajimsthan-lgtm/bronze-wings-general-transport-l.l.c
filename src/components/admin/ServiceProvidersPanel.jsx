@@ -5,6 +5,7 @@ import { useI18n } from '@/lib/i18n';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Store, Plus, Truck, Users, TrendingDown, Wrench } from 'lucide-react';
@@ -221,8 +222,8 @@ function ServiceProviderForm({ editItem, onSave, onCancel }) {
       <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={form.email} onChange={(e) => update('email', e.target.value)} className="bg-background border-border" /></div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Input value={form.address} onChange={(e) => update('address', e.target.value)} className="bg-background border-border" /></div>
       <div className="grid grid-cols-2 gap-3">
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Contract Start</Label><Input type="date" value={form.contract_start_date || ''} onChange={(e) => update('contract_start_date', e.target.value)} className="bg-background border-border" /></div>
-        <div><Label className="text-xs text-muted-foreground mb-1.5">Contract End</Label><Input type="date" value={form.contract_end_date || ''} onChange={(e) => update('contract_end_date', e.target.value)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Contract Start</Label><DatePicker value={form.contract_start_date || ''} onChange={(v) => update('contract_start_date', v)} className="bg-background border-border" /></div>
+        <div><Label className="text-xs text-muted-foreground mb-1.5">Contract End</Label><DatePicker value={form.contract_end_date || ''} onChange={(v) => update('contract_end_date', v)} className="bg-background border-border" /></div>
       </div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Rate Terms</Label><Input value={form.rate_terms} onChange={(e) => update('rate_terms', e.target.value)} placeholder="e.g. AED 200/day, AED 5000/month" className="bg-background border-border" /></div>
       <div><Label className="text-xs text-muted-foreground mb-1.5">Status</Label>

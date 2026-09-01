@@ -3,6 +3,7 @@ import { Loader2, Receipt, AlertTriangle, Upload, FileText, X } from 'lucide-rea
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -184,10 +185,9 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Payment Date</Label>
-              <Input
-                type="date"
+              <DatePicker
                 value={date}
-                onChange={e => setDate(e.target.value)}
+                onChange={v => setDate(v)}
                 className="mt-1"
               />
             </div>

@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, FileText, Trash2, Download, Loader2, Paperclip } from 'lucide-react';
@@ -104,7 +105,7 @@ export default function EntityDocumentsTab({ entityType, entityId, collapsible =
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5">Expiry</Label>
-              <Input type="date" value={form.expiry_date} onChange={(e) => setForm((p) => ({ ...p, expiry_date: e.target.value }))} className="bg-background border-border" />
+              <DatePicker value={form.expiry_date} onChange={(v) => setForm((p) => ({ ...p, expiry_date: v }))} className="bg-background border-border" />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-1.5">File</Label>

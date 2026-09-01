@@ -4,6 +4,7 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Plus, Trash2, Download, Eye, Loader2, Paperclip, ChevronDown } from 'lucide-react';
@@ -220,10 +221,9 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground mb-1.5">Expiry</Label>
-                    <Input
-                      type="date"
+                    <DatePicker
                       value={form.expiry_date}
-                      onChange={(e) => setForm((p) => ({ ...p, expiry_date: e.target.value }))}
+                      onChange={(v) => setForm((p) => ({ ...p, expiry_date: v }))}
                       className="bg-background border-border"
                     />
                   </div>

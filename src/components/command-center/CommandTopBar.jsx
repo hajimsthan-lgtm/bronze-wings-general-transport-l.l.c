@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar, Search, Bell, Settings, Feather, Home, X, ChevronRight, FileWarning, Wrench, Truck, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import DatePicker from '@/components/common/DatePicker';
 
 const ALERT_ICONS = { FileWarning, Wrench, Truck, FileText };
 const ALERT_STYLES = {
@@ -172,11 +173,11 @@ export default function CommandTopBar({ dateFrom, dateTo, setDateFrom, setDateTo
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date Range</h4>
                 <div>
                   <label className="text-xs text-muted-foreground">From</label>
-                  <input type="date" value={dateFrom || ''} onChange={(e) => setDateFrom(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(0,242,195,0.45)]" />
+                  <DatePicker value={dateFrom || ''} onChange={(v) => setDateFrom(v)} className="w-full mt-1" />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">To</label>
-                  <input type="date" value={dateTo || ''} onChange={(e) => setDateTo(e.target.value)} className="w-full mt-1 px-3 py-2 rounded-lg bg-foreground/[0.04] border border-border/40 text-sm focus:outline-none focus:border-[rgba(0,242,195,0.45)]" />
+                  <DatePicker value={dateTo || ''} onChange={(v) => setDateTo(v)} className="w-full mt-1" />
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="flex-1 px-3 py-2 rounded-lg text-xs font-medium bg-foreground/5 hover:bg-foreground/10 transition-colors">Clear</button>

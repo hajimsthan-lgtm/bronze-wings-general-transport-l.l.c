@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -146,9 +147,9 @@ export default function DriverAddForm({ editItem, onSave, onCancel }) {
 
       <Section icon={ShieldCheck} title="License Details" accent="#22c55e">
         <Field label="License #"><Input value={form.license_number} onChange={(e) => update('license_number', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="License Expiry"><Input type="date" value={form.license_expiry} onChange={(e) => update('license_expiry', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Visa Expiry"><Input type="date" value={form.visa_expiry} onChange={(e) => update('visa_expiry', e.target.value)} className="bg-background border-border" /></Field>
-        <Field label="Join Date"><Input type="date" value={form.join_date} onChange={(e) => update('join_date', e.target.value)} className="bg-background border-border" /></Field>
+        <Field label="License Expiry"><DatePicker value={form.license_expiry} onChange={(v) => update('license_expiry', v)} className="bg-background border-border" /></Field>
+        <Field label="Visa Expiry"><DatePicker value={form.visa_expiry} onChange={(v) => update('visa_expiry', v)} className="bg-background border-border" /></Field>
+        <Field label="Join Date"><DatePicker value={form.join_date} onChange={(v) => update('join_date', v)} className="bg-background border-border" /></Field>
       </Section>
 
       <Section icon={Wallet} title="Employment" accent="#f59e0b">

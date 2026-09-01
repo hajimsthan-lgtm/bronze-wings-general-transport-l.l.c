@@ -19,6 +19,7 @@ import { Truck, Users, Receipt, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VendorTransactionLedger from '@/components/vendors/VendorTransactionLedger';
@@ -254,8 +255,8 @@ export default function ServiceProviderDetail() {
             <div><Label className="text-xs text-muted-foreground mb-1.5">Email</Label><Input value={editForm.email || ''} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="bg-background border-border" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Address</Label><Input value={editForm.address || ''} onChange={(e) => setEditForm((f) => ({ ...f, address: e.target.value }))} className="bg-background border-border" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs text-muted-foreground mb-1.5">Contract Start</Label><Input type="date" value={editForm.contract_start_date || ''} onChange={(e) => setEditForm((f) => ({ ...f, contract_start_date: e.target.value }))} className="bg-background border-border" /></div>
-              <div><Label className="text-xs text-muted-foreground mb-1.5">Contract End</Label><Input type="date" value={editForm.contract_end_date || ''} onChange={(e) => setEditForm((f) => ({ ...f, contract_end_date: e.target.value }))} className="bg-background border-border" /></div>
+              <div><Label className="text-xs text-muted-foreground mb-1.5">Contract Start</Label><DatePicker value={editForm.contract_start_date || ''} onChange={(v) => setEditForm((f) => ({ ...f, contract_start_date: v }))} className="bg-background border-border" /></div>
+              <div><Label className="text-xs text-muted-foreground mb-1.5">Contract End</Label><DatePicker value={editForm.contract_end_date || ''} onChange={(v) => setEditForm((f) => ({ ...f, contract_end_date: v }))} className="bg-background border-border" /></div>
             </div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Rate Terms</Label><Input value={editForm.rate_terms || ''} onChange={(e) => setEditForm((f) => ({ ...f, rate_terms: e.target.value }))} placeholder="e.g. AED 200/day" className="bg-background border-border" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5">Status</Label>

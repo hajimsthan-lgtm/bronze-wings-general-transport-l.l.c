@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -398,11 +399,11 @@ function CompanyDocForm({ editItem, onSave, onCancel }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5">Issue Date</Label>
-          <Input type="date" value={form.issue_date} onChange={e => update('issue_date', e.target.value)} className={inputCls} />
+          <DatePicker value={form.issue_date} onChange={v => update('issue_date', v)} className={inputCls} />
         </div>
         <div>
           <Label className="text-xs text-muted-foreground mb-1.5">Expiry Date</Label>
-          <Input type="date" value={form.expiry_date} onChange={e => update('expiry_date', e.target.value)} className={inputCls} />
+          <DatePicker value={form.expiry_date} onChange={v => update('expiry_date', v)} className={inputCls} />
         </div>
       </div>
       {form.expiry_date && (

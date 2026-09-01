@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Clock, Loader2, CheckCircle2 } from 'lucide-react';
 
@@ -99,7 +100,7 @@ export default function BulkEndTripDialog({ trips, open, onOpenChange, onConfirm
             <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border border-purple-500/20 bg-purple-500/5">
               <div>
                 <Label className="text-xs text-muted-foreground">Offload Date <span className="text-red-400">*</span></Label>
-                <Input type="date" value={sharedDate} onChange={(e) => { setSharedDate(e.target.value); setError(''); }} className="bg-input border-border" autoFocus />
+                <DatePicker value={sharedDate} onChange={(v) => { setSharedDate(v); setError(''); }} className="bg-input border-border" autoFocus />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Offload Time <span className="text-red-400">*</span></Label>
@@ -117,7 +118,7 @@ export default function BulkEndTripDialog({ trips, open, onOpenChange, onConfirm
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <Label className="text-[10px] text-muted-foreground">Offload Date <span className="text-red-400">*</span></Label>
-                      <Input type="date" value={perTrip[trip.id]?.date || ''} onChange={(e) => { setPerTrip(p => ({ ...p, [trip.id]: { ...p[trip.id], date: e.target.value } })); setError(''); }} className="bg-input border-border text-xs h-8" />
+                      <DatePicker value={perTrip[trip.id]?.date || ''} onChange={(v) => { setPerTrip(p => ({ ...p, [trip.id]: { ...p[trip.id], date: v } })); setError(''); }} className="bg-input border-border text-xs h-8" />
                     </div>
                     <div>
                       <Label className="text-[10px] text-muted-foreground">Offload Time <span className="text-red-400">*</span></Label>
