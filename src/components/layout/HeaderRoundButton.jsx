@@ -1,13 +1,15 @@
+import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Shared round icon button used in the top header cluster
- * (date filter, debugger, alerts, settings) for consistent shape & feel.
+ * Shared round icon button used in the top header cluster.
+ * forwardRef so it can be used as a Radix asChild trigger.
  */
-export default function HeaderRoundButton({ icon: Icon, label, onClick, active, className }) {
+const HeaderRoundButton = React.forwardRef(({ icon: Icon, label, onClick, active, className }, ref) => {
   return (
     <button
       type="button"
+      ref={ref}
       onClick={onClick}
       aria-label={label}
       title={label}
@@ -20,4 +22,7 @@ export default function HeaderRoundButton({ icon: Icon, label, onClick, active, 
       <Icon className="w-4 h-4" />
     </button>
   );
-}
+});
+HeaderRoundButton.displayName = 'HeaderRoundButton';
+
+export default HeaderRoundButton;

@@ -366,6 +366,10 @@ export default function DateTimePicker({
       setError(false);
       commitIfReady(next);
       setActiveSeg(nextActive);
+      // Auto-jump out of the field once the full value is complete
+      if (isComplete(next, mode) && nextActive === seg.key) {
+        requestAnimationFrame(() => inputRef.current?.blur());
+      }
     }
   };
 
@@ -553,7 +557,7 @@ export default function DateTimePicker({
               onClick={handleClear}
               aria-label="Clear"
               title="Clear"
-              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-destructive/15 text-destructive hover:bg-destructive hover:text-white transition-colors z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground hover:text-background transition-colors z-10"
             >
               <X className="w-3 h-3" />
             </button>

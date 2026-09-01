@@ -92,7 +92,7 @@ export default function TripModeFields({ p }) {
   return (
     <>
       {/* Client */}
-      <Section title={t('client')} icon={Building2} accent="30,215,96" delay={0}>
+      <Section title={t('client')} icon={Building2} accent="99,102,241" delay={0}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('client')} <span className="text-red-400">*</span></Label>
           {manualClientMode ? (
@@ -284,7 +284,7 @@ export default function TripModeFields({ p }) {
       </Section>
 
       {/* Assignment */}
-      <Section title="Assignment" icon={Truck} accent="20,184,166" delay={180}>
+      <Section title="Assignment" icon={Truck} accent="6,182,212" delay={180}>
         {/* Mode toggle */}
         <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
           <button type="button" onClick={() => { update('assignment_mode', 'company'); update('vendor_name', ''); }}
@@ -447,7 +447,7 @@ export default function TripModeFields({ p }) {
       )}
 
       {/* Delivery */}
-      <Section title="Delivery" icon={Package} accent="6,182,212" delay={240}>
+      <Section title="Delivery" icon={Package} accent="139,92,246" delay={240}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('delivery_note')} #</Label>
           <div className="relative">
@@ -490,7 +490,7 @@ export default function TripModeFields({ p }) {
       <TripFinancialFields p={p} />
 
       {/* Notes */}
-      <Section title={t('notes')} icon={StickyNote} accent="148,163,184" delay={360}>
+      <Section title={t('notes')} icon={StickyNote} accent="236,72,153" delay={360}>
         <Textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} rows={2} className={inputCls} />
       </Section>
     </>

@@ -305,13 +305,16 @@ export default function Operations() {
     const tripHandler = () => { setFormMode('trip'); setEditTrip(null); setEditContract(null); setPrefill(null); setFormOpen(true); };
     const contractHandler = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
     const debugHandler = () => setDebuggerOpen(true);
+    const refreshHandler = () => { refetchTrips(); refetchInvoices(); loadContracts(); };
     window.addEventListener('ops:new-trip', tripHandler);
     window.addEventListener('ops:new-contract', contractHandler);
     window.addEventListener('ops:debug', debugHandler);
+    window.addEventListener('ops:refresh', refreshHandler);
     return () => {
       window.removeEventListener('ops:new-trip', tripHandler);
       window.removeEventListener('ops:new-contract', contractHandler);
       window.removeEventListener('ops:debug', debugHandler);
+      window.removeEventListener('ops:refresh', refreshHandler);
     };
   }, []);
 

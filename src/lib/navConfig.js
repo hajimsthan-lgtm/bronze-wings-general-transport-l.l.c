@@ -1,6 +1,5 @@
 // Shared navigation config for the app shell sidebar.
-// Single source of truth — imported by ShellSidebar.
-// Grouped by business domain: Operations, Fleet & HR, Partners, Accounts, Reports & Docs.
+// Grouped by business domain: Operations, Fleet & HR, Accounts, Reports & Docs.
 import {
   Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench, Fuel as FuelIcon,
@@ -21,6 +20,7 @@ export const navItems = [
       { key: 'expenses', label: 'Expenses', path: '/expenses', icon: 'Receipt', color: '#f97316' },
       { key: 'fuel', label: 'Fuel', path: '/fuel', icon: 'Fuel', color: '#14b8a6' },
       { key: 'maintenance', label: 'Maintenance', path: '/maintenance', icon: 'Wrench', color: '#a855f7' },
+      { key: 'salary', label: 'Salary', path: '/salary', icon: 'Wallet', color: '#22c55e' },
     ],
   },
   {
@@ -28,12 +28,6 @@ export const navItems = [
     children: [
       { key: 'vehicles', label: 'Vehicles', path: '/admin/vehicles', icon: 'Truck', color: '#3b82f6' },
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
-      { key: 'salary', label: 'Salary', path: '/salary', icon: 'Wallet', color: '#22c55e' },
-    ],
-  },
-  {
-    key: 'partners', label: 'Partners', icon: 'Building2', color: '#14b8a6',
-    children: [
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
       { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
     ],

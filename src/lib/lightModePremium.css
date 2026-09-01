@@ -557,6 +557,13 @@
   color: #5B6577;
 }
 
+/* Preserve button text color inside dialogs (e.g. white on primary gradient) */
+.theme-light [role="dialog"] button span,
+.theme-light [role="dialog"] button p,
+.theme-light [role="dialog"] button label {
+  color: inherit !important;
+}
+
 .theme-light [role="dialog"] [class*="text-white"] {
   color: #172033 !important;
 }

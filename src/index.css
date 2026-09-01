@@ -354,6 +354,33 @@
     opacity: 0.12;
   }
 
+  /* ===== Sidebar section header — recurring colored shine sweep ===== */
+  .nav-section-shine {
+    background: linear-gradient(90deg,
+      hsl(var(--muted-foreground)) 0%,
+      hsl(var(--muted-foreground)) 42%,
+      var(--nav-shine-color, rgb(var(--panel-accent-rgb))) 50%,
+      hsl(var(--muted-foreground)) 58%,
+      hsl(var(--muted-foreground)) 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: nav-section-shine-sweep 5s linear infinite;
+  }
+  @keyframes nav-section-shine-sweep {
+    0% { background-position: 150% 0; }
+    100% { background-position: -150% 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav-section-shine {
+      animation: none;
+      -webkit-text-fill-color: hsl(var(--muted-foreground));
+      color: hsl(var(--muted-foreground));
+    }
+  }
+
   /* ===== Skeuomorphic nav tile — premium 3D icon container ===== */
   .skeuo-tile {
     position: relative;
