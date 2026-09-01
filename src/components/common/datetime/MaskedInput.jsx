@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { buildChars, buildSentinel, segValid, isComplete } from './datetimeUtils';
@@ -31,9 +31,9 @@ export default function MaskedInput({
     return segStart[seg.key] + Math.min((raw[seg.key] || '').length, seg.len);
   }, [activeSeg, raw, segStart, segs]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (editing && inputRef.current) {
-      requestAnimationFrame(() => { try { inputRef.current.setSelectionRange(caretPos, caretPos); } catch {} });
+      try { inputRef.current.setSelectionRange(caretPos, caretPos); } catch {}
     }
   }, [caretPos, editing, raw, inputRef]);
 
@@ -105,7 +105,6 @@ export default function MaskedInput({
     if (invalidFull) setError(true);
     else {
       setError(false); onCommit(next); setActiveSeg(nextActive);
-      if (isComplete(next, segs) && nextActive === seg.key) requestAnimationFrame(() => inputRef.current?.blur());
     }
   };
 

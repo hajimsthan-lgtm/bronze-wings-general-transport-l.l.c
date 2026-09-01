@@ -82,17 +82,18 @@ export default function ClientsPanel() {
       <ClientsAnalytics clients={filtered} trips={fTrips} invoices={fInvoices} loading={loading} onBrowseClients={() => setClientsMode('browse')} /> :
 
       <>
-          <div className="relative mb-5">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+          <div className="flex items-center gap-3 mb-5">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
+            </div>
+            <BrowseActionBar
+              selectedCount={selected.size}
+              onClear={clearSelection}
+              onBulkDelete={bulkDelete}
+              exportProps={{ data: filtered.filter((c) => selected.has(c.id)), filename: 'clients', title: 'Clients', columns: CLIENT_COLUMNS }}
+            />
           </div>
-
-          <BrowseActionBar
-            selectedCount={selected.size}
-            onClear={clearSelection}
-            onBulkDelete={bulkDelete}
-            exportProps={{ data: filtered.filter((c) => selected.has(c.id)), filename: 'clients', title: 'Clients', columns: CLIENT_COLUMNS }}
-          />
 
           {loading ? <LoadingSpinner layout={view} /> : filtered.length === 0 ? <EmptyState icon={Building2} title={t('no_data')} /> :
         view === 'grid' ?

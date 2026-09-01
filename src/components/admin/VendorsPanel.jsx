@@ -73,16 +73,18 @@ export default function VendorsPanel() {
         <VendorsAnalytics vendors={items} expenses={expenses} loading={loading} onAdd={() => { setEditItem(null); setFormOpen(true); }} onBrowse={() => setVendorsMode('browse')} />
       ) : (
         <>
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendors..." className="pl-9 search-2026 h-10" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendors..." className="pl-9 search-2026 h-10" />
+            </div>
+            <BrowseActionBar
+              selectedCount={selected.size}
+              onClear={clearSelection}
+              onBulkDelete={bulkDelete}
+              exportProps={{ data: searched.filter((v) => selected.has(v.id)), filename: 'vendors', title: 'Vendors', columns: VENDOR_COLUMNS }}
+            />
           </div>
-          <BrowseActionBar
-            selectedCount={selected.size}
-            onClear={clearSelection}
-            onBulkDelete={bulkDelete}
-            exportProps={{ data: searched.filter((v) => selected.has(v.id)), filename: 'vendors', title: 'Vendors', columns: VENDOR_COLUMNS }}
-          />
           {loading ? (
             <ResponsiveLoading type="list" count={4} />
           ) : searched.length === 0 ? (
