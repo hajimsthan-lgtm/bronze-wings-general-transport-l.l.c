@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, MoreVertical, Pencil, Trash2, Mail, Phone, ChevronRight } from 'lucide-react';
+import { Store, MoreVertical, Pencil, Trash2, Mail, Phone, ChevronRight, Check } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { formatCurrency } from '@/lib/formatters';
 
 const CAT_COLORS = { fuel: '#1ED760', maintenance: '#f59e0b', parts: '#a855f7', insurance: '#34d399', other: '#94a3b8' };
 const STATUS_COLOR = { active: '#22C55E', inactive: '#94A3B8' };
 
-export default function VendorCard({ v, spend = 0, onEdit, onDelete }) {
+export default function VendorCard({ v, spend = 0, onEdit, onDelete, selected = false, onSelect }) {
   const navigate = useNavigate();
   const [confirmDel, setConfirmDel] = useState(false);
   const tone = CAT_COLORS[v.category] || '#94a3b8';
@@ -16,10 +16,22 @@ export default function VendorCard({ v, spend = 0, onEdit, onDelete }) {
   return (
     <>
       <div
-        className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group"
+        className={`row-card row-edge-glow flex items-center gap-3 cursor-pointer group ${selected ? 'ring-1 ring-primary/50' : ''}`}
         onClick={() => navigate(`/admin/vendors/${v.id}`)}
         style={{ ['--row-accent']: tone }}
       >
+        <div
+          className="flex items-center flex-shrink-0 pr-1"
+          onClick={(e) => { e.stopPropagation(); onSelect?.(!selected); }}
+        >
+          <button
+            type="button"
+            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${selected ? 'bg-primary border-primary' : 'border-border hover:border-primary/60'}`}
+            aria-label={selected ? 'Deselect' : 'Select'}
+          >
+            {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+          </button>
+        </div>
         <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}>
           <Store className="w-5 h-5" style={{ color: tone }} />
         </div>

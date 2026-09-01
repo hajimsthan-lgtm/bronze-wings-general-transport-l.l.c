@@ -1,19 +1,31 @@
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
-import { Pencil, Trash2, ChevronRight, Phone, User } from 'lucide-react';
+import { Pencil, Trash2, ChevronRight, Phone, User, Check } from 'lucide-react';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import StatusBadge from '@/components/common/StatusBadge';
 import { getInitials } from '@/lib/formatters';
 
 const ACCENT = '#10b981';
 
-export default function ClientListRow({ c, onOpen, onEdit, onDelete }) {
+export default function ClientListRow({ c, onOpen, onEdit, onDelete, selected = false, onSelect }) {
   const { t } = useI18n();
   const [confirmDel, setConfirmDel] = useState(false);
 
   return (
     <>
-      <div className="row-card row-edge-glow flex items-start gap-3 cursor-pointer group" onClick={() => onOpen?.(c)} style={{ ['--row-accent']: ACCENT }}>
+      <div className={`row-card row-edge-glow flex items-start gap-3 cursor-pointer group ${selected ? 'ring-1 ring-primary/50' : ''}`} onClick={() => onOpen?.(c)} style={{ ['--row-accent']: ACCENT }}>
+        <div
+          className="flex items-center gap-2.5 flex-shrink-0 pt-0.5 pr-1"
+          onClick={(e) => { e.stopPropagation(); onSelect?.(!selected); }}
+        >
+          <button
+            type="button"
+            className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${selected ? 'bg-primary border-primary' : 'border-border hover:border-primary/60'}`}
+            aria-label={selected ? 'Deselect' : 'Select'}
+          >
+            {selected && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+          </button>
+        </div>
         <div className="relative w-10 h-10 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0 text-sm font-bold" style={{ background: `linear-gradient(135deg, ${ACCENT}50, ${ACCENT}18)`, border: `1px solid ${ACCENT}55`, color: '#fff' }}>
           {c.image_url ? <img src={c.image_url} alt={c.name} className="w-full h-full object-cover" /> : getInitials(c.name)}
         </div>

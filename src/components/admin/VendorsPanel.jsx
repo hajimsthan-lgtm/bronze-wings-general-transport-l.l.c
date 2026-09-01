@@ -14,6 +14,16 @@ import ResponsiveLoading from '@/components/mobile/ResponsiveLoading';
 import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { useVendorsMode, setVendorsMode } from '@/lib/vendorsStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import BrowseActionBar from '@/components/common/BrowseActionBar';
+
+const VENDOR_COLUMNS = [
+  { label: 'Name', key: 'name', w: 24 },
+  { label: 'Category', key: 'category', w: 16 },
+  { label: 'Contact', key: 'contact_person', w: 18 },
+  { label: 'Phone', key: 'phone', w: 16 },
+  { label: 'Email', key: 'email', w: 24 },
+  { label: 'Status', key: 'status', w: 12 },
+];
 
 export default function VendorsPanel() {
   const { t } = useI18n();
@@ -24,6 +34,14 @@ export default function VendorsPanel() {
   const [editItem, setEditItem] = useState(null);
   const mode = useVendorsMode();
   const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearSelection = () => setSelected(new Set());
+  const bulkDelete = async () => {
+    for (const id of selected) { await base44.entities.Vendor.delete(id).catch(() => {}); }
+    clearSelection(); load();
+  };
 
   const load = () => {
     setLoading(true);
@@ -59,6 +77,12 @@ export default function VendorsPanel() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendors..." className="pl-9 search-2026 h-10" />
           </div>
+          <BrowseActionBar
+            selectedCount={selected.size}
+            onClear={clearSelection}
+            onBulkDelete={bulkDelete}
+            exportProps={{ data: searched.filter((v) => selected.has(v.id)), filename: 'vendors', title: 'Vendors', columns: VENDOR_COLUMNS }}
+          />
           {loading ? (
             <ResponsiveLoading type="list" count={4} />
           ) : searched.length === 0 ? (
@@ -69,7 +93,7 @@ export default function VendorsPanel() {
           ) : (
             <div className="space-y-2">
               {visVendors.map((v) => (
-                <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
+                <VendorCard key={v.id} v={v} spend={spendMap[v.name] || 0} selected={selected.has(v.id)} onSelect={() => toggleSelect(v.id)} onEdit={handleEdit} onDelete={async (vendor) => { await base44.entities.Vendor.delete(vendor.id); load(); }} />
               ))}
               {hasMoreVendors && (
                 <div {...venSentinel} className="text-center text-xs text-muted-foreground py-4">

@@ -16,6 +16,16 @@ import MobileFAB from '@/components/mobile/MobileFAB';
 import { useGlobalDate, inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { useClientsMode, setClientsMode, setClientsData, getClientsView } from '@/lib/clientsStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import BrowseActionBar from '@/components/common/BrowseActionBar';
+
+const CLIENT_COLUMNS = [
+  { label: 'Name', key: 'name', w: 24 },
+  { label: 'Contact', key: 'contact_person', w: 20 },
+  { label: 'Phone', key: 'phone', w: 16 },
+  { label: 'Email', key: 'email', w: 24 },
+  { label: 'TRN', key: 'trn', w: 18 },
+  { label: 'Status', key: 'status', w: 12 },
+];
 
 export default function ClientsPanel() {
   const { t } = useI18n();
@@ -30,6 +40,14 @@ export default function ClientsPanel() {
   const { mode } = useClientsMode();
   const view = getClientsView();
   const { dateFrom, dateTo } = useGlobalDate();
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearSelection = () => setSelected(new Set());
+  const bulkDelete = async () => {
+    for (const id of selected) { await base44.entities.Client.delete(id).catch(() => {}); }
+    clearSelection(); load();
+  };
 
   const load = () => {
     setLoading(true);
@@ -69,7 +87,14 @@ export default function ClientsPanel() {
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
           </div>
 
-          {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Building2} title={t('no_data')} /> :
+          <BrowseActionBar
+            selectedCount={selected.size}
+            onClear={clearSelection}
+            onBulkDelete={bulkDelete}
+            exportProps={{ data: filtered.filter((c) => selected.has(c.id)), filename: 'clients', title: 'Clients', columns: CLIENT_COLUMNS }}
+          />
+
+          {loading ? <LoadingSpinner layout={view} /> : filtered.length === 0 ? <EmptyState icon={Building2} title={t('no_data')} /> :
         view === 'grid' ?
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {visClients.map((c) =>
@@ -84,7 +109,7 @@ export default function ClientsPanel() {
 
         <div className="space-y-2">
                 {visClients.map((c) =>
-          <ClientListRow key={c.id} c={c} onOpen={(cc) => navigate(`/admin/clients/${cc.id}`)} onEdit={(cc) => {setEditItem(cc);setFormOpen(true);}} onDelete={async (cc) => {await base44.entities.Client.delete(cc.id);load();}} />
+          <ClientListRow key={c.id} c={c} selected={selected.has(c.id)} onSelect={() => toggleSelect(c.id)} onOpen={(cc) => navigate(`/admin/clients/${cc.id}`)} onEdit={(cc) => {setEditItem(cc);setFormOpen(true);}} onDelete={async (cc) => {await base44.entities.Client.delete(cc.id);load();}} />
           )}
                 {hasMoreClients && (
                   <div {...cliSentinel} className="text-center text-xs text-muted-foreground py-4">

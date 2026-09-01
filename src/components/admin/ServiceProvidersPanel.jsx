@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Store, Plus, Truck, Users, TrendingDown, Wrench } from 'lucide-react';
+import { Search, Store, Plus, Truck, Users, TrendingDown, Wrench, Check } from 'lucide-react';
+import BrowseActionBar from '@/components/common/BrowseActionBar';
 import { useVendorsMode } from '@/lib/vendorsStore';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -22,6 +23,15 @@ const TYPE_LABELS = { vehicle_supplier: 'Vehicle Supplier', driver_supplier: 'Dr
 const TYPE_COLORS = { vehicle_supplier: '#3b82f6', driver_supplier: '#0ea5e9', both: '#8b5cf6' };
 const STATUS_COLOR = { active: '#22C55E', inactive: '#94A3B8' };
 
+const PROVIDER_COLUMNS = [
+  { label: 'Name', key: 'name', w: 24 },
+  { label: 'Type', key: 'type', w: 18 },
+  { label: 'Vehicles', key: 'vehicles', numeric: true, w: 12 },
+  { label: 'Drivers', key: 'drivers', numeric: true, w: 12 },
+  { label: 'Spend', key: 'spend', numeric: true, w: 16 },
+  { label: 'Status', key: 'status', w: 12 },
+];
+
 export default function ServiceProvidersPanel() {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -34,6 +44,14 @@ export default function ServiceProvidersPanel() {
   const [editItem, setEditItem] = useState(null);
   const mode = useVendorsMode();
   const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearSelection = () => setSelected(new Set());
+  const bulkDelete = async () => {
+    for (const id of selected) { await base44.entities.Vendor.delete(id).catch(() => {}); }
+    clearSelection(); load();
+  };
 
   const load = () => {
     setLoading(true);
@@ -89,32 +107,36 @@ export default function ServiceProvidersPanel() {
             <p className="text-sm text-muted-foreground">Vehicle & driver suppliers</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <ExportButtons data={exportData} filename="service-providers" title="Service Providers" columns={[
-            { label: 'Name', key: 'name' }, { label: 'Type', key: 'type' },
-            { label: 'Vehicles', key: 'vehicles', numeric: true }, { label: 'Drivers', key: 'drivers', numeric: true },
-            { label: 'Spend', key: 'spend', numeric: true }, { label: 'Status', key: 'status' },
-          ]} />
-        </div>
+
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={0} label="Total Providers" value={vendors.length} icon={Store} color="#f59e0b" />
-        <ReportStatCard index={1} label="Vehicles Supplied" value={totalVehicles} icon={Truck} color="#3b82f6" />
-        <ReportStatCard index={2} label="Drivers Supplied" value={totalDrivers} icon={Users} color="#0ea5e9" />
-        <ReportStatCard index={3} label="Total Spend" value={totalSpend} format={formatCurrency} icon={TrendingDown} color="#ef4444" />
-      </div>
+      {mode === 'analytics' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <ReportStatCard index={0} label="Total Providers" value={vendors.length} icon={Store} color="#f59e0b" />
+          <ReportStatCard index={1} label="Vehicles Supplied" value={totalVehicles} icon={Truck} color="#3b82f6" />
+          <ReportStatCard index={2} label="Drivers Supplied" value={totalDrivers} icon={Users} color="#0ea5e9" />
+          <ReportStatCard index={3} label="Total Spend" value={totalSpend} format={formatCurrency} icon={TrendingDown} color="#ef4444" />
+        </div>
+      )}
 
       {mode === 'browse' && (
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search service providers..." className="pl-9 search-2026 h-10" />
-        </div>
+        <>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search service providers..." className="pl-9 search-2026 h-10" />
+          </div>
+          <BrowseActionBar
+            selectedCount={selected.size}
+            onClear={clearSelection}
+            onBulkDelete={bulkDelete}
+            exportProps={{ data: exportData.filter((row, i) => selected.has(vendors[i]?.id)), filename: 'service-providers', title: 'Service Providers', columns: PROVIDER_COLUMNS }}
+          />
+        </>
       )}
 
       {mode === 'analytics' ? (
         <div className="space-y-4">
-          {loading ? <LoadingSpinner /> : vendors.length === 0 ? (
+          {loading ? <LoadingSpinner layout="stats" /> : vendors.length === 0 ? (
             <EmptyState icon={Wrench} title="No service providers yet" description="Add a service provider to track vehicle and driver suppliers." />
           ) : (
             <div className="space-y-2">
@@ -155,15 +177,20 @@ export default function ServiceProvidersPanel() {
           )}
         </div>
       ) : (
-        loading ? <LoadingSpinner /> : searched.length === 0 ? (
+        loading ? <LoadingSpinner layout="list" /> : searched.length === 0 ? (
           <EmptyState icon={Wrench} title="No service providers found" />
         ) : (
           <div className="space-y-2">
             {visProviders.map((v) => {
               const tone = TYPE_COLORS[v.provider_type] || '#94a3b8';
               return (
-                <div key={v.id} className="row-card row-edge-glow flex items-center gap-3 cursor-pointer group" onClick={() => navigate(`/admin/service-providers/${v.id}`)} style={{ ['--row-accent']: tone }}>
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}>
+                 <div key={v.id} className={`row-card row-edge-glow flex items-center gap-3 cursor-pointer group ${selected.has(v.id) ? 'ring-1 ring-primary/50' : ''}`} onClick={() => navigate(`/admin/service-providers/${v.id}`)} style={{ ['--row-accent']: tone }}>
+                   <div className="flex items-center flex-shrink-0 pr-1" onClick={(e) => { e.stopPropagation(); toggleSelect(v.id); }}>
+                     <button type="button" className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${selected.has(v.id) ? 'bg-primary border-primary' : 'border-border hover:border-primary/60'}`} aria-label={selected.has(v.id) ? 'Deselect' : 'Select'}>
+                       {selected.has(v.id) && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
+                     </button>
+                   </div>
+                   <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${tone}1a`, border: `1px solid ${tone}55` }}>
                     <Wrench className="w-5 h-5" style={{ color: tone }} />
                   </div>
                   <div className="flex-1 min-w-0">

@@ -16,6 +16,16 @@ import { Plus, Search, Users } from 'lucide-react';
 import MobileFAB from '@/components/mobile/MobileFAB';
 import { useDriversMode, setDriversMode, setDriversData, getDriversView } from '@/lib/driversStore';
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
+import BrowseActionBar from '@/components/common/BrowseActionBar';
+
+const DRIVER_COLUMNS = [
+  { label: 'Name', key: 'name', w: 24 },
+  { label: 'Phone', key: 'phone', w: 18 },
+  { label: 'License #', key: 'license_number', w: 18 },
+  { label: 'Nationality', key: 'nationality', w: 16 },
+  { label: 'Vehicle', key: 'assigned_vehicle', w: 18 },
+  { label: 'Status', key: 'status', w: 14 },
+];
 
 export default function Drivers() {
   return <DriversTab />;
@@ -33,6 +43,14 @@ function DriversTab() {
   const { mode } = useDriversMode();
   const view = getDriversView();
   const { dateFrom, dateTo } = useGlobalDate();
+  const [selected, setSelected] = useState(new Set());
+
+  const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const clearSelection = () => setSelected(new Set());
+  const bulkDelete = async () => {
+    for (const id of selected) { await base44.entities.Driver.delete(id).catch(() => {}); }
+    clearSelection(); load();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -73,7 +91,14 @@ function DriversTab() {
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
           </div>
 
-          {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> :
+          <BrowseActionBar
+            selectedCount={selected.size}
+            onClear={clearSelection}
+            onBulkDelete={bulkDelete}
+            exportProps={{ data: filtered.filter((d) => selected.has(d.id)), filename: 'drivers', title: 'Drivers', columns: DRIVER_COLUMNS }}
+          />
+
+          {loading ? <LoadingSpinner layout={view} /> : filtered.length === 0 ? <EmptyState icon={Users} title={t('no_data')} /> :
             view === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visDrivers.map((d) => (
@@ -88,7 +113,7 @@ function DriversTab() {
             ) : (
               <div className="space-y-2">
                 {visDrivers.map((d) => (
-                  <DriverListRow key={d.id} d={d} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
+                  <DriverListRow key={d.id} d={d} selected={selected.has(d.id)} onSelect={() => toggleSelect(d.id)} onOpen={(dd) => navigate(`/admin/drivers/${dd.id}`)} onEdit={(dd) => { setEditItem(dd); setFormOpen(true); }} onDelete={async (dd) => { await base44.entities.Driver.delete(dd.id); load(); }} />
                 ))}
                 {hasMoreDrivers && (
                   <div {...drvSentinel} className="text-center text-xs text-muted-foreground py-4">

@@ -118,17 +118,19 @@ export default function Fuel() {
         }
       />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <ReportStatCard index={0} label="Total Cost" value={totalCost} format={formatCurrency} icon={FuelIcon} color="#14b8a6" />
-        <ReportStatCard index={1} label="Total Liters" value={totalLiters} format={(v) => `${Math.round(v).toLocaleString()} L`} icon={Droplets} color="#f97316" />
-        <ReportStatCard index={2} label="Avg Price / L" value={avgPrice} format={formatCurrency} icon={Gauge} color="#3b82f6" />
-        <ReportStatCard index={3} label="Vehicles Fueled" value={vehiclesFueled} icon={Truck} color="#a855f7" />
-      </div>
-
-      {/* Analytics Dashboard */}
-      {fuelMode === 'analytics' && !loading && filtered.length > 0 && (
-        <FuelAnalytics records={filtered} dateFrom={dateFrom} dateTo={dateTo} />
+      {/* Analytics Dashboard — KPIs + charts (analytics mode only) */}
+      {fuelMode === 'analytics' && !loading && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <ReportStatCard index={0} label="Total Cost" value={totalCost} format={formatCurrency} icon={FuelIcon} color="#14b8a6" />
+            <ReportStatCard index={1} label="Total Liters" value={totalLiters} format={(v) => `${Math.round(v).toLocaleString()} L`} icon={Droplets} color="#f97316" />
+            <ReportStatCard index={2} label="Avg Price / L" value={avgPrice} format={formatCurrency} icon={Gauge} color="#3b82f6" />
+            <ReportStatCard index={3} label="Vehicles Fueled" value={vehiclesFueled} icon={Truck} color="#a855f7" />
+          </div>
+          {filtered.length > 0 && (
+            <FuelAnalytics records={filtered} dateFrom={dateFrom} dateTo={dateTo} />
+          )}
+        </>
       )}
 
       {/* Records List */}
@@ -139,8 +141,8 @@ export default function Fuel() {
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
           </div>
           {loading ? (
-        <LoadingSpinner />
-      ) : searched.length === 0 ? (
+          <LoadingSpinner layout="list" />
+          ) : searched.length === 0 ? (
         <EmptyState icon={Droplets} title="No fuel records" description="Add your first fuel record to start tracking consumption" />
       ) : (
         <div className="glass-card rounded-2xl p-4 sm:p-5">

@@ -27,6 +27,19 @@ import { useVehiclesMode, setVehiclesMode, setVehiclesView, setVehiclesData } fr
 import { useProgressiveRender } from '@/hooks/useProgressiveRender';
 import VehicleCatalogBuilder from '@/components/admin/VehicleCatalogBuilder';
 import ExportButtons from '@/components/common/ExportButtons';
+import BrowseActionBar from '@/components/common/BrowseActionBar';
+
+const VEHICLE_COLUMNS = [
+  { label: 'Plate', key: 'plate_number', w: 20 },
+  { label: 'Year', key: 'year', w: 12 },
+  { label: 'Category', key: 'category', w: 38, transform: (v) => { const m = (v.notes || '').match(/^Vehicle Category:\s*(.+)$/m); return m ? m[1].trim() : ''; } },
+  { label: 'Vehicle Type', key: 'vehicleType', w: 35, transform: (v) => { const m = (v.notes || '').match(/^Vehicle Type:\s*(.+)$/m); return m ? m[1].trim() : ''; } },
+  { label: 'Status', key: 'status', w: 18 },
+  { label: 'Driver', key: 'assigned_driver', w: 22 },
+  { label: 'Reg Expiry', key: 'registration_expiry', w: 22 },
+  { label: 'Ins Expiry', key: 'insurance_expiry', w: 22 },
+  { label: 'Fuel', key: 'fuel_type', w: 12 },
+];
 
 export default function Vehicles() {
   return <VehiclesTab />;
@@ -144,13 +157,14 @@ function VehiclesTab() {
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`${t('search')}...`} className="pl-9 search-2026 h-10" />
           </div>
 
-          {/* Export sub-header — slides in with transition */}
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 mb-4 px-5 py-3 rounded-xl bg-muted/30 border border-border/40 animate-fade-in-up">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{filtered.length} vehicles</span>
-            <ExportButtons data={filtered} filename="vehicles" title="Vehicles" columns={[{ label: 'Plate', key: 'plate_number', w: 20 }, { label: 'Year', key: 'year', w: 12 }, { label: 'Category', key: 'category', w: 38, transform: (v) => { const m = (v.notes || '').match(/^Vehicle Category:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Vehicle Type', key: 'vehicleType', w: 35, transform: (v) => { const m = (v.notes || '').match(/^Vehicle Type:\s*(.+)$/m); return m ? m[1].trim() : ''; } }, { label: 'Status', key: 'status', w: 18 }, { label: 'Driver', key: 'assigned_driver', w: 22 }, { label: 'Reg Expiry', key: 'registration_expiry', w: 22 }, { label: 'Ins Expiry', key: 'insurance_expiry', w: 22 }, { label: 'Fuel', key: 'fuel_type', w: 12 }]} />
-          </div>
+          <BrowseActionBar
+            selectedCount={selected.size}
+            onClear={clearSelection}
+            onBulkDelete={bulkDelete}
+            exportProps={{ data: filtered.filter((v) => selected.has(v.id)), filename: 'vehicles', title: 'Vehicles', columns: VEHICLE_COLUMNS }}
+          />
 
-          {loading ? <LoadingSpinner /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
+          {loading ? <LoadingSpinner layout={view} /> : filtered.length === 0 ? <EmptyState icon={Truck} title={t('no_data')} /> :
           view === 'grid' ? (
             themeMode === 'light' ? (
               <div data-tour data-tour-title="Vehicle List" data-tour-en="Each card is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر کارڈ ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ കാർഡും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ വിവരങ്ങൾ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക.">
@@ -192,15 +206,6 @@ function VehiclesTab() {
             )
           ) : (
             <div data-tour data-tour-title="Vehicle List" data-tour-en="Each row is a vehicle. Tap to open its full profile, edit details, or remove it. Switch between grid and list views using the toggle above." data-tour-ur="ہر قطار ایک گاڑی ہے۔ اس کی مکمل پروفائل کھولنے، تفصیلات میں ترمیم، یا اسے ہٹانے کے لیے ٹیپ کریں۔" data-tour-ml="ഓരോ വരിയും ഒരു വാഹനമാണ്. പ്രൊഫൈൽ തുറക്കാനോ എഡിറ്റുചെയ്യാനോ നീക്കംചെയ്യാനോ ടാപ്പുചെയ്യുക." className="space-y-2">
-              {selected.size > 0 && (
-                <div className="flex items-center justify-between gap-3 mb-3 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/30">
-                  <p className="text-xs font-semibold text-primary">{selected.size} selected</p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={clearSelection} className="h-8 border-border">{t('cancel')}</Button>
-                    <Button size="sm" onClick={bulkDelete} className="h-8 bg-destructive hover:bg-destructive/90"><Trash2 className="w-3.5 h-3.5 mr-1" />{t('delete')} all</Button>
-                  </div>
-                </div>
-              )}
               {visVehicles.map((v) => (
                 <VehicleListRow key={v.id} v={v} selected={selected.has(v.id)} onSelect={() => toggleSelect(v.id)} onOpen={() => navigate(`/admin/vehicles/${v.id}`)} onEdit={() => openEdit(v)} onDelete={async () => { await base44.entities.Vehicle.delete(v.id); load(); }} />
               ))}
