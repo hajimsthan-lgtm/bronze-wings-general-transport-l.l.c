@@ -421,9 +421,9 @@ export default function Operations() {
       onImported: () => { refetchTrips(); refetchInvoices(); },
     });
     // Debugger is only relevant for trips (not contracts)
-    setOpsDebug(showTrips ? { onRun: () => setDebuggerOpen(true) } : null);
+    setOpsDebug(mode !== 'contract' ? { onRun: () => setDebuggerOpen(true) } : null);
     return () => { clearOpsFilter(); setOpsDebug(null); };
-  }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport, showTrips]);
+  }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
   const showTrips = mode === 'all' || mode === 'trip';
