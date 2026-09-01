@@ -138,7 +138,8 @@ export default function DateTimePicker({ value, onChange, placeholder = 'Pick da
     const raw = e.target.value;
     setIsEditing(true);
     const formatted = autoFormat(raw);
-    setManualText(formatted);
+    // Ensure placeholder vanishes as soon as the user types anything
+    setManualText(formatted === '' && raw !== '' ? raw : formatted);
   };
 
   const handleManualBlur = () => {

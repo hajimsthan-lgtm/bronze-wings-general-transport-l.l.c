@@ -28,7 +28,7 @@ export default function DocumentListPane({
 }) {
   const { visible, sentinelProps, hasMore, visibleCount, totalCount } = useProgressiveRender(items);
   return (
-    <div className="glass-card rounded-2xl flex flex-col h-full min-h-0 overflow-hidden">
+    <div className="edge-panel pane-edge-neon rounded-2xl flex flex-col h-full min-h-0 overflow-hidden">
       {/* Tab header */}
       <div className="flex items-center gap-1 px-3 pt-3 border-b border-border/40">
         {tabs.map(t => (

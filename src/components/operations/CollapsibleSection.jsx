@@ -59,7 +59,7 @@ export default function CollapsibleSection({
   const a = ACCENTS[accent] || ACCENTS.blue;
 
   return (
-    <div className="rounded-xl border border-border/50 overflow-hidden bg-background/30">
+    <div className="edge-panel pane-edge-neon rounded-xl overflow-hidden">
       {/* Collapsible header bar */}
       <button
         onClick={() => setCollapsed((c) => !c)}

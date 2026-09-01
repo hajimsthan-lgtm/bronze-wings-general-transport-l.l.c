@@ -802,6 +802,41 @@
     border: 1px solid hsl(var(--border));
     box-shadow: 0 16px 44px -22px rgba(var(--panel-accent-rgb), 0.30), inset 0 1px 0 rgba(255,255,255,0.9);
   }
+
+  /* ===== Pane edge neon — animated border, hover only ===== */
+  .pane-edge-neon { position: relative; isolation: isolate; }
+  .pane-edge-neon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(from var(--pane-angle, 0deg),
+      transparent 0deg,
+      rgb(var(--panel-accent-rgb)) 35deg,
+      rgb(var(--panel-accent2-rgb)) 75deg,
+      transparent 120deg,
+      transparent 240deg,
+      rgb(var(--panel-accent2-rgb)) 280deg,
+      rgb(var(--panel-accent-rgb)) 320deg,
+      transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .pane-edge-neon:hover::after {
+    opacity: 1;
+    animation: pane-edge-spin 3s linear infinite;
+  }
+  @property --pane-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  @keyframes pane-edge-spin { to { --pane-angle: 360deg; } }
+  @media (prefers-reduced-motion: reduce) { .pane-edge-neon:hover::after { animation: none !important; } }
+
   .edge-glow { position: relative; }
   .edge-glow::before {
     content: '';

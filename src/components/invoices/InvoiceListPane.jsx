@@ -168,7 +168,7 @@ export default function InvoiceListPane({
   };
 
   return (
-    <section className="edge-panel rounded-2xl h-full flex flex-col overflow-hidden">
+    <section className="edge-panel pane-edge-neon rounded-2xl h-full flex flex-col overflow-hidden">
       {/* Header — search + select toggle */}
       <div className="p-3 sm:p-4 border-b border-border/40 glass-soft">
         <div className="flex items-center gap-2">
