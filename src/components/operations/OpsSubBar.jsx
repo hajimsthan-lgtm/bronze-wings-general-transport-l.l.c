@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react';
+import { Search, X, Bug } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
@@ -58,6 +58,18 @@ export default function OpsSubBar() {
       )}
 
       <div className="flex-1 min-w-0" />
+
+      {/* Data-integrity Debugger — opens the scanner modal */}
+      {ops.debug?.onRun && (
+        <button
+          onClick={ops.debug.onRun}
+          title="Check trips for data errors"
+          className="shine-sweep flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs font-semibold text-white transition-all whitespace-nowrap shrink-0 bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-[0_0_0_1px_rgba(139,92,246,0.4),0_6px_18px_-6px_rgba(139,92,246,0.6)] hover:brightness-110 hover:-translate-y-0.5"
+        >
+          <Bug className="w-3.5 h-3.5" />
+          <span className="hidden lg:inline">Check Errors</span>
+        </button>
+      )}
 
       {/* Bulk actions — published by TripsTable into the shared store.
           Always mounted so AnimatePresence can play the exit transition. */}
