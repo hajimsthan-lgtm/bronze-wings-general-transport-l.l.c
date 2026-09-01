@@ -258,6 +258,8 @@ const TABLE_COLS = [
 // Verify: 16+18+20+38+30+14+18+18+22 = 194 ✓
 
 function drawTableBanner(pdf, vehiclePlate, y) {
+  // Small gap so the separator line doesn't sit on top of the letterhead border
+  y += 3;
   // Thin separator line above title
   dc(pdf, LIGHT_GRAY);
   pdf.setLineWidth(0.2);

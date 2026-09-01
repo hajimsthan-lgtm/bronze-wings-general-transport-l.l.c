@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Truck, FileText, X, Check, Loader2, Save, AlertCircle } from 'lucide-react';
+import { Truck, FileText, X, Check, Loader2, Save, AlertCircle, AlertTriangle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -66,6 +67,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [mapCollapsed, setMapCollapsed] = useState(true);
   const [errors, setErrors] = useState({});
+  const [statusConfirm, setStatusConfirm] = useState(null); // { oldStatus, newStatus }
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
   const [addOns, setAddOns] = useState([]);
@@ -377,8 +379,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     return true;
   };
 
-  const handleSubmit = async () => {
-    if (mode === 'trip' && !editTrip && !validateTrip()) return;
+  const doSubmit = async () => {
     setSaving(true);
     try {
       if (mode === 'trip') {
@@ -453,6 +454,16 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } finally {setSaving(false);}
   };
 
+  const handleSubmit = () => {
+    if (mode === 'trip' && !editTrip && !validateTrip()) return;
+    // When editing, confirm if status changed
+    if (editTrip && form.status && form.status !== editTrip.status) {
+      setStatusConfirm({ oldStatus: editTrip.status, newStatus: form.status });
+      return;
+    }
+    doSubmit();
+  };
+
   const fromSuggestions = [...new Set(tripsList.map((tr) => tr.from_location).filter(Boolean))];
   const toSuggestions = [...new Set(tripsList.map((tr) => tr.to_location).filter(Boolean))];
   const companyVehicles = vehicles.filter((v) => !v.vendor_name);
@@ -523,8 +534,38 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     allVehicles: vehicles, allDrivers: drivers, allClients: clients
   };
 
+  const STATUS_LABELS = {
+    scheduled: 'Scheduled', in_progress: 'In Progress', completed: 'Completed',
+    cancelled: 'Cancelled', on_hold: 'On Hold'
+  };
+
   return (
     <>
+    {/* Status change confirmation */}
+    <AlertDialog open={!!statusConfirm} onOpenChange={(o) => { if (!o) setStatusConfirm(null); }}>
+      <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-warning/30">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-warning" />
+            Confirm Status Change
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            You are changing the trip status from{' '}
+            <span className="font-semibold text-foreground">{STATUS_LABELS[statusConfirm?.oldStatus] || statusConfirm?.oldStatus}</span>
+            {' '}to{' '}
+            <span className="font-semibold text-foreground">{STATUS_LABELS[statusConfirm?.newStatus] || statusConfirm?.newStatus}</span>.
+            {' '}Do you want to proceed?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setStatusConfirm(null)}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={() => { setStatusConfirm(null); doSubmit(); }}>
+            Yes, Update Status
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
           onInteractOutside={(e) => e.preventDefault()}

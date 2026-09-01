@@ -1,7 +1,7 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Fragment } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { buildChars, buildSentinel, segValid, isComplete } from './datetimeUtils';
+import { buildSentinel, segValid, isComplete } from './datetimeUtils';
 
 /**
  * Reusable masked, segment-based input (date or time).
@@ -108,7 +108,6 @@ export default function MaskedInput({
     }
   };
 
-  const chars = buildChars(raw, segs, seps);
   const sentinel = buildSentinel(raw, segs, seps);
   const hasValue = segs.some((s) => (raw[s.key] || '').length > 0);
 
@@ -132,7 +131,7 @@ export default function MaskedInput({
         name={name}
         required={required}
         className={cn(
-          'w-full h-10 px-3 py-1 pl-9 text-sm font-mono tabular-nums leading-none transition-all duration-200 text-transparent caret-foreground placeholder:text-muted-foreground focus-visible:outline-none',
+          'w-full h-10 px-3 py-1 pl-9 text-sm font-mono tabular-nums leading-none transition-all duration-200 text-transparent caret-transparent placeholder:text-muted-foreground focus-visible:outline-none',
           hasValue && !disabled && 'pr-8',
           bare
             ? 'bg-transparent border-0 shadow-none'
@@ -143,10 +142,32 @@ export default function MaskedInput({
           disabled && 'opacity-50 cursor-not-allowed'
         )}
       />
-      <div aria-hidden className="absolute inset-0 flex items-center px-3 py-1 pl-9 text-sm font-mono tabular-nums leading-none pointer-events-none whitespace-pre select-none">
-        {chars.map((c, i) => (
-          <span key={i} className={c.typed === null ? '' : c.typed ? 'text-foreground' : 'text-muted-foreground/45'}>{c.ch}</span>
-        ))}
+      <div aria-hidden className="absolute inset-0 flex items-center pl-9 pr-3 py-1 text-sm font-mono tabular-nums leading-none pointer-events-none select-none gap-1">
+        {segs.map((seg, i) => {
+          const val = raw[seg.key] || '';
+          const isActive = editing && seg.key === activeSeg;
+          const cells = [];
+          for (let s = 0; s < seg.len; s++) {
+            if (s < val.length) cells.push({ ch: val[s], typed: true });
+            else if (Array.isArray(seg.ph)) cells.push({ ch: seg.ph[s], typed: false });
+            else cells.push({ ch: seg.ph, typed: false });
+          }
+          return (
+            <Fragment key={seg.key}>
+              <span className={cn(
+                'flex items-center justify-center rounded-md h-7 px-1.5 transition-all duration-200',
+                isActive
+                  ? 'bg-white ring-2 ring-primary shadow-[0_0_12px_-2px_rgba(var(--panel-accent-rgb),0.5)]'
+                  : 'bg-white/70'
+              )}>
+                {cells.map((c, ci) => (
+                  <span key={ci} className={c.typed ? 'text-black' : 'text-black/30'}>{c.ch}</span>
+                ))}
+              </span>
+              {i < segs.length - 1 && <span className="text-muted-foreground/50 px-0.5">{seps[i]}</span>}
+            </Fragment>
+          );
+        })}
       </div>
       {hasValue && !disabled && (
         <button type="button" onClick={onClear} aria-label="Clear" title="Clear" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground hover:text-background transition-colors z-10">
