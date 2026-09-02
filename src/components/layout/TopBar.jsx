@@ -18,7 +18,6 @@ import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered,
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
 import { useVendorsMode, setVendorsMode, useVendorsView, setVendorsView } from '@/lib/vendorsStore';
-import { useSalaryMode, setSalaryMode, getSalaryData, useSalarySelected, clearSalarySelected } from '@/lib/salaryStore';
 import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, clearInvoicesFilters } from '@/lib/invoicesStore';
 import { useLedgerState, setLedgerMode, setLedgerView } from '@/lib/ledgerStore';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -54,9 +53,6 @@ export default function TopBar() {
   const isVendorsPage = location.pathname === '/admin/vendors';
   const venMode = useVendorsMode();
   const venView = useVendorsView();
-  const isSalaryPage = location.pathname === '/admin/salary' || location.pathname === '/salary';
-  const salMode = useSalaryMode();
-  const salSelected = useSalarySelected();
   const isExpensesPage = location.pathname === '/expenses';
   const expMode = useExpensesMode();
   const isCompanyDocsPage = location.pathname === '/admin/company-documents';
@@ -215,25 +211,12 @@ export default function TopBar() {
               
               </>
             }
-            {isSalaryPage &&
-            <>
-                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
-                  <button onClick={() => setSalaryMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${salMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
-                  <button onClick={() => setSalaryMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${salMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
-                </div>
-                {salSelected.length > 0 &&
-              <div className="hidden md:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
-                    <span className="text-xs font-semibold text-primary">{salSelected.length} selected</span>
-                    <button onClick={clearSalarySelected} className="text-xs text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
-                  </div>
-              }
-                <ExportButtons data={getSalaryData()} filename="salary_records" title="Salary Records" columns={[{ label: 'Driver', key: 'driver_name' }, { label: 'Month', key: 'month' }, { label: 'Year', key: 'year' }, { label: 'Base', key: 'base_salary', numeric: true }, { label: 'Overtime', key: 'overtime', numeric: true }, { label: 'Bonus', key: 'bonus', numeric: true }, { label: 'Deductions', key: 'deductions', numeric: true }, { label: 'Net', key: 'net_salary', numeric: true }, { label: 'Status', key: 'status' }, { label: 'Method', key: 'payment_method' }, { label: 'Paid On', key: 'payment_date' }]} />
-                <HeaderActionButton
-                label={t('add_new')}
-                variant="trip"
-                onClick={() => window.dispatchEvent(new CustomEvent('salary:new'))} />
-              
-              </>
+            {(location.pathname === '/admin/salary' || location.pathname === '/salary') &&
+            <HeaderActionButton
+              label={t('add_new')}
+              variant="trip"
+              onClick={() => window.dispatchEvent(new CustomEvent('salary:new'))} />
+
             }
             {isFuelPage &&
             <>

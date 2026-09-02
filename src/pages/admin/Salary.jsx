@@ -7,9 +7,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import ExportButtons from '@/components/common/ExportButtons';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import SalaryFormSheet from '@/components/salary/SalaryFormSheet';
-import SalaryAnalytics from '@/components/salary/SalaryAnalytics';
 import EntityFormDialog from '@/components/common/EntityFormDialog';
-import { useSalaryMode, setSalaryMode, setSalaryData } from '@/lib/salaryStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,7 +37,6 @@ export default function Salary() {
   const [prefillDriver, setPrefillDriver] = useState('');
   const [generating, setGenerating] = useState(false);
   const [busyId, setBusyId] = useState(null);
-  const mode = useSalaryMode();
 
   // Filters
   const now = new Date();
@@ -88,9 +85,6 @@ export default function Salary() {
   }), [records, search, monthFilter, yearFilter, statusFilter]);
 
   const { visible: visSalary, sentinelProps: salSentinel, hasMore: hasMoreSalary, visibleCount: visS, totalCount: totalS } = useProgressiveRender(filtered);
-
-  // Publish filtered records to the shared store so the TopBar export works
-  useEffect(() => { setSalaryData(filtered); }, [filtered]);
 
   const totalPayroll = filtered.reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
   const totalPaid = filtered.filter((r) => r.status === 'paid').reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
@@ -237,16 +231,24 @@ export default function Salary() {
         </Button>
       </div>
 
-      {mode === 'analytics' ? (
-        <SalaryAnalytics records={filtered} drivers={drivers} loading={loading} onBrowse={() => setSalaryMode('browse')} />
-      ) : (
-      <>
+      {/* KPIs */}
+      <ResponsiveStats
+        stats={[
+        { label: 'Total Payroll', value: totalPayroll, format: formatCurrency, icon: Wallet, color: '#38BDF8' },
+        { label: t('paid'), value: totalPaid, format: formatCurrency, icon: CheckCircle2, color: '#22c55e' },
+        { label: t('pending'), value: totalPending, format: formatCurrency, icon: Clock, color: '#f59e0b' },
+        { label: 'Records', value: filtered.length, format: (v) => String(v), icon: CreditCard, color: '#a855f7' }]
+        }
+        desktopGridClass="md:grid-cols-2 lg:grid-cols-4"
+        className="mb-5" />
+      
+
       {/* List */}
       {loading ? <ResponsiveLoading type="list" count={4} /> : filtered.length === 0 ?
       <EmptyState icon={Wallet} title={t('no_data')} description="Generate payroll for the selected month or add a salary record manually." /> :
 
       <div className="space-y-2">
-            {visSalary.map((r) =>
+           {visSalary.map((r) =>
         <div key={r.id} className={`row-card flex items-start gap-3 min-h-[56px] ${r.status === 'paid' ? 'row-card-accent-paid' : r.status === 'partial' ? 'row-card-accent-partial' : 'row-card-accent-pending'}`}>
                <div className="w-10 h-10 rounded-lg entity-avatar flex items-center justify-center flex-shrink-0">
                  <Wallet className="w-4 h-4 text-white/70" />
@@ -309,13 +311,11 @@ export default function Salary() {
         )}
              {hasMoreSalary &&
         <div {...salSentinel} className="text-center text-xs text-muted-foreground py-4">
-               Loading more… ({visS}/{totalS})
+              Loading more… ({visS}/{totalS})
              </div>
         }
              </div>
       }
-      </>
-      )}
 
       {/* Form Dialog */}
       <EntityFormDialog open={formOpen} onOpenChange={setFormOpen} icon={Wallet} title={`${editItem ? t('edit') : t('add_new')} Salary`} subtitle="Create or edit a salary record">

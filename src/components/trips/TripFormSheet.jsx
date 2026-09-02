@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Truck, FileText, X, Check, Loader2, Save, AlertCircle, AlertTriangle, Activity, Upload, Eye, Package } from 'lucide-react';
+import { Truck, FileText, X, Check, Loader2, Save, AlertCircle, AlertTriangle, Activity } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/formatters';
 import { useTripCreate, useTripUpdate } from '@/hooks/useEntityQueries';
 import { useToast } from '@/components/ui/use-toast';
@@ -71,8 +70,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [mapCollapsed, setMapCollapsed] = useState(true);
   const [errors, setErrors] = useState({});
   const [statusConfirm, setStatusConfirm] = useState(null); // { oldStatus, newStatus }
-  const [deliveryPrompt, setDeliveryPrompt] = useState(false);
-  const deliveryFileRef = useRef(null);
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
   const [addOns, setAddOns] = useState([]);
@@ -95,7 +92,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         setVehicles(vehs || []);
         setDrivers(drvs || []);
         setClients(clnts || []);
-        setVendors((vnds || []).filter((v) => ['vehicle_supplier', 'driver_supplier', 'both'].includes(v.provider_type)));
+        setVendors((vnds || []).filter((v) => !v.provider_type || ['vehicle_supplier', 'driver_supplier', 'both'].includes(v.provider_type)));
       });
     }
   }, [open]);
@@ -282,15 +279,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     }
   }, [form.offload_datetime, form.status, form.status_source, mode]);
 
-  // 3. Financial section filled (base_fare > 0 AND revenue > 0) → Trip Ended → Completed (auto)
+  // 3. Financial section filled (revenue > 0) → Trip Ended → Completed (auto)
   useEffect(() => {
     if (mode !== 'trip') return;
     const rev = Number(form.revenue) || 0;
-    const baseFare = Number(form.base_fare) || 0;
-    if (rev > 0 && baseFare > 0 && form.status === 'trip_ended' && form.status_source !== 'manual') {
+    if (rev > 0 && form.status === 'trip_ended' && form.status_source !== 'manual') {
       setForm((prev) => ({ ...prev, status: 'completed', status_source: 'automatic' }));
     }
-  }, [form.revenue, form.base_fare, form.status, form.status_source, mode]);
+  }, [form.revenue, form.status, form.status_source, mode]);
 
   // Manual status change handler — validates restrictions before accepting
   const handleStatusChange = (newStatus) => {
@@ -300,13 +296,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     }
     if (newStatus === 'completed') {
       const rev = Number(form.revenue) || 0;
-      const baseFare = Number(form.base_fare) || 0;
-      if (baseFare <= 0) {
-        toast({ title: 'Cannot set Completed', description: 'Base Fare must be filled before completing a trip.', variant: 'destructive' });
-        return;
-      }
       if (rev <= 0) {
-        toast({ title: 'Cannot set Completed', description: 'Revenue (Amount) must be filled before completing a trip.', variant: 'destructive' });
+        toast({ title: 'Cannot set Completed', description: 'Financial section (Revenue) must be filled before completing a trip.', variant: 'destructive' });
         return;
       }
       if (!form.offload_datetime) {
@@ -434,9 +425,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     }
     if (form.status === 'completed') {
       const rev = Number(form.revenue) || 0;
-      const baseFare = Number(form.base_fare) || 0;
-      if (baseFare <= 0) e.base_fare = 'Base Fare is required to save as Completed';
-      if (rev <= 0) e.revenue = 'Revenue (Amount) is required to save as Completed';
+      if (rev <= 0) e.revenue = 'Revenue is required to save as Completed';
       if (!form.offload_datetime) e.offload_datetime = 'Offload Date & Time is required to save as Completed';
     }
     setErrors(e);
@@ -527,11 +516,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     // When editing, confirm if status changed
     if (editTrip && form.status && form.status !== editTrip.status) {
       setStatusConfirm({ oldStatus: editTrip.status, newStatus: form.status });
-      return;
-    }
-    // For completed trips, optionally prompt for delivery note + attachment
-    if (mode === 'trip' && form.status === 'completed') {
-      setDeliveryPrompt(true);
       return;
     }
     doSubmit();
@@ -632,69 +616,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={() => setStatusConfirm(null)}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => {
-            setStatusConfirm(null);
-            if (form.status === 'completed') { setDeliveryPrompt(true); } else { doSubmit(); }
-          }}>
+          <AlertDialogAction onClick={() => { setStatusConfirm(null); doSubmit(); }}>
             Yes, Update Status
           </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
-    {/* Delivery note prompt — optional, shown when submitting a completed trip */}
-    <AlertDialog open={!!deliveryPrompt} onOpenChange={(o) => { if (!o) setDeliveryPrompt(null); }}>
-      <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-primary/25 max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-primary" />
-            Delivery Note (Optional)
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            This trip is marked as completed. You can add a delivery note number and attachment now, or skip to submit without them.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <div className="space-y-3 py-1">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">Delivery Note #</label>
-            <Input
-              maxLength={50}
-              value={form.delivery_note_number || ''}
-              onChange={(e) => update('delivery_note_number', e.target.value)}
-              className="font-mono text-sm tracking-wider"
-              placeholder="000000"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1.5 block">Delivery Note Attachment</label>
-            <input ref={deliveryFileRef} type="file" className="hidden" onChange={handleFileUpload} accept="image/*,application/pdf" />
-            {form.delivery_note_url ? (
-              <div className="flex items-center gap-2 glass-card p-2.5">
-                <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                <a href={form.delivery_note_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline truncate flex-1">View attachment</a>
-                <Button type="button" variant="ghost" size="sm" onClick={() => update('delivery_note_url', '')} className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400">
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <Button type="button" variant="outline" onClick={() => deliveryFileRef.current?.click()} disabled={uploading} className="w-full border-border border-dashed">
-                <Upload className="w-4 h-4 mr-1.5" /> {uploading ? 'Uploading...' : 'Upload Delivery Note'}
-              </Button>
-            )}
-          </div>
-        </div>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setDeliveryPrompt(null)}>Cancel</AlertDialogCancel>
-          <Button
-            variant="outline"
-            onClick={() => { setDeliveryPrompt(null); doSubmit(); }}
-            className="border-primary/30 text-primary hover:bg-primary/10"
-          >
-            Skip & Submit
-          </Button>
-          <Button onClick={() => { setDeliveryPrompt(null); doSubmit(); }}>
-            <Check className="w-4 h-4" /> Submit
-          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
