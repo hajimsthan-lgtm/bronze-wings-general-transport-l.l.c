@@ -8,7 +8,6 @@ import {
   FileWarning, Receipt, Truck, Wrench, IdCard, FileText,
   CalendarClock, CheckCircle2, AlertTriangle,
   Building2, ShieldCheck, Banknote, UserCheck, Users, ScanLine, Zap,
-  ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import './perspectiveAlertBanner.css';
 
@@ -37,7 +36,7 @@ function hexToRgb(hex) {
 
 export default function PerspectiveAlertBanner() {
   const [alerts, setAlerts] = useState([]);
-  const [index, setIndex] = useState(0);
+  const [centerIndex, setCenterIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const navigate = useNavigate();
 
@@ -73,18 +72,14 @@ export default function PerspectiveAlertBanner() {
     return () => { cancelled = true; };
   }, []);
 
-  // Auto-advance every 5s
+  // Auto-advance every 4s
   useEffect(() => {
     if (paused || alerts.length <= 1) return;
     const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % alerts.length);
-    }, 5000);
+      setCenterIndex((i) => (i + 1) % alerts.length);
+    }, 4000);
     return () => clearInterval(timer);
   }, [paused, alerts.length]);
-
-  const go = useCallback((delta) => {
-    setIndex((i) => (i + delta + alerts.length) % alerts.length);
-  }, [alerts.length]);
 
   const handleClick = useCallback((alert) => {
     navigate(alert.to);
@@ -92,79 +87,77 @@ export default function PerspectiveAlertBanner() {
 
   if (alerts.length === 0) return null;
 
-  const alert = alerts[index];
-  const isCompliance = alert.id?.startsWith('comp-');
-  const sev = isCompliance
-    ? { color: alert.color, glow: hexToRgb(alert.color) }
-    : SEVERITY[alert.severity] || SEVERITY.info;
-  const Icon = ICONS[alert.icon] || AlertTriangle;
-  const isCritical = alert.severity === 'critical';
+  const N = alerts.length;
 
   return (
     <div
-      className="alert-banner"
+      className="perspective-banner"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      style={{ '--sev-color': sev.color, '--sev-glow': sev.glow }}
     >
-      {/* Left severity accent bar */}
-      <div className={`alert-banner-accent ${isCritical ? 'is-critical' : ''}`} />
+      <div className="perspective-banner-glow" />
+      <div className="perspective-banner-track">
+        {alerts.map((alert, i) => {
+          let offset = i - centerIndex;
+          if (offset > N / 2) offset -= N;
+          if (offset < -N / 2) offset += N;
+          const absOffset = Math.abs(offset);
+          if (absOffset > 2) return null;
 
-      {/* Clickable content area */}
-      <button
-        className="alert-banner-content"
-        onClick={() => handleClick(alert)}
-        title={`Open ${alert.title}`}
-      >
-        <span
-          className="alert-banner-icon"
-          style={{ background: `${sev.color}1a`, borderColor: `${sev.color}40` }}
-        >
-          <Icon className="w-4 h-4" style={{ color: sev.color }} />
-          {isCritical && <Zap className="w-2.5 h-2.5 alert-banner-zap" style={{ color: sev.color }} />}
-        </span>
+          const isCompliance = alert.id?.startsWith('comp-');
+          const sev = isCompliance
+            ? { color: alert.color, glow: hexToRgb(alert.color) }
+            : SEVERITY[alert.severity] || SEVERITY.info;
+          const Icon = ICONS[alert.icon] || AlertTriangle;
+          const isCenter = offset === 0;
+          const scale = Math.max(0.72, 1 - absOffset * 0.13);
+          const opacity = Math.max(0.12, 1 - absOffset * 0.38);
 
-        <div className="alert-banner-text">
-          <p className="alert-banner-title">
-            {alert.title}
-            {isCritical && <span className="alert-banner-critical-tag">Critical</span>}
-          </p>
-          <p className="alert-banner-sub">{alert.sub}</p>
-        </div>
-
-        {alert.meta && <span className="alert-banner-meta">{alert.meta}</span>}
-      </button>
-
-      {/* Right controls */}
-      <div className="alert-banner-controls">
-        <span className="alert-banner-counter">
-          <span className="tabular-nums">{index + 1}</span>
-          <span className="alert-banner-counter-sep">/</span>
-          <span className="tabular-nums">{alerts.length}</span>
-        </span>
-        <div className="alert-banner-nav">
-          <button
-            onClick={() => go(-1)}
-            className="alert-banner-nav-btn"
-            aria-label="Previous alert"
-            disabled={alerts.length <= 1}
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => go(1)}
-            className="alert-banner-nav-btn"
-            aria-label="Next alert"
-            disabled={alerts.length <= 1}
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+          return (
+            <div
+              key={alert.id}
+              className={`perspective-banner-item ${isCenter ? 'is-center' : ''} ${alert.severity === 'critical' ? 'is-critical' : ''}`}
+              style={{
+                transform: `translateX(calc(${offset} * min(260px, 22vw))) translateY(-50%) scale(${scale})`,
+                opacity,
+                zIndex: 10 - absOffset,
+                pointerEvents: isCenter ? 'auto' : 'none',
+                '--sev-color': sev.color,
+                '--sev-glow': sev.glow,
+              }}
+              onClick={() => isCenter && handleClick(alert)}
+            >
+              <div className="perspective-banner-card">
+                <span
+                  className="perspective-banner-icon-wrap"
+                  style={{ background: `${sev.color}1a`, borderColor: `${sev.color}40` }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: sev.color }} />
+                </span>
+                <div className="perspective-banner-text">
+                  <p className="perspective-banner-title">{alert.title}</p>
+                  <p className="perspective-banner-sub">{alert.sub}</p>
+                </div>
+                {alert.meta && <span className="perspective-banner-meta">{alert.meta}</span>}
+                {isCenter && alert.severity === 'critical' && (
+                  <Zap className="w-3 h-3 perspective-banner-zap" style={{ color: sev.color }} />
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Progress bar */}
-      <div className={`alert-banner-progress ${paused ? 'is-paused' : ''}`} key={index}>
-        <div className="alert-banner-progress-fill" style={{ '--sev-color': sev.color }} />
+      {/* Navigation dots */}
+      <div className="perspective-banner-dots">
+        {alerts.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCenterIndex(i)}
+            className={`perspective-banner-dot ${i === centerIndex ? 'active' : ''}`}
+            aria-label={`Alert ${i + 1}`}
+          />
+        ))}
       </div>
     </div>
   );

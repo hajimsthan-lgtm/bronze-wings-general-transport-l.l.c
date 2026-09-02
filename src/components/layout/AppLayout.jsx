@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import ShellSidebar from '@/components/layout/ShellSidebar';
 import ShellNavbar from '@/components/layout/ShellNavbar';
 import TopBar from '@/components/layout/TopBar';
-import PerspectiveAlertBanner from '@/components/layout/PerspectiveAlertBanner';
 import MobileHeader from '@/components/layout/MobileHeader';
 import MobileNav from '@/components/layout/MobileNav';
 import MobileCanvasBackground from '@/components/mobile/MobileCanvasBackground';
@@ -42,9 +41,6 @@ export default function AppLayout() {
           <div className="flex-1 min-w-0 min-h-0 flex flex-col">
             <ShellNavbar query={navQuery} setQuery={setNavQuery} />
             <TopBar />
-            <div className="hidden md:block">
-              <PerspectiveAlertBanner />
-            </div>
             <main
               className="flex-1 min-h-0 overflow-y-auto thin-scroll"
               style={{
