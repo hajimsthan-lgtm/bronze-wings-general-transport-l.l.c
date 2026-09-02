@@ -33,13 +33,6 @@ export function clearOpsFilter() {
   emit();
 }
 
-// Deactivate the filter bar but PRESERVE the user's search text — so the
-// search only clears when the user manually clicks the X, never automatically.
-export function deactivateOpsFilter() {
-  state = { ...state, active: false, options: [], value: 'all', counts: {}, mode: 'all', exportConfig: null, onImported: null, bulk: null, debug: null };
-  emit();
-}
-
 // Debugger trigger — published by the Operations page so the OpsSubBar
 // toolbar can open the data-integrity scanner without prop drilling.
 export function setOpsDebug(debug) {

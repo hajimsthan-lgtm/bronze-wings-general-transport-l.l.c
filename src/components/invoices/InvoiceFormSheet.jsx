@@ -332,13 +332,12 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         const created = await createInvoice.mutateAsync(data);
         invoiceId = created?.id;
         invoiceNumber = created?.invoice_number || form.invoice_number;
-        // Always persist the counter so the next suggestion continues from
-        // this number (manual edit OR auto-accepted).  Audit entry is added
-        // only when the user genuinely overrode the suggestion.
-        try {
-          const me = await base44.auth.me().catch(() => null);
-          await persistManualInvoiceNumber(form.invoice_number, suggestedNumber, me?.full_name || me?.email || 'Unknown', created?.id);
-        } catch { /* non-blocking — best-effort */ }
+        if (form.invoice_number !== suggestedNumber) {
+          try {
+            const me = await base44.auth.me().catch(() => null);
+            await persistManualInvoiceNumber(form.invoice_number, suggestedNumber, me?.full_name || me?.email || 'Unknown', created?.id);
+          } catch { /* non-blocking — audit is best-effort */ }
+        }
       }
 
       if (receivePayment && payAmount > 0 && invoiceId) {
