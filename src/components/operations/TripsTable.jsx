@@ -17,10 +17,9 @@ import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import { base44 } from '@/api/base44Client';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
-import TripStatusManager from '@/components/trips/TripStatusManager';
 import BulkEndTripDialog from '@/components/trips/BulkEndTripDialog';
 import BulkCancelDialog from '@/components/trips/BulkCancelDialog';
-import { updateTripStatus, canTransition } from '@/lib/tripStatusWorkflow';
+import { updateTripStatus, canTransition, STATUS_META } from '@/lib/tripStatusWorkflow';
 import { useAuth } from '@/lib/AuthContext';
 
 // Column widths in mm — total = 247mm (landscape A4 usable width)
@@ -480,9 +479,17 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                 <TableCell className="text-left align-top trips-grid-td">
                    <TripRevenueCell trip={trip} />
                  </TableCell>
-                  {/* STATUS — workflow dropdown with conditional modals */}
+                  {/* STATUS — static badge only (status changes via edit form) */}
                   <TableCell onClick={(e) => e.stopPropagation()} className="align-top trips-grid-td">
-                    <TripStatusManager trip={trip} onUpdated={onStatusUpdated} />
+                    {(() => {
+                      const meta = STATUS_META[trip.status] || STATUS_META.scheduled;
+                      return (
+                        <span className={cn('font-bold rounded-full border inline-flex items-center gap-1 text-[10px] px-2 py-1 whitespace-nowrap', meta.textClass, meta.borderClass, meta.bgClass)}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                          {meta.label}
+                        </span>
+                      );
+                    })()}
                   </TableCell>
                 <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-center gap-1">

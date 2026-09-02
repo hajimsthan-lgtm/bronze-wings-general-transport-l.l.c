@@ -5,7 +5,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowRight, Copy, Check, Shield, Eye, Pencil, Trash2, X, FileSpreadsheet, FileText, CheckSquare, Square } from 'lucide-react';
-import TripStatusManager from '@/components/trips/TripStatusManager';
+import { STATUS_META } from '@/lib/tripStatusWorkflow';
+import { cn } from '@/lib/utils';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
 import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
 
@@ -365,9 +366,17 @@ export default function MobileAuroraTripsTable({ trips, onOpenDetail, onEdit, on
                       {formatCurrency(revenue)}
                     </span>
 
-                    {/* Status */}
+                    {/* Status — static badge only */}
                     <div className="flex justify-end pt-0.5" onClick={(e) => e.stopPropagation()}>
-                      <TripStatusManager trip={trip} onUpdated={onStatusUpdated} size="sm" />
+                      {(() => {
+                        const meta = STATUS_META[trip.status] || STATUS_META.scheduled;
+                        return (
+                          <span className={cn('font-bold rounded-full border inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 whitespace-nowrap', meta.textClass, meta.borderClass, meta.bgClass)}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                            {meta.short}
+                          </span>
+                        );
+                      })()}
                     </div>
                   </div>
 
