@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CalendarDays, Clock, X, Zap, Sunrise, Sun, Check, PencilLine } from 'lucide-react';
-import { format, parse, isValid, startOfToday } from 'date-fns';
+import { CalendarDays, Clock, Zap, Check, PencilLine } from 'lucide-react';
+import { format, parse, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { toDate, toCanonical, pad2 } from './datetime/datetimeUtils';
@@ -43,7 +43,7 @@ export default function FriendlyDateTimePicker({
   useEffect(() => {
     if (open) {
       setManualDate(d ? format(d, 'dd-MM-yyyy') : '');
-      setManualTime(d ? format(d, 'h:mm a') : '');
+      setManualTime(d ? format(d, 'h:mm') : '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, value]);
@@ -67,19 +67,20 @@ export default function FriendlyDateTimePicker({
       onChange(toCanonical(nd, mode));
     }
   };
+  const autoFmtTime = (s) => {
+    const digits = s.replace(/\D/g, '').slice(0, 4);
+    if (digits.length > 2) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+    return digits;
+  };
   const commitManualTime = (text) => {
-    const t = (text ?? manualTime).trim().toUpperCase();
+    const t = (text ?? manualTime).trim();
     if (!t) return;
-    let parsed = parse(t, 'h:mm a', new Date());
-    if (!isValid(parsed)) parsed = parse(t, 'hh:mm a', new Date());
-    if (!isValid(parsed)) parsed = parse(t, 'H:mm', new Date());
-    if (!isValid(parsed)) parsed = parse(t, 'HH:mm', new Date());
-    if (isValid(parsed)) {
-      const ex = d || new Date();
-      const nd = new Date(ex);
-      nd.setHours(parsed.getHours(), parsed.getMinutes(), 0, 0);
-      onChange(toCanonical(nd, mode));
-    }
+    const m = t.match(/^(\d{1,2}):?(\d{0,2})$/);
+    if (!m) return;
+    const h12 = parseInt(m[1], 10);
+    const min = m[2] ? parseInt(m[2], 10) : 0;
+    if (h12 < 1 || h12 > 12 || min < 0 || min > 59) return;
+    setTime(h12, min, curAm);
   };
 
   const commitDate = (day) => {
@@ -99,27 +100,10 @@ export default function FriendlyDateTimePicker({
   };
 
   const setNow = () => onChange(toCanonical(new Date(), mode));
-  const clear = () => { onChange(''); setOpen(false); };
-
-  const presets = useMemo(() => {
-    const list = [{ label: 'Now', icon: Zap, fn: setNow }];
-    const today = new Date();
-    if (mode === 'datetime') {
-      const mk = (h, m) => { const nd = new Date(today); nd.setHours(h, m, 0, 0); return toCanonical(nd, mode); };
-      list.push({ label: 'Today 8AM', icon: Sunrise, fn: () => onChange(mk(8, 0)) });
-      list.push({ label: 'Today 1PM', icon: Sun, fn: () => onChange(mk(13, 0)) });
-      list.push({ label: 'Tomorrow 8AM', icon: Sunrise, fn: () => { const nd = new Date(today); nd.setDate(nd.getDate() + 1); nd.setHours(8, 0, 0, 0); onChange(toCanonical(nd, mode)); } });
-    } else {
-      list.push({ label: 'Today', icon: Sunrise, fn: () => onChange(toCanonical(startOfToday(), mode)) });
-    }
-    return list;
-  }, [mode]);
 
   const curH12 = d ? (d.getHours() % 12 === 0 ? 12 : d.getHours() % 12) : 12;
   const curMin = d ? d.getMinutes() : 0;
   const curAm = d ? (d.getHours() < 12 ? 'AM' : 'PM') : 'AM';
-
-  const chip = 'inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-[11px] font-semibold border transition-colors';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -133,20 +117,6 @@ export default function FriendlyDateTimePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent dir={dir} align="start" className="w-[320px] p-3 bg-card/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl z-[200]">
-        {/* Quick presets */}
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {presets.map((p) => (
-            <button key={p.label} type="button" onClick={p.fn}
-              className={cn(chip, 'border-primary/30 bg-primary/10 text-primary hover:bg-primary/20')}>
-              <p.icon className="w-3 h-3" /> {p.label}
-            </button>
-          ))}
-          <button type="button" onClick={clear}
-            className={cn(chip, 'border-border text-muted-foreground hover:text-destructive hover:border-destructive/40')}>
-            <X className="w-3 h-3" /> Clear
-          </button>
-        </div>
-
         {mode === 'datetime' && (
           <div className="flex items-center gap-1 p-0.5 mb-3 rounded-lg bg-muted/40 border border-border">
             <button type="button" onClick={() => setTab('date')}
@@ -183,10 +153,10 @@ export default function FriendlyDateTimePicker({
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <PencilLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                <Input value={manualTime} onChange={(e) => setManualTime(e.target.value.toUpperCase())}
+                <Input value={manualTime} onChange={(e) => setManualTime(autoFmtTime(e.target.value))}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualTime(); } }}
                   onBlur={() => commitManualTime()}
-                  placeholder="HH:MM AM/PM"
+                  placeholder="HH:MM" inputMode="numeric"
                   className="h-8 pl-8 text-sm tabular-nums font-mono" />
               </div>
               <Button type="button" variant="outline" size="sm" onClick={() => commitManualTime()} className="h-8 px-3 text-xs">Set</Button>
