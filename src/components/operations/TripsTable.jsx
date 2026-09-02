@@ -488,7 +488,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                    )}
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
-                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words text-shine-rose" title={trip.to_location || ''}>
                      {trip.to_location || '—'}
                    </div>
                    {trip.permit_required && trip.permit_name && (
