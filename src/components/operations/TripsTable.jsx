@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText, CopyPlus } from 'lucide-react';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText, CopyPlus, Calendar, Flag, Clock } from 'lucide-react';
 import TripRevenueCell from './TripRevenueCell';
 
 import { useI18n } from '@/lib/i18n';
@@ -408,18 +408,39 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         onClick={(e) => {e.stopPropagation();copyRef(trip);}}
                         className="text-primary hover:text-cyan-400 font-bold tracking-tight text-[11px] transition-colors flex items-center gap-1 group min-w-0 whitespace-normal break-words"
                         title="Click to copy trip number">
-                      <span className="whitespace-normal break-words">{ref}</span>
+                      <span className="whitespace-normal break-words text-shine-cyan">{ref}</span>
                       {copiedId === trip.id ?
                         <Check className="w-3 h-3 text-emerald-400 shrink-0" /> :
                         <Copy className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />}
                     </button>
                   </div>
                 </TableCell>
-                <TableCell className="text-xs font-mono text-foreground align-top whitespace-nowrap trips-grid-td">
-                  {trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}
-                  <span className="block text-[10px] text-muted-foreground/70 tabular-nums" title={trip.created_date ? `Created ${moment(trip.created_date).format('DD MMM YYYY, HH:mm')}` : ''}>
-                    {trip.created_date ? moment(trip.created_date).format('HH:mm') : ''}
-                  </span>
+                <TableCell className="text-xs font-mono align-top whitespace-nowrap trips-grid-td">
+                  {/* Trip date — primary, with calendar indicator */}
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3 h-3 text-sky-400/70 shrink-0" />
+                    <span className="text-shine-sky font-semibold tabular-nums">{trip.trip_date ? moment(trip.trip_date).format('DD MMM YY') : '—'}</span>
+                  </div>
+                  {/* Trip start time */}
+                  {trip.created_date && (
+                    <span className="block text-[10px] text-muted-foreground/70 tabular-nums ml-[18px]" title={trip.created_date ? `Created ${moment(trip.created_date).format('DD MMM YYYY, HH:mm')}` : ''}>
+                      <Clock className="w-2.5 h-2.5 inline mr-1 -mt-0.5 opacity-60" />{moment(trip.created_date).format('HH:mm')}
+                    </span>
+                  )}
+                  {/* Trip ended — distinct indicator + date/time so it's never confused with the trip date */}
+                  {(() => {
+                    const isEnded = trip.status === 'trip_ended' || trip.status === 'completed';
+                    if (!isEnded) return null;
+                    const od = trip.offload_datetime || (trip.offload_date ? `${trip.offload_date}${trip.offload_time ? 'T' + trip.offload_time : ''}` : null);
+                    if (!od && !trip.offload_date) return null;
+                    const display = od ? moment(od).format('DD MMM YY, HH:mm') : moment(trip.offload_date).format('DD MMM YY');
+                    return (
+                      <div className="mt-1 pt-1 border-t border-white/10 flex items-center gap-1.5" title={`Trip ended ${display}`}>
+                        <Flag className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <span className="text-shine-emerald font-semibold text-[11px] tabular-nums">{display}</span>
+                      </div>
+                    );
+                  })()}
                 </TableCell>
                 {/* CLIENT — hyperlink to client detail */}
                 <TableCell className="align-top trips-grid-td">
@@ -427,7 +448,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                       onClick={(e) => goTo(e, clientMap, trip.client_name, '/admin/clients', 'client')}
                       className="text-xs font-medium text-left text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block leading-tight whitespace-normal break-words"
                       title={trip.client_name}>
-                    {trip.client_name?.toUpperCase() || '—'}
+                    <span className="text-shine-violet">{trip.client_name?.toUpperCase() || '—'}</span>
                   </button>
                   <div className="text-[10px] text-muted-foreground leading-tight mt-0.5 whitespace-normal break-words">{trip.contact_person || ''}</div>
                 </TableCell>
@@ -437,14 +458,14 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                       onClick={(e) => goTo(e, vehicleMap, trip.vehicle_plate, '/admin/vehicles', 'vehicle')}
                       className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors tabular-nums block text-left whitespace-normal break-words leading-tight text-sm"
                       title="View vehicle">
-                    {trip.vehicle_plate || '—'}
+                    <span className="text-shine-amber">{trip.vehicle_plate || '—'}</span>
                   </button>
                   <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-0.5">
                     <button
                         onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers', 'driver')}
                         className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block text-left whitespace-normal break-words leading-tight text-sm"
                         title="View driver">
-                      {trip.driver_name || ''}
+                      <span className="text-shine-sky">{trip.driver_name || ''}</span>
                     </button>
                     {trip.vendor_name && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
@@ -455,7 +476,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                   </div>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.from_location || ''}>
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words text-shine-sky" title={trip.from_location || ''}>
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
@@ -467,7 +488,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                    )}
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
-                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words text-shine-rose" title={trip.to_location || ''}>
                      {trip.to_location || '—'}
                    </div>
                    {trip.permit_required && trip.permit_name && (
