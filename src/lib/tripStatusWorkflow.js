@@ -6,13 +6,12 @@ import { base44 } from '@/api/base44Client';
 // Status is system-derived, never manually settable via the
 // regular UI. Admins may override (forward only) with a reason.
 // Flow (one-directional):
-//   scheduled → reached → trip_started → trip_ended → completed
-//   (+ cancelled as a side branch from scheduled/reached/started/ended)
+//   scheduled → trip_started → trip_ended → completed
+//   (+ cancelled as a side branch from scheduled/started/ended)
 // ═══════════════════════════════════════════════════════
 
 export const TRIP_STATUSES = [
   'scheduled',
-  'reached',
   'trip_started',
   'trip_ended',
   'completed',
@@ -22,7 +21,6 @@ export const TRIP_STATUSES = [
 // Forward-only order (excludes cancelled, which is a side branch)
 export const TRIP_STATUS_FLOW = [
   'scheduled',
-  'reached',
   'trip_started',
   'trip_ended',
   'completed',
@@ -48,8 +46,7 @@ export const STATUS_REQUIRES_MODAL = {
 // STRICT ONE-WAY TRANSITION TABLE
 // ═══════════════════════════════════════════════════════
 export const VALID_TRANSITIONS = {
-  scheduled:     ['reached', 'cancelled'],
-  reached:       ['trip_started', 'cancelled'],
+  scheduled:     ['trip_started', 'cancelled'],
   trip_started:  ['trip_ended', 'cancelled'],
   trip_ended:    ['completed', 'cancelled'],
   completed:     [],
@@ -85,6 +82,7 @@ export function getTransitionError(from, to) {
 // Migration map for old statuses
 const STATUS_MIGRATION = {
   in_transit: 'trip_started',
+  reached: 'trip_started',
 };
 
 export function migrateStatus(oldStatus) {
@@ -117,14 +115,12 @@ export function financialsComplete(trip) {
 
 /**
  * Returns the NEXT status (one step forward) if its trigger condition
- * is met, otherwise null. Advancing one step per cycle keeps "Reached"
- * visible as its own distinct state before auto-advancing to "Trip Started".
+ * is met, otherwise null.
  */
 export function nextStatus(trip) {
   if (!trip || !trip.status) return null;
   switch (trip.status) {
-    case 'scheduled':    return loadReached(trip) ? 'reached' : null;
-    case 'reached':      return loadReached(trip) ? 'trip_started' : null;
+    case 'scheduled':    return loadReached(trip) ? 'trip_started' : null;
     case 'trip_started': return offloadFilled(trip) ? 'trip_ended' : null;
     case 'trip_ended':   return financialsComplete(trip) ? 'completed' : null;
     default:             return null; // completed / cancelled are terminal
@@ -133,7 +129,7 @@ export function nextStatus(trip) {
 
 /**
  * Returns the final target status the trip should reach given its current
- * data (skips intermediate "Reached"). Used for live preview in the form.
+ * data. Used for live preview in the form.
  */
 export function computeTargetStatus(trip) {
   if (!trip) return 'scheduled';

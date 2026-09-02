@@ -1,52 +1,41 @@
-import { useState, useEffect } from 'react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { CalendarDays, Clock, Zap, Check, PencilLine } from 'lucide-react';
+import { CalendarDays, Clock } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
-import { toDate, toCanonical, pad2 } from './datetime/datetimeUtils';
-
-const HOURS_12 = Array.from({ length: 12 }, (_, i) => i + 1); // 1..12
-const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-
-function fmtDisplay(value, mode) {
-  const d = toDate(value);
-  if (!d) return null;
-  if (mode === 'date') return format(d, 'EEE, dd MMM yyyy');
-  return `${format(d, 'EEE, dd MMM yyyy')} · ${format(d, 'h:mm a')}`;
-}
+import { toDate, toCanonical } from './datetime/datetimeUtils';
 
 /**
- * FriendlyDateTimePicker
- *  - Single clean trigger showing the formatted date & time (or placeholder)
- *  - Popover with quick presets (Now, Today 8AM, Today 1PM, Tomorrow 8AM, Clear)
- *  - Date tab: full month calendar with built-in month/year navigation
- *  - Time tab: AM/PM toggle + tappable hour (1-12) and 5-minute grids
- *  - Same canonical value contract as the legacy picker:
- *      datetime → "YYYY-MM-DDTHH:mm" (24h),  date → "YYYY-MM-DD"
+ * FriendlyDateTimePicker — simple manually-writable field.
+ *  - Date input: DD-MM-YYYY (the "-" is inserted automatically)
+ *  - Time input: HH:MM     (the ":" is inserted automatically)  [datetime mode]
+ *  - AM/PM toggle next to the time input                         [datetime mode]
+ *  - When the date is fully typed, focus auto-jumps to the time input.
+ * Same canonical value contract as the legacy picker:
+ *   datetime → "YYYY-MM-DDTHH:mm" (24h),  date → "YYYY-MM-DD"
  */
 export default function FriendlyDateTimePicker({
   value, onChange, mode = 'datetime', disabled, className, placeholder, required, id, name,
 }) {
   const { dir } = useI18n();
-  const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState('date');
   const d = toDate(value);
-  const display = fmtDisplay(value, mode);
 
-  // Manual entry state — synced when the popover opens
-  const [manualDate, setManualDate] = useState('');
-  const [manualTime, setManualTime] = useState('');
+  const dateRef = useRef(null);
+  const timeRef = useRef(null);
+
+  const [dateRaw, setDateRaw] = useState(() => d ? format(d, 'dd-MM-yyyy') : '');
+  const [timeRaw, setTimeRaw] = useState(() => d ? format(d, 'hh:mm') : '');
+
   useEffect(() => {
-    if (open) {
-      setManualDate(d ? format(d, 'dd-MM-yyyy') : '');
-      setManualTime(d ? format(d, 'h:mm') : '');
-    }
+    setDateRaw(d ? format(d, 'dd-MM-yyyy') : '');
+    setTimeRaw(d ? format(d, 'hh:mm') : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, value]);
+  }, [value]);
+
+  const curH12 = d ? (d.getHours() % 12 === 0 ? 12 : d.getHours() % 12) : 12;
+  const curMin = d ? d.getMinutes() : 0;
+  const curAm = d ? (d.getHours() < 12 ? 'AM' : 'PM') : 'AM';
 
   const autoFmtDate = (s) => {
     const digits = s.replace(/\D/g, '').slice(0, 8);
@@ -54,26 +43,34 @@ export default function FriendlyDateTimePicker({
     if (digits.length > 2) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
     return digits;
   };
-  const commitManualDate = (text) => {
-    const t = (text ?? manualDate).trim();
+  const autoFmtTime = (s) => {
+    const digits = s.replace(/\D/g, '').slice(0, 4);
+    if (digits.length > 2) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+    return digits;
+  };
+
+  const commitDate = (text) => {
+    const t = (text ?? dateRaw).trim();
     if (!t) return;
     let parsed = parse(t, 'dd-MM-yyyy', new Date());
     if (!isValid(parsed)) parsed = parse(t, 'dd/MM/yyyy', new Date());
     if (!isValid(parsed)) parsed = parse(t, 'yyyy-MM-dd', new Date());
     if (isValid(parsed)) {
       const nd = new Date(parsed);
-      if (mode === 'datetime') { const ex = d; nd.setHours(ex ? ex.getHours() : 0, ex ? ex.getMinutes() : 0, 0, 0); }
+      if (mode === 'datetime') { nd.setHours(d ? d.getHours() : 0, d ? d.getMinutes() : 0, 0, 0); }
       else nd.setHours(0, 0, 0, 0);
       onChange(toCanonical(nd, mode));
     }
   };
-  const autoFmtTime = (s) => {
-    const digits = s.replace(/\D/g, '').slice(0, 4);
-    if (digits.length > 2) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
-    return digits;
+  const setTime = (h12, min, meridiem) => {
+    const h24 = meridiem === 'PM' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
+    const ex = d || new Date();
+    const nd = new Date(ex);
+    nd.setHours(h24, min, 0, 0);
+    onChange(toCanonical(nd, mode));
   };
-  const commitManualTime = (text) => {
-    const t = (text ?? manualTime).trim();
+  const commitTime = (text) => {
+    const t = (text ?? timeRaw).trim();
     if (!t) return;
     const m = t.match(/^(\d{1,2}):?(\d{0,2})$/);
     if (!m) return;
@@ -83,119 +80,64 @@ export default function FriendlyDateTimePicker({
     setTime(h12, min, curAm);
   };
 
-  const commitDate = (day) => {
-    if (!day) return;
-    const nd = new Date(day);
-    if (mode === 'datetime') { const ex = d; nd.setHours(ex ? ex.getHours() : 0, ex ? ex.getMinutes() : 0, 0, 0); }
-    else nd.setHours(0, 0, 0, 0);
-    onChange(toCanonical(nd, mode));
+  const onDateChange = (e) => {
+    const v = autoFmtDate(e.target.value);
+    setDateRaw(v);
+    commitDate(v);
+    if (v.length === 10 && mode === 'datetime') {
+      setTimeout(() => timeRef.current?.focus(), 0);
+    }
   };
-
-  const setTime = (h12, min, meridiem) => {
-    const h24 = meridiem === 'PM' ? (h12 === 12 ? 12 : h12 + 12) : (h12 === 12 ? 0 : h12);
-    const ex = d || new Date();
-    const nd = new Date(ex);
-    nd.setHours(h24, min, 0, 0);
-    onChange(toCanonical(nd, mode));
-  };
-
-  const setNow = () => onChange(toCanonical(new Date(), mode));
-
-  const curH12 = d ? (d.getHours() % 12 === 0 ? 12 : d.getHours() % 12) : 12;
-  const curMin = d ? d.getMinutes() : 0;
-  const curAm = d ? (d.getHours() < 12 ? 'AM' : 'PM') : 'AM';
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button type="button" id={id} name={name} disabled={disabled} required={required}
-          className={cn('group flex items-center gap-2 w-full h-10 px-3 rounded-xl border border-input bg-input text-left shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4),inset_-3px_-3px_6px_rgba(255,255,255,0.03)] transition-colors focus:border-primary/40 disabled:opacity-50', className)}>
-          <CalendarDays className={cn('w-4 h-4 flex-shrink-0 transition-colors', open ? 'text-primary' : 'text-muted-foreground group-hover:text-primary')} />
-          <span className={cn('flex-1 truncate text-sm', display ? 'text-foreground' : 'text-muted-foreground')}>
-            {display || placeholder || (mode === 'date' ? 'Select date' : 'Select date & time')}
-          </span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent dir={dir} align="start" className="w-[320px] p-3 bg-card/95 backdrop-blur-2xl border border-white/[0.08] rounded-xl shadow-2xl z-[200]">
-        {mode === 'datetime' && (
-          <div className="flex items-center gap-1 p-0.5 mb-3 rounded-lg bg-muted/40 border border-border">
-            <button type="button" onClick={() => setTab('date')}
-              className={cn('flex-1 h-8 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors', tab === 'date' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground')}>
-              <CalendarDays className="w-3.5 h-3.5" /> Date
-            </button>
-            <button type="button" onClick={() => setTab('time')}
-              className={cn('flex-1 h-8 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors', tab === 'time' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground')}>
-              <Clock className="w-3.5 h-3.5" /> Time
-            </button>
-          </div>
-        )}
+    <div className={cn('flex items-center gap-1.5 w-full', className)} dir={dir}>
+      {/* Date — DD-MM-YYYY (auto "-") */}
+      <div className="relative flex-1 min-w-0">
+        <CalendarDays className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        <Input
+          ref={dateRef}
+          type="text"
+          id={id}
+          name={name}
+          disabled={disabled}
+          required={required}
+          value={dateRaw}
+          onChange={onDateChange}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitDate(); timeRef.current?.focus(); } }}
+          onBlur={() => commitDate()}
+          placeholder="DD-MM-YYYY"
+          inputMode="numeric"
+          className="h-10 pl-8 pr-3 text-sm tabular-nums font-mono"
+        />
+      </div>
 
-        {tab === 'date' && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <PencilLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                <Input value={manualDate} onChange={(e) => setManualDate(autoFmtDate(e.target.value))}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualDate(); } }}
-                  onBlur={() => commitManualDate()}
-                  placeholder="DD-MM-YYYY" inputMode="numeric"
-                  className="h-8 pl-8 text-sm tabular-nums font-mono" />
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => commitManualDate()} className="h-8 px-3 text-xs">Set</Button>
-            </div>
-            <Calendar mode="single" dir={dir} selected={d || undefined} onSelect={commitDate}
-              className="rounded-lg" classNames={{ caption_label: 'text-sm font-semibold' }} />
+      {mode === 'datetime' && (
+        <>
+          {/* Time — HH:MM (auto ":") */}
+          <div className="relative w-[84px] flex-shrink-0">
+            <Clock className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              ref={timeRef}
+              type="text"
+              disabled={disabled}
+              value={timeRaw}
+              onChange={(e) => { const v = autoFmtTime(e.target.value); setTimeRaw(v); commitTime(v); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
+              onBlur={() => commitTime()}
+              placeholder="HH:MM"
+              inputMode="numeric"
+              className="h-10 pl-8 pr-2 text-sm tabular-nums font-mono"
+            />
           </div>
-        )}
-
-        {tab === 'time' && mode === 'datetime' && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <PencilLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                <Input value={manualTime} onChange={(e) => setManualTime(autoFmtTime(e.target.value))}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualTime(); } }}
-                  onBlur={() => commitManualTime()}
-                  placeholder="HH:MM" inputMode="numeric"
-                  className="h-8 pl-8 text-sm tabular-nums font-mono" />
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => commitManualTime()} className="h-8 px-3 text-xs">Set</Button>
-            </div>
-            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-muted/40 border border-border">
-              <button type="button" onClick={() => setTime(curH12, curMin, 'AM')}
-                className={cn('flex-1 h-8 rounded-md text-xs font-bold transition-colors', curAm === 'AM' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>AM</button>
-              <button type="button" onClick={() => setTime(curH12, curMin, 'PM')}
-                className={cn('flex-1 h-8 rounded-md text-xs font-bold transition-colors', curAm === 'PM' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>PM</button>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Hour</p>
-              <div className="grid grid-cols-4 gap-1">
-                {HOURS_12.map((h) => (
-                  <button key={h} type="button" onClick={() => setTime(h, curMin, curAm)}
-                    className={cn('h-8 rounded-md text-xs font-semibold border transition-all', h === curH12 ? 'bg-primary text-primary-foreground border-primary shadow scale-105' : 'bg-transparent border-border text-muted-foreground hover:bg-white/[0.06] hover:text-foreground')}>{h}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 px-1">Minute</p>
-              <div className="grid grid-cols-6 gap-1">
-                {MINUTES.map((m) => (
-                  <button key={m} type="button" onClick={() => setTime(curH12, m, curAm)}
-                    className={cn('h-8 rounded-md text-xs font-semibold border transition-all', m === curMin ? 'bg-primary text-primary-foreground border-primary shadow scale-105' : 'bg-transparent border-border text-muted-foreground hover:bg-white/[0.06] hover:text-foreground')}>{pad2(m)}</button>
-                ))}
-              </div>
-            </div>
-            <button type="button" onClick={setNow} className="self-end text-[11px] text-primary hover:underline flex items-center gap-1"><Zap className="w-3 h-3" /> Set to now</button>
+          {/* AM/PM toggle */}
+          <div className="flex items-center gap-0.5 p-0.5 rounded-xl bg-muted/40 border border-border flex-shrink-0">
+            <button type="button" disabled={disabled} onClick={() => setTime(curH12, curMin, 'AM')}
+              className={cn('h-8 px-2 rounded-lg text-xs font-bold transition-colors', curAm === 'AM' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>AM</button>
+            <button type="button" disabled={disabled} onClick={() => setTime(curH12, curMin, 'PM')}
+              className={cn('h-8 px-2 rounded-lg text-xs font-bold transition-colors', curAm === 'PM' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>PM</button>
           </div>
-        )}
-
-        {mode === 'datetime' && (
-          <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/[0.06]">
-            <span className="text-[11px] text-muted-foreground tabular-nums truncate">{display || 'No date set'}</span>
-            <Button type="button" size="sm" onClick={() => setOpen(false)} className="h-8"><Check className="w-3.5 h-3.5" /> Done</Button>
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
+        </>
+      )}
+    </div>
   );
 }

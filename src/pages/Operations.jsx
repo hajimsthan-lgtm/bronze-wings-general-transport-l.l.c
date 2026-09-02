@@ -37,7 +37,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { useAuth } from '@/lib/AuthContext';
 import TripDebuggerModal from '@/components/operations/TripDebuggerModal';
 
-const TRIP_STATUSES = ['all', 'scheduled', 'reached', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
+const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
 
 const TRIP_EXPORT_COLUMNS = [
@@ -246,7 +246,7 @@ export default function Operations() {
   }), [contracts, contractFilter, search]);
 
   const tripCounts = useMemo(() => {
-    const c = { scheduled: 0, reached: 0, trip_started: 0, trip_ended: 0, completed: 0, cancelled: 0 };
+    const c = { scheduled: 0, trip_started: 0, trip_ended: 0, completed: 0, cancelled: 0 };
     trips.forEach((tr) => { if (!tr.is_draft && c[tr.status] != null) c[tr.status]++; });
     return c;
   }, [trips]);
