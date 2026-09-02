@@ -83,53 +83,6 @@ export default function BulkActionBar({
               <span className="hidden sm:inline">{allSelected ? 'Clear' : 'All'}</span>
             </motion.button>
 
-            {/* Bulk status update */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.6 }}
-                  transition={{ duration: 0.2, ease: EASE, delay: 0.06 }}
-                  className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold text-white transition-colors"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.30), rgba(var(--panel-accent-rgb),0.18))',
-                    border: '1px solid rgba(var(--panel-accent-rgb),0.45)',
-                  }}
-                >
-                  Set Status
-                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-                </motion.button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="min-w-[200px]">
-                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {STATUS_OPTIONS.map((opt) => {
-                  const { valid, invalid } = getTransitionCounts(opt.value);
-                  const noneValid = valid === 0;
-                  return (
-                    <DropdownMenuItem
-                      key={opt.value}
-                      onClick={() => !noneValid && handleStatusClick(opt.value)}
-                      disabled={noneValid}
-                      className="text-xs cursor-pointer flex items-center gap-2"
-                    >
-                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
-                      <span className="flex-1">{opt.label}</span>
-                      {noneValid
-                        ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
-                        : invalid > 0
-                          ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
-                          : null
-                      }
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             {/* Export selected — CSV */}
             {onBulkExportCSV && (
               <motion.button

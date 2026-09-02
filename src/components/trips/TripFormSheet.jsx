@@ -67,7 +67,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [mapCollapsed, setMapCollapsed] = useState(true);
   const [errors, setErrors] = useState({});
-  const [statusConfirm, setStatusConfirm] = useState(null); // { oldStatus, newStatus }
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({ ...DEFAULT_FORM });
   const [addOns, setAddOns] = useState([]);
@@ -456,11 +455,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const handleSubmit = () => {
     if (mode === 'trip' && !editTrip && !validateTrip()) return;
-    // When editing, confirm if status changed
-    if (editTrip && form.status && form.status !== editTrip.status) {
-      setStatusConfirm({ oldStatus: editTrip.status, newStatus: form.status });
-      return;
-    }
     doSubmit();
   };
 
@@ -511,6 +505,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const tripCtx = {
     form, update, setRevenueOverride, t, inputCls, errors,
+    editTrip, onStatusUpdated: () => onSaved?.(),
     fromSuggestions, toSuggestions, vehicleSuggestions, driverSuggestions, clientSuggestions,
     serviceProviderVendors: vendors,
     allVehicles: vehicles, allDrivers: drivers, allClients: clients,
@@ -534,38 +529,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     allVehicles: vehicles, allDrivers: drivers, allClients: clients
   };
 
-  const STATUS_LABELS = {
-    scheduled: 'Scheduled', in_progress: 'In Progress', completed: 'Completed',
-    cancelled: 'Cancelled', on_hold: 'On Hold'
-  };
-
   return (
     <>
-    {/* Status change confirmation */}
-    <AlertDialog open={!!statusConfirm} onOpenChange={(o) => { if (!o) setStatusConfirm(null); }}>
-      <AlertDialogContent className="bg-card/95 backdrop-blur-2xl border border-warning/30">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-warning" />
-            Confirm Status Change
-          </AlertDialogTitle>
-          <AlertDialogDescription>
-            You are changing the trip status from{' '}
-            <span className="font-semibold text-foreground">{STATUS_LABELS[statusConfirm?.oldStatus] || statusConfirm?.oldStatus}</span>
-            {' '}to{' '}
-            <span className="font-semibold text-foreground">{STATUS_LABELS[statusConfirm?.newStatus] || statusConfirm?.newStatus}</span>.
-            {' '}Do you want to proceed?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setStatusConfirm(null)}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => { setStatusConfirm(null); doSubmit(); }}>
-            Yes, Update Status
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
           onInteractOutside={(e) => e.preventDefault()}

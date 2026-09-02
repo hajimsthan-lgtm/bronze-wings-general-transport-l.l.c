@@ -18,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import GradientAvatar from '@/components/common/GradientAvatar';
 import ContactPersonSelect from './ContactPersonSelect';
 import { autoCap } from '@/lib/formEnhancements';
+import TripStatusDisplay from './TripStatusDisplay';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -36,6 +37,7 @@ export default function TripModeFields({ p }) {
     serviceProviderVendors,
     allVehicles, allDrivers, allClients,
     errors = {},
+    editTrip, onStatusUpdated,
   } = p;
 
   const [manualClientMode, setManualClientMode] = useState(false);
@@ -91,6 +93,9 @@ export default function TripModeFields({ p }) {
 
   return (
     <>
+      {/* Automated trip status */}
+      <TripStatusDisplay trip={editTrip} onUpdated={onStatusUpdated} />
+
       {/* Client */}
       <Section title={t('client')} icon={Building2} accent="99,102,241" delay={0}>
         <div>
