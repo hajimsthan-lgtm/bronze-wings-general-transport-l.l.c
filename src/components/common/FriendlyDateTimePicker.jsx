@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Clock, X, Zap, Sunrise, Sun, Check } from 'lucide-react';
-import { format, startOfToday } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { CalendarDays, Clock, X, Zap, Sunrise, Sun, Check, PencilLine } from 'lucide-react';
+import { format, parse, isValid, startOfToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import { toDate, toCanonical, pad2 } from './datetime/datetimeUtils';
@@ -35,6 +36,51 @@ export default function FriendlyDateTimePicker({
   const [tab, setTab] = useState('date');
   const d = toDate(value);
   const display = fmtDisplay(value, mode);
+
+  // Manual entry state — synced when the popover opens
+  const [manualDate, setManualDate] = useState('');
+  const [manualTime, setManualTime] = useState('');
+  useEffect(() => {
+    if (open) {
+      setManualDate(d ? format(d, 'dd-MM-yyyy') : '');
+      setManualTime(d ? format(d, 'h:mm a') : '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, value]);
+
+  const autoFmtDate = (s) => {
+    const digits = s.replace(/\D/g, '').slice(0, 8);
+    if (digits.length > 4) return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`;
+    if (digits.length > 2) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    return digits;
+  };
+  const commitManualDate = (text) => {
+    const t = (text ?? manualDate).trim();
+    if (!t) return;
+    let parsed = parse(t, 'dd-MM-yyyy', new Date());
+    if (!isValid(parsed)) parsed = parse(t, 'dd/MM/yyyy', new Date());
+    if (!isValid(parsed)) parsed = parse(t, 'yyyy-MM-dd', new Date());
+    if (isValid(parsed)) {
+      const nd = new Date(parsed);
+      if (mode === 'datetime') { const ex = d; nd.setHours(ex ? ex.getHours() : 0, ex ? ex.getMinutes() : 0, 0, 0); }
+      else nd.setHours(0, 0, 0, 0);
+      onChange(toCanonical(nd, mode));
+    }
+  };
+  const commitManualTime = (text) => {
+    const t = (text ?? manualTime).trim().toUpperCase();
+    if (!t) return;
+    let parsed = parse(t, 'h:mm a', new Date());
+    if (!isValid(parsed)) parsed = parse(t, 'hh:mm a', new Date());
+    if (!isValid(parsed)) parsed = parse(t, 'H:mm', new Date());
+    if (!isValid(parsed)) parsed = parse(t, 'HH:mm', new Date());
+    if (isValid(parsed)) {
+      const ex = d || new Date();
+      const nd = new Date(ex);
+      nd.setHours(parsed.getHours(), parsed.getMinutes(), 0, 0);
+      onChange(toCanonical(nd, mode));
+    }
+  };
 
   const commitDate = (day) => {
     if (!day) return;
@@ -115,12 +161,36 @@ export default function FriendlyDateTimePicker({
         )}
 
         {tab === 'date' && (
-          <Calendar mode="single" dir={dir} selected={d || undefined} onSelect={commitDate}
-            className="rounded-lg" classNames={{ caption_label: 'text-sm font-semibold' }} />
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <PencilLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <Input value={manualDate} onChange={(e) => setManualDate(autoFmtDate(e.target.value))}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualDate(); } }}
+                  onBlur={() => commitManualDate()}
+                  placeholder="DD-MM-YYYY" inputMode="numeric"
+                  className="h-8 pl-8 text-sm tabular-nums font-mono" />
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => commitManualDate()} className="h-8 px-3 text-xs">Set</Button>
+            </div>
+            <Calendar mode="single" dir={dir} selected={d || undefined} onSelect={commitDate}
+              className="rounded-lg" classNames={{ caption_label: 'text-sm font-semibold' }} />
+          </div>
         )}
 
         {tab === 'time' && mode === 'datetime' && (
           <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <PencilLine className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <Input value={manualTime} onChange={(e) => setManualTime(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitManualTime(); } }}
+                  onBlur={() => commitManualTime()}
+                  placeholder="HH:MM AM/PM"
+                  className="h-8 pl-8 text-sm tabular-nums font-mono" />
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => commitManualTime()} className="h-8 px-3 text-xs">Set</Button>
+            </div>
             <div className="flex items-center gap-1 p-0.5 rounded-lg bg-muted/40 border border-border">
               <button type="button" onClick={() => setTime(curH12, curMin, 'AM')}
                 className={cn('flex-1 h-8 rounded-md text-xs font-bold transition-colors', curAm === 'AM' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}>AM</button>
