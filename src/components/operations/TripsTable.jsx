@@ -465,7 +465,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         onClick={(e) => goTo(e, driverMap, trip.driver_name, '/admin/drivers', 'driver')}
                         className="text-sky-400 hover:text-sky-300 hover:underline decoration-sky-400/40 underline-offset-2 transition-colors block text-left whitespace-normal break-words leading-tight text-sm"
                         title="View driver">
-                      {trip.driver_name || ''}
+                      <span className="text-shine-sky">{trip.driver_name || ''}</span>
                     </button>
                     {trip.vendor_name && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
@@ -476,7 +476,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                   </div>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
-                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.from_location || ''}>
+                   <div className="text-foreground font-medium leading-tight whitespace-normal break-words text-shine-sky" title={trip.from_location || ''}>
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
