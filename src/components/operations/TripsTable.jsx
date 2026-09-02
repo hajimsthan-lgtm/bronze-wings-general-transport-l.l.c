@@ -25,18 +25,18 @@ import { useAuth } from '@/lib/AuthContext';
 
 // Column widths in mm — total = 247mm (landscape A4 usable width)
 const TRIP_EXPORT_COLUMNS = [
-  { label: 'Trip #',       key: 'trip_number',    w: 22, noWrap: true },
-  { label: 'Date',         key: 'trip_date',       w: 20 },
-  { label: 'Driver',       key: 'driver_name',     w: 28 },
-  { label: 'Driver Phone', key: 'driver_phone',    w: 24, noWrap: true },
-  { label: 'Vehicle',      key: 'vehicle_plate',   w: 22, noWrap: true },
-  { label: 'Client',       key: 'client_name',     w: 32 },
-  { label: 'From',         key: 'from_location',   w: 25 },
-  { label: 'To',           key: 'to_location',     w: 25 },
-  { label: 'Revenue',      key: 'revenue',         w: 20, numeric: true },
-  { label: 'Status',       key: 'status',          w: 20 },
-  { label: 'Payment',      key: 'payment_status',  w: 19 },
-];
+{ label: 'Trip #', key: 'trip_number', w: 22, noWrap: true },
+{ label: 'Date', key: 'trip_date', w: 20 },
+{ label: 'Driver', key: 'driver_name', w: 28 },
+{ label: 'Driver Phone', key: 'driver_phone', w: 24, noWrap: true },
+{ label: 'Vehicle', key: 'vehicle_plate', w: 22, noWrap: true },
+{ label: 'Client', key: 'client_name', w: 32 },
+{ label: 'From', key: 'from_location', w: 25 },
+{ label: 'To', key: 'to_location', w: 25 },
+{ label: 'Revenue', key: 'revenue', w: 20, numeric: true },
+{ label: 'Status', key: 'status', w: 20 },
+{ label: 'Payment', key: 'payment_status', w: 19 }];
+
 
 const STATUS_HEX = {
   scheduled: '#60a5fa',
@@ -75,7 +75,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
   const PAGE = 50;
   const [visibleCount, setVisibleCount] = useState(PAGE);
   const sentinelRef = useRef(null);
-  useEffect(() => { setVisibleCount(PAGE); }, [trips]);
+  useEffect(() => {setVisibleCount(PAGE);}, [trips]);
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -205,7 +205,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
       status: targetStatus,
       status_source: 'manual',
       status_updated_at: now,
-      status_updated_by: actorName,
+      status_updated_by: actorName
     }));
 
     try {
@@ -231,7 +231,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
       status_updated_by: actorName,
       offload_date,
       offload_time,
-      offload_datetime,
+      offload_datetime
     }));
     try {
       await base44.entities.Trip.bulkUpdate(updates);
@@ -255,7 +255,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
       status_updated_by: actorName,
       cancellation_reason,
       cancelled_at: now,
-      cancelled_by: actorName,
+      cancelled_by: actorName
     }));
     try {
       await base44.entities.Trip.bulkUpdate(updates);
@@ -299,7 +299,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
       onBulkDelete: handleBulkDelete,
       onBulkExportCSV: handleBulkExportCSV,
       onBulkExportPDF: handleBulkExportPDF,
-      selectedTrips,
+      selectedTrips
     });
     return () => setOpsBulk(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -337,59 +337,59 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
       <Table className="table-fixed trips-grid-table" style={{ minWidth: totalWidth }}>
         <TableHeader>
           {(() => {
-            const headerBg = 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.96) 0%, rgba(var(--surf-2-rgb),0.99) 100%)';
-            const headerShadow = 'inset 0 -1.5px 0 rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.06)';
-            return (
-            <TableRow
-              className="hover:bg-transparent"
-              style={{
-                background: headerBg,
-                backdropFilter: 'blur(16px) saturate(1.3)',
-                WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
-                boxShadow: headerShadow,
-                position: 'sticky',
-                top: 0,
-                zIndex: 20,
-              }}
-            >
+              const headerBg = 'linear-gradient(180deg, rgba(var(--surf-1-rgb),0.96) 0%, rgba(var(--surf-2-rgb),0.99) 100%)';
+              const headerShadow = 'inset 0 -1.5px 0 rgba(var(--panel-accent-rgb),0.30), inset 0 1px 0 rgba(255,255,255,0.06)';
+              return (
+                <TableRow
+                  className="hover:bg-transparent"
+                  style={{
+                    background: headerBg,
+                    backdropFilter: 'blur(16px) saturate(1.3)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
+                    boxShadow: headerShadow,
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 20
+                  }}>
+                  
             <TableHead
-              className="relative pl-3 trips-grid-th"
-              style={{ ...thStyle(0), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}
-            >
+                    className="relative pl-3 trips-grid-th"
+                    style={{ ...thStyle(0), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}>
+                    
               <Checkbox checked={allSelected} onCheckedChange={toggleAll} className="border-border/60" />
               {resizeHandle(0)}
             </TableHead>
             {[
-              ['TRIP #', 'text-left'],
-              ['DATE', 'text-left'],
-              ['CLIENT', 'text-left'],
-              ['VEHICLE & DRIVER', 'text-left'],
-              ['FROM', 'text-left'],
-              ['TO', 'text-left'],
-              ['TRIP FARE', 'text-left'],
-              ['STATUS', 'text-left'],
-              ['ACTIONS', 'text-center']].
-              map(([label, align], i) => {
-                 const index = i + 1;
-                 return (
-                   <TableHead
-                     key={label || 'actions'}
-                     className={cn('relative text-xs font-bold uppercase tracking-wider text-foreground/80 trips-grid-th', align)}
-                     style={{ ...thStyle(index), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}
-                   >
+                  ['TRIP #', 'text-left'],
+                  ['DATE', 'text-left'],
+                  ['CLIENT', 'text-left'],
+                  ['VEHICLE & DRIVER', 'text-left'],
+                  ['FROM', 'text-left'],
+                  ['TO', 'text-left'],
+                  ['TRIP FARE', 'text-left'],
+                  ['STATUS', 'text-left'],
+                  ['ACTIONS', 'text-center']].
+                  map(([label, align], i) => {
+                    const index = i + 1;
+                    return (
+                      <TableHead
+                        key={label || 'actions'}
+                        className={cn('relative text-xs font-bold uppercase tracking-wider text-foreground/80 trips-grid-th', align)}
+                        style={{ ...thStyle(index), background: headerBg, backdropFilter: 'blur(16px) saturate(1.3)', WebkitBackdropFilter: 'blur(16px) saturate(1.3)', boxShadow: headerShadow, position: 'sticky', top: 0, zIndex: 20 }}>
+                        
                      <span className="relative z-10">{label}</span>
                      {resizeHandle(index)}
-                   </TableHead>
-                 );
-               })}
-            </TableRow>
-            );
-          })()}
+                   </TableHead>);
+
+                  })}
+            </TableRow>);
+
+            })()}
         </TableHeader>
         <TableBody>
           {visibleTrips.map((trip) => {
-               const isSelected = selected.has(trip.id);
-               const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
+              const isSelected = selected.has(trip.id);
+              const ref = trip.trip_number || `#${trip.id?.slice(-6)}`;
               return (
                 <TableRow
                   key={trip.id}
@@ -446,12 +446,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         title="View driver">
                       {trip.driver_name || ''}
                     </button>
-                    {trip.vendor_name && (
+                    {trip.vendor_name &&
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title={`Vendor: ${trip.vendor_name}`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
                         {trip.vendor_name}
                       </span>
-                    )}
+                      }
                   </div>
                 </TableCell>
                 <TableCell className="text-xs align-top trips-grid-td">
@@ -459,23 +459,23 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                      {trip.from_location || '—'}
                    </div>
                    {trip.trip_type === 'hourly' && trip.hours ? <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{trip.hours}h</div> : null}
-                   {trip.delivery_note_number && (
-                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/40" style={{ boxShadow: '0 0 10px -2px rgba(var(--panel-accent2-rgb),0.45)' }} title={`Delivery Note: DN#${trip.delivery_note_number}`}>
+                   {trip.delivery_note_number &&
+                    <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/40" style={{ boxShadow: '0 0 10px -2px rgba(var(--panel-accent2-rgb),0.45)' }} title={`Delivery Note: DN#${trip.delivery_note_number}`}>
                        <FileText className="w-3 h-3" />
                        DN#{trip.delivery_note_number}
                      </div>
-                   )}
+                    }
                    </TableCell>
                    <TableCell className="text-xs align-top trips-grid-td">
                    <div className="text-foreground font-medium leading-tight whitespace-normal break-words" title={trip.to_location || ''}>
                      {trip.to_location || '—'}
                    </div>
-                   {trip.permit_required && trip.permit_name && (
-                     <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40" title={`Permit: ${trip.permit_name}`}>
+                   {trip.permit_required && trip.permit_name &&
+                    <div className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider bg-red-500/15 text-red-400 border border-red-500/40" title={`Permit: ${trip.permit_name}`}>
                        <Shield className="w-3 h-3" />
                        {trip.permit_name}
                      </div>
-                   )}
+                    }
                    </TableCell>
                 <TableCell className="text-left align-top trips-grid-td">
                    <TripRevenueCell trip={trip} />
@@ -500,7 +500,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                     </button>
                     <button
                         onClick={() => onDuplicate?.(trip)}
-                        className="rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 p-1.5 transition-colors"
+                        className="rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 p-1.5 transition-colors hidden"
                         title="Duplicate trip">
                       <CopyPlus className="w-3.5 h-3.5" />
                     </button>
@@ -515,13 +515,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
               </TableRow>);
 
             })}
-            {visibleCount < trips.length && (
+            {visibleCount < trips.length &&
             <TableRow ref={sentinelRef} className="hover:bg-transparent">
              <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-3">
                Loading more… ({visibleCount}/{trips.length})
              </TableCell>
             </TableRow>
-            )}
+            }
             </TableBody>
             </Table>
             </div>
@@ -531,15 +531,15 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
         trips={bulkSelectedTrips}
         open={bulkModal === 'end'}
         onOpenChange={(v) => !v && setBulkModal(null)}
-        onConfirm={handleBulkEndConfirm}
-      />
+        onConfirm={handleBulkEndConfirm} />
+      
       {/* Bulk Cancel modal */}
       <BulkCancelDialog
         trips={bulkSelectedTrips}
         open={bulkModal === 'cancel'}
         onOpenChange={(v) => !v && setBulkModal(null)}
-        onConfirm={handleBulkCancelConfirm}
-      />
+        onConfirm={handleBulkCancelConfirm} />
+      
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
@@ -572,7 +572,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { if (navConfirm) navigate(navConfirm.path); setNavConfirm(null); }}>
+            <AlertDialogAction onClick={() => {if (navConfirm) navigate(navConfirm.path);setNavConfirm(null);}}>
               Open
             </AlertDialogAction>
           </AlertDialogFooter>
