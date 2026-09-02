@@ -7,7 +7,7 @@ export const DATE_SEGS = [
   { key: 'month', len: 2, ph: 'M', kind: 'num', label: 'Month' },
   { key: 'year', len: 4, ph: 'Y', kind: 'num', label: 'Year' },
 ];
-export const DATE_SEPS = ['-', '-'];
+export const DATE_SEPS = ['/', '/'];
 
 export const TIME_SEGS = [
   { key: 'hour', len: 2, ph: 'H', kind: 'hour', label: 'Hour' },

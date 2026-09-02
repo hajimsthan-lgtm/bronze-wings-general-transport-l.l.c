@@ -25,6 +25,16 @@ export default function TripStatusManager({ trip, onUpdated, size = 'sm' }) {
       toast({ title: 'Status change not allowed', description: err, variant: 'destructive' });
       return;
     }
+    // Guard: Trip Ended requires offload date & time to be filled
+    if (newStatus === 'trip_ended' && !selectedTrip.offload_datetime) {
+      toast({ title: 'Offload date & time required', description: 'Fill the offload date & time in the schedule before ending the trip.', variant: 'destructive' });
+      return;
+    }
+    // Guard: Completed requires the financial section to be filled (revenue)
+    if (newStatus === 'completed' && (!selectedTrip.revenue || Number(selectedTrip.revenue) <= 0)) {
+      toast({ title: 'Financial section required', description: 'Fill the financial section (revenue) before completing the trip.', variant: 'destructive' });
+      return;
+    }
     const modalKey = STATUS_REQUIRES_MODAL[newStatus];
     if (modalKey) {
       setModalType(modalKey);
