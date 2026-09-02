@@ -144,8 +144,8 @@ export default function Operations() {
     setContractsLoading(true);
     try {
       const [list, exp] = await safeAll([
-        () => base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []),
-        () => base44.entities.ContractExpense.list('-created_date', 500).catch(() => []),
+        () => base44.entities.MonthlyContract.list('-created_date', 100).catch(() => []),
+        () => base44.entities.ContractExpense.list('-created_date', 200).catch(() => []),
       ], 2);
       setContracts(list || []);
       setAllExpenses(exp || []);
@@ -157,9 +157,9 @@ export default function Operations() {
   const loadMaps = useCallback(async () => {
     try {
       const [drivers, vehicles, clients] = await safeAll([
-        () => base44.entities.Driver.list('-created_date', 200).catch(() => []),
-        () => base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
-        () => base44.entities.Client.list('-created_date', 200).catch(() => []),
+        () => base44.entities.Driver.list('-created_date', 100).catch(() => []),
+        () => base44.entities.Vehicle.list('-created_date', 100).catch(() => []),
+        () => base44.entities.Client.list('-created_date', 100).catch(() => []),
       ], 2);
       setDriverMap(Object.fromEntries((drivers || []).map((d) => [d.name, d.id])));
       setVehicleMap(Object.fromEntries((vehicles || []).map((v) => [v.plate_number, v.id])));

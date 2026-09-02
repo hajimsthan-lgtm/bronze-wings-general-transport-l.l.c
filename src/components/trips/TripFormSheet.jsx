@@ -4,6 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { withRetry } from '@/lib/safeRequest';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,19 +83,24 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   useEffect(() => {
     if (open) {
       getCompanySettings().then(setCompanySettings).catch(() => {});
-      Promise.all([
-      base44.entities.Trip.list('-created_date', 200).catch(() => []),
-      base44.entities.Vehicle.list('-created_date', 200).catch(() => []),
-      base44.entities.Driver.list('-created_date', 200).catch(() => []),
-      base44.entities.Client.list('-created_date', 200).catch(() => []),
-      base44.entities.Vendor.list('-created_date', 200).catch(() => [])]
-      ).then(([trips, vehs, drvs, clnts, vnds]) => {
+      // Stagger API calls with retry to avoid 429 rate limit burst
+      const loadEntities = async () => {
+        const trips = await withRetry(() => base44.entities.Trip.list('-created_date', 50)).catch(() => []);
         setTripsList(trips || []);
+        await new Promise(r => setTimeout(r, 150));
+        const vehs = await withRetry(() => base44.entities.Vehicle.list('-created_date', 50)).catch(() => []);
         setVehicles(vehs || []);
+        await new Promise(r => setTimeout(r, 150));
+        const drvs = await withRetry(() => base44.entities.Driver.list('-created_date', 50)).catch(() => []);
         setDrivers(drvs || []);
+        await new Promise(r => setTimeout(r, 150));
+        const clnts = await withRetry(() => base44.entities.Client.list('-created_date', 50)).catch(() => []);
         setClients(clnts || []);
+        await new Promise(r => setTimeout(r, 150));
+        const vnds = await withRetry(() => base44.entities.Vendor.list('-created_date', 50)).catch(() => []);
         setVendors((vnds || []).filter((v) => ['vehicle_supplier', 'driver_supplier', 'both'].includes(v.provider_type)));
-      });
+      };
+      loadEntities();
     }
   }, [open]);
 
