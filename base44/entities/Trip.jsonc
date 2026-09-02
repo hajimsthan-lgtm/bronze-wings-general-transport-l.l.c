@@ -125,7 +125,6 @@
       "type": "string",
       "enum": [
         "scheduled",
-        "reached",
         "trip_started",
         "trip_ended",
         "completed",
@@ -145,15 +144,6 @@
       "type": "string"
     },
     "status_updated_by": {
-      "type": "string"
-    },
-    "status_override_reason": {
-      "type": "string"
-    },
-    "status_override_by": {
-      "type": "string"
-    },
-    "status_override_at": {
       "type": "string"
     },
     "cancellation_reason": {

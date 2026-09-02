@@ -18,7 +18,7 @@ import ContractsTable from '@/components/operations/ContractsTable';
 import CollapsibleSection from '@/components/operations/CollapsibleSection';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
-import DraftsTable from '@/components/operations/DraftsTable';
+
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsStats from '@/components/operations/OperationsStats';
 import MobileOperationsStats from '@/components/operations/MobileOperationsStats';
@@ -27,12 +27,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
-import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
+import { setOpsFilter, deactivateOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
-import { advanceTripStatuses, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
+import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
 import { getCompanySettings } from '@/lib/companySettings';
 import { useAuth } from '@/lib/AuthContext';
 import TripDebuggerModal from '@/components/operations/TripDebuggerModal';
@@ -189,8 +189,8 @@ export default function Operations() {
   useEffect(() => {
     const check = () => {
       if (!tripsRef.current || tripsRef.current.length === 0) return;
-      advanceTripStatuses(tripsRef.current).then((advanced) => {
-        if (advanced.length > 0) refetchTrips();
+      autoStartScheduledTrips(tripsRef.current).then((started) => {
+        if (started.length > 0) refetchTrips();
       });
     };
     const t = setTimeout(check, 3000);
@@ -206,8 +206,6 @@ export default function Operations() {
     });
     return map;
   }, [allExpenses]);
-
-  const draftTrips = useMemo(() => trips.filter((trip) => trip.is_draft), [trips]);
 
   const filteredTrips = useMemo(() => trips.filter((trip) => {
     if (trip.is_draft) return false;
@@ -282,7 +280,7 @@ export default function Operations() {
   };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
   const handleContinueDraft = (draft) => { openEditTrip(draft); };
-  const handleDeleteDraft = async (draft) => { await base44.entities.Trip.update(draft.id, { deleted_at: new Date().toISOString() }); refetchTrips(); };
+  const handleDeleteDraft = async (draft) => { await base44.entities.Trip.delete(draft.id); refetchTrips(); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
@@ -306,15 +304,18 @@ export default function Operations() {
     const contractHandler = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
     const debugHandler = () => setDebuggerOpen(true);
     const refreshHandler = () => { refetchTrips(); refetchInvoices(); loadContracts(); };
+    const continueDraftHandler = (e) => { setFormMode('trip'); setEditTrip(e.detail); setEditContract(null); setFormOpen(true); };
     window.addEventListener('ops:new-trip', tripHandler);
     window.addEventListener('ops:new-contract', contractHandler);
     window.addEventListener('ops:debug', debugHandler);
     window.addEventListener('ops:refresh', refreshHandler);
+    window.addEventListener('ops:continue-draft', continueDraftHandler);
     return () => {
       window.removeEventListener('ops:new-trip', tripHandler);
       window.removeEventListener('ops:new-contract', contractHandler);
       window.removeEventListener('ops:debug', debugHandler);
       window.removeEventListener('ops:refresh', refreshHandler);
+      window.removeEventListener('ops:continue-draft', continueDraftHandler);
     };
   }, []);
 
@@ -428,7 +429,7 @@ export default function Operations() {
     });
     // Debugger is only relevant for trips (not contracts)
     setOpsDebug(mode !== 'contract' ? { onRun: () => setDebuggerOpen(true) } : null);
-    return () => { clearOpsFilter(); setOpsDebug(null); };
+    return () => { deactivateOpsFilter(); setOpsDebug(null); };
   }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
@@ -491,18 +492,6 @@ export default function Operations() {
           <LoadingSpinner />
         ) : (
           <div className="space-y-3">
-            {/* Drafts — only visible when drafts exist */}
-            {showTrips && draftTrips.length > 0 && (
-              <CollapsibleSection
-                icon={FileEdit}
-                label="Drafts"
-                count={draftTrips.length}
-                accent="amber"
-                defaultCollapsed={true}
-              >
-                <DraftsTable drafts={draftTrips} onContinue={handleContinueDraft} onDelete={handleDeleteDraft} />
-              </CollapsibleSection>
-            )}
             {/* Empty state — when no trips/contracts */}
             {((mode === 'trip' && noTrips) || (mode === 'contract' && noContracts) || (mode === 'all' && allEmpty)) && (
               <EmptyState

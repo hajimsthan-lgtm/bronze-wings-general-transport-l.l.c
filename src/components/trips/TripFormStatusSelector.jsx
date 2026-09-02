@@ -1,16 +1,17 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Check, Lock } from 'lucide-react';
+import { ChevronDown, Check, Lock, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TRIP_STATUSES, STATUS_META, canTransition } from '@/lib/tripStatusWorkflow';
 
 /**
- * Inline status badge + dropdown for the Trips table.
- * Calls onSelectStatus(trip, newStatus) — the parent decides
- * whether to save immediately or open a modal.
- * Invalid transitions are DISABLED (not just dimmed).
+ * Status selector rendered inside the Trip form.
+ * Mirrors the outside TripStatusDropdown visual style and transition rules,
+ * but operates on form state (form.status) with automation + validation hooks.
+ *
+ * onStatusChange(newStatus) — parent decides whether to accept (after validation).
  */
-export default function TripStatusDropdown({ trip, onSelectStatus, size = 'sm' }) {
-  const meta = STATUS_META[trip.status] || STATUS_META.scheduled;
+export default function TripFormStatusSelector({ status, onStatusChange, size = 'md' }) {
+  const meta = STATUS_META[status] || STATUS_META.scheduled;
 
   const padCls = size === 'sm' ? 'text-[10px] px-2 py-1' : 'text-xs px-2.5 py-1.5';
   const iconCls = size === 'sm' ? 'w-3 h-3' : 'w-3.5 h-3.5';
@@ -19,8 +20,9 @@ export default function TripStatusDropdown({ trip, onSelectStatus, size = 'sm' }
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          type="button"
           className={cn(
-            'font-bold rounded-full border inline-flex items-center gap-1 transition-colors hover:brightness-125 whitespace-nowrap',
+            'font-bold rounded-full border inline-flex items-center gap-1.5 transition-colors hover:brightness-125 whitespace-nowrap',
             padCls,
             meta.textClass,
             meta.borderClass,
@@ -32,20 +34,21 @@ export default function TripStatusDropdown({ trip, onSelectStatus, size = 'sm' }
           <ChevronDown className={cn(iconCls, 'opacity-60')} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[180px]">
+      <DropdownMenuContent align="start" className="min-w-[200px]">
         <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Set Status
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {TRIP_STATUSES.map((st) => {
           const m = STATUS_META[st];
-          const isCurrent = trip.status === st;
-          const allowed = canTransition(trip.status, st);
+          const isCurrent = status === st;
+          // For a new trip (no status yet), allow selecting scheduled freely
+          const allowed = !status ? st === 'scheduled' : canTransition(status, st);
           const disabled = isCurrent || !allowed;
           return (
             <DropdownMenuItem
               key={st}
-              onClick={() => !disabled && onSelectStatus?.(trip, st)}
+              onClick={() => !disabled && onStatusChange?.(st)}
               disabled={disabled}
               className={cn(
                 'gap-2 text-xs',

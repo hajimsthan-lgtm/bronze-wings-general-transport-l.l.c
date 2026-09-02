@@ -72,6 +72,45 @@ export default function MobileBulkActionsInline() {
               {allSelected ? <X className="w-4 h-4" /> : <CheckCheck className="w-4 h-4" />}
             </button>
 
+            {/* Bulk status update — standalone icon with dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-primary active:scale-90 transition-transform flex-shrink-0"
+                  aria-label="Update status"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[200px]">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {STATUS_OPTIONS.map((opt) => {
+                  const { valid, invalid } = getTransitionCounts(opt.value);
+                  const noneValid = valid === 0;
+                  return (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onClick={() => !noneValid && onBulkStatus(opt.value)}
+                      disabled={noneValid}
+                      className="text-xs cursor-pointer flex items-center gap-2"
+                    >
+                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                      <span className="flex-1">{opt.label}</span>
+                      {noneValid
+                        ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
+                        : invalid > 0
+                          ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
+                          : null
+                      }
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* Export CSV — standalone icon */}
             {onBulkExportCSV && (
               <button

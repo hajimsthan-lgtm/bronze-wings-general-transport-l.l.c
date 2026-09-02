@@ -84,6 +84,49 @@ export default function MobileBulkActionBar({ bulk }) {
               {allSelected ? <X className="w-4 h-4" /> : <CheckCheck className="w-4 h-4" />}
             </button>
 
+            {/* Bulk status update */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center gap-1 h-9 px-3 rounded-xl text-xs font-semibold text-white active:scale-95 transition-transform flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(var(--panel-accent-rgb),0.30), rgba(var(--panel-accent-rgb),0.18))',
+                    border: '1px solid rgba(var(--panel-accent-rgb),0.45)',
+                  }}
+                >
+                  Status
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="min-w-[200px]">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Update {selectedCount} trip{selectedCount !== 1 ? 's' : ''}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {STATUS_OPTIONS.map((opt) => {
+                  const { valid, invalid } = getTransitionCounts(opt.value);
+                  const noneValid = valid === 0;
+                  return (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onClick={() => !noneValid && onBulkStatus(opt.value)}
+                      disabled={noneValid}
+                      className="text-xs cursor-pointer flex items-center gap-2"
+                    >
+                      <span className={`w-2 h-2 rounded-full ${opt.dot}`} />
+                      <span className="flex-1">{opt.label}</span>
+                      {noneValid
+                        ? <Lock className="w-3 h-3 opacity-40 ml-auto" />
+                        : invalid > 0
+                          ? <span className="text-[10px] text-muted-foreground ml-auto">{valid}/{valid + invalid}</span>
+                          : null
+                      }
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* Export CSV */}
             {onBulkExportCSV && (
               <button

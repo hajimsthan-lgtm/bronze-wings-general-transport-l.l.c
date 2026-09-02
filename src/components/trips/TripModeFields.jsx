@@ -7,7 +7,7 @@ import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truc
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from './CreateNewCard';
-import FriendlyDateTimePicker from '@/components/common/FriendlyDateTimePicker';
+import DateTimePicker from '@/components/common/DateTimePicker';
 import Section from './Section';
 import IconInput from './IconInput';
 import TripTypeSelector from './TripTypeSelector';
@@ -18,7 +18,6 @@ import { Switch } from '@/components/ui/switch';
 import GradientAvatar from '@/components/common/GradientAvatar';
 import ContactPersonSelect from './ContactPersonSelect';
 import { autoCap } from '@/lib/formEnhancements';
-import TripStatusDisplay from './TripStatusDisplay';
 
 const PAYMENT_STATUSES = ['corporate_credit', 'cash_received', 'bank_received'];
 
@@ -37,7 +36,6 @@ export default function TripModeFields({ p }) {
     serviceProviderVendors,
     allVehicles, allDrivers, allClients,
     errors = {},
-    editTrip, onStatusUpdated,
   } = p;
 
   const [manualClientMode, setManualClientMode] = useState(false);
@@ -93,9 +91,6 @@ export default function TripModeFields({ p }) {
 
   return (
     <>
-      {/* Automated trip status */}
-      <TripStatusDisplay trip={editTrip} onUpdated={onStatusUpdated} />
-
       {/* Client */}
       <Section title={t('client')} icon={Building2} accent="99,102,241" delay={0}>
         <div>
@@ -258,14 +253,14 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Load Date &amp; Time</Label>
-            <FriendlyDateTimePicker value={form.load_datetime} onChange={(v) => update('load_datetime', v)} placeholder="Load date &amp; time" />
+            <DateTimePicker value={form.load_datetime} onChange={(v) => update('load_datetime', v)} placeholder="Load time" />
             {loadIsPast && (
               <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Load date is in the past — please verify</p>
             )}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Offload Date &amp; Time</Label>
-            <FriendlyDateTimePicker value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} placeholder="Offload date &amp; time" />
+            <DateTimePicker value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} placeholder="Offload time" />
           </div>
         </div>
         {form.trip_type !== 'contract' && (
@@ -302,16 +297,49 @@ export default function TripModeFields({ p }) {
           </button>
         </div>
 
-        {/* Service Provider dropdown — only in vendor mode */}
+        {/* Service Provider dropdown — only in vendor mode, service providers only */}
         {form.assignment_mode === 'vendor' && (
           <div>
             <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1"><Store className="w-3 h-3" /> Service Provider</Label>
             <SearchableSelect
               value={form.vendor_name || ''}
               onChange={(v) => { update('vendor_name', v); update('vehicle_plate', ''); update('driver_name', ''); }}
-              placeholder="Select Vendor"
-              items={serviceProviderVendors.map((v) => ({ value: v.name, label: v.name }))}
+              placeholder="Select service provider"
+              renderLabel={(it) => (
+                <span className="flex items-center gap-2 truncate">
+                  <GradientAvatar name={it.label} size="xs" />
+                  <span className="truncate">{it.label}</span>
+                </span>
+              )}
+              items={serviceProviderVendors.map((v) => ({
+                value: v.name,
+                label: v.name,
+                search: v.contact_person ? ` ${v.contact_person}` : '',
+                content: (
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <GradientAvatar name={v.name} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{v.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {v.contact_person || 'No contact'} · {v.provider_type === 'both' ? 'Vehicles & Drivers' : v.provider_type === 'vehicle_supplier' ? 'Vehicle Supplier' : 'Driver Supplier'}
+                      </p>
+                    </div>
+                    {v.status && (
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
+                        v.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {v.status}
+                      </span>
+                    )}
+                  </div>
+                ),
+              }))}
             />
+            {serviceProviderVendors.length === 0 && (
+              <p className="text-[10px] text-amber-400/80 mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" /> No service providers found. Add vendors with provider type set to vehicle/driver supplier.
+              </p>
+            )}
           </div>
         )}
 
