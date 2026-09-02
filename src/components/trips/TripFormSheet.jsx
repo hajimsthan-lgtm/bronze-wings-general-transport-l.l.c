@@ -674,7 +674,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wider text-foreground">Trip Status</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {form.status_source === 'manual' ? 'Manually set' : form.status_source === 'automatic' ? 'Auto-switched' : 'Default — auto-advances as you fill the form'}
+                      {form.status_source === 'manual' ? 'Manually set' : (form.status_source === 'automatic' && form.status !== 'scheduled') ? 'Auto-switched — fill more to advance' : 'Default — auto-advances as you fill the form'}
                     </p>
                   </div>
                 </div>
