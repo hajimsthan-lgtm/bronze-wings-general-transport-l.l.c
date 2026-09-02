@@ -40,12 +40,12 @@ export default function DraftsButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold
-                   bg-amber-500/15 text-amber-500 border border-amber-500/30
-                   hover:bg-amber-500/25 hover:border-amber-500/45
-                   transition-all duration-200 animate-fade-in"
-        title={`${drafts.length} draft${drafts.length !== 1 ? 's' : ''} — click to view`}
-      >
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30 hover:bg-amber-500/25 hover:border-amber-500/45 transition-all duration-200 animate-fade-in hidden"
+
+
+
+        title={`${drafts.length} draft${drafts.length !== 1 ? 's' : ''} — click to view`}>
+        
         <FileEdit className="w-3.5 h-3.5" />
         <span className="tabular-nums">{drafts.length}</span>
         <span className="hidden lg:inline">Draft{drafts.length !== 1 ? 's' : ''}</span>
@@ -56,8 +56,8 @@ export default function DraftsButton() {
         onOpenChange={setOpen}
         drafts={drafts}
         onContinue={handleContinue}
-        onDelete={handleDelete}
-      />
-    </>
-  );
+        onDelete={handleDelete} />
+      
+    </>);
+
 }
