@@ -40,7 +40,10 @@ export async function generateNextInvoiceNumber() {
   const dbSeq = computeNextSeq(all, year);
   const s = settingsList?.[0];
   const counterSeq = s && s.invoice_last_year === year ? (s.invoice_last_seq || 0) : 0;
-  return formatInvoiceNumber(year, Math.max(dbSeq, counterSeq + 1));
+  // Continue from the last-used counter (set by manual edits or auto-accepted
+  // creations).  Fall back to DB max only when no counter exists for this year.
+  const nextSeq = counterSeq > 0 ? counterSeq + 1 : dbSeq;
+  return formatInvoiceNumber(year, nextSeq);
 }
 
 /**
@@ -108,18 +111,23 @@ export async function persistManualInvoiceNumber(manualNumber, originalSuggested
   const s = list?.[0];
   if (!s) return;
   const audit = Array.isArray(s.invoice_seq_audit) ? s.invoice_seq_audit : [];
-  const entry = {
-    from_number: originalSuggested || '',
-    to_number: manualNumber,
-    changed_by: changedBy || '',
-    changed_date: new Date().toISOString(),
-    invoice_id: invoiceId || '',
-  };
-  const update = { invoice_seq_audit: [entry, ...audit].slice(0, 50) };
-  const currentCounter = s.invoice_last_year === parsed.year ? (s.invoice_last_seq || 0) : 0;
-  if (parsed.seq > currentCounter) {
-    update.invoice_last_seq = parsed.seq;
-    update.invoice_last_year = parsed.year;
+  const isManualOverride = !!originalSuggested && manualNumber !== originalSuggested;
+  const update = {};
+  // ALWAYS update the counter to the saved invoice's seq — whether the user
+  // manually typed a higher OR lower number — so the next auto-suggestion
+  // continues from whatever was last used (manualNumber + 1).
+  update.invoice_last_seq = parsed.seq;
+  update.invoice_last_year = parsed.year;
+  // Audit trail entry only for genuine manual overrides
+  if (isManualOverride) {
+    const entry = {
+      from_number: originalSuggested || '',
+      to_number: manualNumber,
+      changed_by: changedBy || '',
+      changed_date: new Date().toISOString(),
+      invoice_id: invoiceId || '',
+    };
+    update.invoice_seq_audit = [entry, ...audit].slice(0, 50);
   }
   await base44.entities.CompanySettings.update(s.id, update);
 }
