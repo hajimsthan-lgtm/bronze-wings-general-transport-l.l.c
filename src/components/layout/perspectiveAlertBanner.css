@@ -1,246 +1,303 @@
 /* ═══════════════════════════════════════════════════════
-   PERSPECTIVE ALERT BANNER — 3D carousel with depth fade
-   Center item emphasized, adjacent items fade in scale/opacity
+   ALERT BANNER — single-row glass strip with severity accent
+   Clean corporate style: accent bar · icon · title/sub · counter · nav
    ═══════════════════════════════════════════════════════ */
 
-.perspective-banner {
+.alert-banner {
   position: relative;
-  height: 64px;
-  overflow: hidden;
+  height: 56px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, hsl(var(--background-elevated) / 0.5) 0%, hsl(var(--background) / 0.2) 100%);
+  align-items: stretch;
+  background: linear-gradient(180deg, hsl(var(--background-elevated) / 0.6) 0%, hsl(var(--background) / 0.3) 100%);
   border-bottom: 1px solid hsl(var(--border) / 0.3);
   flex-shrink: 0;
+  overflow: hidden;
+  transition: background 0.5s ease;
 }
 
-/* Ambient glow that shifts with the active alert's severity color */
-.perspective-banner-glow {
+/* Ambient severity glow */
+.alert-banner::before {
+  content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 50% 120% at 50% 50%, rgba(var(--panel-accent-rgb), 0.05), transparent 70%);
+  background: radial-gradient(ellipse 40% 100% at 0% 50%, rgba(var(--sev-glow, var(--panel-accent-rgb)), 0.08), transparent 60%);
   pointer-events: none;
-  transition: background 0.6s ease;
+  transition: background 0.5s ease;
 }
 
-.perspective-banner-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
+/* Left severity accent bar */
+.alert-banner-accent {
+  width: 3px;
+  flex-shrink: 0;
+  background: var(--sev-color, rgb(var(--panel-accent-rgb)));
+  box-shadow: 0 0 12px rgba(var(--sev-glow, var(--panel-accent-rgb)), 0.5);
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+  z-index: 2;
 }
 
-/* Each item is absolutely centered, then translated by offset */
-.perspective-banner-item {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center center;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
-  cursor: default;
+.alert-banner-accent.is-critical {
+  animation: alert-accent-pulse 1.5s ease-in-out infinite;
 }
 
-.perspective-banner-item.is-center {
-  cursor: pointer;
+@keyframes alert-accent-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(var(--sev-glow), 0.5); }
+  50% { box-shadow: 0 0 22px 2px rgba(var(--sev-glow), 0.8); }
 }
 
-/* The pill card */
-.perspective-banner-card {
+/* Clickable content — icon + text + meta */
+.alert-banner-content {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 16px 7px 8px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, hsl(var(--card) / 0.96) 0%, hsl(var(--background-elevated) / 0.92) 100%);
-  border: 1px solid hsl(var(--border) / 0.5);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  white-space: nowrap;
-  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  gap: 12px;
+  padding: 0 16px;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.25s ease;
 }
 
-/* Center card gets severity-colored glow + border */
-.perspective-banner-item.is-center .perspective-banner-card {
-  border-color: color-mix(in srgb, var(--sev-color, rgb(var(--panel-accent-rgb))) 45%, transparent);
-  box-shadow:
-    0 0 28px -4px rgba(var(--sev-glow, var(--panel-accent-rgb)), 0.35),
-    0 6px 24px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 0 1px color-mix(in srgb, var(--sev-color, rgb(var(--panel-accent-rgb))) 18%, transparent);
-}
-
-/* Critical center card gets an animated lightning border */
-.perspective-banner-item.is-center.is-critical .perspective-banner-card {
-  animation: banner-critical-pulse 2s ease-in-out infinite;
-}
-
-@keyframes banner-critical-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 28px -4px rgba(var(--sev-glow), 0.35),
-      0 6px 24px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 0 1px color-mix(in srgb, var(--sev-color) 18%, transparent);
-  }
-  50% {
-    box-shadow:
-      0 0 40px -2px rgba(var(--sev-glow), 0.55),
-      0 6px 24px rgba(0, 0, 0, 0.18),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 0 2px color-mix(in srgb, var(--sev-color) 35%, transparent);
-  }
+.alert-banner-content:hover {
+  background: hsl(var(--foreground) / 0.03);
 }
 
 /* Icon circle */
-.perspective-banner-icon-wrap {
-  width: 30px;
-  height: 30px;
+.alert-banner-icon {
+  position: relative;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   border: 1px solid;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 2px 8px rgba(var(--sev-glow), 0.12);
 }
 
-.perspective-banner-text {
+.alert-banner-zap {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  animation: alert-zap-pulse 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+@keyframes alert-zap-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Text block */
+.alert-banner-text {
   display: flex;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
+  flex: 1;
 }
 
-.perspective-banner-title {
-  font-size: 12px;
+.alert-banner-title {
+  font-size: 13px;
   font-weight: 700;
   color: hsl(var(--foreground));
-  line-height: 1.15;
+  line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.perspective-banner-sub {
-  font-size: 10px;
+.alert-banner-critical-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(var(--sev-glow), 0.18);
+  color: var(--sev-color);
+  border: 1px solid rgba(var(--sev-glow), 0.35);
+  flex-shrink: 0;
+}
+
+.alert-banner-sub {
+  font-size: 11px;
   color: hsl(var(--muted-foreground));
-  line-height: 1.15;
+  line-height: 1.2;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.perspective-banner-meta {
+/* Meta badge */
+.alert-banner-meta {
   font-size: 9px;
   font-family: var(--font-mono);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: hsl(var(--muted-foreground) / 0.7);
+  color: hsl(var(--muted-foreground) / 0.8);
   padding: 2px 7px;
   border-radius: 4px;
   background: hsl(var(--muted) / 0.5);
+  border: 1px solid hsl(var(--border) / 0.4);
   flex-shrink: 0;
 }
 
-/* Lightning bolt for critical alerts */
-.perspective-banner-zap {
-  animation: banner-zap-pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 4px currentColor);
+/* Right controls — counter + nav arrows */
+.alert-banner-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 0 8px;
   flex-shrink: 0;
+  z-index: 2;
 }
 
-@keyframes banner-zap-pulse {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.25); }
+.alert-banner-counter {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
 }
 
-/* Navigation dots */
-.perspective-banner-dots {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
+.alert-banner-counter-sep {
+  opacity: 0.4;
+  margin: 0 1px;
+}
+
+.alert-banner-nav {
   display: flex;
   gap: 4px;
-  z-index: 20;
 }
 
-.perspective-banner-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: hsl(var(--muted-foreground) / 0.25);
-  border: none;
+.alert-banner-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: hsl(var(--foreground) / 0.04);
+  border: 1px solid hsl(var(--border) / 0.4);
+  color: hsl(var(--muted-foreground));
   cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
+  transition: all 0.2s ease;
 }
 
-.perspective-banner-dot:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+.alert-banner-nav-btn:hover:not(:disabled) {
+  background: hsl(var(--foreground) / 0.08);
+  border-color: var(--sev-color);
+  color: var(--sev-color);
+  box-shadow: 0 0 10px -2px rgba(var(--sev-glow), 0.4);
 }
 
-.perspective-banner-dot.active {
-  width: 18px;
-  border-radius: 9999px;
-  background: rgb(var(--panel-accent-rgb));
-  box-shadow: 0 0 8px rgba(var(--panel-accent-rgb), 0.5);
+.alert-banner-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Progress bar at the bottom */
+.alert-banner-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: hsl(var(--border) / 0.2);
+  z-index: 3;
+}
+
+.alert-banner-progress-fill {
+  height: 100%;
+  background: var(--sev-color, rgb(var(--panel-accent-rgb)));
+  box-shadow: 0 0 6px rgba(var(--sev-glow), 0.5);
+  animation: alert-progress-fill 5s linear forwards;
+  transform-origin: left;
+}
+
+.alert-banner-progress.is-paused .alert-banner-progress-fill {
+  animation-play-state: paused;
+}
+
+@keyframes alert-progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 /* ═══════════════════════════════════════════════════════
    LIGHT THEME OVERRIDES
    ═══════════════════════════════════════════════════════ */
-.theme-light .perspective-banner {
-  background: linear-gradient(180deg, hsl(var(--background-elevated) / 0.7) 0%, hsl(var(--background) / 0.4) 100%);
+.theme-light .alert-banner {
+  background: linear-gradient(180deg, hsl(var(--background-elevated) / 0.8) 0%, hsl(var(--background) / 0.5) 100%);
   border-bottom-color: hsl(var(--border) / 0.5);
 }
 
-.theme-light .perspective-banner-card {
-  background: linear-gradient(135deg, hsl(var(--card) / 0.98) 0%, hsl(var(--background-elevated) / 0.95) 100%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+.theme-light .alert-banner-content:hover {
+  background: hsl(var(--foreground) / 0.03);
 }
 
-.theme-light .perspective-banner-item.is-center .perspective-banner-card {
-  box-shadow:
-    0 0 28px -4px rgba(var(--sev-glow, var(--panel-accent-rgb)), 0.18),
-    0 6px 24px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 0 0 1px color-mix(in srgb, var(--sev-color, rgb(var(--panel-accent-rgb))) 18%, transparent);
+.theme-light .alert-banner-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px rgba(var(--sev-glow), 0.08);
+}
+
+.theme-light .alert-banner-nav-btn {
+  background: hsl(var(--foreground) / 0.03);
+  border-color: hsl(var(--border) / 0.5);
 }
 
 /* ═══════════════════════════════════════════════════════
    MOBILE
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .perspective-banner {
-    height: 54px;
+  .alert-banner {
+    height: 48px;
   }
-  .perspective-banner-card {
-    padding: 6px 12px 6px 7px;
+  .alert-banner-content {
     gap: 8px;
+    padding: 0 10px;
   }
-  .perspective-banner-icon-wrap {
-    width: 26px;
-    height: 26px;
+  .alert-banner-icon {
+    width: 28px;
+    height: 28px;
   }
-  .perspective-banner-title {
-    font-size: 11px;
+  .alert-banner-title {
+    font-size: 12px;
   }
-  .perspective-banner-sub {
-    font-size: 9px;
+  .alert-banner-sub {
+    font-size: 10px;
   }
-  .perspective-banner-meta {
+  .alert-banner-meta {
     display: none;
   }
-  .perspective-banner-dots {
-    bottom: 3px;
+  .alert-banner-controls {
+    padding: 0 8px 0 4px;
+    gap: 6px;
+  }
+  .alert-banner-counter {
+    font-size: 10px;
+  }
+  .alert-banner-nav-btn {
+    width: 22px;
+    height: 22px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .perspective-banner-item {
-    transition: opacity 0.3s ease !important;
-  }
-  .perspective-banner-zap,
-  .perspective-banner-item.is-center.is-critical .perspective-banner-card {
+  .alert-banner-progress-fill,
+  .alert-banner-zap,
+  .alert-banner-accent.is-critical {
     animation: none !important;
   }
 }
