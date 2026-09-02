@@ -498,12 +498,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         title="Edit">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                        onClick={() => onDuplicate?.(trip)}
-                        className="rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-400 hover:bg-violet-500/20 p-1.5 transition-colors hidden"
-                        title="Duplicate trip">
-                      <CopyPlus className="w-3.5 h-3.5" />
-                    </button>
+                    
+
+
+
+
+                      
                     <button
                         onClick={() => setDeleteTarget(trip)}
                         className="rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 p-1.5 transition-colors"
