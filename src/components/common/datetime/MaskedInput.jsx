@@ -1,10 +1,17 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Fragment } from 'react';
+import { useState, useRef, useCallback, Fragment } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { buildSentinel, segValid, isComplete } from './datetimeUtils';
 
 /**
  * Reusable masked, segment-based input (date or time).
+ *
+ * No-overlap model: segment cells are rendered directly as visible children
+ * of a single focusable container. The container handles all keyboard input
+ * (arrow keys to navigate segments, digits to type, Backspace/Delete, Enter,
+ * Escape). A hidden <input type="hidden"> holds the form id/name — it is NOT
+ * stacked behind a visual overlay.
+ *
  * Parent owns `raw` + `editingRef`; this component handles the keyboard/mask UI.
  */
 export default function MaskedInput({
@@ -17,25 +24,7 @@ export default function MaskedInput({
   const rawRef = useRef(raw);
   rawRef.current = raw;
   const internalRef = useRef(null);
-  const inputRef = externalRef || internalRef;
-
-  const segStart = useMemo(() => {
-    const map = {};
-    let pos = 0;
-    segs.forEach((s, i) => { map[s.key] = pos; pos += s.len + (i < segs.length - 1 ? 1 : 0); });
-    return map;
-  }, [segs]);
-
-  const caretPos = useMemo(() => {
-    const seg = segs.find((s) => s.key === activeSeg) || segs[0];
-    return segStart[seg.key] + Math.min((raw[seg.key] || '').length, seg.len);
-  }, [activeSeg, raw, segStart, segs]);
-
-  useLayoutEffect(() => {
-    if (editing && inputRef.current) {
-      try { inputRef.current.setSelectionRange(caretPos, caretPos); } catch {}
-    }
-  }, [caretPos, editing, raw, inputRef]);
+  const containerRef = externalRef || internalRef;
 
   const firstIncomplete = useCallback((r) => {
     for (const s of segs) if ((r[s.key] || '').length < s.len) return s.key;
@@ -48,11 +37,18 @@ export default function MaskedInput({
     return fromKey;
   }, [segs]);
 
+  const focusContainer = useCallback(() => {
+    if (!disabled && containerRef.current) containerRef.current.focus();
+  }, [disabled, containerRef]);
+
   const handleFocus = () => {
+    if (disabled) return;
     if (editingRef) editingRef.current = true;
     setEditing(true); setError(false); setActiveSeg(firstIncomplete(rawRef.current));
   };
-  const handleBlur = () => {
+  const handleBlur = (e) => {
+    // Don't blur if focus moves to a descendant (e.g. a segment cell re-focusing)
+    if (e.relatedTarget && containerRef.current?.contains(e.relatedTarget)) return;
     if (editingRef) editingRef.current = false;
     setEditing(false);
     const r = rawRef.current;
@@ -64,6 +60,7 @@ export default function MaskedInput({
   };
 
   const handleKeyDown = (e) => {
+    if (disabled) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key;
     if (key === 'ArrowLeft') { e.preventDefault(); const idx = segs.findIndex((s) => s.key === activeSeg); if (idx > 0) setActiveSeg(segs[idx - 1].key); return; }
@@ -76,8 +73,8 @@ export default function MaskedInput({
       return;
     }
     if (key === 'Delete') { e.preventDefault(); setRaw({ ...rawRef.current, [activeSeg]: '' }); return; }
-    if (key === 'Enter') { e.preventDefault(); if (onCommit(rawRef.current)) inputRef.current?.blur(); else setError(true); return; }
-    if (key === 'Escape') { e.preventDefault(); onRevert(); setError(false); inputRef.current?.blur(); return; }
+    if (key === 'Enter') { e.preventDefault(); if (onCommit(rawRef.current)) containerRef.current?.blur(); else setError(true); return; }
+    if (key === 'Escape') { e.preventDefault(); onRevert(); setError(false); containerRef.current?.blur(); return; }
     if (key.length !== 1) return;
     e.preventDefault();
     const seg = segs.find((s) => s.key === activeSeg);
@@ -113,37 +110,32 @@ export default function MaskedInput({
 
   return (
     <div className={cn('relative w-full h-full', className)}>
-      <input
-        ref={inputRef}
-        type="text"
-        inputMode="numeric"
-        value={sentinel}
-        disabled={disabled}
+      {/* Hidden input for form id/name — completely invisible, no overlap */}
+      <input type="hidden" id={id} name={name} value={sentinel} disabled={disabled} required={required} />
+
+      {/* Visible interactive container — segment cells rendered directly */}
+      <div
+        ref={containerRef}
+        role="textbox"
+        tabIndex={disabled ? -1 : 0}
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        onChange={() => {}}
-        onPaste={(e) => e.preventDefault()}
         aria-label={ariaLabel}
-        spellCheck={false}
-        autoComplete="off"
-        id={id}
-        name={name}
-        required={required}
+        onClick={focusContainer}
         className={cn(
-          'w-full h-10 px-3 py-1 text-sm font-mono tabular-nums leading-none transition-all duration-200 text-transparent caret-transparent placeholder:text-muted-foreground focus-visible:outline-none',
-          bare ? 'pl-9' : 'pl-3',
+          'w-full h-10 flex items-center text-sm font-mono tabular-nums leading-none cursor-text select-none gap-1 outline-none transition-all duration-200',
+          bare ? 'pl-9 pr-3 py-1' : 'pl-3 pr-3 py-1',
           hasValue && !disabled && 'pr-8',
           bare
-            ? 'bg-transparent border-0 shadow-none'
+            ? 'bg-transparent'
             : 'rounded-full border border-[#6b3fa0]/60 bg-gradient-to-b from-[#1a1329] to-[#282040] shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(255,255,255,0.05),0_0_16px_-4px_rgba(107,63,160,0.5)]',
           !bare && (error
             ? 'border-destructive/70'
-            : 'focus-visible:border-[#6b3fa0] focus-visible:shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),0_0_20px_-2px_rgba(107,63,160,0.7)]'),
+            : editing && 'border-[#6b3fa0] shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),0_0_20px_-2px_rgba(107,63,160,0.7)]'),
           disabled && 'opacity-50 cursor-not-allowed'
         )}
-      />
-      <div aria-hidden className={cn('absolute inset-0 flex items-center py-1 text-sm font-mono tabular-nums leading-none pointer-events-none select-none gap-1', bare ? 'pl-9 pr-3' : 'pl-3 pr-3')}>
+      >
         {segs.map((seg, i) => {
           const val = raw[seg.key] || '';
           const isActive = editing && seg.key === activeSeg;
@@ -155,10 +147,15 @@ export default function MaskedInput({
           }
           return (
             <Fragment key={seg.key}>
-              <span className={cn(
-                'relative flex items-center justify-center rounded-lg h-7 px-2 transition-all duration-200 bg-[#0f0b1a] border border-white/5',
-                isActive && 'border-[#00e5ff]/40 shadow-[0_0_12px_-2px_rgba(0,229,255,0.4)]'
-              )}>
+              <span
+                onClick={(e) => { e.stopPropagation(); if (!disabled) { focusContainer(); setActiveSeg(seg.key); } }}
+                className={cn(
+                  'relative flex items-center justify-center rounded-lg h-7 px-2 transition-all duration-200 bg-[#0f0b1a] border',
+                  isActive
+                    ? 'border-[#00e5ff]/40 shadow-[0_0_12px_-2px_rgba(0,229,255,0.4)]'
+                    : 'border-white/5 hover:border-white/10'
+                )}
+              >
                 {isActive && <span className="absolute bottom-0 left-1 right-1 h-px bg-[#00e5ff] shadow-[0_0_6px_rgba(0,229,255,0.8)]" />}
                 {cells.map((c, ci) => (
                   <span key={ci} className={cn(c.typed ? 'text-white' : 'text-[#483f60]', 'transition-colors')}>{c.ch}</span>
@@ -169,6 +166,7 @@ export default function MaskedInput({
           );
         })}
       </div>
+
       {hasValue && !disabled && (
         <button type="button" onClick={onClear} aria-label="Clear" title="Clear" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-[#0f0b1a] border border-[#00d4ff]/30 text-[#00d4ff] hover:bg-[#00d4ff]/15 hover:border-[#00d4ff]/60 shadow-[0_0_10px_-2px_rgba(0,212,255,0.5)] transition-all z-10">
           <X className="w-3 h-3" />
