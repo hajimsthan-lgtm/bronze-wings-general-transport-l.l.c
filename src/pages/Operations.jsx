@@ -18,7 +18,7 @@ import ContractsTable from '@/components/operations/ContractsTable';
 import CollapsibleSection from '@/components/operations/CollapsibleSection';
 import TripFormSheet from '@/components/trips/TripFormSheet';
 import TripDetailSheet from '@/components/trips/TripDetailSheet';
-import DraftsTable from '@/components/operations/DraftsTable';
+
 import ContractDetailSheet from '@/components/contracts/ContractDetailSheet';
 import OperationsStats from '@/components/operations/OperationsStats';
 import MobileOperationsStats from '@/components/operations/MobileOperationsStats';
@@ -27,7 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
 import { setOpsFilter, deactivateOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
@@ -207,8 +207,6 @@ export default function Operations() {
     return map;
   }, [allExpenses]);
 
-  const draftTrips = useMemo(() => trips.filter((trip) => trip.is_draft), [trips]);
-
   const filteredTrips = useMemo(() => trips.filter((trip) => {
     if (trip.is_draft) return false;
     if (trip.deleted_at) return false;
@@ -282,7 +280,7 @@ export default function Operations() {
   };
   const openEditContract = (c) => { setFormMode('contract'); setEditTrip(null); setEditContract(c); setFormOpen(true); };
   const handleContinueDraft = (draft) => { openEditTrip(draft); };
-  const handleDeleteDraft = async (draft) => { await base44.entities.Trip.update(draft.id, { deleted_at: new Date().toISOString() }); refetchTrips(); };
+  const handleDeleteDraft = async (draft) => { await base44.entities.Trip.delete(draft.id); refetchTrips(); };
   const handleFormClose = (v) => { setFormOpen(v); if (!v) { setEditTrip(null); setEditContract(null); } };
   const handleFormSaved = () => { refetchTrips(); loadContracts(); };
 
@@ -306,15 +304,18 @@ export default function Operations() {
     const contractHandler = () => { setFormMode('contract'); setEditTrip(null); setEditContract(null); setFormOpen(true); };
     const debugHandler = () => setDebuggerOpen(true);
     const refreshHandler = () => { refetchTrips(); refetchInvoices(); loadContracts(); };
+    const continueDraftHandler = (e) => { setFormMode('trip'); setEditTrip(e.detail); setEditContract(null); setFormOpen(true); };
     window.addEventListener('ops:new-trip', tripHandler);
     window.addEventListener('ops:new-contract', contractHandler);
     window.addEventListener('ops:debug', debugHandler);
     window.addEventListener('ops:refresh', refreshHandler);
+    window.addEventListener('ops:continue-draft', continueDraftHandler);
     return () => {
       window.removeEventListener('ops:new-trip', tripHandler);
       window.removeEventListener('ops:new-contract', contractHandler);
       window.removeEventListener('ops:debug', debugHandler);
       window.removeEventListener('ops:refresh', refreshHandler);
+      window.removeEventListener('ops:continue-draft', continueDraftHandler);
     };
   }, []);
 
@@ -491,18 +492,6 @@ export default function Operations() {
           <LoadingSpinner />
         ) : (
           <div className="space-y-3">
-            {/* Drafts — only visible when drafts exist */}
-            {showTrips && draftTrips.length > 0 && (
-              <CollapsibleSection
-                icon={FileEdit}
-                label="Drafts"
-                count={draftTrips.length}
-                accent="amber"
-                defaultCollapsed={true}
-              >
-                <DraftsTable drafts={draftTrips} onContinue={handleContinueDraft} onDelete={handleDeleteDraft} />
-              </CollapsibleSection>
-            )}
             {/* Empty state — when no trips/contracts */}
             {((mode === 'trip' && noTrips) || (mode === 'contract' && noContracts) || (mode === 'all' && allEmpty)) && (
               <EmptyState
