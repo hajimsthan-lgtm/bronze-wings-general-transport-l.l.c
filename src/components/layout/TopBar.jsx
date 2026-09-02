@@ -10,6 +10,7 @@ import ReportClientDropdown from './ReportClientDropdown';
 import HeaderSubNav, { subNavMap, hasSubNavForPath } from './headerSubNav';
 import OpsSubBar from '@/components/operations/OpsSubBar';
 import MobileBulkActionsInline from '@/components/operations/MobileBulkActionsInline';
+import DraftsButton from '@/components/operations/DraftsButton';
 import { useMaintenanceMode, setMaintenanceMode, getMaintenanceData, useMaintenanceSelected, clearMaintenanceSelected } from '@/lib/maintenanceStore';
 import { useFuelMode, setFuelMode, getFuelData, useFuelSelected, clearFuelSelected } from '@/lib/fuelStore';
 import { useExpensesMode, setExpensesMode, getExpensesData, useExpensesSelected, clearExpensesSelected } from '@/lib/expensesStore';
@@ -186,11 +187,13 @@ export default function TopBar() {
             </div>
             {location.pathname.startsWith('/reports/') && <ReportClientDropdown />}
             {(location.pathname === '/trips' || location.pathname === '/contracts') &&
-            <HeaderActionButton
+            <>
+              <DraftsButton />
+              <HeaderActionButton
               label={t('new_trip')}
               variant="trip"
               onClick={() => window.dispatchEvent(new CustomEvent('ops:new-trip'))} />
-
+            </>
             }
             {isExpensesPage &&
             <>
