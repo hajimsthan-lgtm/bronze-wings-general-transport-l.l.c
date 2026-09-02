@@ -523,6 +523,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
       }
       onOpenChange(false);
       onSaved?.();
+    } catch (err) {
+      const msg = err?.message || err?.error || (typeof err === 'string' ? err : 'Failed to save the trip. Please try again.');
+      toast({ title: 'Submit failed', description: msg, variant: 'destructive' });
     } finally {setSaving(false);}
   };
 
