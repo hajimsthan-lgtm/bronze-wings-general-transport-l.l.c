@@ -266,11 +266,15 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   }, [form.assignment_mode]);
 
   // ═══ Status automation (form-internal) ═══
-  // 1. Load datetime filled → Scheduled → Trip Started (auto)
+  // 1. Load datetime reached (now >= load time) → Scheduled → Trip Started (auto)
+  // A future-scheduled trip stays "Scheduled" until its load time actually arrives.
   useEffect(() => {
     if (mode !== 'trip') return;
     if (form.load_datetime && form.status === 'scheduled' && form.status_source !== 'manual') {
-      setForm((prev) => ({ ...prev, status: 'trip_started', status_source: 'automatic' }));
+      const startDT = new Date(form.load_datetime);
+      if (!isNaN(startDT.getTime()) && new Date() >= startDT) {
+        setForm((prev) => ({ ...prev, status: 'trip_started', status_source: 'automatic' }));
+      }
     }
   }, [form.load_datetime, form.status, form.status_source, mode]);
 
