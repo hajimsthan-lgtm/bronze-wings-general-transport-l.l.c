@@ -30,7 +30,7 @@ import { inGlobalDateRange } from '@/lib/GlobalDateContext';
 import { Truck, FileText, Landmark, Building2, FileEdit } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
-import { setOpsFilter, clearOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
+import { setOpsFilter, deactivateOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
 import { useMobileFilter } from '@/lib/mobileHeaderFilter';
 import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWorkflow';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -428,7 +428,7 @@ export default function Operations() {
     });
     // Debugger is only relevant for trips (not contracts)
     setOpsDebug(mode !== 'contract' ? { onRun: () => setDebuggerOpen(true) } : null);
-    return () => { clearOpsFilter(); setOpsDebug(null); };
+    return () => { deactivateOpsFilter(); setOpsDebug(null); };
   }, [statusOptions, statusValue, onStatusChange, statusCounts, mode, isContractExport]);
 
   const loading = tripsLoading || contractsLoading;
