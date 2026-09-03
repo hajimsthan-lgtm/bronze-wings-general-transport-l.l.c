@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Calendar, Sun, Moon } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 /**
  * Two-column datetime input for trip forms.
  *  Left  → Date (DD-MM-YYYY) with one-click calendar picker
- *  Right → Time (HH:MM) with AM/PM toggle
+ *  Right → Time (HH:MM) with iPhone-style AM/PM segmented toggle
  * Internal value remains "YYYY-MM-DDTHH:mm" (24h).
  * When date is fully written (10 chars), focus auto-jumps to the time column.
+ * When time is fully written (5 chars), focus auto-jumps to the AM/PM toggle.
  */
 
 // internal "YYYY-MM-DDTHH:mm" → { date: "DD-MM-YYYY", time12: "hh", minute: "mm", ampm }
@@ -40,6 +41,21 @@ function toInternal({ date, time12, minute, ampm }) {
   if (ampm === 'PM' && h !== 12) h += 12;
   if (ampm === 'AM' && h === 12) h = 0;
   return `${yy}-${mm}-${dd}T${String(h).padStart(2, '0')}:${minute}`;
+}
+
+// Validate a DD-MM-YYYY date string (real calendar check)
+function isValidDate(str) {
+  const m = str.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (!m) return false;
+  const [, dd, mm, yy] = m;
+  const day = parseInt(dd, 10);
+  const month = parseInt(mm, 10);
+  const year = parseInt(yy, 10);
+  if (month < 1 || month > 12) return false;
+  if (year < 1900 || year > 2100) return false;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  if (day < 1 || day > daysInMonth) return false;
+  return true;
 }
 
 // Auto-format raw digits into DD-MM-YYYY
@@ -76,7 +92,9 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
 
   const dateInputRef = useRef(null);
   const timeInputRef = useRef(null);
+  const ampmRef = useRef(null);
   const nativeDateRef = useRef(null);
+  const blurTimerRef = useRef(null);
 
   // Sync from external value when not actively editing
   useEffect(() => {
@@ -87,12 +105,20 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
     setAmpm(p.ampm);
   }, [value, editing]);
 
+  // Clear any pending blur timer on unmount
+  useEffect(() => () => clearTimeout(blurTimerRef.current), []);
+
   // Auto-jump: when date is fully written (10 chars), focus the time input
   const jumpToTime = () => {
     setTimeout(() => {
       timeInputRef.current?.focus();
       timeInputRef.current?.select();
     }, 0);
+  };
+
+  // Auto-jump: when time is fully written (5 chars), focus the AM/PM toggle
+  const jumpToAmpm = () => {
+    setTimeout(() => ampmRef.current?.focus(), 0);
   };
 
   // Emit internal value whenever any part changes
@@ -105,21 +131,45 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
     else if (!newDate && !newTime) onChange('');
   }, [onChange]);
 
-  // Date change — auto-format + cursor preservation
+  // Shared blur handler — only clears editing if focus didn't move to another element in this component
+  const handleBlur = () => {
+    clearTimeout(blurTimerRef.current);
+    blurTimerRef.current = setTimeout(() => {
+      if (document.activeElement === timeInputRef.current ||
+          document.activeElement === dateInputRef.current ||
+          document.activeElement === ampmRef.current ||
+          document.activeElement === nativeDateRef.current) return;
+      setEditing(false);
+    }, 150);
+  };
+
+  // Date change — auto-format + cursor preservation + validation on jump
   const handleDateChange = (e) => {
     const input = e.target;
     const raw = input.value;
     const cursorPos = input.selectionStart || 0;
-    // Count digits before cursor in the raw input
     const digitsBefore = (raw.slice(0, cursorPos).match(/\d/g) || []).length;
 
     if (raw === '') { setDateStr(''); emit('', timeStr, ampm); return; }
     const formatted = autoFormatDate(raw);
+
+    // When date is fully written (10 chars), validate before jumping
+    if (formatted.length === 10) {
+      if (!isValidDate(formatted)) {
+        // Invalid date — clear it and stay on the date field
+        setDateStr('');
+        emit('', timeStr, ampm);
+        return;
+      }
+      // Valid date — keep it and jump to time
+      setDateStr(formatted);
+      emit(formatted, timeStr, ampm);
+      jumpToTime();
+      return;
+    }
+
     setDateStr(formatted);
     emit(formatted, timeStr, ampm);
-
-    // Jump to time field when date is fully written
-    if (formatted.length === 10) { jumpToTime(); return; }
 
     // Restore cursor position based on digit count
     requestAnimationFrame(() => {
@@ -137,7 +187,7 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
     });
   };
 
-  // Time change — auto-format + cursor preservation
+  // Time change — auto-format + cursor preservation + jump to AM/PM when complete
   const handleTimeChange = (e) => {
     const input = e.target;
     const raw = input.value;
@@ -148,6 +198,9 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
     const formatted = autoFormatTime(raw);
     setTimeStr(formatted);
     emit(dateStr, formatted, ampm);
+
+    // Jump to AM/PM when time is fully written (5 chars)
+    if (formatted.length === 5) { jumpToAmpm(); return; }
 
     requestAnimationFrame(() => {
       if (!timeInputRef.current) return;
@@ -178,20 +231,15 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
 
   const openCalendar = () => {
     if (disabled) return;
-    // showPicker works on visible (non-hidden) inputs
     if (nativeDateRef.current && typeof nativeDateRef.current.showPicker === 'function') {
       try { nativeDateRef.current.showPicker(); return; } catch (e) {}
     }
-    // Fallback: focus the native input to trigger picker
     nativeDateRef.current?.focus();
     nativeDateRef.current?.click();
   };
 
-  const toggleAmpm = () => {
-    const next = ampm === 'AM' ? 'PM' : 'AM';
-    setAmpm(next);
-    emit(dateStr, timeStr, next);
-  };
+  const setAm = () => { if (ampm !== 'AM') { setAmpm('AM'); emit(dateStr, timeStr, 'AM'); } };
+  const setPm = () => { if (ampm !== 'PM') { setAmpm('PM'); emit(dateStr, timeStr, 'PM'); } };
 
   return (
     <div className="flex gap-1.5 w-full min-w-0">
@@ -202,8 +250,8 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
           type="text"
           value={dateStr}
           onChange={handleDateChange}
-          onFocus={() => setEditing(true)}
-          onBlur={() => setTimeout(() => setEditing(false), 150)}
+          onFocus={() => { setEditing(true); clearTimeout(blurTimerRef.current); }}
+          onBlur={handleBlur}
           placeholder="DD-MM-YYYY"
           disabled={disabled}
           maxLength={10}
@@ -232,34 +280,58 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
         />
       </div>
 
-      {/* Time column — HH:MM + AM/PM toggle */}
-      <div className="flex gap-1 items-center flex-shrink-0">
-        <Input
-          ref={timeInputRef}
-          type="text"
-          value={timeStr}
-          onChange={handleTimeChange}
-          onFocus={() => setEditing(true)}
-          onBlur={() => setTimeout(() => setEditing(false), 150)}
-          placeholder="HH:MM"
+      {/* Time column — HH:MM */}
+      <Input
+        ref={timeInputRef}
+        type="text"
+        value={timeStr}
+        onChange={handleTimeChange}
+        onFocus={() => { setEditing(true); clearTimeout(blurTimerRef.current); }}
+        onBlur={handleBlur}
+        placeholder="HH:MM"
+        disabled={disabled}
+        maxLength={5}
+        className={cn('font-mono text-xs tabular-nums w-[56px] text-center px-1.5 flex-shrink-0', className)}
+      />
+
+      {/* iPhone-style AM/PM segmented toggle — AM green, PM blue */}
+      <div
+        className="flex items-center bg-muted/60 rounded-full p-[3px] h-9 flex-shrink-0 border border-border/50"
+        role="group"
+        aria-label="AM / PM"
+      >
+        <button
+          ref={ampmRef}
+          type="button"
+          onClick={setAm}
           disabled={disabled}
-          maxLength={5}
-          className={cn('font-mono text-xs tabular-nums w-[56px] text-center px-1.5', className)}
-        />
+          onFocus={() => { setEditing(true); clearTimeout(blurTimerRef.current); }}
+          onBlur={handleBlur}
+          className={cn(
+            'flex items-center justify-center h-[30px] w-[34px] rounded-full text-[11px] font-bold transition-all duration-300',
+            ampm === 'AM'
+              ? 'bg-green-500 text-white shadow-md shadow-green-500/40 scale-105'
+              : 'text-muted-foreground hover:text-foreground/80'
+          )}
+          title="AM"
+        >
+          AM
+        </button>
         <button
           type="button"
-          onClick={toggleAmpm}
+          onClick={setPm}
           disabled={disabled}
+          onFocus={() => { setEditing(true); clearTimeout(blurTimerRef.current); }}
+          onBlur={handleBlur}
           className={cn(
-            'flex items-center gap-0.5 h-9 px-2 rounded-lg border text-xs font-bold transition-all flex-shrink-0',
-            ampm === 'AM'
-              ? 'border-amber-500/40 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'
-              : 'border-indigo-500/40 bg-indigo-500/15 text-indigo-400 hover:bg-indigo-500/25'
+            'flex items-center justify-center h-[30px] w-[34px] rounded-full text-[11px] font-bold transition-all duration-300',
+            ampm === 'PM'
+              ? 'bg-blue-500 text-white shadow-md shadow-blue-500/40 scale-105'
+              : 'text-muted-foreground hover:text-foreground/80'
           )}
-          title="Toggle AM / PM"
+          title="PM"
         >
-          {ampm === 'AM' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
-          {ampm}
+          PM
         </button>
       </div>
     </div>
