@@ -13,7 +13,7 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
-import { exportToCSV, exportToPDF, exportToXLSX } from '@/lib/exportUtils';
+import { exportToPDF, exportToXLSX } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import { base44 } from '@/api/base44Client';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
@@ -70,21 +70,29 @@ function formatDuration(loadDT, offloadDT, calcDur) {
 }
 
 // Pre-compute export row with all derived fields
-function buildExportRow(tr) {
+// clientContactMap: { client_name → default contact_person } for fallback
+function buildExportRow(tr, clientContactMap = {}) {
   const revenue = Number(tr.revenue) || 0;
-  const tax = Math.round(revenue * 0.05 * 100) / 100;
-  const total = Math.round(revenue * 1.05 * 100) / 100;
+  const hasRevenue = revenue > 0;
+  const tax = hasRevenue ? Math.round(revenue * 0.05 * 100) / 100 : '';
+  const total = hasRevenue ? Math.round(revenue * 1.05 * 100) / 100 : '';
+  // Contact person: trip-specific override takes priority, fall back to client default
+  const contactPerson = tr.contact_person || clientContactMap[tr.client_name] || '';
+  // Offloading only shown when the trip has actually been offloaded (offload_datetime set)
+  const offloading = tr.offload_datetime ? formatTimeOnly(tr.offload_datetime, null) : '';
+  // Duration only computable when both load and offload datetimes exist
+  const duration = (tr.load_datetime && tr.offload_datetime) ? formatDuration(tr.load_datetime, tr.offload_datetime) : '';
   return {
     ...tr,
     trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
-    contact_person: tr.contact_person || '',
+    contact_person: contactPerson,
     delivery_note_number: tr.delivery_note_number || '',
-    amount: revenue,
+    amount: hasRevenue ? revenue : '',
     tax,
     total,
     loading: formatTimeOnly(tr.load_datetime, tr.load_time),
-    offloading: formatTimeOnly(tr.offload_datetime, tr.offload_time),
-    duration: formatDuration(tr.load_datetime, tr.offload_datetime, tr.calculated_duration),
+    offloading,
+    duration,
   };
 }
 
@@ -146,7 +154,7 @@ const DEFAULT_WIDTHS = {
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
-export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDuplicate, onStatusUpdated, driverMap, vehicleMap, clientMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
+export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDuplicate, onStatusUpdated, driverMap, vehicleMap, clientMap, clientContactMap, invoiceMap, onInvoicesChanged, onBulkStatus, onBulkDelete }) {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { toast } = useToast();
@@ -367,7 +375,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
     if (selectedTrips.length === 0) return;
     const data = [...selectedTrips]
       .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
-      .map(buildExportRow);
+      .map((t) => buildExportRow(t, clientContactMap));
     await exportToXLSX(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to Excel` });
   };
@@ -375,7 +383,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
     if (selectedTrips.length === 0) return;
     const data = [...selectedTrips]
       .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
-      .map(buildExportRow);
+      .map((t) => buildExportRow(t, clientContactMap));
     exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips', { landscape: true });
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };

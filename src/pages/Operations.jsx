@@ -105,6 +105,7 @@ export default function Operations() {
   const [vehicleMap, setVehicleMap] = useState({});
   const [clientMap, setClientMap] = useState({});
   const [clientsList, setClientsList] = useState([]);
+  const clientContactMap = useMemo(() => Object.fromEntries((clientsList || []).map((c) => [c.name, c.contact_person || ''])), [clientsList]);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [debuggerOpen, setDebuggerOpen] = useState(false);
   const opsBulk = useOpsBulk();
@@ -529,7 +530,7 @@ export default function Operations() {
                   {viewMode === 'card'
                     ? tripGrid(filteredTrips)
                     : viewMode === 'table'
-                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDuplicate={handleDuplicateTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
+                    ? <TripsTable trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDuplicate={handleDuplicateTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} clientContactMap={clientContactMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />
                     : <TripsList trips={filteredTrips} onOpenDetail={openDetailTrip} onEdit={openEditTrip} onDelete={requestDeleteTrip} onStatusUpdated={refetchTrips} driverMap={driverMap} vehicleMap={vehicleMap} clientMap={clientMap} invoiceMap={invoiceMap} onInvoicesChanged={() => refetchInvoices()} onBulkStatus={handleBulkTripStatus} onBulkDelete={handleBulkTripDelete} />}
                 </CollapsibleSection>
               )
