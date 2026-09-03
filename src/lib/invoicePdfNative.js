@@ -300,9 +300,6 @@ function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
   const boxH = 18;
-  const padX = 3;
-  const padY = 2;
-  const contactColW = 42;
 
   // Bordered box with cream background
   fc(pdf, CREAM);
@@ -311,10 +308,10 @@ function drawLetterhead(pdf, s, y) {
   pdf.setLineWidth(0.6);
   pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
 
-  // ── COL 1: Logo — left, vertically centered ──
+  // Logo — left, vertically centered
   const invStyle = getInvStyle(s);
   const logoSize = Math.min(invStyle.logoSize, 14);
-  const logoX = CONTENT_X + padX;
+  const logoX = CONTENT_X + 3;
   const logoY = y + (boxH - logoSize) / 2;
   if (invStyle.logoUrl) {
     try {
@@ -326,32 +323,27 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // ── COL 2: Company names — English left-aligned, Arabic right-aligned RTL ──
+  // Company text — left-aligned, top-aligned with logo (Arabic on top, same as before)
   const textX = logoX + logoSize + 3;
-  const textRightX = CONTENT_RIGHT - contactColW - 2;
-  const engBaseline = y + 8;
-  const subBaseline = y + 12;
+  const textTop = logoY;
   tc(pdf, BROWN);
 
-  // English company name — left-aligned
+  // Arabic name — above company name, aligned with logo top
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 3.5, BROWN);
+
+  // Company name — left-aligned
   pdf.setFont('times', 'bold');
   pdf.setFontSize(13);
-  pdf.text('BRONZE WINGS', textX, engBaseline, { charSpace: 0.5 });
+  pdf.text('BRONZE WINGS', textX, textTop + 5, { charSpace: 0.5 });
 
-  // English subtitle — left-aligned
+  // Subtitle — left-aligned
   pdf.setFont('times', 'bold');
   pdf.setFontSize(7);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, subBaseline, { charSpace: 0.3 });
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 9, { charSpace: 0.3 });
 
-  // Arabic company name — right-aligned (RTL), vertically centered against English stack
-  const arFontMm = 3.2;
-  const arImgH = arFontMm * 1.4;
-  const arY = y + boxH / 2 - arImgH / 2;
-  drawArabicTextRight(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textRightX, arY, arFontMm, BROWN);
-
-  // ── COL 3: Contact info — right-aligned, tight spacing ──
-  const rightX = CONTENT_RIGHT - padX;
-  let cy = y + padY + 1;
+  // Right contact column — right-aligned, tight line spacing
+  const rightX = CONTENT_RIGHT - 3;
+  let cy = y + 3;
   pdf.setFont('times', 'normal');
   pdf.setFontSize(7);
   tc(pdf, BROWN);
@@ -424,8 +416,8 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   }
 
   // Dynamic height: label area + all wrapped lines + padding
-  const labelArea = 5;
-  const h = Math.max(15, labelArea + totalLines * lineH + 2);
+  const labelArea = 7;
+  const h = Math.max(17, labelArea + totalLines * lineH + 2);
 
   // Draw box border
   dc(pdf, LIGHT_GRAY);

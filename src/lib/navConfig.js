@@ -1,13 +1,13 @@
 // Shared navigation config for the app shell sidebar.
 // Grouped by business domain: Operations, Fleet & HR, Accounts, Reports & Docs.
 import {
-  Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
+  Route, Receipt, Shield, Truck, UsersRound, Building2, Store, Briefcase,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench, Fuel as FuelIcon,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 } from 'lucide-react';
 
 const ICONS = {
-  Route, Receipt, Shield, Truck, UsersRound, Building2, Store,
+  Route, Receipt, Shield, Truck, UsersRound, Building2, Store, Briefcase,
   ClipboardList, TrendingUp, FileText, Landmark, Wallet, Wrench, Fuel: FuelIcon,
   Files, FilePlus2, FileSignature, Bot, Sparkles, Award, Trash2,
 };
@@ -30,6 +30,7 @@ export const navItems = [
       { key: 'drivers', label: 'Drivers', path: '/admin/drivers', icon: 'UsersRound', color: '#0ea5e9' },
       { key: 'clients', label: 'Clients', path: '/admin/clients', icon: 'Building2', color: '#14b8a6' },
       { key: 'vendors', label: 'Vendors', path: '/admin/vendors', icon: 'Store', color: '#f59e0b' },
+      { key: 'service_providers', label: 'Service Providers', path: '/admin/service-providers', icon: 'Briefcase', color: '#8b5cf6' },
     ],
   },
   {
