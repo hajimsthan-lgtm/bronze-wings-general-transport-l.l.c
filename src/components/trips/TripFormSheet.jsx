@@ -535,12 +535,12 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   const handleSubmit = () => {
     if (mode === 'trip' && !editTrip && !validateTrip()) return;
-    // When editing, confirm if status changed
-    if (editTrip && form.status && form.status !== editTrip.status) {
+    // When editing, confirm only if status was MANUALLY changed by the user.
+    // Auto-advanced statuses (from filling dates/financials) submit directly.
+    if (editTrip && form.status && form.status !== editTrip.status && form.status_source === 'manual') {
       setStatusConfirm({ oldStatus: editTrip.status, newStatus: form.status });
       return;
     }
-    // For completed trips, optionally prompt for delivery note + attachment
     doSubmit();
   };
 
