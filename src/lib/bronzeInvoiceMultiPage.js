@@ -198,14 +198,14 @@ export function buildBronzeMultiPageHTML(invoice, clientName, settings = {}, seq
   tr.zebra td { background: ${ZEBRA_BG}; }
   tr.body-row { page-break-inside: avoid; }
   /* column widths */
-  col.c1 { width: 6%; }
-  col.c2 { width: 12%; }
-  col.c3 { width: 48%; }
-  col.c4 { width: 6%; }
+  col.c1 { width: 5%; }
+  col.c2 { width: 10%; }
+  col.c3 { width: 54%; }
+  col.c4 { width: 5%; }
   col.c5 { width: 7%; }
   col.c6 { width: 8%; }
-  col.c7 { width: 6%; }
-  col.c8 { width: 7%; }
+  col.c7 { width: 5%; }
+  col.c8 { width: 6%; }
   /* ── Totals rows ── */
   tr.totals td {
     background: ${ZEBRA_BG};
