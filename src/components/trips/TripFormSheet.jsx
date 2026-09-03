@@ -302,26 +302,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
 
   // Manual status change handler — validates restrictions before accepting
   const handleStatusChange = (newStatus) => {
-    if (newStatus === 'trip_ended' && !form.offload_datetime) {
-      toast({ title: 'Cannot set Trip Ended', description: 'Offload Date & Time is required before ending a trip.', variant: 'destructive' });
-      return;
-    }
-    if (newStatus === 'completed') {
-      const rev = Number(form.revenue) || 0;
-      const baseFare = Number(form.base_fare) || 0;
-      if (baseFare <= 0) {
-        toast({ title: 'Cannot set Completed', description: 'Base Fare must be filled before completing a trip.', variant: 'destructive' });
-        return;
-      }
-      if (rev <= 0) {
-        toast({ title: 'Cannot set Completed', description: 'Revenue (Amount) must be filled before completing a trip.', variant: 'destructive' });
-        return;
-      }
-      if (!form.offload_datetime) {
-        toast({ title: 'Cannot set Completed', description: 'Offload Date & Time is required before completing a trip.', variant: 'destructive' });
-        return;
-      }
-    }
     setForm((prev) => ({ ...prev, status: newStatus, status_source: 'manual' }));
   };
 
@@ -436,16 +416,26 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     if (!form.vehicle_plate?.trim()) e.vehicle_plate = 'Vehicle is required';
     if (!form.driver_name?.trim()) e.driver_name = 'Driver is required';
     if (!form.trip_date) e.trip_date = 'Trip date is required';
-    // Status-based restrictions
-    if (form.status === 'trip_ended' && !form.offload_datetime) {
-      e.offload_datetime = 'Offload Date & Time is required to save as Trip Ended';
-    }
+    // Completed requires all fields (forward validation — always enforced)
     if (form.status === 'completed') {
-      const rev = Number(form.revenue) || 0;
-      const baseFare = Number(form.base_fare) || 0;
-      if (baseFare <= 0) e.base_fare = 'Base Fare is required to save as Completed';
-      if (rev <= 0) e.revenue = 'Revenue (Amount) is required to save as Completed';
       if (!form.offload_datetime) e.offload_datetime = 'Offload Date & Time is required to save as Completed';
+      if ((Number(form.base_fare) || 0) <= 0) e.base_fare = 'Base Fare is required to save as Completed';
+      if ((Number(form.revenue) || 0) <= 0) e.revenue = 'Revenue (Amount) is required to save as Completed';
+    }
+    // Manual downgrade validation — fields from higher status must be cleared first
+    if (form.status_source === 'manual') {
+      const hasLoad = !!form.load_datetime;
+      const hasOffload = !!form.offload_datetime;
+      const hasPayment = (Number(form.revenue) || 0) > 0 || (Number(form.base_fare) || 0) > 0;
+      if (form.status === 'trip_ended' && (hasOffload || hasPayment)) {
+        e.status = 'Remove Offload Date & Time and payment column to save as Trip Ended';
+      }
+      if (form.status === 'trip_started' && (hasLoad || hasOffload || hasPayment)) {
+        e.status = 'Remove Load Date & Time, Offload Date & Time, and financial section to save as Trip Started';
+      }
+      if (form.status === 'scheduled' && (hasLoad || hasOffload || hasPayment)) {
+        e.status = 'Remove all sections (Load Date & Time, Offload Date & Time, and financial section) to save as Scheduled';
+      }
     }
     setErrors(e);
     if (Object.keys(e).length > 0) {
@@ -534,13 +524,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
   };
 
   const handleSubmit = () => {
-    if (mode === 'trip' && !editTrip && !validateTrip()) return;
-    // When editing, confirm only if status was MANUALLY changed by the user.
-    // Auto-advanced statuses (from filling dates/financials) submit directly.
-    if (editTrip && form.status && form.status !== editTrip.status && form.status_source === 'manual') {
-      setStatusConfirm({ oldStatus: editTrip.status, newStatus: form.status });
-      return;
-    }
+    if (mode === 'trip' && !validateTrip()) return;
     doSubmit();
   };
 
@@ -656,38 +640,47 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           <TripCalcMobileBar form={form} isOvertime={isOvertime} overtimeMetric={overtimeMetric} extraCharges={extraCharges} revenueOverridden={revenueOverridden} addOns={addOns} />
           }
 
+        {/* Frozen status section — always visible, non-scrollable */}
+        {mode === 'trip' && (
+          <div className="px-3 sm:px-5 py-2.5 border-b border-border/50 flex-shrink-0 bg-card/90 backdrop-blur-2xl z-10">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="trip-section-icon">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-foreground">Trip Status</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {form.status_source === 'manual' ? 'Manually set' : (form.status_source === 'automatic' && form.status !== 'scheduled') ? 'Auto-switched — fill more to advance' : 'Default — auto-advances as you fill the form'}
+                  </p>
+                </div>
+              </div>
+              <TripFormStatusSelector
+                status={form.status}
+                onStatusChange={handleStatusChange}
+              />
+            </div>
+            {errors.status && (
+              <p className="text-[10px] text-red-400 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.status}</p>
+            )}
+            {errors.offload_datetime && form.status === 'completed' && (
+              <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.offload_datetime}</p>
+            )}
+            {errors.revenue && form.status === 'completed' && (
+              <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.revenue}</p>
+            )}
+            {errors.base_fare && form.status === 'completed' && (
+              <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.base_fare}</p>
+            )}
+          </div>
+        )}
+
         {/* Body: scrollable form with standalone floating calc panel in right column */}
         <div className="flex-1 overflow-y-auto premium-scroll">
         <div className="px-3 py-3 sm:px-5 sm:py-4 grid lg:grid-cols-[1fr_260px] gap-3 sm:gap-4 items-start">
           <div className="space-y-5">
             {mode === 'trip' ?
                 <>
-            {/* Status selector — connected to outside dropdown via shared form.status */}
-            <div className="trip-section" style={{ '--section-accent': STATUS_META[form.status]?.color?.replace('#', '').match(/.{2}/g)?.map((h) => parseInt(h, 16)).join(',') || '96,165,250' }}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="trip-section-icon">
-                    <Activity className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-foreground">Trip Status</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
-                      {form.status_source === 'manual' ? 'Manually set' : (form.status_source === 'automatic' && form.status !== 'scheduled') ? 'Auto-switched — fill more to advance' : 'Default — auto-advances as you fill the form'}
-                    </p>
-                  </div>
-                </div>
-                <TripFormStatusSelector
-                  status={form.status}
-                  onStatusChange={handleStatusChange}
-                />
-              </div>
-              {errors.offload_datetime && form.status === 'trip_ended' && (
-                <p className="text-[10px] text-red-400 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.offload_datetime}</p>
-              )}
-              {errors.revenue && form.status === 'completed' && (
-                <p className="text-[10px] text-red-400 mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.revenue}</p>
-              )}
-            </div>
             <TripModeFields p={tripCtx} />
             <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
             </> :

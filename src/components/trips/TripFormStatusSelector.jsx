@@ -1,7 +1,7 @@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Check, Lock, Activity } from 'lucide-react';
+import { ChevronDown, Check, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { TRIP_STATUSES, STATUS_META, canTransition } from '@/lib/tripStatusWorkflow';
+import { TRIP_STATUSES, STATUS_META } from '@/lib/tripStatusWorkflow';
 
 /**
  * Status selector rendered inside the Trip form.
@@ -42,24 +42,19 @@ export default function TripFormStatusSelector({ status, onStatusChange, size = 
         {TRIP_STATUSES.map((st) => {
           const m = STATUS_META[st];
           const isCurrent = status === st;
-          // For a new trip (no status yet), allow selecting scheduled freely
-          const allowed = !status ? st === 'scheduled' : canTransition(status, st);
-          const disabled = isCurrent || !allowed;
           return (
             <DropdownMenuItem
               key={st}
-              onClick={() => !disabled && onStatusChange?.(st)}
-              disabled={disabled}
+              onClick={() => !isCurrent && onStatusChange?.(st)}
+              disabled={isCurrent}
               className={cn(
                 'gap-2 text-xs',
-                isCurrent && 'bg-primary/10 font-semibold',
-                disabled && !isCurrent && 'opacity-35 cursor-not-allowed'
+                isCurrent && 'bg-primary/10 font-semibold'
               )}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: m.color }} />
               <span className="flex-1">{m.label}</span>
               {isCurrent && <Check className="w-3 h-3 ml-auto" />}
-              {!isCurrent && disabled && <Lock className="w-2.5 h-2.5 ml-auto opacity-50" />}
             </DropdownMenuItem>
           );
         })}
