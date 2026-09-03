@@ -270,13 +270,39 @@ function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
   } catch (e) { /* skip if canvas unavailable */ }
 }
 
+// Right-aligned variant for RTL Arabic text — places image so its right edge is at rightX
+function drawArabicTextRight(pdf, text, rightX, y, fontSizeMm, color) {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const dpi = 3;
+    const fontPx = fontSizeMm * 3.78 * dpi;
+    ctx.font = `bold ${fontPx}px 'Arial', 'Segoe UI', sans-serif`;
+    const metrics = ctx.measureText(text);
+    canvas.width = Math.ceil(metrics.width) + 4;
+    canvas.height = Math.ceil(fontPx * 1.4);
+    ctx.font = `bold ${fontPx}px 'Arial', 'Segoe UI', sans-serif`;
+    ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'right';
+    ctx.fillText(text, canvas.width - 2, 0);
+    const dataUrl = canvas.toDataURL('image/png');
+    const imgW = canvas.width / (3.78 * dpi);
+    const imgH = canvas.height / (3.78 * dpi);
+    pdf.addImage(dataUrl, 'PNG', rightX - imgW, y, imgW, imgH);
+  } catch (e) { /* skip if canvas unavailable */ }
+}
+
 // ═══════════════════════════════════════════════════════════
 // DRAW: LETTERHEAD (all pages)
 // ═══════════════════════════════════════════════════════════
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 20;
+  const boxH = 18;
+  const padX = 3;
+  const padY = 2;
+  const contactColW = 42;
 
   // Bordered box with cream background
   fc(pdf, CREAM);
@@ -285,10 +311,10 @@ function drawLetterhead(pdf, s, y) {
   pdf.setLineWidth(0.6);
   pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
 
-  // Logo — left, vertically centered (configurable size & source)
+  // ── COL 1: Logo — left, vertically centered ──
   const invStyle = getInvStyle(s);
-  const logoSize = invStyle.logoSize;
-  const logoX = CONTENT_X + 4;
+  const logoSize = Math.min(invStyle.logoSize, 14);
+  const logoX = CONTENT_X + padX;
   const logoY = y + (boxH - logoSize) / 2;
   if (invStyle.logoUrl) {
     try {
@@ -300,40 +326,45 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // Company text — left-aligned, top-aligned with logo
-  const textX = logoX + logoSize + 4;
-  const textTop = logoY;
+  // ── COL 2: Company names — English left-aligned, Arabic right-aligned RTL ──
+  const textX = logoX + logoSize + 3;
+  const textRightX = CONTENT_RIGHT - contactColW - 2;
+  const engBaseline = y + 8;
+  const subBaseline = y + 12;
   tc(pdf, BROWN);
 
-  // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
-
-  // Company name — left-aligned
+  // English company name — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(15);
-  pdf.text('BRONZE WINGS', textX, textTop + 6, { charSpace: 0.5 });
+  pdf.setFontSize(13);
+  pdf.text('BRONZE WINGS', textX, engBaseline, { charSpace: 0.5 });
 
-  // Subtitle — left-aligned
+  // English subtitle — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(7.5);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 10, { charSpace: 0.3 });
+  pdf.setFontSize(7);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, subBaseline, { charSpace: 0.3 });
 
-  // Right contact column — right-aligned, each on its own line
-  const rightX = CONTENT_RIGHT - 4;
-  let cy = y + 3.5;
+  // Arabic company name — right-aligned (RTL), vertically centered against English stack
+  const arFontMm = 3.2;
+  const arImgH = arFontMm * 1.4;
+  const arY = y + boxH / 2 - arImgH / 2;
+  drawArabicTextRight(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textRightX, arY, arFontMm, BROWN);
+
+  // ── COL 3: Contact info — right-aligned, tight spacing ──
+  const rightX = CONTENT_RIGHT - padX;
+  let cy = y + padY + 1;
   pdf.setFont('times', 'normal');
   pdf.setFontSize(7);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.5; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.5; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.5; }
   if (s.address) {
-    const addrLines = pdf.splitTextToSize(str(s.address), 35);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.8; }
+    const addrLines = pdf.splitTextToSize(str(s.address), 38);
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.5; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
-  return y + boxH + 1;
+  return y + boxH + 0.5;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -355,7 +386,7 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
     pdf.text(`Bronze TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 3.5, { align: 'right' });
   }
 
-  return y + h + 1;
+  return y + h + 0.5;
 }
 
 // ═══════════════════════════════════════════════════════════
