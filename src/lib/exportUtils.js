@@ -50,7 +50,13 @@ export async function exportToXLSX(data, filename, columns) {
     };
   });
 
-  // Data rows
+  // Data rows — with thin borders on all cells for full grid
+  const thinBorder = {
+    top: { style: 'thin', color: { argb: 'FFB0B0B0' } },
+    bottom: { style: 'thin', color: { argb: 'FFB0B0B0' } },
+    left: { style: 'thin', color: { argb: 'FFB0B0B0' } },
+    right: { style: 'thin', color: { argb: 'FFB0B0B0' } },
+  };
   data.forEach(item => {
     const values = columns.map(c => {
       const val = c.transform ? c.transform(item) : item[c.key];
@@ -65,6 +71,7 @@ export async function exportToXLSX(data, filename, columns) {
     row.eachCell((cell, colIdx) => {
       cell.alignment = { vertical: 'middle', horizontal: columns[colIdx - 1].numeric ? 'right' : 'left' };
       if (columns[colIdx - 1].numeric) cell.numFmt = '#,##0.00';
+      cell.border = thinBorder;
     });
   });
 
