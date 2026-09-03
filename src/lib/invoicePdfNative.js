@@ -299,19 +299,23 @@ function drawArabicTextRight(pdf, text, rightX, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 18;
+  const boxH = 22;
+
+  // Match footer positioning — inset 2mm from border on all sides
+  const hdrX = BORDER_POS + 2;
+  const hdrW = PAGE_W - 2 * (BORDER_POS + 2);
 
   // Bordered box with cream background
   fc(pdf, CREAM);
-  pdf.rect(CONTENT_X, y, CONTENT_W, boxH, 'F');
+  pdf.rect(hdrX, y, hdrW, boxH, 'F');
   dc(pdf, BROWN);
   pdf.setLineWidth(0.6);
-  pdf.rect(CONTENT_X, y, CONTENT_W, boxH);
+  pdf.rect(hdrX, y, hdrW, boxH);
 
   // Logo — left, vertically centered
   const invStyle = getInvStyle(s);
   const logoSize = Math.min(invStyle.logoSize, 14);
-  const logoX = CONTENT_X + 3;
+  const logoX = hdrX + 4;
   const logoY = y + (boxH - logoSize) / 2;
   if (invStyle.logoUrl) {
     try {
@@ -323,36 +327,36 @@ function drawLetterhead(pdf, s, y) {
     drawDefaultLogo(pdf, logoX, logoY, logoSize);
   }
 
-  // Company text — left-aligned, top-aligned with logo (Arabic on top, same as before)
-  const textX = logoX + logoSize + 3;
-  const textTop = logoY;
+  // Company text — vertically centered, total height matches logo
+  const textX = logoX + logoSize + 4;
+  const textTop = logoY;  // top of text block = top of logo (both centered)
   tc(pdf, BROWN);
 
-  // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 3.5, BROWN);
+  // Arabic name — top of block, slightly bigger (4mm from 3.5)
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
 
-  // Company name — left-aligned
+  // Company name — clear gap below Arabic (no overlap), bigger (15pt from 13)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(13);
-  pdf.text('BRONZE WINGS', textX, textTop + 5, { charSpace: 0.5 });
+  pdf.setFontSize(15);
+  pdf.text('BRONZE WINGS', textX, textTop + 7.5, { charSpace: 0.5 });
 
-  // Subtitle — left-aligned
+  // Subtitle — spaced below company name, bigger (8pt from 7)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(7);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 9, { charSpace: 0.3 });
+  pdf.setFontSize(8);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 12, { charSpace: 0.3 });
 
-  // Right contact column — right-aligned, tight line spacing
-  const rightX = CONTENT_RIGHT - 3;
-  let cy = y + 3;
+  // Right contact column — right-aligned, vertically centered
+  const rightX = hdrX + hdrW - 4;
+  let cy = y + 4;
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(7);
+  pdf.setFontSize(7.5);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.5; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.5; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.5; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.8; }
   if (s.address) {
-    const addrLines = pdf.splitTextToSize(str(s.address), 38);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.5; }
+    const addrLines = pdf.splitTextToSize(str(s.address), 42);
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.8; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
@@ -764,7 +768,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
       if (y + estH > contentBottom) {
         pdf.addPage();
         drawPageBorder(pdf);
-        y = drawLetterhead(pdf, s, MARGIN);
+        y = drawLetterhead(pdf, s, BORDER_POS + 2);
         y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
         y = drawTableHeader(pdf, cols, y, invoiceType);
       }
@@ -793,7 +797,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   if (y + 7 > contentBottom) {
     pdf.addPage();
     drawPageBorder(pdf);
-    y = drawLetterhead(pdf, s, MARGIN);
+    y = drawLetterhead(pdf, s, BORDER_POS + 2);
     y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
     y = drawTableHeader(pdf, cols, y, invoiceType);
   }
@@ -1111,7 +1115,7 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
 
   // ══ PAGE 1 ══
   drawPageBorder(pdf);
-  let y = MARGIN;
+  let y = BORDER_POS + 2;
   y = drawLetterhead(pdf, s, y);
   y = drawTaxBanner(pdf, y, refNumber, invoiceDate, s.trn);
   y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate);
@@ -1128,7 +1132,7 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
   if (y + 12 > FOOTER_TOP - 2) {
     pdf.addPage();
     drawPageBorder(pdf);
-    y = drawLetterhead(pdf, s, MARGIN);
+    y = drawLetterhead(pdf, s, BORDER_POS + 2);
   }
   y = drawTermsInline(pdf, y, invoiceType);
 
