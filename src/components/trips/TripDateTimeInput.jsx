@@ -194,9 +194,9 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
   };
 
   return (
-    <div className="flex gap-2 w-full">
+    <div className="flex gap-1.5 w-full min-w-0">
       {/* Date column — DD-MM-YYYY + calendar picker */}
-      <div className="relative flex-[1.4] min-w-[140px]">
+      <div className="relative flex-1 min-w-0">
         <Input
           ref={dateInputRef}
           type="text"
@@ -207,17 +207,17 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
           placeholder="DD-MM-YYYY"
           disabled={disabled}
           maxLength={10}
-          className={cn('font-mono text-sm tabular-nums pr-9', className)}
+          className={cn('font-mono text-xs tabular-nums pl-3 pr-7 min-w-0', className)}
         />
         <button
           type="button"
           tabIndex={-1}
           onClick={openCalendar}
           disabled={disabled}
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors z-10"
+          className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors z-10"
           title="Pick date"
         >
-          <Calendar className="w-4 h-4" />
+          <Calendar className="w-3.5 h-3.5" />
         </button>
         {/* Native date input — opacity-0 overlay so showPicker() works */}
         <input
@@ -233,7 +233,7 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
       </div>
 
       {/* Time column — HH:MM + AM/PM toggle */}
-      <div className="flex gap-1.5 items-center flex-shrink-0">
+      <div className="flex gap-1 items-center flex-shrink-0">
         <Input
           ref={timeInputRef}
           type="text"
@@ -244,21 +244,21 @@ export default function TripDateTimeInput({ value, onChange, placeholder, classN
           placeholder="HH:MM"
           disabled={disabled}
           maxLength={5}
-          className={cn('font-mono text-sm tabular-nums w-[72px] text-center', className)}
+          className={cn('font-mono text-xs tabular-nums w-[56px] text-center px-1.5', className)}
         />
         <button
           type="button"
           onClick={toggleAmpm}
           disabled={disabled}
           className={cn(
-            'flex items-center gap-1 h-9 px-2.5 rounded-lg border text-xs font-bold transition-all flex-shrink-0',
+            'flex items-center gap-0.5 h-9 px-2 rounded-lg border text-xs font-bold transition-all flex-shrink-0',
             ampm === 'AM'
               ? 'border-amber-500/40 bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'
               : 'border-indigo-500/40 bg-indigo-500/15 text-indigo-400 hover:bg-indigo-500/25'
           )}
           title="Toggle AM / PM"
         >
-          {ampm === 'AM' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          {ampm === 'AM' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
           {ampm}
         </button>
       </div>
