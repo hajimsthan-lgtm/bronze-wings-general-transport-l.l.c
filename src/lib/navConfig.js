@@ -47,6 +47,7 @@ export const navItems = [
     key: 'reports_docs', label: 'Reports & Docs', icon: 'ClipboardList', color: '#fbbf24',
     children: [
       { key: 'daily_report', label: 'Daily', path: '/reports/daily', icon: 'ClipboardList', color: '#fbbf24' },
+      { key: 'driver_performance', label: 'Driver Performance', path: '/reports/driver-performance', icon: 'TrendingUp', color: '#0ea5e9' },
       { key: 'profit_loss', label: 'P&L', path: '/reports/pnl', icon: 'TrendingUp', color: '#22c55e' },
       { key: 'soa', label: 'SOA', path: '/reports/soa', icon: 'FileText', color: '#ef4444' },
       { key: 'documents', label: 'Documents', path: '/admin/documents', icon: 'Files', color: '#0ea5e9' },

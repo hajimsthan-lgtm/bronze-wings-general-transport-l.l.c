@@ -22,21 +22,92 @@ import BulkCancelDialog from '@/components/trips/BulkCancelDialog';
 import { updateTripStatus, canTransition, STATUS_META } from '@/lib/tripStatusWorkflow';
 import { useAuth } from '@/lib/AuthContext';
 
-// Column widths in mm — total = 247mm (landscape A4 usable width)
+// Format a datetime or time string into "h:mm AM/PM" (time only)
+function formatTimeOnly(datetimeStr, timeStr) {
+  const source = datetimeStr || timeStr;
+  if (!source) return '';
+  const d = new Date(source);
+  if (!isNaN(d.getTime())) {
+    let h = d.getHours();
+    const min = d.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${String(min).padStart(2, '0')} ${ampm}`;
+  }
+  // Maybe it's already a time string like "14:30"
+  const m = String(source).match(/^(\d{1,2}):(\d{2})/);
+  if (m) {
+    let h = parseInt(m[1], 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m[2]} ${ampm}`;
+  }
+  return '';
+}
+
+// Compute elapsed duration as "HH:MM" from load/offload datetimes
+function formatDuration(loadDT, offloadDT, calcDur) {
+  if (loadDT && offloadDT) {
+    const load = new Date(loadDT);
+    const offload = new Date(offloadDT);
+    if (!isNaN(load.getTime()) && !isNaN(offload.getTime())) {
+      const diffMs = offload - load;
+      if (diffMs > 0) {
+        const totalMin = Math.round(diffMs / 60000);
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      }
+    }
+  }
+  if (calcDur && calcDur > 0) {
+    const totalMin = Math.round(calcDur * 60);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+  return '';
+}
+
+// Pre-compute export row with all derived fields
+function buildExportRow(tr) {
+  const revenue = Number(tr.revenue) || 0;
+  const tax = Math.round(revenue * 0.05 * 100) / 100;
+  const total = Math.round(revenue * 1.05 * 100) / 100;
+  return {
+    ...tr,
+    trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
+    contact_person: tr.contact_person || '',
+    delivery_note_number: tr.delivery_note_number || '',
+    amount: revenue,
+    tax,
+    total,
+    loading: formatTimeOnly(tr.load_datetime, tr.load_time),
+    offloading: formatTimeOnly(tr.offload_datetime, tr.offload_time),
+    duration: formatDuration(tr.load_datetime, tr.offload_datetime, tr.calculated_duration),
+  };
+}
+
+// Column widths in mm — auto-scaled to fit landscape A4
 const TRIP_EXPORT_COLUMNS = [
-{ label: 'Trip #', key: 'trip_number', w: 22, noWrap: true },
-{ label: 'Date', key: 'trip_date', w: 20 },
-{ label: 'Driver', key: 'driver_name', w: 26 },
-{ label: 'Driver Phone', key: 'driver_phone', w: 22, noWrap: true },
-{ label: 'Vehicle', key: 'vehicle_plate', w: 20, noWrap: true },
-{ label: 'Client', key: 'client_name', w: 28 },
-{ label: 'Contact Person', key: 'contact_person', w: 24 },
-{ label: 'DN #', key: 'delivery_note_number', w: 18, noWrap: true },
-{ label: 'From', key: 'from_location', w: 22 },
-{ label: 'To', key: 'to_location', w: 22 },
-{ label: 'Revenue', key: 'revenue', w: 18, numeric: true },
-{ label: 'Status', key: 'status', w: 18 },
-{ label: 'Payment', key: 'payment_status', w: 17 }];
+{ label: 'Trip #', key: 'trip_number', w: 20, noWrap: true },
+{ label: 'Date', key: 'trip_date', w: 18 },
+{ label: 'Driver', key: 'driver_name', w: 22 },
+{ label: 'Driver Phone', key: 'driver_phone', w: 20, noWrap: true },
+{ label: 'Vehicle', key: 'vehicle_plate', w: 18, noWrap: true },
+{ label: 'Client', key: 'client_name', w: 24 },
+{ label: 'Contact Person', key: 'contact_person', w: 20 },
+{ label: 'DN #', key: 'delivery_note_number', w: 16, noWrap: true },
+{ label: 'From', key: 'from_location', w: 18 },
+{ label: 'To', key: 'to_location', w: 18 },
+{ label: 'Amount', key: 'amount', w: 14, numeric: true },
+{ label: 'Tax', key: 'tax', w: 12, numeric: true },
+{ label: 'Total', key: 'total', w: 14, numeric: true },
+{ label: 'Loading', key: 'loading', w: 13 },
+{ label: 'Offloading', key: 'offloading', w: 13 },
+{ label: 'Duration', key: 'duration', w: 13 },
+{ label: 'Status', key: 'status', w: 16 },
+{ label: 'Payment', key: 'payment_status', w: 15 }];
 
 // Parse "TR-DDMM-SEQ" into a sortable { date, seq } pair for ascending export sort
 function tripSortKey(tr) {
@@ -296,12 +367,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
     if (selectedTrips.length === 0) return;
     const data = [...selectedTrips]
       .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
-      .map((tr) => ({
-        ...tr,
-        trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
-        contact_person: tr.contact_person || '',
-        delivery_note_number: tr.delivery_note_number || '',
-      }));
+      .map(buildExportRow);
     exportToCSV(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to CSV` });
   };
@@ -309,12 +375,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
     if (selectedTrips.length === 0) return;
     const data = [...selectedTrips]
       .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
-      .map((tr) => ({
-        ...tr,
-        trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
-        contact_person: tr.contact_person || '',
-        delivery_note_number: tr.delivery_note_number || '',
-      }));
+      .map(buildExportRow);
     exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips', { landscape: true });
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };
