@@ -117,8 +117,8 @@ export async function exportToPDF(data, filename, columns, title, options = {}) 
   const colX = (i) => colWidths.slice(0, i).reduce((s, w) => s + w, margin);
 
   const drawHeaders = (y) => {
-    doc.setFillColor(240, 240, 240); doc.rect(margin, y - 4, tableW, 7, 'F');
-    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
+    doc.setFillColor(37, 99, 235); doc.rect(margin, y - 4, tableW, 7, 'F'); // blue header fill
+    doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(255, 255, 255); // white header text
     columns.forEach((c, i) => {
       const x = colX(i);
       const cw = colWidths[i];
