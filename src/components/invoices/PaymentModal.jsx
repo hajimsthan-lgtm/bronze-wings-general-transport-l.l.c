@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Receipt, AlertTriangle, Upload, FileText, X } from 'lucide-react';
+import { Loader2, Receipt, AlertTriangle, Upload, FileText, X, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,7 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
   const [slipName, setSlipName] = useState('');
   const [uploadingSlip, setUploadingSlip] = useState(false);
   const [acknowledgedUnsigned, setAcknowledgedUnsigned] = useState(false);
+  const [overRemark, setOverRemark] = useState('');
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -64,13 +65,15 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
       setSlipUrl('');
       setSlipName('');
       setAcknowledgedUnsigned(false);
+      setOverRemark('');
       generatePaymentReference().then(setReference).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode]);
 
   const amt = Number(amount) || 0;
-  const canConfirm = amt > 0 && !saving && (!isUnsigned || acknowledgedUnsigned);
+  const isOverBalance = amt > balance;
+  const canConfirm = amt > 0 && !saving && (!isUnsigned || acknowledgedUnsigned) && (!isOverBalance || overRemark.trim().length > 0);
 
   const handleSlipUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -96,7 +99,7 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
         date,
         mode: payMode,
         reference,
-        notes,
+        notes: isOverBalance && overRemark.trim() ? `${notes ? notes + ' | ' : ''}[Overpayment: ${overRemark.trim()}]` : notes,
         slipUrl,
       });
       onOpenChange(false);
@@ -179,6 +182,25 @@ export default function PaymentModal({ invoice, mode, open, onOpenChange, onConf
             )}
             {amt <= 0 && (
               <p className="text-[11px] text-red-400 mt-1">Amount is required to change status.</p>
+            )}
+            {isOverBalance && (
+              <div className="mt-2 rounded-lg bg-red-500/10 border border-red-500/20 p-2.5">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-[11px] text-red-500 font-medium">
+                      Amount exceeds balance by AED {(amt - balance).toFixed(2)}. A remark is required to proceed.
+                    </p>
+                  </div>
+                </div>
+                <Input
+                  value={overRemark}
+                  onChange={e => setOverRemark(e.target.value)}
+                  placeholder="Enter remark (required) — e.g. customer overpaid, advance for next invoice..."
+                  className="mt-2 text-xs h-8 border-red-500/30 focus-visible:border-red-500/50"
+                  autoFocus
+                />
+              </div>
             )}
           </div>
 
