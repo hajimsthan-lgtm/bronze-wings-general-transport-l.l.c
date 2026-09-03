@@ -54,6 +54,16 @@ function normalizeRoute(str) {
   return words.join(' To ');
 }
 
+// Build indicator line from line item's show_* flags + values
+// Returns "D:waheed  V:1/89125  DL#:154215" or empty string
+function buildIndicatorLine(item) {
+  const parts = [];
+  if (item.show_driver !== false && item.driver_name) parts.push(`D:${item.driver_name}`);
+  if (item.show_vehicle !== false && item.vehicle_no) parts.push(`V:${item.vehicle_no}`);
+  if (item.show_delivery_note !== false && item.delivery_note_no) parts.push(`DL#:${item.delivery_note_no}`);
+  return parts.length > 0 ? parts.join('  ') : '';
+}
+
 export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
   const s = settings;
   const items = invoice.line_items || [];
@@ -84,11 +94,13 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     const taxableAmount = grossAmount - discount;
     const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
-    const desc = normalizeRoute(item.description ?? '')
+    let desc = normalizeRoute(item.description ?? '')
       .split('\n')
       .map(esc)
       .map(line => line.replace(/\(CANCELLED[^)]*\)/gi, '<span style="color:#dc2626;font-weight:600;">$&</span>'))
       .join('<br>');
+    const _indicatorLine = buildIndicatorLine(item);
+    if (_indicatorLine) desc += `<br><span style="font-size:10pt;color:#555;font-weight:600;">${esc(_indicatorLine)}</span>`;
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#f9fbfd';
     const nf = "font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;";
 
@@ -305,11 +317,13 @@ export function buildMonthlyInvoiceHTML(invoice, clientName, settings = {}, seqN
     const taxableAmount = grossAmount;
     const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
-    const desc = normalizeRoute(item.description ?? '')
+    let desc = normalizeRoute(item.description ?? '')
       .split('\n')
       .map(esc)
       .map(line => line.replace(/\(CANCELLED[^)]*\)/gi, '<span style="color:#dc2626;font-weight:600;">$&</span>'))
       .join('<br>');
+    const _indicatorLine = buildIndicatorLine(item);
+    if (_indicatorLine) desc += `<br><span style="font-size:10pt;color:#555;font-weight:600;">${esc(_indicatorLine)}</span>`;
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafbfc';
     const nf = "font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;";
 
@@ -526,11 +540,13 @@ export function buildPerTripInvoiceHTML(invoice, clientName, settings = {}, seqN
     const taxableAmount = grossAmount;
     const lineVat = item.vat_excluded ? 0 : taxableAmount * (vatRate / 100);
     const lineTotal = taxableAmount + lineVat;
-    const desc = normalizeRoute(item.description ?? '')
+    let desc = normalizeRoute(item.description ?? '')
       .split('\n')
       .map(esc)
       .map(line => line.replace(/\(CANCELLED[^)]*\)/gi, '<span style="color:#dc2626;font-weight:600;">$&</span>'))
       .join('<br>');
+    const _indicatorLine = buildIndicatorLine(item);
+    if (_indicatorLine) desc += `<br><span style="font-size:10pt;color:#555;font-weight:600;">${esc(_indicatorLine)}</span>`;
     const tripDate = fmtDate(item.date);
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafbfc';
     const nf = "font-family:'Century Gothic','Tw Cen MT','Segoe UI',Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;";

@@ -14,6 +14,16 @@ import { numberToWords } from './numberToWords';
 import { formatInvoiceNumber } from './invoiceSequence';
 import { hasArabicText, renderCellToImage } from './pdfArabicRenderer';
 
+// Build indicator line from line item's show_* flags + values
+// Returns "D:waheed  V:1/89125  DL#:154215" or empty string
+function buildIndicatorLine(item) {
+  const parts = [];
+  if (item.show_driver !== false && item.driver_name) parts.push(`D:${item.driver_name}`);
+  if (item.show_vehicle !== false && item.vehicle_no) parts.push(`V:${item.vehicle_no}`);
+  if (item.show_delivery_note !== false && item.delivery_note_no) parts.push(`DL#:${item.delivery_note_no}`);
+  return parts.length > 0 ? parts.join('  ') : '';
+}
+
 // ═══════════════════════════════════════════════════════════
 // PAGE CONSTANTS (mm)
 // ═══════════════════════════════════════════════════════════
@@ -480,7 +490,8 @@ function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
 function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, invStyle) {
   const style = invStyle || getInvStyle({});
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
-  const descText = normalizeRoute(item.description ?? '');
+  const _indicatorLine = buildIndicatorLine(item);
+  const descText = _indicatorLine ? `${normalizeRoute(item.description ?? '')}\n${_indicatorLine}` : normalizeRoute(item.description ?? '');
   const fSize = invoiceType === 'monthly' ? 10 : 9;
   const descColW = descCol.w - 4;
   const lineH = 3.5;
@@ -718,7 +729,9 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     for (let idx = 0; idx < items.length; idx++) {
       // Estimate row height for fit check
       const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
-      const descLines = pdf.splitTextToSize(normalizeRoute(items[idx].description ?? ''), descCol.w - 4);
+      const _indLine = buildIndicatorLine(items[idx]);
+      const _descText = _indLine ? `${normalizeRoute(items[idx].description ?? '')}\n${_indLine}` : normalizeRoute(items[idx].description ?? '');
+      const descLines = pdf.splitTextToSize(_descText, descCol.w - 4);
       const estH = Math.max(10, descLines.length * 3.5 + 3);
 
       if (y + estH > contentBottom) {

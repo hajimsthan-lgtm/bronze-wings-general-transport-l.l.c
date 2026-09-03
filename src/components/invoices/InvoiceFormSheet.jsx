@@ -23,7 +23,7 @@ import ContactPersonSelect from '@/components/trips/ContactPersonSelect';
 import { autoCap } from '@/lib/formEnhancements';
 import { cn } from '@/lib/utils';
 
-const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0, vat_excluded: false };
+const emptyItem = { description: '', quantity: 1, unit_price: 0, amount: 0, vat_excluded: false, show_driver: true, show_vehicle: true, show_delivery_note: true, driver_name: '', vehicle_no: '', delivery_note_no: '' };
 
 const STATUS_STYLES = {
   paid: 'bg-emerald-500/20 text-emerald-400',
@@ -212,6 +212,12 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         service: 'TRIP',
         uom: 'TRIP',
         vat_excluded: false,
+        show_driver: true,
+        show_vehicle: true,
+        show_delivery_note: true,
+        driver_name: trip.driver_name || '',
+        vehicle_no: trip.vehicle_plate || '',
+        delivery_note_no: trip.delivery_note_number || '',
       }];
       // add each add-on as a separate line item; without-tax add-ons are VAT-excluded (VAT 0, shown separately)
       (Array.isArray(trip.add_ons) ? trip.add_ons : []).forEach((a, ai) => {
@@ -672,6 +678,34 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                       <Checkbox checked={!!item.vat_excluded} onCheckedChange={(v) => updateItem(i, 'vat_excluded', !!v)} />
                       <span className="text-[11px] text-muted-foreground">VAT Excluded</span>
                     </label>
+                    {/* Driver / Vehicle / DN# checklist — appends indicators to PDF description */}
+                    <div className="pt-2 border-t border-border/40 space-y-2">
+                      <div className="flex flex-wrap gap-3">
+                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                          <Checkbox checked={!!item.show_driver} onCheckedChange={(v) => updateItem(i, 'show_driver', !!v)} />
+                          <span className="text-[11px] text-muted-foreground">Driver</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                          <Checkbox checked={!!item.show_vehicle} onCheckedChange={(v) => updateItem(i, 'show_vehicle', !!v)} />
+                          <span className="text-[11px] text-muted-foreground">Vehicle #</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                          <Checkbox checked={!!item.show_delivery_note} onCheckedChange={(v) => updateItem(i, 'show_delivery_note', !!v)} />
+                          <span className="text-[11px] text-muted-foreground">DN #</span>
+                        </label>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {item.show_driver && (
+                          <Input value={item.driver_name || ''} onChange={e => updateItem(i, 'driver_name', autoCap(e.target.value))} placeholder="Driver name" className={`${inputCls} text-xs h-8`} />
+                        )}
+                        {item.show_vehicle && (
+                          <Input value={item.vehicle_no || ''} onChange={e => updateItem(i, 'vehicle_no', e.target.value.toUpperCase())} placeholder="Vehicle #" className={`${inputCls} text-xs h-8`} />
+                        )}
+                        {item.show_delivery_note && (
+                          <Input value={item.delivery_note_no || ''} onChange={e => updateItem(i, 'delivery_note_no', e.target.value.toUpperCase())} placeholder="DN #" className={`${inputCls} text-xs h-8`} />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
