@@ -26,15 +26,34 @@ import { useAuth } from '@/lib/AuthContext';
 const TRIP_EXPORT_COLUMNS = [
 { label: 'Trip #', key: 'trip_number', w: 22, noWrap: true },
 { label: 'Date', key: 'trip_date', w: 20 },
-{ label: 'Driver', key: 'driver_name', w: 28 },
-{ label: 'Driver Phone', key: 'driver_phone', w: 24, noWrap: true },
-{ label: 'Vehicle', key: 'vehicle_plate', w: 22, noWrap: true },
-{ label: 'Client', key: 'client_name', w: 32 },
-{ label: 'From', key: 'from_location', w: 25 },
-{ label: 'To', key: 'to_location', w: 25 },
-{ label: 'Revenue', key: 'revenue', w: 20, numeric: true },
-{ label: 'Status', key: 'status', w: 20 },
-{ label: 'Payment', key: 'payment_status', w: 19 }];
+{ label: 'Driver', key: 'driver_name', w: 26 },
+{ label: 'Driver Phone', key: 'driver_phone', w: 22, noWrap: true },
+{ label: 'Vehicle', key: 'vehicle_plate', w: 20, noWrap: true },
+{ label: 'Client', key: 'client_name', w: 28 },
+{ label: 'Contact Person', key: 'contact_person', w: 24 },
+{ label: 'DN #', key: 'delivery_note_number', w: 18, noWrap: true },
+{ label: 'From', key: 'from_location', w: 22 },
+{ label: 'To', key: 'to_location', w: 22 },
+{ label: 'Revenue', key: 'revenue', w: 18, numeric: true },
+{ label: 'Status', key: 'status', w: 18 },
+{ label: 'Payment', key: 'payment_status', w: 17 }];
+
+// Parse "TR-DDMM-SEQ" into a sortable { date, seq } pair for ascending export sort
+function tripSortKey(tr) {
+  const tn = tr.trip_number || '';
+  const m = tn.match(/^TR-(\d{2})(\d{2})-(\d+)$/);
+  if (m) {
+    const dd = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    const seq = parseInt(m[3], 10);
+    // Use trip_date year if available, else current year; build a sortable number
+    const year = tr.trip_date ? parseInt(String(tr.trip_date).slice(0, 4), 10) : new Date().getFullYear();
+    return { dateNum: year * 10000 + mm * 100 + dd, seq };
+  }
+  // Fallback: sort by trip_date then created_date
+  const d = tr.trip_date || tr.created_date || '';
+  return { dateNum: d ? parseInt(String(d).replace(/-/g, ''), 10) : 0, seq: 0 };
+}
 
 
 const STATUS_HEX = {
@@ -275,13 +294,27 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
   const selectedTrips = trips.filter((t) => selected.has(t.id));
   const handleBulkExportCSV = () => {
     if (selectedTrips.length === 0) return;
-    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    const data = [...selectedTrips]
+      .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
+      .map((tr) => ({
+        ...tr,
+        trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
+        contact_person: tr.contact_person || '',
+        delivery_note_number: tr.delivery_note_number || '',
+      }));
     exportToCSV(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to CSV` });
   };
   const handleBulkExportPDF = () => {
     if (selectedTrips.length === 0) return;
-    const data = selectedTrips.map((tr) => ({ ...tr, trip_date: tr.trip_date ? formatDate(tr.trip_date) : '' }));
+    const data = [...selectedTrips]
+      .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
+      .map((tr) => ({
+        ...tr,
+        trip_date: tr.trip_date ? formatDate(tr.trip_date) : '',
+        contact_person: tr.contact_person || '',
+        delivery_note_number: tr.delivery_note_number || '',
+      }));
     exportToPDF(data, 'selected-trips', TRIP_EXPORT_COLUMNS, 'Selected Trips', { landscape: true });
     toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to PDF` });
   };

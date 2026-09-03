@@ -254,14 +254,14 @@ export default function TripModeFields({ p }) {
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Load Date &amp; Time</Label>
-            <TripDateTimeInput value={form.load_datetime} onChange={(v) => update('load_datetime', v)} placeholder="MM-DD-YYYY HH:mm" className={inputCls} />
+            <TripDateTimeInput value={form.load_datetime} onChange={(v) => update('load_datetime', v)} className={inputCls} />
             {loadIsPast && (
               <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Load date is in the past — please verify</p>
             )}
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">Offload Date &amp; Time</Label>
-            <TripDateTimeInput value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} placeholder="MM-DD-YYYY HH:mm" className={inputCls} />
+            <TripDateTimeInput value={form.offload_datetime} onChange={(v) => update('offload_datetime', v)} className={inputCls} />
           </div>
         </div>
         {form.trip_type !== 'contract' && (
