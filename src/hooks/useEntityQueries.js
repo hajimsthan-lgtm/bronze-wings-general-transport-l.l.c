@@ -53,7 +53,7 @@ function deleteOpts(qc, key) {
 }
 
 /* Trips */
-export const useTrips = () => useQuery({ queryKey: KEYS.trips, queryFn: () => withRetry(() => base44.entities.Trip.list('-created_date', 200)) });
+export const useTrips = () => useQuery({ queryKey: KEYS.trips, queryFn: () => withRetry(() => base44.entities.Trip.list('-created_date', 500)) });
 export const useTripCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => withRetry(() => base44.entities.Trip.create(data), 5), retry: 0, ...createOpts(qc, KEYS.trips) }); };
 export const useTripUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => withRetry(() => base44.entities.Trip.update(id, data), 5), retry: 0, ...updateOpts(qc, KEYS.trips) }); };
 export const useTripDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => withRetry(() => base44.entities.Trip.delete(id), 5), retry: 0, ...deleteOpts(qc, KEYS.trips) }); };
