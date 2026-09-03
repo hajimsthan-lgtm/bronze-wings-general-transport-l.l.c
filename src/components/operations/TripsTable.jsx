@@ -13,7 +13,7 @@ import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
-import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
+import { exportToCSV, exportToPDF, exportToXLSX } from '@/lib/exportUtils';
 import { formatDate } from '@/lib/formatters';
 import { base44 } from '@/api/base44Client';
 import { setOpsBulk } from '@/lib/operationsFilterStore';
@@ -363,13 +363,13 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
   };
 
   const selectedTrips = trips.filter((t) => selected.has(t.id));
-  const handleBulkExportCSV = () => {
+  const handleBulkExportCSV = async () => {
     if (selectedTrips.length === 0) return;
     const data = [...selectedTrips]
       .sort((a, b) => { const ka = tripSortKey(a), kb = tripSortKey(b); return ka.dateNum - kb.dateNum || ka.seq - kb.seq; })
       .map(buildExportRow);
-    exportToCSV(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
-    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to CSV` });
+    await exportToXLSX(data, 'selected-trips', TRIP_EXPORT_COLUMNS);
+    toast({ title: `Exported ${selectedTrips.length} trip${selectedTrips.length !== 1 ? 's' : ''} to Excel` });
   };
   const handleBulkExportPDF = () => {
     if (selectedTrips.length === 0) return;

@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import ExcelJS from 'exceljs';
 import { getCompanySettings } from './companySettings';
 import { downloadInvoicePDF } from './invoiceHtml';
 import { hasArabicText, renderCellToImage } from './pdfArabicRenderer';
@@ -25,6 +26,69 @@ export function exportToCSV(data, filename, columns) {
   const a = document.createElement('a');
   a.href = url;
   a.download = `${filename}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Styled .xlsx export — blue header fill, white bold text
+export async function exportToXLSX(data, filename, columns) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Sheet1', { views: [{ showGridLines: false }] });
+
+  // Header row — blue fill, white bold text
+  const headerRow = ws.addRow(columns.map(c => c.label));
+  headerRow.height = 22;
+  headerRow.eachCell((cell) => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF1D4ED8' } },
+      bottom: { style: 'thin', color: { argb: 'FF1D4ED8' } },
+      left: { style: 'thin', color: { argb: 'FF1D4ED8' } },
+      right: { style: 'thin', color: { argb: 'FF1D4ED8' } },
+    };
+  });
+
+  // Data rows
+  data.forEach(item => {
+    const values = columns.map(c => {
+      const val = c.transform ? c.transform(item) : item[c.key];
+      if (val == null) return '';
+      if (c.numeric) {
+        const num = Number(String(val).replace(/[^\d.-]/g, ''));
+        return isNaN(num) ? '' : num;
+      }
+      return String(val);
+    });
+    const row = ws.addRow(values);
+    row.eachCell((cell, colIdx) => {
+      cell.alignment = { vertical: 'middle', horizontal: columns[colIdx - 1].numeric ? 'right' : 'left' };
+      if (columns[colIdx - 1].numeric) cell.numFmt = '#,##0.00';
+    });
+  });
+
+  // Auto-fit column widths
+  columns.forEach((c, i) => {
+    const col = ws.getColumn(i + 1);
+    let maxLen = String(c.label).length;
+    data.forEach(item => {
+      const val = c.transform ? c.transform(item) : item[c.key];
+      const len = val != null ? String(val).length : 0;
+      if (len > maxLen) maxLen = len;
+    });
+    col.width = Math.min(Math.max(maxLen + 2, 10), 42);
+  });
+
+  // Freeze header row
+  ws.views = [{ showGridLines: false, state: 'frozen', ySplit: 1 }];
+
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${filename}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
 }
