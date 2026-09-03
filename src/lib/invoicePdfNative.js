@@ -15,12 +15,12 @@ import { formatInvoiceNumber } from './invoiceSequence';
 import { hasArabicText, renderCellToImage } from './pdfArabicRenderer';
 
 // Build indicator line from line item's show_* flags + values
-// Returns "D:waheed  V:1/89125  DL#:154215" or empty string
+// Returns "D:waheed  V:1/89125  DN#:154215" or empty string
 function buildIndicatorLine(item) {
   const parts = [];
   if (item.show_driver !== false && item.driver_name) parts.push(`D:${item.driver_name}`);
   if (item.show_vehicle !== false && item.vehicle_no) parts.push(`V:${item.vehicle_no}`);
-  if (item.show_delivery_note !== false && item.delivery_note_no) parts.push(`DL#:${item.delivery_note_no}`);
+  if (item.show_delivery_note !== false && item.delivery_note_no) parts.push(`DN#:${item.delivery_note_no}`);
   return parts.length > 0 ? parts.join('  ') : '';
 }
 
