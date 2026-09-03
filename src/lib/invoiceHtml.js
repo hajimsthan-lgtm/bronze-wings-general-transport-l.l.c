@@ -200,13 +200,13 @@ export function buildInvoiceHTML(invoice, clientName, settings = {}, seqNo) {
     <thead>
       <tr>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">SL.<br>No</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:12%;">Trip<br>Date</th>
-        <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:33%;">Description</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:10%;">Trip<br>Date</th>
+        <th style="border:1px solid #000;padding:8px 6px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:45%;">Description</th>
         <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">Qty</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:11%;">Unit<br>Price</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">Total</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:10%;">VAT<br>5%</th>
-        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:18%;">Total<br>Price</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:9%;">Unit<br>Price</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">Amount</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">VAT<br>5%</th>
+        <th style="border:1px solid #000;padding:8px 4px;text-align:center;vertical-align:middle;background:#1D3F55;font-weight:bold;font-size:10.5pt;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:10%;">Total</th>
       </tr>
     </thead>
     <tbody>

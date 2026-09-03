@@ -60,35 +60,35 @@ const CELL_BORDER = [187, 187, 187];
 // ═══════════════════════════════════════════════════════════
 const COLS_MONTHLY = [
   { label: 'SL.\nNo',        w: 8,  align: 'center' },
-  { label: 'MONTH',          w: 20, align: 'center' },
-  { label: 'DESCRIPTION',    w: 52, align: 'center' },
-  { label: 'QTY',            w: 14, align: 'center' },
-  { label: 'UNIT\nPRICE',    w: 24, align: 'center' },
-  { label: 'AMOUNT',         w: 24, align: 'center' },
-  { label: 'VAT\n5%',        w: 24, align: 'center' },
-  { label: 'TOTAL',          w: 24, align: 'center' },
+  { label: 'MONTH',          w: 18, align: 'center' },
+  { label: 'DESCRIPTION',    w: 72, align: 'center' },
+  { label: 'QTY',            w: 10, align: 'center' },
+  { label: 'UNIT\nPRICE',    w: 18, align: 'center' },
+  { label: 'AMOUNT',         w: 18, align: 'center' },
+  { label: 'VAT\n5%',        w: 18, align: 'center' },
+  { label: 'TOTAL',          w: 22, align: 'center' },
 ];
 
 const COLS_TRIP = [
   { label: 'SL.\nNo',        w: 7,  align: 'center' },
   { label: 'TRIP\nDATE',     w: 16, align: 'center' },
-  { label: 'DESCRIPTION',    w: 75, align: 'center' },
-  { label: 'QTY',            w: 10, align: 'center' },
-  { label: 'UNIT\nPRICE',    w: 24, align: 'center' },
-  { label: 'AMOUNT',         w: 24, align: 'center' },
-  { label: 'VAT\n5%',        w: 24, align: 'center' },
-  { label: 'TOTAL',          w: 24, align: 'center' },
+  { label: 'DESCRIPTION',    w: 93, align: 'center' },
+  { label: 'QTY',            w: 8,  align: 'center' },
+  { label: 'UNIT\nPRICE',    w: 17, align: 'center' },
+  { label: 'AMOUNT',         w: 17, align: 'center' },
+  { label: 'VAT\n5%',        w: 17, align: 'center' },
+  { label: 'TOTAL',          w: 9,  align: 'center' },
 ];
 
 const COLS_STANDARD = [
   { label: 'SL.\nNo',        w: 8,  align: 'center' },
-  { label: 'TRIP\nDATE',     w: 22, align: 'center' },
-  { label: 'DESCRIPTION',    w: 60, align: 'center' },
-  { label: 'QTY',            w: 10, align: 'center' },
-  { label: 'UNIT\nPRICE',    w: 24, align: 'center' },
-  { label: 'AMOUNT',         w: 24, align: 'center' },
-  { label: 'VAT\n5%',        w: 24, align: 'center' },
-  { label: 'TOTAL',          w: 24, align: 'center' },
+  { label: 'TRIP\nDATE',     w: 18, align: 'center' },
+  { label: 'DESCRIPTION',    w: 80, align: 'center' },
+  { label: 'QTY',            w: 8,  align: 'center' },
+  { label: 'UNIT\nPRICE',    w: 18, align: 'center' },
+  { label: 'AMOUNT',         w: 18, align: 'center' },
+  { label: 'VAT\n5%',        w: 18, align: 'center' },
+  { label: 'TOTAL',          w: 16, align: 'center' },
 ];
 
 // ═══════════════════════════════════════════════════════════

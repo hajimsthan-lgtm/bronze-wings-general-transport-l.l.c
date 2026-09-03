@@ -151,12 +151,12 @@ export function buildBronzeInvoiceHTML(invoice, clientName, settings = {}, seqNo
         <tr>
           <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:center;border:1px solid ${DARK_BRONZE};width:4%;">#</th>
           <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 4px;text-align:left;border:1px solid ${DARK_BRONZE};width:10%;">TRIP DATE</th>
-          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 4px;text-align:left;border:1px solid ${DARK_BRONZE};width:40%;">DESCRIPTION</th>
+          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 4px;text-align:left;border:1px solid ${DARK_BRONZE};width:48%;">DESCRIPTION</th>
           <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:5%;">QTY</th>
-          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:11%;">UNIT PRICE (AED)</th>
-          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:11%;">AMOUNT (AED)</th>
-          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:9.5%;">VAT 5%</th>
-          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:9.5%;">TOTAL (AED)</th>
+          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:9%;">UNIT<br>PRICE</th>
+          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:8%;">AMOUNT</th>
+          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:8%;">VAT 5%</th>
+          <th style="background:${DARK_BRONZE};color:#fff;font-weight:bold;font-size:8pt;padding:7px 3px;text-align:right;border:1px solid ${DARK_BRONZE};width:8%;">TOTAL</th>
         </tr>
       </thead>
       <tbody>
@@ -347,14 +347,14 @@ export async function downloadBronzeInvoicePDF(invoice, clientName, settings = {
   // ══ ITEMS TABLE ══
   // Column widths (mm) — total = CW (190)
   const cols = [
-    { w: 8, align: 'center' },   // #
-    { w: 19, align: 'left' },   // TRIP DATE
-    { w: 75, align: 'left' },   // DESCRIPTION
-    { w: 10, align: 'right' },  // QTY
-    { w: 21, align: 'right' },  // UNIT PRICE
-    { w: 21, align: 'right' },  // AMOUNT
-    { w: 18, align: 'right' },  // VAT 5%
-    { w: 18, align: 'right' },  // TOTAL
+    { w: 8,  align: 'center' },  // #
+    { w: 18, align: 'left' },    // TRIP DATE
+    { w: 90, align: 'left' },    // DESCRIPTION (wider)
+    { w: 9,  align: 'right' },   // QTY
+    { w: 17, align: 'right' },   // UNIT PRICE (narrower)
+    { w: 16, align: 'right' },   // AMOUNT (narrower)
+    { w: 16, align: 'right' },   // VAT 5% (narrower)
+    { w: 16, align: 'right' },   // TOTAL (narrower)
   ];
   // Compute x positions
   let cx = M;

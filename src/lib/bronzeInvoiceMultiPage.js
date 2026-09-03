@@ -200,12 +200,12 @@ export function buildBronzeMultiPageHTML(invoice, clientName, settings = {}, seq
   /* column widths */
   col.c1 { width: 5%; }
   col.c2 { width: 10%; }
-  col.c3 { width: 54%; }
+  col.c3 { width: 60%; }
   col.c4 { width: 5%; }
-  col.c5 { width: 7%; }
-  col.c6 { width: 8%; }
-  col.c7 { width: 5%; }
-  col.c8 { width: 6%; }
+  col.c5 { width: 6%; }
+  col.c6 { width: 6%; }
+  col.c7 { width: 4%; }
+  col.c8 { width: 4%; }
   /* ── Totals rows ── */
   tr.totals td {
     background: ${ZEBRA_BG};
