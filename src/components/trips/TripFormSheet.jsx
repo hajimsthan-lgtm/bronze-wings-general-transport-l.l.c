@@ -425,13 +425,14 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     // Manual downgrade validation — fields from higher status must be cleared first
     if (form.status_source === 'manual') {
       const hasLoad = !!form.load_datetime;
+      const loadInFuture = hasLoad && new Date(form.load_datetime) > new Date();
       const hasOffload = !!form.offload_datetime;
       const hasPayment = (Number(form.revenue) || 0) > 0 || (Number(form.base_fare) || 0) > 0;
       if (form.status === 'trip_ended' && (hasOffload || hasPayment)) {
         e.status = 'Remove Offload Date & Time and payment column to save as Trip Ended';
       }
-      if (form.status === 'trip_started' && (hasLoad || hasOffload || hasPayment)) {
-        e.status = 'Remove Load Date & Time, Offload Date & Time, and financial section to save as Trip Started';
+      if (form.status === 'trip_started' && (loadInFuture || hasOffload || hasPayment)) {
+        e.status = 'Remove future or upcoming Load Date & Time, Offload Date & Time, and financial section to save as Trip Started';
       }
       if (form.status === 'scheduled' && (hasLoad || hasOffload || hasPayment)) {
         e.status = 'Remove sections (Offload Date & Time, and financial section) to save as Scheduled';
