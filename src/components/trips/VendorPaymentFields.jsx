@@ -11,7 +11,7 @@ import IconInput from './IconInput';
 export default function VendorPaymentFields({ p }) {
   const { form, update, t, inputCls, autoVendorRate, vendorRateOverridden } = p;
   return (
-    <Section title="Vendor Payment" icon={CreditCard} accent="239,68,68" delay={210}>
+    <Section title="Service Provider Payment" icon={CreditCard} accent="239,68,68" delay={210}>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs text-white/60 mb-1.5">Agreed Rate (AED)</Label>
@@ -49,7 +49,7 @@ export default function VendorPaymentFields({ p }) {
         <Label className="text-xs text-white/60 mb-1.5">Notes / Reference</Label>
         <Textarea value={form.vendor_payment_notes} onChange={(e) => update('vendor_payment_notes', e.target.value)} rows={2} placeholder="Reference number, invoice notes, etc." className={inputCls} />
       </div>
-      <p className="text-[9px] text-white/30 italic">Internal only — vendor payment data never appears on client-facing invoices or documents.</p>
+      <p className="text-[9px] text-white/30 italic">Internal only — service provider payment data never appears on client-facing invoices or documents.</p>
     </Section>
   );
 }

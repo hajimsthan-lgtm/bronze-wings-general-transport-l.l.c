@@ -299,7 +299,7 @@ function drawArabicTextRight(pdf, text, rightX, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 22;
+  const boxH = 28;
 
   // Match footer positioning — inset 2mm from border on all sides
   const hdrX = BORDER_POS + 2;
@@ -312,9 +312,9 @@ function drawLetterhead(pdf, s, y) {
   pdf.setLineWidth(0.6);
   pdf.rect(hdrX, y, hdrW, boxH);
 
-  // Logo — left, vertically centered
+  // Logo — left, vertically centered (bigger: 18mm cap)
   const invStyle = getInvStyle(s);
-  const logoSize = Math.min(invStyle.logoSize, 14);
+  const logoSize = Math.min(invStyle.logoSize, 18);
   const logoX = hdrX + 4;
   const logoY = y + (boxH - logoSize) / 2;
   if (invStyle.logoUrl) {
@@ -332,31 +332,31 @@ function drawLetterhead(pdf, s, y) {
   const textTop = logoY;  // top of text block = top of logo (both centered)
   tc(pdf, BROWN);
 
-  // Arabic name — top of block, slightly bigger (4mm from 3.5)
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
+  // Arabic name — top of block (bigger: 5mm)
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
 
-  // Company name — clear gap below Arabic (no overlap), bigger (15pt from 13)
+  // Company name — clear gap below Arabic, no overlap (bigger: 18pt)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(15);
-  pdf.text('BRONZE WINGS', textX, textTop + 7.5, { charSpace: 0.5 });
+  pdf.setFontSize(18);
+  pdf.text('BRONZE WINGS', textX, textTop + 12, { charSpace: 0.5 });
 
-  // Subtitle — spaced below company name, bigger (8pt from 7)
+  // Subtitle — spaced below company name (bigger: 10pt)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(8);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 12, { charSpace: 0.3 });
+  pdf.setFontSize(10);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 16.5, { charSpace: 0.3 });
 
   // Right contact column — right-aligned, vertically centered
   const rightX = hdrX + hdrW - 4;
-  let cy = y + 4;
+  let cy = y + 5;
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(7.5);
+  pdf.setFontSize(8.5);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3; }
   if (s.address) {
-    const addrLines = pdf.splitTextToSize(str(s.address), 42);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.8; }
+    const addrLines = pdf.splitTextToSize(str(s.address), 44);
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 

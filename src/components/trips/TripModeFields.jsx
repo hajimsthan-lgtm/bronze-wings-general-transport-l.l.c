@@ -392,7 +392,7 @@ export default function TripModeFields({ p }) {
               }))}
             />
             {driverIsVendor && (
-              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">Service Provider</span>
             )}
             {selectedDriver?.assigned_vehicle && availableVehicles.some((v) => v.plate_number === selectedDriver.assigned_vehicle) && (
               <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">↳ Auto-selected assigned vehicle</p>
@@ -450,7 +450,7 @@ export default function TripModeFields({ p }) {
               }))}
             />
             {vehicleIsVendor && (
-              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">Vendor</span>
+              <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">Service Provider</span>
             )}
             {selectedVehicle?.assigned_driver && availableDrivers.some((d) => d.name === selectedVehicle.assigned_driver) && (
               <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">↳ Auto-selected assigned driver</p>
