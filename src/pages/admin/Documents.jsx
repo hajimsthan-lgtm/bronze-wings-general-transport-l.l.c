@@ -113,10 +113,15 @@ export default function Documents() {
   const [renewDoc, setRenewDoc] = useState(null);
   const [quickViewDoc, setQuickViewDoc] = useState(null);
   const [historyDoc, setHistoryDoc] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   const load = () => {
     setLoading(true);
-    base44.entities.Document.list('-created_date', 200).then(setItems).finally(() => setLoading(false));
+    setLoadError(null);
+    base44.entities.Document.list('-created_date', 200)
+      .then(setItems)
+      .catch(err => { setLoadError(err?.message || 'Failed to load documents'); setItems([]); })
+      .finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
 
@@ -246,8 +251,24 @@ export default function Documents() {
         <Button onClick={() => { setEditItem(null); setFormOpen(true); }} className="bg-primary hover:bg-primary/90 h-10"><Plus className="w-4 h-4 mr-1.5" />{t('add_new')}</Button>
       </div>
 
+      {/* Rate-limit / load error — friendly retry prompt */}
+      {loadError && !loading && (
+        <div className="glass-card p-6 rounded-xl flex flex-col items-center text-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}>
+            <RefreshCw className="w-5 h-5 text-amber-500" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Couldn't load documents</p>
+            <p className="text-xs text-muted-foreground mt-1">{loadError}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={load} className="mt-1">
+            <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Retry
+          </Button>
+        </div>
+      )}
+
       {/* List */}
-      {loading ? <LoadingSpinner /> : filtered.length === 0 ? (
+      {loading ? <LoadingSpinner /> : loadError ? null : filtered.length === 0 ? (
         <EmptyState
           icon={FileText}
           title={items.length === 0 ? "No documents" : "No matching documents"}
