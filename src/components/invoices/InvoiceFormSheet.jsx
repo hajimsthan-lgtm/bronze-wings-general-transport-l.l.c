@@ -317,6 +317,10 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       toast({ variant: 'destructive', title: 'Client name is required' });
       return;
     }
+    if (!isEdit && isDuplicate) {
+      toast({ variant: 'destructive', title: 'Duplicate invoice number', description: 'This invoice number already exists. Choose a different number.' });
+      return;
+    }
     setSaving(true);
     try {
       const tripNumbers = form.line_items.map(i => i._trip_number).filter(Boolean);
@@ -593,21 +597,33 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">Invoice #</Label>
-                  <Input
-                    value={form.invoice_number}
-                    onChange={isEdit ? undefined : (e) => update('invoice_number', e.target.value)}
-                    readOnly={isEdit}
-                    className={`${inputCls} font-mono text-xs ${isEdit ? 'opacity-60 cursor-not-allowed' : isDuplicate ? 'border-red-500/50' : isManualOverride ? 'border-amber-500/50' : 'border-primary/30'}`}
-                  />
-                  {isManualOverride && !isDuplicate && (
-                    <p className="text-[10px] text-amber-400/80 mt-1 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      You're manually setting the invoice number. Make sure it doesn't clash with an existing invoice number.
+                  <div className="relative">
+                    <Input
+                      value={form.invoice_number}
+                      onChange={isEdit ? undefined : (e) => update('invoice_number', e.target.value)}
+                      readOnly={isEdit}
+                      className={`${inputCls} font-mono text-xs pr-9 ${isEdit ? 'opacity-60 cursor-not-allowed' : isDuplicate ? 'border-red-500/60' : isManualOverride ? 'border-emerald-500/50' : 'border-primary/30'}`}
+                    />
+                    {!isEdit && isManualOverride && !isDuplicate && (
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400">
+                        <Check className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                    {!isEdit && isDuplicate && (
+                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 text-red-400">
+                        <X className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                  </div>
+                  {!isEdit && isManualOverride && !isDuplicate && (
+                    <p className="text-[10px] text-emerald-400 mt-1 flex items-start gap-1">
+                      <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      Successfully verified — no duplicate found.
                     </p>
                   )}
-                  {isDuplicate && (
+                  {!isEdit && isDuplicate && (
                     <p className="text-[10px] text-red-400 mt-1 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <X className="w-3 h-3 mt-0.5 flex-shrink-0" />
                       This invoice number already exists. Choose a different number.
                     </p>
                   )}

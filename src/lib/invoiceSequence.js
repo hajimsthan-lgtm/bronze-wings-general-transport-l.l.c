@@ -7,16 +7,16 @@ export function formatInvoiceNumber(year, seq) {
   return `${year}-${String(seq).padStart(SEQ_PAD, '0')}`;
 }
 
-/** Parse a strict new-format invoice number "YYYY-XXXX" → { year, seq } or null */
+/** Parse a new-format invoice number "YYYY-XXXX" (variable-length seq) → { year, seq } or null */
 export function parseInvoiceNumber(num) {
-  const m = String(num || '').match(/^(\d{4})-(\d{4})$/);
+  const m = String(num || '').match(/^(\d{4})-(\d+)$/);
   if (!m) return null;
   return { year: parseInt(m[1], 10), seq: parseInt(m[2], 10) };
 }
 
 /** Extract the sequence for a given year from any invoice number (old BW- or new format) */
 function extractSeqForYear(num, year) {
-  const m = String(num || '').match(new RegExp(`${year}-(\\d{4})$`));
+  const m = String(num || '').match(new RegExp(`${year}-(\\d+)$`));
   return m ? parseInt(m[1], 10) : 0;
 }
 
