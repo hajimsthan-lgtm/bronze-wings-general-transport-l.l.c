@@ -17,7 +17,7 @@ import { useExpensesMode, setExpensesMode, getExpensesData, useExpensesSelected,
 import { useVehiclesMode, setVehiclesMode, setVehiclesView, getVehiclesFiltered, getVehiclesLoad, getVehiclesView } from '@/lib/vehiclesStore';
 import { useDriversMode, setDriversMode, setDriversView, getDriversFiltered, getDriversLoad, getDriversView } from '@/lib/driversStore';
 import { useClientsMode, setClientsMode, setClientsView, getClientsFiltered, getClientsLoad, getClientsView } from '@/lib/clientsStore';
-import { useVendorsMode, setVendorsMode, useVendorsView, setVendorsView } from '@/lib/vendorsStore';
+import { useVendorsMode, setVendorsMode, useVendorsView, setVendorsView, useProvidersMode, setProvidersMode } from '@/lib/vendorsStore';
 import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, clearInvoicesFilters } from '@/lib/invoicesStore';
 import { useLedgerState, setLedgerMode, setLedgerView } from '@/lib/ledgerStore';
 import ExportButtons from '@/components/common/ExportButtons';
@@ -51,8 +51,10 @@ export default function TopBar() {
   const isClientsPage = location.pathname === '/admin/clients';
   const cliMode = useClientsMode();
   const isVendorsPage = location.pathname === '/admin/vendors';
+  const isServiceProvidersPage = location.pathname === '/admin/service-providers';
   const venMode = useVendorsMode();
   const venView = useVendorsView();
+  const provMode = useProvidersMode();
   const isExpensesPage = location.pathname === '/expenses';
   const expMode = useExpensesMode();
   const isCompanyDocsPage = location.pathname === '/admin/company-documents';
@@ -89,22 +91,6 @@ export default function TopBar() {
 
 
             
-            {isVendorsPage &&
-            <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5 ml-2">
-                <button
-                onClick={() => setVendorsView('all')}
-                className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venView === 'all' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-                
-                  All Vendors
-                </button>
-                <button
-                onClick={() => setVendorsView('providers')}
-                className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${venView === 'providers' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-                
-                  Service Providers
-                </button>
-              </div>
-            }
             {isInvoicesPage &&
             <div className="hidden md:flex items-center gap-2 ml-2">
                 {(invFilters.clientFilter !== 'all' || invFilters.statusFilter !== 'all') &&
@@ -380,8 +366,19 @@ export default function TopBar() {
                 <HeaderActionButton
                 label={t('add_new')}
                 variant="trip"
-                onClick={() => window.dispatchEvent(new CustomEvent(venView === 'all' ? 'vendors:new' : 'service-providers:new'))} />
-              
+                onClick={() => window.dispatchEvent(new CustomEvent('vendors:new'))} />
+              </>
+            }
+            {isServiceProvidersPage &&
+            <>
+                <div className="hidden md:inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5">
+                  <button onClick={() => setProvidersMode('analytics')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${provMode === 'analytics' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><BarChart3 className="w-3.5 h-3.5" />Analytics</button>
+                  <button onClick={() => setProvidersMode('browse')} className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors ${provMode === 'browse' ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'}`}><LayoutGrid className="w-3.5 h-3.5" />Browse</button>
+                </div>
+                <HeaderActionButton
+                label={t('add_new')}
+                variant="trip"
+                onClick={() => window.dispatchEvent(new CustomEvent('service-providers:new'))} />
               </>
             }
             {isCompanyDocsPage &&

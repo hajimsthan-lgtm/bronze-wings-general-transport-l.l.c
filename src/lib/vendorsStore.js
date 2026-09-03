@@ -18,6 +18,15 @@ export function setVendorsMode(mode) {
   emit();
 }
 
+export function setProvidersMode(mode) {
+  state = { ...state, providersMode: mode };
+  emit();
+}
+
+export function useProvidersMode() {
+  return useSyncExternalStore(subscribeVendors, () => state.providersMode, () => 'analytics');
+}
+
 export function subscribeVendors(l) {
   listeners.add(l);
   return () => listeners.delete(l);

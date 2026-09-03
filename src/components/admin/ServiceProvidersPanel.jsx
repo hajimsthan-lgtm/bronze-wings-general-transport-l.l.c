@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Store, Plus, Truck, Users, TrendingDown, Wrench, Check } from 'lucide-react';
 import BrowseActionBar from '@/components/common/BrowseActionBar';
-import { useVendorsMode } from '@/lib/vendorsStore';
+import { useProvidersMode } from '@/lib/vendorsStore';
 import ReportStatCard from '@/components/reports/ReportStatCard';
 import ExportButtons from '@/components/common/ExportButtons';
 import EmptyState from '@/components/common/EmptyState';
@@ -42,7 +42,7 @@ export default function ServiceProvidersPanel() {
   const [expenses, setExpenses] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const mode = useVendorsMode();
+  const mode = useProvidersMode();
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
 
