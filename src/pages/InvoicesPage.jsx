@@ -598,9 +598,11 @@ export default function InvoicesPage() {
             allSelected={allSelected}
             onToggleSelectAll={toggleSelectAll}
             onClientClick={handleClientClick}
-            onAction={handleAction} />
-          
-          </div>
+            onAction={handleAction}
+            onEdit={handleEdit}
+            onDelete={setDeleteTarget} />
+
+            </div>
 
           {/* Right pane — detail / generator (desktop) */}
           <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, FileText, CheckSquare, CheckCircle2, Sparkles, PenLine, FileSignature, Send, CreditCard, AlertCircle, Bell } from 'lucide-react';
+import { Search, FileText, CheckSquare, CheckCircle2, Sparkles, PenLine, FileSignature, Send, CreditCard, AlertCircle, Bell, Pencil, Trash2 } from 'lucide-react';
 import { getInitials } from '@/lib/formatters';
 import EmptyState from '@/components/common/EmptyState';
 import InvoiceActionsMenu from '@/components/invoices/InvoiceActionsMenu';
@@ -26,7 +26,7 @@ function dueLabel(inv) {
   return `Due in ${d}d`;
 }
 
-function RowBody({ inv, onClientClick, onAction }) {
+function RowBody({ inv, onClientClick, onAction, onEdit, onDelete }) {
   const total = Number(inv.total_amount || 0);
   const paid = Number(inv.paid_amount || 0);
   const balance = Math.max(0, total - paid);
@@ -62,12 +62,9 @@ function RowBody({ inv, onClientClick, onAction }) {
             </span>
           )}
         </div>
-        <button
-          onClick={(e) => { e.stopPropagation(); onClientClick?.(inv.client_name); }}
-          className="text-sm font-semibold text-foreground truncate block hover:text-primary transition-colors text-left"
-        >
+        <span className="text-sm font-semibold text-foreground truncate block">
           {inv.client_name || '—'}
-        </button>
+        </span>
         <div className="flex items-center gap-2">
           <span className={`text-[11px] ${overdue ? 'text-red-400 font-medium' : 'text-muted-foreground'}`}>{dueLabel(inv)}</span>
           {idleDays >= 5 && (
@@ -89,6 +86,20 @@ function RowBody({ inv, onClientClick, onAction }) {
           </div>
         )}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit?.(inv); }}
+            className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            title="Edit"
+          >
+            <Pencil className="w-3 h-3" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete?.(inv); }}
+            className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+            title="Delete"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
           {actions.sendForSignature && (
             <button
               onClick={(e) => { e.stopPropagation(); onAction('sendForSignature', inv); }}
@@ -120,7 +131,7 @@ function RowBody({ inv, onClientClick, onAction }) {
       </div>
 
       {/* Amount */}
-      <div className="text-right mt-0.5 flex-shrink-0">
+      <div className="text-right mt-0.5 flex-shrink-0 pr-9 group-hover:pr-0 transition-all">
         <p className="text-sm font-bold tabular-nums text-foreground">
           {balance > 0 && status !== 'paid' && status !== 'cancelled'
             ? formatCurrencyShort(balance)
@@ -149,6 +160,8 @@ export default function InvoiceListPane({
   onToggleSelectAll,
   onClientClick,
   onAction,
+  onEdit,
+  onDelete,
 }) {
   const [mode, setMode] = useState(false);
   const { visible: visibleInvoices, sentinelProps, hasMore: hasMoreInvoices, visibleCount: visInv, totalCount: totalInv } = useProgressiveRender(invoices);
@@ -268,7 +281,7 @@ export default function InvoiceListPane({
                       {checked && <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <RowBody inv={inv} onClientClick={onClientClick} onAction={onAction} />
+                      <RowBody inv={inv} onClientClick={onClientClick} onAction={onAction} onEdit={onEdit} onDelete={onDelete} />
                     </div>
                   </button>
                 );

@@ -114,6 +114,27 @@
           "vat_excluded": {
             "type": "boolean",
             "default": false
+          },
+          "show_driver": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_vehicle": {
+            "type": "boolean",
+            "default": true
+          },
+          "show_delivery_note": {
+            "type": "boolean",
+            "default": true
+          },
+          "driver_name": {
+            "type": "string"
+          },
+          "vehicle_no": {
+            "type": "string"
+          },
+          "delivery_note_no": {
+            "type": "string"
           }
         }
       }
