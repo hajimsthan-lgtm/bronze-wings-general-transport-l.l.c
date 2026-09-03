@@ -2,6 +2,9 @@
   "name": "Driver",
   "type": "object",
   "properties": {
+    "driver_code": {
+      "type": "string"
+    },
     "name": {
       "type": "string"
     },

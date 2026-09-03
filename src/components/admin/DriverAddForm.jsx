@@ -13,9 +13,10 @@ import DuplicateConfirmDialog from '@/components/common/DuplicateConfirmDialog';
 import { uploadAndExtractDriverLicense } from '@/lib/driverLicenseScan';
 import { uploadAndExtractVisa } from '@/lib/visaScan';
 import { uploadAndExtractEmiratesId } from '@/lib/emiratesIdScan';
+import { nextDriverCode } from '@/lib/driverCode';
 
 const EMPTY = {
-  name: '', image_url: '', phone: '', email: '',
+  driver_code: '', name: '', image_url: '', phone: '', email: '',
   license_number: '', license_expiry: '', nationality: '',
   status: 'active', assigned_vehicle: '', base_salary: '',
   join_date: '', emergency_contact: '', visa_expiry: '', notes: '',
@@ -97,7 +98,11 @@ export default function DriverAddForm({ editItem, onSave, onCancel }) {
   const doSave = async () => {
     setSaving(true);
     try {
-      await onSave({ ...form, base_salary: Number(form.base_salary) || 0 });
+      const payload = { ...form, base_salary: Number(form.base_salary) || 0 };
+      if (!editItem && !payload.driver_code) {
+        payload.driver_code = await nextDriverCode();
+      }
+      await onSave(payload);
     } finally { setSaving(false); }
   };
 
