@@ -97,8 +97,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         const clnts = await withRetry(() => base44.entities.Client.list('-created_date', 50)).catch(() => []);
         setClients(clnts || []);
         await new Promise(r => setTimeout(r, 150));
-        const vnds = await withRetry(() => base44.entities.Vendor.list('-created_date', 50)).catch(() => []);
-        setVendors((vnds || []).filter((v) => v.category === 'service_provider'));
+        const vnds = await withRetry(() => base44.entities.Vendor.filter({ category: 'service_provider' })).catch(() => []);
+        setVendors(vnds || []);
       };
       loadEntities();
     }
