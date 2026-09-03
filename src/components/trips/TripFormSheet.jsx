@@ -434,7 +434,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         e.status = 'Remove Load Date & Time, Offload Date & Time, and financial section to save as Trip Started';
       }
       if (form.status === 'scheduled' && (hasLoad || hasOffload || hasPayment)) {
-        e.status = 'Remove all sections (Load Date & Time, Offload Date & Time, and financial section) to save as Scheduled';
+        e.status = 'Remove sections (Offload Date & Time, and financial section) to save as Scheduled';
       }
     }
     setErrors(e);
