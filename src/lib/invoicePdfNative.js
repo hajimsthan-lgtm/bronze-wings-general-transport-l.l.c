@@ -276,7 +276,7 @@ function drawArabicText(pdf, text, x, y, fontSizeMm, color) {
 function drawLetterhead(pdf, s, y) {
   const BROWN = [99, 60, 26];    // #633C1A
   const CREAM = [253, 251, 240]; // #FDFBF0
-  const boxH = 30;
+  const boxH = 20;
 
   // Bordered box with cream background
   fc(pdf, CREAM);
@@ -306,53 +306,53 @@ function drawLetterhead(pdf, s, y) {
   tc(pdf, BROWN);
 
   // Arabic name — above company name, aligned with logo top
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 4, BROWN);
 
   // Company name — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(21);
-  pdf.text('BRONZE WINGS', textX, textTop + 10, { charSpace: 0.7 });
+  pdf.setFontSize(15);
+  pdf.text('BRONZE WINGS', textX, textTop + 6, { charSpace: 0.5 });
 
   // Subtitle — left-aligned
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(10);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 14, { charSpace: 0.5 });
+  pdf.setFontSize(7.5);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 10, { charSpace: 0.3 });
 
   // Right contact column — right-aligned, each on its own line
   const rightX = CONTENT_RIGHT - 4;
-  let cy = y + 6;
+  let cy = y + 3.5;
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7);
   tc(pdf, BROWN);
-  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
-  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 3.5; }
-  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 3.5; }
+  if (s.phone1) { pdf.text(`Mob: ${str(s.phone1)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.phone2) { pdf.text(`Mob: ${str(s.phone2)}`, rightX, cy, { align: 'right' }); cy += 2.8; }
+  if (s.email) { pdf.text(str(s.email), rightX, cy, { align: 'right' }); cy += 2.8; }
   if (s.address) {
     const addrLines = pdf.splitTextToSize(str(s.address), 35);
-    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 3.5; }
+    for (const line of addrLines) { pdf.text(line, rightX, cy, { align: 'right' }); cy += 2.8; }
   }
   if (s.website) { pdf.text(str(s.website), rightX, cy, { align: 'right' }); }
 
-  return y + boxH + 2;
+  return y + boxH + 1;
 }
 
 // ═══════════════════════════════════════════════════════════
 // DRAW: TAX INVOICE BANNER (first page only)
 // ═══════════════════════════════════════════════════════════
 function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
-  const h = 8;
+  const h = 5;
 
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(14);
+  pdf.setFontSize(11);
   tc(pdf, DARK_BLUE);
-  pdf.text('TAX INVOICE', PAGE_W / 2, y + 5.5, { align: 'center' });
+  pdf.text('TAX INVOICE', PAGE_W / 2, y + 3.5, { align: 'center' });
 
   // TRN — right side of the tax invoice bar
   if (trn) {
     pdf.setFont('times', 'bold');
-    pdf.setFontSize(9);
+    pdf.setFontSize(7.5);
     tc(pdf, DARK_BLUE);
-    pdf.text(`Bronze TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 5.5, { align: 'right' });
+    pdf.text(`Bronze TRN: ${str(trn)}`, CONTENT_RIGHT - 2, y + 3.5, { align: 'right' });
   }
 
   return y + h + 1;
@@ -375,7 +375,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   if (invoice.sub)            rawLines.push({ text: `SUB: ${str(invoice.sub)}`, bold: false });
   if (invoice.reg_no)          rawLines.push({ text: `REG NO: ${str(invoice.reg_no)}`, bold: false });
 
-  const lineH = 4;
+  const lineH = 3.2;
   const wrapped = [];
   let totalLines = 0;
   for (const line of rawLines) {
@@ -393,8 +393,8 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   }
 
   // Dynamic height: label area + all wrapped lines + padding
-  const labelArea = 9;
-  const h = Math.max(24, labelArea + totalLines * lineH + 3);
+  const labelArea = 5;
+  const h = Math.max(15, labelArea + totalLines * lineH + 2);
 
   // Draw box border
   dc(pdf, LIGHT_GRAY);
@@ -403,18 +403,18 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 
   // ── LEFT: BILL TO ──
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(10);
+  pdf.setFontSize(8.5);
   tc(pdf, MAROON);
-  pdf.text('BILL TO', leftX, y + 4);
+  pdf.text('BILL TO', leftX, y + 3.5);
   dc(pdf, MAROON);
   pdf.setLineWidth(0.3);
-  pdf.line(leftX, y + 5, leftX + 15, y + 5);
+  pdf.line(leftX, y + 4.5, leftX + 15, y + 4.5);
 
   // Render each wrapped line strictly within leftX..leftX+maxTextWidth
   let ly = y + labelArea;
   for (const line of wrapped) {
     pdf.setFont('times', line.bold ? 'bold' : 'normal');
-    pdf.setFontSize(10);
+    pdf.setFontSize(8.5);
     tc(pdf, BLACK);
     if (line.imgData) {
       const imgW = maxTextWidth;
@@ -431,7 +431,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 
   // ── RIGHT: INVOICE # and DATE ──
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(10);
+  pdf.setFontSize(8.5);
   tc(pdf, BLACK);
   // Right-align labels so colons line up; left-align values right after
   const labels = ['INVOICE #:', 'INVOICE DATE:', 'LPO Ref #:'];
@@ -439,20 +439,20 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   const widestLabelW = Math.max(...labels.map(l => pdf.getTextWidth(l)));
   const colonX = rightX - widestLabelW - 1;
   const valueX = colonX + 1.5;
-  const yPos = [y + 5, y + 9, y + 13];
+  const yPos = [y + 4, y + 7.5, y + 11];
   for (let i = 0; i < 3; i++) {
     pdf.text(labels[i], colonX, yPos[i], { align: 'right' });
     pdf.text(values[i], valueX, yPos[i], { align: 'left' });
   }
 
-  return y + h + 2;
+  return y + h + 1;
 }
 
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE HEADER ROW
 // ═══════════════════════════════════════════════════════════
 function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
-  const h = 12;
+  const h = 8;
   const isTrip = invoiceType === 'trip';
   const style = invStyle || getInvStyle({});
 
@@ -460,11 +460,11 @@ function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
   fc(pdf, style.headerBg);
   pdf.rect(CONTENT_X, y, CONTENT_W, h, 'F');
   tc(pdf, style.headerText);
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
 
   for (const col of cols) {
     const lines = col.label.split('\n');
-    const lineH = 4;
+    const lineH = 3;
     const startY = y + (h - lines.length * lineH) / 2 + lineH;
     const textX = col.align === 'right' ? col.right - 2
                 : col.align === 'center' ? col.center : col.x + 2;
@@ -492,10 +492,10 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
   const _indicatorLine = buildIndicatorLine(item);
   const descText = _indicatorLine ? `${normalizeRoute(item.description ?? '')}\n${_indicatorLine}` : normalizeRoute(item.description ?? '');
-  const fSize = invoiceType === 'monthly' ? 10 : 9;
+  const fSize = invoiceType === 'monthly' ? 8 : 7.5;
   const descColW = descCol.w - 4;
-  const lineH = 3.5;
-  const minH = 10;
+  const lineH = 2.8;
+  const minH = 6.5;
 
   const descIsArabic = hasArabicText(descText);
   let descLineCount;
@@ -618,10 +618,10 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
 // DRAW: TABLE TOTALS — Column-based (Subtotal/VAT/Total stacked right)
 // ═══════════════════════════════════════════════════════════
 function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
-  const wordsBoxW = CONTENT_W - 80;  // left box for amount in words
+  const wordsBoxW = CONTENT_W - 70;  // left box for amount in words
   const colX = CONTENT_X + wordsBoxW;
-  const rowH = 7;
-  const totalRowH = 9;
+  const rowH = 5;
+  const totalRowH = 7;
   const boxH = rowH * 2 + totalRowH;  // subtotal + vat + total
 
   // ── Left: Amount in Words box (dashed border) ──
@@ -657,11 +657,11 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
   pdf.setFont('times', 'normal');
   pdf.setFontSize(9);
   tc(pdf, [51, 51, 51]);
-  pdf.text('Subtotal:', colX + 2, ry + 4.5);
+  pdf.text('Subtotal:', colX + 2, ry + 3.5);
   pdf.setFont('courier', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, BLACK);
-  pdf.text(`AED ${fmtMoney(totals.subtotal)}`, CONTENT_RIGHT - 2, ry + 4.5, { align: 'right' });
+  pdf.text(`AED ${fmtMoney(totals.subtotal)}`, CONTENT_RIGHT - 2, ry + 3.5, { align: 'right' });
   ry += rowH;
 
   // VAT row
@@ -669,13 +669,13 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
   pdf.setLineWidth(0.2);
   pdf.line(colX, ry, CONTENT_RIGHT, ry);
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, [51, 51, 51]);
-  pdf.text('VAT (5%):', colX + 2, ry + 4.5);
+  pdf.text('VAT (5%):', colX + 2, ry + 3.5);
   pdf.setFont('courier', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, BLACK);
-  pdf.text(`AED ${fmtMoney(totals.vat)}`, CONTENT_RIGHT - 2, ry + 4.5, { align: 'right' });
+  pdf.text(`AED ${fmtMoney(totals.vat)}`, CONTENT_RIGHT - 2, ry + 3.5, { align: 'right' });
   ry += rowH;
 
   // Total row (double border top & bottom)
@@ -683,12 +683,12 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
   pdf.setLineWidth(0.5);
   pdf.line(colX, ry, CONTENT_RIGHT, ry);
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(10);
+  pdf.setFontSize(9);
   tc(pdf, BLACK);
-  pdf.text('Total Amount:', colX + 2, ry + 5.5);
+  pdf.text('Total Amount:', colX + 2, ry + 4.5);
   pdf.setFont('courier', 'bold');
-  pdf.setFontSize(10);
-  pdf.text(`AED ${fmtMoney(totals.total)}`, CONTENT_RIGHT - 2, ry + 5.5, { align: 'right' });
+  pdf.setFontSize(9);
+  pdf.text(`AED ${fmtMoney(totals.total)}`, CONTENT_RIGHT - 2, ry + 4.5, { align: 'right' });
   dc(pdf, BLACK);
   pdf.setLineWidth(0.5);
   pdf.line(colX, ry + totalRowH, CONTENT_RIGHT, ry + totalRowH);
@@ -707,9 +707,13 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   );
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
+  // Compute header values for continuation pages
+  const _year = new Date().getFullYear();
+  const _refNumber = invoice.invoice_number || `${_year}-0001`;
+  const _invoiceDate = fmtDate(invoice.issue_date);
   // Leave room for the footer banner + page number (page number at y=282, banner at y=284)
-  // Stop table at 278 so up to 18 rows fit on one page without overlapping the page number
-  const contentBottom = 278;
+  // Stop table at 255 so up to 18 rows fit on one page without overlapping the page number
+  const contentBottom = 255;
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
@@ -732,12 +736,13 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
       const _indLine = buildIndicatorLine(items[idx]);
       const _descText = _indLine ? `${normalizeRoute(items[idx].description ?? '')}\n${_indLine}` : normalizeRoute(items[idx].description ?? '');
       const descLines = pdf.splitTextToSize(_descText, descCol.w - 4);
-      const estH = Math.max(10, descLines.length * 3.5 + 3);
+      const estH = Math.max(6.5, descLines.length * 2.8 + 3);
 
       if (y + estH > contentBottom) {
         pdf.addPage();
         drawPageBorder(pdf);
         y = drawLetterhead(pdf, s, MARGIN);
+        y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
         y = drawTableHeader(pdf, cols, y, invoiceType);
       }
       y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice);
@@ -766,6 +771,7 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
     pdf.addPage();
     drawPageBorder(pdf);
     y = drawLetterhead(pdf, s, MARGIN);
+    y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
     y = drawTableHeader(pdf, cols, y, invoiceType);
   }
   y = drawTableTotal(pdf, cols, y, { subtotal, discount: totalDiscount, taxable, vat, total }, invoiceType);
@@ -968,16 +974,16 @@ function drawTermsInline(pdf, y, invoiceType) {
   fc(pdf, accent);
   pdf.rect(CONTENT_X, y, bw, bannerH, 'F');
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, BLACK);
   pdf.text('TERMS & CONDITIONS', CONTENT_X + 3, y + 3.5);
 
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, [51, 51, 51]);
-  pdf.text('Payment due within 60 days.', CONTENT_X + 3, y + 8);
+  pdf.text('Payment due within 60 days.', CONTENT_X + 3, y + 7);
 
-  return y + 12;
+  return y + 9;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -991,23 +997,23 @@ function drawBankDetailsBlock(pdf, s, y, invoiceType) {
 
   const lx = CONTENT_X + 2;
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, accent);
-  pdf.text('BANK DETAILS', lx, y + 4);
+  pdf.text('BANK DETAILS', lx, y + 3);
   dc(pdf, accent);
   pdf.setLineWidth(0.3);
-  pdf.line(lx, y + 5, lx + 22, y + 5);
+  pdf.line(lx, y + 4, lx + 22, y + 4);
 
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   tc(pdf, BLACK);
-  let ly = y + 9;
-  if (s.bank_name)           { pdf.text(`Bank: ${str(s.bank_name)}`, lx, ly); ly += 4; }
-  if (s.bank_account_title || s.company_name) { pdf.text(`Account Title: ${str(s.bank_account_title || s.company_name)}`, lx, ly); ly += 4; }
-  if (s.bank_account_no)     { pdf.text(`Account No: ${str(s.bank_account_no)}`, lx, ly); ly += 4; }
-  if (s.bank_iban)           { pdf.text(`IBAN #: ${str(s.bank_iban)}`, lx, ly); ly += 4; }
-  if (s.bank_branch)         { pdf.text(`Branch: ${str(s.bank_branch)}`, lx, ly); ly += 4; }
-  return ly - y + 2;
+  let ly = y + 7;
+  if (s.bank_name)           { pdf.text(`Bank: ${str(s.bank_name)}`, lx, ly); ly += 3.2; }
+  if (s.bank_account_title || s.company_name) { pdf.text(`Account Title: ${str(s.bank_account_title || s.company_name)}`, lx, ly); ly += 3.2; }
+  if (s.bank_account_no)     { pdf.text(`Account No: ${str(s.bank_account_no)}`, lx, ly); ly += 3.2; }
+  if (s.bank_iban)           { pdf.text(`IBAN #: ${str(s.bank_iban)}`, lx, ly); ly += 3.2; }
+  if (s.bank_branch)         { pdf.text(`Branch: ${str(s.bank_branch)}`, lx, ly); ly += 3.2; }
+  return ly - y + 1;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1017,47 +1023,47 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
   const sigW = CONTENT_W / 2;
   const leftX = CONTENT_X;
   const rightX = CONTENT_X + sigW;
-  const sigTopGap = 18;
+  const sigTopGap = 12;
   const lineY = y + sigTopGap;
   const warmGold = [51, 51, 51];
   const darkGray = [51, 51, 51];
 
   // Left — AUTHORIZED BY
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, warmGold);
-  pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 4, { align: 'center' });
+  pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 3, { align: 'center' });
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   tc(pdf, GRAY);
-  pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 3.5, { align: 'center' });
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   tc(pdf, BLACK);
-  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 8, { align: 'center' });
+  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 7, { align: 'center' });
 
   // Right — RECEIVED BY
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(8);
   tc(pdf, warmGold);
-  pdf.text('RECEIVED BY', rightX + sigW / 2, y + 4, { align: 'center' });
+  pdf.text('RECEIVED BY', rightX + sigW / 2, y + 3, { align: 'center' });
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
   pdf.setFont('times', 'normal');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   tc(pdf, GRAY);
-  pdf.text('Client Signature', rightX + sigW / 2, lineY + 4, { align: 'center' });
+  pdf.text('Client Signature', rightX + sigW / 2, lineY + 3.5, { align: 'center' });
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(9);
+  pdf.setFontSize(7.5);
   tc(pdf, BLACK);
   const clientText = str(clientName || invoice.client_name || '');
   const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
   for (let i = 0; i < Math.min(clientLines.length, 2); i++) {
-    pdf.text(clientLines[i], rightX + sigW / 2, lineY + 8 + i * 3.5, { align: 'center' });
+    pdf.text(clientLines[i], rightX + sigW / 2, lineY + 7 + i * 3, { align: 'center' });
   }
 }
 
@@ -1104,13 +1110,12 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
   y = drawTermsInline(pdf, y, invoiceType);
 
   // Bank details
-  y += 4;
-  drawBankDetailsBlock(pdf, s, y, invoiceType);
+  y += 2;
+  const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType);
+  y += bankH + 4;
 
-  // Signatures near footer (with company names)
-  const sigH = 30;
-  const sigY = FOOTER_TOP - sigH - 2;
-  drawTripSignaturesWithCompany(pdf, invoice, clientName, sigY);
+  // Signatures (flowing after bank details to avoid overlap)
+  drawTripSignaturesWithCompany(pdf, invoice, clientName, y);
 
   // ══ FOOTER BANNER + PAGE NUMBERS (on every page) ══
   const pageCount = pdf.getNumberOfPages();
