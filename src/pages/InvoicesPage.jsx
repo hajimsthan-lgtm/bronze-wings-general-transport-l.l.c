@@ -85,6 +85,7 @@ export default function InvoicesPage() {
   const [layoutSelectorOpen, setLayoutSelectorOpen] = useState(false);
   const [layoutSelectorTarget, setLayoutSelectorTarget] = useState(null);
   const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
+  const [layoutEditorInvoice, setLayoutEditorInvoice] = useState(null);
   const [settings, setSettings] = useState({});
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
@@ -653,7 +654,8 @@ export default function InvoicesPage() {
             onDownloadSigned={handleDownloadSigned}
             onDeleteSigned={handleDeleteSigned}
             payments={payments}
-            settings={settings} />
+            settings={settings}
+            onEditLayout={(inv) => { setLayoutEditorInvoice(inv); setLayoutEditorOpen(true); }} />
           
               </div>
               </div>
@@ -687,8 +689,9 @@ export default function InvoicesPage() {
               onDownloadSigned={handleDownloadSigned}
               onDeleteSigned={handleDeleteSigned}
               payments={payments}
-              settings={settings} />
-            
+              settings={settings}
+              onEditLayout={(inv) => { setLayoutEditorInvoice(inv); setLayoutEditorOpen(true); setMobileDetailOpen(false); }} />
+
               </div>
               </SheetContent>
               </Sheet>
@@ -744,7 +747,10 @@ export default function InvoicesPage() {
 
       <InvoiceLayoutEditor
         open={layoutEditorOpen}
-        onClose={() => setLayoutEditorOpen(false)}
+        onClose={() => { setLayoutEditorOpen(false); setLayoutEditorInvoice(null); }}
+        invoice={layoutEditorInvoice}
+        clientName={layoutEditorInvoice?.client_name}
+        invoiceType={layoutEditorInvoice?.line_items?.some(li => li.service && li.service !== 'TRIP') || (layoutEditorInvoice?.line_items?.length || 0) <= 3 ? 'monthly' : 'trip'}
         settings={settings}
       />
 

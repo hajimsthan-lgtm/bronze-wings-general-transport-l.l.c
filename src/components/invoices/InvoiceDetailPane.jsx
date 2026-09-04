@@ -30,6 +30,7 @@ export default function InvoiceDetailPane({
   onDeleteSigned,
   payments,
   settings,
+  onEditLayout,
 }) {
   const fileRef = useRef(null);
   const [view, setView] = useState('details');
@@ -115,6 +116,9 @@ export default function InvoiceDetailPane({
                 <Eye className="w-3 h-3" /> Preview
               </button>
             </div>
+            <button onClick={() => onEditLayout?.(inv)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Layout Editor">
+              <LayoutTemplate className="w-3.5 h-3.5" />
+            </button>
             <button onClick={() => onEdit(inv)} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" title="Edit">
               <Pencil className="w-3.5 h-3.5" />
             </button>
