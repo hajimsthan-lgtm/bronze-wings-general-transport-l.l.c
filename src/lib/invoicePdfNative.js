@@ -40,9 +40,9 @@ const FOOTER_BOTTOM = PAGE_H - BORDER_POS;
 // Reserved signature zone — table rows NEVER go below SIGNATURE_ZONE_TOP on any page.
 // The bottom block (totals + terms + bank + signatures) is drawn in this zone on the
 // last page only. On non-last pages the zone stays empty — rows never spill into it.
-const SIGNATURE_ZONE_TOP = 225;   // rows stop here on every page
-const FOOTER_RESERVED_TOP = 278;  // nothing except footer banner / page number below this
-const BOTTOM_BLOCK_HEIGHT = 57;  // estimated totals + terms + bank + signatures height
+const SIGNATURE_ZONE_TOP = 198;   // rows stop here on every page
+const FOOTER_RESERVED_TOP = 280;  // hard-blocked footer zone — nothing draws below this
+const BOTTOM_BLOCK_HEIGHT = 82;  // totals + terms + bank + signatures (with 3-line name wrap)
 
 // ═══════════════════════════════════════════════════════════
 // COLORS (RGB)
@@ -154,7 +154,7 @@ function normalizeRoute(s) {
     result = v.replace(/\s+/g, ' ').trim();
   } else {
     const words = parts
-      .map(p => p.replace(/\s+/g, ''))
+      .map(p => p.replace(/\s+/g, ' ').trim())
       .filter(p => p.length > 0);
     result = words.join(' To ');
   }
@@ -1085,7 +1085,11 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
   pdf.setFont('times', 'bold');
   pdf.setFontSize(7.5);
   tc(pdf, BLACK);
-  pdf.text('BRONZE WINGS GENERAL TRANSPORT L.L.C', leftX + sigW / 2, lineY + 7, { align: 'center' });
+  const bwText = 'BRONZE WINGS GENERAL TRANSPORT L.L.C';
+  const bwLines = pdf.splitTextToSize(bwText, sigW - 4);
+  for (let i = 0; i < Math.min(bwLines.length, 2); i++) {
+    pdf.text(bwLines[i], leftX + sigW / 2, lineY + 7 + i * 3, { align: 'center' });
+  }
 
   // Right — RECEIVED BY
   pdf.setFont('times', 'bold');
@@ -1104,7 +1108,7 @@ function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
   tc(pdf, BLACK);
   const clientText = str(clientName || invoice.client_name || '');
   const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
-  for (let i = 0; i < Math.min(clientLines.length, 2); i++) {
+  for (let i = 0; i < Math.min(clientLines.length, 3); i++) {
     pdf.text(clientLines[i], rightX + sigW / 2, lineY + 7 + i * 3, { align: 'center' });
   }
 }
@@ -1151,15 +1155,15 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
   ), y, totals, invoiceType);
 
   // Terms & Conditions inline
-  y += 3;
+  y += 2;
   y = drawTermsInline(pdf, y, invoiceType);
 
   // Bank details
-  y += 2;
+  y += 1;
   const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType);
-  y += bankH + 4;
+  y += bankH + 2;
 
-  // Signatures (flowing after bank details to avoid overlap)
+  // Signatures — must finish above the hard-blocked footer zone (FOOTER_RESERVED_TOP)
   drawTripSignaturesWithCompany(pdf, invoice, clientName, y);
 
   // ══ FOOTER BANNER + PAGE NUMBERS (on every page) ══
