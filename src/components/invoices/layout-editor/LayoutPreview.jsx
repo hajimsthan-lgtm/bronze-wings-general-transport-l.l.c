@@ -8,7 +8,7 @@ const A4_W = 794;
 const A4_H = 1123;
 
 export default function LayoutPreview({ previewUrl, previewLoading, pageCount, validationErrors }) {
-  const [zoom, setZoom] = useState(0.6);
+  const [zoom, setZoom] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
   const [fitToScreen, setFitToScreen] = useState(false);
   const containerRef = useRef(null);
@@ -24,7 +24,7 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
 
   const handleZoomIn  = () => { setFitToScreen(false); setZoom(z => Math.min(2, +(z + 0.1).toFixed(2))); };
   const handleZoomOut = () => { setFitToScreen(false); setZoom(z => Math.max(0.3, +(z - 0.1).toFixed(2))); };
-  const handleReset   = () => { setFitToScreen(false); setZoom(0.6); };
+  const handleReset   = () => { setFitToScreen(false); setZoom(0.75); };
   const handleFit     = () => setFitToScreen(f => !f);
 
   const iframeSrc = previewUrl ? `${previewUrl}#page=${currentPage}` : '';

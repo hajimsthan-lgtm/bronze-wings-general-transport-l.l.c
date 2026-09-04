@@ -225,7 +225,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
 
           <div className="flex-1 overflow-hidden flex flex-col lg:flex-row min-h-0">
             {/* Left: Block list + templates */}
-            <div className="lg:w-[440px] flex-shrink-0 border-r border-border/50 overflow-y-auto p-4 space-y-4">
+            <div className="lg:w-[360px] flex-shrink-0 border-r border-border/50 overflow-y-auto p-4 space-y-4">
               {/* Validation */}
               {validation.errors.length > 0 ? (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
