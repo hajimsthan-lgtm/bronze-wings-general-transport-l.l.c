@@ -43,6 +43,7 @@ import HeaderActionButton from '@/components/layout/HeaderActionButton';
 import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
 import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
 import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
+import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -83,6 +84,7 @@ export default function InvoicesPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [layoutSelectorOpen, setLayoutSelectorOpen] = useState(false);
   const [layoutSelectorTarget, setLayoutSelectorTarget] = useState(null);
+  const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
   const [settings, setSettings] = useState({});
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
@@ -96,7 +98,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     const onNew = () => handleNew();
     const onTemplates = () => setTemplateManagerOpen(true);
-    const onLayoutEditor = () => navigate('/settings');
+    const onLayoutEditor = () => setLayoutEditorOpen(true);
     window.addEventListener('invoices:new', onNew);
     window.addEventListener('invoices:templates', onTemplates);
     window.addEventListener('invoices:layoutEditor', onLayoutEditor);
@@ -738,6 +740,12 @@ export default function InvoicesPage() {
         open={layoutSelectorOpen}
         onClose={() => setLayoutSelectorOpen(false)}
         onSelect={handleLayoutSelect}
+      />
+
+      <InvoiceLayoutEditor
+        open={layoutEditorOpen}
+        onClose={() => setLayoutEditorOpen(false)}
+        settings={settings}
       />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => {if (!open) setDeleteTarget(null);}}>

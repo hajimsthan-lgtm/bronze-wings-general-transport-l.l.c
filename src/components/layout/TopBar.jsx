@@ -391,10 +391,9 @@ export default function TopBar() {
             {isInvoicesPage &&
             <>
                 <button
-                onClick={() => window.dispatchEvent(new CustomEvent('invoices:templates'))}
+                onClick={() => window.dispatchEvent(new CustomEvent('invoices:layoutEditor'))}
                 className="w-9 h-9 rounded-lg flex items-center justify-center border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-                title="Custom Templates">
-                
+                title="Invoice Layout Editor">
                   <LayoutTemplate className="w-4 h-4" />
                 </button>
                 <HeaderActionButton
