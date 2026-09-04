@@ -134,7 +134,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
         newY = drawTaxBanner(pdf, newY, refNumber, invoiceDate, s.trn);
         break;
       case 'billTo':
-        newY = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate);
+        newY = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate, block.fields, block.style);
         break;
       case 'totals':
         newY = drawTableTotal(pdf, cols, y, totals, invoiceType);
@@ -143,9 +143,9 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
         newY = drawTermsInline(pdf, y, invoiceType);
         break;
       case 'signature': {
-        const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType);
-        y += bankH + 2;
-        drawTripSignaturesWithCompany(pdf, invoice, clientName, y);
+        const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType, block.fields, block.style);
+        y += bankH + (block.sigSpacing?.sigGap ?? 2);
+        drawTripSignaturesWithCompany(pdf, invoice, clientName, y, block.fields, block.style, block.sigSpacing);
         newY = y + 25;
         break;
       }

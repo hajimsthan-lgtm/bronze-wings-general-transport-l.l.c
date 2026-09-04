@@ -13,6 +13,8 @@ import LayoutPreview from './LayoutPreview';
 import {
   DEFAULT_LAYOUT, validateLayout, serializeLayout, deserializeLayout, BLOCK_META,
   moveBlock, resetBlockStyle, applyStyleToAll, getDefaultColumns,
+  smartRestyleFields, applyPreset, resetBlockFields,
+  BILLTO_PRESETS, SIGNATURE_PRESETS, DEFAULT_SIG_SPACING,
 } from '@/lib/invoiceLayoutModel';
 import { generateLayoutPreviewUrl } from '@/lib/invoiceLayoutRenderer';
 
@@ -166,6 +168,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
       blocks: layout.blocks.map(b => {
         if (b.id !== blockId) return b;
         if (configType === 'columns') return { ...b, columns: updates };
+        if (configType === 'fields') return { ...b, fields: updates };
         return { ...b, [configType]: { ...b[configType], ...updates } };
       }),
     });
@@ -176,7 +179,22 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
       setLayout(resetBlockStyle(layout, blockId));
     } else if (configType === 'columns') {
       setLayout({ ...layout, blocks: layout.blocks.map(b => b.id === blockId ? { ...b, columns: getDefaultColumns(invoiceType) } : b) });
+    } else if (configType === 'fields') {
+      const block = layout.blocks.find(b => b.id === blockId);
+      setLayout(resetBlockFields(layout, blockId, block?.type));
+    } else if (configType === 'sigSpacing') {
+      setLayout({ ...layout, blocks: layout.blocks.map(b => b.id === blockId ? { ...b, sigSpacing: { ...DEFAULT_SIG_SPACING } } : b) });
     }
+  };
+
+  const handleSmartRestyle = (blockId) => {
+    setLayout(smartRestyleFields(layout, blockId));
+    toast({ title: 'Smart restyle applied', description: 'Key fields emphasized automatically' });
+  };
+
+  const handleApplyPreset = (blockId, blockType, preset) => {
+    setLayout(applyPreset(layout, blockId, blockType, preset));
+    toast({ title: `${preset.name} preset applied`, description: `${blockType === 'billTo' ? 'Bill To' : 'Signature'} restyled` });
   };
 
   const handleApplyStyleToAll = (style) => {
@@ -318,6 +336,8 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                                   onConfigChange={handleConfigChange}
                                   onResetConfig={handleResetConfig}
                                   onApplyStyleToAll={handleApplyStyleToAll}
+                                  onSmartRestyle={handleSmartRestyle}
+                                  onApplyPreset={handleApplyPreset}
                                   isExpanded={expandedBlock === block.id}
                                   onExpand={() => setExpandedBlock(expandedBlock === block.id ? null : block.id)}
                                 />

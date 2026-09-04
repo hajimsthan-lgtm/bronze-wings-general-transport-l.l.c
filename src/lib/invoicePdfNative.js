@@ -395,33 +395,55 @@ function drawTaxBanner(pdf, y, refNumber, invoiceDate, trn) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: BILLING SECTION (first page only)
 // ═══════════════════════════════════════════════════════════
-function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate) {
+function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate, fieldConfig, blockStyle) {
   const leftX = CONTENT_X + 3;
   const rightX = CONTENT_RIGHT - 3;
-  const maxTextWidth = CONTENT_W * 0.62; // left column — leave room for right column
+  const maxTextWidth = CONTENT_W * 0.62;
+  const baseFont = blockStyle?.fontFamily || 'times';
+  const baseSize = blockStyle?.fontSize || 8.5;
+  const baseColor = (blockStyle?.color && hexToRgb(blockStyle.color)) || BLACK;
 
-  // Build all billing lines, then pre-wrap each to the inner width
+  // Per-field style helper
+  const fld = (key, defWeight) => {
+    const f = (fieldConfig || {})[key] || {};
+    return {
+      visible: f.visible !== false,
+      weight: f.fontWeight || defWeight || 'normal',
+      sizeMul: f.fontSize || 1,
+      color: f.color ? (hexToRgb(f.color) || baseColor) : baseColor,
+    };
+  };
+
+  // Build left-side lines with per-field config
   const rawLines = [];
-  rawLines.push({ text: str(clientName || invoice.client_name || '—'), bold: true });
-  if (invoice.contact_person) rawLines.push({ text: `ATT: ${str(invoice.contact_person)}`, bold: false });
-  if (invoice.client_address) rawLines.push({ text: `ADDRESS: ${str(invoice.client_address)}`, bold: false });
-  if (invoice.client_trn)     rawLines.push({ text: `TRN: ${str(invoice.client_trn)}`, bold: false });
-  if (invoice.sub)            rawLines.push({ text: `SUB: ${str(invoice.sub)}`, bold: false });
-  if (invoice.reg_no)          rawLines.push({ text: `REG NO: ${str(invoice.reg_no)}`, bold: false });
+  const cn = fld('clientName', 'bold');
+  if (cn.visible && (clientName || invoice.client_name)) rawLines.push({ text: str(clientName || invoice.client_name || '—'), style: cn });
+  const cp = fld('contactPerson', 'normal');
+  if (cp.visible && invoice.contact_person) rawLines.push({ text: `ATT: ${str(invoice.contact_person)}`, style: cp });
+  const ad = fld('address', 'normal');
+  if (ad.visible && invoice.client_address) rawLines.push({ text: `ADDRESS: ${str(invoice.client_address)}`, style: ad });
+  const tr = fld('trn', 'normal');
+  if (tr.visible && invoice.client_trn) rawLines.push({ text: `TRN: ${str(invoice.client_trn)}`, style: tr });
+  const su = fld('sub', 'normal');
+  if (su.visible && invoice.sub) rawLines.push({ text: `SUB: ${str(invoice.sub)}`, style: su });
+  const rg = fld('regNo', 'normal');
+  if (rg.visible && invoice.reg_no) rawLines.push({ text: `REG NO: ${str(invoice.reg_no)}`, style: rg });
 
   const lineH = 3.2;
   const wrapped = [];
   let totalLines = 0;
   for (const line of rawLines) {
-    pdf.setFont('times', line.bold ? 'bold' : 'normal');
-    pdf.setFontSize(10);
+    const sz = baseSize * line.style.sizeMul;
+    pdf.setFont(baseFont, line.style.weight);
+    pdf.setFontSize(sz);
+    tc(pdf, line.style.color);
     if (hasArabicText(line.text)) {
-      const rendered = renderCellToImage(line.text, 10, maxTextWidth, lineH, [0, 0, 0]);
-      wrapped.push({ imgData: rendered, bold: line.bold });
+      const rendered = renderCellToImage(line.text, sz, maxTextWidth, lineH, line.style.color);
+      wrapped.push({ imgData: rendered, style: line.style });
       totalLines += rendered.linesCount;
     } else {
       const parts = pdf.splitTextToSize(line.text, maxTextWidth);
-      wrapped.push({ parts, bold: line.bold });
+      wrapped.push({ parts, style: line.style });
       totalLines += parts.length;
     }
   }
@@ -436,7 +458,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.rect(CONTENT_X, y, CONTENT_W, h);
 
   // ── LEFT: BILL TO ──
-  pdf.setFont('times', 'bold');
+  pdf.setFont(baseFont, 'bold');
   pdf.setFontSize(8.5);
   tc(pdf, MAROON);
   pdf.text('BILL TO', leftX, y + 3.5);
@@ -444,12 +466,13 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   pdf.setLineWidth(0.3);
   pdf.line(leftX, y + 4.5, leftX + 15, y + 4.5);
 
-  // Render each wrapped line strictly within leftX..leftX+maxTextWidth
+  // Render each wrapped line with per-field style
   let ly = y + labelArea;
   for (const line of wrapped) {
-    pdf.setFont('times', line.bold ? 'bold' : 'normal');
-    pdf.setFontSize(8.5);
-    tc(pdf, BLACK);
+    const sz = baseSize * line.style.sizeMul;
+    pdf.setFont(baseFont, line.style.weight);
+    pdf.setFontSize(sz);
+    tc(pdf, line.style.color);
     if (line.imgData) {
       const imgW = maxTextWidth;
       const imgH = line.imgData.linesCount * lineH;
@@ -463,20 +486,31 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
     }
   }
 
-  // ── RIGHT: INVOICE # and DATE ──
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(8.5);
-  tc(pdf, BLACK);
-  // Right-align labels so colons line up; left-align values right after
-  const labels = ['INVOICE #:', 'INVOICE DATE:', 'LPO Ref #:'];
-  const values = [refNumber, invoiceDate, str(invoice.lpo_ref || '—')];
-  const widestLabelW = Math.max(...labels.map(l => pdf.getTextWidth(l)));
-  const colonX = rightX - widestLabelW - 1;
-  const valueX = colonX + 1.5;
-  const yPos = [y + 4, y + 7.5, y + 11];
-  for (let i = 0; i < 3; i++) {
-    pdf.text(labels[i], colonX, yPos[i], { align: 'right' });
-    pdf.text(values[i], valueX, yPos[i], { align: 'left' });
+  // ── RIGHT: INVOICE #, DATE, LPO Ref (per-field config) ──
+  const rightFields = [
+    { key: 'invoiceNo',   label: 'INVOICE #:',    value: refNumber },
+    { key: 'invoiceDate', label: 'INVOICE DATE:', value: invoiceDate },
+    { key: 'lpoRef',      label: 'LPO Ref #:',    value: str(invoice.lpo_ref || '—') },
+  ].filter(r => fld(r.key, 'normal').visible);
+
+  if (rightFields.length > 0) {
+    // Measure widest label at base size to align colons
+    pdf.setFont(baseFont, 'normal');
+    pdf.setFontSize(baseSize);
+    const widestLabelW = Math.max(...rightFields.map(r => pdf.getTextWidth(r.label)));
+    const colonX = rightX - widestLabelW - 1;
+    const valueX = colonX + 1.5;
+    let ry = y + 4;
+    for (const r of rightFields) {
+      const st = fld(r.key, 'normal');
+      const sz = baseSize * st.sizeMul;
+      pdf.setFont(baseFont, st.weight);
+      pdf.setFontSize(sz);
+      tc(pdf, st.color);
+      pdf.text(r.label, colonX, ry, { align: 'right' });
+      pdf.text(r.value, valueX, ry, { align: 'left' });
+      ry += 3.5;
+    }
   }
 
   return y + h + 1;
@@ -1061,85 +1095,144 @@ function drawTermsInline(pdf, y, invoiceType) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: BANK DETAILS BLOCK (standalone, full-width)
 // ═══════════════════════════════════════════════════════════
-function drawBankDetailsBlock(pdf, s, y, invoiceType) {
+function drawBankDetailsBlock(pdf, s, y, invoiceType, fieldConfig, blockStyle) {
   const hasBank = s.bank_name || s.bank_account_title || s.bank_account_no || s.bank_iban || s.bank_branch;
   const accent = MAROON;
-
   if (!hasBank) return 4;
 
-  const lx = CONTENT_X + 2;
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(8);
-  tc(pdf, accent);
-  pdf.text('BANK DETAILS', lx, y + 3);
-  dc(pdf, accent);
-  pdf.setLineWidth(0.3);
-  pdf.line(lx, y + 4, lx + 22, y + 4);
+  const baseFont = blockStyle?.fontFamily || 'times';
+  const baseSize = blockStyle?.fontSize || 7.5;
+  const baseColor = (blockStyle?.color && hexToRgb(blockStyle.color)) || BLACK;
 
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(7.5);
-  tc(pdf, BLACK);
+  const fld = (key, defWeight) => {
+    const f = (fieldConfig || {})[key] || {};
+    return {
+      visible: f.visible !== false,
+      weight: f.fontWeight || defWeight || 'normal',
+      sizeMul: f.fontSize || 1,
+      color: f.color ? (hexToRgb(f.color) || baseColor) : baseColor,
+    };
+  };
+
+  const lx = CONTENT_X + 2;
+  const bl = fld('bankLabel', 'bold');
+  if (bl.visible) {
+    pdf.setFont(baseFont, bl.weight);
+    pdf.setFontSize(baseSize * bl.sizeMul);
+    tc(pdf, accent);
+    pdf.text('BANK DETAILS', lx, y + 3);
+    dc(pdf, accent);
+    pdf.setLineWidth(0.3);
+    pdf.line(lx, y + 4, lx + 22, y + 4);
+  }
+
   let ly = y + 7;
-  if (s.bank_name)           { pdf.text(`Bank: ${str(s.bank_name)}`, lx, ly); ly += 3.2; }
-  if (s.bank_account_title || s.company_name) { pdf.text(`Account Title: ${str(s.bank_account_title || s.company_name)}`, lx, ly); ly += 3.2; }
-  if (s.bank_account_no)     { pdf.text(`Account No: ${str(s.bank_account_no)}`, lx, ly); ly += 3.2; }
-  if (s.bank_iban)           { pdf.text(`IBAN #: ${str(s.bank_iban)}`, lx, ly); ly += 3.2; }
-  if (s.bank_branch)         { pdf.text(`Branch: ${str(s.bank_branch)}`, lx, ly); ly += 3.2; }
+  const bankLines = [
+    { key: 'bankName',        text: s.bank_name ? `Bank: ${str(s.bank_name)}` : null },
+    { key: 'bankAccountTitle',text: (s.bank_account_title || s.company_name) ? `Account Title: ${str(s.bank_account_title || s.company_name)}` : null },
+    { key: 'bankAccountNo',   text: s.bank_account_no ? `Account No: ${str(s.bank_account_no)}` : null },
+    { key: 'bankIban',        text: s.bank_iban ? `IBAN #: ${str(s.bank_iban)}` : null },
+    { key: 'bankBranch',      text: s.bank_branch ? `Branch: ${str(s.bank_branch)}` : null },
+  ];
+  for (const bl of bankLines) {
+    if (!bl.text) continue;
+    const st = fld(bl.key, 'normal');
+    if (!st.visible) continue;
+    pdf.setFont(baseFont, st.weight);
+    pdf.setFontSize(baseSize * st.sizeMul);
+    tc(pdf, st.color);
+    pdf.text(bl.text, lx, ly);
+    ly += 3.2;
+  }
   return ly - y + 1;
 }
 
 // ═══════════════════════════════════════════════════════════
 // DRAW: TRIP SIGNATURES (with company names, positioned near footer)
 // ═══════════════════════════════════════════════════════════
-function drawTripSignaturesWithCompany(pdf, invoice, clientName, y) {
+function drawTripSignaturesWithCompany(pdf, invoice, clientName, y, fieldConfig, blockStyle, sigSpacing) {
   const sigW = CONTENT_W / 2;
   const leftX = CONTENT_X;
   const rightX = CONTENT_X + sigW;
-  const sigTopGap = 12;
-  const lineY = y + sigTopGap;
+  const sp = sigSpacing || { sigTopGap: 12, lineCaptionGap: 3.5, captionNameGap: 7 };
+  const lineY = y + (sp.sigTopGap || 12);
   const warmGold = [51, 51, 51];
   const darkGray = [51, 51, 51];
 
+  const baseFont = blockStyle?.fontFamily || 'times';
+  const baseSize = blockStyle?.fontSize || 7.5;
+  const baseColor = (blockStyle?.color && hexToRgb(blockStyle.color)) || BLACK;
+
+  const fld = (key, defWeight) => {
+    const f = (fieldConfig || {})[key] || {};
+    return {
+      visible: f.visible !== false,
+      weight: f.fontWeight || defWeight || 'normal',
+      sizeMul: f.fontSize || 1,
+      color: f.color ? (hexToRgb(f.color) || baseColor) : baseColor,
+    };
+  };
+
   // Left — AUTHORIZED BY
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(8);
-  tc(pdf, warmGold);
-  pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 3, { align: 'center' });
+  const al = fld('authLabel', 'bold');
+  if (al.visible) {
+    pdf.setFont(baseFont, al.weight);
+    pdf.setFontSize(baseSize * al.sizeMul);
+    tc(pdf, warmGold);
+    pdf.text('AUTHORIZED BY', leftX + sigW / 2, y + 3, { align: 'center' });
+  }
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(leftX + 10, lineY, leftX + sigW - 10, lineY);
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(7.5);
-  tc(pdf, GRAY);
-  pdf.text('Authorized Signature', leftX + sigW / 2, lineY + 3.5, { align: 'center' });
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(7.5);
-  tc(pdf, BLACK);
-  const bwText = 'BRONZE WINGS GENERAL TRANSPORT L.L.C';
-  const bwLines = pdf.splitTextToSize(bwText, sigW - 4);
-  for (let i = 0; i < Math.min(bwLines.length, 2); i++) {
-    pdf.text(bwLines[i], leftX + sigW / 2, lineY + 7 + i * 3, { align: 'center' });
+  const ac = fld('authCaption', 'normal');
+  if (ac.visible) {
+    pdf.setFont(baseFont, ac.weight);
+    pdf.setFontSize(baseSize * ac.sizeMul);
+    tc(pdf, GRAY);
+    pdf.text('Authorized Signature', leftX + sigW / 2, lineY + (sp.lineCaptionGap || 3.5), { align: 'center' });
+  }
+  const aco = fld('authCompany', 'bold');
+  if (aco.visible) {
+    pdf.setFont(baseFont, aco.weight);
+    pdf.setFontSize(baseSize * aco.sizeMul);
+    tc(pdf, aco.color);
+    const bwText = 'BRONZE WINGS GENERAL TRANSPORT L.L.C';
+    const bwLines = pdf.splitTextToSize(bwText, sigW - 4);
+    const nameStart = lineY + (sp.captionNameGap || 7);
+    for (let i = 0; i < Math.min(bwLines.length, 2); i++) {
+      pdf.text(bwLines[i], leftX + sigW / 2, nameStart + i * 3, { align: 'center' });
+    }
   }
 
   // Right — RECEIVED BY
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(8);
-  tc(pdf, warmGold);
-  pdf.text('RECEIVED BY', rightX + sigW / 2, y + 3, { align: 'center' });
+  const rl = fld('recvLabel', 'bold');
+  if (rl.visible) {
+    pdf.setFont(baseFont, rl.weight);
+    pdf.setFontSize(baseSize * rl.sizeMul);
+    tc(pdf, warmGold);
+    pdf.text('RECEIVED BY', rightX + sigW / 2, y + 3, { align: 'center' });
+  }
   dc(pdf, darkGray);
   pdf.setLineWidth(0.3);
   pdf.line(rightX + 10, lineY, rightX + sigW - 10, lineY);
-  pdf.setFont('times', 'normal');
-  pdf.setFontSize(7.5);
-  tc(pdf, GRAY);
-  pdf.text('Client Signature', rightX + sigW / 2, lineY + 3.5, { align: 'center' });
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(7.5);
-  tc(pdf, BLACK);
-  const clientText = str(clientName || invoice.client_name || '');
-  const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
-  for (let i = 0; i < Math.min(clientLines.length, 3); i++) {
-    pdf.text(clientLines[i], rightX + sigW / 2, lineY + 7 + i * 3, { align: 'center' });
+  const rc = fld('recvCaption', 'normal');
+  if (rc.visible) {
+    pdf.setFont(baseFont, rc.weight);
+    pdf.setFontSize(baseSize * rc.sizeMul);
+    tc(pdf, GRAY);
+    pdf.text('Client Signature', rightX + sigW / 2, lineY + (sp.lineCaptionGap || 3.5), { align: 'center' });
+  }
+  const rcl = fld('recvClient', 'bold');
+  if (rcl.visible) {
+    pdf.setFont(baseFont, rcl.weight);
+    pdf.setFontSize(baseSize * rcl.sizeMul);
+    tc(pdf, rcl.color);
+    const clientText = str(clientName || invoice.client_name || '');
+    const clientLines = pdf.splitTextToSize(clientText, sigW - 4);
+    const nameStart = lineY + (sp.captionNameGap || 7);
+    for (let i = 0; i < Math.min(clientLines.length, 3); i++) {
+      pdf.text(clientLines[i], rightX + sigW / 2, nameStart + i * 3, { align: 'center' });
+    }
   }
 }
 

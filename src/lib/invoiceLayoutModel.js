@@ -42,6 +42,113 @@ export const ALIGNMENTS = [
   { value: 'right', label: 'Right' },
 ];
 
+// ═══════════════════════════════════════════════════════════
+// BILL TO FIELD DEFINITIONS (per-field styling)
+// ═══════════════════════════════════════════════════════════
+export const BILLTO_FIELDS = [
+  { key: 'clientName',    label: 'Client Name',    defaultWeight: 'bold',   defaultSize: 1.1, side: 'left' },
+  { key: 'contactPerson', label: 'Attention',      defaultWeight: 'normal', defaultSize: 1,   side: 'left' },
+  { key: 'address',       label: 'Address',        defaultWeight: 'normal', defaultSize: 1,   side: 'left' },
+  { key: 'trn',           label: 'TRN',            defaultWeight: 'normal', defaultSize: 1,   side: 'left' },
+  { key: 'sub',           label: 'Subject',       defaultWeight: 'normal', defaultSize: 1,   side: 'left' },
+  { key: 'regNo',         label: 'Reg No',         defaultWeight: 'normal', defaultSize: 1,   side: 'left' },
+  { key: 'invoiceNo',     label: 'Invoice #',      defaultWeight: 'normal', defaultSize: 1,   side: 'right' },
+  { key: 'invoiceDate',   label: 'Invoice Date',   defaultWeight: 'normal', defaultSize: 1,   side: 'right' },
+  { key: 'lpoRef',        label: 'LPO Ref #',      defaultWeight: 'normal', defaultSize: 1,   side: 'right' },
+];
+
+// ═══════════════════════════════════════════════════════════
+// SIGNATURE FIELD DEFINITIONS (per-field styling)
+// ═══════════════════════════════════════════════════════════
+export const SIGNATURE_FIELDS = [
+  { key: 'bankLabel',       label: 'Bank Details Label', defaultWeight: 'bold',   defaultSize: 1 },
+  { key: 'bankName',        label: 'Bank Name',          defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'bankAccountTitle',label: 'Account Title',      defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'bankAccountNo',   label: 'Account No',         defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'bankIban',        label: 'IBAN',               defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'bankBranch',      label: 'Branch',             defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'authLabel',       label: 'Authorized By',      defaultWeight: 'bold',   defaultSize: 1 },
+  { key: 'authCaption',     label: 'Auth Signature Text',defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'authCompany',     label: 'Company Name',      defaultWeight: 'bold',   defaultSize: 1 },
+  { key: 'recvLabel',       label: 'Received By',        defaultWeight: 'bold',   defaultSize: 1 },
+  { key: 'recvCaption',     label: 'Client Signature Text',defaultWeight: 'normal', defaultSize: 1 },
+  { key: 'recvClient',      label: 'Client Name',        defaultWeight: 'bold',   defaultSize: 1 },
+];
+
+// Default signature internal spacing (mm)
+export const DEFAULT_SIG_SPACING = { sigGap: 2, sigTopGap: 12, lineCaptionGap: 3.5, captionNameGap: 7 };
+
+// Build default field config for a block type
+function defaultFieldsFor(type) {
+  const defs = type === 'billTo' ? BILLTO_FIELDS : type === 'signature' ? SIGNATURE_FIELDS : [];
+  return defs.reduce((acc, f) => ({
+    ...acc,
+    [f.key]: { visible: true, fontWeight: f.defaultWeight, fontSize: f.defaultSize, color: null },
+  }), {});
+}
+
+// ═══════════════════════════════════════════════════════════
+// READY-MADE PRESETS (3 per block type)
+// ═══════════════════════════════════════════════════════════
+export const BILLTO_PRESETS = [
+  {
+    name: 'Classic',
+    style: { fontFamily: 'times', fontSize: 10, fontWeight: 'normal', color: '#000000', lineHeight: 1.3 },
+    fields: {
+      clientName: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: null },
+      contactPerson: { visible: true, fontWeight: 'normal', fontSize: 1, color: null },
+      address: { visible: true, fontWeight: 'normal', fontSize: 1, color: null },
+      trn: { visible: true, fontWeight: 'normal', fontSize: 1, color: null },
+    },
+  },
+  {
+    name: 'Modern',
+    style: { fontFamily: 'helvetica', fontSize: 10, fontWeight: 'normal', color: '#1f2937', lineHeight: 1.4 },
+    fields: {
+      clientName: { visible: true, fontWeight: 'bold', fontSize: 1.3, color: '#1e40af' },
+      contactPerson: { visible: true, fontWeight: 'normal', fontSize: 1, color: null },
+      address: { visible: true, fontWeight: 'normal', fontSize: 0.95, color: '#6b7280' },
+      trn: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e40af' },
+    },
+  },
+  {
+    name: 'Minimal',
+    style: { fontFamily: 'helvetica', fontSize: 9, fontWeight: 'normal', color: '#4b5563', lineHeight: 1.5 },
+    fields: {
+      clientName: { visible: true, fontWeight: 'bold', fontSize: 1, color: '#111827' },
+      contactPerson: { visible: true, fontWeight: 'normal', fontSize: 0.9, color: null },
+      address: { visible: true, fontWeight: 'normal', fontSize: 0.9, color: null },
+      trn: { visible: true, fontWeight: 'normal', fontSize: 0.9, color: null },
+    },
+  },
+];
+
+export const SIGNATURE_PRESETS = [
+  {
+    name: 'Classic',
+    sigSpacing: { ...DEFAULT_SIG_SPACING },
+    fields: {},
+  },
+  {
+    name: 'Compact',
+    sigSpacing: { sigGap: 1, sigTopGap: 8, lineCaptionGap: 2.5, captionNameGap: 5 },
+    fields: {
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 0.95, color: null },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 0.95, color: null },
+    },
+  },
+  {
+    name: 'Spacious',
+    sigSpacing: { sigGap: 4, sigTopGap: 18, lineCaptionGap: 5, captionNameGap: 10 },
+    fields: {
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e40af' },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e40af' },
+      authCompany: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: null },
+      recvClient: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: null },
+    },
+  },
+];
+
 // Default text style per block type
 export const BLOCK_DEFAULT_STYLES = {
   header:    { fontFamily: 'times', fontSize: 10, fontWeight: 'bold',   color: '#000000', align: 'left',   lineHeight: 1.2 },
@@ -126,6 +233,12 @@ function makeBlock(id, type) {
   if (type === 'table') {
     block.columns = DEFAULT_COLUMNS.map(c => ({ ...c }));
   }
+  if (type === 'billTo' || type === 'signature') {
+    block.fields = defaultFieldsFor(type);
+  }
+  if (type === 'signature') {
+    block.sigSpacing = { ...DEFAULT_SIG_SPACING };
+  }
   return block;
 }
 
@@ -156,26 +269,10 @@ export function validateLayout(layout) {
   const enabled = layout.blocks.filter(b => b.enabled);
   const types = enabled.map(b => b.type);
 
-  // Header must be first (only if enabled)
-  if (types.includes('header') && types[0] !== 'header') errors.push('Header must be the first block on the page');
-  // Footer must be last (only if enabled)
-  if (types.includes('footer') && types[types.length - 1] !== 'footer') errors.push('Footer must be the last block on the page');
-
+  // Only enforce: table must appear exactly once (essential for a valid invoice)
   const tableCount = types.filter(t => t === 'table').length;
   if (tableCount === 0) errors.push('Table block is required');
   else if (tableCount > 1) errors.push('Table block must appear exactly once');
-
-  const tableIdx = types.indexOf('table');
-  if (tableIdx >= 0) {
-    for (const t of ['totals', 'signature']) {
-      const idx = types.indexOf(t);
-      if (idx >= 0 && idx < tableIdx) errors.push(`${BLOCK_META[t].label} must appear after the Table`);
-    }
-  }
-
-  if (!enabled.some(b => b.type === 'totals') && enabled.some(b => b.type === 'signature')) {
-    warnings.push('Signature block without Totals — the client may not see the total amount due');
-  }
 
   return { errors, warnings };
 }
@@ -223,6 +320,8 @@ export function deserializeLayout(config) {
   if (!config?.blocks) {
     return { ...DEFAULT_LAYOUT, blocks: DEFAULT_LAYOUT.blocks.map(b => ({
       ...b, style: { ...b.style }, columns: b.columns?.map(c => ({ ...c })),
+      fields: b.fields ? { ...b.fields } : undefined,
+      sigSpacing: b.sigSpacing ? { ...b.sigSpacing } : undefined,
     }))};
   }
   return {
@@ -235,6 +334,8 @@ export function deserializeLayout(config) {
         spacing:   { paddingTop: 0, paddingBottom: 0, ...(b.spacing   || {}) },
         border:    { top: false, bottom: false,           ...(b.border    || {}) },
         background:{ enabled: false, color: '#f5f5f5',    ...(b.background|| {}) },
+        ...((b.type === 'billTo' || b.type === 'signature') ? { fields: { ...defaultBlock.fields, ...(b.fields || {}) } } : {}),
+        ...(b.type === 'signature' ? { sigSpacing: { ...defaultBlock.sigSpacing, ...(b.sigSpacing || {}) } } : {}),
         ...(b.type === 'table' ? { columns: (b.columns || defaultBlock.columns || []).map(c => ({ ...c })) } : {}),
       };
     }),
@@ -284,6 +385,64 @@ export function resetBlockStyle(layout, blockId) {
 
 export function applyStyleToAll(layout, style) {
   return { ...layout, blocks: layout.blocks.map(b => ({ ...b, style: { ...b.style, ...style } })) };
+}
+
+// ═══════════════════════════════════════════════════════════
+// PER-FIELD STYLING HELPERS (billTo + signature)
+// ═══════════════════════════════════════════════════════════
+
+// Smart restyle: auto-emphasize key fields, de-emphasize secondary ones
+export function smartRestyleFields(layout, blockId) {
+  const block = layout.blocks.find(b => b.id === blockId);
+  if (!block || !block.fields) return layout;
+  const newFields = { ...block.fields };
+  if (block.type === 'billTo') {
+    // Emphasize client name + TRN, keep others regular
+    newFields.clientName = { ...newFields.clientName, fontWeight: 'bold', fontSize: 1.2, color: null };
+    newFields.trn = { ...newFields.trn, fontWeight: 'bold', fontSize: 1.05, color: null };
+    newFields.contactPerson = { ...newFields.contactPerson, fontWeight: 'normal', fontSize: 1, color: null };
+    newFields.address = { ...newFields.address, fontWeight: 'normal', fontSize: 0.95, color: null };
+    if (newFields.sub) newFields.sub = { ...newFields.sub, fontWeight: 'normal', fontSize: 1, color: null };
+    if (newFields.regNo) newFields.regNo = { ...newFields.regNo, fontWeight: 'normal', fontSize: 1, color: null };
+    if (newFields.invoiceNo) newFields.invoiceNo = { ...newFields.invoiceNo, fontWeight: 'bold', fontSize: 1, color: null };
+    if (newFields.invoiceDate) newFields.invoiceDate = { ...newFields.invoiceDate, fontWeight: 'normal', fontSize: 1, color: null };
+  } else if (block.type === 'signature') {
+    // Emphasize labels + company names, keep details regular
+    newFields.bankLabel = { ...newFields.bankLabel, fontWeight: 'bold', fontSize: 1.05, color: null };
+    newFields.authLabel = { ...newFields.authLabel, fontWeight: 'bold', fontSize: 1.1, color: null };
+    newFields.recvLabel = { ...newFields.recvLabel, fontWeight: 'bold', fontSize: 1.1, color: null };
+    newFields.authCompany = { ...newFields.authCompany, fontWeight: 'bold', fontSize: 1, color: null };
+    newFields.recvClient = { ...newFields.recvClient, fontWeight: 'bold', fontSize: 1, color: null };
+    newFields.authCaption = { ...newFields.authCaption, fontWeight: 'normal', fontSize: 0.9, color: null };
+    newFields.recvCaption = { ...newFields.recvCaption, fontWeight: 'normal', fontSize: 0.9, color: null };
+  }
+  return { ...layout, blocks: layout.blocks.map(b => b.id === blockId ? { ...b, fields: newFields } : b) };
+}
+
+// Apply a preset to a block
+export function applyPreset(layout, blockId, blockType, preset) {
+  return {
+    ...layout,
+    blocks: layout.blocks.map(b => {
+      if (b.id !== blockId) return b;
+      const updated = { ...b };
+      if (preset.style) updated.style = { ...b.style, ...preset.style };
+      if (preset.sigSpacing) updated.sigSpacing = { ...b.sigSpacing, ...preset.sigSpacing };
+      if (preset.fields) {
+        const baseDefaults = defaultFieldsFor(blockType);
+        updated.fields = { ...baseDefaults, ...b.fields, ...preset.fields };
+      }
+      return updated;
+    }),
+  };
+}
+
+// Reset fields to defaults
+export function resetBlockFields(layout, blockId, blockType) {
+  return {
+    ...layout,
+    blocks: layout.blocks.map(b => b.id === blockId ? { ...b, fields: defaultFieldsFor(blockType) } : b),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════

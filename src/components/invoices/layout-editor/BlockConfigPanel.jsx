@@ -1,23 +1,39 @@
 import React, { useState } from 'react';
-import { Type, Table2, Move, RotateCcw, Check, Wand2, AlignJustify, Eye, EyeOff, Settings2, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Type, Table2, Move, RotateCcw, Check, Wand2, AlignJustify, Eye, EyeOff, Settings2, AlignLeft, AlignCenter, AlignRight, List, Sparkles, Layers } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS, smartAdjustColumns, distributeColumnsEvenly } from '@/lib/invoiceLayoutModel';
+import {
+  FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS, smartAdjustColumns, distributeColumnsEvenly,
+  BILLTO_FIELDS, SIGNATURE_FIELDS, BILLTO_PRESETS, SIGNATURE_PRESETS,
+} from '@/lib/invoiceLayoutModel';
 import { cn } from '@/lib/utils';
 
 const ALIGN_ICONS = { left: AlignLeft, center: AlignCenter, right: AlignRight };
 
-export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onResetColumns, onApplyStyleToAll }) {
+export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onResetColumns, onApplyStyleToAll, onResetFields, onResetSigSpacing, onSmartRestyle, onApplyPreset }) {
   const [tab, setTab] = useState('style');
   const isTable = block.type === 'table';
+  const isBillTo = block.type === 'billTo';
+  const isSignature = block.type === 'signature';
+  const hasFields = isBillTo || isSignature;
   const style = block.style || {};
   const spacing = block.spacing || {};
   const border = block.border || {};
   const background = block.background || {};
+  const fields = block.fields || {};
+  const sigSpacing = block.sigSpacing || {};
+  const fieldDefs = isBillTo ? BILLTO_FIELDS : isSignature ? SIGNATURE_FIELDS : [];
+  const presets = isBillTo ? BILLTO_PRESETS : isSignature ? SIGNATURE_PRESETS : [];
+
+  const updateField = (key, changes) => {
+    const newFields = { ...fields, [key]: { ...fields[key], ...changes } };
+    onUpdate('fields', newFields);
+  };
+  const updateSigSpacing = (changes) => onUpdate('sigSpacing', changes);
 
   const updateColumns = (i, changes) => {
     const newCols = block.columns.map((c, ci) => ci === i ? { ...c, ...changes } : c);
@@ -29,6 +45,7 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
       {/* Tab bar */}
       <div className="flex items-center gap-1 mb-3">
         <TabBtn active={tab === 'style'} onClick={() => setTab('style')} icon={Type} label="Style" />
+        {hasFields && <TabBtn active={tab === 'fields'} onClick={() => setTab('fields')} icon={List} label="Fields" />}
         {isTable && <TabBtn active={tab === 'columns'} onClick={() => setTab('columns')} icon={Table2} label="Columns" />}
         <TabBtn active={tab === 'spacing'} onClick={() => setTab('spacing')} icon={Move} label="Spacing" />
       </div>
@@ -75,6 +92,111 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
             <Button variant="outline" size="sm" onClick={onResetStyle} className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Reset</Button>
             <Button variant="outline" size="sm" onClick={onApplyStyleToAll} className="h-7 text-xs gap-1"><Check className="w-3 h-3" /> Apply to all</Button>
           </div>
+        </div>
+      )}
+
+      {/* ── Fields tab (billTo + signature) ── */}
+      {tab === 'fields' && hasFields && (
+        <div className="space-y-2.5">
+          {/* Presets + Smart Restyle */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold w-full mb-0.5">Presets</span>
+            {presets.map(p => (
+              <Button key={p.name} variant="outline" size="sm" onClick={() => onApplyPreset(p)} className="h-7 text-xs gap-1" title={`Apply ${p.name} preset`}>
+                <Layers className="w-3 h-3" /> {p.name}
+              </Button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Button variant="default" size="sm" onClick={onSmartRestyle} className="h-7 text-xs gap-1" title="Auto-emphasize key fields">
+              <Sparkles className="w-3 h-3" /> Smart Restyle
+            </Button>
+            <Button variant="outline" size="sm" onClick={onResetFields} className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Reset</Button>
+          </div>
+
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold pt-1">Per-Field Style</div>
+
+          {/* Per-field rows */}
+          {fieldDefs.map(fd => {
+            const f = fields[fd.key] || { visible: true, fontWeight: fd.defaultWeight, fontSize: fd.defaultSize, color: null };
+            return (
+              <div key={fd.key} className={cn('flex items-center gap-1.5 rounded-lg border border-border/30 px-2 py-1.5', f.visible === false && 'opacity-50')}>
+                {/* Visibility toggle */}
+                <button onClick={() => updateField(fd.key, { visible: !(f.visible !== false) })}
+                  className="p-1 rounded hover:bg-muted/50 flex-shrink-0" title={f.visible !== false ? 'Hide field' : 'Show field'}>
+                  {f.visible !== false ? <Eye className="w-3.5 h-3.5 text-muted-foreground" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
+                </button>
+
+                {/* Per-field style dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1 rounded hover:bg-muted/50 flex-shrink-0" title="Field text style">
+                      <Settings2 className="w-3.5 h-3.5 text-primary" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 p-2">
+                    <DropdownMenuLabel className="text-xs">{fd.label} — Style</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {/* Weight */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-muted-foreground">Weight</span>
+                      <Select value={f.fontWeight || 'normal'} onValueChange={v => updateField(fd.key, { fontWeight: v })}>
+                        <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>{FONT_WEIGHTS.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    {/* Size */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-muted-foreground">Size</span>
+                      <div className="flex items-center gap-1.5 w-28">
+                        <input type="range" min={0.6} max={1.6} step={0.1} value={f.fontSize || 1}
+                          onChange={e => updateField(fd.key, { fontSize: Number(e.target.value) })}
+                          className="flex-1 accent-primary" />
+                        <span className="text-[10px] text-muted-foreground tabular-nums w-7">{(f.fontSize || 1).toFixed(1)}×</span>
+                      </div>
+                    </div>
+                    {/* Color */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">Color</span>
+                      <div className="flex items-center gap-1.5">
+                        <input type="color" value={f.color || '#000000'} onChange={e => updateField(fd.key, { color: e.target.value })}
+                          className="w-7 h-7 rounded cursor-pointer bg-transparent border border-border/40" />
+                        {f.color && (
+                          <button onClick={() => updateField(fd.key, { color: null })} className="text-[10px] text-muted-foreground hover:text-foreground">Clear</button>
+                        )}
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Label */}
+                <span className="text-xs text-foreground flex-1 min-w-0 truncate font-medium">{fd.label}</span>
+                {/* Current weight badge */}
+                <span className="text-[9px] text-muted-foreground/70 flex-shrink-0 uppercase">{f.fontWeight === 'bold' ? 'B' : f.fontWeight === 'italic' ? 'I' : f.fontWeight === 'bolditalic' ? 'BI' : 'R'}</span>
+                <span className="text-[9px] text-muted-foreground/70 flex-shrink-0 tabular-nums">{(f.fontSize || 1).toFixed(1)}×</span>
+              </div>
+            );
+          })}
+
+          {/* Signature internal spacing */}
+          {isSignature && (
+            <>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold pt-2">Signature Spacing</div>
+              <Row label="Bank→Sig gap">
+                <Slider min={0} max={10} step={0.5} value={sigSpacing.sigGap ?? 2} onChange={v => updateSigSpacing({ sigGap: v })} suffix="mm" format={v => v.toFixed(1)} />
+              </Row>
+              <Row label="Sign space">
+                <Slider min={4} max={25} step={0.5} value={sigSpacing.sigTopGap ?? 12} onChange={v => updateSigSpacing({ sigTopGap: v })} suffix="mm" format={v => v.toFixed(1)} />
+              </Row>
+              <Row label="Line→Caption">
+                <Slider min={1} max={8} step={0.5} value={sigSpacing.lineCaptionGap ?? 3.5} onChange={v => updateSigSpacing({ lineCaptionGap: v })} suffix="mm" format={v => v.toFixed(1)} />
+              </Row>
+              <Row label="Caption→Name">
+                <Slider min={3} max={15} step={0.5} value={sigSpacing.captionNameGap ?? 7} onChange={v => updateSigSpacing({ captionNameGap: v })} suffix="mm" format={v => v.toFixed(1)} />
+              </Row>
+              <Button variant="outline" size="sm" onClick={onResetSigSpacing} className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Reset Spacing</Button>
+            </>
+          )}
         </div>
       )}
 

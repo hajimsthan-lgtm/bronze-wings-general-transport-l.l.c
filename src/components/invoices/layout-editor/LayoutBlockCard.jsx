@@ -10,6 +10,7 @@ const ICON_MAP = { Building2, User, Table2, Calculator, FileText, PenLine, Panel
 export default function LayoutBlockCard({
   block, index, layout, dragHandleProps,
   onToggle, onMove, onConfigChange, onResetConfig, onApplyStyleToAll,
+  onSmartRestyle, onApplyPreset,
   isExpanded, onExpand,
 }) {
   const meta = BLOCK_META[block.type];
@@ -84,7 +85,11 @@ export default function LayoutBlockCard({
             onUpdate={(configType, updates) => onConfigChange(block.id, configType, updates)}
             onResetStyle={() => onResetConfig(block.id, 'style')}
             onResetColumns={() => onResetConfig(block.id, 'columns')}
+            onResetFields={() => onResetConfig(block.id, 'fields')}
+            onResetSigSpacing={() => onResetConfig(block.id, 'sigSpacing')}
             onApplyStyleToAll={() => onApplyStyleToAll(block.style)}
+            onSmartRestyle={() => onSmartRestyle(block.id)}
+            onApplyPreset={(preset) => onApplyPreset(block.id, block.type, preset)}
           />
         </div>
       )}
