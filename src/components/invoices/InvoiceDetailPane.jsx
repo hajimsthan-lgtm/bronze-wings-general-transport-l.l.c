@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   ExternalLink, FileDown, Loader2, Pencil, Trash2,
-  Plus, FileText, Download, Eye, Upload, FileSignature, AlertCircle, LayoutList,
+  Plus, FileText, Download, Eye, Upload, FileSignature, AlertCircle, LayoutList, LayoutTemplate,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/common/EmptyState';

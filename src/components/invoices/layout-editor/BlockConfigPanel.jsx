@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS, smartAdjustColumns, distributeColumnsEvenly,
-  BILLTO_FIELDS, SIGNATURE_FIELDS, BILLTO_PRESETS, SIGNATURE_PRESETS,
+  BILLTO_FIELDS, SIGNATURE_FIELDS, BILLTO_PRESETS, SIGNATURE_PRESETS, SIGNATURE_SMART_STYLES,
 } from '@/lib/invoiceLayoutModel';
 import { cn } from '@/lib/utils';
 
@@ -113,6 +113,25 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
             </Button>
             <Button variant="outline" size="sm" onClick={onResetFields} className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Reset</Button>
           </div>
+
+          {/* 5 Smart Signature Styles — one-click professional layouts */}
+          {isSignature && (
+            <div className="space-y-1.5">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Smart Styles</span>
+              <div className="grid grid-cols-1 gap-1">
+                {SIGNATURE_SMART_STYLES.map(s => (
+                  <button key={s.name} onClick={() => onApplyPreset(s)} title={s.desc}
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border/40 bg-muted/20 hover:bg-primary/10 hover:border-primary/30 transition-all text-left group">
+                    <Sparkles className="w-3 h-3 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground">{s.name}</p>
+                      <p className="text-[9px] text-muted-foreground truncate">{s.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold pt-1">Per-Field Style</div>
 

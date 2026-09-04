@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
-import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText, CopyPlus } from 'lucide-react';
+import { Copy, Check, Pencil, Trash2, Eye, ChevronDown, Save, Shield, FileText, CopyPlus, FileCheck2 } from 'lucide-react';
 import TripRevenueCell from './TripRevenueCell';
 
 import { useI18n } from '@/lib/i18n';
@@ -592,6 +592,12 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         </span>
                       );
                     })()}
+                    {invoiceMap?.[trip.id] && (
+                      <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/40" title="This trip has been invoiced">
+                        <FileCheck2 className="w-2.5 h-2.5" />
+                        INVOICED
+                      </span>
+                    )}
                   </TableCell>
                 <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-center gap-1">

@@ -25,12 +25,34 @@ export default function SalaryDeductionsPicker({ deductions, selectedIds, onTogg
     );
   }
 
+  const totalRemaining = deductions.reduce((s, d) => s + (Number(d.remaining_balance) || 0), 0);
+  const totalSelected = deductions
+    .filter((d) => selectedIds.includes(d.id))
+    .reduce((s, d) => s + (Number(amounts?.[d.id]) || 0), 0);
+  const remainingAfter = totalRemaining - totalSelected;
+
   return (
     <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-2">
       <div className="flex items-center gap-2 mb-1">
         <Wallet className="w-3.5 h-3.5 text-primary" />
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Pending Deductions · FIFO</span>
         <span className="text-[10px] text-muted-foreground/60 ml-auto">edit amount to apply</span>
+      </div>
+
+      {/* Live balance summary */}
+      <div className="grid grid-cols-3 gap-2 mb-1">
+        <div className="rounded-lg bg-muted/30 border border-border/40 px-2.5 py-1.5">
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70 font-semibold">Total Pending</p>
+          <p className="text-sm font-bold text-foreground tabular-nums">{formatCurrency(totalRemaining)}</p>
+        </div>
+        <div className="rounded-lg bg-primary/10 border border-primary/25 px-2.5 py-1.5">
+          <p className="text-[9px] uppercase tracking-wider text-primary/70 font-semibold">Selected</p>
+          <p className="text-sm font-bold text-primary tabular-nums">{formatCurrency(totalSelected)}</p>
+        </div>
+        <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1.5">
+          <p className="text-[9px] uppercase tracking-wider text-emerald-400/70 font-semibold">After Deduction</p>
+          <p className="text-sm font-bold text-emerald-400 tabular-nums">{formatCurrency(remainingAfter)}</p>
+        </div>
       </div>
       {deductions.map((d) => {
         const Icon = TYPE_ICON[d.type] || Package;

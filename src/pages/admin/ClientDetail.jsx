@@ -243,7 +243,7 @@ export default function ClientDetail({ id: propId, inline = false }) {
             {dataLoading ? <LoadingSpinner /> : (
               <InvoiceGeneratorTab
                 client={client}
-                trips={displayTrips}
+                trips={trips}
                 invoices={invoices}
                 displayInvoices={displayInvoices}
                 payments={payments}
