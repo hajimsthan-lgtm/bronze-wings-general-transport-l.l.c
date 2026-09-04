@@ -3,7 +3,9 @@ import { ZoomIn, ZoomOut, Maximize, ChevronLeft, ChevronRight, Loader2, AlertTri
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// A4 at 96dpi ≈ 794 × 1123 px
+// A4 at 96dpi ≈ 794 × 1123 px. Render at 2× internal resolution for a crisp
+// preview that stays sharp across the full zoom range (downscaling is sharp).
+const RENDER_SCALE = 2;
 const A4_W = 794;
 const A4_H = 1123;
 
@@ -89,9 +91,9 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
               src={iframeSrc}
               className="rounded-lg shadow-lg bg-white"
               style={{
-                width: A4_W,
-                height: totalH,
-                transform: `scale(${zoom})`,
+                width: A4_W * RENDER_SCALE,
+                height: totalH * RENDER_SCALE,
+                transform: `scale(${zoom / RENDER_SCALE})`,
                 transformOrigin: 'top left',
                 border: '1px solid hsl(var(--border) / 0.3)',
               }}

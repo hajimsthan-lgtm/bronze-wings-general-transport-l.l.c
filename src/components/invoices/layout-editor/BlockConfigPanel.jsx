@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { Type, Table2, Move, RotateCcw, Check } from 'lucide-react';
+import { Type, Table2, Move, RotateCcw, Check, Wand2, AlignJustify, Eye, EyeOff, Settings2, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS } from '@/lib/invoiceLayoutModel';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS, smartAdjustColumns, distributeColumnsEvenly } from '@/lib/invoiceLayoutModel';
 import { cn } from '@/lib/utils';
+
+const ALIGN_ICONS = { left: AlignLeft, center: AlignCenter, right: AlignRight };
 
 export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onResetColumns, onApplyStyleToAll }) {
   const [tab, setTab] = useState('style');
@@ -76,25 +81,109 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
       {/* ── Columns tab (table only) ── */}
       {tab === 'columns' && isTable && (
         <div className="space-y-2">
-          {/* Mini header preview */}
-          <div className="flex rounded-md overflow-hidden border border-border/30 mb-2 h-6">
-            {block.columns?.filter(c => c.visible !== false).map(c => (
-              <div key={c.key} className="flex items-center justify-center text-[9px] font-semibold text-muted-foreground bg-muted/40 border-r border-border/20 last:border-r-0" style={{ width: `${c.width}%` }}>
-                {c.label}
-              </div>
-            ))}
+          {/* Quick tools */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button variant="default" size="sm" onClick={() => onUpdate('columns', smartAdjustColumns(block.columns))} className="h-7 text-xs gap-1" title="Auto-fit widths to content">
+              <Wand2 className="w-3 h-3" /> Smart Adjust
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => onUpdate('columns', distributeColumnsEvenly(block.columns))} className="h-7 text-xs gap-1" title="Distribute visible columns evenly">
+              <AlignJustify className="w-3 h-3" /> Even
+            </Button>
+            <Button variant="outline" size="sm" onClick={onResetColumns} className="h-7 text-xs gap-1" title="Reset to default widths and styles">
+              <RotateCcw className="w-3 h-3" /> Reset
+            </Button>
           </div>
-          {block.columns?.map((col, i) => (
-            <div key={col.key} className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground w-20 truncate flex-shrink-0">{col.label}</span>
-              <input type="range" min={3} max={40} step={1} value={col.width}
-                onChange={e => updateColumns(i, { width: Number(e.target.value) })}
-                disabled={col.locked}
-                className={cn('flex-1', col.locked && 'opacity-40 cursor-not-allowed')} />
-              <span className="text-xs text-muted-foreground w-8 tabular-nums">{col.width}%</span>
-            </div>
-          ))}
-          <Button variant="outline" size="sm" onClick={onResetColumns} className="h-7 text-xs gap-1 mt-2"><RotateCcw className="w-3 h-3" /> Reset widths</Button>
+
+          {/* Mini header preview — reflects widths + alignment */}
+          <div className="flex rounded-md overflow-hidden border border-border/30 h-6">
+            {block.columns?.filter(c => c.visible !== false).map(c => {
+              const AlignIcon = ALIGN_ICONS[c.align] || AlignCenter;
+              return (
+                <div key={c.key} className="flex items-center justify-center gap-0.5 text-[9px] font-semibold text-muted-foreground bg-muted/40 border-r border-border/20 last:border-r-0 px-1 overflow-hidden"
+                  style={{ width: `${c.width}%`, justifyContent: c.align === 'right' ? 'flex-end' : c.align === 'left' ? 'flex-start' : 'center' }}>
+                  <AlignIcon className="w-2.5 h-2.5 opacity-50 flex-shrink-0" />
+                  <span className="truncate">{c.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Per-column rows */}
+          {block.columns?.map((col, i) => {
+            const AlignIcon = ALIGN_ICONS[col.align] || AlignCenter;
+            return (
+              <div key={col.key} className={cn('flex items-center gap-1.5 rounded-lg border border-border/30 px-2 py-1.5', col.visible === false && 'opacity-50')}>
+                {/* Visibility toggle */}
+                <button onClick={() => updateColumns(i, { visible: !(col.visible !== false) })}
+                  className="p-1 rounded hover:bg-muted/50 flex-shrink-0" title={col.visible !== false ? 'Hide column' : 'Show column'}>
+                  {col.visible !== false ? <Eye className="w-3.5 h-3.5 text-muted-foreground" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
+                </button>
+
+                {/* Per-column style dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-1 rounded hover:bg-muted/50 flex-shrink-0" title="Column alignment & text style">
+                      <Settings2 className="w-3.5 h-3.5 text-primary" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 p-2">
+                    <DropdownMenuLabel className="text-xs">{col.label} — Style</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {/* Alignment */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-muted-foreground">Alignment</span>
+                      <div className="flex items-center gap-1">
+                        {ALIGNMENTS.map(a => {
+                          const Icon = ALIGN_ICONS[a.value];
+                          return (
+                            <button key={a.value} onClick={() => updateColumns(i, { align: a.value })}
+                              className={cn('p-1.5 rounded-md border transition-all',
+                                col.align === a.value ? 'bg-primary/20 text-primary border-primary/30' : 'text-muted-foreground hover:bg-muted/40 border-transparent')}
+                              title={a.label}>
+                              <Icon className="w-3.5 h-3.5" />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Weight */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] text-muted-foreground">Weight</span>
+                      <Select value={col.fontWeight || 'normal'} onValueChange={v => updateColumns(i, { fontWeight: v })}>
+                        <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>{FONT_WEIGHTS.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    {/* Relative size */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground">Size</span>
+                      <div className="flex items-center gap-1.5 w-28">
+                        <input type="range" min={0.6} max={1.6} step={0.1} value={col.fontSize || 1}
+                          onChange={e => updateColumns(i, { fontSize: Number(e.target.value) })}
+                          className="flex-1 accent-primary" />
+                        <span className="text-[10px] text-muted-foreground tabular-nums w-7">{(col.fontSize || 1).toFixed(1)}×</span>
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Label */}
+                <span className="text-xs text-foreground w-16 truncate flex-shrink-0 font-medium">{col.label}</span>
+
+                {/* Width slider */}
+                <input type="range" min={3} max={40} step={1} value={col.width}
+                  onChange={e => updateColumns(i, { width: Number(e.target.value) })}
+                  disabled={col.locked}
+                  className={cn('flex-1 min-w-0', col.locked && 'opacity-40 cursor-not-allowed')} />
+                <span className="text-[10px] text-muted-foreground w-7 tabular-nums flex-shrink-0">{col.width}%</span>
+              </div>
+            );
+          })}
+
+          <p className="text-[10px] text-muted-foreground/70 pt-0.5 leading-snug">
+            <Settings2 className="w-2.5 h-2.5 inline mr-1" />
+            Tap the gear icon per column to set alignment, weight & size. Text auto-clips to column width — no overlap.
+          </p>
         </div>
       )}
 

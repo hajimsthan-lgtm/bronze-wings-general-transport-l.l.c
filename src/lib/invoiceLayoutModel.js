@@ -53,8 +53,25 @@ export const BLOCK_DEFAULT_STYLES = {
   footer:    { fontFamily: 'times', fontSize: 8,  fontWeight: 'normal', color: '#666666', align: 'center', lineHeight: 1.2 },
 };
 
+// Per-column text style defaults: alignment + weight + relative size multiplier.
+// `fontSize` is a multiplier of the block's base font size (1 = same as block).
+const COL_STYLE = {
+  sl:     { align: 'center', fontWeight: 'normal', fontSize: 1 },
+  date:   { align: 'center', fontWeight: 'normal', fontSize: 1 },
+  desc:   { align: 'left',   fontWeight: 'bold',   fontSize: 1 },
+  qty:    { align: 'center', fontWeight: 'normal', fontSize: 1 },
+  price:  { align: 'right',  fontWeight: 'bold',   fontSize: 1 },
+  amount: { align: 'right',  fontWeight: 'bold',   fontSize: 1 },
+  vat:    { align: 'right',  fontWeight: 'bold',   fontSize: 1 },
+  total:  { align: 'right',  fontWeight: 'bold',   fontSize: 1 },
+};
+
+function withColStyle(cols) {
+  return cols.map(c => ({ ...c, ...(COL_STYLE[c.key] || { align: 'center', fontWeight: 'normal', fontSize: 1 }) }));
+}
+
 // Default table columns — Per Trip (percentage of table width)
-export const DEFAULT_COLUMNS = [
+export const DEFAULT_COLUMNS = withColStyle([
   { key: 'sl',     label: 'SL No',      width: 7,  visible: true, locked: true },
   { key: 'date',   label: 'Trip Date',  width: 12, visible: true },
   { key: 'desc',   label: 'Description',width: 28, visible: true },
@@ -63,10 +80,10 @@ export const DEFAULT_COLUMNS = [
   { key: 'amount', label: 'Amount',     width: 11, visible: true },
   { key: 'vat',    label: 'VAT',        width: 10, visible: true },
   { key: 'total',  label: 'Total',      width: 14, visible: true, locked: true },
-];
+]);
 
 // Default table columns — Monthly
-export const DEFAULT_COLUMNS_MONTHLY = [
+export const DEFAULT_COLUMNS_MONTHLY = withColStyle([
   { key: 'sl',     label: 'SL No',      width: 7,  visible: true, locked: true },
   { key: 'date',   label: 'Month',      width: 12, visible: true },
   { key: 'desc',   label: 'Description',width: 28, visible: true },
@@ -75,7 +92,7 @@ export const DEFAULT_COLUMNS_MONTHLY = [
   { key: 'amount', label: 'Amount',     width: 11, visible: true },
   { key: 'vat',    label: 'VAT',        width: 10, visible: true },
   { key: 'total',  label: 'Total',      width: 14, visible: true, locked: true },
-];
+]);
 
 // Get default columns for a given invoice type
 export function getDefaultColumns(invoiceType) {
@@ -267,4 +284,45 @@ export function resetBlockStyle(layout, blockId) {
 
 export function applyStyleToAll(layout, style) {
   return { ...layout, blocks: layout.blocks.map(b => ({ ...b, style: { ...b.style, ...style } })) };
+}
+
+// ═══════════════════════════════════════════════════════════
+// COLUMN WIDTH HELPERS
+// ═══════════════════════════════════════════════════════════
+
+// Smart adjust: give wide columns (description) more room and narrow columns
+// (sl, qty) just enough, based on content-type heuristics. Keeps total = 100.
+export function smartAdjustColumns(columns) {
+  const visible = columns.filter(c => c.visible !== false);
+  if (visible.length === 0) return columns;
+  // Heuristic ideal widths by column key
+  const ideal = {
+    sl: 6, date: 13, desc: 30, qty: 7, price: 12, amount: 12, vat: 10, total: 14,
+  };
+  let total = 0;
+  const proposed = visible.map(c => {
+    const w = ideal[c.key] || 10;
+    total += w;
+    return { ...c, width: w };
+  });
+  // Normalize to 100
+  return columns.map(c => {
+    if (c.visible === false) return c;
+    const p = proposed.find(x => x.key === c.key);
+    return p ? { ...p, width: Math.round((p.width / total) * 100) } : c;
+  });
+}
+
+// Distribute visible column widths evenly
+export function distributeColumnsEvenly(columns) {
+  const visible = columns.filter(c => c.visible !== false);
+  if (visible.length === 0) return columns;
+  const each = Math.floor(100 / visible.length);
+  let remainder = 100 - each * visible.length;
+  return columns.map(c => {
+    if (c.visible === false) return c;
+    const w = each + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder--;
+    return { ...c, width: w };
+  });
 }

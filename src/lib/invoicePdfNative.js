@@ -485,6 +485,28 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
 // ═══════════════════════════════════════════════════════════
 // DRAW: TABLE HEADER ROW
 // ═══════════════════════════════════════════════════════════
+// Clip a single-line value to a column's inner width so it can never overlap
+// the next column. Shrinks font size down to minSize; if still too wide,
+// truncates with an ellipsis. Returns the font size actually used.
+function clipCellText(pdf, value, innerW, minSize) {
+  let text = String(value ?? '');
+  let size = pdf.getFontSize();
+  // Shrink font until it fits (down to minSize)
+  while (size > minSize && pdf.getTextWidth(text) > innerW) {
+    size -= 0.5;
+    pdf.setFontSize(size);
+  }
+  // If still too wide at min size, truncate with ellipsis
+  if (pdf.getTextWidth(text) > innerW) {
+    const ell = '…';
+    while (text.length > 1 && pdf.getTextWidth(text + ell) > innerW) {
+      text = text.slice(0, -1);
+    }
+    text += ell;
+  }
+  return { text, size };
+}
+
 function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
   const h = 8;
   const isTrip = invoiceType === 'trip';
@@ -497,14 +519,18 @@ function drawTableHeader(pdf, cols, y, invoiceType, invStyle) {
   pdf.setFontSize(7.5);
 
   for (const col of cols) {
+    const align = col.colAlign || col.align || 'center';
     const lines = col.label.split('\n');
     const lineH = 3;
     const startY = y + (h - lines.length * lineH) / 2 + lineH;
-    const textX = col.align === 'right' ? col.right - 2
-                : col.align === 'center' ? col.center : col.x + 2;
-    const align = col.align === 'right' ? 'right' : col.align === 'center' ? 'center' : 'left';
+    const textX = align === 'right' ? col.right - 2
+                : align === 'center' ? col.center : col.x + 2;
+    const pdfAlign = align === 'right' ? 'right' : align === 'center' ? 'center' : 'left';
+    // Clip each header line to column inner width (no overlap into neighbor)
+    const innerW = col.w - 4;
     for (let i = 0; i < lines.length; i++) {
-      pdf.text(lines[i], textX, startY + i * lineH, { align });
+      const { text } = clipCellText(pdf, lines[i], innerW, 6);
+      pdf.text(text, textX, startY + i * lineH, { align: pdfAlign });
     }
   }
 
@@ -561,35 +587,46 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   pdf.setFontSize(fSize);
   tc(pdf, style.rowText);
 
+  // Helper: draw a single-line cell with per-column align/weight, clipped to width
+  const drawCell = (col, value, defaultAlign, defaultWeight, defaultFont) => {
+    const align = col.colAlign || defaultAlign || 'center';
+    const weight = col.colWeight || defaultWeight || 'normal';
+    const font = defaultFont || 'times';
+    const sizeMul = col.colSizeMul || 1;
+    pdf.setFont(font, weight);
+    pdf.setFontSize(fSize * sizeMul);
+    const innerW = col.w - 4;
+    const { text } = clipCellText(pdf, value, innerW, 6);
+    const textX = align === 'right' ? col.right - 2
+                : align === 'center' ? col.center : col.x + 2;
+    const pdfAlign = align === 'right' ? 'right' : align === 'center' ? 'center' : 'left';
+    pdf.text(text, textX, vCenter, { align: pdfAlign });
+  };
+
   // # column
-  pdf.setFont('times', 'normal');
-  pdf.text(String(idx + 1), cols[0].center, vCenter, { align: 'center' });
+  drawCell(cols[0], String(idx + 1), 'center', 'normal', 'times');
 
   let ci = 1;
 
   // TRIP DATE column (trip only)
   if (invoiceType === 'trip') {
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
-    pdf.text(fmtDate(item.date), cols[ci].center, vCenter, { align: 'center' });
+    drawCell(cols[ci], fmtDate(item.date), 'center', 'normal', 'times');
     ci++;
   }
 
   // DATE column (monthly + standard)
   if (invoiceType === 'monthly' || invoiceType === 'standard') {
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(fSize);
     const dateStr = invoiceType === 'monthly'
       ? getMonthYear(item.date || invoice.issue_date)
       : fmtDate(item.date || invoice.issue_date);
-    pdf.text(dateStr, cols[ci].center, vCenter, { align: 'center' });
+    drawCell(cols[ci], dateStr, 'center', 'bold', 'times');
     ci++;
   }
 
-  // DESCRIPTION column (configurable alignment)
-  pdf.setFont('times', 'bold');
-  pdf.setFontSize(fSize);
-  const descAlign = style.descAlign;
+  // DESCRIPTION column (configurable alignment, wraps within column)
+  const descAlign = descCol.colAlign || style.descAlign;
+  pdf.setFont('times', descCol.colWeight || 'bold');
+  pdf.setFontSize(fSize * (descCol.colSizeMul || 1));
   if (descImgData) {
     const imgW = descColW;
     const imgH = descLineCount * lineH;
@@ -610,31 +647,24 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   }
   ci++;
 
-  // QTY column (standard only — center-aligned text)
+  // QTY column (standard only)
   if (invoiceType === 'standard') {
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(9);
-    pdf.text(String(qty), cols[ci].center, vCenter, { align: 'center' });
+    drawCell(cols[ci], String(qty), 'center', 'normal', 'times');
     ci++;
   }
 
-  // Numeric columns — courier monospace (configurable alignment)
-  pdf.setFont('courier', 'bold');
-  pdf.setFontSize(fSize);
-  const numAlign = style.numAlign;
-  const numPdfAlign = numAlign === 'left' ? 'left' : numAlign === 'center' ? 'center' : 'right';
-  const numTextX = (col) => numAlign === 'left' ? col.x + 2 : numAlign === 'center' ? col.center : col.right - 2;
+  // Numeric columns — courier monospace, per-column align/weight, clipped
   if (invoiceType === 'standard') {
     const stdNums = [unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < stdNums.length; i++) {
-      pdf.text(fmtMoney(stdNums[i]), numTextX(cols[ci + i]), vCenter, { align: numPdfAlign });
+      drawCell(cols[ci + i], fmtMoney(stdNums[i]), style.numAlign, 'bold', 'courier');
     }
   } else {
     const nums = [qty, unitPrice, gross, lineVat, lineTotal];
     for (let i = 0; i < nums.length; i++) {
       const col = cols[ci + i];
       const val = i === 0 ? String(nums[i]) : fmtMoney(nums[i]);
-      pdf.text(val, numTextX(col), vCenter, { align: numPdfAlign });
+      drawCell(col, val, style.numAlign, 'bold', 'courier');
     }
   }
 

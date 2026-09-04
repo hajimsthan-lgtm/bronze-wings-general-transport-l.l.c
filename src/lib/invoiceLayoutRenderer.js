@@ -34,8 +34,15 @@ function applyCustomColumns(cols, block) {
   if (totalPct <= 0) return cols;
   let x = CONTENT_X;
   return cols.map((col, i) => {
-    const w = (custom[i].width / totalPct) * CONTENT_W;
-    const newCol = { ...col, x, w };
+    const c = custom[i];
+    const w = (c.width / totalPct) * CONTENT_W;
+    const newCol = {
+      ...col, x, w, right: x + w, center: x + w / 2,
+      // Per-column style overrides (align + weight + relative size)
+      colAlign: c.align || col.align,
+      colWeight: c.fontWeight || 'normal',
+      colSizeMul: c.fontSize || 1,
+    };
     x += w;
     return newCol;
   });
