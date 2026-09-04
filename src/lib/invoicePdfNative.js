@@ -733,7 +733,7 @@ function drawTableTotal(pdf, cols, y, totals, invoiceType, invStyle) {
 // ═══════════════════════════════════════════════════════════
 // DRAW: FULL TABLE (with pagination)
 // ═══════════════════════════════════════════════════════════
-function drawTable(pdf, invoice, s, startY, invoiceType) {
+function drawTable(pdf, invoice, clientName, s, startY, invoiceType) {
   const cols = colPositions(
     invoiceType === 'trip' ? COLS_TRIP
     : invoiceType === 'standard' ? COLS_STANDARD
@@ -781,14 +781,17 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
           drawPageBorder(pdf);
           y = drawLetterhead(pdf, s, BORDER_POS + 2);
           y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
+          y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, _refNumber, _invoiceDate);
           y = drawTableHeader(pdf, cols, y, invoiceType);
         }
       } else if (y + estH > contentBottom) {
         // Normal pagination: row doesn't fit above the reserved signature zone — new page.
+        // Redraw Header + Bill To + table head on every continuation page.
         pdf.addPage();
         drawPageBorder(pdf);
         y = drawLetterhead(pdf, s, BORDER_POS + 2);
         y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
+        y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, _refNumber, _invoiceDate);
         y = drawTableHeader(pdf, cols, y, invoiceType);
       }
       y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice);
@@ -1133,7 +1136,7 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
   y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate);
 
   // ══ TABLE (with pagination) ══
-  const { y: tableY, totals } = drawTable(pdf, invoice, s, y, invoiceType);
+  const { y: tableY, totals } = drawTable(pdf, invoice, clientName, s, y, invoiceType);
   y = tableY;
 
   // ══ BOTTOM BLOCK: totals + terms + bank + signatures (last page only) ══
