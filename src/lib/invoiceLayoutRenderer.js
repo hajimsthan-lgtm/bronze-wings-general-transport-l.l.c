@@ -146,7 +146,10 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
         const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType, block.fields, block.style);
         y += bankH + (block.sigSpacing?.sigGap ?? 2);
         drawTripSignaturesWithCompany(pdf, invoice, clientName, y, block.fields, block.style, block.sigSpacing);
-        newY = y + 25;
+        // Dynamic height: sigTopGap (top→line) + captionNameGap (line→name) + name lines (up to 3 × 3mm) + padding
+        const sigTopGap = block.sigSpacing?.sigTopGap ?? 12;
+        const captionNameGap = block.sigSpacing?.captionNameGap ?? 7;
+        newY = y + sigTopGap + captionNameGap + 10;
         break;
       }
       default: break;

@@ -149,6 +149,80 @@ export const SIGNATURE_PRESETS = [
   },
 ];
 
+// 5 Smart Signature Styles — one-click professional layouts
+export const SIGNATURE_SMART_STYLES = [
+  {
+    name: 'Executive',
+    desc: 'Bold labels, accent navy names',
+    sigSpacing: { sigGap: 3, sigTopGap: 14, lineCaptionGap: 4, captionNameGap: 8 },
+    fields: {
+      bankLabel: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e3a5f' },
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 1.15, color: '#1e3a5f' },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 1.15, color: '#1e3a5f' },
+      authCompany: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e3a5f' },
+      recvClient: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#1e3a5f' },
+      authCaption: { visible: true, fontWeight: 'italic', fontSize: 0.9, color: null },
+      recvCaption: { visible: true, fontWeight: 'italic', fontSize: 0.9, color: null },
+    },
+  },
+  {
+    name: 'Minimal',
+    desc: 'Clean, light, lots of whitespace',
+    sigSpacing: { sigGap: 2, sigTopGap: 16, lineCaptionGap: 3, captionNameGap: 6 },
+    fields: {
+      bankLabel: { visible: true, fontWeight: 'normal', fontSize: 0.95, color: '#666666' },
+      authLabel: { visible: true, fontWeight: 'normal', fontSize: 1, color: '#333333' },
+      recvLabel: { visible: true, fontWeight: 'normal', fontSize: 1, color: '#333333' },
+      authCompany: { visible: true, fontWeight: 'normal', fontSize: 1, color: '#333333' },
+      recvClient: { visible: true, fontWeight: 'normal', fontSize: 1, color: '#333333' },
+      authCaption: { visible: true, fontWeight: 'normal', fontSize: 0.85, color: '#999999' },
+      recvCaption: { visible: true, fontWeight: 'normal', fontSize: 0.85, color: '#999999' },
+    },
+  },
+  {
+    name: 'Corporate',
+    desc: 'Professional bold hierarchy',
+    sigSpacing: { sigGap: 2, sigTopGap: 12, lineCaptionGap: 3.5, captionNameGap: 7 },
+    fields: {
+      bankLabel: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: '#000000' },
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#000000' },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 1.1, color: '#000000' },
+      authCompany: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: '#000000' },
+      recvClient: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: '#000000' },
+      authCaption: { visible: true, fontWeight: 'normal', fontSize: 0.9, color: '#555555' },
+      recvCaption: { visible: true, fontWeight: 'normal', fontSize: 0.9, color: '#555555' },
+    },
+  },
+  {
+    name: 'Elegant',
+    desc: 'Italic captions, refined spacing',
+    sigSpacing: { sigGap: 3, sigTopGap: 15, lineCaptionGap: 4, captionNameGap: 9 },
+    fields: {
+      bankLabel: { visible: true, fontWeight: 'bold', fontSize: 1, color: '#4a4a4a' },
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: '#4a4a4a' },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 1.05, color: '#4a4a4a' },
+      authCompany: { visible: true, fontWeight: 'bold', fontSize: 1, color: '#2a2a2a' },
+      recvClient: { visible: true, fontWeight: 'bold', fontSize: 1, color: '#2a2a2a' },
+      authCaption: { visible: true, fontWeight: 'italic', fontSize: 0.9, color: '#888888' },
+      recvCaption: { visible: true, fontWeight: 'italic', fontSize: 0.9, color: '#888888' },
+    },
+  },
+  {
+    name: 'Bold',
+    desc: 'Heavy emphasis, tight spacing',
+    sigSpacing: { sigGap: 1, sigTopGap: 10, lineCaptionGap: 3, captionNameGap: 6 },
+    fields: {
+      bankLabel: { visible: true, fontWeight: 'bold', fontSize: 1.15, color: '#000000' },
+      authLabel: { visible: true, fontWeight: 'bold', fontSize: 1.2, color: '#000000' },
+      recvLabel: { visible: true, fontWeight: 'bold', fontSize: 1.2, color: '#000000' },
+      authCompany: { visible: true, fontWeight: 'bold', fontSize: 1.15, color: '#000000' },
+      recvClient: { visible: true, fontWeight: 'bold', fontSize: 1.15, color: '#000000' },
+      authCaption: { visible: true, fontWeight: 'bold', fontSize: 0.9, color: '#444444' },
+      recvCaption: { visible: true, fontWeight: 'bold', fontSize: 0.9, color: '#444444' },
+    },
+  },
+];
+
 // Default text style per block type
 export const BLOCK_DEFAULT_STYLES = {
   header:    { fontFamily: 'times', fontSize: 10, fontWeight: 'bold',   color: '#000000', align: 'left',   lineHeight: 1.2 },
