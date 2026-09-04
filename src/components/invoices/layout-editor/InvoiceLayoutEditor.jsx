@@ -203,7 +203,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-[1700px] w-[96vw] max-h-[95vh] p-0 gap-0 overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[1700px] w-[96vw] max-h-[95vh] p-0 gap-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-6 py-4 border-b border-border/50 flex-row items-center justify-between space-y-0">
             <DialogTitle className="flex items-center gap-2 text-lg">
               <Eye className="w-5 h-5 text-primary" />

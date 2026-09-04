@@ -10,7 +10,7 @@ const A4_H = 1123;
 export default function LayoutPreview({ previewUrl, previewLoading, pageCount, validationErrors }) {
   const [zoom, setZoom] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
-  const [fitToScreen, setFitToScreen] = useState(false);
+  const [fitToScreen, setFitToScreen] = useState(true);
   const containerRef = useRef(null);
 
   useEffect(() => { setCurrentPage(1); }, [previewUrl]);
@@ -22,6 +22,19 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
     setZoom(Math.max(0.3, Math.min(1.5, cw / A4_W)));
   }, [fitToScreen, previewUrl]);
 
+  // Auto-fit on mount and when container resizes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(() => {
+      if (fitToScreen && containerRef.current) {
+        const cw = containerRef.current.clientWidth - 32;
+        setZoom(Math.max(0.3, Math.min(1.5, cw / A4_W)));
+      }
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [fitToScreen]);
+
   const handleZoomIn  = () => { setFitToScreen(false); setZoom(z => Math.min(2, +(z + 0.1).toFixed(2))); };
   const handleZoomOut = () => { setFitToScreen(false); setZoom(z => Math.max(0.3, +(z - 0.1).toFixed(2))); };
   const handleReset   = () => { setFitToScreen(false); setZoom(0.75); };
@@ -31,7 +44,7 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
   const totalH = A4_H * (pageCount || 1);
 
   return (
-    <div className="flex-1 min-w-0 flex flex-col bg-muted/10">
+    <div className="flex-1 min-h-0 flex flex-col bg-muted/10 w-full lg:w-auto">
       {/* Toolbar */}
       <div className="px-4 py-2 border-b border-border/50 flex items-center justify-between gap-2 flex-wrap">
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Live Preview</span>
@@ -59,7 +72,7 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
       </div>
 
       {/* Preview area */}
-      <div ref={containerRef} className="flex-1 overflow-auto p-4 flex items-start justify-center">
+      <div ref={containerRef} className="flex-1 min-h-0 overflow-auto p-4 flex items-start justify-center">
         {validationErrors.length > 0 ? (
           <div className="text-center text-muted-foreground text-sm max-w-xs m-auto">
             <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-400/60" />
