@@ -1,0 +1,325 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Save, RotateCcw, Plus, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import LayoutBlockCard from './LayoutBlockCard';
+import { DEFAULT_LAYOUT, validateLayout, serializeLayout, deserializeLayout, BLOCK_META } from '@/lib/invoiceLayoutModel';
+import { generateLayoutPreviewUrl } from '@/lib/invoiceLayoutRenderer';
+
+const SAMPLE_INVOICE = {
+  invoice_number: '2026-PREVIEW',
+  client_name: 'Emirates Filaments Factory - Sole Proprietorship L.L.C',
+  contact_person: 'John Doe',
+  client_address: 'Dubai Industrial City, Dubai, UAE',
+  client_trn: '100-123-456-789',
+  issue_date: '2026-09-04',
+  due_date: '2026-10-04',
+  lpo_ref: 'LPO-2026-001',
+  vat_rate: 5,
+  line_items: [
+    { description: 'Dubai To Umm Al Quwain', date: '2026-09-01', quantity: 1, unit_price: 500, amount: 500, driver_name: 'Waheed', vehicle_no: '1/89125', delivery_note_no: '154215' },
+    { description: 'Sharjah To Abu Dhabi', date: '2026-09-02', quantity: 1, unit_price: 600, amount: 600, driver_name: 'Ali', vehicle_no: '2/89126', delivery_note_no: '154216' },
+    { description: 'Al Ain To Ras Al Khaimah', date: '2026-09-03', quantity: 1, unit_price: 750, amount: 750, driver_name: 'Saeed', vehicle_no: '3/89127', delivery_note_no: '154217' },
+  ],
+};
+
+export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName, settings, invoiceType = 'monthly' }) {
+  const { toast } = useToast();
+  const [layout, setLayout] = useState(DEFAULT_LAYOUT);
+  const [templates, setTemplates] = useState([]);
+  const [layoutName, setLayoutName] = useState('');
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const previewTimer = useRef(null);
+
+  const previewInvoice = invoice || SAMPLE_INVOICE;
+  const previewClient = clientName || previewInvoice.client_name;
+
+  // Load saved layout templates
+  const loadTemplates = useCallback(async () => {
+    try {
+      const list = await base44.entities.CustomTemplate.filter({ document_type: 'invoice_layout' }, '-updated_date', 50).catch(() => []);
+      setTemplates(list || []);
+    } catch { setTemplates([]); }
+  }, []);
+
+  useEffect(() => {
+    if (open) loadTemplates();
+  }, [open, loadTemplates]);
+
+  // Validate layout
+  const validation = validateLayout(layout);
+
+  // Debounced live preview
+  useEffect(() => {
+    if (!open || validation.errors.length > 0) {
+      setPreviewUrl('');
+      return;
+    }
+    if (previewTimer.current) clearTimeout(previewTimer.current);
+    previewTimer.current = setTimeout(async () => {
+      setPreviewLoading(true);
+      try {
+        const url = await generateLayoutPreviewUrl(previewInvoice, previewClient, settings || {}, layout, invoiceType);
+        setPreviewUrl(url);
+      } catch (e) {
+        setPreviewUrl('');
+      } finally {
+        setPreviewLoading(false);
+      }
+    }, 800);
+    return () => { if (previewTimer.current) clearTimeout(previewTimer.current); };
+  }, [layout, open, validation.errors.length, settings, invoiceType]);
+
+  // Drag-reorder handler
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    const newBlocks = Array.from(layout.blocks);
+    const [moved] = newBlocks.splice(result.source.index, 1);
+    newBlocks.splice(result.destination.index, 0, moved);
+    setLayout({ ...layout, blocks: newBlocks });
+  };
+
+  // Toggle block enabled/disabled
+  const handleToggle = (blockId, enabled) => {
+    setLayout({
+      ...layout,
+      blocks: layout.blocks.map(b => b.id === blockId ? { ...b, enabled } : b),
+    });
+  };
+
+  // Reset to default
+  const handleReset = () => {
+    setLayout({ ...DEFAULT_LAYOUT, blocks: DEFAULT_LAYOUT.blocks.map(b => ({ ...b })) });
+    setLayoutName('');
+  };
+
+  // Load a saved template
+  const handleLoadTemplate = (tpl) => {
+    setLayout(deserializeLayout(tpl.template_config));
+    setLayoutName(tpl.name);
+  };
+
+  // Save current layout as a template
+  const handleSave = async () => {
+    if (!layoutName.trim()) {
+      toast({ variant: 'destructive', title: 'Name required', description: 'Enter a name for this layout template' });
+      return;
+    }
+    if (validation.errors.length > 0) {
+      toast({ variant: 'destructive', title: 'Cannot save', description: 'Fix validation errors first' });
+      return;
+    }
+    setSaving(true);
+    try {
+      await base44.entities.CustomTemplate.create({
+        name: layoutName.trim(),
+        document_type: 'invoice_layout',
+        template_config: serializeLayout(layout),
+      });
+      toast({ title: 'Layout saved', description: `"${layoutName}" is now available for invoice generation` });
+      setLayoutName('');
+      loadTemplates();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Save failed', description: e.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete a template
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await base44.entities.CustomTemplate.delete(deleteTarget.id);
+      toast({ title: 'Template deleted' });
+      setDeleteTarget(null);
+      loadTemplates();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Delete failed', description: e.message });
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
+          <DialogHeader className="px-6 py-4 border-b border-border/50 flex-row items-center justify-between space-y-0">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <Eye className="w-5 h-5 text-primary" />
+              Invoice Layout Editor
+            </DialogTitle>
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+              <X className="w-4 h-4" />
+            </Button>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-hidden flex flex-col lg:flex-row min-h-0">
+            {/* Left: Block list + templates */}
+            <div className="lg:w-[380px] flex-shrink-0 border-r border-border/50 overflow-y-auto p-4 space-y-4">
+              {/* Validation status */}
+              {validation.errors.length > 0 ? (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    {validation.errors.map((err, i) => <div key={i}>{err}</div>)}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-xs text-green-400">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                  Layout is valid — all constraints satisfied
+                </div>
+              )}
+
+              {/* Block list */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Invoice Blocks</div>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="blocks">
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                        {layout.blocks.map((block, index) => {
+                          const meta = BLOCK_META[block.type];
+                          return (
+                            <Draggable
+                              key={block.id}
+                              draggableId={block.id}
+                              index={index}
+                              isDragDisabled={!meta.canReorder}
+                            >
+                              {(prov, snapshot) => (
+                                <div
+                                  ref={prov.innerRef}
+                                  {...prov.draggableProps}
+                                  {...prov.dragHandleProps}
+                                  style={{
+                                    ...prov.draggableProps.style,
+                                    opacity: snapshot.isDragging ? 0.8 : 1,
+                                  }}
+                                >
+                                  <LayoutBlockCard block={block} index={index} onToggle={handleToggle} />
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
+
+              {/* Saved templates */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center justify-between">
+                  <span>Saved Layouts</span>
+                  <Button variant="ghost" size="sm" onClick={handleReset} className="h-6 text-[10px] gap-1">
+                    <RotateCcw className="w-3 h-3" /> Reset
+                  </Button>
+                </div>
+                {templates.length === 0 ? (
+                  <div className="text-xs text-muted-foreground/60 p-3 text-center border border-dashed border-border/40 rounded-xl">
+                    No saved layouts yet. Arrange blocks above and save.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {templates.map((tpl) => (
+                      <div
+                        key={tpl.id}
+                        className="flex items-center gap-2 p-2.5 rounded-xl glass-card-hover border border-border/40 hover:border-primary/40 transition-all group cursor-pointer"
+                        onClick={() => handleLoadTemplate(tpl)}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-foreground truncate">{tpl.name}</div>
+                          <div className="text-[10px] text-muted-foreground">{tpl.template_config?.blocks?.filter(b => b.enabled).length || 0} blocks</div>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeleteTarget(tpl); }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-red-500/15 text-red-400"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Live PDF preview */}
+            <div className="flex-1 min-w-0 bg-muted/10 flex flex-col">
+              <div className="px-4 py-2.5 border-b border-border/50 flex items-center justify-between">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Live Preview</span>
+                {previewLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
+              </div>
+              <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+                {validation.errors.length > 0 ? (
+                  <div className="text-center text-muted-foreground text-sm max-w-xs">
+                    <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-red-400/60" />
+                    Fix layout errors to see the preview
+                  </div>
+                ) : previewUrl ? (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full min-h-[500px] rounded-xl border border-border/30 shadow-lg"
+                    title="Invoice Layout Preview"
+                  />
+                ) : (
+                  <div className="text-center text-muted-foreground text-sm">
+                    <Loader2 className="w-8 h-8 mx-auto mb-3 animate-spin text-primary/60" />
+                    Generating preview...
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer: save controls */}
+          <DialogFooter className="px-6 py-4 border-t border-border/50 gap-2">
+            <Input
+              placeholder="Layout template name..."
+              value={layoutName}
+              onChange={(e) => setLayoutName(e.target.value)}
+              className="flex-1 max-w-xs"
+            />
+            <Button
+              onClick={handleSave}
+              disabled={saving || validation.errors.length > 0 || !layoutName.trim()}
+              className="gap-2"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Save Layout
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete layout "{deleteTarget?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. The layout template will be permanently removed.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

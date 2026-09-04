@@ -919,15 +919,28 @@ async function renderToPDF(html, invoice) {
 // signature zone. No html2canvas full-page rasterization/slicing.
 // ═══════════════════════════════════════════════════════════
 import { renderInvoicePDF as _renderNativePDF } from './invoicePdfNative';
+import { renderLayoutPDF as _renderLayoutPDF } from './invoiceLayoutRenderer';
 
-export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await _renderNativePDF(invoice, clientName, settings, 'standard', seqNo, draft);
+export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false, layout = null) {
+  if (layout) {
+    await _renderLayoutPDF(invoice, clientName, settings, layout, 'standard', seqNo, draft);
+  } else {
+    await _renderNativePDF(invoice, clientName, settings, 'standard', seqNo, draft);
+  }
 }
 
-export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await _renderNativePDF(invoice, clientName, settings, 'monthly', seqNo, draft);
+export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false, layout = null) {
+  if (layout) {
+    await _renderLayoutPDF(invoice, clientName, settings, layout, 'monthly', seqNo, draft);
+  } else {
+    await _renderNativePDF(invoice, clientName, settings, 'monthly', seqNo, draft);
+  }
 }
 
-export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await _renderNativePDF(invoice, clientName, settings, 'trip', seqNo, draft);
+export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false, layout = null) {
+  if (layout) {
+    await _renderLayoutPDF(invoice, clientName, settings, layout, 'trip', seqNo, draft);
+  } else {
+    await _renderNativePDF(invoice, clientName, settings, 'trip', seqNo, draft);
+  }
 }

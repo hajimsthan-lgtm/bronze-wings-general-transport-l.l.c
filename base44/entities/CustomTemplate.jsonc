@@ -13,7 +13,8 @@
       "enum": [
         "invoice",
         "quotation",
-        "agreement"
+        "agreement",
+        "invoice_layout"
       ],
       "default": "invoice"
     },

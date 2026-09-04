@@ -1195,3 +1195,19 @@ export async function renderInvoicePDF(invoice, clientName, settings, invoiceTyp
   const pdf = await buildInvoicePdf(invoice, clientName, settings, invoiceType, seqNo, draft);
   pdf.save(`invoice-${invoice.invoice_number || invoice.id}.pdf`);
 }
+
+// ═══════════════════════════════════════════════════════════
+// EXPORTS — shared drawing functions for the layout renderer
+// ═══════════════════════════════════════════════════════════
+export {
+  drawPageBorder, drawLetterhead, drawTaxBanner, drawBillingSection,
+  drawTableHeader, drawTableRow, drawTableTotal,
+  drawTermsInline, drawBankDetailsBlock, drawTripSignaturesWithCompany,
+  drawFooterBanners, colPositions,
+  COLS_TRIP, COLS_STANDARD, COLS_MONTHLY,
+  fmtDate, normalizeRoute, buildIndicatorLine,
+  PAGE_W, PAGE_H, CONTENT_X, CONTENT_W, CONTENT_RIGHT,
+  BORDER_POS, FOOTER_RESERVED_TOP,
+  tc, fc, dc, MAROON, BLACK, GRAY, WHITE,
+  getInvStyle, fetchLogoDataUrl,
+};

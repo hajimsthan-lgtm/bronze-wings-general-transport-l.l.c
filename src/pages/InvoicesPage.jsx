@@ -42,6 +42,8 @@ import SkipSignatureDialog from '@/components/invoices/SkipSignatureDialog';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
 import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
 import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
+import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
+import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -80,6 +82,9 @@ export default function InvoicesPage() {
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
+  const [layoutSelectorOpen, setLayoutSelectorOpen] = useState(false);
+  const [layoutSelectorTarget, setLayoutSelectorTarget] = useState(null);
   const [settings, setSettings] = useState({});
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
@@ -93,11 +98,14 @@ export default function InvoicesPage() {
   useEffect(() => {
     const onNew = () => handleNew();
     const onTemplates = () => setTemplateManagerOpen(true);
+    const onLayoutEditor = () => setLayoutEditorOpen(true);
     window.addEventListener('invoices:new', onNew);
     window.addEventListener('invoices:templates', onTemplates);
+    window.addEventListener('invoices:layoutEditor', onLayoutEditor);
     return () => {
       window.removeEventListener('invoices:new', onNew);
       window.removeEventListener('invoices:templates', onTemplates);
+      window.removeEventListener('invoices:layoutEditor', onLayoutEditor);
     };
   }, []);
 
@@ -471,18 +479,29 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleDownload = async (inv) => {
+  const handleDownload = async (inv, layout = null) => {
     setDownloadingId(inv.id);
     try {
       const settings = await getCompanySettings();
       const isMonthly = /Rental|Contract/i.test(inv.line_items?.[0]?.description || '');
       const downloader = isMonthly ? downloadMonthlyInvoicePDF : downloadInvoicePDF;
-      await downloader(inv, inv.client_name, settings);
+      await downloader(inv, inv.client_name, settings, undefined, false, layout);
     } catch (e) {
       toast({ variant: 'destructive', title: 'PDF error', description: e.message });
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  const handleDownloadWithLayoutSelect = (inv) => {
+    setLayoutSelectorTarget(inv);
+    setLayoutSelectorOpen(true);
+  };
+
+  const handleLayoutSelect = (layout) => {
+    setLayoutSelectorOpen(false);
+    if (layoutSelectorTarget) handleDownload(layoutSelectorTarget, layout);
+    setLayoutSelectorTarget(null);
   };
 
   // Base filter (date + client + search + status)
@@ -532,9 +551,17 @@ export default function InvoicesPage() {
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
-      <div className="mb-4">
-        
-        
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Invoices</h1>
+          <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setLayoutEditorOpen(true)} className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+            <LayoutTemplate className="w-4 h-4" />
+            Layout Editor
+          </Button>
+        </div>
       </div>
 
       {/* Stat cards */}
@@ -612,7 +639,7 @@ export default function InvoicesPage() {
             onClientClick={handleClientClick}
             onEdit={handleEdit}
             onDelete={setDeleteTarget}
-            onDownload={handleDownload}
+            onDownload={handleDownloadWithLayoutSelect}
             onAttachSigned={handleAttachSigned}
             onAction={handleAction}
             downloadingId={downloadingId}
@@ -705,6 +732,19 @@ export default function InvoicesPage() {
       <CustomTemplateManager open={templateManagerOpen} onClose={() => setTemplateManagerOpen(false)} documentType="invoice" />
 
       <TemplateSelectorModal open={templateSelectorOpen} onClose={() => setTemplateSelectorOpen(false)} onSelect={handleTemplateSelect} documentType="invoice" />
+      <InvoiceLayoutEditor
+        open={layoutEditorOpen}
+        onClose={() => setLayoutEditorOpen(false)}
+        invoice={selectedId ? allInvoices.find(i => i.id === selectedId) : null}
+        clientName={selectedId ? allInvoices.find(i => i.id === selectedId)?.client_name : 'Emirates Filaments Factory - Sole Proprietorship L.L.C'}
+        settings={settings}
+        invoiceType="monthly"
+      />
+      <LayoutSelectorModal
+        open={layoutSelectorOpen}
+        onClose={() => setLayoutSelectorOpen(false)}
+        onSelect={handleLayoutSelect}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => {if (!open) setDeleteTarget(null);}}>
         <AlertDialogContent>
