@@ -37,6 +37,13 @@ const BORDER_POS = 4;
 const FOOTER_TOP = 279;
 const FOOTER_BOTTOM = PAGE_H - BORDER_POS;
 
+// Reserved signature zone — table rows NEVER go below SIGNATURE_ZONE_TOP on any page.
+// The bottom block (totals + terms + bank + signatures) is drawn in this zone on the
+// last page only. On non-last pages the zone stays empty — rows never spill into it.
+const SIGNATURE_ZONE_TOP = 225;   // rows stop here on every page
+const FOOTER_RESERVED_TOP = 278;  // nothing except footer banner / page number below this
+const BOTTOM_BLOCK_HEIGHT = 57;  // estimated totals + terms + bank + signatures height
+
 // ═══════════════════════════════════════════════════════════
 // COLORS (RGB)
 // ═══════════════════════════════════════════════════════════
@@ -738,9 +745,9 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   const _year = new Date().getFullYear();
   const _refNumber = invoice.invoice_number || `${_year}-0001`;
   const _invoiceDate = fmtDate(invoice.issue_date);
-  // Leave room for the footer banner + page number (page number at y=282, banner at y=284)
-  // Stop table at 255 so up to 18 rows fit on one page without overlapping the page number
-  const contentBottom = 255;
+  // Table rows stop at SIGNATURE_ZONE_TOP on every page — the reserved bottom zone
+  // is never usable by rows. The bottom block is drawn in that zone on the last page only.
+  const contentBottom = SIGNATURE_ZONE_TOP;
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 
@@ -765,7 +772,19 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
       const descLines = pdf.splitTextToSize(_descText, descCol.w - 4);
       const estH = Math.max(6.5, descLines.length * 2.8 + 3);
 
-      if (y + estH > contentBottom) {
+      const isLast = idx === items.length - 1;
+      if (isLast) {
+        // Safety check: last row + bottom block must fit above the footer reserved area.
+        // If not, push this row to a new page so totals/signatures never get squeezed.
+        if (y + estH + BOTTOM_BLOCK_HEIGHT > FOOTER_RESERVED_TOP) {
+          pdf.addPage();
+          drawPageBorder(pdf);
+          y = drawLetterhead(pdf, s, BORDER_POS + 2);
+          y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
+          y = drawTableHeader(pdf, cols, y, invoiceType);
+        }
+      } else if (y + estH > contentBottom) {
+        // Normal pagination: row doesn't fit above the reserved signature zone — new page.
         pdf.addPage();
         drawPageBorder(pdf);
         y = drawLetterhead(pdf, s, BORDER_POS + 2);
@@ -794,16 +813,9 @@ function drawTable(pdf, invoice, s, startY, invoiceType) {
   const vat = taxableForVat * vatRate / 100;
   const total = subtotal - totalDiscount + vat;
 
-  if (y + 7 > contentBottom) {
-    pdf.addPage();
-    drawPageBorder(pdf);
-    y = drawLetterhead(pdf, s, BORDER_POS + 2);
-    y = drawTaxBanner(pdf, y, _refNumber, _invoiceDate, s.trn);
-    y = drawTableHeader(pdf, cols, y, invoiceType);
-  }
-  y = drawTableTotal(pdf, cols, y, { subtotal, discount: totalDiscount, taxable, vat, total }, invoiceType);
-
-  return { y, total };
+  // Totals are NOT drawn here — they are drawn in the reserved bottom zone by the
+  // caller (buildInvoicePdf) so they always sit at the bottom of the last page.
+  return { y, totals: { subtotal, discount: totalDiscount, taxable, vat, total } };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1121,19 +1133,22 @@ export async function buildInvoicePdf(invoice, clientName, settings, invoiceType
   y = drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber, invoiceDate);
 
   // ══ TABLE (with pagination) ══
-  const { y: tableY, total } = drawTable(pdf, invoice, s, y, invoiceType);
+  const { y: tableY, totals } = drawTable(pdf, invoice, s, y, invoiceType);
   y = tableY;
 
-  // ══ TERMS → BANK → SIGNATURES (unified for all invoice types) ══
-  // Amount in words is now integrated into the column-based totals box above.
+  // ══ BOTTOM BLOCK: totals + terms + bank + signatures (last page only) ══
+  // Drawn in the reserved signature zone. Start at max(currentY, SIGNATURE_ZONE_TOP)
+  // so the block sits at the bottom of the page when rows fill the upper area,
+  // or right after the rows when there are only a few.
+  y = Math.max(y, SIGNATURE_ZONE_TOP);
+  y = drawTableTotal(pdf, colPositions(
+    invoiceType === 'trip' ? COLS_TRIP
+    : invoiceType === 'standard' ? COLS_STANDARD
+    : COLS_MONTHLY
+  ), y, totals, invoiceType);
 
-  // Terms & Conditions inline (right below totals)
+  // Terms & Conditions inline
   y += 3;
-  if (y + 12 > FOOTER_TOP - 2) {
-    pdf.addPage();
-    drawPageBorder(pdf);
-    y = drawLetterhead(pdf, s, BORDER_POS + 2);
-  }
   y = drawTermsInline(pdf, y, invoiceType);
 
   // Bank details

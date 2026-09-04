@@ -913,14 +913,21 @@ async function renderToPDF(html, invoice) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// PDF DOWNLOAD — delegated to the native jsPDF vector renderer
+// (invoicePdfNative.js) which paginates row-by-row with a reserved
+// signature zone. No html2canvas full-page rasterization/slicing.
+// ═══════════════════════════════════════════════════════════
+import { renderInvoicePDF as _renderNativePDF } from './invoicePdfNative';
+
 export async function downloadInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await renderInvoicePDF(invoice, clientName, settings, 'standard', seqNo, draft);
+  await _renderNativePDF(invoice, clientName, settings, 'standard', seqNo, draft);
 }
 
 export async function downloadMonthlyInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await renderInvoicePDF(invoice, clientName, settings, 'monthly', seqNo, draft);
+  await _renderNativePDF(invoice, clientName, settings, 'monthly', seqNo, draft);
 }
 
 export async function downloadPerTripInvoicePDF(invoice, clientName, settings = {}, seqNo, draft = false) {
-  await renderInvoicePDF(invoice, clientName, settings, 'trip', seqNo, draft);
+  await _renderNativePDF(invoice, clientName, settings, 'trip', seqNo, draft);
 }
