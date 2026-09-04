@@ -42,7 +42,6 @@ import SkipSignatureDialog from '@/components/invoices/SkipSignatureDialog';
 import HeaderActionButton from '@/components/layout/HeaderActionButton';
 import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
 import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
-import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
 import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
@@ -82,7 +81,6 @@ export default function InvoicesPage() {
   const [templateManagerOpen, setTemplateManagerOpen] = useState(false);
   const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
-  const [layoutEditorOpen, setLayoutEditorOpen] = useState(false);
   const [layoutSelectorOpen, setLayoutSelectorOpen] = useState(false);
   const [layoutSelectorTarget, setLayoutSelectorTarget] = useState(null);
   const [settings, setSettings] = useState({});
@@ -98,7 +96,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     const onNew = () => handleNew();
     const onTemplates = () => setTemplateManagerOpen(true);
-    const onLayoutEditor = () => setLayoutEditorOpen(true);
+    const onLayoutEditor = () => navigate('/settings');
     window.addEventListener('invoices:new', onNew);
     window.addEventListener('invoices:templates', onTemplates);
     window.addEventListener('invoices:layoutEditor', onLayoutEditor);
@@ -557,9 +555,13 @@ export default function InvoicesPage() {
           <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setLayoutEditorOpen(true)} className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+          <Button variant="outline" size="sm" onClick={() => setTemplateManagerOpen(true)} className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
             <LayoutTemplate className="w-4 h-4" />
-            Layout Editor
+            Templates
+          </Button>
+          <Button size="sm" onClick={handleNew} className="gap-2 lightning-btn">
+            <Plus className="w-4 h-4" />
+            New Invoice
           </Button>
         </div>
       </div>
@@ -732,14 +734,6 @@ export default function InvoicesPage() {
       <CustomTemplateManager open={templateManagerOpen} onClose={() => setTemplateManagerOpen(false)} documentType="invoice" />
 
       <TemplateSelectorModal open={templateSelectorOpen} onClose={() => setTemplateSelectorOpen(false)} onSelect={handleTemplateSelect} documentType="invoice" />
-      <InvoiceLayoutEditor
-        open={layoutEditorOpen}
-        onClose={() => setLayoutEditorOpen(false)}
-        invoice={selectedId ? allInvoices.find(i => i.id === selectedId) : null}
-        clientName={selectedId ? allInvoices.find(i => i.id === selectedId)?.client_name : 'Emirates Filaments Factory - Sole Proprietorship L.L.C'}
-        settings={settings}
-        invoiceType="monthly"
-      />
       <LayoutSelectorModal
         open={layoutSelectorOpen}
         onClose={() => setLayoutSelectorOpen(false)}

@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock, Activity } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock, Activity, LayoutTemplate } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
+import InvoiceLayoutEditorCard from '@/components/settings/InvoiceLayoutEditorCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
 import LocalizationCard from '@/components/settings/LocalizationCard';
 import SecurityCard from '@/components/settings/SecurityCard';
@@ -64,6 +65,7 @@ export default function Settings() {
   const chipColors = {
     company: 'bg-blue-500/15 text-blue-400',
     invoice: 'bg-violet-500/15 text-violet-400',
+    layout: 'bg-indigo-500/15 text-indigo-400',
     profile: 'bg-blue-500/15 text-blue-400',
     localization: 'bg-emerald-500/15 text-emerald-400',
     display: 'bg-violet-500/15 text-violet-400',
@@ -82,6 +84,7 @@ export default function Settings() {
   const sections = [
   { key: 'company', label: 'Company', icon: Building2, render: () => <CompanySettingsSection /> },
   { key: 'invoice', label: 'Invoice', icon: FileText, render: () => <InvoiceAppearanceCard /> },
+  { key: 'layout', label: 'Layout Editor', icon: LayoutTemplate, render: () => <InvoiceLayoutEditorCard /> },
   { key: 'profile', label: 'Profile', icon: User, render: () => <ProfileHeader user={user} loading={loading} onUpdated={handleProfileUpdated} /> },
   { key: 'localization', label: 'Localization', icon: Globe, render: () => <LocalizationCard language={language} onLanguageChange={handleLanguageChange} /> },
   { key: 'display', label: 'Display', icon: Palette, render: () => <DisplaySettingsCard /> },

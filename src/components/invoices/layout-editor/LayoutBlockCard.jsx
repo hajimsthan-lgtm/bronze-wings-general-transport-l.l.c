@@ -95,7 +95,7 @@ export default function LayoutBlockCard({
         <div className="border-t border-border/40 p-3 bg-muted/5 animate-fade-in">
           <BlockConfigPanel
             block={block}
-            onUpdate={onConfigChange}
+            onUpdate={(configType, updates) => onConfigChange(block.id, configType, updates)}
             onResetStyle={() => onResetConfig(block.id, 'style')}
             onResetColumns={() => onResetConfig(block.id, 'columns')}
             onApplyStyleToAll={() => onApplyStyleToAll(block.style)}

@@ -53,7 +53,7 @@ export const BLOCK_DEFAULT_STYLES = {
   footer:    { fontFamily: 'times', fontSize: 8,  fontWeight: 'normal', color: '#666666', align: 'center', lineHeight: 1.2 },
 };
 
-// Default table columns (percentage of table width)
+// Default table columns — Per Trip (percentage of table width)
 export const DEFAULT_COLUMNS = [
   { key: 'sl',     label: 'SL No',      width: 7,  visible: true, locked: true },
   { key: 'date',   label: 'Trip Date',  width: 12, visible: true },
@@ -64,6 +64,23 @@ export const DEFAULT_COLUMNS = [
   { key: 'vat',    label: 'VAT',        width: 10, visible: true },
   { key: 'total',  label: 'Total',      width: 14, visible: true, locked: true },
 ];
+
+// Default table columns — Monthly
+export const DEFAULT_COLUMNS_MONTHLY = [
+  { key: 'sl',     label: 'SL No',      width: 7,  visible: true, locked: true },
+  { key: 'date',   label: 'Month',      width: 12, visible: true },
+  { key: 'desc',   label: 'Description',width: 28, visible: true },
+  { key: 'qty',    label: 'Qty',        width: 7,  visible: true },
+  { key: 'price',  label: 'Unit Price', width: 11, visible: true },
+  { key: 'amount', label: 'Amount',     width: 11, visible: true },
+  { key: 'vat',    label: 'VAT',        width: 10, visible: true },
+  { key: 'total',  label: 'Total',      width: 14, visible: true, locked: true },
+];
+
+// Get default columns for a given invoice type
+export function getDefaultColumns(invoiceType) {
+  return (invoiceType === 'monthly' ? DEFAULT_COLUMNS_MONTHLY : DEFAULT_COLUMNS).map(c => ({ ...c }));
+}
 
 // Block height estimates (mm) — for pagination + background rendering
 export const BLOCK_HEIGHTS = {

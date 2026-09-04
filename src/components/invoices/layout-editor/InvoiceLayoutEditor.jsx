@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useCallback, useRef, useReducer } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy } from 'lucide-react';
+import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import LayoutBlockCard from './LayoutBlockCard';
 import LayoutPreview from './LayoutPreview';
 import {
   DEFAULT_LAYOUT, validateLayout, serializeLayout, deserializeLayout, BLOCK_META,
-  moveBlock, resetBlockStyle, applyStyleToAll, DEFAULT_COLUMNS,
+  moveBlock, resetBlockStyle, applyStyleToAll, getDefaultColumns,
 } from '@/lib/invoiceLayoutModel';
 import { generateLayoutPreviewUrl } from '@/lib/invoiceLayoutRenderer';
 
-const SAMPLE_INVOICE = {
+const SAMPLE_TRIP = {
   invoice_number: '2026-PREVIEW',
   client_name: 'Emirates Filaments Factory - Sole Proprietorship L.L.C',
   contact_person: 'John Doe',
@@ -32,7 +33,24 @@ const SAMPLE_INVOICE = {
   ],
 };
 
-export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName, settings, invoiceType = 'monthly' }) {
+const SAMPLE_MONTHLY = {
+  invoice_number: '2026-PREVIEW',
+  client_name: 'Emirates Filaments Factory - Sole Proprietorship L.L.C',
+  contact_person: 'John Doe',
+  client_address: 'Dubai Industrial City, Dubai, UAE',
+  client_trn: '100-123-456-789',
+  issue_date: '2026-09-04',
+  due_date: '2026-10-04',
+  lpo_ref: 'LPO-2026-001',
+  vat_rate: 5,
+  line_items: [
+    { description: 'Truck Rental — September 2026', date: '2026-09-01', quantity: 30, unit_price: 150, amount: 4500 },
+    { description: 'Truck Rental — October 2026', date: '2026-10-01', quantity: 31, unit_price: 150, amount: 4650 },
+    { description: 'Additional Trips (5)', date: '2026-09-15', quantity: 5, unit_price: 500, amount: 2500 },
+  ],
+};
+
+export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName, settings, invoiceType: initialType = 'monthly' }) {
   const { toast } = useToast();
   const [layout, setLayoutRaw] = useState(DEFAULT_LAYOUT);
   const [templates, setTemplates] = useState([]);
@@ -43,6 +61,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [expandedBlock, setExpandedBlock] = useState(null);
+  const [invoiceType, setInvoiceType] = useState(initialType);
   const previewTimer = useRef(null);
 
   // ── Undo / Redo ──
@@ -79,8 +98,20 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   const canUndo = histIdxRef.current > 0;
   const canRedo = histIdxRef.current < historyRef.current.length - 1;
 
-  const previewInvoice = invoice || SAMPLE_INVOICE;
+  const previewInvoice = invoice || (invoiceType === 'monthly' ? SAMPLE_MONTHLY : SAMPLE_TRIP);
   const previewClient = clientName || previewInvoice.client_name;
+
+  // Switch invoice type: update table block columns to match the new type
+  const handleTypeChange = (newType) => {
+    if (newType === invoiceType) return;
+    setInvoiceType(newType);
+    setLayout({
+      ...layout,
+      blocks: layout.blocks.map(b => b.type === 'table'
+        ? { ...b, columns: getDefaultColumns(newType) }
+        : b),
+    });
+  };
 
   // ── Load templates ──
   const loadTemplates = useCallback(async () => {
@@ -144,7 +175,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
     if (configType === 'style') {
       setLayout(resetBlockStyle(layout, blockId));
     } else if (configType === 'columns') {
-      setLayout({ ...layout, blocks: layout.blocks.map(b => b.id === blockId ? { ...b, columns: DEFAULT_COLUMNS.map(c => ({ ...c })) } : b) });
+      setLayout({ ...layout, blocks: layout.blocks.map(b => b.id === blockId ? { ...b, columns: getDefaultColumns(invoiceType) } : b) });
     }
   };
 
@@ -154,7 +185,11 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   };
 
   const handleReset = () => {
-    setLayout({ ...DEFAULT_LAYOUT, blocks: DEFAULT_LAYOUT.blocks.map(b => ({ ...b, style: { ...b.style }, columns: b.columns?.map(c => ({ ...c })) })) });
+    setLayout({ ...DEFAULT_LAYOUT, blocks: DEFAULT_LAYOUT.blocks.map(b => ({
+      ...b,
+      style: { ...b.style },
+      columns: b.type === 'table' ? getDefaultColumns(invoiceType) : b.columns?.map(c => ({ ...c })),
+    })) });
     setLayoutName('');
     setExpandedBlock(null);
   };
@@ -205,10 +240,33 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[1700px] w-[96vw] max-h-[95vh] p-0 gap-0 overflow-hidden flex flex-col">
           <DialogHeader className="px-6 py-4 border-b border-border/50 flex-row items-center justify-between space-y-0">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Eye className="w-5 h-5 text-primary" />
-              Invoice Layout Editor
-            </DialogTitle>
+            <div className="flex items-center gap-4">
+              <DialogTitle className="flex items-center gap-2 text-lg">
+                <Eye className="w-5 h-5 text-primary" />
+                Invoice Layout Editor
+              </DialogTitle>
+              {/* Invoice type toggle */}
+              <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border/40">
+                <button
+                  onClick={() => handleTypeChange('monthly')}
+                  className={cn('px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
+                    invoiceType === 'monthly'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground')}
+                >
+                  <CalendarDays className="w-3.5 h-3.5" /> Monthly
+                </button>
+                <button
+                  onClick={() => handleTypeChange('trip')}
+                  className={cn('px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
+                    invoiceType === 'trip'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground')}
+                >
+                  <Truck className="w-3.5 h-3.5" /> Per Trip
+                </button>
+              </div>
+            </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" onClick={undo} disabled={!canUndo} className="h-8 gap-1.5" title="Undo">
                 <Undo2 className="w-4 h-4" /> Undo
