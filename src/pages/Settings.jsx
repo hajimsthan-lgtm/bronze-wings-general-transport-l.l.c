@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock } from 'lucide-react';
+import { ArrowLeft, Building2, User, Users, Globe, Shield, AlertTriangle, BookOpen, Palette, Bell, FileText, Bot, Database, LogOut, Clock, Activity } from 'lucide-react';
 import CompanySettingsSection from '@/components/settings/CompanySettingsSection';
 import InvoiceAppearanceCard from '@/components/settings/InvoiceAppearanceCard';
 import ProfileHeader from '@/components/settings/ProfileHeader';
@@ -18,6 +18,7 @@ import StorageSettingsCard from '@/components/settings/StorageSettingsCard';
 import UsersManagementCard from '@/components/settings/UsersManagementCard';
 import LogoutCard from '@/components/settings/LogoutCard';
 import DateTimePickerStyleCard from '@/components/settings/DateTimePickerStyleCard';
+import ActivityLogsCard from '@/components/settings/ActivityLogsCard';
 
 export default function Settings() {
   const { language, toggleLanguage } = useI18n();
@@ -74,7 +75,8 @@ export default function Settings() {
     agents: 'bg-emerald-500/15 text-emerald-400',
     manual: 'bg-slate-500/15 text-slate-400',
     logout: 'bg-rose-500/15 text-rose-400',
-    danger: 'bg-red-500/15 text-red-400'
+    danger: 'bg-red-500/15 text-red-400',
+    logs: 'bg-emerald-500/15 text-emerald-400'
   };
 
   const sections = [
@@ -101,6 +103,7 @@ export default function Settings() {
         </div>
       </Link>
   },
+  { key: 'logs', label: 'Activity Logs', icon: Activity, render: () => <ActivityLogsCard /> },
   { key: 'manual', label: 'User Manual', icon: BookOpen, render: () => <UserManualCard /> },
   { key: 'logout', label: 'Log out', icon: LogOut, render: () => <LogoutCard /> },
   { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, danger: true, render: () =>

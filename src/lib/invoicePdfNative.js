@@ -312,9 +312,9 @@ function drawLetterhead(pdf, s, y) {
   pdf.setLineWidth(0.6);
   pdf.rect(hdrX, y, hdrW, boxH);
 
-  // Logo — left, vertically centered (bigger: 18mm cap)
+  // Logo — left, vertically centered (bigger: 22mm cap, stays within 28mm header box)
   const invStyle = getInvStyle(s);
-  const logoSize = Math.min(invStyle.logoSize, 18);
+  const logoSize = Math.min(invStyle.logoSize, 22);
   const logoX = hdrX + 4;
   const logoY = y + (boxH - logoSize) / 2;
   if (invStyle.logoUrl) {
@@ -332,18 +332,18 @@ function drawLetterhead(pdf, s, y) {
   const textTop = logoY;  // top of text block = top of logo (both centered)
   tc(pdf, BROWN);
 
-  // Arabic name — top of block (bigger: 5mm)
-  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 5, BROWN);
+  // Arabic name — top of block (bigger: 6mm)
+  drawArabicText(pdf, 'الاجنحه البرونزية للنقليات العامة - ذ.م.م', textX, textTop, 6, BROWN);
 
-  // Company name — clear gap below Arabic, no overlap (bigger: 18pt)
+  // Company name — clear gap below Arabic, no overlap (bigger: 22pt)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(18);
-  pdf.text('BRONZE WINGS', textX, textTop + 12, { charSpace: 0.5 });
+  pdf.setFontSize(22);
+  pdf.text('BRONZE WINGS', textX, textTop + 13, { charSpace: 0.5 });
 
-  // Subtitle — spaced below company name (bigger: 10pt)
+  // Subtitle — spaced below company name (bigger: 11pt)
   pdf.setFont('times', 'bold');
-  pdf.setFontSize(10);
-  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 16.5, { charSpace: 0.3 });
+  pdf.setFontSize(11);
+  pdf.text('GENERAL TRANSPORT - L.L.C', textX, textTop + 18, { charSpace: 0.3 });
 
   // Right contact column — right-aligned, vertically centered
   const rightX = hdrX + hdrW - 4;
