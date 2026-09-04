@@ -1,5 +1,5 @@
 import React from 'react';
-import { GripVertical, Lock, ChevronUp, ChevronDown, ChevronRight, Building2, User, Table2, Calculator, FileText, PenLine, PanelBottom, EyeOff } from 'lucide-react';
+import { GripVertical, ChevronUp, ChevronDown, ChevronRight, Building2, User, Table2, Calculator, FileText, PenLine, PanelBottom, EyeOff } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { BLOCK_META, canMoveUp, canMoveDown } from '@/lib/invoiceLayoutModel';
 import { cn } from '@/lib/utils';
@@ -14,7 +14,6 @@ export default function LayoutBlockCard({
 }) {
   const meta = BLOCK_META[block.type];
   const Icon = ICON_MAP[meta.icon] || FileText;
-  const isFixed = !meta.canReorder;
   const upRes = canMoveUp(layout, index);
   const downRes = canMoveDown(layout, index);
 
@@ -24,36 +23,30 @@ export default function LayoutBlockCard({
       block.enabled ? 'glass-card-hover border-border/50' : 'bg-muted/20 border-border/30 opacity-50'
     )}>
       <div className="flex items-center gap-2 p-3">
-        {/* Drag handle or lock */}
-        {isFixed ? (
-          <Lock className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
-        ) : (
-          <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing flex-shrink-0 p-0.5 hover:bg-muted/40 rounded">
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
-          </div>
-        )}
+        {/* Drag handle */}
+        <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing flex-shrink-0 p-0.5 hover:bg-muted/40 rounded">
+          <GripVertical className="w-4 h-4 text-muted-foreground" />
+        </div>
 
-        {/* Arrow buttons (movable blocks only) */}
-        {!isFixed && (
-          <div className="flex flex-col gap-0.5 flex-shrink-0">
-            <button
-              onClick={() => upRes.can && onMove(block.id, 'up')}
-              disabled={!upRes.can}
-              title={upRes.can ? 'Move up' : upRes.reason}
-              className={cn('p-0.5 rounded transition-colors',
-                upRes.can ? 'hover:bg-primary/15 text-muted-foreground hover:text-primary' : 'text-muted-foreground/20 cursor-not-allowed')}>
-              <ChevronUp className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => downRes.can && onMove(block.id, 'down')}
-              disabled={!downRes.can}
-              title={downRes.can ? 'Move down' : downRes.reason}
-              className={cn('p-0.5 rounded transition-colors',
-                downRes.can ? 'hover:bg-primary/15 text-muted-foreground hover:text-primary' : 'text-muted-foreground/20 cursor-not-allowed')}>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+        {/* Arrow buttons */}
+        <div className="flex flex-col gap-0.5 flex-shrink-0">
+          <button
+            onClick={() => upRes.can && onMove(block.id, 'up')}
+            disabled={!upRes.can}
+            title={upRes.can ? 'Move up' : upRes.reason}
+            className={cn('p-0.5 rounded transition-colors',
+              upRes.can ? 'hover:bg-primary/15 text-muted-foreground hover:text-primary' : 'text-muted-foreground/20 cursor-not-allowed')}>
+            <ChevronUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => downRes.can && onMove(block.id, 'down')}
+            disabled={!downRes.can}
+            title={downRes.can ? 'Move down' : downRes.reason}
+            className={cn('p-0.5 rounded transition-colors',
+              downRes.can ? 'hover:bg-primary/15 text-muted-foreground hover:text-primary' : 'text-muted-foreground/20 cursor-not-allowed')}>
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
         {/* Icon */}
         <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -74,20 +67,13 @@ export default function LayoutBlockCard({
           <div className="text-[11px] text-muted-foreground truncate">{meta.desc}</div>
         </div>
 
-        {/* Fixed badge */}
-        {isFixed && (
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold px-2 py-0.5 rounded-full bg-muted/40">Fixed</span>
-        )}
-
         {/* Expand button */}
         <button onClick={onExpand} className="p-1 rounded hover:bg-muted/40 transition-colors flex-shrink-0" title="Configure block">
           {isExpanded ? <ChevronDown className="w-4 h-4 text-primary" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
         </button>
 
         {/* Enable/disable toggle */}
-        {meta.canDisable && (
-          <Switch checked={block.enabled} onCheckedChange={(checked) => onToggle(block.id, checked)} className="scale-90 flex-shrink-0" />
-        )}
+        <Switch checked={block.enabled} onCheckedChange={(checked) => onToggle(block.id, checked)} className="scale-90 flex-shrink-0" />
       </div>
 
       {/* Expanded config panel */}

@@ -305,7 +305,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                     {(provided) => (
                       <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
                         {layout.blocks.map((block, index) => (
-                          <Draggable key={block.id} draggableId={block.id} index={index} isDragDisabled={!BLOCK_META[block.type].canReorder}>
+                          <Draggable key={block.id} draggableId={block.id} index={index}>
                             {(prov) => (
                               <div ref={prov.innerRef} {...prov.draggableProps} style={{ ...prov.draggableProps.style, opacity: 1 }}>
                                 <LayoutBlockCard

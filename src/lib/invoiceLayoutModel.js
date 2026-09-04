@@ -11,13 +11,13 @@
 export const BLOCK_TYPES = ['header', 'billTo', 'table', 'totals', 'terms', 'signature', 'footer'];
 
 export const BLOCK_META = {
-  header:    { label: 'Header',             icon: 'Building2',  color: '#6366f1', canDisable: false, canReorder: false, desc: 'Logo, company name, contact info, TAX INVOICE title, TRN' },
-  billTo:    { label: 'Bill To',            icon: 'User',      color: '#8b5cf6', canDisable: true,  canReorder: true,  desc: 'Client name, attention, address, TRN, invoice #/date/LPO ref' },
-  table:     { label: 'Line Items Table',   icon: 'Table2',    color: '#3b82f6', canDisable: false, canReorder: false, desc: 'SL No, Trip Date, Description, Qty, Unit Price, Amount, VAT, Total' },
-  totals:    { label: 'Totals',             icon: 'Calculator',color: '#10b981', canDisable: true,  canReorder: true,  desc: 'Amount in Words, Subtotal, VAT, Total Amount' },
-  terms:     { label: 'Terms & Conditions',  icon: 'FileText', color: '#f59e0b', canDisable: true,  canReorder: true,  desc: 'Payment terms text' },
-  signature: { label: 'Signature',          icon: 'PenLine',  color: '#ec4899', canDisable: true,  canReorder: true,  desc: 'Bank details, Authorized By / Received By, signature lines' },
-  footer:    { label: 'Footer',             icon: 'PanelBottom',color: '#64748b', canDisable: false, canReorder: false, desc: 'Tagline banner, page number' },
+  header:    { label: 'Header',             icon: 'Building2',  color: '#6366f1', canDisable: true,  canReorder: true,  desc: 'Logo, company name, contact info, TAX INVOICE title, TRN' },
+  billTo:    { label: 'Bill To',            icon: 'User',       color: '#8b5cf6', canDisable: true,  canReorder: true,  desc: 'Client name, attention, address, TRN, invoice #/date/LPO ref' },
+  table:     { label: 'Line Items Table',   icon: 'Table2',     color: '#3b82f6', canDisable: true,  canReorder: true,  desc: 'SL No, Trip Date, Description, Qty, Unit Price, Amount, VAT, Total' },
+  totals:    { label: 'Totals',             icon: 'Calculator', color: '#10b981', canDisable: true,  canReorder: true,  desc: 'Amount in Words, Subtotal, VAT, Total Amount' },
+  terms:     { label: 'Terms & Conditions',  icon: 'FileText',  color: '#f59e0b', canDisable: true,  canReorder: true,  desc: 'Payment terms text' },
+  signature: { label: 'Signature',          icon: 'PenLine',    color: '#ec4899', canDisable: true,  canReorder: true,  desc: 'Bank details, Authorized By / Received By, signature lines' },
+  footer:    { label: 'Footer',             icon: 'PanelBottom',color: '#64748b', canDisable: true,  canReorder: true,  desc: 'Tagline banner, page number' },
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -139,8 +139,10 @@ export function validateLayout(layout) {
   const enabled = layout.blocks.filter(b => b.enabled);
   const types = enabled.map(b => b.type);
 
-  if (types[0] !== 'header') errors.push('Header must be the first block on the page');
-  if (types[types.length - 1] !== 'footer') errors.push('Footer must be the last block on the page');
+  // Header must be first (only if enabled)
+  if (types.includes('header') && types[0] !== 'header') errors.push('Header must be the first block on the page');
+  // Footer must be last (only if enabled)
+  if (types.includes('footer') && types[types.length - 1] !== 'footer') errors.push('Footer must be the last block on the page');
 
   const tableCount = types.filter(t => t === 'table').length;
   if (tableCount === 0) errors.push('Table block is required');
@@ -227,8 +229,6 @@ export function deserializeLayout(config) {
 // ═══════════════════════════════════════════════════════════
 export function canMoveUp(layout, index) {
   if (index <= 0) return { can: false, reason: 'Already at the top' };
-  const meta = BLOCK_META[layout.blocks[index].type];
-  if (!meta.canReorder) return { can: false, reason: 'This block is fixed in position' };
   const newBlocks = Array.from(layout.blocks);
   [newBlocks[index - 1], newBlocks[index]] = [newBlocks[index], newBlocks[index - 1]];
   const v = validateLayout({ ...layout, blocks: newBlocks });
@@ -238,8 +238,6 @@ export function canMoveUp(layout, index) {
 
 export function canMoveDown(layout, index) {
   if (index >= layout.blocks.length - 1) return { can: false, reason: 'Already at the bottom' };
-  const meta = BLOCK_META[layout.blocks[index].type];
-  if (!meta.canReorder) return { can: false, reason: 'This block is fixed in position' };
   const newBlocks = Array.from(layout.blocks);
   [newBlocks[index], newBlocks[index + 1]] = [newBlocks[index + 1], newBlocks[index]];
   const v = validateLayout({ ...layout, blocks: newBlocks });
