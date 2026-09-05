@@ -8,7 +8,7 @@ import BlockConfigPanel from './BlockConfigPanel';
 const ICON_MAP = { Building2, User, Table2, Calculator, FileText, PenLine, PanelBottom };
 
 export default function LayoutBlockCard({
-  block, index, layout, dragHandleProps,
+  block, index, layout, editPage, dragHandleProps,
   onToggle, onMove, onConfigChange, onResetConfig, onApplyStyleToAll,
   onSmartRestyle, onApplyPreset, onAutoFixOverlap,
   isExpanded, onExpand,
@@ -82,6 +82,7 @@ export default function LayoutBlockCard({
         <div className="border-t border-border/40 p-3 bg-muted/5 animate-fade-in">
           <BlockConfigPanel
             block={block}
+            editPage={editPage}
             onUpdate={(configType, updates) => onConfigChange(block.id, configType, updates)}
             onResetStyle={() => onResetConfig(block.id, 'style')}
             onResetColumns={() => onResetConfig(block.id, 'columns')}

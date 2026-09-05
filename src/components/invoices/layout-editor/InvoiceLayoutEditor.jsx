@@ -500,10 +500,9 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                             {(prov) => (
                               <div ref={prov.innerRef} {...prov.draggableProps} style={{ ...prov.draggableProps.style, opacity: 1 }}>
                                 <LayoutBlockCard
-                                  block={editPage !== 'all' ? { ...block, spacing: { ...block.spacing, ...(layout.pageOverrides?.[editPage]?.[block.id]?.spacing || {}) } } : block}
+                                  block={block}
                                   index={index}
                                   layout={layout}
-                                  editPage={editPage}
                                   dragHandleProps={prov.dragHandleProps}
                                   onToggle={handleToggle}
                                   onMove={handleMove}
