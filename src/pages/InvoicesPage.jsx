@@ -46,7 +46,8 @@ import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
 import InvoiceDebugger from '@/components/invoices/InvoiceDebugger';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
-import { restructureInvoiceSequence, restoreInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
+import { restructureInvoiceSequence, restoreInvoiceNumberSnapshot, detectSequenceErrors } from '@/lib/invoiceSequence';
+import SequenceErrorBanner from '@/components/invoices/SequenceErrorBanner';
 import { useUndoRedo, registerNumberChangeUndo } from '@/hooks/useUndoRedo';
 import InvoiceHistoryDialog from '@/components/invoices/InvoiceHistoryDialog';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -643,6 +644,9 @@ export default function InvoicesPage() {
   // Tab-filtered list
   const filtered = useMemo(() => filterByTab(baseFiltered, tab), [baseFiltered, tab]);
 
+  // Detect invoice number sequence errors (numbers not matching chronological order)
+  const sequenceErrors = useMemo(() => detectSequenceErrors(allInvoices), [allInvoices]);
+
   const selectedInvoice = filtered.find((i) => i.id === selectedId) || baseFiltered.find((i) => i.id === selectedId) || null;
   const allSelected = filtered.length > 0 && selected.size === filtered.length;
 
@@ -749,6 +753,13 @@ export default function InvoicesPage() {
           </Button>
           <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => setSelected(new Set())} className="h-8 disabled:opacity-40 disabled:cursor-not-allowed">Clear</Button>
         </div>
+
+      {/* Sequence error banner + Smart Allocator */}
+      <SequenceErrorBanner
+        errors={sequenceErrors}
+        currentUser={currentUser}
+        onAllocated={() => { refetch(); setHistoryRefresh((r) => r + 1); }}
+      />
 
       {/* Two-pane layout */}
       {loading ?

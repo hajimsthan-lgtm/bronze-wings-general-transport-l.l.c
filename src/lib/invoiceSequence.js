@@ -227,5 +227,130 @@ export async function restoreInvoiceNumberSnapshot(snapshot) {
   return updates;
 }
 
+/**
+ * Detect sequence errors: invoices whose number doesn't match their
+ * chronological (created_date) order.  Returns an array of error entries:
+ * { invoice_id, invoice_number, expected_position, actual_position, message }
+ *
+ * The display order is created_date DESCENDING (newest first), so the
+ * invoice numbers should also be descending — the newest invoice should
+ * have the highest number.  Any inversion is a sequence error.
+ */
+export function detectSequenceErrors(invoices) {
+  if (!Array.isArray(invoices) || invoices.length < 2) return [];
+
+  // Only consider new-format, non-voided invoices with a parseable number
+  const eligible = invoices
+    .filter((inv) => !inv.voided && parseInvoiceNumber(inv.invoice_number))
+    .map((inv) => {
+      const parsed = parseInvoiceNumber(inv.invoice_number);
+      return { id: inv.id, number: inv.invoice_number, seq: parsed.seq, year: parsed.year, created: inv.created_date };
+    });
+
+  if (eligible.length < 2) return [];
+
+  // Group by year — errors are only meaningful within the same year
+  const byYear = {};
+  eligible.forEach((e) => {
+    if (!byYear[e.year]) byYear[e.year] = [];
+    byYear[e.year].push(e);
+  });
+
+  const errors = [];
+  Object.keys(byYear).forEach((year) => {
+    const group = byYear[year];
+    // Sort by created_date DESCENDING (same as display order)
+    group.sort((a, b) => new Date(b.created) - new Date(a.created));
+    // In this order, seq should be strictly DESCENDING (newest = highest)
+    for (let i = 0; i < group.length - 1; i++) {
+      const newer = group[i];
+      const older = group[i + 1];
+      if (newer.seq < older.seq) {
+        errors.push({
+          invoice_id: newer.id,
+          invoice_number: newer.number,
+          newer_seq: newer.seq,
+          older_seq: older.seq,
+          older_number: older.number,
+          message: `${newer.number} (newer) is lower than ${older.number} (older)`,
+        });
+      }
+    }
+  });
+
+  return errors;
+}
+
+/**
+ * Smart Allocator: renumber all non-voided, new-format invoices so their
+ * numbers match their chronological (created_date) order.  The oldest
+ * invoice gets the lowest available number; the newest gets the highest.
+ *
+ * Voided and old-format invoices keep their original numbers (locked).
+ * Returns { updates, snapshot, reallocated } for undo support.
+ */
+export async function smartAllocateInvoiceNumbers(year) {
+  const targetYear = year || new Date().getFullYear();
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+
+  const lockedSeqs = new Set();
+  const renumberable = [];
+
+  (all || []).forEach((inv) => {
+    const parsed = parseInvoiceNumber(inv.invoice_number);
+    if (!parsed) return;
+    if (parsed.year !== targetYear) return;
+    if (inv.voided || parsed === null) {
+      const seq = extractSeqForYear(inv.invoice_number, targetYear);
+      if (seq > 0) lockedSeqs.add(seq);
+    } else {
+      renumberable.push({ id: inv.id, seq: parsed.seq, created: inv.created_date, oldNumber: inv.invoice_number });
+    }
+  });
+
+  if (renumberable.length === 0) return { updates: [], snapshot: {}, reallocated: [] };
+
+  // Sort by created_date ASCENDING (oldest first) → assign lowest numbers first
+  renumberable.sort((a, b) => new Date(a.created) - new Date(b.created));
+
+  // Build snapshot for undo
+  const snapshot = {};
+  renumberable.forEach((r) => { snapshot[r.id] = r.oldNumber; });
+
+  // Assign sequential numbers, skipping locked positions
+  let nextSeq = 1;
+  const updates = [];
+  const reallocated = [];
+  for (const inv of renumberable) {
+    while (lockedSeqs.has(nextSeq)) nextSeq++;
+    const newNumber = formatInvoiceNumber(targetYear, nextSeq);
+    if (inv.oldNumber !== newNumber) {
+      updates.push({ id: inv.id, invoice_number: newNumber });
+      reallocated.push({ invoice_id: inv.id, from_number: inv.oldNumber, to_number: newNumber });
+    }
+    lockedSeqs.add(nextSeq);
+    nextSeq++;
+  }
+
+  if (updates.length > 0) {
+    await base44.entities.Invoice.bulkUpdate(updates);
+  }
+
+  // Update the company settings counter to the highest assigned seq
+  const settingsList = await base44.entities.CompanySettings.list().catch(() => []);
+  const s = settingsList?.[0];
+  if (s) {
+    const maxSeq = nextSeq - 1;
+    if (s.invoice_last_year !== targetYear || (s.invoice_last_seq || 0) < maxSeq) {
+      await base44.entities.CompanySettings.update(s.id, {
+        invoice_last_seq: maxSeq,
+        invoice_last_year: targetYear,
+      });
+    }
+  }
+
+  return { updates, snapshot, reallocated };
+}
+
 /** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
 export { generateNextInvoiceNumber as generateInvoiceNumber };
