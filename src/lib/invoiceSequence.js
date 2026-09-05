@@ -352,5 +352,75 @@ export async function smartAllocateInvoiceNumbers(year) {
   return { updates, snapshot, reallocated };
 }
 
+/**
+ * Smart Allocator (keep-changed mode): lock the manually-changed invoice(s) at
+ * their current numbers and renumber every OTHER non-voided invoice chronologically
+ * around them.  `lockedInvoiceIds` = invoice IDs whose numbers should NOT change.
+ * Returns { updates, snapshot, reallocated } for undo support.
+ */
+export async function smartAllocateKeepChanged(year, lockedInvoiceIds) {
+  const targetYear = year || new Date().getFullYear();
+  const lockedSet = new Set(lockedInvoiceIds || []);
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+
+  const lockedSeqs = new Set();
+  const renumberable = [];
+
+  (all || []).forEach((inv) => {
+    const parsed = parseInvoiceNumber(inv.invoice_number);
+    if (!parsed || parsed.year !== targetYear) return;
+    if (inv.voided) {
+      const seq = extractSeqForYear(inv.invoice_number, targetYear);
+      if (seq > 0) lockedSeqs.add(seq);
+    } else if (lockedSet.has(inv.id)) {
+      // Keep this invoice's current number — lock its position
+      lockedSeqs.add(parsed.seq);
+    } else {
+      renumberable.push({ id: inv.id, created: inv.created_date, oldNumber: inv.invoice_number });
+    }
+  });
+
+  if (renumberable.length === 0) return { updates: [], snapshot: {}, reallocated: [] };
+
+  // Sort by created_date ASCENDING (oldest first) → lowest numbers first
+  renumberable.sort((a, b) => new Date(a.created) - new Date(b.created));
+
+  const snapshot = {};
+  renumberable.forEach((r) => { snapshot[r.id] = r.oldNumber; });
+
+  let nextSeq = 1;
+  const updates = [];
+  const reallocated = [];
+  for (const inv of renumberable) {
+    while (lockedSeqs.has(nextSeq)) nextSeq++;
+    const newNumber = formatInvoiceNumber(targetYear, nextSeq);
+    if (inv.oldNumber !== newNumber) {
+      updates.push({ id: inv.id, invoice_number: newNumber });
+      reallocated.push({ invoice_id: inv.id, from_number: inv.oldNumber, to_number: newNumber });
+    }
+    lockedSeqs.add(nextSeq);
+    nextSeq++;
+  }
+
+  if (updates.length > 0) {
+    await base44.entities.Invoice.bulkUpdate(updates);
+  }
+
+  // Update company settings counter to the highest assigned seq
+  const settingsList = await base44.entities.CompanySettings.list().catch(() => []);
+  const s = settingsList?.[0];
+  if (s) {
+    const maxSeq = nextSeq - 1;
+    if (s.invoice_last_year !== targetYear || (s.invoice_last_seq || 0) < maxSeq) {
+      await base44.entities.CompanySettings.update(s.id, {
+        invoice_last_seq: maxSeq,
+        invoice_last_year: targetYear,
+      });
+    }
+  }
+
+  return { updates, snapshot, reallocated };
+}
+
 /** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
 export { generateNextInvoiceNumber as generateInvoiceNumber };
