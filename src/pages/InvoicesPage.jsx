@@ -562,10 +562,10 @@ export default function InvoicesPage() {
             <LayoutTemplate className="w-4 h-4" />
             Templates
           </Button>
-          <Button size="sm" onClick={handleNew} className="gap-2 lightning-btn hidden">
-            <Plus className="w-4 h-4" />
-            New Invoice
-          </Button>
+          
+
+
+          
         </div>
       </div>
 
