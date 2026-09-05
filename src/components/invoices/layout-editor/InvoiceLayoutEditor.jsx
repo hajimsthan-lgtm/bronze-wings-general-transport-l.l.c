@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useReducer } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck, Printer, CloudUpload } from 'lucide-react';
+import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck, Printer, CloudUpload, Wand2, Sparkles } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -137,9 +137,9 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
         const result = await generateLayoutPreviewUrl(previewInvoice, previewClient, settings || {}, layout, invoiceType);
         setPreviewUrl(result.url);
         setPreviewPageCount(result.pageCount);
-      } catch (e) { setPreviewUrl(''); }
+      } catch (e) { /* keep old preview on error */ }
       finally { setPreviewLoading(false); }
-    }, 800);
+    }, 350);
     return () => { if (previewTimer.current) clearTimeout(previewTimer.current); };
   }, [layout, open, validation.errors.length, settings, invoiceType]);
 
@@ -190,6 +190,48 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   const handleSmartRestyle = (blockId) => {
     setLayout(smartRestyleFields(layout, blockId));
     toast({ title: 'Smart restyle applied', description: 'Key fields emphasized automatically' });
+  };
+
+  const handleAutoFixOverlap = (blockId) => {
+    setLayout({
+      ...layout,
+      blocks: layout.blocks.map(b => {
+        if (b.id !== blockId) return b;
+        const fixedFields = {};
+        Object.entries(b.fields || {}).forEach(([key, f]) => {
+          fixedFields[key] = { ...f, visible: true, fontSize: 1 };
+        });
+        return {
+          ...b,
+          fields: fixedFields,
+          style: { ...b.style, lineHeight: 1.3 },
+          spacing: { ...b.spacing, paddingTop: 0, paddingBottom: 0 },
+        };
+      }),
+    });
+    toast({ title: 'Overlap auto-fixed', description: 'Field sizes, spacing & line height adjusted' });
+  };
+
+  const handleCompactAll = () => {
+    setLayout({
+      ...layout,
+      blocks: layout.blocks.map(b => ({
+        ...b,
+        spacing: { ...b.spacing, paddingTop: 0, paddingBottom: 0 },
+      })),
+    });
+    toast({ title: 'Spacing compacted', description: 'All block padding reduced to minimum' });
+  };
+
+  const handleOptimizeAll = () => {
+    let newLayout = layout;
+    for (const b of newLayout.blocks) {
+      if (b.type === 'billTo' || b.type === 'signature') {
+        newLayout = smartRestyleFields(newLayout, b.id);
+      }
+    }
+    setLayout(newLayout);
+    toast({ title: 'All blocks optimized', description: 'Key fields emphasized automatically' });
   };
 
   const handleApplyPreset = (blockId, blockType, preset) => {
@@ -390,6 +432,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                                   onApplyStyleToAll={handleApplyStyleToAll}
                                   onSmartRestyle={handleSmartRestyle}
                                   onApplyPreset={handleApplyPreset}
+                                  onAutoFixOverlap={handleAutoFixOverlap}
                                   isExpanded={expandedBlock === block.id}
                                   onExpand={() => setExpandedBlock(expandedBlock === block.id ? null : block.id)}
                                 />
@@ -402,6 +445,19 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                     )}
                   </Droppable>
                 </DragDropContext>
+              </div>
+
+              {/* Quick Tools */}
+              <div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Quick Tools</div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <Button variant="outline" size="sm" onClick={handleOptimizeAll} className="h-8 text-xs gap-1.5" title="Apply smart restyle to all blocks">
+                    <Sparkles className="w-3.5 h-3.5" /> Optimize All
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleCompactAll} className="h-8 text-xs gap-1.5" title="Reduce all block padding to zero">
+                    <Wand2 className="w-3.5 h-3.5" /> Compact
+                  </Button>
+                </div>
               </div>
 
               {/* Saved templates */}

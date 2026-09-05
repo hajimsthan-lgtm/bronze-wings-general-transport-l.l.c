@@ -149,8 +149,19 @@ const STATUS_LABELS = {
   cancelled: 'Cancelled'
 };
 
+const INV_STATUS_META = {
+  draft: { label: 'Draft', color: '#fbbf24' },
+  unsigned: { label: 'Waiting Sign', color: '#f97316' },
+  signed: { label: 'Signed', color: '#3b82f6' },
+  sent: { label: 'Sent', color: '#6366f1' },
+  partially_paid: { label: 'Partial', color: '#f59e0b' },
+  paid: { label: 'Paid', color: '#10b981' },
+  cancelled: { label: 'Cancelled', color: '#ef4444' },
+  overdue: { label: 'Overdue', color: '#ef4444' },
+};
+
 const DEFAULT_WIDTHS = {
-  0: 44, 1: 120, 2: 90, 3: 220, 4: 130, 5: 160, 6: 160, 7: 100, 8: 120, 9: 100
+  0: 44, 1: 120, 2: 90, 3: 220, 4: 130, 5: 160, 6: 160, 7: 100, 8: 120, 9: 100, 10: 100
 };
 const LAYOUT_KEY = 'trips-table-layout-v1';
 
@@ -469,6 +480,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                   ['TO', 'text-left'],
                   ['TRIP FARE', 'text-left'],
                   ['STATUS', 'text-left'],
+                  ['INV STATUS', 'text-left'],
                   ['ACTIONS', 'text-center']].
                   map(([label, align], i) => {
                     const index = i + 1;
@@ -592,15 +604,26 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
                         </span>
                       );
                     })()}
-                    {invoiceMap?.[trip.id] && (
-                      <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/40" title="This trip has been invoiced">
-                        <FileCheck2 className="w-2.5 h-2.5" />
-                        INVOICED
-                      </span>
-                    )}
-                  </TableCell>
-                <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-center gap-1">
+                    </TableCell>
+                    {/* INVOICE STATUS — pill bubble showing linked invoice status */}
+                    <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
+                      {(() => {
+                        const inv = invoiceMap?.[trip.trip_number];
+                        if (!inv) return <span className="text-[10px] text-muted-foreground/40">—</span>;
+                        const status = inv.status || 'draft';
+                        const meta = INV_STATUS_META[status] || INV_STATUS_META.draft;
+                        return (
+                          <span className="font-bold rounded-full border inline-flex items-center gap-1 text-[9px] px-2 py-0.5 whitespace-nowrap"
+                            style={{ color: meta.color, borderColor: `${meta.color}66`, background: `${meta.color}1a` }}
+                            title={`Invoice ${inv.invoice_number || ''} — ${meta.label}`}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+                            {meta.label}
+                          </span>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell className="align-top trips-grid-td" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-center gap-1">
                     <button
                         onClick={() => onOpenDetail?.(trip)}
                         className="rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 p-1.5 transition-colors"
@@ -632,7 +655,7 @@ export default function TripsTable({ trips, onOpenDetail, onEdit, onDelete, onDu
             })}
             {visibleCount < trips.length &&
             <TableRow ref={sentinelRef} className="hover:bg-transparent">
-             <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-3">
+             <TableCell colSpan={11} className="text-center text-xs text-muted-foreground py-3">
                Loading more… ({visibleCount}/{trips.length})
              </TableCell>
             </TableRow>

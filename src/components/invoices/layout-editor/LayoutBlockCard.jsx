@@ -10,7 +10,7 @@ const ICON_MAP = { Building2, User, Table2, Calculator, FileText, PenLine, Panel
 export default function LayoutBlockCard({
   block, index, layout, dragHandleProps,
   onToggle, onMove, onConfigChange, onResetConfig, onApplyStyleToAll,
-  onSmartRestyle, onApplyPreset,
+  onSmartRestyle, onApplyPreset, onAutoFixOverlap,
   isExpanded, onExpand,
 }) {
   const meta = BLOCK_META[block.type];
@@ -90,6 +90,7 @@ export default function LayoutBlockCard({
             onApplyStyleToAll={() => onApplyStyleToAll(block.style)}
             onSmartRestyle={() => onSmartRestyle(block.id)}
             onApplyPreset={(preset) => onApplyPreset(block.id, block.type, preset)}
+            onAutoFixOverlap={() => onAutoFixOverlap(block.id)}
           />
         </div>
       )}

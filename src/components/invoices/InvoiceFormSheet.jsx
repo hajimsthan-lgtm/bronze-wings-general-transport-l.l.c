@@ -628,6 +628,18 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                       This invoice number already exists. Choose a different number.
                     </p>
                   )}
+                  {form.invoice_number === '' && suggestedNumber && !isEdit && (
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 flex-shrink-0 text-primary" />
+                      <span>Suggested:</span>
+                      <code className="font-mono font-semibold text-primary cursor-pointer hover:underline" onClick={() => { navigator.clipboard?.writeText(suggestedNumber); toast({ title: 'Copied', description: suggestedNumber }); }}>
+                        {suggestedNumber}
+                      </code>
+                      <button onClick={() => update('invoice_number', suggestedNumber)} className="text-[9px] text-primary hover:underline uppercase tracking-wider font-semibold">
+                        Use
+                      </button>
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground mb-1.5">{t('status')}</Label>

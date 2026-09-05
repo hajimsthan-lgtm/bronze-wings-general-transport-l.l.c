@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 
 const ALIGN_ICONS = { left: AlignLeft, center: AlignCenter, right: AlignRight };
 
-export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onResetColumns, onApplyStyleToAll, onResetFields, onResetSigSpacing, onSmartRestyle, onApplyPreset }) {
+export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onResetColumns, onApplyStyleToAll, onResetFields, onResetSigSpacing, onSmartRestyle, onApplyPreset, onAutoFixOverlap }) {
   const [tab, setTab] = useState('style');
   const isTable = block.type === 'table';
   const isBillTo = block.type === 'billTo';
@@ -108,10 +108,15 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
               </Button>
             ))}
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Button variant="default" size="sm" onClick={onSmartRestyle} className="h-7 text-xs gap-1" title="Auto-emphasize key fields">
               <Sparkles className="w-3 h-3" /> Smart Restyle
             </Button>
+            {isBillTo && (
+              <Button variant="outline" size="sm" onClick={onAutoFixOverlap} className="h-7 text-xs gap-1 border-amber-500/30 text-amber-500 hover:bg-amber-500/10" title="Auto-adjust field sizes & spacing to prevent text overlap">
+                <Wand2 className="w-3 h-3" /> Auto-Fix Overlap
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={onResetFields} className="h-7 text-xs gap-1"><RotateCcw className="w-3 h-3" /> Reset</Button>
           </div>
 

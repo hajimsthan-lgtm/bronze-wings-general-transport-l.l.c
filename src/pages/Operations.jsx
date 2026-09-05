@@ -87,7 +87,14 @@ export default function Operations() {
   const deleteTrip = useTripDelete();
   const { user } = useAuth();
   const { data: invoices = [], refetch: refetchInvoices } = useInvoices();
-  const invoiceMap = useMemo(() => Object.fromEntries((invoices || []).filter((i) => i.trip_id).map((i) => [i.trip_id, i])), [invoices]);
+  const invoiceMap = useMemo(() => {
+    const map = {};
+    (invoices || []).forEach(inv => {
+      if (!inv.trip_id) return;
+      String(inv.trip_id).split(',').forEach(tn => { const v = tn.trim(); if (v) map[v] = inv; });
+    });
+    return map;
+  }, [invoices]);
 
   const { dateFrom, dateTo, setDateFrom, setDateTo } = useGlobalDate();
   const isMobile = useIsMobile();

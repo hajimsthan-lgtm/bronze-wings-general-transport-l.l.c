@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 // A4 at 96dpi ≈ 794 × 1123 px. Render at 2× internal resolution for a crisp
 // preview that stays sharp across the full zoom range (downscaling is sharp).
-const RENDER_SCALE = 2;
+const RENDER_SCALE = 1;
 const A4_W = 794;
 const A4_H = 1123;
 

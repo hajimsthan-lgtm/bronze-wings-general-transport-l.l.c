@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Bug, CheckCircle2, AlertTriangle, RefreshCw, ChevronDown } from 'lucide-react';
+import { Bug, CheckCircle2, AlertTriangle, RefreshCw, ChevronDown, Lightbulb, Wrench, Info } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { formatCurrency } from '@/lib/formatters';
 
 /**
  * Runs diagnostics on invoices + payments and reports issues.
- * If no issues found, shows a "No errors" badge.
+ * Each issue includes a solution and advice for resolution.
  */
 export default function InvoiceDebugger({ invoices }) {
   const [open, setOpen] = useState(false);
@@ -31,6 +31,8 @@ export default function InvoiceDebugger({ invoices }) {
             severity: 'error',
             title: `Duplicate invoice number: ${num}`,
             detail: `${group.length} invoices share this number — ${group.map((g) => g.client_name).join(', ')}`,
+            solution: 'Edit one of the duplicate invoices and assign a unique invoice number.',
+            advice: 'Use the Refresh button after renumbering to verify the fix.',
           });
         }
       });
@@ -57,6 +59,8 @@ export default function InvoiceDebugger({ invoices }) {
             severity: 'error',
             title: `Payment mismatch: ${inv.invoice_number}`,
             detail: `Invoice paid_amount is ${formatCurrency(paid)} but linked payments sum to ${formatCurrency(sumAllocs)} — diff ${formatCurrency(Math.abs(paid - sumAllocs))}`,
+            solution: `Update the invoice paid_amount to ${formatCurrency(sumAllocs)} to match allocated payments, or adjust the payment allocations.`,
+            advice: 'Open the invoice and use the Payment modal to record a correction or adjust allocations from the SoA page.',
           });
         }
 
@@ -66,6 +70,8 @@ export default function InvoiceDebugger({ invoices }) {
             severity: 'warning',
             title: `Status "paid" but balance remains: ${inv.invoice_number}`,
             detail: `Total ${formatCurrency(total)}, paid ${formatCurrency(paid)}, balance ${formatCurrency(total - paid)}`,
+            solution: `Record the remaining ${formatCurrency(total - paid)} payment, or change the status back to "partially_paid".`,
+            advice: 'Verify the client has actually paid the remaining balance before recording it.',
           });
         }
         if (inv.status === 'partially_paid' && paid >= total - 0.01 && total > 0) {
@@ -73,6 +79,8 @@ export default function InvoiceDebugger({ invoices }) {
             severity: 'warning',
             title: `Status "partially_paid" but fully paid: ${inv.invoice_number}`,
             detail: `Total ${formatCurrency(total)}, paid ${formatCurrency(paid)} — should be "paid"`,
+            solution: 'Change the invoice status to "paid" to reflect the correct state.',
+            advice: 'This usually happens when a final payment was recorded without updating the status.',
           });
         }
         if (paid > total + 0.01 && total > 0) {
@@ -80,6 +88,8 @@ export default function InvoiceDebugger({ invoices }) {
             severity: 'error',
             title: `Overpaid: ${inv.invoice_number}`,
             detail: `Paid ${formatCurrency(paid)} exceeds total ${formatCurrency(total)} by ${formatCurrency(paid - total)}`,
+            solution: `Issue a refund of ${formatCurrency(paid - total)} to the client, or create a credit note for the next invoice.`,
+            advice: 'Contact the client to confirm whether they want a refund or a credit toward future invoices.',
           });
         }
       });
@@ -97,12 +107,14 @@ export default function InvoiceDebugger({ invoices }) {
           severity: 'warning',
           title: `${orphanCount} payment allocation(s) linked to missing invoices`,
           detail: 'These payments reference invoice IDs that no longer exist in the system.',
+          solution: 'Reallocate these payments to existing invoices, or delete the orphaned payment records.',
+          advice: 'Use the Statement of Account page to review all client payments and their allocations.',
         });
       }
 
       setIssues(found);
     } catch (e) {
-      setIssues([{ severity: 'error', title: 'Scan failed', detail: e.message }]);
+      setIssues([{ severity: 'error', title: 'Scan failed', detail: e.message, solution: 'Check your network connection and try again.', advice: 'If the error persists, contact support.' }]);
     } finally {
       setScanning(false);
     }
@@ -142,7 +154,7 @@ export default function InvoiceDebugger({ invoices }) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 w-[420px] max-w-[calc(100vw-2rem)] glass-card rounded-xl shadow-2xl overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 z-50 w-[480px] max-w-[calc(100vw-2rem)] glass-card rounded-xl shadow-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-border/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bug className="w-4 h-4 text-primary" />
@@ -158,7 +170,7 @@ export default function InvoiceDebugger({ invoices }) {
               </button>
             </div>
 
-            <div className="max-h-[360px] overflow-y-auto thin-scroll p-3 space-y-2">
+            <div className="max-h-[420px] overflow-y-auto thin-scroll p-3 space-y-2">
               {scanning && issues === null ? (
                 <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
                   <RefreshCw className="w-4 h-4 animate-spin mr-2" />
@@ -193,6 +205,28 @@ export default function InvoiceDebugger({ invoices }) {
                 </>
               )}
             </div>
+
+            {/* Advice section */}
+            <div className="border-t border-border/40 px-4 py-3 bg-muted/10">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">Advice</span>
+              </div>
+              <ul className="space-y-1 text-[11px] text-muted-foreground leading-snug">
+                <li className="flex items-start gap-1.5">
+                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary/60" />
+                  Run diagnostics after bulk payment operations to catch allocation mismatches early.
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary/60" />
+                  Use the Statement of Account page to reconcile client payments against invoice totals.
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary/60" />
+                  Always use the Refresh button after deleting invoices — sequence numbers auto-renumber.
+                </li>
+              </ul>
+            </div>
           </div>
         </>
       )}
@@ -206,9 +240,21 @@ function IssueRow({ iss }) {
     <div className={`rounded-lg border p-2.5 ${isError ? 'border-red-500/20 bg-red-500/5' : 'border-amber-500/20 bg-amber-500/5'}`}>
       <div className="flex items-start gap-2">
         <AlertTriangle className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${isError ? 'text-red-400' : 'text-amber-400'}`} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-foreground">{iss.title}</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{iss.detail}</p>
+          {iss.solution && (
+            <div className="mt-1.5 flex items-start gap-1.5 rounded-md bg-primary/5 border border-primary/15 px-2 py-1.5">
+              <Wrench className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
+              <p className="text-[11px] text-foreground/80 leading-snug">{iss.solution}</p>
+            </div>
+          )}
+          {iss.advice && (
+            <div className="mt-1 flex items-start gap-1.5">
+              <Lightbulb className="w-3 h-3 mt-0.5 flex-shrink-0 text-amber-400/70" />
+              <p className="text-[10px] text-muted-foreground/80 leading-snug italic">{iss.advice}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -538,6 +538,13 @@ export default function InvoicesPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    await refetch();
+    base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
+    getCompanySettings().then(setSettings).catch(() => {});
+    toast({ title: 'Invoices refreshed' });
+  };
+
   const handleLayoutSelect = (layout) => {
     setLayoutSelectorOpen(false);
     if (layoutSelectorTarget) handleDownload(layoutSelectorTarget, layout);
@@ -597,7 +604,7 @@ export default function InvoicesPage() {
           <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading} className="gap-2 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-50">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading} className="gap-2 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
