@@ -1,0 +1,41 @@
+{
+  "name": "Auto Backup Invoices to Drive",
+  "description": "Automatically generates a PDF backup of every finalized invoice and uploads it to Google Drive, organized by month",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Invoice",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ (.trigger.event_type == \"create\" and .trigger.data.status != \"draft\") or (.trigger.event_type == \"update\" and .trigger.data.status != \"draft\" and ((.trigger.old_data // {}).status // \"draft\") == \"draft\") }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_backup_invoices",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "backup_invoice": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoBackupInvoice",
+            "args": {
+              "invoice_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Backup invoice to Drive",
+            "description": "Generate PDF and upload to Google Drive"
+          }
+        }
+      }
+    ]
+  }
+}

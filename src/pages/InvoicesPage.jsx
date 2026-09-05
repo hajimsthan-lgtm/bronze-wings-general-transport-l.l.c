@@ -308,6 +308,7 @@ export default function InvoicesPage() {
       }
       toast({ title: 'Signed invoice attached', description: inv.invoice_number });
       refetch();
+      autoSaveToDrive(inv);
     } catch (e) {
       toast({ variant: 'destructive', title: 'Upload error', description: e.message });
     } finally {
@@ -357,6 +358,7 @@ export default function InvoicesPage() {
       });
       toast({ title: 'Sent for signature', description: `${inv.invoice_number} → Unsigned` });
       refetch();
+      autoSaveToDrive(inv);
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
     }
@@ -370,6 +372,7 @@ export default function InvoicesPage() {
       });
       toast({ title: 'Signature skipped', description: `${inv.invoice_number} → Sent (payment-ready)` });
       refetch();
+      autoSaveToDrive(inv);
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
     }
@@ -575,6 +578,35 @@ export default function InvoicesPage() {
       toast({ variant: 'destructive', title: 'Drive save failed', description: e.message });
     } finally {
       setDriveUploading(false);
+    }
+  };
+
+  const autoSaveToDrive = async (inv) => {
+    if (!inv) return;
+    try {
+      const s = await getCompanySettings();
+      const isMonthly = /Rental|Contract/i.test(inv.line_items?.[0]?.description || '');
+      const invoiceType = isMonthly ? 'monthly' : 'trip';
+      const { buildLayoutInvoicePdf } = await import('@/lib/invoiceLayoutRenderer');
+      const { deserializeLayout, DEFAULT_LAYOUT } = await import('@/lib/invoiceLayoutModel');
+      const layout = inv.custom_layout ? deserializeLayout(inv.custom_layout) : DEFAULT_LAYOUT;
+      const pdf = await buildLayoutInvoicePdf(inv, inv.client_name, s, layout, invoiceType);
+      const blob = pdf.output('blob');
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      await base44.functions.invoke('saveInvoiceToDrive', {
+        invoiceNumber: inv.invoice_number,
+        issueDate: inv.issue_date,
+        clientName: inv.client_name,
+        pdfBase64: base64,
+        fileName: `Invoice-${inv.invoice_number}.pdf`,
+      });
+      toast({ title: 'Auto-saved to Google Drive', description: `${inv.invoice_number} backed up` });
+    } catch (e) {
+      console.warn('Auto-save to Drive failed:', e.message);
     }
   };
 

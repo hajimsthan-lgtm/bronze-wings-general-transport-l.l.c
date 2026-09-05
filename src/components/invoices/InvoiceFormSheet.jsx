@@ -448,7 +448,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="w-full sm:max-w-5xl sm:h-[88vh] sm:max-h-[88vh] h-[100vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
+        className="w-full sm:max-w-5xl sm:h-[88vh] sm:max-h-[88vh] h-[100dvh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
         <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-3">
           <div className="space-y-1">
             <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>

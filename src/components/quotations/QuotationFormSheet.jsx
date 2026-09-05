@@ -165,7 +165,8 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
 
         <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
           {/* LEFT: Form */}
-          <div className={cn('w-full sm:w-1/2 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
+          <div className={cn('w-full sm:w-1/2 min-h-0 flex flex-col sm:border-r border-border', mobileView === 'form' ? 'flex' : 'hidden sm:flex')}>
+            <div className="flex-1 overflow-y-auto thin-scroll px-4 sm:px-5 py-4 space-y-4">
             {/* Client details */}
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
@@ -264,8 +265,9 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
               <Textarea value={form.notes || ''} onChange={e => update('notes', e.target.value)} rows={2} />
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 pt-2 pb-6">
+            </div>
+            {/* Actions — pinned at bottom */}
+            <div className="flex gap-2 pt-3 pb-4 px-4 sm:px-5 bg-background/95 backdrop-blur-sm border-t border-border flex-shrink-0">
               <Button onClick={handleSave} disabled={saving} className="flex-1">
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}

@@ -157,8 +157,9 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
 
         <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
           {/* LEFT: Form */}
-          <div className={cn('w-full sm:w-1/2 overflow-y-auto px-4 sm:px-5 py-4 sm:py-5 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
-            {/* CLIENT SECTION */}
+          <div className={cn('w-full sm:w-1/2 min-h-0 flex flex-col sm:border-r border-border', mobileView === 'form' ? 'flex' : 'hidden sm:flex')}>
+          <div className="flex-1 overflow-y-auto thin-scroll px-4 sm:px-5 py-4 sm:py-5 space-y-4">
+          {/* CLIENT SECTION */}
             <Section title="Client" accent="59, 130, 246" delay={0}>
               <ClientAutocomplete form={form} update={update} />
               <div className="grid grid-cols-2 gap-3">
@@ -293,7 +294,9 @@ export default function AgreementFormSheet({ open, onOpenChange, agreement, onSa
               </div>
             </Section>
 
-            <div className="flex gap-2 pt-1 pb-6">
+            </div>
+            {/* Actions — pinned at bottom */}
+            <div className="flex gap-2 pt-3 pb-4 px-4 sm:px-5 bg-background/95 backdrop-blur-sm border-t border-border flex-shrink-0">
               <Button onClick={handleSave} disabled={saving} className="flex-1">
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
