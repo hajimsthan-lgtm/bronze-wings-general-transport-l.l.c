@@ -91,7 +91,7 @@ export default function InvoicesPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => { setClients(c); setInvoicesClients(c); });
+    base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
     base44.auth.me().then(setCurrentUser).catch(() => {});
     getCompanySettings().then(setSettings).catch(() => {});
   }, []);
@@ -562,7 +562,7 @@ export default function InvoicesPage() {
             <LayoutTemplate className="w-4 h-4" />
             Templates
           </Button>
-          <Button size="sm" onClick={handleNew} className="gap-2 lightning-btn">
+          <Button size="sm" onClick={handleNew} className="gap-2 lightning-btn hidden">
             <Plus className="w-4 h-4" />
             New Invoice
           </Button>
@@ -655,7 +655,7 @@ export default function InvoicesPage() {
             onDeleteSigned={handleDeleteSigned}
             payments={payments}
             settings={settings}
-            onEditLayout={(inv) => { setLayoutEditorInvoice(inv); setLayoutEditorOpen(true); }} />
+            onEditLayout={(inv) => {setLayoutEditorInvoice(inv);setLayoutEditorOpen(true);}} />
           
               </div>
               </div>
@@ -690,7 +690,7 @@ export default function InvoicesPage() {
               onDeleteSigned={handleDeleteSigned}
               payments={payments}
               settings={settings}
-              onEditLayout={(inv) => { setLayoutEditorInvoice(inv); setLayoutEditorOpen(true); setMobileDetailOpen(false); }} />
+              onEditLayout={(inv) => {setLayoutEditorInvoice(inv);setLayoutEditorOpen(true);setMobileDetailOpen(false);}} />
 
               </div>
               </SheetContent>
@@ -742,17 +742,17 @@ export default function InvoicesPage() {
       <LayoutSelectorModal
         open={layoutSelectorOpen}
         onClose={() => setLayoutSelectorOpen(false)}
-        onSelect={handleLayoutSelect}
-      />
+        onSelect={handleLayoutSelect} />
+      
 
       <InvoiceLayoutEditor
         open={layoutEditorOpen}
-        onClose={() => { setLayoutEditorOpen(false); setLayoutEditorInvoice(null); }}
+        onClose={() => {setLayoutEditorOpen(false);setLayoutEditorInvoice(null);}}
         invoice={layoutEditorInvoice}
         clientName={layoutEditorInvoice?.client_name}
-        invoiceType={layoutEditorInvoice?.line_items?.some(li => li.service && li.service !== 'TRIP') || (layoutEditorInvoice?.line_items?.length || 0) <= 3 ? 'monthly' : 'trip'}
-        settings={settings}
-      />
+        invoiceType={layoutEditorInvoice?.line_items?.some((li) => li.service && li.service !== 'TRIP') || (layoutEditorInvoice?.line_items?.length || 0) <= 3 ? 'monthly' : 'trip'}
+        settings={settings} />
+      
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => {if (!open) setDeleteTarget(null);}}>
         <AlertDialogContent>
