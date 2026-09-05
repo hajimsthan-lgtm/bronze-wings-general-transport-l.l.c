@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, formatDateDash } from '@/lib/formatters';
 import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle, Users, Receipt, ListOrdered, Wallet } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
@@ -523,7 +523,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                                 </span>
                                 <span className="flex-1 min-w-0">
                                   <span className="block text-sm font-medium truncate">{tr.trip_number} · {route || 'Trip'}</span>
-                                  <span className="block text-[11px] text-muted-foreground">{tr.trip_date ? new Date(tr.trip_date).toLocaleDateString() : '—'} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
+                                  <span className="block text-[11px] text-muted-foreground">{formatDateDash(tr.trip_date)} · AED {Number(tr.revenue || tr.base_fare || 0).toFixed(2)}</span>
                                 </span>
                               </button>
                             );
@@ -557,7 +557,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                                 </span>
                                 <span className="flex-1 min-w-0">
                                   <span className="block text-sm font-medium truncate">{c.company_name}{c.vehicle_plate ? ` · ${c.vehicle_plate}` : ''}</span>
-                                  <span className="block text-[11px] text-muted-foreground">{c.start_date ? new Date(c.start_date).toLocaleDateString() : '—'} → {c.end_date ? new Date(c.end_date).toLocaleDateString() : '—'} · AED {Number(c.monthly_rate || 0).toFixed(2)}/mo</span>
+                                  <span className="block text-[11px] text-muted-foreground">{formatDateDash(c.start_date)} → {formatDateDash(c.end_date)} · AED {Number(c.monthly_rate || 0).toFixed(2)}/mo</span>
                                 </span>
                               </button>
                             );

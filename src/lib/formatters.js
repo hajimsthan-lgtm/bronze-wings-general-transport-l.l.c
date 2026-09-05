@@ -51,6 +51,16 @@ export function formatDateShort(date) {
   return moment(date).format('DD/MM/YY');
 }
 
+/**
+ * Format a date as DD-MM-YYYY (dashes).
+ * Uses normalizeDate first so dd-MM-yyyy / dd/MM/yyyy / ISO all parse consistently.
+ */
+export function formatDateDash(date) {
+  if (!date) return '—';
+  const normalized = normalizeDate(date);
+  return moment(normalized).format('DD-MM-YYYY');
+}
+
 export function formatNumber(num) {
   if (num == null) return '0';
   return Number(num).toLocaleString();
