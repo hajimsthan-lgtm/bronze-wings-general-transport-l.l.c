@@ -13,7 +13,7 @@ import { formatCurrency, formatDateDash } from '@/lib/formatters';
 import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle, Users, Receipt, ListOrdered, Wallet } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
-import { persistManualInvoiceNumber } from '@/lib/invoiceSequence';
+import { persistManualInvoiceNumber, reallocateInvoiceNumbers, buildInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
@@ -339,7 +339,42 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
       let invoiceId = editInvoice?.id;
       let invoiceNumber = form.invoice_number;
       if (editInvoice) {
+        const oldNumber = editInvoice.invoice_number;
+        const newNumber = form.invoice_number;
+        const numberChanged = oldNumber && newNumber && oldNumber !== newNumber;
+        let reallocated = [];
+        let undoSnapshot = null;
+        if (numberChanged) {
+          try {
+            undoSnapshot = await buildInvoiceNumberSnapshot();
+            const result = await reallocateInvoiceNumbers(editInvoice.id, oldNumber, newNumber);
+            reallocated = result.reallocated || [];
+            if (result.updates.length > 0) {
+              await base44.entities.Invoice.bulkUpdate(result.updates);
+            }
+          } catch (e) { /* non-blocking — best-effort reallocation */ }
+        }
         await updateInvoice.mutateAsync({ id: editInvoice.id, data });
+        if (numberChanged) {
+          try {
+            const me = await base44.auth.me().catch(() => null);
+            await base44.entities.InvoiceNumberChange.create({
+              invoice_id: editInvoice.id,
+              invoice_number: newNumber,
+              from_number: oldNumber,
+              to_number: newNumber,
+              reason: 'Manual edit from invoice form',
+              changed_by: me?.full_name || me?.email || 'Unknown',
+              changed_at: new Date().toISOString(),
+              action_type: 'manual_edit',
+              reallocated_invoices: reallocated,
+              undo_snapshot: undoSnapshot || {},
+            });
+            window.dispatchEvent(new CustomEvent('invoice:number-changed', {
+              detail: { invoiceId: editInvoice.id, fromNumber: oldNumber, toNumber: newNumber, reallocated, undoSnapshot }
+            }));
+          } catch { /* non-blocking */ }
+        }
       } else {
         const created = await createInvoice.mutateAsync(data);
         invoiceId = created?.id;

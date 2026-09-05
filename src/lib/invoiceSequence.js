@@ -132,5 +132,100 @@ export async function persistManualInvoiceNumber(manualNumber, originalSuggested
   await base44.entities.CompanySettings.update(s.id, update);
 }
 
+/**
+ * Smart reallocation: when an invoice number is manually changed from the middle
+ * of the sequence, shift the surrounding invoices to maintain a gap-free sequence.
+ *
+ * Example: invoices are 0001..0005. User changes 0003 → 0010.
+ *   → invoices 0004, 0005 shift DOWN to 0003, 0004 (filling the gap).
+ *   → the changed invoice takes 0010.
+ *
+ * Example: invoices are 0001..0005. User changes 0004 → 0002.
+ *   → invoices 0002, 0003 shift UP to 0003, 0004 (making room).
+ *   → the changed invoice takes 0002.
+ *
+ * Returns { updates, reallocated } where updates is an array of {id, invoice_number}
+ * for bulkUpdate, and reallocated is an array of {invoice_id, from_number, to_number}.
+ */
+export async function reallocateInvoiceNumbers(invoiceId, oldNumber, newNumber, year) {
+  const oldParsed = parseInvoiceNumber(oldNumber);
+  const newParsed = parseInvoiceNumber(newNumber);
+  if (!oldParsed || !newParsed || oldParsed.year !== newParsed.year) {
+    return { updates: [], reallocated: [] };
+  }
+  year = year || newParsed.year;
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+
+  // Only non-voided, new-format invoices in the same year are eligible for shifting
+  const eligible = (all || []).filter((inv) => {
+    if (inv.id === invoiceId) return false;
+    if (inv.voided) return false;
+    const p = parseInvoiceNumber(inv.invoice_number);
+    return p && p.year === year;
+  });
+
+  const oldSeq = oldParsed.seq;
+  const newSeq = newParsed.seq;
+
+  const updates = [];
+  const reallocated = [];
+
+  if (newSeq > oldSeq) {
+    // Moving forward: shift invoices in (oldSeq, newSeq] down by 1 to fill the gap
+    eligible.forEach((inv) => {
+      const p = parseInvoiceNumber(inv.invoice_number);
+      if (p.seq > oldSeq && p.seq <= newSeq) {
+        const shifted = formatInvoiceNumber(year, p.seq - 1);
+        updates.push({ id: inv.id, invoice_number: shifted });
+        reallocated.push({ invoice_id: inv.id, from_number: inv.invoice_number, to_number: shifted });
+      }
+    });
+  } else if (newSeq < oldSeq) {
+    // Moving backward: shift invoices in [newSeq, oldSeq) up by 1 to make room
+    eligible.forEach((inv) => {
+      const p = parseInvoiceNumber(inv.invoice_number);
+      if (p.seq >= newSeq && p.seq < oldSeq) {
+        const shifted = formatInvoiceNumber(year, p.seq + 1);
+        updates.push({ id: inv.id, invoice_number: shifted });
+        reallocated.push({ invoice_id: inv.id, from_number: inv.invoice_number, to_number: shifted });
+      }
+    });
+  }
+
+  return { updates, reallocated };
+}
+
+/**
+ * Build a full snapshot of all invoice numbers (id → invoice_number) for undo purposes.
+ */
+export async function buildInvoiceNumberSnapshot() {
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+  const snapshot = {};
+  (all || []).forEach((inv) => {
+    if (inv.invoice_number) snapshot[inv.id] = inv.invoice_number;
+  });
+  return snapshot;
+}
+
+/**
+ * Restore invoice numbers from a snapshot (undo).
+ * Returns the updates array that was applied.
+ */
+export async function restoreInvoiceNumberSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object') return [];
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+  const updates = [];
+  (all || []).forEach((inv) => {
+    const targetNum = snapshot[inv.id];
+    if (targetNum && targetNum !== inv.invoice_number) {
+      updates.push({ id: inv.id, invoice_number: targetNum });
+    }
+  });
+  if (updates.length > 0) {
+    await base44.entities.Invoice.bulkUpdate(updates);
+  }
+  return updates;
+}
+
 /** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
 export { generateNextInvoiceNumber as generateInvoiceNumber };

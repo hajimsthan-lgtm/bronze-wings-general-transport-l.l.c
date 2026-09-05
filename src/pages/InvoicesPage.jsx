@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw, CloudUpload } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw, CloudUpload, Undo2, Redo2, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -46,7 +46,9 @@ import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
 import InvoiceDebugger from '@/components/invoices/InvoiceDebugger';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
-import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
+import { restructureInvoiceSequence, restoreInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
+import { useUndoRedo, registerNumberChangeUndo } from '@/hooks/useUndoRedo';
+import InvoiceNumberHistoryPanel from '@/components/invoices/InvoiceNumberHistoryPanel';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { deriveStatus, computeTabCounts, filterByTab } from '@/lib/invoiceWorkflow';
 import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, setInvoicesClients } from '@/lib/invoicesStore';
@@ -90,6 +92,9 @@ export default function InvoicesPage() {
   const [settings, setSettings] = useState({});
   const { dateFrom, dateTo } = useGlobalDate();
   const navigate = useNavigate();
+  const { undoStack, redoStack, canUndo, canRedo, pushAction, undo, redo, busy: undoBusy } = useUndoRedo({ refetch, toast });
+  const [historyRefresh, setHistoryRefresh] = useState(0);
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
@@ -110,6 +115,28 @@ export default function InvoicesPage() {
       window.removeEventListener('invoices:layoutEditor', onLayoutEditor);
     };
   }, []);
+
+  // Listen for invoice number changes from the form sheet → register undo + refresh history
+  useEffect(() => {
+    const onNumberChanged = async (e) => {
+      const { invoiceId, fromNumber, toNumber, reallocated, undoSnapshot } = e.detail || {};
+      try {
+        const me = currentUser?.full_name || currentUser?.email || 'Unknown';
+        await registerNumberChangeUndo({
+          undoSnapshot,
+          fromNumber,
+          toNumber,
+          reallocated,
+          invoiceId,
+          pushAction,
+          changedBy: me,
+        });
+      } catch { /* non-blocking */ }
+      setHistoryRefresh((r) => r + 1);
+    };
+    window.addEventListener('invoice:number-changed', onNumberChanged);
+    return () => window.removeEventListener('invoice:number-changed', onNumberChanged);
+  }, [currentUser, pushAction]);
 
   const handleClientClick = (clientName) => {
     const client = clients.find((c) => c.name === clientName);
@@ -159,7 +186,19 @@ export default function InvoicesPage() {
 
   const doStatusUpdate = async (inv, newStatus, extraData = {}) => {
     try {
+      const prevStatus = inv.status;
+      const prevData = { status: prevStatus, ...Object.fromEntries(Object.keys(extraData).map(k => [k, inv[k]])) };
       await base44.entities.Invoice.update(inv.id, { status: newStatus, ...extraData });
+      pushAction({
+        label: `${inv.invoice_number}: ${prevStatus} → ${newStatus}`,
+        type: 'status_change',
+        undo: async () => {
+          await base44.entities.Invoice.update(inv.id, prevData);
+        },
+        redo: async () => {
+          await base44.entities.Invoice.update(inv.id, { status: newStatus, ...extraData });
+        },
+      });
       refetch();
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: e.message });
@@ -542,7 +581,42 @@ export default function InvoicesPage() {
     await refetch();
     base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
     getCompanySettings().then(setSettings).catch(() => {});
+    setHistoryRefresh((r) => r + 1);
     toast({ title: 'Invoices refreshed' });
+  };
+
+  // Undo a specific history entry (restore its snapshot)
+  const handleUndoHistoryEntry = async (ch) => {
+    if (!ch?.undo_snapshot || Object.keys(ch.undo_snapshot).length === 0) {
+      toast({ variant: 'destructive', title: 'Cannot undo', description: 'No snapshot was saved for this change.' });
+      return;
+    }
+    try {
+      const restored = await restoreInvoiceNumberSnapshot(ch.undo_snapshot);
+      // Record the undo as a new history entry
+      const me = currentUser?.full_name || currentUser?.email || 'Unknown';
+      await base44.entities.InvoiceNumberChange.create({
+        invoice_id: ch.invoice_id,
+        invoice_number: ch.from_number,
+        from_number: ch.to_number,
+        to_number: ch.from_number,
+        reason: `Undo: reverted ${ch.to_number} back to ${ch.from_number}`,
+        changed_by: me,
+        changed_at: new Date().toISOString(),
+        action_type: 'undo',
+        reallocated_invoices: (ch.reallocated_invoices || []).map((r) => ({
+          invoice_id: r.invoice_id,
+          from_number: r.to_number,
+          to_number: r.from_number,
+        })),
+        undo_snapshot: {},
+      });
+      toast({ title: 'Undone', description: `${ch.to_number} → ${ch.from_number} (${restored.length} invoices restored)` });
+      setHistoryRefresh((r) => r + 1);
+      refetch();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Undo failed', description: e.message });
+    }
   };
 
   const handleLayoutSelect = (layout) => {
@@ -604,6 +678,39 @@ export default function InvoicesPage() {
           <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 mr-1 pr-2 border-r border-border/40">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={undo}
+              disabled={!canUndo || undoBusy}
+              className="gap-1.5 h-8 px-2.5 border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed"
+              title={canUndo ? `Undo: ${undoStack[undoStack.length - 1]?.label || ''}` : 'Nothing to undo'}
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              <span className="text-xs">Undo</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={redo}
+              disabled={!canRedo || undoBusy}
+              className="gap-1.5 h-8 px-2.5 border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 disabled:opacity-30 disabled:cursor-not-allowed"
+              title={canRedo ? `Redo: ${redoStack[redoStack.length - 1]?.label || ''}` : 'Nothing to redo'}
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+              <span className="text-xs">Redo</span>
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setHistoryOpen((v) => !v)}
+            className={`gap-2 h-8 ${historyOpen ? 'border-primary/40 text-primary bg-primary/10' : 'border-border/60 text-muted-foreground hover:text-foreground'}`}
+          >
+            <History className="w-3.5 h-3.5" />
+            History
+          </Button>
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading} className="gap-2 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -664,7 +771,7 @@ export default function InvoicesPage() {
         }
         </div> :
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px]">
+      <div className={`grid grid-cols-1 lg:gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px] ${historyOpen ? 'lg:grid-cols-7' : 'lg:grid-cols-5'}`}>
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane
@@ -688,7 +795,7 @@ export default function InvoicesPage() {
             </div>
 
           {/* Right pane — detail / generator (desktop) */}
-          <div className="hidden lg:block lg:col-span-3 min-h-0 h-full">
+          <div className={`hidden lg:block min-h-0 h-full ${historyOpen ? 'lg:col-span-3' : 'lg:col-span-3'}`}>
             <InvoiceDetailPane
             inv={selectedInvoice}
             clients={clients}
@@ -709,6 +816,15 @@ export default function InvoicesPage() {
             onEditLayout={(inv) => {setLayoutEditorInvoice(inv);setLayoutEditorOpen(true);}} />
           
               </div>
+
+          {/* History pane — right side (desktop) */}
+          {historyOpen && (
+            <div className="hidden lg:block lg:col-span-2 min-h-0 h-full">
+              <div className="h-full rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden">
+                <InvoiceNumberHistoryPanel refreshKey={historyRefresh} onUndo={handleUndoHistoryEntry} />
+              </div>
+            </div>
+          )}
               </div>
       }
 
