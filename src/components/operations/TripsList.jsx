@@ -156,7 +156,7 @@ export default function TripsList({ trips, onOpenDetail, onEdit, onDelete, onSta
       )}
 
       {visibleTrips.map((trip, i) => {
-        const invoice = invoiceMap?.[trip.id];
+        const invoice = invoiceMap?.[trip.trip_number];
         const isSent = invoice?.status === 'sent';
         const isSelected = selected.has(trip.id);
         const statusOpt = STATUS_OPTIONS.find((s) => s.value === trip.status) || STATUS_OPTIONS[0];
