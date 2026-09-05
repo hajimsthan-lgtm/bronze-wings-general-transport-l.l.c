@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useReducer } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck } from 'lucide-react';
+import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck, Printer, CloudUpload } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -253,6 +253,58 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
     } catch (e) { toast({ variant: 'destructive', title: 'Delete failed', description: e.message }); }
   };
 
+  // Save layout to this specific invoice record + download PDF
+  const handleSaveAndPrint = async () => {
+    if (validation.errors.length > 0) return;
+    setSaving(true);
+    try {
+      if (invoice?.id) {
+        await base44.entities.Invoice.update(invoice.id, { custom_layout: serializeLayout(layout) });
+      }
+      const { renderLayoutPDF } = await import('@/lib/invoiceLayoutRenderer');
+      await renderLayoutPDF(previewInvoice, previewClient, settings || {}, layout, invoiceType);
+      toast({ title: 'Layout saved & PDF downloaded', description: invoice?.invoice_number || 'Invoice' });
+      onClose();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Error', description: e.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Save layout to invoice + upload PDF to Google Drive
+  const [driveUploading, setDriveUploading] = useState(false);
+  const handleSaveToDrive = async () => {
+    if (validation.errors.length > 0) return;
+    setDriveUploading(true);
+    try {
+      if (invoice?.id) {
+        await base44.entities.Invoice.update(invoice.id, { custom_layout: serializeLayout(layout) });
+      }
+      const { buildLayoutInvoicePdf } = await import('@/lib/invoiceLayoutRenderer');
+      const pdf = await buildLayoutInvoicePdf(previewInvoice, previewClient, settings || {}, layout, invoiceType);
+      const blob = pdf.output('blob');
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      const res = await base44.functions.invoke('saveInvoiceToDrive', {
+        invoiceNumber: invoice?.invoice_number || 'untitled',
+        issueDate: invoice?.issue_date || previewInvoice.issue_date,
+        clientName: previewClient,
+        pdfBase64: base64,
+        fileName: `Invoice-${invoice?.invoice_number || 'untitled'}.pdf`,
+      });
+      toast({ title: 'Saved to Google Drive', description: `${invoice?.invoice_number || 'Invoice'} → ${res?.data?.folder || ''} folder` });
+      onClose();
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Drive save failed', description: e.message });
+    } finally {
+      setDriveUploading(false);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
@@ -400,6 +452,18 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
             <Button variant="outline" onClick={handleDuplicate} className="gap-2">
               <Copy className="w-4 h-4" /> Duplicate
             </Button>
+            {invoice?.id && (
+              <Button onClick={handleSaveAndPrint} disabled={saving || driveUploading || validation.errors.length > 0} className="gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+                Save & Print
+              </Button>
+            )}
+            {invoice?.id && (
+              <Button onClick={handleSaveToDrive} disabled={saving || driveUploading || validation.errors.length > 0} variant="outline" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+                {driveUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
+                Save to Drive
+              </Button>
+            )}
             <Button onClick={handleSave} disabled={saving || validation.errors.length > 0 || !layoutName.trim()} className="gap-2">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               Save Layout

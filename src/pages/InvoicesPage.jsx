@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw, CloudUpload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -496,8 +496,46 @@ export default function InvoicesPage() {
   };
 
   const handleDownloadWithLayoutSelect = (inv) => {
-    setLayoutSelectorTarget(inv);
-    setLayoutSelectorOpen(true);
+    // Auto-apply saved custom layout — skip template prompt
+    if (inv.custom_layout) {
+      handleDownload(inv, inv.custom_layout);
+    } else {
+      setLayoutSelectorTarget(inv);
+      setLayoutSelectorOpen(true);
+    }
+  };
+
+  const [driveUploading, setDriveUploading] = useState(false);
+  const handleSaveToDrive = async (inv) => {
+    if (!inv) return;
+    setDriveUploading(true);
+    try {
+      const settings = await getCompanySettings();
+      const isMonthly = /Rental|Contract/i.test(inv.line_items?.[0]?.description || '');
+      const invoiceType = isMonthly ? 'monthly' : 'trip';
+      const { buildLayoutInvoicePdf } = await import('@/lib/invoiceLayoutRenderer');
+      const { deserializeLayout, DEFAULT_LAYOUT } = await import('@/lib/invoiceLayoutModel');
+      const layout = inv.custom_layout ? deserializeLayout(inv.custom_layout) : DEFAULT_LAYOUT;
+      const pdf = await buildLayoutInvoicePdf(inv, inv.client_name, settings, layout, invoiceType);
+      const blob = pdf.output('blob');
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+      const res = await base44.functions.invoke('saveInvoiceToDrive', {
+        invoiceNumber: inv.invoice_number,
+        issueDate: inv.issue_date,
+        clientName: inv.client_name,
+        pdfBase64: base64,
+        fileName: `Invoice-${inv.invoice_number}.pdf`,
+      });
+      toast({ title: 'Saved to Google Drive', description: `${inv.invoice_number} → ${res?.data?.folder || ''} folder` });
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Drive save failed', description: e.message });
+    } finally {
+      setDriveUploading(false);
+    }
   };
 
   const handleLayoutSelect = (layout) => {
@@ -567,6 +605,10 @@ export default function InvoicesPage() {
           <Button variant="outline" size="sm" onClick={() => setTemplateManagerOpen(true)} className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
             <LayoutTemplate className="w-4 h-4" />
             Templates
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handleSaveToDrive(selectedInvoice)} disabled={!selectedInvoice || driveUploading} className="gap-2 border-primary/30 text-primary hover:bg-primary/10 disabled:opacity-40">
+            {driveUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
+            Save to Drive
           </Button>
         </div>
       </div>

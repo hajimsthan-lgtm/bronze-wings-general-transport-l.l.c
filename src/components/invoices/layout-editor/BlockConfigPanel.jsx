@@ -9,6 +9,7 @@ import {
 import {
   FONT_FAMILIES, FONT_WEIGHTS, ALIGNMENTS, DEFAULT_COLUMNS, smartAdjustColumns, distributeColumnsEvenly,
   BILLTO_FIELDS, SIGNATURE_FIELDS, BILLTO_PRESETS, SIGNATURE_PRESETS, SIGNATURE_SMART_STYLES,
+  DEFAULT_SIG_ELEMENTS, DEFAULT_TABLE_PAGINATION,
 } from '@/lib/invoiceLayoutModel';
 import { cn } from '@/lib/utils';
 
@@ -197,9 +198,40 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
             );
           })}
 
-          {/* Signature internal spacing */}
+          {/* Signature element checklist */}
           {isSignature && (
             <>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold pt-2">Elements Checklist</div>
+              <div className="space-y-1">
+                {[
+                  { key: 'authorizedBy', label: 'Authorized By line' },
+                  { key: 'receivedBy', label: 'Received By line' },
+                  { key: 'companyStamp', label: 'Company Stamp placeholder' },
+                  { key: 'dateField', label: 'Date field' },
+                  { key: 'termsAccepted', label: '"Terms accepted" line' },
+                ].map(el => {
+                  const checked = block.sigElements?.[el.key] !== false;
+                  return (
+                    <label key={el.key} className="flex items-center gap-2 cursor-pointer rounded-lg border border-border/30 px-2 py-1.5 hover:bg-muted/20 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={e => onUpdate('sigElements', { [el.key]: e.target.checked })}
+                        className="w-3.5 h-3.5 rounded accent-primary"
+                      />
+                      <span className={cn('text-xs flex-1', checked ? 'text-foreground font-medium' : 'text-muted-foreground')}>{el.label}</span>
+                      {!checked && <span className="text-[9px] text-muted-foreground/60">collapsed</span>}
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-muted-foreground/70 leading-snug">
+                Unchecked items collapse entirely — no empty gap left behind.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => onUpdate('sigElements', { ...DEFAULT_SIG_ELEMENTS })} className="h-7 text-xs gap-1">
+                <RotateCcw className="w-3 h-3" /> Reset Elements
+              </Button>
+
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold pt-2">Signature Spacing</div>
               <Row label="Bank→Sig gap">
                 <Slider min={0} max={10} step={0.5} value={sigSpacing.sigGap ?? 2} onChange={v => updateSigSpacing({ sigGap: v })} suffix="mm" format={v => v.toFixed(1)} />
@@ -325,6 +357,45 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
             <Settings2 className="w-2.5 h-2.5 inline mr-1" />
             Tap the gear icon per column to set alignment, weight & size. Text auto-clips to column width — no overlap.
           </p>
+
+          {/* Pagination control */}
+          <div className="pt-2 border-t border-border/30 space-y-2">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Rows Per Page</div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onUpdate('pagination', { mode: 'auto' })}
+                className={cn('px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
+                  (block.pagination?.mode || 'auto') === 'auto' ? 'bg-primary/20 text-primary border-primary/30' : 'text-muted-foreground hover:text-foreground border-border/40')}
+              >
+                Auto-balance
+              </button>
+              <button
+                onClick={() => onUpdate('pagination', { mode: 'manual' })}
+                className={cn('px-2.5 py-1 rounded-lg text-xs font-medium border transition-all',
+                  block.pagination?.mode === 'manual' ? 'bg-primary/20 text-primary border-primary/30' : 'text-muted-foreground hover:text-foreground border-border/40')}
+              >
+                Manual
+              </button>
+            </div>
+            {block.pagination?.mode === 'manual' && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={3}
+                  max={100}
+                  value={block.pagination?.rowsPerPage ?? 20}
+                  onChange={e => onUpdate('pagination', { rowsPerPage: Math.max(3, Number(e.target.value) || 20) })}
+                  className="w-20 h-8 rounded-lg bg-muted/30 border border-border/40 text-xs text-foreground px-2 text-center"
+                />
+                <span className="text-xs text-muted-foreground">rows per page — remaining rows flow to next page</span>
+              </div>
+            )}
+            {(block.pagination?.mode || 'auto') === 'auto' && (
+              <p className="text-[10px] text-muted-foreground/70 leading-snug">
+                Auto-balance calculates max rows that fit before the footer and fills each page — no dead space.
+              </p>
+            )}
+          </div>
         </div>
       )}
 

@@ -36,6 +36,7 @@ import { autoStartScheduledTrips, migrateTripStatuses } from '@/lib/tripStatusWo
 import { getCompanySettings } from '@/lib/companySettings';
 import { useAuth } from '@/lib/AuthContext';
 import TripDebuggerModal from '@/components/operations/TripDebuggerModal';
+import TripFilterBar from '@/components/operations/TripFilterBar';
 
 const TRIP_STATUSES = ['all', 'scheduled', 'trip_started', 'trip_ended', 'completed', 'cancelled'];
 const CONTRACT_STATUSES = ['all', 'active', 'expired', 'terminated'];
@@ -105,6 +106,12 @@ export default function Operations() {
   const [vehicleMap, setVehicleMap] = useState({});
   const [clientMap, setClientMap] = useState({});
   const [clientsList, setClientsList] = useState([]);
+  const [driversList, setDriversList] = useState([]);
+  const [vehiclesList, setVehiclesList] = useState([]);
+  const [filterStatuses, setFilterStatuses] = useState(new Set());
+  const [filterClient, setFilterClient] = useState('all');
+  const [filterDriver, setFilterDriver] = useState('all');
+  const [filterVehicle, setFilterVehicle] = useState('all');
   const clientContactMap = useMemo(() => Object.fromEntries((clientsList || []).map((c) => [c.name, c.contact_person || ''])), [clientsList]);
   const [companySettings, setCompanySettings] = useState({ vendor_rate_percentage: 80 });
   const [debuggerOpen, setDebuggerOpen] = useState(false);
@@ -166,6 +173,8 @@ export default function Operations() {
       setVehicleMap(Object.fromEntries((vehicles || []).map((v) => [v.plate_number, v.id])));
       setClientMap(Object.fromEntries((clients || []).map((c) => [c.name, c.id])));
       setClientsList(clients || []);
+      setDriversList(drivers || []);
+      setVehiclesList(vehicles || []);
     } catch {}
   }, []);
 
@@ -212,7 +221,13 @@ export default function Operations() {
     if (trip.is_draft) return false;
     if (trip.deleted_at) return false;
     if (!inGlobalDateRange(normalizeDate(trip.trip_date), dateFrom, dateTo)) return false;
-    if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
+    // Multi-select status from filter bar takes precedence; fall back to single-select tripFilter
+    if (filterStatuses.size > 0) {
+      if (!filterStatuses.has(trip.status)) return false;
+    } else if (tripFilter !== 'all' && trip.status !== tripFilter) return false;
+    if (filterClient !== 'all' && trip.client_name !== filterClient) return false;
+    if (filterDriver !== 'all' && trip.driver_name !== filterDriver) return false;
+    if (filterVehicle !== 'all' && trip.vehicle_plate !== filterVehicle) return false;
     if (search) {
       const q = search.toLowerCase();
       return trip.trip_number?.toLowerCase().includes(q) ||
@@ -229,7 +244,7 @@ export default function Operations() {
     const da = new Date(a.trip_date || a.created_date).getTime();
     const db = new Date(b.trip_date || b.created_date).getTime();
     return db - da;
-  }), [trips, dateFrom, dateTo, tripFilter, search]);
+  }), [trips, dateFrom, dateTo, tripFilter, search, filterStatuses, filterClient, filterDriver, filterVehicle]);
 
   const filteredContracts = useMemo(() => contracts.filter((c) => {
     if (contractFilter !== 'all' && c.status !== contractFilter) return false;
@@ -458,9 +473,47 @@ export default function Operations() {
 
   const totalRevenue = filteredTrips.reduce((s, t) => s + (Number(t.revenue) || 0), 0);
 
+  const toggleFilterStatus = (status) => {
+    setFilterStatuses(prev => {
+      const n = new Set(prev);
+      if (n.has(status)) n.delete(status); else n.add(status);
+      return n;
+    });
+  };
+  const clearAllFilters = () => {
+    setFilterStatuses(new Set());
+    setFilterClient('all');
+    setFilterDriver('all');
+    setFilterVehicle('all');
+    setDateFrom('');
+    setDateTo('');
+  };
+
   return (
     <div>
       <PullToRefresh onRefresh={() => { refetchTrips(); refetchInvoices(); loadContracts(); }}>
+        {showTrips && !isMobile && (
+          <TripFilterBar
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+            selectedStatuses={filterStatuses}
+            onToggleStatus={toggleFilterStatus}
+            clients={clientsList}
+            drivers={driversList}
+            vehicles={vehiclesList}
+            clientFilter={filterClient}
+            onClientFilterChange={setFilterClient}
+            driverFilter={filterDriver}
+            onDriverFilterChange={setFilterDriver}
+            vehicleFilter={filterVehicle}
+            onVehicleFilterChange={setFilterVehicle}
+            onClearAll={clearAllFilters}
+            totalCount={trips.filter(t => !t.is_draft && !t.deleted_at).length}
+            filteredCount={filteredTrips.length}
+          />
+        )}
         <div className="mb-3">
           {isMobile ? (
             <MobileOperationsStats

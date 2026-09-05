@@ -65,6 +65,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   );
   const tableBlock = layout.blocks.find(b => b.type === 'table');
   if (tableBlock?.columns) cols = applyCustomColumns(cols, tableBlock);
+  const tablePagination = tableBlock?.pagination || { mode: 'auto', rowsPerPage: 20 };
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
@@ -143,13 +144,45 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
         newY = drawTermsInline(pdf, y, invoiceType);
         break;
       case 'signature': {
-        const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType, block.fields, block.style);
+        // Merge sigElements checklist into field visibility
+        const sigElements = block.sigElements || {};
+        const mergedFields = { ...block.fields };
+        if (sigElements.authorizedBy === false) {
+          ['authLabel', 'authCaption', 'authCompany'].forEach(k => {
+            mergedFields[k] = { ...(mergedFields[k] || {}), visible: false };
+          });
+        }
+        if (sigElements.receivedBy === false) {
+          ['recvLabel', 'recvCaption', 'recvClient'].forEach(k => {
+            mergedFields[k] = { ...(mergedFields[k] || {}), visible: false };
+          });
+        }
+        const bankH = drawBankDetailsBlock(pdf, s, y, invoiceType, mergedFields, block.style);
         y += bankH + (block.sigSpacing?.sigGap ?? 2);
-        drawTripSignaturesWithCompany(pdf, invoice, clientName, y, block.fields, block.style, block.sigSpacing);
-        // Dynamic height: sigTopGap (top→line) + captionNameGap (line→name) + name lines (up to 3 × 3mm) + padding
+        drawTripSignaturesWithCompany(pdf, invoice, clientName, y, mergedFields, block.style, block.sigSpacing);
         const sigTopGap = block.sigSpacing?.sigTopGap ?? 12;
         const captionNameGap = block.sigSpacing?.captionNameGap ?? 7;
-        newY = y + sigTopGap + captionNameGap + 10;
+        let extraY = y + sigTopGap + captionNameGap + 10;
+
+        // Optional checklist elements — drawn below signatures, collapse entirely when unchecked
+        if (sigElements.companyStamp) {
+          pdf.setFont('times', 'italic'); pdf.setFontSize(8); tc(pdf, GRAY);
+          pdf.setDrawColor(150, 150, 150); pdf.setLineWidth(0.3);
+          pdf.rect(CONTENT_RIGHT - 35, extraY, 25, 12);
+          pdf.text('Company Stamp', CONTENT_RIGHT - 22, extraY + 7, { align: 'center' });
+          extraY += 14;
+        }
+        if (sigElements.dateField) {
+          pdf.setFont('times', 'normal'); pdf.setFontSize(9); tc(pdf, BLACK);
+          pdf.text('Date: __________________', CONTENT_X, extraY + 4);
+          extraY += 7;
+        }
+        if (sigElements.termsAccepted) {
+          pdf.setFont('times', 'normal'); pdf.setFontSize(8); tc(pdf, GRAY);
+          pdf.text('I accept the terms and conditions stated above.', CONTENT_X, extraY + 4);
+          extraY += 6;
+        }
+        newY = extraY;
         break;
       }
       default: break;
@@ -193,6 +226,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
     dc(pdf, BLACK); pdf.setLineWidth(0.3); pdf.rect(CONTENT_X, y, CONTENT_W, 7);
     y += 7;
   } else {
+    let rowsOnPage = 0;
     for (let idx = 0; idx < items.length; idx++) {
       const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
       const _indLine = buildIndicatorLine(items[idx]);
@@ -201,12 +235,18 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
       const estH = Math.max(6.5, descLines.length * 2.8 + 3);
       const isLast = idx === items.length - 1;
 
-      if (isLast) {
-        if (y + estH + afterTableHeight + 2 > FOOTER_RESERVED_TOP) y = startNewPage();
+      // Manual rows-per-page: break after exactly N rows
+      if (tablePagination.mode === 'manual' && rowsOnPage >= tablePagination.rowsPerPage) {
+        y = startNewPage();
+        rowsOnPage = 0;
+      } else if (isLast) {
+        if (y + estH + afterTableHeight + 2 > FOOTER_RESERVED_TOP) { y = startNewPage(); rowsOnPage = 0; }
       } else if (y + estH > contentBottom) {
         y = startNewPage();
+        rowsOnPage = 0;
       }
       y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice, invStyle);
+      rowsOnPage++;
     }
   }
 

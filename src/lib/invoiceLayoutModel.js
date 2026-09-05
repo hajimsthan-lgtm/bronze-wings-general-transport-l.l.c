@@ -78,6 +78,18 @@ export const SIGNATURE_FIELDS = [
 // Default signature internal spacing (mm)
 export const DEFAULT_SIG_SPACING = { sigGap: 2, sigTopGap: 12, lineCaptionGap: 3.5, captionNameGap: 7 };
 
+// Default signature element checklist — unchecked items collapse entirely
+export const DEFAULT_SIG_ELEMENTS = {
+  authorizedBy: true,
+  receivedBy: true,
+  companyStamp: false,
+  dateField: false,
+  termsAccepted: false,
+};
+
+// Default table pagination — auto-balance fills each page to the footer
+export const DEFAULT_TABLE_PAGINATION = { mode: 'auto', rowsPerPage: 20 };
+
 // Build default field config for a block type
 function defaultFieldsFor(type) {
   const defs = type === 'billTo' ? BILLTO_FIELDS : type === 'signature' ? SIGNATURE_FIELDS : [];
@@ -306,12 +318,14 @@ function makeBlock(id, type) {
   };
   if (type === 'table') {
     block.columns = DEFAULT_COLUMNS.map(c => ({ ...c }));
+    block.pagination = { ...DEFAULT_TABLE_PAGINATION };
   }
   if (type === 'billTo' || type === 'signature') {
     block.fields = defaultFieldsFor(type);
   }
   if (type === 'signature') {
     block.sigSpacing = { ...DEFAULT_SIG_SPACING };
+    block.sigElements = { ...DEFAULT_SIG_ELEMENTS };
   }
   return block;
 }
@@ -409,8 +423,14 @@ export function deserializeLayout(config) {
         border:    { top: false, bottom: false,           ...(b.border    || {}) },
         background:{ enabled: false, color: '#f5f5f5',    ...(b.background|| {}) },
         ...((b.type === 'billTo' || b.type === 'signature') ? { fields: { ...defaultBlock.fields, ...(b.fields || {}) } } : {}),
-        ...(b.type === 'signature' ? { sigSpacing: { ...defaultBlock.sigSpacing, ...(b.sigSpacing || {}) } } : {}),
-        ...(b.type === 'table' ? { columns: (b.columns || defaultBlock.columns || []).map(c => ({ ...c })) } : {}),
+        ...(b.type === 'signature' ? {
+          sigSpacing: { ...defaultBlock.sigSpacing, ...(b.sigSpacing || {}) },
+          sigElements: { ...defaultBlock.sigElements, ...(b.sigElements || {}) },
+        } : {}),
+        ...(b.type === 'table' ? {
+          columns: (b.columns || defaultBlock.columns || []).map(c => ({ ...c })),
+          pagination: { ...defaultBlock.pagination, ...(b.pagination || {}) },
+        } : {}),
       };
     }),
   };

@@ -175,6 +175,10 @@
     },
     "custom_template_id": {
       "type": "string"
+    },
+    "custom_layout": {
+      "type": "object",
+      "additionalProperties": true
     }
   },
   "required": [
