@@ -250,7 +250,7 @@ export default function InvoiceListPane({
       )}
 
       {/* List */}
-      <div className="overflow-y-auto flex-1 no-scrollbar overscroll-contain min-h-0">
+      <div className="overflow-y-auto flex-1 no-scrollbar overscroll-contain min-h-0 pb-24 lg:pb-0">
         {invoices.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">
             <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-primary/40" />

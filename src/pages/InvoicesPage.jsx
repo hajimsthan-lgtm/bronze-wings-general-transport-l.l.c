@@ -676,12 +676,12 @@ export default function InvoicesPage() {
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Page header */}
-      <div className="mb-4 flex items-center justify-between gap-3">
+      <div className="mb-4 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-foreground">Invoices</h1>
           <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <div className="flex items-center gap-1 mr-1 pr-2 border-r border-border/40">
             <Button
               variant="outline"
@@ -784,7 +784,7 @@ export default function InvoicesPage() {
 
       <div className="grid grid-cols-1 lg:gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px] lg:grid-cols-5">
           {/* Left pane — list */}
-          <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
+          <div className="lg:col-span-2 min-h-0 h-[calc(100dvh-24rem)] min-h-[280px] lg:h-full">
             <InvoiceListPane
             invoices={filtered}
             selectedId={selectedId}
