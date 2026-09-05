@@ -449,7 +449,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         className="w-full sm:max-w-5xl sm:h-[88vh] sm:max-h-[88vh] h-[100vh] overflow-hidden bg-background p-0 flex flex-col gap-0 rounded-xl">
-        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-4">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex-shrink-0 space-y-1 flex flex-row items-start justify-between gap-3">
           <div className="space-y-1">
             <DialogTitle>{isEdit ? 'Edit Invoice' : 'New Invoice'}</DialogTitle>
             <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
@@ -471,7 +471,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         <div className="flex-1 min-h-0 flex flex-col sm:flex-row overflow-hidden">
           {/* LEFT: Form */}
           <div className={cn('w-full sm:w-1/2 min-h-0 flex flex-col sm:border-r border-border', mobileView === 'form' ? 'flex' : 'hidden sm:flex')}>
-          <div className="flex-1 overflow-y-auto thin-scroll px-5 py-5 space-y-4">
+          <div className="flex-1 overflow-y-auto thin-scroll px-4 sm:px-5 py-4 sm:py-5 space-y-4">
             {/* Invoice Mode Toggle */}
             <div className="flex gap-1 p-1 rounded-lg bg-muted/50 border border-border">
               <button type="button" onClick={() => setInvoiceMode('trip')} className={cn('flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors', invoiceMode === 'trip' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>Per-Trip Invoice</button>
@@ -614,7 +614,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                       <Input value={item.description || ''} onChange={(e) => updateItem(i, 'description', e.target.value)} className={cn(inputCls, 'flex-1')} placeholder="Description" />
                       <button type="button" onClick={() => removeItem(i)} className="mt-1.5 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div>
                         <Label className="text-[10px] mb-1 block">Qty</Label>
                         <Input type="number" value={item.quantity} onChange={(e) => updateItem(i, 'quantity', Number(e.target.value))} className={inputCls} />
@@ -627,7 +627,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                         <Label className="text-[10px] mb-1 block">Amount</Label>
                         <Input value={(Number(item.amount) || 0).toFixed(2)} readOnly className={cn(inputCls, 'opacity-70')} />
                       </div>
-                      <div className="flex items-end gap-2 pb-0.5">
+                      <div className="flex items-end gap-2 pb-0.5 col-span-2 sm:col-span-1">
                         <label className="flex items-center gap-1 text-[10px] text-muted-foreground cursor-pointer">
                           <Checkbox checked={item.vat_excluded || false} onCheckedChange={(v) => updateItem(i, 'vat_excluded', v)} />
                           VAT Excl
@@ -665,7 +665,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                   <Label className="text-xs cursor-pointer" onClick={() => setReceivePayment(!receivePayment)}>Receive payment now</Label>
                 </div>
                 {receivePayment && (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <div>
                       <Label className="text-[10px] mb-1 block">Amount</Label>
                       <Input type="number" value={payment.amount} onChange={(e) => updatePayment('amount', e.target.value)} className={inputCls} placeholder={String(total)} />
@@ -679,7 +679,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
                       <Label className="text-[10px] mb-1 block">Date</Label>
                       <DatePicker value={payment.date} onChange={(v) => updatePayment('date', v)} />
                     </div>
@@ -694,7 +694,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
             </Section>
           </div>
           {/* Footer Actions — always visible at bottom */}
-          <div className="flex gap-2 pt-3 pb-4 px-5 bg-background/95 backdrop-blur-sm border-t border-border flex-shrink-0">
+          <div className="flex gap-2 pt-3 pb-4 px-4 sm:px-5 bg-background/95 backdrop-blur-sm border-t border-border flex-shrink-0">
             <Button onClick={handleSave} disabled={saving} className="flex-1">
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
               {saving ? 'Saving...' : (isEdit ? 'Update' : 'Create')}

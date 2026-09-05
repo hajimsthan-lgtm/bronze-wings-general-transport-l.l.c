@@ -391,18 +391,18 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[1700px] w-[96vw] max-h-[95vh] p-0 gap-0 overflow-hidden flex flex-col">
-          <DialogHeader className="px-6 py-4 border-b border-border/50 flex-row items-center justify-between space-y-0">
-            <div className="flex items-center gap-4">
-              <DialogTitle className="flex items-center gap-2 text-lg">
-                <Eye className="w-5 h-5 text-primary" />
-                Invoice Layout Editor
+        <DialogContent className="sm:max-w-[1700px] w-full sm:w-[96vw] h-[100dvh] sm:h-auto sm:max-h-[95vh] p-0 gap-0 overflow-hidden flex flex-col">
+          <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border/50 flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                Layout Editor
               </DialogTitle>
               {/* Invoice type toggle */}
               <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border/40">
                 <button
                   onClick={() => handleTypeChange('monthly')}
-                  className={cn('px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
+                  className={cn('px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
                     invoiceType === 'monthly'
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground')}
@@ -411,7 +411,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                 </button>
                 <button
                   onClick={() => handleTypeChange('trip')}
-                  className={cn('px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
+                  className={cn('px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5',
                     invoiceType === 'trip'
                       ? 'bg-primary text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground')}
@@ -424,11 +424,11 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border/40">
                   <button
                     onClick={() => setEditPage('all')}
-                    className={cn('px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1',
+                    className={cn('px-2 sm:px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1',
                       editPage === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
                     title="Edit spacing for all pages"
                   >
-                    <Layers className="w-3 h-3" /> All Pages
+                    <Layers className="w-3 h-3" /> All
                   </button>
                   <div className="w-px h-4 bg-border/40" />
                   <button
@@ -442,10 +442,10 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                     <button
                       key={pg}
                       onClick={() => setEditPage(pg)}
-                      className={cn('px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all',
+                      className={cn('px-2 sm:px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all',
                         editPage === pg ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40')}
                     >
-                      Pg {pg}
+                      {pg}
                     </button>
                   ))}
                   <button
@@ -458,12 +458,12 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 self-end sm:self-auto">
               <Button variant="ghost" size="sm" onClick={undo} disabled={!canUndo} className="h-8 gap-1.5" title="Undo">
-                <Undo2 className="w-4 h-4" /> Undo
+                <Undo2 className="w-4 h-4" /> <span className="hidden sm:inline">Undo</span>
               </Button>
               <Button variant="ghost" size="sm" onClick={redo} disabled={!canRedo} className="h-8 gap-1.5" title="Redo">
-                <Redo2 className="w-4 h-4" /> Redo
+                <Redo2 className="w-4 h-4" /> <span className="hidden sm:inline">Redo</span>
               </Button>
               <div className="w-px h-5 bg-border/50 mx-1" />
               <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
@@ -474,7 +474,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
 
           <div className="flex-1 overflow-hidden flex flex-col lg:flex-row min-h-0">
             {/* Left: Block list + templates */}
-            <div className="lg:w-[360px] flex-shrink-0 border-r border-border/50 overflow-y-auto p-4 space-y-4">
+            <div className="lg:w-[360px] w-full flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border/50 overflow-y-auto p-3 sm:p-4 space-y-4 max-h-[40vh] lg:max-h-none">
               {/* Validation */}
               {validation.errors.length > 0 ? (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400">
@@ -582,30 +582,30 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
           </div>
 
           {/* Footer */}
-          <DialogFooter className="px-6 py-4 border-t border-border/50 gap-2">
-            <Input placeholder="Layout template name..." value={layoutName} onChange={(e) => setLayoutName(e.target.value)} className="flex-1 max-w-xs" />
-            <Button variant="outline" onClick={handleSetDefault} disabled={saving || validation.errors.length > 0} className="gap-2 border-amber-500/30 text-amber-600 hover:bg-amber-500/10" title="Set as default layout for all invoices">
+          <DialogFooter className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border/50 gap-2 flex-wrap">
+            <Input placeholder="Layout name..." value={layoutName} onChange={(e) => setLayoutName(e.target.value)} className="flex-1 min-w-0 sm:max-w-xs h-9" />
+            <Button variant="outline" onClick={handleSetDefault} disabled={saving || validation.errors.length > 0} className="gap-1.5 border-amber-500/30 text-amber-600 hover:bg-amber-500/10" title="Set as default layout for all invoices">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
-              Set Default
+              <span className="hidden sm:inline">Set Default</span>
             </Button>
-            <Button variant="outline" onClick={handleDuplicate} className="gap-2">
-              <Copy className="w-4 h-4" /> Duplicate
+            <Button variant="outline" onClick={handleDuplicate} className="gap-1.5">
+              <Copy className="w-4 h-4" /> <span className="hidden sm:inline">Duplicate</span>
             </Button>
             {invoice?.id && (
-              <Button onClick={handleSaveAndPrint} disabled={saving || driveUploading || validation.errors.length > 0} className="gap-2">
+              <Button onClick={handleSaveAndPrint} disabled={saving || driveUploading || validation.errors.length > 0} className="gap-1.5">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
-                Save & Print
+                <span className="hidden sm:inline">Save & Print</span>
               </Button>
             )}
             {invoice?.id && (
-              <Button onClick={handleSaveToDrive} disabled={saving || driveUploading || validation.errors.length > 0} variant="outline" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+              <Button onClick={handleSaveToDrive} disabled={saving || driveUploading || validation.errors.length > 0} variant="outline" className="gap-1.5 border-primary/30 text-primary hover:bg-primary/10">
                 {driveUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
-                Save to Drive
+                <span className="hidden sm:inline">Save to Drive</span>
               </Button>
             )}
-            <Button onClick={handleSave} disabled={saving || validation.errors.length > 0 || !layoutName.trim()} className="gap-2">
+            <Button onClick={handleSave} disabled={saving || validation.errors.length > 0 || !layoutName.trim()} className="gap-1.5">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Save Layout
+              <span className="hidden sm:inline">Save Layout</span>
             </Button>
           </DialogFooter>
         </DialogContent>

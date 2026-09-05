@@ -322,10 +322,10 @@ function ExpenseFormSheet({ open, onOpenChange, editItem, onSaved }) {
               <SelectContent>{['toll','insurance','registration','office','other'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
             </Select></div>
           <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('description')}</Label><Input value={form.description} onChange={e => update('description', e.target.value)} className="bg-background border-border expense-form-input" /></div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('amount')}</Label><Input type="number" value={form.amount} onChange={e => update('amount', e.target.value)} className="bg-background border-border expense-form-input" /></div>
             <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">{t('date')}</Label><DatePicker value={form.date} onChange={v => update('date', v)} className="bg-background border-border expense-form-input" /></div>
-            <div><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Rate</Label>
+            <div className="col-span-2 sm:col-span-1"><Label className="text-xs text-muted-foreground mb-1.5 expense-form-label">VAT Rate</Label>
               <Select value={String(form.vat_rate ?? 5)} onValueChange={v => update('vat_rate', Number(v))}>
                 <SelectTrigger className="bg-background border-border expense-form-input"><SelectValue /></SelectTrigger>
                 <SelectContent>{[0, 5].map(r => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>

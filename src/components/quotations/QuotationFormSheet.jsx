@@ -144,8 +144,8 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="sm:max-w-6xl h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0">
-        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0 flex flex-row items-start justify-between gap-4">
+        className="sm:max-w-6xl h-[100dvh] sm:h-[90vh] overflow-hidden bg-background p-0 flex flex-col gap-0">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex-shrink-0 flex flex-row items-start justify-between gap-3">
           <div>
             <DialogTitle>{isEdit ? 'Edit Quotation' : 'New Quotation'}</DialogTitle>
             <DialogDescription>Left: fill in details · Right: live PDF preview</DialogDescription>
@@ -165,7 +165,7 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
 
         <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
           {/* LEFT: Form */}
-          <div className={cn('w-full sm:w-1/2 overflow-y-auto px-5 py-4 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
+          <div className={cn('w-full sm:w-1/2 overflow-y-auto px-4 sm:px-5 py-4 space-y-4 sm:border-r border-border', mobileView === 'form' ? 'flex flex-col' : 'hidden sm:flex flex-col')}>
             {/* Client details */}
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
@@ -215,27 +215,26 @@ export default function QuotationFormSheet({ open, onOpenChange, quotation, onSa
               </div>
               <div className="space-y-2">
                 {(form.line_items || []).map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-1.5 items-end p-2 rounded-lg border border-border bg-muted/30">
-                    <div className="col-span-5">
-                      <Label className="text-[10px]">Description</Label>
-                      <Input value={item.description || ''} onChange={e => updateItem(idx, 'description', e.target.value)} className="h-8 text-xs" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label className="text-[10px]">Qty</Label>
-                      <Input type="number" value={item.quantity || 0} onChange={e => updateItem(idx, 'quantity', Number(e.target.value))} className="h-8 text-xs" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label className="text-[10px]">Unit Price</Label>
-                      <Input type="number" value={item.unit_price || 0} onChange={e => updateItem(idx, 'unit_price', Number(e.target.value))} className="h-8 text-xs" />
-                    </div>
-                    <div className="col-span-2">
-                      <Label className="text-[10px]">Amount</Label>
-                      <Input value={Number(item.amount || 0).toFixed(2)} readOnly className="h-8 text-xs bg-muted/50" />
-                    </div>
-                    <div className="col-span-1">
-                      <Button size="icon" variant="ghost" onClick={() => removeItem(idx)} className="h-8 w-8 text-destructive">
+                  <div key={idx} className="p-2.5 rounded-lg border border-border bg-muted/30 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Input value={item.description || ''} onChange={e => updateItem(idx, 'description', e.target.value)} className="h-8 text-xs flex-1" placeholder="Description" />
+                      <Button size="icon" variant="ghost" onClick={() => removeItem(idx)} className="h-8 w-8 text-destructive flex-shrink-0">
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <div>
+                        <Label className="text-[10px]">Qty</Label>
+                        <Input type="number" value={item.quantity || 0} onChange={e => updateItem(idx, 'quantity', Number(e.target.value))} className="h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">Unit Price</Label>
+                        <Input type="number" value={item.unit_price || 0} onChange={e => updateItem(idx, 'unit_price', Number(e.target.value))} className="h-8 text-xs" />
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">Amount</Label>
+                        <Input value={Number(item.amount || 0).toFixed(2)} readOnly className="h-8 text-xs bg-muted/50" />
+                      </div>
                     </div>
                   </div>
                 ))}
