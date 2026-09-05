@@ -245,7 +245,7 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
                 <Slider min={4} max={25} step={0.5} value={sigSpacing.sigTopGap ?? 12} onChange={v => updateSigSpacing({ sigTopGap: v })} suffix="mm" format={v => v.toFixed(1)} />
               </Row>
               <Row label="Line→Caption">
-                <Slider min={1} max={8} step={0.5} value={sigSpacing.lineCaptionGap ?? 3.5} onChange={v => updateSigSpacing({ lineCaptionGap: v })} suffix="mm" format={v => v.toFixed(1)} />
+                <Slider min={1} max={10} step={0.5} value={sigSpacing.lineCaptionGap ?? 3.5} onChange={v => updateSigSpacing({ lineCaptionGap: v })} suffix="mm" format={v => v.toFixed(1)} />
               </Row>
               <Row label="Caption→Name">
                 <Slider min={3} max={15} step={0.5} value={sigSpacing.captionNameGap ?? 7} onChange={v => updateSigSpacing({ captionNameGap: v })} suffix="mm" format={v => v.toFixed(1)} />
