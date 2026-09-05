@@ -110,8 +110,11 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   }
 
   // ── Draw a single block at y, return new y ──
-  function drawBlock(block, y) {
-    y += block.spacing?.paddingTop || 0;
+  function drawBlock(block, y, pageNum = 1) {
+    // Merge per-page spacing override if present
+    const pageSpacing = layout.pageOverrides?.[pageNum]?.[block.id]?.spacing;
+    const effSpacing = { ...block.spacing, ...(pageSpacing || {}) };
+    y += effSpacing.paddingTop || 0;
 
     // Background shading
     if (block.background?.enabled) {
@@ -194,20 +197,23 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
       pdf.line(CONTENT_X, newY, CONTENT_RIGHT, newY);
     }
 
-    newY += block.spacing?.paddingBottom || 0;
+    newY += effSpacing.paddingBottom || 0;
     return newY;
   }
 
-  function drawBeforeTableBlocks(y) {
-    for (const block of beforeTableBlocks) y = drawBlock(block, y);
+  let currentPageNum = 1;
+
+  function drawBeforeTableBlocks(y, pageNum) {
+    for (const block of beforeTableBlocks) y = drawBlock(block, y, pageNum);
     return y;
   }
 
   function startNewPage() {
     pdf.addPage();
     drawPageBorder(pdf);
+    currentPageNum++;
     let y = BORDER_POS + 2;
-    y = drawBeforeTableBlocks(y);
+    y = drawBeforeTableBlocks(y, currentPageNum);
     y = drawTableHeader(pdf, cols, y, invoiceType, invStyle);
     return y;
   }
@@ -215,7 +221,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   // ── PAGE 1 ──
   drawPageBorder(pdf);
   let y = BORDER_POS + 2;
-  y = drawBeforeTableBlocks(y);
+  y = drawBeforeTableBlocks(y, currentPageNum);
   y = drawTableHeader(pdf, cols, y, invoiceType, invStyle);
 
   // ── TABLE ROWS ──
@@ -252,7 +258,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
 
   // ── AFTER-TABLE BLOCKS ──
   for (const block of afterTableBlocks) {
-    y = drawBlock(block, y);
+    y = drawBlock(block, y, currentPageNum);
     y += 2;
   }
 

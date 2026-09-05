@@ -429,7 +429,7 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   const rg = fld('regNo', 'normal');
   if (rg.visible && invoice.reg_no) rawLines.push({ text: `REG NO: ${str(invoice.reg_no)}`, style: rg });
 
-  const lineH = 3.2;
+  const lineH = 3.2 * (blockStyle?.lineHeight || 1);
   const wrapped = [];
   let totalLines = 0;
   for (const line of rawLines) {
@@ -449,7 +449,8 @@ function drawBillingSection(pdf, invoice, clientName, y, invoiceType, refNumber,
   }
 
   // Dynamic height: label area + all wrapped lines + padding
-  const labelArea = 7;
+  // labelArea must clear the "BILL TO" underline (y+4.5) + gap + first line height
+  const labelArea = Math.max(9, 4.5 + lineH + 1.5);
   const h = Math.max(17, labelArea + totalLines * lineH + 2);
 
   // Draw box border

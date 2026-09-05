@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useReducer } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck, Printer, CloudUpload, Wand2, Sparkles } from 'lucide-react';
+import { Save, RotateCcw, Trash2, Loader2, AlertTriangle, CheckCircle2, X, Eye, Undo2, Redo2, Copy, CalendarDays, Truck, Printer, CloudUpload, Wand2, Sparkles, ChevronLeft, ChevronRight, Star, Layers } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -63,7 +63,12 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [expandedBlock, setExpandedBlock] = useState(null);
-  const [invoiceType, setInvoiceType] = useState(initialType);
+  const [editPage, setEditPage] = useState('all'); // 'all' | page number
+  const [invoiceType, setInvoiceType] = useState(() => {
+    // Auto-detect invoice type from line items
+    if (invoice?.line_items?.some(i => i.driver_name || i.vehicle_no || i.delivery_note_no)) return 'trip';
+    return initialType;
+  });
   const previewTimer = useRef(null);
 
   // ── Undo / Redo ──
@@ -163,6 +168,23 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   };
 
   const handleConfigChange = (blockId, configType, updates) => {
+    // Per-page spacing override when editing a specific page
+    if (configType === 'spacing' && editPage !== 'all') {
+      setLayout({
+        ...layout,
+        pageOverrides: {
+          ...layout.pageOverrides,
+          [editPage]: {
+            ...(layout.pageOverrides?.[editPage] || {}),
+            [blockId]: {
+              ...(layout.pageOverrides?.[editPage]?.[blockId] || {}),
+              spacing: { ...(layout.pageOverrides?.[editPage]?.[blockId]?.spacing || {}), ...updates },
+            },
+          },
+        },
+      });
+      return;
+    }
     setLayout({
       ...layout,
       blocks: layout.blocks.map(b => {
@@ -249,9 +271,28 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
       ...b,
       style: { ...b.style },
       columns: b.type === 'table' ? getDefaultColumns(invoiceType) : b.columns?.map(c => ({ ...c })),
-    })) });
+    })), pageOverrides: {} });
     setLayoutName('');
     setExpandedBlock(null);
+    setEditPage('all');
+  };
+
+  // Set this layout as the default for ALL invoices (saved to CompanySettings)
+  const handleSetDefault = async () => {
+    if (validation.errors.length > 0) { toast({ variant: 'destructive', title: 'Cannot set default', description: 'Fix validation errors first' }); return; }
+    setSaving(true);
+    try {
+      const existing = await base44.entities.CompanySettings.list('-updated_date', 1);
+      const settingsRecord = existing?.[0];
+      const newTemplateConfig = { ...(settingsRecord?.template_config || {}), defaultInvoiceLayout: serializeLayout(layout) };
+      if (settingsRecord?.id) {
+        await base44.entities.CompanySettings.update(settingsRecord.id, { template_config: newTemplateConfig });
+      } else {
+        await base44.entities.CompanySettings.create({ company_name: settings?.company_name || 'My Company', template_config: newTemplateConfig });
+      }
+      toast({ title: 'Default layout set', description: 'This layout will be used for all new invoices without asking' });
+    } catch (e) { toast({ variant: 'destructive', title: 'Failed to set default', description: e.message }); }
+    finally { setSaving(false); }
   };
 
   const handleLoadTemplate = (tpl) => {
@@ -378,6 +419,44 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                   <Truck className="w-3.5 h-3.5" /> Per Trip
                 </button>
               </div>
+              {/* Page switcher */}
+              {previewPageCount > 1 && (
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border/40">
+                  <button
+                    onClick={() => setEditPage('all')}
+                    className={cn('px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1',
+                      editPage === 'all' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+                    title="Edit spacing for all pages"
+                  >
+                    <Layers className="w-3 h-3" /> All Pages
+                  </button>
+                  <div className="w-px h-4 bg-border/40" />
+                  <button
+                    onClick={() => setEditPage(ep => ep === 'all' ? 1 : Math.max(1, (typeof ep === 'number' ? ep : 1) - 1))}
+                    disabled={editPage === 1}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  {Array.from({ length: previewPageCount }, (_, i) => i + 1).map(pg => (
+                    <button
+                      key={pg}
+                      onClick={() => setEditPage(pg)}
+                      className={cn('px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all',
+                        editPage === pg ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40')}
+                    >
+                      Pg {pg}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setEditPage(ep => ep === 'all' ? 1 : Math.min(previewPageCount, (typeof ep === 'number' ? ep : 1) + 1))}
+                    disabled={editPage === previewPageCount}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" onClick={undo} disabled={!canUndo} className="h-8 gap-1.5" title="Undo">
@@ -421,9 +500,10 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                             {(prov) => (
                               <div ref={prov.innerRef} {...prov.draggableProps} style={{ ...prov.draggableProps.style, opacity: 1 }}>
                                 <LayoutBlockCard
-                                  block={block}
+                                  block={editPage !== 'all' ? { ...block, spacing: { ...block.spacing, ...(layout.pageOverrides?.[editPage]?.[block.id]?.spacing || {}) } } : block}
                                   index={index}
                                   layout={layout}
+                                  editPage={editPage}
                                   dragHandleProps={prov.dragHandleProps}
                                   onToggle={handleToggle}
                                   onMove={handleMove}
@@ -505,6 +585,10 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
           {/* Footer */}
           <DialogFooter className="px-6 py-4 border-t border-border/50 gap-2">
             <Input placeholder="Layout template name..." value={layoutName} onChange={(e) => setLayoutName(e.target.value)} className="flex-1 max-w-xs" />
+            <Button variant="outline" onClick={handleSetDefault} disabled={saving || validation.errors.length > 0} className="gap-2 border-amber-500/30 text-amber-600 hover:bg-amber-500/10" title="Set as default layout for all invoices">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />}
+              Set Default
+            </Button>
             <Button variant="outline" onClick={handleDuplicate} className="gap-2">
               <Copy className="w-4 h-4" /> Duplicate
             </Button>

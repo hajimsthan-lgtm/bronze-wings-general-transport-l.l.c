@@ -344,6 +344,8 @@ export const DEFAULT_LAYOUT = {
     makeBlock('signature', 'signature'),
     makeBlock('footer',    'footer'),
   ],
+  // Per-page spacing overrides: { [pageNum]: { [blockId]: { spacing: { paddingTop, paddingBottom } } } }
+  pageOverrides: {},
 };
 
 // ═══════════════════════════════════════════════════════════
