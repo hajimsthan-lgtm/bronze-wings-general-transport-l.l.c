@@ -70,7 +70,7 @@ export const useTransactionCreate = () => { const qc = useQueryClient(); return 
 export const useTransactionUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Transaction.update(id, data), ...updateOpts(qc, KEYS.transactions) }); };
 
 /* Invoices */
-export const useInvoices = () => useQuery({ queryKey: KEYS.invoices, queryFn: () => withRetry(() => base44.entities.Invoice.list('-created_date', 200)) });
+export const useInvoices = () => useQuery({ queryKey: KEYS.invoices, queryFn: () => withRetry(() => base44.entities.Invoice.list('-created_date', 500)) });
 export const useInvoiceCreate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (data) => base44.entities.Invoice.create(data), ...createOpts(qc, KEYS.invoices) }); };
 export const useInvoiceUpdate = () => { const qc = useQueryClient(); return useMutation({ mutationFn: ({ id, data }) => base44.entities.Invoice.update(id, data), ...updateOpts(qc, KEYS.invoices) }); };
 export const useInvoiceDelete = () => { const qc = useQueryClient(); return useMutation({ mutationFn: (id) => base44.entities.Invoice.delete(id), ...deleteOpts(qc, KEYS.invoices) }); };

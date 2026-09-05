@@ -102,7 +102,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
 
   useEffect(() => {
     if (open) {
-      base44.entities.Client.list('-created_date', 200).catch(() => []).then((cl) => {
+      base44.entities.Client.list('-created_date', 500).catch(() => []).then((cl) => {
         setClients(cl || []);
         if (defaultClientName && !editInvoice) {
           const c = (cl || []).find((x) => x.name === defaultClientName);
@@ -119,7 +119,7 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           }
         }
       });
-      base44.entities.Trip.list('-created_date', 200).catch(() => []).then(setTrips);
+      base44.entities.Trip.list('-created_date', 500).catch(() => []).then(setTrips);
       base44.entities.Invoice.list('-created_date', 500).catch(() => []).then(setInvoices);
       base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []).then(setMonthlyContracts);
       base44.entities.Vehicle.list('-created_date', 500).catch(() => []).then(setVehicles);
