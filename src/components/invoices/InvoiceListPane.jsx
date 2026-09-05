@@ -77,7 +77,7 @@ function RowBody({ inv, onClientClick, onAction, onEdit, onDelete }) {
         {paid > 0 && status !== 'paid' && status !== 'cancelled' && (
           <div className="mt-1.5">
             <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-0.5">
-              <span className="tabular-nums">AED {paid.toFixed(0)} of AED {total.toFixed(0)}</span>
+              <span className="tabular-nums">AED {paid.toFixed(2)} of AED {total.toFixed(2)}</span>
               <span className="tabular-nums">{pct.toFixed(0)}%</span>
             </div>
             <div className="h-1 rounded-full bg-muted overflow-hidden">
@@ -320,5 +320,5 @@ export default function InvoiceListPane({
 }
 
 function formatCurrencyShort(amount) {
-  return `AED ${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  return `AED ${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }

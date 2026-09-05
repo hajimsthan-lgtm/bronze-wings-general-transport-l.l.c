@@ -309,15 +309,17 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
   const balanceDue = Math.max(0, total - payAmount);
   const resultingStatus = payAmount <= 0 ? form.status : (payAmount >= total ? 'paid' : 'partially_paid');
   const inputCls = "bg-background/50 border-border backdrop-blur-sm";
-  const isManualOverride = !isEdit && suggestedNumber !== '' && form.invoice_number !== suggestedNumber;
-  const isDuplicate = form.invoice_number !== '' && invoices.some(inv => inv.invoice_number === form.invoice_number);
+  const isManualOverride = isEdit
+    ? (!!editInvoice?.invoice_number && form.invoice_number !== editInvoice.invoice_number && form.invoice_number !== '')
+    : (suggestedNumber !== '' && form.invoice_number !== suggestedNumber);
+  const isDuplicate = form.invoice_number !== '' && invoices.some(inv => inv.invoice_number === form.invoice_number && (isEdit ? inv.id !== editInvoice?.id : true));
 
   const handleSave = async () => {
     if (!form.client_name?.trim()) {
       toast({ variant: 'destructive', title: 'Client name is required' });
       return;
     }
-    if (!isEdit && isDuplicate) {
+    if (isDuplicate) {
       toast({ variant: 'destructive', title: 'Duplicate invoice number', description: 'This invoice number already exists. Choose a different number.' });
       return;
     }
@@ -600,28 +602,27 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                   <div className="relative">
                     <Input
                       value={form.invoice_number}
-                      onChange={isEdit ? undefined : (e) => update('invoice_number', e.target.value)}
-                      readOnly={isEdit}
-                      className={`${inputCls} font-mono text-xs pr-9 ${isEdit ? 'opacity-60 cursor-not-allowed' : isDuplicate ? 'border-red-500/60' : isManualOverride ? 'border-emerald-500/50' : 'border-primary/30'}`}
+                      onChange={(e) => update('invoice_number', e.target.value)}
+                      className={`${inputCls} font-mono text-xs pr-9 ${isDuplicate ? 'border-red-500/60' : isManualOverride ? 'border-emerald-500/50' : 'border-primary/30'}`}
                     />
-                    {!isEdit && isManualOverride && !isDuplicate && (
+                    {isManualOverride && !isDuplicate && (
                       <span className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400">
                         <Check className="w-3.5 h-3.5" />
                       </span>
                     )}
-                    {!isEdit && isDuplicate && (
+                    {isDuplicate && (
                       <span className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-5 h-5 rounded-full bg-red-500/20 text-red-400">
                         <X className="w-3.5 h-3.5" />
                       </span>
                     )}
                   </div>
-                  {!isEdit && isManualOverride && !isDuplicate && (
+                  {isManualOverride && !isDuplicate && (
                     <p className="text-[10px] text-emerald-400 mt-1 flex items-start gap-1">
                       <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      Successfully verified — no duplicate found.
+                      {isEdit ? 'Invoice number modified — verified, no duplicate found.' : 'Successfully verified — no duplicate found.'}
                     </p>
                   )}
-                  {!isEdit && isDuplicate && (
+                  {isDuplicate && (
                     <p className="text-[10px] text-red-400 mt-1 flex items-start gap-1">
                       <X className="w-3 h-3 mt-0.5 flex-shrink-0" />
                       This invoice number already exists. Choose a different number.

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -44,6 +44,7 @@ import CustomTemplateManager from '@/components/invoices/CustomTemplateManager';
 import TemplateSelectorModal from '@/components/invoices/TemplateSelectorModal';
 import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
+import InvoiceDebugger from '@/components/invoices/InvoiceDebugger';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence } from '@/lib/invoiceSequence';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -558,14 +559,15 @@ export default function InvoicesPage() {
           <p className="text-xs text-muted-foreground">Manage and generate tax invoices with custom layouts</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={loading} className="gap-2 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-50">
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <InvoiceDebugger invoices={allInvoices} />
           <Button variant="outline" size="sm" onClick={() => setTemplateManagerOpen(true)} className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
             <LayoutTemplate className="w-4 h-4" />
             Templates
           </Button>
-          
-
-
-          
         </div>
       </div>
 
