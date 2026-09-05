@@ -3,13 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
 
-import { FileText, Plus, Trash2, Download, Eye, Loader2, ChevronDown } from 'lucide-react';
+import { FileText, Plus, Trash2, Download, Eye, Loader2, ChevronDown, Pencil, RefreshCw } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import EmptyState from '@/components/common/EmptyState';
 import { openDocument } from '@/lib/openDocument';
 import { getDocStatus, getExpirySubtext, summarizeHealth, getHealthLevel, DOC_STATUS_VAR } from '@/lib/documentHealth';
 import DocumentAddDialog from '@/components/admin/DocumentAddDialog';
+import DocumentRenewDialog from '@/components/documents/DocumentRenewDialog';
 
 const HEALTH_DOT_STYLE = {
   expired: { background: 'hsl(var(--danger))' },
@@ -25,6 +26,8 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(defaultOpen || autoExpand);
   const [adding, setAdding] = useState(false);
+  const [editingDoc, setEditingDoc] = useState(null);
+  const [renewingDoc, setRenewingDoc] = useState(null);
   const [form, setForm] = useState({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -85,25 +88,44 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
     }
     setSaving(true);
     try {
-      await base44.entities.Document.create({
-        title: form.title,
-        type: form.type,
-        related_entity: entityType,
-        related_id: entityId,
-        file_url: form.file_url,
-        expiry_date: form.expiry_date || null,
-        notes: form.notes,
-        status: getDocStatus({ file_url: form.file_url, expiry_date: form.expiry_date }),
-      });
+      if (editingDoc) {
+        await base44.entities.Document.update(editingDoc.id, {
+          title: form.title,
+          type: form.type,
+          expiry_date: form.expiry_date || null,
+          notes: form.notes,
+          file_url: form.file_url,
+          status: getDocStatus({ file_url: form.file_url, expiry_date: form.expiry_date }),
+        });
+        setEditingDoc(null);
+        toast({ title: 'Document updated' });
+      } else {
+        await base44.entities.Document.create({
+          title: form.title,
+          type: form.type,
+          related_entity: entityType,
+          related_id: entityId,
+          file_url: form.file_url,
+          expiry_date: form.expiry_date || null,
+          notes: form.notes,
+          status: getDocStatus({ file_url: form.file_url, expiry_date: form.expiry_date }),
+        });
+        toast({ title: 'Document added' });
+      }
       setForm({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' });
       setAdding(false);
       load();
-      toast({ title: 'Document added' });
     } catch {
-      toast({ title: 'Could not add document', variant: 'destructive' });
+      toast({ title: editingDoc ? 'Could not update document' : 'Could not add document', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
+  };
+
+  const editDoc = (d) => {
+    setEditingDoc(d);
+    setForm({ title: d.title || '', type: d.type || 'other', expiry_date: d.expiry_date || '', file_url: d.file_url || '', notes: d.notes || '' });
+    setAdding(true);
   };
 
   const downloadDoc = (d) => {
@@ -197,7 +219,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
             {/* Add document dialog (popup in front) */}
             <DocumentAddDialog
               open={adding}
-              onOpenChange={(v) => { if (!v) setForm({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' }); setAdding(v); }}
+              onOpenChange={(v) => { if (!v) { setForm({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' }); setEditingDoc(null); } setAdding(v); }}
               form={form}
               setForm={setForm}
               onFile={onFile}
@@ -205,6 +227,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
               saving={saving}
               uploading={uploading}
               usedTypes={usedTypes}
+              editDoc={editingDoc}
             />
 
             {/* Document list */}
@@ -218,11 +241,11 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
               <div className="rounded-xl border border-border overflow-hidden">
                 {/* Table header */}
                 <div className="grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/30 border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-                  <div className="col-span-4">Title</div>
+                  <div className="col-span-3">Title</div>
                   <div className="col-span-2">Type</div>
                   <div className="col-span-2">Expiry</div>
-                  <div className="col-span-3">Status</div>
-                  <div className="col-span-1 text-right">Actions</div>
+                  <div className="col-span-2">Status</div>
+                  <div className="col-span-3 text-right">Actions</div>
                 </div>
                 {/* Rows */}
                 <div className="divide-y divide-border">
@@ -236,7 +259,7 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                         className={`grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm hover:bg-muted/20 transition-colors ${isFlashing ? 'doc-row-flash' : ''}`}
                       >
                         {/* Title + status dot */}
-                        <div className="col-span-4 flex items-center gap-2 text-foreground font-medium truncate min-w-0">
+                        <div className="col-span-3 flex items-center gap-2 text-foreground font-medium truncate min-w-0">
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ background: `hsl(var(--${DOC_STATUS_VAR[st]}))` }}
@@ -259,12 +282,12 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                           )}
                         </div>
                         <div
-                          className="col-span-3 text-[11px] font-semibold uppercase truncate"
+                          className="col-span-2 text-[11px] font-semibold uppercase truncate"
                           style={{ color: `hsl(var(--${DOC_STATUS_VAR[st]}))` }}
                         >
                           {st.replace('_', ' ')}
                         </div>
-                        <div className="col-span-1 text-right flex items-center justify-end gap-1">
+                        <div className="col-span-3 text-right flex items-center justify-end gap-0.5">
                           {d.file_url && (
                             <>
                               <button
@@ -284,7 +307,22 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
                             </>
                           )}
                           <button
+                            onClick={() => editDoc(d)}
+                            title="Edit"
+                            className="text-muted-foreground hover:text-primary p-1.5"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setRenewingDoc(d)}
+                            title="Renew"
+                            className="text-muted-foreground hover:text-primary p-1.5"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={() => remove(d)}
+                            title="Delete"
                             className="text-muted-foreground hover:text-red-400 p-1.5"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -299,6 +337,13 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
           </div>
         </div>
       </div>
+
+      <DocumentRenewDialog
+        doc={renewingDoc}
+        open={!!renewingDoc}
+        onOpenChange={(v) => { if (!v) setRenewingDoc(null); }}
+        onRenewed={load}
+      />
     </div>
   );
 }

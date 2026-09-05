@@ -25,6 +25,7 @@ export default function DocumentAddDialog({
   saving,
   uploading,
   usedTypes = [],
+  editDoc = null,
 }) {
   const [typeOpen, setTypeOpen] = useState(false);
   const typeRef = useRef(null);
@@ -56,7 +57,7 @@ export default function DocumentAddDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add Document</DialogTitle>
+          <DialogTitle>{editDoc ? 'Edit Document' : 'Add Document'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
@@ -182,7 +183,7 @@ export default function DocumentAddDialog({
             Cancel
           </Button>
           <Button onClick={onSave} disabled={saving || uploading} className="bg-primary hover:bg-primary/90">
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : editDoc ? 'Update' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

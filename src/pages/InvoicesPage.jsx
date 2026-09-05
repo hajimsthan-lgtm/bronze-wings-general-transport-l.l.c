@@ -48,7 +48,7 @@ import InvoiceDebugger from '@/components/invoices/InvoiceDebugger';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
 import { restructureInvoiceSequence, restoreInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
 import { useUndoRedo, registerNumberChangeUndo } from '@/hooks/useUndoRedo';
-import InvoiceNumberHistoryPanel from '@/components/invoices/InvoiceNumberHistoryPanel';
+import InvoiceHistoryDialog from '@/components/invoices/InvoiceHistoryDialog';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { deriveStatus, computeTabCounts, filterByTab } from '@/lib/invoiceWorkflow';
 import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, setInvoicesClients } from '@/lib/invoicesStore';
@@ -94,7 +94,7 @@ export default function InvoicesPage() {
   const navigate = useNavigate();
   const { undoStack, redoStack, canUndo, canRedo, pushAction, undo, redo, busy: undoBusy } = useUndoRedo({ refetch, toast });
   const [historyRefresh, setHistoryRefresh] = useState(0);
-  const [historyOpen, setHistoryOpen] = useState(true);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
@@ -705,8 +705,8 @@ export default function InvoicesPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setHistoryOpen((v) => !v)}
-            className={`gap-2 h-8 ${historyOpen ? 'border-primary/40 text-primary bg-primary/10' : 'border-border/60 text-muted-foreground hover:text-foreground'}`}
+            onClick={() => { setHistoryRefresh((r) => r + 1); setHistoryDialogOpen(true); }}
+            className="gap-2 h-8 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40"
           >
             <History className="w-3.5 h-3.5" />
             History
@@ -771,7 +771,7 @@ export default function InvoicesPage() {
         }
         </div> :
 
-      <div className={`grid grid-cols-1 lg:gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px] ${historyOpen ? 'lg:grid-cols-7' : 'lg:grid-cols-5'}`}>
+      <div className="grid grid-cols-1 lg:gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px] lg:grid-cols-5">
           {/* Left pane — list */}
           <div className="lg:col-span-2 min-h-0 h-[50vh] lg:h-full">
             <InvoiceListPane
@@ -795,7 +795,7 @@ export default function InvoicesPage() {
             </div>
 
           {/* Right pane — detail / generator (desktop) */}
-          <div className={`hidden lg:block min-h-0 h-full ${historyOpen ? 'lg:col-span-3' : 'lg:col-span-3'}`}>
+          <div className="hidden lg:block min-h-0 h-full lg:col-span-3">
             <InvoiceDetailPane
             inv={selectedInvoice}
             clients={clients}
@@ -817,16 +817,8 @@ export default function InvoicesPage() {
           
               </div>
 
-          {/* History pane — right side (desktop) */}
-          {historyOpen && (
-            <div className="hidden lg:block lg:col-span-2 min-h-0 h-full">
-              <div className="h-full rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden">
-                <InvoiceNumberHistoryPanel refreshKey={historyRefresh} onUndo={handleUndoHistoryEntry} />
-              </div>
-            </div>
-          )}
-              </div>
-      }
+          </div>
+          }
 
       {/* Mobile detail sheet */}
       <Sheet open={mobileDetailOpen} onOpenChange={setMobileDetailOpen}>
@@ -920,6 +912,8 @@ export default function InvoicesPage() {
         invoiceType={layoutEditorInvoice?.line_items?.some((li) => li.service && li.service !== 'TRIP') || (layoutEditorInvoice?.line_items?.length || 0) <= 3 ? 'monthly' : 'trip'}
         settings={settings} />
       
+
+      <InvoiceHistoryDialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen} refreshKey={historyRefresh} onUndo={handleUndoHistoryEntry} />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => {if (!open) setDeleteTarget(null);}}>
         <AlertDialogContent>

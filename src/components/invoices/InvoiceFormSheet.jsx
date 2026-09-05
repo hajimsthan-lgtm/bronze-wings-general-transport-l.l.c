@@ -13,7 +13,7 @@ import { formatCurrency, formatDateDash } from '@/lib/formatters';
 import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle, Users, Receipt, ListOrdered, Wallet } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
-import { persistManualInvoiceNumber, reallocateInvoiceNumbers, buildInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
+import { persistManualInvoiceNumber, buildInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
@@ -347,17 +347,13 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
         if (numberChanged) {
           try {
             undoSnapshot = await buildInvoiceNumberSnapshot();
-            const result = await reallocateInvoiceNumbers(editInvoice.id, oldNumber, newNumber);
-            reallocated = result.reallocated || [];
-            if (result.updates.length > 0) {
-              await base44.entities.Invoice.bulkUpdate(result.updates);
-            }
-          } catch (e) { /* non-blocking — best-effort reallocation */ }
+          } catch (e) { /* non-blocking */ }
         }
         await updateInvoice.mutateAsync({ id: editInvoice.id, data });
         if (numberChanged) {
           try {
             const me = await base44.auth.me().catch(() => null);
+            await persistManualInvoiceNumber(newNumber, oldNumber, me?.full_name || me?.email || 'Unknown', editInvoice.id);
             await base44.entities.InvoiceNumberChange.create({
               invoice_id: editInvoice.id,
               invoice_number: newNumber,
