@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, Sparkles, Loader2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -9,30 +9,6 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser }
   const { toast } = useToast();
   const [allocating, setAllocating] = useState(false);
   const [dismissed, setDismissed] = useState(false);
-  const [lastEditedInvoiceId, setLastEditedInvoiceId] = useState(null);
-
-  // Find the most recently manually-edited invoice from the audit trail
-  useEffect(() => {
-    if (!errors || errors.length === 0) {
-      setLastEditedInvoiceId(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const changes = await base44.entities.InvoiceNumberChange.list('-changed_at', 20);
-        const lastManual = (changes || []).find(
-          (c) => c.action_type === 'manual_edit' && c.invoice_id
-        );
-        if (!cancelled && lastManual) {
-          setLastEditedInvoiceId(lastManual.invoice_id);
-        }
-      } catch {
-        /* non-blocking */
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [errors]);
 
   if (dismissed || !errors || errors.length === 0) return null;
 
@@ -40,39 +16,29 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser }
     setAllocating(true);
     try {
       const year = new Date().getFullYear();
-      // Always keep the last-edited invoice locked, renumber others around it
-      const lockedIds = lastEditedInvoiceId ? [lastEditedInvoiceId] : [];
-      const result = await smartAllocateKeepChanged(year, lockedIds);
+      // Single pass: renumber all non-voided invoices chronologically
+      const result = await smartAllocateKeepChanged(year, []);
       const changed = result.updates.length;
       if (changed === 0) {
-        toast({
-          title: 'Already sequential',
-          description: 'All other invoice numbers are in correct order.',
-        });
+        toast({ title: 'Already sequential', description: 'All invoice numbers are in correct order.' });
       } else {
-        // Audit log
-        try {
-          const me = currentUser?.full_name || currentUser?.email || 'Unknown';
-          await base44.entities.InvoiceNumberChange.create({
-            invoice_id: lastEditedInvoiceId || result.reallocated[0]?.invoice_id || '',
-            invoice_number:
-              result.reallocated[result.reallocated.length - 1]?.to_number || '',
-            from_number: 'multiple',
-            to_number: `smart-allocated (${changed} invoices)`,
-            reason: `Smart Allocator: kept last-edited invoice, renumbered ${changed} other invoices`,
-            changed_by: me,
-            changed_at: new Date().toISOString(),
-            action_type: 'auto_reallocate',
-            reallocated_invoices: result.reallocated,
-            undo_snapshot: result.snapshot,
-          });
-        } catch {
-          /* non-blocking */
-        }
+        // Audit log (non-blocking, fire-and-forget)
+        base44.entities.InvoiceNumberChange.create({
+          invoice_id: result.reallocated[0]?.invoice_id || '',
+          invoice_number: result.reallocated[result.reallocated.length - 1]?.to_number || '',
+          from_number: 'multiple',
+          to_number: `smart-allocated (${changed} invoices)`,
+          reason: `Smart Allocator: renumbered ${changed} invoice${changed !== 1 ? 's' : ''} chronologically`,
+          changed_by: currentUser?.full_name || currentUser?.email || 'Unknown',
+          changed_at: new Date().toISOString(),
+          action_type: 'auto_reallocate',
+          reallocated_invoices: result.reallocated,
+          undo_snapshot: result.snapshot,
+        }).catch(() => {});
 
         toast({
           title: 'Smart Allocation Complete',
-          description: `Last-edited invoice kept as-is. ${changed} other invoice${changed !== 1 ? 's' : ''} renumbered.`,
+          description: `${changed} invoice${changed !== 1 ? 's' : ''} renumbered to match chronological order.`,
         });
       }
       onAllocated?.();

@@ -473,7 +473,225 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
           <div className={cn('w-full sm:w-1/2 min-h-0 flex flex-col sm:border-r border-border', mobileView === 'form' ? 'flex' : 'hidden sm:flex')}>
           <div className="flex-1 overflow-y-auto thin-scroll px-5 py-5 space-y-4">
             {/* Invoice Mode Toggle */}
-...
+            <div className="flex gap-1 p-1 rounded-lg bg-muted/50 border border-border">
+              <button type="button" onClick={() => setInvoiceMode('trip')} className={cn('flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors', invoiceMode === 'trip' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>Per-Trip Invoice</button>
+              <button type="button" onClick={() => setInvoiceMode('monthly')} className={cn('flex-1 py-1.5 rounded-md text-xs font-semibold transition-colors', invoiceMode === 'monthly' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>Monthly Contract</button>
+            </div>
+
+            {/* Client Section */}
+            <Section title="Client" icon={Users} accent="34, 197, 94">
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs mb-1.5 block">Client *</Label>
+                  <ClientSelect value={form.client_name} onChange={handleClientChange} clients={clients} placeholder="Select client" />
+                </div>
+                {availableContacts.length > 0 && (
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Contact Person</Label>
+                    <ContactPersonSelect value={form.contact_person} onChange={(v) => update('contact_person', v)} contacts={availableContacts} placeholder="Select contact" />
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Email</Label>
+                    <Input value={form.client_email || ''} onChange={(e) => update('client_email', e.target.value)} className={inputCls} placeholder="client@email.com" />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Phone</Label>
+                    <Input value={form.client_phone || ''} onChange={(e) => update('client_phone', e.target.value)} className={inputCls} placeholder="+971..." />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs mb-1.5 block">Address</Label>
+                  <Input value={form.client_address || ''} onChange={(e) => update('client_address', e.target.value)} className={inputCls} placeholder="Street, city" />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1.5 block">TRN</Label>
+                  <Input value={form.client_trn || ''} onChange={(e) => update('client_trn', e.target.value)} className={inputCls} placeholder="Tax registration number" />
+                </div>
+              </div>
+            </Section>
+
+            {/* Invoice Details */}
+            <Section title="Invoice Details" icon={FileText} accent="59, 130, 246">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Invoice #</Label>
+                    <Input value={form.invoice_number || ''} onChange={(e) => update('invoice_number', e.target.value)} className={cn(inputCls, isDuplicate && 'border-destructive', isManualOverride && 'border-amber-500')} placeholder="2026-0001" />
+                    {isDuplicate && <p className="text-[11px] text-destructive mt-1">Duplicate number</p>}
+                    {isManualOverride && !isDuplicate && <p className="text-[11px] text-amber-500 mt-1">Manual override</p>}
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Status</Label>
+                    <Select value={form.status} onValueChange={(v) => update('status', v)}>
+                      <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {['draft', 'unsigned', 'signed', 'sent', 'partially_paid', 'paid', 'cancelled', 'overdue'].map(s => <SelectItem key={s} value={s}>{s.replace(/_/g, ' ')}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Issue Date</Label>
+                    <DatePicker value={form.issue_date} onChange={(v) => update('issue_date', v)} />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Due Date</Label>
+                    <DatePicker value={form.due_date} onChange={(v) => update('due_date', v)} />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs mb-1.5 block">LPO Ref</Label>
+                  <Input value={form.lpo_ref || ''} onChange={(e) => update('lpo_ref', e.target.value)} className={inputCls} placeholder="Purchase order reference" />
+                </div>
+              </div>
+            </Section>
+
+            {/* Line Items — Trip Picker or Contract Picker or Manual */}
+            {invoiceMode === 'trip' && form.client_name && (
+              <Section title="Trips" icon={Receipt} accent="168, 85, 247">
+                <div className="relative" ref={tripsDropdownRef}>
+                  <button type="button" onClick={() => setTripsOpen(o => !o)} className={cn('w-full flex items-center justify-between px-3 py-2 rounded-lg border border-border bg-background/50 text-sm transition-colors hover:border-primary/40', tripsOpen && 'border-primary/40')}>
+                    <span className="text-muted-foreground">{selectedTripNumbers.length} trip{selectedTripNumbers.length !== 1 ? 's' : ''} selected</span>
+                    <ChevronDown className={cn('w-4 h-4 transition-transform', tripsOpen && 'rotate-180')} />
+                  </button>
+                  {tripsOpen && (
+                    <div className="absolute z-30 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-border bg-popover shadow-xl">
+                      {clientCompletedTrips.length === 0 ? (
+                        <p className="px-3 py-4 text-xs text-muted-foreground text-center">No uninvoiced completed trips for this client.</p>
+                      ) : (
+                        clientCompletedTrips.map(tr => (
+                          <button key={tr.id} type="button" onClick={() => toggleTrip(tr)} className={cn('w-full flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-primary/10 border-b border-border/50', selectedTripNumbers.includes(tr.trip_number) && 'bg-primary/5')}>
+                            <Checkbox checked={selectedTripNumbers.includes(tr.trip_number)} className="pointer-events-none" />
+                            <span className="font-mono">{tr.trip_number}</span>
+                            <span className="text-muted-foreground truncate">{[tr.from_location, tr.to_location].filter(Boolean).join(' → ')}</span>
+                            <span className="ml-auto font-semibold">{formatCurrency(tr.revenue || tr.base_fare || 0)}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Section>
+            )}
+
+            {invoiceMode === 'monthly' && form.client_name && (
+              <Section title="Monthly Contracts" icon={Receipt} accent="168, 85, 247">
+                <div className="relative" ref={contractsDropdownRef}>
+                  <button type="button" onClick={() => setContractsOpen(o => !o)} className={cn('w-full flex items-center justify-between px-3 py-2 rounded-lg border border-border bg-background/50 text-sm transition-colors hover:border-primary/40', contractsOpen && 'border-primary/40')}>
+                    <span className="text-muted-foreground">{selectedContractIds.length} contract{selectedContractIds.length !== 1 ? 's' : ''} selected</span>
+                    <ChevronDown className={cn('w-4 h-4 transition-transform', contractsOpen && 'rotate-180')} />
+                  </button>
+                  {contractsOpen && (
+                    <div className="absolute z-30 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-border bg-popover shadow-xl">
+                      {availableContracts.length === 0 ? (
+                        <p className="px-3 py-4 text-xs text-muted-foreground text-center">No active contracts available for this client.</p>
+                      ) : (
+                        availableContracts.map(c => (
+                          <button key={c.id} type="button" onClick={() => toggleContract(c)} className={cn('w-full flex items-center gap-2 px-3 py-2 text-left text-xs hover:bg-primary/10 border-b border-border/50', selectedContractIds.includes(c.id) && 'bg-primary/5')}>
+                            <Checkbox checked={selectedContractIds.includes(c.id)} className="pointer-events-none" />
+                            <span className="font-medium">{c.vehicle_plate || c.company_name}</span>
+                            <span className="text-muted-foreground">{c.driver_name || ''}</span>
+                            <span className="ml-auto font-semibold">{formatCurrency(c.monthly_rate || 0)}</span>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Section>
+            )}
+
+            {/* Line Items */}
+            <Section title="Line Items" icon={ListOrdered} accent="245, 158, 11">
+              <div className="space-y-2">
+                {form.line_items.length === 0 && <p className="text-xs text-muted-foreground py-2">No line items yet. Select trips/contracts above or add manually.</p>}
+                {form.line_items.map((item, i) => (
+                  <div key={i} className="rounded-lg border border-border bg-background/30 p-2.5 space-y-2">
+                    <div className="flex items-start gap-2">
+                      <Input value={item.description || ''} onChange={(e) => updateItem(i, 'description', e.target.value)} className={cn(inputCls, 'flex-1')} placeholder="Description" />
+                      <button type="button" onClick={() => removeItem(i)} className="mt-1.5 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <div>
+                        <Label className="text-[10px] mb-1 block">Qty</Label>
+                        <Input type="number" value={item.quantity} onChange={(e) => updateItem(i, 'quantity', Number(e.target.value))} className={inputCls} />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] mb-1 block">Unit Price</Label>
+                        <Input type="number" value={item.unit_price} onChange={(e) => updateItem(i, 'unit_price', Number(e.target.value))} className={inputCls} />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] mb-1 block">Amount</Label>
+                        <Input value={(Number(item.amount) || 0).toFixed(2)} readOnly className={cn(inputCls, 'opacity-70')} />
+                      </div>
+                      <div className="flex items-end gap-2 pb-0.5">
+                        <label className="flex items-center gap-1 text-[10px] text-muted-foreground cursor-pointer">
+                          <Checkbox checked={item.vat_excluded || false} onCheckedChange={(v) => updateItem(i, 'vat_excluded', v)} />
+                          VAT Excl
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={addItem} className="w-full py-2 rounded-lg border border-dashed border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors flex items-center justify-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5" /> Add Line Item
+                </button>
+              </div>
+            </Section>
+
+            {/* Totals & Payment */}
+            <Section title="Totals & Payment" icon={Wallet} accent="34, 197, 94">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs mb-1.5 block">VAT Rate (%)</Label>
+                    <Input type="number" value={form.vat_rate} onChange={(e) => update('vat_rate', Number(e.target.value))} className={inputCls} />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Payment Terms</Label>
+                    <Input value={form.payment_terms || ''} onChange={(e) => update('payment_terms', e.target.value)} className={inputCls} placeholder="Net 30" />
+                  </div>
+                </div>
+                <div className="rounded-lg bg-muted/30 p-3 space-y-1.5 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-medium">{formatCurrency(subtotal)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">VAT ({form.vat_rate}%)</span><span className="font-medium">{formatCurrency(vatAmount)}</span></div>
+                  <div className="flex justify-between text-base font-bold pt-1.5 border-t border-border"><span>Total</span><span>{formatCurrency(total)}</span></div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={receivePayment} onCheckedChange={setReceivePayment} />
+                  <Label className="text-xs cursor-pointer" onClick={() => setReceivePayment(!receivePayment)}>Receive payment now</Label>
+                </div>
+                {receivePayment && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <Label className="text-[10px] mb-1 block">Amount</Label>
+                      <Input type="number" value={payment.amount} onChange={(e) => updatePayment('amount', e.target.value)} className={inputCls} placeholder={String(total)} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] mb-1 block">Mode</Label>
+                      <Select value={payment.mode} onValueChange={(v) => updatePayment('mode', v)}>
+                        <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {['cash', 'bank_transfer', 'cheque', 'card'].map(m => <SelectItem key={m} value={m}>{m.replace(/_/g, ' ')}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] mb-1 block">Date</Label>
+                      <DatePicker value={payment.date} onChange={(v) => updatePayment('date', v)} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Section>
+
+            {/* Notes */}
+            <Section title="Notes" icon={FileText} accent="148, 163, 184">
+              <Textarea value={form.notes || ''} onChange={(e) => update('notes', e.target.value)} className={inputCls} rows={2} placeholder="Optional notes for the client" />
+            </Section>
           </div>
           {/* Footer Actions — always visible at bottom */}
           <div className="flex gap-2 pt-3 pb-4 px-5 bg-background/95 backdrop-blur-sm border-t border-border flex-shrink-0">
