@@ -784,7 +784,7 @@ export default function InvoicesPage() {
 
       <div className="grid grid-cols-1 lg:gap-4 lg:h-[calc(100vh-18rem)] min-h-[400px] lg:grid-cols-5">
           {/* Left pane — list */}
-          <div className="lg:col-span-2 min-h-0 h-[calc(100dvh-24rem)] min-h-[280px] lg:h-full">
+          <div className="lg:col-span-2 min-h-0 lg:h-full">
             <InvoiceListPane
             invoices={filtered}
             selectedId={selectedId}
