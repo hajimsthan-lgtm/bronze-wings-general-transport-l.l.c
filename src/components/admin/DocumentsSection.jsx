@@ -1,20 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import DatePicker from '@/components/common/DatePicker';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FileText, Plus, Trash2, Download, Eye, Loader2, Paperclip, ChevronDown } from 'lucide-react';
+
+import { FileText, Plus, Trash2, Download, Eye, Loader2, ChevronDown } from 'lucide-react';
 import { formatDate } from '@/lib/formatters';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
 import EmptyState from '@/components/common/EmptyState';
 import { openDocument } from '@/lib/openDocument';
 import { getDocStatus, getExpirySubtext, summarizeHealth, getHealthLevel, DOC_STATUS_VAR } from '@/lib/documentHealth';
-
-const TYPES = ['registration', 'insurance', 'license', 'permit', 'contract', 'invoice', 'other'];
+import DocumentAddDialog from '@/components/admin/DocumentAddDialog';
 
 const HEALTH_DOT_STYLE = {
   expired: { background: 'hsl(var(--danger))' },
@@ -61,6 +56,13 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
 
   const health = summarizeHealth(docs);
   const healthLevel = getHealthLevel(docs);
+
+  // Collect previously used types for combobox suggestions
+  const usedTypes = useMemo(() => {
+    const set = new Set();
+    docs.forEach((d) => { if (d.type) set.add(d.type); });
+    return Array.from(set);
+  }, [docs]);
 
   const onFile = async (e) => {
     const file = e.target.files?.[0];
@@ -192,61 +194,18 @@ export default function DocumentsSection({ entityType, entityId, accent = '#a855
       >
         <div className="overflow-hidden">
           <div className="p-4 space-y-3">
-            {/* Add form */}
-            {adding && (
-              <div className="glass-card p-4 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-1.5">Title</Label>
-                    <Input
-                      value={form.title}
-                      onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                      className="bg-background border-border"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-1.5">Type</Label>
-                    <Select value={form.type} onValueChange={(v) => setForm((p) => ({ ...p, type: v }))}>
-                      <SelectTrigger className="bg-background border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TYPES.map((tp) => (
-                          <SelectItem key={tp} value={tp}>
-                            {tp}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-1.5">Expiry</Label>
-                    <DatePicker
-                      value={form.expiry_date}
-                      onChange={(v) => setForm((p) => ({ ...p, expiry_date: v }))}
-                      className="bg-background border-border"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground mb-1.5">File</Label>
-                    <label className="flex items-center gap-2 h-9 px-3 rounded-lg bg-background border border-border cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                      <Paperclip className="w-4 h-4" />
-                      {uploading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : form.file_url ? (
-                        'File attached'
-                      ) : (
-                        'Choose file'
-                      )}
-                      <input type="file" className="hidden" onChange={onFile} disabled={uploading} />
-                    </label>
-                  </div>
-                </div>
-                <Button onClick={save} disabled={saving} size="sm" className="bg-primary hover:bg-primary/90">
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('save')}
-                </Button>
-              </div>
-            )}
+            {/* Add document dialog (popup in front) */}
+            <DocumentAddDialog
+              open={adding}
+              onOpenChange={(v) => { if (!v) setForm({ title: '', type: 'other', expiry_date: '', file_url: '', notes: '' }); setAdding(v); }}
+              form={form}
+              setForm={setForm}
+              onFile={onFile}
+              onSave={save}
+              saving={saving}
+              uploading={uploading}
+              usedTypes={usedTypes}
+            />
 
             {/* Document list */}
             {loading ? (
