@@ -56,6 +56,13 @@ const isRoLoopError = (arg) => {
   if (typeof arg?.message === 'string') return arg.message.includes(RO_LOOP_MSG);
   return false;
 };
+// Override window.onerror directly — it runs BEFORE capture-phase listeners,
+// so the platform's error tracker (which may hook onerror) sees it first.
+const _origWindowOnError = window.onerror;
+window.onerror = function (message, source, lineno, colno, error) {
+  if (isRoLoopError(message) || isRoLoopError(error)) return true; // suppress
+  return _origWindowOnError ? _origWindowOnError.call(this, message, source, lineno, colno, error) : false;
+};
 // Capture-phase listener: stops the error before app-level handlers see it.
 window.addEventListener('error', (e) => {
   if (isRoLoopError(e?.error) || isRoLoopError(e?.message)) {
