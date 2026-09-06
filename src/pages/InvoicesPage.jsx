@@ -672,11 +672,11 @@ export default function InvoicesPage() {
   // Tab counts — derived from action-based status logic
   const counts = useMemo(() => computeTabCounts(baseFiltered), [baseFiltered]);
 
-  // Tab-filtered list — always auto-sorted by invoice number (ascending)
+  // Tab-filtered list — always auto-sorted by invoice number (descending)
   const filtered = useMemo(() => {
     const tabFiltered = filterByTab(baseFiltered, tab);
     return [...tabFiltered].sort((a, b) =>
-      (a.invoice_number || '').localeCompare(b.invoice_number || '', undefined, { numeric: true })
+      (b.invoice_number || '').localeCompare(a.invoice_number || '', undefined, { numeric: true })
     );
   }, [baseFiltered, tab]);
 
