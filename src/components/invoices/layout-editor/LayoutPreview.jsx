@@ -9,13 +9,20 @@ const RENDER_SCALE = 1;
 const A4_W = 794;
 const A4_H = 1123;
 
-export default function LayoutPreview({ previewUrl, previewLoading, pageCount, validationErrors }) {
+export default function LayoutPreview({ previewUrl, previewLoading, pageCount, validationErrors, currentPage: extPage, onPageChange }) {
   const [zoom, setZoom] = useState(0.75);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [intPage, setIntPage] = useState(1);
   const [fitToScreen, setFitToScreen] = useState(true);
   const containerRef = useRef(null);
 
-  useEffect(() => { setCurrentPage(1); }, [previewUrl]);
+  // External page control (from editor) takes precedence; fall back to internal state
+  const currentPage = extPage !== undefined ? extPage : intPage;
+  const setCurrentPage = onPageChange || setIntPage;
+
+  // Clamp to valid range when page count changes — don't reset to 1
+  useEffect(() => {
+    if (pageCount > 0 && currentPage > pageCount) setCurrentPage(Math.max(1, pageCount));
+  }, [pageCount]);
 
   // Fit-to-screen: calculate zoom from container width
   useEffect(() => {

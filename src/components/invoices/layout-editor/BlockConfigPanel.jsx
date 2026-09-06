@@ -397,9 +397,26 @@ export default function BlockConfigPanel({ block, onUpdate, onResetStyle, onRese
             )}
             {(block.pagination?.mode || 'auto') === 'auto' && (
               <p className="text-[10px] text-muted-foreground/70 leading-snug">
-                Auto-balance calculates max rows that fit before the footer and fills each page — no dead space.
+                Auto-balance fills each page with the maximum rows that fit — no dead space.
+                Use the page selector above to pin a specific row count per page.
               </p>
             )}
+            {/* Signature on every page toggle */}
+            <div className="pt-1.5 border-t border-border/20">
+              <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-border/30 px-2 py-1.5 hover:bg-muted/20 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={block.pagination?.sigOnEveryPage || false}
+                  onChange={e => onUpdate('pagination', { sigOnEveryPage: e.target.checked })}
+                  className="w-3.5 h-3.5 rounded accent-primary"
+                />
+                <span className="text-xs text-foreground font-medium flex-1">Show signature block on every page</span>
+                {block.pagination?.sigOnEveryPage && <span className="text-[9px] text-primary font-semibold">ON</span>}
+              </label>
+              <p className="text-[10px] text-muted-foreground/70 leading-snug mt-1">
+                Off (default): signature appears only on the last page. On: repeats on every page.
+              </p>
+            </div>
           </div>
         </div>
       )}

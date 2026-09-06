@@ -88,7 +88,9 @@ export const DEFAULT_SIG_ELEMENTS = {
 };
 
 // Default table pagination — auto-balance fills each page to the footer
-export const DEFAULT_TABLE_PAGINATION = { mode: 'auto', rowsPerPage: 20 };
+// pageOverrides: { [pageNum]: rowCount } — manual per-page row count override
+// sigOnEveryPage: when true, signature block repeats on every page (not just last)
+export const DEFAULT_TABLE_PAGINATION = { mode: 'auto', rowsPerPage: 20, pageOverrides: {}, sigOnEveryPage: false };
 
 // Build default field config for a block type
 function defaultFieldsFor(type) {
@@ -385,6 +387,24 @@ export function estimateAfterTableHeight(layout) {
   return height;
 }
 
+// Estimate the height of just the signature block (for sigOnEveryPage reservation)
+export function estimateSignatureHeight(layout) {
+  if (!layout?.blocks) return 0;
+  const enabled = layout.blocks.filter(b => b.enabled);
+  const tableIdx = enabled.findIndex(b => b.type === 'table');
+  if (tableIdx < 0) return 0;
+  let height = 0;
+  for (const block of enabled.slice(tableIdx + 1)) {
+    if (block.type === 'footer') continue;
+    if (block.type === 'signature') {
+      height += BLOCK_HEIGHTS.signature || 28;
+      height += 3;
+      height += (block.spacing?.paddingTop || 0) + (block.spacing?.paddingBottom || 0);
+    }
+  }
+  return height;
+}
+
 export function estimateBeforeTableHeight(layout) {
   if (!layout?.blocks) return 0;
   const enabled = layout.blocks.filter(b => b.enabled);
@@ -431,7 +451,11 @@ export function deserializeLayout(config) {
         } : {}),
         ...(b.type === 'table' ? {
           columns: (b.columns || defaultBlock.columns || []).map(c => ({ ...c })),
-          pagination: { ...defaultBlock.pagination, ...(b.pagination || {}) },
+          pagination: {
+            ...defaultBlock.pagination,
+            ...(b.pagination || {}),
+            pageOverrides: { ...(b.pagination?.pageOverrides || defaultBlock.pagination?.pageOverrides || {}) },
+          },
         } : {}),
       };
     }),

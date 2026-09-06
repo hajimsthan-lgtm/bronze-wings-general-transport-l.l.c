@@ -18,7 +18,7 @@ import {
   getInvStyle, fetchLogoDataUrl,
 } from './invoicePdfNative';
 import { formatInvoiceNumber } from './invoiceSequence';
-import { estimateAfterTableHeight, BLOCK_HEIGHTS } from './invoiceLayoutModel';
+import { estimateAfterTableHeight, estimateSignatureHeight, BLOCK_HEIGHTS } from './invoiceLayoutModel';
 
 // ── Helpers ──
 function hexToRgb(hex) {
@@ -48,6 +48,118 @@ function applyCustomColumns(cols, block) {
   });
 }
 
+// ── Measure a single row's height (must match drawTableRow's height calc) ──
+function measureRowHeight(pdf, item, cols, invoiceType) {
+  const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
+  const _indLine = buildIndicatorLine(item);
+  const _descText = _indLine ? `${normalizeRoute(item.description ?? '')}\n${_indLine}` : normalizeRoute(item.description ?? '');
+  const fSize = invoiceType === 'monthly' ? 8 : 7.5;
+  pdf.setFont('times', descCol?.colWeight || 'bold');
+  pdf.setFontSize(fSize * (descCol?.colSizeMul || 1));
+  const descLines = pdf.splitTextToSize(_descText, (descCol?.w || 80) - 4);
+  return Math.max(6.5, descLines.length * 2.8 + 3);
+}
+
+// ── Auto-balancing page break planner ──
+// Pre-measures all row heights, then distributes rows across pages so each
+// non-last page is filled maximally (no dead space), and the last page fits
+// rows + after-table blocks. Supports per-page manual row count overrides.
+function planPageBreaks(pdf, items, cols, startY, nonLastMaxY, lastMaxY, pagination) {
+  const total = items.length;
+  if (total === 0) return [{ startIdx: 0, count: 0, isLast: true, pageNum: 1, isManual: false }];
+
+  // Pre-measure all row heights
+  const rowHeights = items.map(item => measureRowHeight(pdf, item, cols, pagination?._invoiceType || 'monthly'));
+
+  const pageOverrides = pagination?.pageOverrides || {};
+  const mode = pagination?.mode || 'auto';
+
+  // Manual mode (legacy): fixed rowsPerPage for all pages
+  if (mode === 'manual' && !pagination?.pageOverrides?.[1]) {
+    const rpp = pagination?.rowsPerPage || 20;
+    const pages = [];
+    for (let i = 0; i < total; i += rpp) {
+      const count = Math.min(rpp, total - i);
+      pages.push({ startIdx: i, count, isLast: i + count >= total, pageNum: pages.length + 1, isManual: true });
+    }
+    return pages;
+  }
+
+  // Auto mode (with optional per-page overrides)
+  const pages = [];
+  let idx = 0;
+  let pageNum = 1;
+
+  while (idx < total) {
+    const override = pageOverrides[pageNum];
+    let count;
+
+    if (override && override > 0) {
+      // Manual per-page override — use exact count
+      count = Math.min(override, total - idx);
+    } else {
+      // Auto-calculate: fill page greedily up to nonLastMaxY
+      let y = startY;
+      count = 0;
+      while (idx + count < total && y + rowHeights[idx + count] <= nonLastMaxY) {
+        y += rowHeights[idx + count];
+        count++;
+      }
+      if (count === 0) count = 1; // safety: at least 1 row
+    }
+
+    pages.push({ startIdx: idx, count, isLast: false, pageNum, isManual: !!override });
+    idx += count;
+    pageNum++;
+  }
+
+  // Mark the last page
+  if (pages.length > 0) pages[pages.length - 1].isLast = true;
+
+  // Fix-up: ensure last page rows + afterTable fit in lastMaxY
+  // Move rows from last page to previous page if needed (skip manual pages)
+  while (pages.length > 1) {
+    const lastPage = pages[pages.length - 1];
+    const prevPage = pages[pages.length - 2];
+    if (lastPage.isManual || prevPage.isManual) break;
+
+    let lastRowsY = startY;
+    for (let i = 0; i < lastPage.count; i++) {
+      lastRowsY += rowHeights[lastPage.startIdx + i];
+    }
+    if (lastRowsY <= lastMaxY) break; // fits!
+    if (lastPage.count <= 1) break;   // can't move more
+
+    lastPage.count--;
+    lastPage.startIdx++;
+    prevPage.count++;
+  }
+
+  // Edge case: single page with rows + afterTable not fitting → split
+  if (pages.length === 1) {
+    const page = pages[0];
+    let rowsY = startY;
+    for (let i = 0; i < page.count; i++) {
+      rowsY += rowHeights[page.startIdx + i];
+    }
+    if (rowsY > lastMaxY) {
+      let splitIdx = 0;
+      let y = startY;
+      for (let i = 0; i < page.count; i++) {
+        if (y + rowHeights[page.startIdx + i] > nonLastMaxY) break;
+        y += rowHeights[page.startIdx + i];
+        splitIdx++;
+      }
+      if (splitIdx > 0 && splitIdx < page.count) {
+        pages[0] = { startIdx: page.startIdx, count: splitIdx, isLast: false, pageNum: 1, isManual: page.isManual };
+        pages.push({ startIdx: page.startIdx + splitIdx, count: page.count - splitIdx, isLast: true, pageNum: 2, isManual: false });
+      }
+    }
+  }
+
+  return pages;
+}
+
 export async function buildLayoutInvoicePdf(invoice, clientName, settings, layout, invoiceType = 'monthly', seqNo, draft = false) {
   const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
@@ -65,7 +177,7 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   );
   const tableBlock = layout.blocks.find(b => b.type === 'table');
   if (tableBlock?.columns) cols = applyCustomColumns(cols, tableBlock);
-  const tablePagination = tableBlock?.pagination || { mode: 'auto', rowsPerPage: 20 };
+  const tablePagination = { ...(tableBlock?.pagination || { mode: 'auto', rowsPerPage: 20, pageOverrides: {}, sigOnEveryPage: false }), _invoiceType: invoiceType };
 
   const vatRate = invoice.vat_rate ?? s.default_vat_rate ?? 5;
   const items = invoice.line_items || [];
@@ -80,7 +192,13 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   const hasFooter = enabledBlocks.some(b => b.type === 'footer');
 
   const afterTableHeight = estimateAfterTableHeight(layout);
-  const contentBottom = FOOTER_RESERVED_TOP - afterTableHeight - 2;
+  const sigOnEveryPage = tablePagination.sigOnEveryPage || false;
+  const sigBlock = afterTableBlocks.find(b => b.type === 'signature');
+  const sigHeight = sigBlock ? (BLOCK_HEIGHTS.signature + 3 + (sigBlock.spacing?.paddingTop || 0) + (sigBlock.spacing?.paddingBottom || 0)) : 0;
+  // Non-last pages: rows fill almost the entire page (no after-table reservation)
+  // unless sigOnEveryPage is on — then reserve signature height on every page.
+  const lastMaxY = FOOTER_RESERVED_TOP - afterTableHeight - 2;
+  const nonLastMaxY = sigOnEveryPage ? FOOTER_RESERVED_TOP - sigHeight - 2 : FOOTER_RESERVED_TOP - 2;
 
   // Compute totals
   const subtotal = items.reduce((sum, i) => {
@@ -224,42 +342,52 @@ export async function buildLayoutInvoicePdf(invoice, clientName, settings, layou
   y = drawBeforeTableBlocks(y, currentPageNum);
   y = drawTableHeader(pdf, cols, y, invoiceType, invStyle);
 
-  // ── TABLE ROWS ──
+  // ── PLAN PAGE BREAKS (auto-balancing engine) ──
+  // Pre-measure all rows and distribute across pages so each page is filled
+  // maximally — no dead space. The last page reserves room for after-table blocks.
+  const pagePlan = planPageBreaks(pdf, items, cols, y, nonLastMaxY, lastMaxY, tablePagination);
+
+  // ── TABLE ROWS (rendered according to the plan) ──
   if (items.length === 0) {
     fc(pdf, WHITE); pdf.rect(CONTENT_X, y, CONTENT_W, 7, 'F');
     pdf.setFont('times', 'normal'); pdf.setFontSize(9); tc(pdf, GRAY);
     pdf.text('No items', CONTENT_X + 2, y + 4.5);
     dc(pdf, BLACK); pdf.setLineWidth(0.3); pdf.rect(CONTENT_X, y, CONTENT_W, 7);
     y += 7;
-  } else {
-    let rowsOnPage = 0;
-    for (let idx = 0; idx < items.length; idx++) {
-      const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
-      const _indLine = buildIndicatorLine(items[idx]);
-      const _descText = _indLine ? `${normalizeRoute(items[idx].description ?? '')}\n${_indLine}` : normalizeRoute(items[idx].description ?? '');
-      const descLines = pdf.splitTextToSize(_descText, descCol.w - 4);
-      const estH = Math.max(6.5, descLines.length * 2.8 + 3);
-      const isLast = idx === items.length - 1;
-
-      // Manual rows-per-page: break after exactly N rows
-      if (tablePagination.mode === 'manual' && rowsOnPage >= tablePagination.rowsPerPage) {
-        y = startNewPage();
-        rowsOnPage = 0;
-      } else if (isLast) {
-        if (y + estH + afterTableHeight + 2 > FOOTER_RESERVED_TOP) { y = startNewPage(); rowsOnPage = 0; }
-      } else if (y + estH > contentBottom) {
-        y = startNewPage();
-        rowsOnPage = 0;
-      }
-      y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice, invStyle);
-      rowsOnPage++;
+    // After-table blocks on the single page
+    for (const block of afterTableBlocks) {
+      y = drawBlock(block, y, currentPageNum);
+      y += 2;
     }
-  }
-
-  // ── AFTER-TABLE BLOCKS ──
-  for (const block of afterTableBlocks) {
-    y = drawBlock(block, y, currentPageNum);
-    y += 2;
+  } else {
+    for (let p = 0; p < pagePlan.length; p++) {
+      const plan = pagePlan[p];
+      if (p > 0) {
+        // New page — redraw before-table blocks + table header
+        pdf.addPage();
+        drawPageBorder(pdf);
+        currentPageNum++;
+        y = BORDER_POS + 2;
+        y = drawBeforeTableBlocks(y, currentPageNum);
+        y = drawTableHeader(pdf, cols, y, invoiceType, invStyle);
+      }
+      // Draw this page's rows
+      for (let i = 0; i < plan.count; i++) {
+        const idx = plan.startIdx + i;
+        y = drawTableRow(pdf, items[idx], cols, y, idx, vatRate, invoiceType, invoice, invStyle);
+      }
+      // After-table blocks: all on the last page, signature-only on non-last pages
+      // when sigOnEveryPage is enabled
+      if (plan.isLast) {
+        for (const block of afterTableBlocks) {
+          y = drawBlock(block, y, currentPageNum);
+          y += 2;
+        }
+      } else if (sigOnEveryPage && sigBlock) {
+        y = drawBlock(sigBlock, y, currentPageNum);
+        y += 2;
+      }
+    }
   }
 
   // ── FOOTER + PAGE NUMBERS ──

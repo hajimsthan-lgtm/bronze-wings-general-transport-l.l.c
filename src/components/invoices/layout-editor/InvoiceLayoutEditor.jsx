@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import LayoutBlockCard from './LayoutBlockCard';
 import LayoutPreview from './LayoutPreview';
+import PageOverrideBar from './PageOverrideBar';
 import {
   DEFAULT_LAYOUT, validateLayout, serializeLayout, deserializeLayout, BLOCK_META,
   moveBlock, resetBlockStyle, applyStyleToAll, getDefaultColumns,
@@ -63,7 +64,8 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [expandedBlock, setExpandedBlock] = useState(null);
-  const [editPage, setEditPage] = useState('all'); // 'all' | page number
+  const [editPage, setEditPage] = useState('all'); // 'all' | page number (for spacing overrides)
+  const [previewPage, setPreviewPage] = useState(1); // which page the preview shows
   const [invoiceType, setInvoiceType] = useState(() => {
     // Auto-detect invoice type from line items
     if (invoice?.line_items?.some(i => i.driver_name || i.vehicle_no || i.delivery_note_no)) return 'trip';
@@ -275,6 +277,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
     setLayoutName('');
     setExpandedBlock(null);
     setEditPage('all');
+    setPreviewPage(1);
   };
 
   // Set this layout as the default for ALL invoices (saved to CompanySettings)
@@ -419,7 +422,7 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                   <Truck className="w-3.5 h-3.5" /> Per Trip
                 </button>
               </div>
-              {/* Page switcher */}
+              {/* Page switcher — controls both the preview page and the edit context */}
               {previewPageCount > 1 && (
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/40 border border-border/40">
                   <button
@@ -432,25 +435,31 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
                   </button>
                   <div className="w-px h-4 bg-border/40" />
                   <button
-                    onClick={() => setEditPage(ep => ep === 'all' ? 1 : Math.max(1, (typeof ep === 'number' ? ep : 1) - 1))}
-                    disabled={editPage === 1}
+                    onClick={() => { const np = Math.max(1, previewPage - 1); setPreviewPage(np); setEditPage(np); }}
+                    disabled={previewPage <= 1}
                     className="p-1 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
-                  {Array.from({ length: previewPageCount }, (_, i) => i + 1).map(pg => (
-                    <button
-                      key={pg}
-                      onClick={() => setEditPage(pg)}
-                      className={cn('px-2 sm:px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all',
-                        editPage === pg ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40')}
-                    >
-                      {pg}
-                    </button>
-                  ))}
+                  {Array.from({ length: previewPageCount }, (_, i) => i + 1).map(pg => {
+                    const tableBlock = layout.blocks.find(b => b.type === 'table');
+                    const hasOverride = tableBlock?.pagination?.pageOverrides?.[pg] > 0;
+                    return (
+                      <button
+                        key={pg}
+                        onClick={() => { setPreviewPage(pg); setEditPage(pg); }}
+                        className={cn('px-2 sm:px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all relative',
+                          previewPage === pg ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40')}
+                        title={hasOverride ? `Page ${pg}: manual override (${tableBlock.pagination.pageOverrides[pg]} rows)` : `Page ${pg}: auto-balance`}
+                      >
+                        {pg}
+                        {hasOverride && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-500" />}
+                      </button>
+                    );
+                  })}
                   <button
-                    onClick={() => setEditPage(ep => ep === 'all' ? 1 : Math.min(previewPageCount, (typeof ep === 'number' ? ep : 1) + 1))}
-                    disabled={editPage === previewPageCount}
+                    onClick={() => { const np = Math.min(previewPageCount, previewPage + 1); setPreviewPage(np); setEditPage(np); }}
+                    disabled={previewPage >= previewPageCount}
                     className="p-1 rounded-md text-muted-foreground hover:text-foreground disabled:opacity-30"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -572,12 +581,24 @@ export default function InvoiceLayoutEditor({ open, onClose, invoice, clientName
               </div>
             </div>
 
+            {/* Per-page manual override bar (shown when a specific page is selected) */}
+            {editPage !== 'all' && previewPageCount > 1 && (
+              <PageOverrideBar
+                layout={layout}
+                setLayout={setLayout}
+                editPage={editPage}
+                previewPageCount={previewPageCount}
+              />
+            )}
+
             {/* Right: Live preview */}
             <LayoutPreview
               previewUrl={previewUrl}
               previewLoading={previewLoading}
               pageCount={previewPageCount}
               validationErrors={validation.errors}
+              currentPage={previewPage}
+              onPageChange={setPreviewPage}
             />
           </div>
 
