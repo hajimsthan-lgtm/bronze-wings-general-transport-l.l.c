@@ -491,7 +491,14 @@ const translations = {
   }
 };
 
-const I18nContext = createContext();
+const _defaultT = (key) => key;
+const I18nContext = createContext({
+  language: 'en',
+  setLanguage: () => {},
+  toggleLanguage: () => {},
+  t: _defaultT,
+  dir: 'ltr',
+});
 
 export function I18nProvider({ children }) {
   const [language, setLanguage] = useState('en');
@@ -516,7 +523,5 @@ export function I18nProvider({ children }) {
 }
 
 export function useI18n() {
-  const context = useContext(I18nContext);
-  if (!context) throw new Error('useI18n must be used within I18nProvider');
-  return context;
+  return useContext(I18nContext);
 }
