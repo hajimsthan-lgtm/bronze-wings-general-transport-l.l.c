@@ -43,7 +43,7 @@ const DEFAULT_CONTRACT = {
   company_name: '', start_date: '', end_date: '', auto_renewal: false,
   contract_rate: '', monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
   allowance_days: '', allowance_hours_per_day: '', extra_day_rate: '', extra_hour_rate: '',
-  prorate_underuse: false, actual_days_used: '', daily_usage: [], avg_hours_per_day: ''
+  prorate_underuse: false, daily_usage: [], avg_hours_per_day: ''
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -128,7 +128,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           extra_day_rate: editContract.extra_day_rate || '',
           extra_hour_rate: editContract.extra_hour_rate || '',
           prorate_underuse: !!editContract.prorate_underuse,
-          actual_days_used: editContract.actual_days_used || '',
           daily_usage: Array.isArray(editContract.daily_usage) ? editContract.daily_usage : [],
           avg_hours_per_day: editContract.avg_hours_per_day || ''
         });
@@ -518,7 +517,6 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           extra_day_rate: Number(contract.extra_day_rate) || 0,
           extra_hour_rate: Number(contract.extra_hour_rate) || 0,
           prorate_underuse: !!contract.prorate_underuse,
-          actual_days_used: Number(contract.actual_days_used) || 0,
           daily_usage: Array.isArray(contract.daily_usage) ? contract.daily_usage : [],
           avg_hours_per_day: Number(contract.avg_hours_per_day) || 0,
           add_ons: contractAddOns || []
@@ -612,7 +610,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     isNewClient: cIsNewClient, isNewVehicle: cIsNewVehicle, isNewDriver: cIsNewDriver,
     cCreatedFlags, cCreating, createContractEntity: (type, payload, flagKey) => createEntity(type, payload, flagKey, true),
     addOns: contractAddOns, setAddOns: setContractAddOns,
-    allVehicles: vehicles, allDrivers: drivers, allClients: clients
+    allVehicles: vehicles, allDrivers: drivers, allClients: clients,
+    companySettings, isEditing: !!editContract
   };
 
   const STATUS_LABELS = {

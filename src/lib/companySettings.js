@@ -22,6 +22,7 @@ const DEFAULTS = {
   inv_logo_url: '',
   inv_logo_size: 16,
   vendor_rate_percentage: 80,
+  default_allowance_hours_per_day: 10,
 };
 
 export async function getCompanySettings() {

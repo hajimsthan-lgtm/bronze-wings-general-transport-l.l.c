@@ -4,8 +4,9 @@ import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus, Info } from 'lucide-react';
+import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus, Info, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
+import { base44 } from '@/api/base44Client';
 import CreateNewCard from '../CreateNewCard';
 import Section from '../Section';
 import TripAddOnsSection from '../TripAddOnsSection';
@@ -16,7 +17,13 @@ import DailyUsageLog from './DailyUsageLog';
 import ContractCalcSummary from './ContractCalcSummary';
 import { useI18n } from '@/lib/i18n';
 
-const initials = (name) => (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const ACCENT = {
+  contract: '99, 102, 241',
+  usage: '16, 185, 129',
+  assignment: '139, 92, 246',
+  addons: '245, 158, 11',
+  docs: '100, 116, 139',
+};
 
 const DOC_PLACEHOLDERS = [
   { key: 'doc_contract_agreement' },
@@ -24,15 +31,6 @@ const DOC_PLACEHOLDERS = [
   { key: 'doc_insurance_policy' },
   { key: 'doc_vehicle_photos' },
 ];
-
-// Light professional accent colors per section
-const ACCENT = {
-  contract: '99, 102, 241',    // indigo
-  usage: '16, 185, 129',       // emerald
-  assignment: '139, 92, 246',  // violet
-  addons: '245, 158, 11',     // amber
-  docs: '100, 116, 139',      // slate
-};
 
 export default function ContractModeFields({ p }) {
   const { t } = useI18n();
@@ -43,13 +41,16 @@ export default function ContractModeFields({ p }) {
     cCreatedFlags, cCreating, createContractEntity,
     addOns, setAddOns,
     allVehicles, allDrivers, allClients,
+    companySettings, isEditing,
   } = p;
 
   const [manualCompanyMode, setManualCompanyMode] = useState(false);
   const [quickMode, setQuickMode] = useState(true);
+  const [copiedFrom, setCopiedFrom] = useState(null);
+  const manualEdits = useRef({});
   const syncedRef = useRef(false);
 
-  // Sync quickMode from contract data on first load (when opening for edit)
+  // Sync quickMode from contract data on first load
   useEffect(() => {
     if (syncedRef.current) return;
     const hasDaily = Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0;
@@ -59,26 +60,116 @@ export default function ContractModeFields({ p }) {
     }
   }, [contract?.daily_usage?.length]);
 
+  // Wrapper that tracks manual edits
+  const setField = (field, value, isManual = false) => {
+    if (isManual) manualEdits.current[field] = true;
+    updateContract(field, value);
+  };
+
   const handleQuickModeToggle = (v) => {
     setQuickMode(v);
     if (v) {
-      // Switching to quick mode — clear daily entries
       updateContract('daily_usage', []);
     } else {
-      // Switching to daily log mode — clear avg
       updateContract('avg_hours_per_day', '');
     }
   };
 
-  // Company fleet only — strict separation from vendor vehicles/drivers
+  // ── Auto-fill allowance_hours_per_day from CompanySettings ──
+  useEffect(() => {
+    if (isEditing) return;
+    if (manualEdits.current.allowance_hours_per_day) return;
+    const defaultHours = Number(companySettings?.default_allowance_hours_per_day);
+    if (defaultHours > 0 && !contract.allowance_hours_per_day) {
+      updateContract('allowance_hours_per_day', defaultHours);
+    }
+  }, [companySettings?.default_allowance_hours_per_day, isEditing]);
+
+  // ── Auto-suggest allowance_days from date range ──
+  useEffect(() => {
+    if (manualEdits.current.allowance_days) return;
+    if (contract.start_date && contract.end_date) {
+      const start = new Date(contract.start_date);
+      const end = new Date(contract.end_date);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const days = Math.round((end - start) / 86400000) + 1;
+        if (days > 0 && !contract.allowance_days) {
+          updateContract('allowance_days', days);
+        }
+      }
+    }
+  }, [contract.start_date, contract.end_date]);
+
+  // ── Auto-suggest extra_day_rate = contract_rate / allowance_days ──
+  useEffect(() => {
+    if (manualEdits.current.extra_day_rate) return;
+    const rate = Number(contract.contract_rate) || Number(contract.monthly_rate) || 0;
+    const days = Number(contract.allowance_days) || 0;
+    if (rate > 0 && days > 0) {
+      const suggested = Math.round((rate / days) * 100) / 100;
+      if (Number(contract.extra_day_rate) !== suggested) {
+        updateContract('extra_day_rate', suggested);
+      }
+    }
+  }, [contract.contract_rate, contract.monthly_rate, contract.allowance_days]);
+
+  // ── Auto-suggest extra_hour_rate = extra_day_rate / allowance_hours_per_day ──
+  useEffect(() => {
+    if (manualEdits.current.extra_hour_rate) return;
+    const dayRate = Number(contract.extra_day_rate) || 0;
+    const hoursPerDay = Number(contract.allowance_hours_per_day) || 0;
+    if (dayRate > 0 && hoursPerDay > 0) {
+      const suggested = Math.round((dayRate / hoursPerDay) * 100) / 100;
+      if (Number(contract.extra_hour_rate) !== suggested) {
+        updateContract('extra_hour_rate', suggested);
+      }
+    }
+  }, [contract.extra_day_rate, contract.allowance_hours_per_day]);
+
+  // ── Carry-forward from previous contract for same company ──
+  useEffect(() => {
+    if (isEditing) return;
+    if (!contract.company_name) return;
+    let cancelled = false;
+    base44.entities.MonthlyContract.filter({ company_name: contract.company_name, status: 'active' })
+      .then((contracts) => {
+        if (cancelled || !contracts || contracts.length === 0) return;
+        const sorted = [...contracts].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        const prev = sorted[0];
+        if (!prev) return;
+        setCopiedFrom(prev);
+        if (!manualEdits.current.allowance_days && prev.allowance_days) updateContract('allowance_days', prev.allowance_days);
+        if (!manualEdits.current.allowance_hours_per_day && prev.allowance_hours_per_day) updateContract('allowance_hours_per_day', prev.allowance_hours_per_day);
+        if (!manualEdits.current.contract_rate && (prev.contract_rate || prev.monthly_rate)) updateContract('contract_rate', prev.contract_rate || prev.monthly_rate);
+        if (!manualEdits.current.extra_day_rate && prev.extra_day_rate) updateContract('extra_day_rate', prev.extra_day_rate);
+        if (!manualEdits.current.extra_hour_rate && prev.extra_hour_rate) updateContract('extra_hour_rate', prev.extra_hour_rate);
+        if (prev.prorate_underuse) updateContract('prorate_underuse', prev.prorate_underuse);
+      })
+      .catch(() => {})
+      .finally(() => {});
+    return () => { cancelled = true; };
+  }, [contract.company_name, isEditing]);
+
+  // Company fleet only
   const availableVehicles = (allVehicles || [])
     .filter((v) => !v.vendor_name && (v.status === 'active' || v.plate_number === contract.vehicle_plate));
   const availableDrivers = (allDrivers || [])
     .filter((d) => !d.vendor_name && (d.status === 'active' || d.name === contract.driver_name));
-
   const selectedVehicle = allVehicles?.find((v) => v.plate_number === contract.vehicle_plate);
   const selectedDriver = allDrivers?.find((d) => d.name === contract.driver_name);
   const selectedCompany = allClients?.find((c) => c.name === contract.company_name);
+
+  // Suggested values for display
+  const suggestedExtraDayRate = (() => {
+    const rate = Number(contract.contract_rate) || Number(contract.monthly_rate) || 0;
+    const days = Number(contract.allowance_days) || 0;
+    return rate > 0 && days > 0 ? Math.round((rate / days) * 100) / 100 : null;
+  })();
+  const suggestedExtraHourRate = (() => {
+    const dayRate = Number(contract.extra_day_rate) || 0;
+    const hoursPerDay = Number(contract.allowance_hours_per_day) || 0;
+    return dayRate > 0 && hoursPerDay > 0 ? Math.round((dayRate / hoursPerDay) * 100) / 100 : null;
+  })();
 
   return (
     <>
@@ -88,7 +179,7 @@ export default function ContractModeFields({ p }) {
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
           {manualCompanyMode ? (
             <>
-              <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => updateContract('company_name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} placeholder="Type company name" />
+              <Input list="contract-company-suggestions" value={contract.company_name} onChange={(e) => setField('company_name', e.target.value, true)} onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); } }} className={inputCls} placeholder="Type company name" />
               <datalist id="contract-company-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
               <button type="button" onClick={() => setManualCompanyMode(false)} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
                 ← Select from list
@@ -98,7 +189,7 @@ export default function ContractModeFields({ p }) {
             <>
               <SearchableSelect
                 value={contract.company_name || ''}
-                onChange={(v) => updateContract('company_name', v)}
+                onChange={(v) => { setField('company_name', v, true); setCopiedFrom(null); }}
                 placeholder="Select company"
                 renderLabel={(it) => (
                   <span className="flex items-center gap-2 truncate">
@@ -127,18 +218,11 @@ export default function ContractModeFields({ p }) {
                           {c.contact_person || 'No contact'} · ID: {(c.id || '').slice(0, 8)}
                         </p>
                       </div>
-                      {c.status && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
-                          c.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {c.status}
-                        </span>
-                      )}
                     </div>
                   ),
                 }))}
               />
-              <button type="button" onClick={() => { setManualCompanyMode(true); updateContract('company_name', ''); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
+              <button type="button" onClick={() => { setManualCompanyMode(true); setField('company_name', '', true); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
                 <Plus className="w-3 h-3" /> New company not in list? Type manually
               </button>
             </>
@@ -148,14 +232,25 @@ export default function ContractModeFields({ p }) {
               onCreate={() => createContractEntity('Client', { name: contract.company_name }, 'company')} />
           )}
         </div>
+
+        {/* Carry-forward note */}
+        {copiedFrom && !isEditing && (
+          <div className="flex items-center gap-2 rounded-lg bg-violet-500/10 border border-violet-500/20 px-3 py-2">
+            <Sparkles className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+            <p className="text-[10px] text-violet-300">
+              {t('copied_from') || 'Copied from'} {copiedFrom.start_date ? new Date(copiedFrom.start_date).toLocaleDateString() : ''} → {copiedFrom.end_date ? new Date(copiedFrom.end_date).toLocaleDateString() : ''}
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('start_date')}</Label>
-            <DatePicker value={contract.start_date} onChange={(v) => updateContract('start_date', v)} className={`${inputCls} date-input-clean`} />
+            <DatePicker value={contract.start_date} onChange={(v) => setField('start_date', v, true)} className={`${inputCls} date-input-clean`} />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('end_date')}</Label>
-            <DatePicker value={contract.end_date} onChange={(v) => updateContract('end_date', v)} className={`${inputCls} date-input-clean`} />
+            <DatePicker value={contract.end_date} onChange={(v) => setField('end_date', v, true)} className={`${inputCls} date-input-clean`} />
           </div>
         </div>
         <div className="flex items-center justify-between glass-card p-3">
@@ -178,23 +273,33 @@ export default function ContractModeFields({ p }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('contract_rate') || 'Contract Rate (AED)'}</Label>
-            <Input type="number" value={contract.contract_rate ?? contract.monthly_rate ?? ''} onChange={(e) => updateContract('contract_rate', e.target.value)} className={inputCls} placeholder="0" />
+            <Input type="number" value={contract.contract_rate ?? contract.monthly_rate ?? ''} onChange={(e) => setField('contract_rate', e.target.value, true)} className={inputCls} placeholder="0" />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('allowance_days') || 'Allowance Days'}</Label>
-            <Input type="number" value={contract.allowance_days ?? ''} onChange={(e) => updateContract('allowance_days', e.target.value)} className={inputCls} placeholder="0" />
+            <Input type="number" value={contract.allowance_days ?? ''} onChange={(e) => setField('allowance_days', e.target.value, true)} className={inputCls} placeholder="0" />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('allowance_hours_per_day') || 'Allowance Hours / Day'}</Label>
-            <Input type="number" value={contract.allowance_hours_per_day ?? ''} onChange={(e) => updateContract('allowance_hours_per_day', e.target.value)} className={inputCls} placeholder="0" />
+            <Input type="number" value={contract.allowance_hours_per_day ?? ''} onChange={(e) => setField('allowance_hours_per_day', e.target.value, true)} className={inputCls} placeholder="0" />
           </div>
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('extra_day_rate') || 'Extra Day Rate (AED)'}</Label>
-            <Input type="number" value={contract.extra_day_rate ?? ''} onChange={(e) => updateContract('extra_day_rate', e.target.value)} className={inputCls} placeholder="0" />
+            <Label className="text-xs text-white/60 mb-1.5">
+              {t('extra_day_rate') || 'Extra Day Rate (AED)'}
+              {suggestedExtraDayRate != null && !manualEdits.current.extra_day_rate && (
+                <span className="ml-1 text-[9px] text-indigo-400/70">≈ {suggestedExtraDayRate}</span>
+              )}
+            </Label>
+            <Input type="number" value={contract.extra_day_rate ?? ''} onChange={(e) => setField('extra_day_rate', e.target.value, true)} className={inputCls} placeholder="0" />
           </div>
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('extra_hour_rate') || 'Extra Hour Rate (AED)'}</Label>
-            <Input type="number" value={contract.extra_hour_rate ?? ''} onChange={(e) => updateContract('extra_hour_rate', e.target.value)} className={inputCls} placeholder="0" />
+            <Label className="text-xs text-white/60 mb-1.5">
+              {t('extra_hour_rate') || 'Extra Hour Rate (AED)'}
+              {suggestedExtraHourRate != null && !manualEdits.current.extra_hour_rate && (
+                <span className="ml-1 text-[9px] text-indigo-400/70">≈ {suggestedExtraHourRate}</span>
+              )}
+            </Label>
+            <Input type="number" value={contract.extra_hour_rate ?? ''} onChange={(e) => setField('extra_hour_rate', e.target.value, true)} className={inputCls} placeholder="0" />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('contract_status')}</Label>
@@ -221,26 +326,18 @@ export default function ContractModeFields({ p }) {
 
       {/* Actual Usage — Emerald */}
       <Section title={t('actual_usage') || 'Actual Usage'} icon={TrendingUp} accent={ACCENT.usage}>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('actual_days_used') || 'Actual Days Used'}</Label>
-            <Input type="number" value={contract.actual_days_used ?? ''} onChange={(e) => updateContract('actual_days_used', e.target.value)} className={inputCls} placeholder="0" />
-          </div>
-          <div className="flex items-end">
-            <div className="flex items-center gap-2 glass-card p-2.5 w-full h-full">
-              <Switch checked={quickMode} onCheckedChange={handleQuickModeToggle} />
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{t('quick_mode') || 'Quick Mode (Average)'}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{quickMode ? 'Same hours for every day' : 'Log hours per day'}</p>
-              </div>
-            </div>
+        <div className="flex items-center gap-2 glass-card p-2.5 w-full">
+          <Switch checked={quickMode} onCheckedChange={handleQuickModeToggle} />
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-foreground truncate">{t('quick_mode') || 'Quick Mode (Average)'}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{quickMode ? 'Same hours for every day' : 'Log hours per day'}</p>
           </div>
         </div>
         {quickMode ? (
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('avg_hours_per_day') || 'Avg Hours / Day'}</Label>
-            <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => updateContract('avg_hours_per_day', e.target.value)} className={inputCls} placeholder="0" />
-            <p className="text-[10px] text-amber-400/70 mt-1 italic">Approximation — can't detect which specific days exceeded the cap</p>
+            <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => setField('avg_hours_per_day', e.target.value, true)} className={inputCls} placeholder="0" />
+            <p className="text-[10px] text-amber-400/70 mt-1 italic">{t('avg_hours_help') || 'Approximation — can\'t detect which specific days exceeded the cap'}</p>
           </div>
         ) : (
           <div>
@@ -249,6 +346,9 @@ export default function ContractModeFields({ p }) {
               dailyUsage={Array.isArray(contract.daily_usage) ? contract.daily_usage : []}
               onChange={(v) => updateContract('daily_usage', v)}
               inputCls={inputCls}
+              startDate={contract.start_date}
+              endDate={contract.end_date}
+              allowanceHoursPerDay={contract.allowance_hours_per_day}
             />
           </div>
         )}
@@ -291,13 +391,6 @@ export default function ContractModeFields({ p }) {
                         {d.phone || 'No phone'} · ID: {(d.id || '').slice(0, 8)}
                       </p>
                     </div>
-                    {d.status && (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
-                        d.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        {d.status}
-                      </span>
-                    )}
                   </div>
                 ),
               }))}
@@ -340,13 +433,6 @@ export default function ContractModeFields({ p }) {
                         {[v.make, v.model].filter(Boolean).join(' ') || 'No model'} · ID: {(v.id || '').slice(0, 8)}
                       </p>
                     </div>
-                    {v.status && (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full capitalize flex-shrink-0 ${
-                        v.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-muted text-muted-foreground'
-                      }`}>
-                        {v.status}
-                      </span>
-                    )}
                   </div>
                 ),
               }))}
@@ -355,7 +441,7 @@ export default function ContractModeFields({ p }) {
         </div>
       </Section>
 
-      {/* Add-on Payments — Amber (same as per-trip) */}
+      {/* Add-on Payments — Amber */}
       <Section title="Add-on Payments" icon={Receipt} accent={ACCENT.addons}>
         <TripAddOnsSection addOns={addOns} setAddOns={setAddOns} />
       </Section>

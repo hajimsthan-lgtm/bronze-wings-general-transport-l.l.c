@@ -7,7 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Loader2, LayoutTemplate, Repeat } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
-import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate } from '@/lib/contractCalculator';
+import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate, hasUsageData } from '@/lib/contractCalculator';
 import StatusBadge from '@/components/common/StatusBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -35,6 +35,10 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
   }, []);
 
   const invoiceContract = async (contract) => {
+    if (!hasUsageData(contract)) {
+      toast({ title: t('no_usage_logged') || 'No usage logged', description: t('no_usage_logged_help') || 'Use Fill Remaining Days or log actual usage first', variant: 'destructive' });
+      return;
+    }
     setInvoicingId(contract.id);
     try {
       const calc = calculateContractBilling(contract);

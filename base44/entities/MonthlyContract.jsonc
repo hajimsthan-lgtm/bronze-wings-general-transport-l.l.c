@@ -70,11 +70,6 @@
       "default": false,
       "description": "Credit unused days when actual usage is below allowance"
     },
-    "actual_days_used": {
-      "type": "number",
-      "default": 0,
-      "description": "Total days actually used in the billing period"
-    },
     "daily_usage": {
       "type": "array",
       "items": {

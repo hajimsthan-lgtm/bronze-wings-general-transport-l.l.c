@@ -4,50 +4,50 @@
  * Computes billing based on:
  * - Contract Rate Period (allowance): allowance_days, allowance_hours_per_day,
  *   contract_rate, extra_day_rate, extra_hour_rate, prorate_underuse
- * - Actual Usage: actual_days_used + daily_usage (per-day hours) or avg_hours_per_day (quick mode)
+ * - Actual Usage: daily_usage (per-day hours) or avg_hours_per_day (quick mode)
+ *
+ * days_used is ALWAYS computed — never typed:
+ * - Daily log mode: days_used = daily_usage.length
+ * - Quick mode: days_used = calendar days in start_date→end_date range
+ * - Migration fallback: old records with actual_days_used (removed field)
  *
  * Works with old contracts that only have monthly_rate — falls back gracefully.
  */
 
 const num = (v) => Number(v) || 0;
 
-/**
- * Resolve the effective contract rate — falls back to monthly_rate for old contracts.
- */
 export function getContractRate(contract) {
   return num(contract?.contract_rate) || num(contract?.monthly_rate) || 0;
 }
 
-/**
- * Build the effective daily usage array.
- * If daily_usage is populated, use it. Otherwise, if avg_hours_per_day is set,
- * generate one entry per actual_days_used with that average (quick mode).
- */
-function getEffectiveDailyUsage(contract) {
-  const actualDays = num(contract?.actual_days_used);
+/** Calendar days in the contract date range (inclusive). */
+function getDaysInDateRange(contract) {
+  if (!contract?.start_date || !contract?.end_date) return 0;
+  const start = new Date(contract.start_date);
+  const end = new Date(contract.end_date);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+  const diff = Math.round((end - start) / 86400000) + 1;
+  return diff > 0 ? diff : 0;
+}
+
+/** days_used is always computed, never typed. */
+export function getDaysUsed(contract) {
   if (Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0) {
-    return contract.daily_usage;
+    return contract.daily_usage.length;
   }
-  const avg = num(contract?.avg_hours_per_day);
-  if (avg > 0 && actualDays > 0) {
-    return Array.from({ length: actualDays }, () => ({ date: null, hours_used: avg }));
-  }
-  return [];
+  // Migration fallback: old records may still have actual_days_used
+  if (num(contract?.actual_days_used) > 0) return num(contract?.actual_days_used);
+  // Quick mode: derive from date range
+  return getDaysInDateRange(contract);
+}
+
+/** True when the contract has real per-day entries (not quick mode). */
+export function hasRealDailyUsage(contract) {
+  return Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0;
 }
 
 /**
  * Calculate the full billing breakdown for a contract.
- *
- * @param {object} contract - The MonthlyContract record
- * @returns {{
- *   base: number,
- *   dayDelta: number,
- *   overageDaysCharge: number,
- *   underuseDaysCredit: number,
- *   hourOverageCharge: number,
- *   hourOverageBreakdown: Array<{ date, hoursUsed, hoursOver, charge }>,
- *   total: number
- * }}
  */
 export function calculateContractBilling(contract) {
   const base = getContractRate(contract);
@@ -56,10 +56,11 @@ export function calculateContractBilling(contract) {
   const extraDayRate = num(contract?.extra_day_rate);
   const extraHourRate = num(contract?.extra_hour_rate);
   const prorateUnderuse = !!contract?.prorate_underuse;
-  const actualDays = num(contract?.actual_days_used);
+  const daysUsed = getDaysUsed(contract);
+  const realDaily = hasRealDailyUsage(contract);
 
   // Day overage / under-use
-  const dayDelta = allowanceDays > 0 ? actualDays - allowanceDays : 0;
+  const dayDelta = allowanceDays > 0 ? daysUsed - allowanceDays : 0;
   let overageDaysCharge = 0;
   let underuseDaysCredit = 0;
 
@@ -70,22 +71,41 @@ export function calculateContractBilling(contract) {
     underuseDaysCredit = Math.abs(dayDelta) * perDayValue;
   }
 
-  // Hour overage — per day
-  const dailyUsage = getEffectiveDailyUsage(contract);
+  // Hour overage
   const hourOverageBreakdown = [];
   let hourOverageCharge = 0;
 
-  for (const entry of dailyUsage) {
-    const hoursUsed = num(entry?.hours_used);
-    if (allowanceHoursPerDay > 0 && hoursUsed > allowanceHoursPerDay) {
-      const hoursOver = hoursUsed - allowanceHoursPerDay;
-      const charge = hoursOver * extraHourRate;
-      hourOverageCharge += charge;
+  if (realDaily) {
+    // Per-day breakdown — only flagged days
+    for (const entry of contract.daily_usage) {
+      const hoursUsed = num(entry?.hours_used);
+      if (allowanceHoursPerDay > 0 && hoursUsed > allowanceHoursPerDay) {
+        const hoursOver = hoursUsed - allowanceHoursPerDay;
+        const charge = hoursOver * extraHourRate;
+        hourOverageCharge += charge;
+        hourOverageBreakdown.push({
+          date: entry?.date || null,
+          hoursUsed,
+          hoursOver,
+          charge,
+          isQuickMode: false,
+        });
+      }
+    }
+  } else {
+    // Quick mode — lump sum
+    const avg = num(contract?.avg_hours_per_day);
+    if (allowanceHoursPerDay > 0 && avg > allowanceHoursPerDay && daysUsed > 0) {
+      const hoursOver = avg - allowanceHoursPerDay;
+      const charge = hoursOver * daysUsed * extraHourRate;
+      hourOverageCharge = charge;
       hourOverageBreakdown.push({
-        date: entry?.date || null,
-        hoursUsed,
+        date: null,
+        hoursUsed: avg,
         hoursOver,
         charge,
+        isQuickMode: true,
+        days: daysUsed,
       });
     }
   }
@@ -94,19 +114,20 @@ export function calculateContractBilling(contract) {
 
   return {
     base,
+    daysUsed,
+    allowanceDays,
     dayDelta,
     overageDaysCharge,
     underuseDaysCredit,
     hourOverageCharge,
     hourOverageBreakdown,
+    isQuickMode: !realDaily,
     total,
   };
 }
 
 /**
  * Build invoice line items from the calculation result.
- * Each charge component becomes a separate line item so the client can see
- * exactly what they're being charged for.
  */
 export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driverLabel) {
   const items = [];
@@ -145,18 +166,26 @@ export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driv
     });
   }
 
-  // Hour overage — one line per day that exceeded
+  // Hour overage
   for (const br of calc.hourOverageBreakdown) {
-    const dateLabel = br.date ? ` (${br.date})` : '';
-    items.push({
-      description: `Hour Overage${dateLabel} — ${br.hoursUsed}h used, ${br.hoursOver}h over @ ${extraHourRate}/hr`,
-      quantity: br.hoursOver,
-      unit_price: extraHourRate,
-      amount: br.charge,
-    });
+    if (br.isQuickMode) {
+      items.push({
+        description: `Hour Overage (approx — ${br.days} days × ${br.hoursOver}h over @ ${extraHourRate}/hr)`,
+        quantity: br.hoursOver * br.days,
+        unit_price: extraHourRate,
+        amount: br.charge,
+      });
+    } else {
+      const dateLabel = br.date ? ` (${br.date})` : '';
+      items.push({
+        description: `Hour Overage${dateLabel} — ${br.hoursUsed}h used, ${br.hoursOver}h over @ ${extraHourRate}/hr`,
+        quantity: br.hoursOver,
+        unit_price: extraHourRate,
+        amount: br.charge,
+      });
+    }
   }
 
-  // Fallback: if no line items at all, add a zero-amount placeholder
   if (items.length === 0) {
     items.push({
       description: `${prefix} Rental`,
@@ -167,4 +196,9 @@ export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driv
   }
 
   return items;
+}
+
+/** Check whether a contract has enough usage data to invoice. */
+export function hasUsageData(contract) {
+  return hasRealDailyUsage(contract) || num(contract?.avg_hours_per_day) > 0;
 }

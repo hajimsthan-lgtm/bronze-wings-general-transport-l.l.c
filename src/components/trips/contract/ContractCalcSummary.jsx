@@ -3,14 +3,13 @@ import { calculateContractBilling } from '@/lib/contractCalculator';
 import { useI18n } from '@/lib/i18n';
 
 /**
- * Live calculation summary showing base, day overage/under-use credit,
- * hour overage breakdown per day, and final total.
+ * Live calculation summary: base, days used/allowed with delta,
+ * only flagged hour-overage days, and final total.
  */
 export default function ContractCalcSummary({ contract }) {
   const { t } = useI18n();
   const calc = calculateContractBilling(contract);
 
-  // Don't render if everything is zero (nothing to show)
   if (
     calc.base === 0 &&
     calc.overageDaysCharge === 0 &&
@@ -28,44 +27,43 @@ export default function ContractCalcSummary({ contract }) {
         <span className="text-white font-semibold tabular-nums">{formatCurrency(calc.base)}</span>
       </div>
 
-      {/* Day overage */}
-      {calc.overageDaysCharge > 0 && (
+      {/* Days used / allowed */}
+      {calc.allowanceDays > 0 && (
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-amber-400">
-            {t('day_overage') || 'Day Overage'} ({calc.dayDelta} day{calc.dayDelta !== 1 ? 's' : ''})
+          <span className="text-white/60">
+            {t('days') || 'Days'}: {calc.daysUsed} / {calc.allowanceDays}
+            {calc.dayDelta !== 0 && (
+              <span className={`ml-1 ${calc.dayDelta > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                ({calc.dayDelta > 0 ? `+${calc.dayDelta}` : calc.dayDelta})
+              </span>
+            )}
           </span>
-          <span className="text-amber-400 font-semibold tabular-nums">+{formatCurrency(calc.overageDaysCharge)}</span>
+          {calc.overageDaysCharge > 0 && (
+            <span className="text-amber-400 font-semibold tabular-nums">+{formatCurrency(calc.overageDaysCharge)}</span>
+          )}
+          {calc.underuseDaysCredit > 0 && (
+            <span className="text-emerald-400 font-semibold tabular-nums">−{formatCurrency(calc.underuseDaysCredit)}</span>
+          )}
         </div>
       )}
 
-      {/* Under-use credit */}
-      {calc.underuseDaysCredit > 0 && (
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-emerald-400">
-            {t('underuse_credit') || 'Under-usage Credit'} ({Math.abs(calc.dayDelta)} day{Math.abs(calc.dayDelta) !== 1 ? 's' : ''})
-          </span>
-          <span className="text-emerald-400 font-semibold tabular-nums">−{formatCurrency(calc.underuseDaysCredit)}</span>
-        </div>
-      )}
-
-      {/* Hour overage breakdown */}
+      {/* Hour overage — only flagged days */}
       {calc.hourOverageBreakdown.length > 0 && (
         <div className="space-y-1 pt-1.5 border-t border-white/5">
           <p className="text-[10px] uppercase tracking-wider text-white/40 font-semibold">
             {t('hour_overage') || 'Hour Overage'}
+            {calc.isQuickMode && <span className="ml-1 text-amber-400/60 normal-case font-normal">(approx)</span>}
           </p>
           {calc.hourOverageBreakdown.map((br, i) => (
             <div key={i} className="flex items-center justify-between text-[11px] pl-2">
               <span className="text-white/50">
-                {br.date || `Day ${i + 1}`}: {br.hoursUsed}h → {br.hoursOver}h over
+                {br.isQuickMode
+                  ? `${br.days} days × ${br.hoursOver}h over`
+                  : `${br.date || `Day ${i + 1}`}: ${br.hoursUsed}h → ${br.hoursOver}h over`}
               </span>
               <span className="text-amber-400 font-medium tabular-nums">+{formatCurrency(br.charge)}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between text-[11px] pl-2 pt-0.5">
-            <span className="text-white/60 font-medium">{t('hour_overage') || 'Hour Overage'} Total</span>
-            <span className="text-amber-400 font-semibold tabular-nums">+{formatCurrency(calc.hourOverageCharge)}</span>
-          </div>
         </div>
       )}
 

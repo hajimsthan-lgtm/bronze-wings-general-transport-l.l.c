@@ -136,6 +136,11 @@
       "type": "number",
       "default": 80
     },
+    "default_allowance_hours_per_day": {
+      "type": "number",
+      "default": 10,
+      "description": "Company-wide default for contract allowance hours per day"
+    },
     "template_config": {
       "type": "object",
       "additionalProperties": true

@@ -9,7 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Pencil, Trash2, Building2, User, Truck, Calendar, Repeat, DollarSign, FileText } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
-import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate } from '@/lib/contractCalculator';
+import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate, hasUsageData } from '@/lib/contractCalculator';
 
 export default function ContractDetailSheet({ contract, expenses = [], onClose, onEdit, onDelete, onInvoiceCreated }) {
   const { t } = useI18n();
@@ -31,6 +31,10 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
   };
 
   const handleCreateInvoice = async () => {
+    if (!hasUsageData(contract)) {
+      toast({ title: t('no_usage_logged') || 'No usage logged', description: t('no_usage_logged_help') || 'Use Fill Remaining Days or log actual usage first', variant: 'destructive' });
+      return;
+    }
     setInvoicing(true);
     try {
       const calc = calculateContractBilling(contract);
