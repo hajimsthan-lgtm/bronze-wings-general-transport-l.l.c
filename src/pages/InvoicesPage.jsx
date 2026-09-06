@@ -787,14 +787,6 @@ export default function InvoicesPage() {
           <Button size="sm" variant="outline" disabled={selected.size === 0} onClick={() => setSelected(new Set())} className="h-8 disabled:opacity-40 disabled:cursor-not-allowed">Clear</Button>
         </div>
 
-      {/* Sequence error banner + Smart Allocator */}
-      <SequenceErrorBanner
-        errors={sequenceErrors}
-        currentUser={currentUser}
-        recentManualEdit={lastManualEdit}
-        onAllocated={() => { refetch(); setHistoryRefresh((r) => r + 1); setLastManualEdit(null); }}
-      />
-
       {/* Two-pane layout */}
       {loading ?
       <div className="flex items-center justify-center py-20">
