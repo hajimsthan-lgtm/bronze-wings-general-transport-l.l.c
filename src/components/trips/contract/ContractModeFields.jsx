@@ -4,7 +4,7 @@ import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus, Info, Sparkles } from 'lucide-react';
+import { CalendarClock, Clock, CalendarDays, UserCheck, FolderLock, Receipt, Truck, Plus, Info, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import { base44 } from '@/api/base44Client';
 import CreateNewCard from '../CreateNewCard';
@@ -13,8 +13,6 @@ import TripAddOnsSection from '../TripAddOnsSection';
 import { Upload } from 'lucide-react';
 import SearchableSelect from '@/components/common/SearchableSelect';
 import GradientAvatar from '@/components/common/GradientAvatar';
-import DailyUsageLog from './DailyUsageLog';
-import ContractCalcSummary from './ContractCalcSummary';
 import { useI18n } from '@/lib/i18n';
 
 const ACCENT = {
@@ -45,34 +43,13 @@ export default function ContractModeFields({ p }) {
   } = p;
 
   const [manualCompanyMode, setManualCompanyMode] = useState(false);
-  const [quickMode, setQuickMode] = useState(true);
   const [copiedFrom, setCopiedFrom] = useState(null);
   const manualEdits = useRef({});
-  const syncedRef = useRef(false);
-
-  // Sync quickMode from contract data on first load
-  useEffect(() => {
-    if (syncedRef.current) return;
-    const hasDaily = Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0;
-    if (hasDaily) {
-      setQuickMode(false);
-      syncedRef.current = true;
-    }
-  }, [contract?.daily_usage?.length]);
 
   // Wrapper that tracks manual edits
   const setField = (field, value, isManual = false) => {
     if (isManual) manualEdits.current[field] = true;
     updateContract(field, value);
-  };
-
-  const handleQuickModeToggle = (v) => {
-    setQuickMode(v);
-    if (v) {
-      updateContract('daily_usage', []);
-    } else {
-      updateContract('avg_hours_per_day', '');
-    }
   };
 
   // ── Auto-fill allowance_hours_per_day from CompanySettings ──
@@ -301,52 +278,38 @@ export default function ContractModeFields({ p }) {
           </div>
         </div>
 
-        {/* Prorate underuse toggle */}
-        <div className="flex items-center justify-between glass-card p-3">
-          <div>
-            <p className="text-sm font-medium text-foreground">{t('prorate_underuse') || 'Prorate Under-usage'}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">{t('prorate_underuse_help') || 'Credit unused days when actual usage is below allowance'}</p>
-          </div>
-          <Switch checked={!!contract.prorate_underuse} onCheckedChange={(v) => updateContract('prorate_underuse', v)} />
-        </div>
       </Section>
 
-      {/* Actual Usage — Emerald */}
-      <Section title={t('actual_usage') || 'Actual Usage'} icon={TrendingUp} accent={ACCENT.usage}>
-        <div className="flex items-center gap-2 glass-card p-2.5 w-full">
-          <Switch checked={quickMode} onCheckedChange={handleQuickModeToggle} />
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-foreground truncate">{t('quick_mode') || 'Quick Mode (Average)'}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{quickMode ? 'Same hours for every day' : 'Log hours per day'}</p>
+      {/* Overtime — Emerald */}
+      <Section title="Overtime" icon={Clock} accent={ACCENT.usage}>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1.5">
+              <CalendarDays className="w-3.5 h-3.5 text-emerald-400" />
+              Over Date Used
+            </Label>
+            <Input type="number" value={contract.actual_days_used ?? ''} onChange={(e) => setField('actual_days_used', e.target.value, true)} className={inputCls} placeholder="0" />
+            <p className="text-[10px] text-white/40 mt-1">
+              × {formatCurrency(Number(contract.extra_day_rate) || 0)}/day
+              {Number(contract.actual_days_used) > 0 && (
+                <span className="text-amber-400 ml-1">= +{formatCurrency((Number(contract.actual_days_used) || 0) * (Number(contract.extra_day_rate) || 0))}</span>
+              )}
+            </p>
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              Over Time Used
+            </Label>
+            <Input type="number" value={contract.overtime_hours ?? ''} onChange={(e) => setField('overtime_hours', e.target.value, true)} className={inputCls} placeholder="0" />
+            <p className="text-[10px] text-white/40 mt-1">
+              × {formatCurrency(Number(contract.extra_hour_rate) || 0)}/hr
+              {Number(contract.overtime_hours) > 0 && (
+                <span className="text-amber-400 ml-1">= +{formatCurrency((Number(contract.overtime_hours) || 0) * (Number(contract.extra_hour_rate) || 0))}</span>
+              )}
+            </p>
           </div>
         </div>
-        {quickMode ? (
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs text-white/60 mb-1.5">Used Days</Label>
-              <Input type="number" value={contract.actual_days_used ?? ''} onChange={(e) => setField('actual_days_used', e.target.value, true)} className={inputCls} placeholder="0" />
-              <p className="text-[10px] text-white/40 mt-1">Days vehicle was used</p>
-            </div>
-            <div>
-              <Label className="text-xs text-white/60 mb-1.5">{t('avg_hours_per_day') || 'Avg Hours / Day'}</Label>
-              <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => setField('avg_hours_per_day', e.target.value, true)} className={inputCls} placeholder="0" />
-              <p className="text-[10px] text-amber-400/70 mt-1 italic">{t('avg_hours_help') || 'Approximation — can\'t detect which specific days exceeded the cap'}</p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('daily_usage_log') || 'Daily Hour Log'}</Label>
-            <DailyUsageLog
-              dailyUsage={Array.isArray(contract.daily_usage) ? contract.daily_usage : []}
-              onChange={(v) => updateContract('daily_usage', v)}
-              inputCls={inputCls}
-              startDate={contract.start_date}
-              endDate={contract.end_date}
-              allowanceHoursPerDay={contract.allowance_hours_per_day}
-            />
-          </div>
-        )}
-        <ContractCalcSummary contract={contract} />
       </Section>
 
       {/* Assignment — Violet */}

@@ -10,12 +10,14 @@ function CalcRow({ label, value, tone = 'text-foreground' }) {
   );
 }
 
-export default function ContractProfitPanel({ monthlyRate, addOns, endDate, t }) {
+export default function ContractProfitPanel({ monthlyRate, addOns, endDate, t, overDateCharge, overtimeCharge }) {
   const addOnList = Array.isArray(addOns) ? addOns : [];
   const addOnTotal = addOnList.reduce((s, a) => s + (Number(a.amount) || 0), 0);
   const addOnVat = addOnList.reduce((s, a) => a.vat_included ? s + Math.round((Number(a.amount) || 0) * 0.05 * 100) / 100 : s, 0);
   const rateVat = Math.round(monthlyRate * 0.05 * 100) / 100;
-  const grandTotal = Math.round((monthlyRate + addOnTotal + rateVat + addOnVat) * 100) / 100;
+  const overDate = Number(overDateCharge) || 0;
+  const overTime = Number(overtimeCharge) || 0;
+  const grandTotal = Math.round((monthlyRate + overDate + overTime + addOnTotal + rateVat + addOnVat) * 100) / 100;
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const daysLeft = endDate ? Math.ceil((new Date(endDate) - today) / 86400000) : null;
@@ -30,6 +32,12 @@ export default function ContractProfitPanel({ monthlyRate, addOns, endDate, t })
             <p className="eyebrow">Live Balance</p>
           </div>
           <CalcRow label={t('monthly_rental')} value={formatCurrency(monthlyRate)} />
+          {overDate > 0 && (
+            <CalcRow label="Over Date Charge" value={`+${formatCurrency(overDate)}`} tone="text-amber-300" />
+          )}
+          {overTime > 0 && (
+            <CalcRow label="Overtime Charge" value={`+${formatCurrency(overTime)}`} tone="text-amber-300" />
+          )}
           <CalcRow label="VAT (5%)" value={formatCurrency(rateVat)} tone="text-muted-foreground" />
           {addOnList.length > 0 && (
             <div className="border-t border-white/10 pt-2 space-y-1.5">

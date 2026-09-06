@@ -95,7 +95,12 @@
     "actual_days_used": {
       "type": "number",
       "default": 0,
-      "description": "Quick mode \u2014 manually entered number of days the vehicle was used"
+      "description": "Over date used \u2014 extra days beyond allowance, multiplied by extra_day_rate"
+    },
+    "overtime_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Over time used \u2014 extra hours beyond allowance, multiplied by extra_hour_rate"
     },
     "add_ons": {
       "type": "array",

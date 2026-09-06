@@ -18,6 +18,7 @@ import TripCalcPanel from './TripCalcPanel';
 import TripCalcMobileBar from './TripCalcMobileBar';
 import ContractModeFields from './contract/ContractModeFields';
 import ContractProfitPanel from './contract/ContractProfitPanel';
+// eslint-disable-next-line
 import TripMapPanel from './TripMapPanel';
 import TripFinancialFields from './TripFinancialFields';
 import VendorPaymentFields from './VendorPaymentFields';
@@ -385,7 +386,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     } catch (e) {} finally {setter(null);}
   };
 
-  const monthlyRate = Number(contract.monthly_rate) || 0;
+  const monthlyRate = Number(contract.contract_rate) || Number(contract.monthly_rate) || 0;
+  const overDateCharge = (Number(contract.actual_days_used) || 0) * (Number(contract.extra_day_rate) || 0);
+  const overtimeCharge = (Number(contract.overtime_hours) || 0) * (Number(contract.extra_hour_rate) || 0);
 
   const handleSaveDraft = async () => {
     setSaving(true);
@@ -519,6 +522,8 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           prorate_underuse: !!contract.prorate_underuse,
           daily_usage: Array.isArray(contract.daily_usage) ? contract.daily_usage : [],
           avg_hours_per_day: Number(contract.avg_hours_per_day) || 0,
+          actual_days_used: Number(contract.actual_days_used) || 0,
+          overtime_hours: Number(contract.overtime_hours) || 0,
           add_ons: contractAddOns || []
         };
         let recordId;
@@ -726,7 +731,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
               </div>
                 }
             {mode === 'contract' &&
-                <ContractProfitPanel monthlyRate={monthlyRate} addOns={contractAddOns} endDate={contract.end_date} t={t} />
+                <ContractProfitPanel monthlyRate={monthlyRate} addOns={contractAddOns} endDate={contract.end_date} t={t} overDateCharge={overDateCharge} overtimeCharge={overtimeCharge} />
                 }
             {mode === 'trip' && !mapCollapsed &&
                 <div className="text-center text-[9px] opacity-20 select-none" aria-hidden>🚚</div>
@@ -743,7 +748,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
             </div>
             <div>
               <p className="eyebrow mb-1">{t('total')}</p>
-              <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(monthlyRate)}</p>
+              <p className="text-sm font-bold tabular-nums text-emerald-400">{formatCurrency(monthlyRate + overDateCharge + overtimeCharge)}</p>
             </div>
           </div>
             }
