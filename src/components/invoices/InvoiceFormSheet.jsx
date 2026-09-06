@@ -13,7 +13,7 @@ import { formatCurrency, formatDateDash } from '@/lib/formatters';
 import { Plus, Trash2, Check, Loader2, CreditCard, User, FileText, Sparkles, FileDown, ChevronDown, X, AlertTriangle, Users, Receipt, ListOrdered, Wallet } from 'lucide-react';
 import { useInvoiceCreate, useInvoiceUpdate, useClientPaymentCreate } from '@/hooks/useEntityQueries';
 import { generateInvoiceNumber, getCompanySettings } from '@/lib/companySettings';
-import { persistManualInvoiceNumber, buildInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
+import { persistManualInvoiceNumber, buildInvoiceNumberSnapshot, parseInvoiceNumber, formatInvoiceNumber } from '@/lib/invoiceSequence';
 import { downloadInvoicePDF, downloadPerTripInvoicePDF, downloadMonthlyInvoicePDF } from '@/lib/invoiceHtml';
 import { useToast } from '@/components/ui/use-toast';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
@@ -314,6 +314,34 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
     : (suggestedNumber !== '' && form.invoice_number !== suggestedNumber);
   const isDuplicate = form.invoice_number !== '' && invoices.some(inv => inv.invoice_number === form.invoice_number && (isEdit ? inv.id !== editInvoice?.id : true));
 
+  // Always base the next number on the actual highest invoice in the panel —
+  // so deleting the last-made invoice is detected and the suggestion recalculates.
+  const currentYear = new Date().getFullYear();
+  const panelMaxSeq = useMemo(() => {
+    let max = 0;
+    (invoices || []).forEach(inv => {
+      if (isEdit && inv.id === editInvoice?.id) return;
+      const p = parseInvoiceNumber(inv.invoice_number);
+      if (p && p.year === currentYear && p.seq > max) max = p.seq;
+    });
+    return max;
+  }, [invoices, currentYear, isEdit, editInvoice]);
+
+  // Recompute the suggestion from the panel whenever invoices load (new invoice only)
+  useEffect(() => {
+    if (isEdit || !open) return;
+    // Only update if the user hasn't manually overridden the field yet
+    if (suggestedNumber !== '' && form.invoice_number !== suggestedNumber) return;
+    const next = formatInvoiceNumber(currentYear, panelMaxSeq + 1);
+    if (next !== suggestedNumber) {
+      setSuggestedNumber(next);
+      setForm(prev => ({ ...prev, invoice_number: next }));
+    }
+  }, [panelMaxSeq, isEdit, open, currentYear]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const parsedCurrent = parseInvoiceNumber(form.invoice_number);
+  const isSkipped = !!parsedCurrent && parsedCurrent.year === currentYear && parsedCurrent.seq > panelMaxSeq + 1;
+
   const handleSave = async () => {
     if (!form.client_name?.trim()) {
       toast({ variant: 'destructive', title: 'Client name is required' });
@@ -520,7 +548,8 @@ export default function InvoiceFormSheet({ open, onOpenChange, editInvoice, onSa
                     <Label className="text-xs mb-1.5 block">Invoice #</Label>
                     <Input value={form.invoice_number || ''} onChange={(e) => update('invoice_number', e.target.value)} className={cn(inputCls, isDuplicate && 'border-destructive', isManualOverride && 'border-amber-500')} placeholder="2026-0001" />
                     {isDuplicate && <p className="text-[11px] text-destructive mt-1">Duplicate number</p>}
-                    {isManualOverride && !isDuplicate && <p className="text-[11px] text-amber-500 mt-1">Manual override</p>}
+                    {isSkipped && !isDuplicate && <p className="text-[11px] text-amber-500 mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Skips {formatInvoiceNumber(currentYear, panelMaxSeq + 1)} — gap in sequence</p>}
+                    {isManualOverride && !isDuplicate && !isSkipped && <p className="text-[11px] text-amber-500 mt-1">Manual override</p>}
                   </div>
                   <div>
                     <Label className="text-xs mb-1.5 block">Status</Label>
