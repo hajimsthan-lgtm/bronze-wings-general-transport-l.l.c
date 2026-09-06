@@ -35,7 +35,7 @@ export default function TripFilterBar({
   onClearAll,
   totalCount, filteredCount,
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const activeCount = useMemo(() => {
     let n = 0;
     if (dateFrom || dateTo) n++;

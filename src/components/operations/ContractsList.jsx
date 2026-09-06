@@ -65,7 +65,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
                 {/* Line 3 — meta (desktop only) */}
                 <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mt-1 min-w-0">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 whitespace-nowrap">
-                    {t('monthly_contract')}
+                    Monthly Rental
                   </span>
                   {c.driver_name && (
                     <>
@@ -85,8 +85,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
               {/* Right — status + margin + rate + menu */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="w-[112px] sm:w-[152px] flex items-center justify-end gap-1.5">
-                  <StatusPill as="span" variant={statusVariant(c.status)} dot>{t(c.status || 'active')}</StatusPill>
-                  <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}%</span>
+                  <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}% margin</span>
                 </div>
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />

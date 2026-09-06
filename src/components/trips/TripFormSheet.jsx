@@ -44,7 +44,8 @@ const DEFAULT_CONTRACT = {
   company_name: '', start_date: '', end_date: '', auto_renewal: false,
   contract_rate: '', monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
   allowance_days: '', allowance_hours_per_day: '', extra_day_rate: '', extra_hour_rate: '',
-  prorate_underuse: false, daily_usage: [], avg_hours_per_day: ''
+  prorate_underuse: false, daily_usage: [], avg_hours_per_day: '',
+  actual_days_used: '', overtime_hours: ''
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -130,7 +131,9 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           extra_hour_rate: editContract.extra_hour_rate || '',
           prorate_underuse: !!editContract.prorate_underuse,
           daily_usage: Array.isArray(editContract.daily_usage) ? editContract.daily_usage : [],
-          avg_hours_per_day: editContract.avg_hours_per_day || ''
+          avg_hours_per_day: editContract.avg_hours_per_day || '',
+          actual_days_used: editContract.actual_days_used ?? '',
+          overtime_hours: editContract.overtime_hours ?? ''
         });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
         setContractAddOns(Array.isArray(editContract.add_ons) ? editContract.add_ons : []);

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Loader2, LayoutTemplate, Repeat } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
 import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate, hasUsageData } from '@/lib/contractCalculator';
-import StatusBadge from '@/components/common/StatusBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function MonthlyContractsGenerator({ clientName, onInvoicesChanged }) {
@@ -92,8 +91,8 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-500/30 flex items-center justify-center"><Repeat className="w-4 h-4 text-violet-400" /></div>
         <div>
-          <p className="text-sm font-semibold text-foreground">Monthly Contracts</p>
-          <p className="text-[11px] text-muted-foreground">{contracts.length} contracts · generate invoices in one click</p>
+          <p className="text-sm font-semibold text-foreground">Monthly Rentals</p>
+          <p className="text-[11px] text-muted-foreground">{contracts.length} rentals · generate invoices in one click</p>
         </div>
       </div>
 
@@ -116,7 +115,6 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
       )}
       <div className="space-y-1.5">
         {contracts.map((c) => {
-          const active = c.status === 'active';
           return (
             <div key={c.id} className="row-card flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center flex-shrink-0"><FileText className="w-4 h-4 text-violet-400" /></div>
@@ -125,10 +123,9 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
                 <p className="text-xs text-muted-foreground flex items-center gap-1 truncate"><Calendar className="w-3 h-3 flex-shrink-0" />{formatDate(c.start_date)} → {formatDate(c.end_date)}</p>
               </div>
               <span className="text-sm font-semibold text-foreground tabular-nums flex-shrink-0">{formatCurrency(getContractRate(c))}</span>
-              <StatusBadge status={c.status} />
               <Button
                 onClick={() => invoiceContract(c)}
-                disabled={invoicingId === c.id || !active}
+                disabled={invoicingId === c.id}
                 size="sm"
                 className="h-8 bg-primary/15 border border-primary/30 text-primary hover:bg-primary/25"
               >

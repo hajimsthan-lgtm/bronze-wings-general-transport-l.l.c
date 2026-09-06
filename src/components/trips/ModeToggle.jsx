@@ -3,7 +3,7 @@ import { Truck } from 'lucide-react';
 export default function ModeToggle({ mode, onChange, t }) {
   const options = [
     { key: 'trip', label: t('per_trip'), icon: Truck },
-    { key: 'contract', label: t('monthly_contract'), icon: null },
+    { key: 'contract', label: 'Monthly Rental', icon: null },
   ];
   return (
     <div className="inline-flex items-center gap-0.5 sm:gap-1 p-1 rounded-full bg-white/5 border border-white/10">

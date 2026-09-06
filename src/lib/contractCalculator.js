@@ -1,5 +1,5 @@
 /**
- * Smart Allowance Calculator for Monthly Contracts.
+ * Smart Allowance Calculator for Monthly Rentals.
  *
  * Simplified billing model:
  * - Base = contract_rate (fixed monthly rental)
@@ -9,6 +9,7 @@
  *
  * Works with old contracts that only have monthly_rate — falls back gracefully.
  */
+import { formatDateDash } from '@/lib/formatters';
 
 const num = (v) => Number(v) || 0;
 
@@ -43,52 +44,45 @@ export function calculateContractBilling(contract) {
 }
 
 /**
- * Build invoice line items from the calculation result.
+ * Build a single Monthly Rental invoice line item whose description mirrors the
+ * company's paper invoice format: MONTH, rental charge breakdown, over-usage
+ * lines, vehicle plate and driver — all in one descriptive block, one row,
+ * one amount (matches the "S.NO / MONTH / Description / QTY / PRICE / Amount" layout).
  */
 export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driverLabel) {
-  const items = [];
-  const prefix = vehicleLabel || 'Vehicle';
+  const monthLabel = contract?.start_date
+    ? new Date(contract.start_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase()
+    : '';
 
-  // Base contract rate
-  if (calc.base > 0) {
-    items.push({
-      description: `${prefix} Rental — Base Contract Rate${driverLabel ? ` — ${driverLabel}` : ''}`,
-      quantity: 1,
-      unit_price: calc.base,
-      amount: calc.base,
-    });
+  const lines = [];
+  lines.push(`${(vehicleLabel || 'VEHICLE').toUpperCase()} RENTAL CHARGES`);
+  lines.push(`MONTHLY CHARGES = ${calc.base}`);
+  if (contract?.start_date && contract?.end_date) {
+    lines.push(`(From ${formatDateDash(contract.start_date)} Till ${formatDateDash(contract.end_date)})`);
   }
-
-  // Day overage
   if (calc.overageDaysCharge > 0) {
-    items.push({
-      description: `Extra Days (${calc.overDateUsed} day${calc.overDateUsed !== 1 ? 's' : ''} @ ${calc.extraDayRate}/day)`,
-      quantity: calc.overDateUsed,
-      unit_price: calc.extraDayRate,
-      amount: calc.overageDaysCharge,
-    });
+    lines.push('');
+    lines.push(`EXTRA DAYS USED = (${calc.extraDayRate} x ${calc.overDateUsed} = ${calc.overageDaysCharge})`);
   }
-
-  // Hour overage
   if (calc.hourOverageCharge > 0) {
-    items.push({
-      description: `Overtime Hours (${calc.overtimeHours}h @ ${calc.extraHourRate}/hr)`,
-      quantity: calc.overtimeHours,
-      unit_price: calc.extraHourRate,
-      amount: calc.hourOverageCharge,
-    });
+    lines.push(`EXTRA HOURS USED = (${calc.extraHourRate} x ${calc.overtimeHours} = ${calc.hourOverageCharge})`);
+  }
+  if (contract?.vehicle_plate) {
+    lines.push('');
+    lines.push(`VEHICLE PLATE NUMBER = ${contract.vehicle_plate}`);
+  }
+  if (driverLabel) {
+    lines.push(`Driver Name: = ${driverLabel}`);
   }
 
-  if (items.length === 0) {
-    items.push({
-      description: `${prefix} Rental`,
-      quantity: 1,
-      unit_price: 0,
-      amount: 0,
-    });
-  }
-
-  return items;
+  return [{
+    description: lines.join('\n'),
+    date: contract?.start_date || '',
+    quantity: 1,
+    unit_price: calc.total,
+    amount: calc.total,
+    month_label: monthLabel,
+  }];
 }
 
 /** Check whether a contract has enough data to invoice. */

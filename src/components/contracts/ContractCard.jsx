@@ -86,17 +86,12 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
             <Building2 className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] uppercase tracking-[0.12em] text-white/40 font-semibold leading-none">{t('monthly_contract') || 'Contract'}</p>
+            <p className="text-[9px] uppercase tracking-[0.12em] text-white/40 font-semibold leading-none">Monthly Rental</p>
             <p className="text-sm font-bold text-white truncate leading-tight mt-0.5">{contract.company_name || '—'}</p>
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           {contract.auto_renewal && <Repeat className="w-3 h-3 text-primary" />}
-          <span className="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold"
-            style={{ background: `rgba(${st.glow},0.14)`, border: `1px solid rgba(${st.glow},0.32)`, color: st.color }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />
-            {t(contract.status || 'active')}
-          </span>
         </div>
       </div>
 

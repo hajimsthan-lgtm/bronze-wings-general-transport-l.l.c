@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { CalendarClock, Clock, CalendarDays, UserCheck, FolderLock, Receipt, Truck, Plus, Info, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
@@ -264,17 +263,6 @@ export default function ContractModeFields({ p }) {
               )}
             </Label>
             <Input type="number" value={contract.extra_hour_rate ?? ''} onChange={(e) => setField('extra_hour_rate', e.target.value, true)} className={inputCls} placeholder="0" />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('contract_status')}</Label>
-            <Select value={contract.status} onValueChange={(v) => updateContract('status', v)}>
-              <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">{t('active')}</SelectItem>
-                <SelectItem value="expired">{t('expired')}</SelectItem>
-                <SelectItem value="terminated">{t('terminated')}</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 

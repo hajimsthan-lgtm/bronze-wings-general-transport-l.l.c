@@ -586,7 +586,8 @@ function drawTableRow(pdf, item, cols, y, idx, vatRate, invoiceType, invoice, in
   const style = invStyle || getInvStyle({});
   const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
   const _indicatorLine = buildIndicatorLine(item);
-  const descText = _indicatorLine ? `${normalizeRoute(item.description ?? '')}\n${_indicatorLine}` : normalizeRoute(item.description ?? '');
+  const rawDesc = invoiceType === 'monthly' ? str(item.description ?? '') : normalizeRoute(item.description ?? '');
+  const descText = _indicatorLine ? `${rawDesc}\n${_indicatorLine}` : rawDesc;
   const fSize = invoiceType === 'monthly' ? 8 : 7.5;
   const descColW = descCol.w - 4;
   const lineH = 2.8;
@@ -834,7 +835,8 @@ function drawTable(pdf, invoice, clientName, s, startY, invoiceType) {
       // Estimate row height for fit check
       const descCol = cols.find(c => c.label.startsWith('DESCRIPTION'));
       const _indLine = buildIndicatorLine(items[idx]);
-      const _descText = _indLine ? `${normalizeRoute(items[idx].description ?? '')}\n${_indLine}` : normalizeRoute(items[idx].description ?? '');
+      const _rawDesc = invoiceType === 'monthly' ? str(items[idx].description ?? '') : normalizeRoute(items[idx].description ?? '');
+      const _descText = _indLine ? `${_rawDesc}\n${_indLine}` : _rawDesc;
       const descLines = pdf.splitTextToSize(_descText, descCol.w - 4);
       const estH = Math.max(6.5, descLines.length * 2.8 + 3);
 
