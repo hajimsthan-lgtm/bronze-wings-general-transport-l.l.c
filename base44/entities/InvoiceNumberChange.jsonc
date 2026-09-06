@@ -31,7 +31,8 @@
         "auto_reallocate",
         "undo",
         "redo",
-        "delete_renumber"
+        "delete_renumber",
+        "rearrange_only"
       ],
       "default": "manual_edit"
     },

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw, CloudUpload, Undo2, Redo2, History } from 'lucide-react';
+import { Plus, Loader2, FileText, Search, Building2, LayoutTemplate, ArrowLeft, X, Send, Ban, RefreshCw, CloudUpload, Undo2, Redo2, History, ArrowDownUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
@@ -52,7 +52,7 @@ import { useUndoRedo, registerNumberChangeUndo } from '@/hooks/useUndoRedo';
 import InvoiceHistoryDialog from '@/components/invoices/InvoiceHistoryDialog';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
 import { deriveStatus, computeTabCounts, filterByTab } from '@/lib/invoiceWorkflow';
-import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, setInvoicesClients } from '@/lib/invoicesStore';
+import { useInvoicesFilters, setInvoicesClientFilter, setInvoicesStatusFilter, setInvoicesClients, setInvoicesSortBy } from '@/lib/invoicesStore';
 
 export default function InvoicesPage() {
   const { toast } = useToast();
@@ -64,7 +64,7 @@ export default function InvoicesPage() {
   const [downloadingId, setDownloadingId] = useState(null);
   const [uploadingId, setUploadingId] = useState(null);
   const [search, setSearch] = useState('');
-  const { clientFilter, statusFilter } = useInvoicesFilters();
+  const { clientFilter, statusFilter, sortBy } = useInvoicesFilters();
   const setClientFilter = setInvoicesClientFilter;
   const setStatusFilter = setInvoicesStatusFilter;
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -678,7 +678,15 @@ export default function InvoicesPage() {
   const counts = useMemo(() => computeTabCounts(baseFiltered), [baseFiltered]);
 
   // Tab-filtered list
-  const filtered = useMemo(() => filterByTab(baseFiltered, tab), [baseFiltered, tab]);
+  const filtered = useMemo(() => {
+    const tabFiltered = filterByTab(baseFiltered, tab);
+    if (sortBy === 'number') {
+      return [...tabFiltered].sort((a, b) =>
+        (a.invoice_number || '').localeCompare(b.invoice_number || '', undefined, { numeric: true })
+      );
+    }
+    return tabFiltered;
+  }, [baseFiltered, tab, sortBy]);
 
   // Detect invoice number sequence errors (numbers not matching chronological order)
   const sequenceErrors = useMemo(() => detectSequenceErrors(allInvoices), [allInvoices]);
@@ -750,6 +758,16 @@ export default function InvoicesPage() {
           >
             <History className="w-3.5 h-3.5" />
             History
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setInvoicesSortBy(sortBy === 'number' ? 'created' : 'number')}
+            className={`gap-2 h-8 border-border/60 hover:border-primary/40 ${sortBy === 'number' ? 'text-primary border-primary/30 bg-primary/5' : 'text-muted-foreground hover:text-foreground'}`}
+            title={sortBy === 'number' ? 'Sorted by invoice number — click to sort by date' : 'Sorted by date — click to sort by invoice number'}
+          >
+            <ArrowDownUp className="w-3.5 h-3.5" />
+            <span className="text-xs">{sortBy === 'number' ? 'By Number' : 'By Date'}</span>
           </Button>
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading} className="gap-2 border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />

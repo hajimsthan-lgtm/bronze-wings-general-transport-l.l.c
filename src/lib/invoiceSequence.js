@@ -619,5 +619,57 @@ export async function applyCascadeRenumber(plan, changedBy) {
   }).catch(() => {});
 }
 
+/**
+ * Rearrange Only: do NOT change any other invoice's number.
+ * Only updates the CompanySettings counter if the edited number is the new highest
+ * in the year, and writes an audit entry. The edited invoice keeps its new number
+ * and will appear in its correct numeric position when the list is sorted by number.
+ */
+export async function rearrangeOnly(anchorInvoiceId, changedBy) {
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+  const anchor = (all || []).find((inv) => inv.id === anchorInvoiceId);
+  if (!anchor) return { rearranged: false };
+
+  const anchorParsed = parseInvoiceNumber(anchor.invoice_number);
+  if (!anchorParsed) return { rearranged: false };
+
+  const year = anchorParsed.year;
+  const anchorSeq = anchorParsed.seq;
+
+  // Update CompanySettings counter if the edited number is the highest in the year
+  const settingsList = await base44.entities.CompanySettings.list().catch(() => []);
+  const s = settingsList?.[0];
+  if (s) {
+    let maxSeq = anchorSeq;
+    (all || []).forEach((inv) => {
+      if (inv.id === anchorInvoiceId || inv.voided) return;
+      const p = parseInvoiceNumber(inv.invoice_number);
+      if (p && p.year === year && p.seq > maxSeq) maxSeq = p.seq;
+    });
+    if (s.invoice_last_year !== year || (s.invoice_last_seq || 0) < maxSeq) {
+      await base44.entities.CompanySettings.update(s.id, {
+        invoice_last_seq: maxSeq,
+        invoice_last_year: year,
+      });
+    }
+  }
+
+  // Audit trail — distinguishable from cascade actions
+  await base44.entities.InvoiceNumberChange.create({
+    invoice_id: anchor.id,
+    invoice_number: anchor.invoice_number,
+    from_number: 'rearrange',
+    to_number: 'rearranged (no other invoices changed)',
+    reason: `Rearrange: kept ${anchor.invoice_number} at its numeric position — no other invoice numbers were changed`,
+    changed_by: changedBy || 'Unknown',
+    changed_at: new Date().toISOString(),
+    action_type: 'rearrange_only',
+    reallocated_invoices: [],
+    undo_snapshot: {},
+  }).catch(() => {});
+
+  return { rearranged: true, anchorNumber: anchor.invoice_number };
+}
+
 /** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
 export { generateNextInvoiceNumber as generateInvoiceNumber };

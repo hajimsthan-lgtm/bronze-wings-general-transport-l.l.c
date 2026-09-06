@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Sparkles, Loader2, X, GitBranch } from 'lucide-react';
+import { AlertTriangle, Sparkles, Loader2, X, GitBranch, Shuffle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,6 +7,7 @@ import {
   smartAllocateKeepChanged,
   computeCascadeRenumber,
   applyCascadeRenumber,
+  rearrangeOnly,
 } from '@/lib/invoiceSequence';
 import CascadeRenumberDialog from './CascadeRenumberDialog';
 
@@ -29,25 +30,44 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser, 
 
   const isCascadeMode = hasManualEdit && !hasErrors;
 
-  const handleSmartAllocate = async () => {
-    // If there's a recent manual edit, try cascade renumber first
-    if (hasManualEdit) {
-      setCascadeLoading(true);
-      try {
-        const plan = await computeCascadeRenumber(recentManualEdit.invoiceId, recentManualEdit.fromNumber);
-        if (plan.anchorInfo) {
-          setCascadePlan(plan);
-          setCascadeLoading(false);
-          return;
-        }
-        // No anchor found — fall through to chronological renumber
-      } catch (e) {
-        console.warn('Cascade computation failed, falling back to chronological:', e.message);
+  const handleCascade = async () => {
+    setCascadeLoading(true);
+    try {
+      const plan = await computeCascadeRenumber(recentManualEdit.invoiceId, recentManualEdit.fromNumber);
+      if (plan.anchorInfo) {
+        setCascadePlan(plan);
+      } else {
+        toast({ variant: 'destructive', title: 'Cannot compute cascade', description: 'No anchor invoice found for the manual edit.' });
       }
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Cascade failed', description: e.message });
+    } finally {
       setCascadeLoading(false);
     }
+  };
 
-    // Fall back to chronological renumber (existing behavior)
+  const handleRearrange = async () => {
+    setAllocating(true);
+    try {
+      const result = await rearrangeOnly(recentManualEdit.invoiceId, currentUser?.full_name || currentUser?.email || 'Unknown');
+      if (result.rearranged) {
+        toast({
+          title: 'Rearrange Complete',
+          description: `${result.anchorNumber} kept at its numeric position. No other invoice numbers were changed.`,
+        });
+        onAllocated?.();
+      } else {
+        toast({ variant: 'destructive', title: 'Rearrange failed', description: 'Could not find the edited invoice.' });
+      }
+    } catch (e) {
+      toast({ variant: 'destructive', title: 'Rearrange failed', description: e.message });
+    } finally {
+      setAllocating(false);
+    }
+  };
+
+  const handleSmartAllocate = async () => {
+    // Chronological renumber (no manual edit — existing behavior)
     setAllocating(true);
     try {
       const year = new Date().getFullYear();
@@ -118,8 +138,8 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser, 
             {isCascadeMode ? 'Manual Number Edit Detected' : 'Invoice Sequence Mismatch Detected'}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {isCascadeMode
-              ? `Invoice ${recentManualEdit.toNumber} was manually edited. Smart Allocate will cascade-renumber all same-year invoices around it, keeping the edited number fixed.`
+            {hasManualEdit
+              ? `Invoice ${recentManualEdit.toNumber} was manually edited. "Renumber (Cascade)" shifts surrounding invoices to stay consecutive around it. "Rearrange" keeps all other numbers unchanged — just re-sort by number.`
               : `${errors.length} invoice${errors.length !== 1 ? 's have' : ' has'} a number that doesn't match its chronological order. Smart Allocate will keep your last-edited invoice and renumber the others to fit.`}
           </p>
           {hasErrors && errors.length <= 3 && (
@@ -133,19 +153,51 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser, 
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Button
-            size="sm"
-            onClick={handleSmartAllocate}
-            disabled={allocating || cascadeLoading}
-            className="h-8 gap-1.5 bg-[linear-gradient(135deg,rgb(var(--panel-accent-rgb))_0%,rgb(var(--panel-accent2-rgb))_100%)] text-primary-foreground shadow-md"
-          >
-            {allocating || cascadeLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
-            {allocating ? 'Allocating…' : cascadeLoading ? 'Computing…' : 'Smart Allocate'}
-          </Button>
+          {hasManualEdit ? (
+            <>
+              <Button
+                size="sm"
+                onClick={handleCascade}
+                disabled={allocating || cascadeLoading}
+                className="h-8 gap-1.5 bg-[linear-gradient(135deg,rgb(var(--panel-accent-rgb))_0%,rgb(var(--panel-accent2-rgb))_100%)] text-primary-foreground shadow-md"
+              >
+                {cascadeLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <GitBranch className="w-3.5 h-3.5" />
+                )}
+                Renumber (Cascade)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRearrange}
+                disabled={allocating || cascadeLoading}
+                className="h-8 gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+              >
+                {allocating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Shuffle className="w-3.5 h-3.5" />
+                )}
+                Rearrange
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleSmartAllocate}
+              disabled={allocating || cascadeLoading}
+              className="h-8 gap-1.5 bg-[linear-gradient(135deg,rgb(var(--panel-accent-rgb))_0%,rgb(var(--panel-accent2-rgb))_100%)] text-primary-foreground shadow-md"
+            >
+              {allocating || cascadeLoading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              {allocating ? 'Allocating…' : cascadeLoading ? 'Computing…' : 'Smart Allocate'}
+            </Button>
+          )}
           <button
             onClick={() => setDismissed(true)}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
