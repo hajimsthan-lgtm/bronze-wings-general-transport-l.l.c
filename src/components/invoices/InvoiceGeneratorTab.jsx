@@ -10,7 +10,7 @@ import { getCompanySettings } from '@/lib/companySettings';
 import { downloadInvoicePDF, downloadMonthlyInvoicePDF, downloadPerTripInvoicePDF } from '@/lib/invoiceHtml';
 import { FileText, Trash2, Zap, Truck, AlertCircle, Layers, AlertTriangle, Clock, Calendar, CheckCircle2, Plus, Wallet, MailCheck, Split, MessageCircle, Mail, Pencil, ChevronDown, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { computeNextSeq, formatInvoiceNumber, restructureInvoiceYear, parseInvoiceNumber } from '@/lib/invoiceSequence';
+import { computeNextSeq, formatInvoiceNumber, parseInvoiceNumber } from '@/lib/invoiceSequence';
 import InvoiceAgingStrip, { getAgingBuckets } from '@/components/invoices/InvoiceAgingStrip';
 
 const SCROLL_H = 'max-h-[440px] overflow-y-auto thin-scroll pr-1';
@@ -297,8 +297,6 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       setBusy(true);
       try {
         await base44.entities.Invoice.delete(inv.id);
-        const yr = parseInvoiceNumber(inv.invoice_number)?.year;
-        if (yr) await restructureInvoiceYear(yr);
         onInvoicesChanged();
       }
       finally { setBusy(false); setProgress(''); }
@@ -321,14 +319,11 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
     // No paid invoices — just delete all
     setBusy(true);
     try {
-      const toDelete = nonPaidIds.map(id => allInvoicesSorted.find(i => i.id === id)).filter(Boolean);
-      const years = new Set(toDelete.map(inv => parseInvoiceNumber(inv.invoice_number)?.year).filter(Boolean));
       const BATCH = 25;
       for (let i = 0; i < nonPaidIds.length; i += BATCH) {
         await Promise.all(nonPaidIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
         setProgress(`${Math.min(i + BATCH, nonPaidIds.length)}/${nonPaidIds.length}`);
       }
-      for (const y of years) await restructureInvoiceYear(y);
       setSelectedInv(new Set());
       onInvoicesChanged();
     } finally { setBusy(false); setProgress(''); }
@@ -344,13 +339,10 @@ export default function InvoiceGeneratorTab({ client, trips, invoices, displayIn
       }
       // Delete the non-paid invoices (if from bulk)
       if (voidPendingDeleteIds.length > 0) {
-        const toDelete = voidPendingDeleteIds.map(id => allInvoicesSorted.find(i => i.id === id)).filter(Boolean);
-        const years = new Set(toDelete.map(inv => parseInvoiceNumber(inv.invoice_number)?.year).filter(Boolean));
         const BATCH = 25;
         for (let i = 0; i < voidPendingDeleteIds.length; i += BATCH) {
           await Promise.all(voidPendingDeleteIds.slice(i, i + BATCH).map((id) => base44.entities.Invoice.delete(id).catch(() => null)));
         }
-        for (const y of years) await restructureInvoiceYear(y);
       }
       setVoidDialogOpen(false);
       setVoidReason('');

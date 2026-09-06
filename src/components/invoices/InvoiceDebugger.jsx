@@ -223,7 +223,7 @@ export default function InvoiceDebugger({ invoices }) {
                 </li>
                 <li className="flex items-start gap-1.5">
                   <Info className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary/60" />
-                  Always use the Refresh button after deleting invoices — sequence numbers auto-renumber.
+                  Invoice numbers are manual — deleting an invoice does not renumber others. The next new invoice gets its number from the form.
                 </li>
               </ul>
             </div>

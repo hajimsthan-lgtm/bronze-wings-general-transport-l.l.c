@@ -46,7 +46,7 @@ import LayoutSelectorModal from '@/components/invoices/LayoutSelectorModal';
 import InvoiceLayoutEditor from '@/components/invoices/layout-editor/InvoiceLayoutEditor';
 import InvoiceDebugger from '@/components/invoices/InvoiceDebugger';
 import { useInvoices, useInvoiceDelete } from '@/hooks/useEntityQueries';
-import { restructureInvoiceSequence, restoreInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
+import { restoreInvoiceNumberSnapshot } from '@/lib/invoiceSequence';
 import { useUndoRedo, registerNumberChangeUndo } from '@/hooks/useUndoRedo';
 import InvoiceHistoryDialog from '@/components/invoices/InvoiceHistoryDialog';
 import { useGlobalDate } from '@/lib/GlobalDateContext';
@@ -512,9 +512,7 @@ export default function InvoicesPage() {
     setDeleteTarget(null);
     if (!inv) return;
     try {
-      const invNum = inv.invoice_number;
       await deleteInvoice.mutateAsync(inv.id);
-      await restructureInvoiceSequence(invNum);
       toast({ title: 'Invoice deleted' });
       if (selectedId === inv.id) setSelectedId(null);
       refetch();
@@ -957,7 +955,7 @@ export default function InvoicesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete invoice {deleteTarget?.invoice_number}. Subsequent invoice numbers will be automatically renumbered to maintain a strict sequence.
+              This will permanently delete invoice {deleteTarget?.invoice_number}. The invoice number will not be reused — the next new invoice gets its number from the form.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
