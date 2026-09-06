@@ -3,6 +3,7 @@ import { useId } from 'react';
 import { Building2, Calendar, Pencil, Trash2, Truck, User, Repeat, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
+import { getContractRate } from '@/lib/contractCalculator';
 
 const TONE = {
   eco:  { color: '#34d399', glow: '52,211,153' },
@@ -43,7 +44,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
   const { t } = useI18n();
   const gid = useId().replace(/[:]/g, '');
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-  const monthlyRate = Number(contract.monthly_rate) || 0;
+  const monthlyRate = getContractRate(contract);
   const netProfit = monthlyRate - totalExpenses;
   const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
 

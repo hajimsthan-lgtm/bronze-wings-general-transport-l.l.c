@@ -19,7 +19,8 @@
     },
     "monthly_rate": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Legacy field \u2014 kept for backward compatibility. Use contract_rate for new contracts."
     },
     "status": {
       "type": "string",
@@ -39,25 +40,62 @@
     "notes": {
       "type": "string"
     },
-    "usage_date": {
-      "type": "string",
-      "format": "date"
-    },
-    "usage_hours": {
+    "allowance_days": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Days included in the base contract price for the billing period"
     },
-    "usage_days": {
+    "allowance_hours_per_day": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Hours per day included before overage kicks in"
     },
-    "per_hour_rate": {
+    "contract_rate": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Base price for the allowance"
     },
-    "per_day_rate": {
+    "extra_day_rate": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Price charged per day beyond allowance_days"
+    },
+    "extra_hour_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Price charged per hour beyond allowance_hours_per_day on any day"
+    },
+    "prorate_underuse": {
+      "type": "boolean",
+      "default": false,
+      "description": "Credit unused days when actual usage is below allowance"
+    },
+    "actual_days_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Total days actually used in the billing period"
+    },
+    "daily_usage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "hours_used": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      },
+      "default": []
+    },
+    "avg_hours_per_day": {
+      "type": "number",
+      "default": 0,
+      "description": "Quick mode \u2014 same hour figure applied to every day (approximation)"
     },
     "add_ons": {
       "type": "array",
@@ -81,8 +119,7 @@
     }
   },
   "required": [
-    "company_name",
-    "monthly_rate"
+    "company_name"
   ],
   "rls": {
     "read": {

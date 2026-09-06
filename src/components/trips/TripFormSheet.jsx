@@ -41,8 +41,9 @@ const DEFAULT_FORM = {
 
 const DEFAULT_CONTRACT = {
   company_name: '', start_date: '', end_date: '', auto_renewal: false,
-  monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
-  usage_date: '', usage_hours: '', usage_days: '', per_hour_rate: '', per_day_rate: ''
+  contract_rate: '', monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
+  allowance_days: '', allowance_hours_per_day: '', extra_day_rate: '', extra_hour_rate: '',
+  prorate_underuse: false, actual_days_used: '', daily_usage: [], avg_hours_per_day: ''
 };
 
 const todayStr = () => new Date().toISOString().split('T')[0];
@@ -121,11 +122,15 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           vehicle_plate: editContract.vehicle_plate || '',
           driver_name: editContract.driver_name || '',
           notes: editContract.notes || '',
-          usage_date: editContract.usage_date || '',
-          usage_hours: editContract.usage_hours || '',
-          usage_days: editContract.usage_days || '',
-          per_hour_rate: editContract.per_hour_rate || '',
-          per_day_rate: editContract.per_day_rate || ''
+          contract_rate: editContract.contract_rate || editContract.monthly_rate || '',
+          allowance_days: editContract.allowance_days || '',
+          allowance_hours_per_day: editContract.allowance_hours_per_day || '',
+          extra_day_rate: editContract.extra_day_rate || '',
+          extra_hour_rate: editContract.extra_hour_rate || '',
+          prorate_underuse: !!editContract.prorate_underuse,
+          actual_days_used: editContract.actual_days_used || '',
+          daily_usage: Array.isArray(editContract.daily_usage) ? editContract.daily_usage : [],
+          avg_hours_per_day: editContract.avg_hours_per_day || ''
         });
         setCCreatedFlags({ company: false, vehicle: false, driver: false });
         setContractAddOns(Array.isArray(editContract.add_ons) ? editContract.add_ons : []);
@@ -187,15 +192,11 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
     if (field === 'driver_name') setCCreatedFlags((prev) => ({ ...prev, driver: false }));
   };
 
-  // Auto-calculate monthly rate from usage-based pricing (hours × per-hour + days × per-day)
+  // Auto-sync monthly_rate from contract_rate for backward compatibility
   useEffect(() => {
-    const hours = Number(contract.usage_hours) || 0;
-    const days = Number(contract.usage_days) || 0;
-    const perHour = Number(contract.per_hour_rate) || 0;
-    const perDay = Number(contract.per_day_rate) || 0;
-    const calc = hours * perHour + days * perDay;
-    if (calc > 0) setContract((prev) => ({ ...prev, monthly_rate: calc }));
-  }, [contract.usage_hours, contract.usage_days, contract.per_hour_rate, contract.per_day_rate]);
+    const cr = Number(contract.contract_rate);
+    if (cr > 0) setContract((prev) => ({ ...prev, monthly_rate: cr }));
+  }, [contract.contract_rate]);
 
   useEffect(() => {
     if (form.client_name) {
@@ -506,16 +507,20 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           start_date: contract.start_date,
           end_date: contract.end_date,
           auto_renewal: !!contract.auto_renewal,
-          monthly_rate: Number(contract.monthly_rate) || 0,
+          monthly_rate: Number(contract.contract_rate) || Number(contract.monthly_rate) || 0,
+          contract_rate: Number(contract.contract_rate) || Number(contract.monthly_rate) || 0,
           status: contract.status,
           vehicle_plate: contract.vehicle_plate,
           driver_name: contract.driver_name,
           notes: contract.notes,
-          usage_date: contract.usage_date || null,
-          usage_hours: Number(contract.usage_hours) || 0,
-          usage_days: Number(contract.usage_days) || 0,
-          per_hour_rate: Number(contract.per_hour_rate) || 0,
-          per_day_rate: Number(contract.per_day_rate) || 0,
+          allowance_days: Number(contract.allowance_days) || 0,
+          allowance_hours_per_day: Number(contract.allowance_hours_per_day) || 0,
+          extra_day_rate: Number(contract.extra_day_rate) || 0,
+          extra_hour_rate: Number(contract.extra_hour_rate) || 0,
+          prorate_underuse: !!contract.prorate_underuse,
+          actual_days_used: Number(contract.actual_days_used) || 0,
+          daily_usage: Array.isArray(contract.daily_usage) ? contract.daily_usage : [],
+          avg_hours_per_day: Number(contract.avg_hours_per_day) || 0,
           add_ons: contractAddOns || []
         };
         let recordId;

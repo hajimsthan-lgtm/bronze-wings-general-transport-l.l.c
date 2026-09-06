@@ -9,6 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { Pencil, Trash2, Building2, User, Truck, Calendar, Repeat, DollarSign, FileText } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
+import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate } from '@/lib/contractCalculator';
 
 export default function ContractDetailSheet({ contract, expenses = [], onClose, onEdit, onDelete, onInvoiceCreated }) {
   const { t } = useI18n();
@@ -19,7 +20,7 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
   if (!contract) return null;
 
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-  const monthlyRate = Number(contract.monthly_rate) || 0;
+  const monthlyRate = getContractRate(contract);
   const netProfit = monthlyRate - totalExpenses;
   const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
 
@@ -32,7 +33,8 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
   const handleCreateInvoice = async () => {
     setInvoicing(true);
     try {
-      const subtotal = monthlyRate;
+      const calc = calculateContractBilling(contract);
+      const subtotal = calc.total;
       const vatAmount = Math.round(subtotal * 0.05 * 100) / 100;
       const total = Math.round((subtotal + vatAmount) * 100) / 100;
       const now = new Date();
@@ -43,6 +45,8 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
         const clients = await base44.entities.Client.filter({ name: contract.company_name });
         clientData = clients?.[0] || {};
       } catch (e) {}
+      const driver = (contract.driver_name || '').trim();
+      const lineItems = buildContractInvoiceLineItems(contract, calc, contract.vehicle_plate || 'Vehicle', driver);
       await base44.entities.Invoice.create({
         invoice_number: invNo,
         client_name: contract.company_name,
@@ -53,7 +57,7 @@ export default function ContractDetailSheet({ contract, expenses = [], onClose, 
         reg_no: contract.vehicle_plate || '',
         issue_date: now.toISOString().split('T')[0],
         due_date: due.toISOString().split('T')[0],
-        line_items: [{ description: `Monthly Contract - ${contract.company_name}\nDriver: ${contract.driver_name || '—'} | Vehicle: ${contract.vehicle_plate || '—'}`, quantity: 1, unit_price: subtotal, amount: subtotal }],
+        line_items: lineItems,
         subtotal,
         vat_rate: 5,
         vat_amount: vatAmount,

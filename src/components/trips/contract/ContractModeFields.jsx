@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import DatePicker from '@/components/common/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus } from 'lucide-react';
+import { CalendarClock, TrendingUp, UserCheck, FolderLock, Receipt, Truck, Plus, Info } from 'lucide-react';
 import { formatCurrency } from '@/lib/formatters';
 import CreateNewCard from '../CreateNewCard';
 import Section from '../Section';
@@ -12,6 +12,9 @@ import TripAddOnsSection from '../TripAddOnsSection';
 import { Upload } from 'lucide-react';
 import SearchableSelect from '@/components/common/SearchableSelect';
 import GradientAvatar from '@/components/common/GradientAvatar';
+import DailyUsageLog from './DailyUsageLog';
+import ContractCalcSummary from './ContractCalcSummary';
+import { useI18n } from '@/lib/i18n';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -32,8 +35,9 @@ const ACCENT = {
 };
 
 export default function ContractModeFields({ p }) {
+  const { t } = useI18n();
   const {
-    contract, updateContract, t, inputCls,
+    contract, updateContract, t: _t, inputCls,
     vehicleSuggestions, driverSuggestions, clientSuggestions,
     isNewClient, isNewVehicle, isNewDriver,
     cCreatedFlags, cCreating, createContractEntity,
@@ -42,6 +46,29 @@ export default function ContractModeFields({ p }) {
   } = p;
 
   const [manualCompanyMode, setManualCompanyMode] = useState(false);
+  const [quickMode, setQuickMode] = useState(true);
+  const syncedRef = useRef(false);
+
+  // Sync quickMode from contract data on first load (when opening for edit)
+  useEffect(() => {
+    if (syncedRef.current) return;
+    const hasDaily = Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0;
+    if (hasDaily) {
+      setQuickMode(false);
+      syncedRef.current = true;
+    }
+  }, [contract?.daily_usage?.length]);
+
+  const handleQuickModeToggle = (v) => {
+    setQuickMode(v);
+    if (v) {
+      // Switching to quick mode — clear daily entries
+      updateContract('daily_usage', []);
+    } else {
+      // Switching to daily log mode — clear avg
+      updateContract('avg_hours_per_day', '');
+    }
+  };
 
   // Company fleet only — strict separation from vendor vehicles/drivers
   const availableVehicles = (allVehicles || [])
@@ -55,8 +82,8 @@ export default function ContractModeFields({ p }) {
 
   return (
     <>
-      {/* Contract Details — Indigo */}
-      <Section title={t('contract_period')} icon={CalendarClock} accent={ACCENT.contract}>
+      {/* Contract Rate Period — Indigo */}
+      <Section title={t('contract_rate_period') || t('contract_period')} icon={CalendarClock} accent={ACCENT.contract}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
           {manualCompanyMode ? (
@@ -138,10 +165,36 @@ export default function ContractModeFields({ p }) {
           </div>
           <Switch checked={!!contract.auto_renewal} onCheckedChange={(v) => updateContract('auto_renewal', v)} />
         </div>
+
+        {/* Allowance explainer */}
+        <div className="flex items-start gap-2 rounded-lg bg-white/[0.03] border border-white/8 px-3 py-2">
+          <Info className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] text-white/50 leading-relaxed">
+            {t('allowance_explainer') || 'This is what the base price includes — usage beyond this is charged extra'}
+          </p>
+        </div>
+
+        {/* Allowance fields */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('monthly_rate')} (AED)</Label>
-            <Input type="number" value={contract.monthly_rate} onChange={(e) => updateContract('monthly_rate', e.target.value)} className={inputCls} />
+            <Label className="text-xs text-white/60 mb-1.5">{t('contract_rate') || 'Contract Rate (AED)'}</Label>
+            <Input type="number" value={contract.contract_rate ?? contract.monthly_rate ?? ''} onChange={(e) => updateContract('contract_rate', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('allowance_days') || 'Allowance Days'}</Label>
+            <Input type="number" value={contract.allowance_days ?? ''} onChange={(e) => updateContract('allowance_days', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('allowance_hours_per_day') || 'Allowance Hours / Day'}</Label>
+            <Input type="number" value={contract.allowance_hours_per_day ?? ''} onChange={(e) => updateContract('allowance_hours_per_day', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('extra_day_rate') || 'Extra Day Rate (AED)'}</Label>
+            <Input type="number" value={contract.extra_day_rate ?? ''} onChange={(e) => updateContract('extra_day_rate', e.target.value)} className={inputCls} placeholder="0" />
+          </div>
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('extra_hour_rate') || 'Extra Hour Rate (AED)'}</Label>
+            <Input type="number" value={contract.extra_hour_rate ?? ''} onChange={(e) => updateContract('extra_hour_rate', e.target.value)} className={inputCls} placeholder="0" />
           </div>
           <div>
             <Label className="text-xs text-white/60 mb-1.5">{t('contract_status')}</Label>
@@ -155,54 +208,51 @@ export default function ContractModeFields({ p }) {
             </Select>
           </div>
         </div>
+
+        {/* Prorate underuse toggle */}
+        <div className="flex items-center justify-between glass-card p-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">{t('prorate_underuse') || 'Prorate Under-usage'}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t('prorate_underuse_help') || 'Credit unused days when actual usage is below allowance'}</p>
+          </div>
+          <Switch checked={!!contract.prorate_underuse} onCheckedChange={(v) => updateContract('prorate_underuse', v)} />
+        </div>
       </Section>
 
-      {/* Usage & Pricing — Emerald */}
-      <Section title={t('usage_pricing') || 'Usage & Pricing'} icon={TrendingUp} accent={ACCENT.usage}>
+      {/* Actual Usage — Emerald */}
+      <Section title={t('actual_usage') || 'Actual Usage'} icon={TrendingUp} accent={ACCENT.usage}>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('usage_date') || 'Usage Date'}</Label>
-            <DatePicker value={contract.usage_date || ''} onChange={(v) => updateContract('usage_date', v)} className={`${inputCls} date-input-clean`} />
+            <Label className="text-xs text-white/60 mb-1.5">{t('actual_days_used') || 'Actual Days Used'}</Label>
+            <Input type="number" value={contract.actual_days_used ?? ''} onChange={(e) => updateContract('actual_days_used', e.target.value)} className={inputCls} placeholder="0" />
           </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('usage_hours') || 'Hours'}</Label>
-            <Input type="number" value={contract.usage_hours || ''} onChange={(e) => updateContract('usage_hours', e.target.value)} className={inputCls} placeholder="0" />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('per_hour_rate') || 'Per Hour (AED)'}</Label>
-            <Input type="number" value={contract.per_hour_rate || ''} onChange={(e) => updateContract('per_hour_rate', e.target.value)} className={inputCls} placeholder="0" />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('usage_days') || 'Days'}</Label>
-            <Input type="number" value={contract.usage_days || ''} onChange={(e) => updateContract('usage_days', e.target.value)} className={inputCls} placeholder="0" />
-          </div>
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('per_day_rate') || 'Per Day (AED)'}</Label>
-            <Input type="number" value={contract.per_day_rate || ''} onChange={(e) => updateContract('per_day_rate', e.target.value)} className={inputCls} placeholder="0" />
-          </div>
-        </div>
-        {(() => {
-          const hours = Number(contract.usage_hours) || 0;
-          const days = Number(contract.usage_days) || 0;
-          const perHour = Number(contract.per_hour_rate) || 0;
-          const perDay = Number(contract.per_day_rate) || 0;
-          const hourTotal = hours * perHour;
-          const dayTotal = days * perDay;
-          const total = hourTotal + dayTotal;
-          if (!total) return null;
-          return (
-            <div className="calc-total-glow flex flex-wrap items-center justify-between gap-3 mt-1">
-              <div className="flex items-center gap-3 text-[11px] text-white/70">
-                {hourTotal > 0 && <span className="tabular-nums">{hours}h × {formatCurrency(perHour)} = <b className="text-white">{formatCurrency(hourTotal)}</b></span>}
-                {dayTotal > 0 && <span className="tabular-nums">{days}d × {formatCurrency(perDay)} = <b className="text-white">{formatCurrency(dayTotal)}</b></span>}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="live-pulse-dot" />
-                <span className="text-sm font-bold text-white tabular-nums">{formatCurrency(total)}</span>
+          <div className="flex items-end">
+            <div className="flex items-center gap-2 glass-card p-2.5 w-full h-full">
+              <Switch checked={quickMode} onCheckedChange={handleQuickModeToggle} />
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-foreground truncate">{t('quick_mode') || 'Quick Mode (Average)'}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{quickMode ? 'Same hours for every day' : 'Log hours per day'}</p>
               </div>
             </div>
-          );
-        })()}
+          </div>
+        </div>
+        {quickMode ? (
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('avg_hours_per_day') || 'Avg Hours / Day'}</Label>
+            <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => updateContract('avg_hours_per_day', e.target.value)} className={inputCls} placeholder="0" />
+            <p className="text-[10px] text-amber-400/70 mt-1 italic">Approximation — can't detect which specific days exceeded the cap</p>
+          </div>
+        ) : (
+          <div>
+            <Label className="text-xs text-white/60 mb-1.5">{t('daily_usage_log') || 'Daily Hour Log'}</Label>
+            <DailyUsageLog
+              dailyUsage={Array.isArray(contract.daily_usage) ? contract.daily_usage : []}
+              onChange={(v) => updateContract('daily_usage', v)}
+              inputCls={inputCls}
+            />
+          </div>
+        )}
+        <ContractCalcSummary contract={contract} />
       </Section>
 
       {/* Assignment — Violet */}

@@ -7,6 +7,7 @@ import EmptyState from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Loader2, LayoutTemplate, Repeat } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
+import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate } from '@/lib/contractCalculator';
 import StatusBadge from '@/components/common/StatusBadge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -36,7 +37,8 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
   const invoiceContract = async (contract) => {
     setInvoicingId(contract.id);
     try {
-      const subtotal = Number(contract.monthly_rate) || 0;
+      const calc = calculateContractBilling(contract);
+      const subtotal = calc.total;
       const vatAmount = Math.round(subtotal * 0.05 * 100) / 100;
       const total = Math.round((subtotal + vatAmount) * 100) / 100;
       const now = new Date();
@@ -54,8 +56,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
       } catch (e) {}
       const vTypeLabel = vehicleType && vehicleType !== 'other' ? vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1) : 'Vehicle';
       const driver = (contract.driver_name || '').trim();
-      const plate = contract.vehicle_plate || '—';
-      const desc = `${vTypeLabel} Rental${driver ? ` — ${driver}` : ''} — ${plate}`;
+      const lineItems = buildContractInvoiceLineItems(contract, calc, vTypeLabel, driver);
       await base44.entities.Invoice.create({
         invoice_number: invNo,
         client_name: contract.company_name,
@@ -66,7 +67,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         reg_no: contract.vehicle_plate || '',
         issue_date: now.toISOString().split('T')[0],
         due_date: due.toISOString().split('T')[0],
-        line_items: [{ description: desc, quantity: 1, unit_price: subtotal, amount: subtotal }],
+        line_items: lineItems,
         subtotal, vat_rate: 5, vat_amount: vatAmount, total_amount: total, paid_amount: 0, status: 'draft',
         ...(selectedTemplate !== 'default' ? { custom_template_id: selectedTemplate } : {}),
       });
@@ -119,7 +120,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
                 <p className="text-sm font-medium text-foreground truncate">{c.vehicle_plate || '—'} · {c.driver_name || '—'}</p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1 truncate"><Calendar className="w-3 h-3 flex-shrink-0" />{formatDate(c.start_date)} → {formatDate(c.end_date)}</p>
               </div>
-              <span className="text-sm font-semibold text-foreground tabular-nums flex-shrink-0">{formatCurrency(c.monthly_rate)}</span>
+              <span className="text-sm font-semibold text-foreground tabular-nums flex-shrink-0">{formatCurrency(getContractRate(c))}</span>
               <StatusBadge status={c.status} />
               <Button
                 onClick={() => invoiceContract(c)}
