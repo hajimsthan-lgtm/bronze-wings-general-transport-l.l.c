@@ -810,9 +810,10 @@ function drawTable(pdf, invoice, clientName, s, startY, invoiceType) {
   const _year = new Date().getFullYear();
   const _refNumber = invoice.invoice_number || `${_year}-0001`;
   const _invoiceDate = fmtDate(invoice.issue_date);
-  // Table rows stop at SIGNATURE_ZONE_TOP on every page — the reserved bottom zone
-  // is never usable by rows. The bottom block is drawn in that zone on the last page only.
-  const contentBottom = SIGNATURE_ZONE_TOP;
+  // Continuation pages fill all the way to FOOTER_RESERVED_TOP; only the `isLast`
+  // row check below still reserves BOTTOM_BLOCK_HEIGHT, since that's the only row
+  // where totals/signature actually need the space.
+  const contentBottom = FOOTER_RESERVED_TOP - 2;
 
   let y = drawTableHeader(pdf, cols, startY, invoiceType);
 

@@ -95,6 +95,7 @@ export default function LayoutPreview({ previewUrl, previewLoading, pageCount, v
         ) : (
           <div style={{ width: A4_W * zoom, height: totalH * zoom, flexShrink: 0 }} className="relative">
             <iframe
+              key={`${previewUrl}-${currentPage}`}
               src={iframeSrc}
               className="rounded-lg shadow-lg bg-white"
               style={{
