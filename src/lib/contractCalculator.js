@@ -74,11 +74,13 @@ export function calculateContractBilling(contract) {
   // Hour overage
   const hourOverageBreakdown = [];
   let hourOverageCharge = 0;
+  let totalHoursUsed = 0;
 
   if (realDaily) {
     // Per-day breakdown — only flagged days
     for (const entry of contract.daily_usage) {
       const hoursUsed = num(entry?.hours_used);
+      totalHoursUsed += hoursUsed;
       if (allowanceHoursPerDay > 0 && hoursUsed > allowanceHoursPerDay) {
         const hoursOver = hoursUsed - allowanceHoursPerDay;
         const charge = hoursOver * extraHourRate;
@@ -95,6 +97,7 @@ export function calculateContractBilling(contract) {
   } else {
     // Quick mode — lump sum
     const avg = num(contract?.avg_hours_per_day);
+    totalHoursUsed = avg * daysUsed;
     if (allowanceHoursPerDay > 0 && avg > allowanceHoursPerDay && daysUsed > 0) {
       const hoursOver = avg - allowanceHoursPerDay;
       const charge = hoursOver * daysUsed * extraHourRate;
@@ -110,6 +113,10 @@ export function calculateContractBilling(contract) {
     }
   }
 
+  // Total allowed hours for the used days
+  const totalAllowanceHours = allowanceHoursPerDay * daysUsed;
+  const hourDelta = totalHoursUsed - totalAllowanceHours;
+
   const total = base + overageDaysCharge - underuseDaysCredit + hourOverageCharge;
 
   return {
@@ -121,6 +128,9 @@ export function calculateContractBilling(contract) {
     underuseDaysCredit,
     hourOverageCharge,
     hourOverageBreakdown,
+    totalHoursUsed,
+    totalAllowanceHours,
+    hourDelta,
     isQuickMode: !realDaily,
     total,
   };

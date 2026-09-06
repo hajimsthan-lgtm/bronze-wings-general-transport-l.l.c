@@ -69,7 +69,7 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
           {visibleContracts.map((c) => {
             const expenses = expensesByContract[c.id] || [];
             const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            const monthlyRate = Number(c.monthly_rate) || 0;
+            const monthlyRate = Number(c.contract_rate) || Number(c.monthly_rate) || 0;
             const netProfit = monthlyRate - totalExpenses;
             const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
             const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';

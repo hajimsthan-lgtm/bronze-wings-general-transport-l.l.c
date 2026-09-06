@@ -113,13 +113,20 @@ export default function DateTimePicker({
   useEffect(() => () => clearTimeout(blurTimerRef.current), []);
 
   const emit = useCallback((newDate, newTime, newAmpm) => {
+    // Date-only mode: emit ISO date directly, no time required
+    if (isDateOnly) {
+      const iso = toISODate(newDate);
+      if (iso) onChange(`${iso}T00:00`);
+      else if (!newDate) onChange('');
+      return;
+    }
     const tm = newTime.match(/^(\d{2}):(\d{2})$/);
     const time12 = tm ? tm[1] : '';
     const minute = tm ? tm[2] : '';
     const internal = toInternal({ date: newDate, time12, minute, ampm: newAmpm });
     if (internal) onChange(internal);
     else if (!newDate && !newTime) onChange('');
-  }, [onChange, onChange]);
+  }, [onChange, isDateOnly]);
 
   const handleBlur = () => {
     clearTimeout(blurTimerRef.current);
