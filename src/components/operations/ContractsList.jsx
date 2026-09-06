@@ -3,8 +3,8 @@ import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Eye, Pencil, Trash2, MoreVertical, Building2, Repeat, ArrowRight } from 'lucide-react';
-import StatusPill, { statusVariant } from '@/components/operations/StatusPill';
 import { hexToRgba } from '@/components/reports/ReportStatCard';
+import { calculateContractBilling } from '@/lib/contractCalculator';
 
 const CONTRACT_ACCENT = '#a855f7';
 
@@ -21,12 +21,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
   return (
     <div>
       {contracts.map((c, i) => {
-        const expenses = expensesByContract[c.id] || [];
-        const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const monthlyRate = Number(c.contract_rate) || Number(c.monthly_rate) || 0;
-        const netProfit = monthlyRate - totalExpenses;
-        const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
-        const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';
+        const calc = calculateContractBilling(c);
         return (
           <div
             key={c.id}
@@ -51,7 +46,7 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
               <div className="flex-1 min-w-0">
                 {/* Line 1 — contract id + date range */}
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
-                  <span className="font-mono text-muted-foreground/80 whitespace-nowrap">#{c.id?.slice(-6).toUpperCase()}</span>
+                  <span className="font-mono text-primary/80 whitespace-nowrap">{c.contract_number || `#${c.id?.slice(-6).toUpperCase()}`}</span>
                   <span className="text-muted-foreground/40">·</span>
                   <span className="tabular-nums whitespace-nowrap">{formatDate(c.start_date)}</span>
                   <ArrowRight className="w-3 h-3 text-muted-foreground/40 flex-shrink-0" />
@@ -85,14 +80,14 @@ export default function ContractsList({ contracts, expensesByContract, onEdit, o
               {/* Right — status + margin + rate + menu */}
               <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <div className="w-[112px] sm:w-[152px] flex items-center justify-end gap-1.5">
-                  <span className={`text-[11px] font-semibold tabular-nums ${marginTone}`}>{margin}% margin</span>
+                  <span className="text-[11px] font-semibold tabular-nums text-foreground/60">{formatCurrency(calc.base)}/mo</span>
                 </div>
 
                 <div className="h-6 w-px bg-border/50 hidden sm:block" />
 
-                <div className="w-[84px] sm:w-[96px] text-right">
-                  <p className="text-sm font-bold text-foreground tabular-nums whitespace-nowrap leading-tight">{formatCurrency(monthlyRate)}</p>
-                  <p className={`text-[10px] tabular-nums leading-tight ${netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatCurrency(netProfit)}</p>
+                <div className="w-[96px] sm:w-[112px] text-right">
+                  <p className="text-sm font-bold text-emerald-400 tabular-nums whitespace-nowrap leading-tight">{formatCurrency(calc.total)}</p>
+                  <p className="text-[10px] tabular-nums text-muted-foreground leading-tight">rent+overtime</p>
                 </div>
 
                 <DropdownMenu>

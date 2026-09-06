@@ -27,7 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useTrips, useTripDelete, useInvoices } from '@/hooks/useEntityQueries';
 import { formatDate, formatCurrency, normalizeDate } from '@/lib/formatters';
 import { inGlobalDateRange } from '@/lib/GlobalDateContext';
-import { Truck, FileText, Landmark, Building2 } from 'lucide-react';
+import { Truck, FileText, Landmark, Building2, ArrowUp } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog';
 
 import { setOpsFilter, deactivateOpsFilter, useOpsSearch, setOpsSearch, setOpsDebug, useOpsBulk } from '@/lib/operationsFilterStore';
@@ -55,17 +55,17 @@ const TRIP_EXPORT_COLUMNS = [
   { label: 'Payment',      key: 'payment_status',   w: 27 },
 ];
 const CONTRACT_EXPORT_COLUMNS = [
-  { label: 'Contract ID', key: 'contract_id' },
-  { label: 'Client', key: 'company_name' },
-  { label: 'Start', key: 'start_date' },
-  { label: 'End', key: 'end_date' },
-  { label: 'Driver', key: 'driver_name' },
-  { label: 'Vehicle', key: 'vehicle_plate' },
-  { label: 'Monthly Rental', key: 'monthly_rate' },
-  { label: 'Total Expenses', key: 'total_expenses' },
-  { label: 'Net Profit', key: 'net_profit' },
-  { label: 'Margin %', key: 'margin' },
-  { label: 'Status', key: 'status' },
+  { label: 'Rental #', key: 'contract_number', w: 18, noWrap: true },
+  { label: 'Client', key: 'company_name', w: 24 },
+  { label: 'Start', key: 'start_date', w: 16 },
+  { label: 'End', key: 'end_date', w: 16 },
+  { label: 'Driver', key: 'driver_name', w: 22 },
+  { label: 'Vehicle', key: 'vehicle_plate', w: 18 },
+  { label: 'Monthly Rental', key: 'monthly_rate', w: 18, numeric: true },
+  { label: 'Over Date Used', key: 'actual_days_used', w: 14, numeric: true },
+  { label: 'Over-Time Used', key: 'overtime_hours', w: 14, numeric: true },
+  { label: 'Total Rent+Overtime', key: 'total_amount', w: 20, numeric: true },
+  { label: 'Status', key: 'status', w: 14 },
 ];
 
 function SectionLabel({ children, count }) {
@@ -92,6 +92,13 @@ export default function Operations() {
     (invoices || []).forEach(inv => {
       if (!inv.trip_id) return;
       String(inv.trip_id).split(',').forEach(tn => { const v = tn.trim(); if (v) map[v] = inv; });
+    });
+    return map;
+  }, [invoices]);
+  const contractInvoiceMap = useMemo(() => {
+    const map = {};
+    (invoices || []).forEach(inv => {
+      if (inv.contract_id) map[inv.contract_id] = inv;
     });
     return map;
   }, [invoices]);
@@ -403,22 +410,21 @@ export default function Operations() {
   const exportData = useMemo(() => {
     if (isContractExport) {
       return filteredContracts.map((c) => {
-        const expenses = expensesByContract[c.id] || [];
-        const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const monthlyRate = Number(c.monthly_rate) || 0;
-        const netProfit = monthlyRate - totalExpenses;
-        const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
+        const base = Number(c.contract_rate) || Number(c.monthly_rate) || 0;
+        const overDateCharge = (Number(c.actual_days_used) || 0) * (Number(c.extra_day_rate) || 0);
+        const overtimeCharge = (Number(c.overtime_hours) || 0) * (Number(c.extra_hour_rate) || 0);
+        const totalAmount = base + overDateCharge + overtimeCharge;
         return {
-          contract_id: `#${c.id?.slice(-6).toUpperCase()}`,
+          contract_number: c.contract_number || `#${c.id?.slice(-6).toUpperCase()}`,
           company_name: c.company_name,
           start_date: c.start_date ? formatDate(c.start_date) : '',
           end_date: c.end_date ? formatDate(c.end_date) : '',
           driver_name: c.driver_name,
           vehicle_plate: c.vehicle_plate,
-          monthly_rate: c.monthly_rate,
-          total_expenses: totalExpenses,
-          net_profit: netProfit,
-          margin,
+          monthly_rate: base,
+          actual_days_used: Number(c.actual_days_used) || 0,
+          overtime_hours: Number(c.overtime_hours) || 0,
+          total_amount: totalAmount,
           status: c.status,
         };
       });
@@ -444,8 +450,8 @@ export default function Operations() {
       mode,
       exportConfig: {
         get data() { return exportDataRef.current; },
-        filename: isContractExport ? 'monthly-contracts' : 'trips',
-        title: isContractExport ? 'Monthly Contracts' : 'Trips',
+        filename: isContractExport ? 'monthly-rentals' : 'trips',
+        title: isContractExport ? 'Monthly Rentals' : 'Trips',
         columns: isContractExport ? CONTRACT_EXPORT_COLUMNS : TRIP_EXPORT_COLUMNS,
       },
       onImported: () => { refetchTrips(); refetchInvoices(); },
@@ -558,7 +564,7 @@ export default function Operations() {
               <EmptyState
                 icon={mode === 'contract' ? FileText : Truck}
                 title={t('no_data')}
-                description={mode === 'contract' ? 'Create your first monthly contract to track rental profitability' : 'Create your first trip to get started'}
+                description={mode === 'contract' ? 'Create your first monthly rental to track rental profitability' : 'Create your first trip to get started'}
                 action={mode === 'contract'
                   ? <button onClick={openNewContract} className="clay-btn-ghost text-sm">{t('new_contract')}</button>
                   : <button onClick={openNewTrip} className="clay-btn-ghost text-sm">{t('new_trip')}</button>}
@@ -598,7 +604,7 @@ export default function Operations() {
             {showContracts && filteredContracts.length > 0 && (
               <CollapsibleSection
                 icon={Building2}
-                label={t('contracts_section')}
+                label="Monthly Rentals"
                 count={filteredContracts.length}
                 accent="violet"
                 defaultCollapsed={false}
@@ -606,12 +612,22 @@ export default function Operations() {
                 {viewMode === 'card'
                   ? contractGrid(filteredContracts)
                   : viewMode === 'table'
-                  ? <ContractsTable contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} />
+                  ? <ContractsTable contracts={filteredContracts} expensesByContract={expensesByContract} invoiceMap={contractInvoiceMap} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} />
                   : <ContractsList contracts={filteredContracts} expensesByContract={expensesByContract} onEdit={openEditContract} onDelete={handleDeleteContract} onDetails={setDetailContract} driverMap={driverMap} vehicleMap={vehicleMap} />}
               </CollapsibleSection>
             )}
           </div>
         )}
+        {/* Scroll-to-top button */}
+        <div className="flex justify-center pt-4 pb-2">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="inline-flex items-center gap-1.5 px-4 h-9 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors"
+          >
+            <ArrowUp className="w-3.5 h-3.5" />
+            Scroll to Top
+          </button>
+        </div>
       </PullToRefresh>
 
       <TripFormSheet

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, FileText, Loader2, LayoutTemplate, Repeat } from 'lucide-react';
 import { generateNextInvoiceNumber } from '@/lib/invoiceSequence';
 import { calculateContractBilling, buildContractInvoiceLineItems, getContractRate, hasUsageData } from '@/lib/contractCalculator';
+import { shortDriverName } from '@/lib/driverName';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function MonthlyContractsGenerator({ clientName, onInvoicesChanged }) {
@@ -58,7 +59,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         vehicleType = vehicles?.[0]?.type || '';
       } catch (e) {}
       const vTypeLabel = vehicleType && vehicleType !== 'other' ? vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1) : 'Vehicle';
-      const driver = (contract.driver_name || '').trim();
+      const driver = shortDriverName(contract.driver_name || '');
       const lineItems = buildContractInvoiceLineItems(contract, calc, vTypeLabel, driver);
       await base44.entities.Invoice.create({
         invoice_number: invNo,
@@ -72,6 +73,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
         due_date: due.toISOString().split('T')[0],
         line_items: lineItems,
         subtotal, vat_rate: 5, vat_amount: vatAmount, total_amount: total, paid_amount: 0, status: 'draft',
+        contract_id: contract.id,
         ...(selectedTemplate !== 'default' ? { custom_template_id: selectedTemplate } : {}),
       });
       toast({ title: t('invoice_created') || 'Invoice created' });
@@ -84,7 +86,7 @@ export default function MonthlyContractsGenerator({ clientName, onInvoicesChange
   };
 
   if (loading) return <div className="flex items-center justify-center py-6"><Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /></div>;
-  if (contracts.length === 0) return <EmptyState icon={Repeat} title="No monthly contracts" description="Active monthly contracts for this client appear here." />;
+  if (contracts.length === 0) return <EmptyState icon={Repeat} title="No monthly rentals" description="Active monthly rentals for this client appear here." />;
 
   return (
     <div className="glass-card p-4 sm:p-5">

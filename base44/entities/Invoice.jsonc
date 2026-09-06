@@ -148,6 +148,10 @@
     "trip_id": {
       "type": "string"
     },
+    "contract_id": {
+      "type": "string",
+      "description": "Linked MonthlyContract id when this invoice was generated from a monthly rental"
+    },
     "voided": {
       "type": "boolean",
       "default": false

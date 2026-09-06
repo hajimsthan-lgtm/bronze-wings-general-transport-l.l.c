@@ -10,6 +10,7 @@
  * Works with old contracts that only have monthly_rate — falls back gracefully.
  */
 import { formatDateDash } from '@/lib/formatters';
+import { shortDriverName } from '@/lib/driverName';
 
 const num = (v) => Number(v) || 0;
 
@@ -45,9 +46,9 @@ export function calculateContractBilling(contract) {
 
 /**
  * Build a single Monthly Rental invoice line item whose description mirrors the
- * company's paper invoice format: MONTH, rental charge breakdown, over-usage
- * lines, vehicle plate and driver — all in one descriptive block, one row,
- * one amount (matches the "S.NO / MONTH / Description / QTY / PRICE / Amount" layout).
+ * company's paper invoice format: rental type, monthly charge, period, over-usage
+ * lines. Driver and vehicle plate appear on a separate indicator line (D:/V:)
+ * via the PDF renderer's buildIndicatorLine — not in the description body.
  */
 export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driverLabel) {
   const monthLabel = contract?.start_date
@@ -61,18 +62,10 @@ export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driv
     lines.push(`(From ${formatDateDash(contract.start_date)} Till ${formatDateDash(contract.end_date)})`);
   }
   if (calc.overageDaysCharge > 0) {
-    lines.push('');
     lines.push(`EXTRA DAYS USED = (${calc.extraDayRate} x ${calc.overDateUsed} = ${calc.overageDaysCharge})`);
   }
   if (calc.hourOverageCharge > 0) {
     lines.push(`EXTRA HOURS USED = (${calc.extraHourRate} x ${calc.overtimeHours} = ${calc.hourOverageCharge})`);
-  }
-  if (contract?.vehicle_plate) {
-    lines.push('');
-    lines.push(`VEHICLE PLATE NUMBER = ${contract.vehicle_plate}`);
-  }
-  if (driverLabel) {
-    lines.push(`Driver Name: = ${driverLabel}`);
   }
 
   return [{
@@ -82,6 +75,11 @@ export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driv
     unit_price: calc.total,
     amount: calc.total,
     month_label: monthLabel,
+    driver_name: shortDriverName(driverLabel),
+    vehicle_no: contract?.vehicle_plate || '',
+    show_driver: true,
+    show_vehicle: true,
+    show_delivery_note: false,
   }];
 }
 

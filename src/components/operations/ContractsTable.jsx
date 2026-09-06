@@ -4,8 +4,20 @@ import { Eye, Pencil, Trash2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatCurrency, formatDate } from '@/lib/formatters';
+import { calculateContractBilling } from '@/lib/contractCalculator';
 
-export default function ContractsTable({ contracts, expensesByContract, onEdit, onDelete, onDetails }) {
+const INV_STATUS_TONE = {
+  draft: 'text-muted-foreground bg-muted/40 border-border',
+  unsigned: 'text-amber-400 bg-amber-500/10 border-amber-500/30',
+  signed: 'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  sent: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
+  partially_paid: 'text-violet-400 bg-violet-500/10 border-violet-500/30',
+  paid: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
+  cancelled: 'text-red-400 bg-red-500/10 border-red-500/30',
+  overdue: 'text-red-400 bg-red-500/10 border-red-500/30',
+};
+
+export default function ContractsTable({ contracts, expensesByContract, invoiceMap, onEdit, onDelete, onDetails }) {
   const { t } = useI18n();
 
   // Progressive rendering — keep DOM small as contract count grows.
@@ -33,13 +45,15 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
         <TableHeader>
           <TableRow className="bg-muted hover:bg-muted">
             {[
-              ['RECORD ID / CLIENT', 'text-left'],
+              ['RENTAL #', 'text-left'],
+              ['CLIENT', 'text-left'],
               ['PERIOD', 'text-left'],
               ['DRIVER / VEHICLE', 'text-left'],
               ['MONTHLY RENTAL', 'text-right'],
-              ['OVER DATE USED', 'text-right'],
-              ['OVER TIME USED', 'text-right'],
-              ['NET PROFIT / MARGIN', 'text-right'],
+              ['OVER DATE', 'text-right'],
+              ['OVER TIME', 'text-right'],
+              ['TOTAL RENT+OVERTIME', 'text-right'],
+              ['INV STATUS', 'text-center'],
               ['ACTIONS', 'text-center'],
             ].map(([label, align]) => (
               <TableHead
@@ -56,20 +70,18 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
         </TableHeader>
         <TableBody>
           {visibleContracts.map((c) => {
-            const expenses = expensesByContract[c.id] || [];
-            const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-            const monthlyRate = Number(c.contract_rate) || Number(c.monthly_rate) || 0;
-            const overDateCharge = (Number(c.actual_days_used) || 0) * (Number(c.extra_day_rate) || 0);
-            const overtimeCharge = (Number(c.overtime_hours) || 0) * (Number(c.extra_hour_rate) || 0);
-            const netProfit = monthlyRate - totalExpenses;
-            const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
-            const marginTone = margin >= 30 ? 'text-emerald-400' : margin >= 15 ? 'text-amber-400' : 'text-red-400';
+            const calc = calculateContractBilling(c);
+            const inv = invoiceMap?.[c.id];
+            const invStatus = inv?.status || '—';
             return (
               <TableRow key={c.id} className="hover:bg-primary/5 transition-all duration-150 group">
-                {/* RECORD ID / CLIENT */}
+                {/* RENTAL # */}
                 <TableCell className="align-top trips-grid-td">
-                  <p className="font-mono text-xs text-foreground">#{c.id?.slice(-6).toUpperCase()}</p>
-                  <p className="text-foreground font-medium truncate max-w-[180px]">{c.company_name || '—'}</p>
+                  <p className="font-mono text-xs text-primary font-semibold">{c.contract_number || `#${c.id?.slice(-6).toUpperCase()}`}</p>
+                </TableCell>
+                {/* CLIENT */}
+                <TableCell className="align-top trips-grid-td">
+                  <p className="text-foreground font-medium truncate max-w-[160px]">{c.company_name || '—'}</p>
                 </TableCell>
                 {/* PERIOD */}
                 <TableCell className="align-top trips-grid-td whitespace-nowrap">
@@ -79,29 +91,36 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
                 </TableCell>
                 {/* DRIVER / VEHICLE */}
                 <TableCell className="align-top trips-grid-td">
-                  <p className="text-foreground truncate max-w-[140px] text-xs">{c.driver_name || '—'}</p>
+                  <p className="text-foreground truncate max-w-[120px] text-xs">{c.driver_name || '—'}</p>
                   <p className="text-xs text-muted-foreground tabular-nums">{c.vehicle_plate || ''}</p>
                 </TableCell>
                 {/* MONTHLY RENTAL */}
                 <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
-                  <span className="font-semibold text-foreground tabular-nums text-xs">{formatCurrency(monthlyRate)}</span>
+                  <span className="font-semibold text-foreground tabular-nums text-xs">{formatCurrency(calc.base)}</span>
                 </TableCell>
-                {/* OVER DATE USED */}
+                {/* OVER DATE */}
                 <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
-                  <p className="text-xs tabular-nums text-foreground">{Number(c.actual_days_used) || 0} day{Number(c.actual_days_used) === 1 ? '' : 's'}</p>
-                  {overDateCharge > 0 && <p className="text-[10px] tabular-nums text-amber-400">+{formatCurrency(overDateCharge)}</p>}
+                  <p className="text-xs tabular-nums text-foreground">{calc.overDateUsed} day{calc.overDateUsed === 1 ? '' : 's'}</p>
+                  {calc.overageDaysCharge > 0 && <p className="text-[10px] tabular-nums text-amber-400">+{formatCurrency(calc.overageDaysCharge)}</p>}
                 </TableCell>
-                {/* OVER TIME USED */}
+                {/* OVER TIME */}
                 <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
-                  <p className="text-xs tabular-nums text-foreground">{Number(c.overtime_hours) || 0} hr{Number(c.overtime_hours) === 1 ? '' : 's'}</p>
-                  {overtimeCharge > 0 && <p className="text-[10px] tabular-nums text-amber-400">+{formatCurrency(overtimeCharge)}</p>}
+                  <p className="text-xs tabular-nums text-foreground">{calc.overtimeHours} hr{calc.overtimeHours === 1 ? '' : 's'}</p>
+                  {calc.hourOverageCharge > 0 && <p className="text-[10px] tabular-nums text-amber-400">+{formatCurrency(calc.hourOverageCharge)}</p>}
                 </TableCell>
-                {/* NET PROFIT / MARGIN */}
+                {/* TOTAL RENT+OVERTIME */}
                 <TableCell className="text-right align-top trips-grid-td whitespace-nowrap">
-                  <p className={cn('font-semibold tabular-nums text-xs', netProfit >= 0 ? 'text-emerald-400' : 'text-red-400')}>
-                    {formatCurrency(netProfit)}
-                  </p>
-                  <p className={cn('text-xs tabular-nums', marginTone)}>{margin}%</p>
+                  <span className="font-bold text-emerald-400 tabular-nums text-xs">{formatCurrency(calc.total)}</span>
+                </TableCell>
+                {/* INV STATUS */}
+                <TableCell className="text-center align-top trips-grid-td">
+                  {inv ? (
+                    <span className={cn('inline-flex items-center px-2 h-5 rounded-full text-[10px] font-semibold border', INV_STATUS_TONE[invStatus] || INV_STATUS_TONE.draft)}>
+                      {invStatus.replace(/_/g, ' ')}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 {/* ACTIONS */}
                 <TableCell className="align-top trips-grid-td">
@@ -134,7 +153,7 @@ export default function ContractsTable({ contracts, expensesByContract, onEdit, 
             })}
             {visibleCount < contracts.length && (
             <TableRow ref={sentinelRef} className="hover:bg-transparent">
-             <TableCell colSpan={8} className="text-center text-xs text-muted-foreground py-3">
+             <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-3">
                Loading more… ({visibleCount}/{contracts.length})
              </TableCell>
             </TableRow>

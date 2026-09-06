@@ -2,6 +2,10 @@
   "name": "MonthlyContract",
   "type": "object",
   "properties": {
+    "contract_number": {
+      "type": "string",
+      "description": "Sequential rental number in TC-MMYY-00 format (e.g. TC-0926-01)"
+    },
     "company_name": {
       "type": "string"
     },

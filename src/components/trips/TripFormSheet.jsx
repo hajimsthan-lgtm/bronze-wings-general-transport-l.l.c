@@ -25,6 +25,7 @@ import VendorPaymentFields from './VendorPaymentFields';
 import TripAddOnsSection from './TripAddOnsSection';
 import TripFormStatusSelector from './TripFormStatusSelector';
 import { STATUS_META } from '@/lib/tripStatusWorkflow';
+import { buildContractNumber } from '@/lib/contractSequence';
 
 const DEFAULT_FORM = {
   from_location: '', to_location: '', vehicle_plate: '', driver_name: '', driver_phone: '', vendor_name: '',
@@ -41,7 +42,7 @@ const DEFAULT_FORM = {
 };
 
 const DEFAULT_CONTRACT = {
-  company_name: '', start_date: '', end_date: '', auto_renewal: false,
+  contract_number: '', company_name: '', start_date: '', end_date: '', auto_renewal: false,
   contract_rate: '', monthly_rate: '', status: 'active', vehicle_plate: '', driver_name: '', notes: '',
   allowance_days: '', allowance_hours_per_day: '', extra_day_rate: '', extra_hour_rate: '',
   prorate_underuse: false, daily_usage: [], avg_hours_per_day: '',
@@ -115,6 +116,7 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
         setMode('contract');
         setContract({
           ...DEFAULT_CONTRACT,
+          contract_number: editContract.contract_number || '',
           company_name: editContract.company_name || '',
           start_date: editContract.start_date || '',
           end_date: editContract.end_date || '',
@@ -507,7 +509,13 @@ export default function TripFormSheet({ open, onOpenChange, editTrip, editContra
           }
         }
       } else {
+        let contractNumber = contract.contract_number;
+        if (!editContract && !contractNumber) {
+          const existingContracts = await base44.entities.MonthlyContract.list('-created_date', 200).catch(() => []);
+          contractNumber = buildContractNumber(contract.start_date || new Date().toISOString(), existingContracts || []);
+        }
         const payload = {
+          contract_number: contractNumber || '',
           company_name: contract.company_name,
           start_date: contract.start_date,
           end_date: contract.end_date,

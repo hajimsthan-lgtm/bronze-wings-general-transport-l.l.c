@@ -138,6 +138,14 @@ export default function ContractModeFields({ p }) {
     <>
       {/* Contract Rate Period — Indigo */}
       <Section title={t('contract_rate_period') || t('contract_period')} icon={CalendarClock} accent={ACCENT.contract}>
+        {contract.contract_number && (
+          <div className="mb-3">
+            <Label className="text-xs text-white/60 mb-1.5">Rental Number</Label>
+            <div className="px-3 py-2 rounded-lg bg-primary/10 border border-primary/25 text-primary font-mono text-sm font-semibold">
+              {contract.contract_number}
+            </div>
+          </div>
+        )}
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('contract_company')}</Label>
           {manualCompanyMode ? (

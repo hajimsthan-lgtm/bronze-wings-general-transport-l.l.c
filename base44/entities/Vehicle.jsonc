@@ -30,6 +30,7 @@
         "trailer",
         "tanker",
         "pickup",
+        "crane",
         "other"
       ],
       "default": "truck"

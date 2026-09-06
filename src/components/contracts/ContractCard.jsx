@@ -3,7 +3,7 @@ import { useId } from 'react';
 import { Building2, Calendar, Pencil, Trash2, Truck, User, Repeat, TrendingUp, TrendingDown, Wallet, Receipt } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/formatters';
 import { useI18n } from '@/lib/i18n';
-import { getContractRate } from '@/lib/contractCalculator';
+import { calculateContractBilling } from '@/lib/contractCalculator';
 
 const TONE = {
   eco:  { color: '#34d399', glow: '52,211,153' },
@@ -43,15 +43,14 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
   const navigate = useNavigate();
   const { t } = useI18n();
   const gid = useId().replace(/[:]/g, '');
+  const calc = calculateContractBilling(contract);
   const totalExpenses = expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-  const monthlyRate = getContractRate(contract);
-  const netProfit = monthlyRate - totalExpenses;
-  const margin = monthlyRate > 0 ? Math.round((netProfit / monthlyRate) * 100) : 0;
+  const netProfit = calc.total - totalExpenses;
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const daysLeft = contract.end_date ? Math.ceil((new Date(contract.end_date) - today) / 86400000) : null;
 
-  const tone = margin >= 30 ? 'eco' : margin >= 15 ? 'cool' : 'heat';
+  const tone = netProfit >= 0 ? 'eco' : 'heat';
   const tn = TONE[tone];
   const st = STATUS[contract.status] || STATUS.active;
 
@@ -86,7 +85,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
             <Building2 className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] uppercase tracking-[0.12em] text-white/40 font-semibold leading-none">Monthly Rental</p>
+            <p className="text-[9px] uppercase tracking-[0.12em] text-white/40 font-semibold leading-none">{contract.contract_number || 'Monthly Rental'}</p>
             <p className="text-sm font-bold text-white truncate leading-tight mt-0.5">{contract.company_name || '—'}</p>
           </div>
         </div>
@@ -95,9 +94,10 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
         </div>
       </div>
 
-      {/* ── Central glowing gauge ── */}
-      <div className="flex justify-center my-1">
-        <ContractGauge value={`${margin}%`} color={tn.color} glow={tn.glow} gid={gid} />
+      {/* ── Total rent+overtime display ── */}
+      <div className="flex flex-col items-center justify-center my-2 py-1">
+        <p className="text-2xl font-bold text-emerald-400 tabular-nums tracking-tight leading-none">{formatCurrency(calc.total)}</p>
+        <p className="text-[9px] uppercase tracking-[0.14em] text-white/45 font-semibold mt-1">Total Rent + Overtime</p>
       </div>
 
       {/* ── Date range ── */}
@@ -116,7 +116,7 @@ export default function ContractCard({ contract, expenses = [], onEdit, onDelete
       {/* ── Bottom pill: 3 financial stats ── */}
       <div className="flex items-center gap-1 p-1 rounded-full bg-muted border border-border">
         <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold text-white/70 tabular-nums">
-          <Wallet className="w-3 h-3 text-white/40 flex-shrink-0" />{short(monthlyRate)}
+          <Wallet className="w-3 h-3 text-white/40 flex-shrink-0" />{short(calc.base)}
         </div>
         <div className="flex-1 flex items-center justify-center gap-1 h-8 rounded-full text-[10px] font-bold text-white/70 tabular-nums">
           <Receipt className="w-3 h-3 text-white/40 flex-shrink-0" />{short(totalExpenses)}

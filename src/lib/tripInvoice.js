@@ -1,21 +1,20 @@
 import { base44 } from '@/api/base44Client';
 import { getCompanySettings } from '@/lib/companySettings';
 import { stripVendorData, assertNoVendorData } from '@/lib/vendorPrivacy';
+import { shortDriverName } from '@/lib/driverName';
 
 import { generateNextInvoiceNumber as nextInvoiceNumber } from '@/lib/invoiceSequence';
 export { nextInvoiceNumber };
 
 /**
- * Build a trip description string: "FromLocation To ToLocation (driver, vehicle)".
- * Omits the parenthetical if neither driver nor vehicle is present.
+ * Build a trip description string: "FromLocation To ToLocation".
+ * Driver and vehicle plate appear on a separate indicator line (D:/V:) via
+ * the PDF renderer's buildIndicatorLine — not inline in the description.
  * NOTE: Vendor name is intentionally excluded — client-facing descriptions must
  * never reveal which service provider handled the trip.
  */
 export function buildTripDesc(trip) {
-  const extra = [trip.driver_name, trip.vehicle_plate].filter(Boolean).join(', ');
-  return extra
-    ? `${trip.from_location} To ${trip.to_location} (${extra})`
-    : `${trip.from_location} To ${trip.to_location}`;
+  return `${trip.from_location} To ${trip.to_location}`;
 }
 
 export async function getTripInvoice(tripId) {
@@ -39,7 +38,19 @@ export async function getTripInvoice(tripId) {
  */
 function buildTripLineItems(safeTrip) {
   const revenue = Number(safeTrip.revenue) || 0;
-  const items = [{ description: buildTripDesc(safeTrip), quantity: 1, unit_price: revenue, amount: revenue, vat_excluded: false }];
+  const items = [{
+    description: buildTripDesc(safeTrip),
+    quantity: 1,
+    unit_price: revenue,
+    amount: revenue,
+    vat_excluded: false,
+    driver_name: shortDriverName(safeTrip.driver_name),
+    vehicle_no: safeTrip.vehicle_plate || '',
+    show_driver: true,
+    show_vehicle: true,
+    show_delivery_note: !!safeTrip.delivery_note_number,
+    delivery_note_no: safeTrip.delivery_note_number || '',
+  }];
   const addOns = Array.isArray(safeTrip.add_ons) ? safeTrip.add_ons : [];
   addOns.forEach((addon) => {
     const amt = Number(addon.amount) || 0;
