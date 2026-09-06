@@ -434,7 +434,7 @@ export async function smartAllocateKeepChanged(year, lockedInvoiceIds) {
  * @param {string} anchorInvoiceId - The ID of the manually-edited invoice (the anchor)
  * @returns {Promise<{ updates, reallocated, collisions, hasNegativeSeq, anchorInfo, snapshot }>}
  */
-export async function computeCascadeRenumber(anchorInvoiceId) {
+export async function computeCascadeRenumber(anchorInvoiceId, originalNumber) {
   const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
 
   const anchor = (all || []).find((inv) => inv.id === anchorInvoiceId);
@@ -445,6 +445,11 @@ export async function computeCascadeRenumber(anchorInvoiceId) {
 
   const year = anchorParsed.year;
   const anchorSeq = anchorParsed.seq;
+
+  // The anchor's ORIGINAL number (before the manual edit) determines its position
+  // in the sequence.  If provided, use it; otherwise fall back to the current number.
+  const originalParsed = originalNumber ? parseInvoiceNumber(originalNumber) : null;
+  const positionSeq = originalParsed && originalParsed.year === year ? originalParsed.seq : anchorSeq;
 
   // All non-voided, new-format invoices in the same year (excluding anchor), sorted by current seq
   const eligible = (all || [])
@@ -461,9 +466,10 @@ export async function computeCascadeRenumber(anchorInvoiceId) {
     .sort((a, b) => a.seq - b.seq);
 
   // Find anchor's position: count how many eligible invoices have a lower seq
+  // than the anchor's ORIGINAL position (not its new number)
   let anchorPos = 0;
   for (const inv of eligible) {
-    if (inv.seq < anchorSeq) anchorPos++;
+    if (inv.seq < positionSeq) anchorPos++;
     else break;
   }
 

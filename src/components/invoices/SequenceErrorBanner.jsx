@@ -34,7 +34,7 @@ export default function SequenceErrorBanner({ errors, onAllocated, currentUser, 
     if (hasManualEdit) {
       setCascadeLoading(true);
       try {
-        const plan = await computeCascadeRenumber(recentManualEdit.invoiceId);
+        const plan = await computeCascadeRenumber(recentManualEdit.invoiceId, recentManualEdit.fromNumber);
         if (plan.anchorInfo) {
           setCascadePlan(plan);
           setCascadeLoading(false);
