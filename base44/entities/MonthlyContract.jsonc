@@ -92,6 +92,11 @@
       "default": 0,
       "description": "Quick mode \u2014 same hour figure applied to every day (approximation)"
     },
+    "actual_days_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Quick mode \u2014 manually entered number of days the vehicle was used"
+    },
     "add_ons": {
       "type": "array",
       "items": {

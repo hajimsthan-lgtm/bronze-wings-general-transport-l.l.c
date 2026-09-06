@@ -30,14 +30,14 @@ function getDaysInDateRange(contract) {
   return diff > 0 ? diff : 0;
 }
 
-/** days_used is always computed, never typed. */
+/** days_used: daily log count → manual entry → date range fallback. */
 export function getDaysUsed(contract) {
   if (Array.isArray(contract?.daily_usage) && contract.daily_usage.length > 0) {
     return contract.daily_usage.length;
   }
-  // Migration fallback: old records may still have actual_days_used
+  // Quick mode: manually entered days used
   if (num(contract?.actual_days_used) > 0) return num(contract?.actual_days_used);
-  // Quick mode: derive from date range
+  // Fallback: derive from date range
   return getDaysInDateRange(contract);
 }
 
@@ -210,5 +210,5 @@ export function buildContractInvoiceLineItems(contract, calc, vehicleLabel, driv
 
 /** Check whether a contract has enough usage data to invoice. */
 export function hasUsageData(contract) {
-  return hasRealDailyUsage(contract) || num(contract?.avg_hours_per_day) > 0;
+  return hasRealDailyUsage(contract) || num(contract?.avg_hours_per_day) > 0 || num(contract?.actual_days_used) > 0;
 }

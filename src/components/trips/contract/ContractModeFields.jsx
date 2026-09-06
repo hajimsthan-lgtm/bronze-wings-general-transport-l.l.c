@@ -85,20 +85,7 @@ export default function ContractModeFields({ p }) {
     }
   }, [companySettings?.default_allowance_hours_per_day, isEditing]);
 
-  // ── Auto-suggest allowance_days from date range ──
-  useEffect(() => {
-    if (manualEdits.current.allowance_days) return;
-    if (contract.start_date && contract.end_date) {
-      const start = new Date(contract.start_date);
-      const end = new Date(contract.end_date);
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        const days = Math.round((end - start) / 86400000) + 1;
-        if (days > 0 && !contract.allowance_days) {
-          updateContract('allowance_days', days);
-        }
-      }
-    }
-  }, [contract.start_date, contract.end_date]);
+
 
   // ── Auto-suggest extra_day_rate = contract_rate / allowance_days ──
   useEffect(() => {
@@ -334,10 +321,17 @@ export default function ContractModeFields({ p }) {
           </div>
         </div>
         {quickMode ? (
-          <div>
-            <Label className="text-xs text-white/60 mb-1.5">{t('avg_hours_per_day') || 'Avg Hours / Day'}</Label>
-            <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => setField('avg_hours_per_day', e.target.value, true)} className={inputCls} placeholder="0" />
-            <p className="text-[10px] text-amber-400/70 mt-1 italic">{t('avg_hours_help') || 'Approximation — can\'t detect which specific days exceeded the cap'}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs text-white/60 mb-1.5">Used Days</Label>
+              <Input type="number" value={contract.actual_days_used ?? ''} onChange={(e) => setField('actual_days_used', e.target.value, true)} className={inputCls} placeholder="0" />
+              <p className="text-[10px] text-white/40 mt-1">Days vehicle was used</p>
+            </div>
+            <div>
+              <Label className="text-xs text-white/60 mb-1.5">{t('avg_hours_per_day') || 'Avg Hours / Day'}</Label>
+              <Input type="number" value={contract.avg_hours_per_day ?? ''} onChange={(e) => setField('avg_hours_per_day', e.target.value, true)} className={inputCls} placeholder="0" />
+              <p className="text-[10px] text-amber-400/70 mt-1 italic">{t('avg_hours_help') || 'Approximation — can\'t detect which specific days exceeded the cap'}</p>
+            </div>
           </div>
         ) : (
           <div>
