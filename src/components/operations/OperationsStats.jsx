@@ -9,7 +9,7 @@ export default function OperationsStats({ mode, tripsCount, totalRevenue, tripCo
   const isContract = mode === 'contract';
 
   const stats = isContract ? [
-    { label: 'Contracts', value: contractsCount, icon: Building2, accent: '#a855f7' },
+    { label: 'Rentals', value: contractsCount, icon: Building2, accent: '#a855f7' },
     { label: 'Active', value: contractCounts.active, icon: CheckCircle2, accent: '#34d399' },
     { label: 'Expired', value: contractCounts.expired, icon: Clock, accent: '#f59e0b' },
     { label: 'Terminated', value: contractCounts.terminated, icon: FileText, accent: '#f43f5e' },
