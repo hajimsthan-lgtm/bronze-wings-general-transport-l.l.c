@@ -20,10 +20,12 @@ import { disableNumberInputSpin } from '@/lib/disableNumberInputSpin'
 disableNumberInputSpin();
 
 // Suppress benign ResizeObserver loop warning (browser layout quirk, not an app bug).
-// Debounce the callback via requestAnimationFrame so notifications are delivered in
-// the next frame — this breaks the synchronous resize loop that triggers the warning.
+// 1) Debounce via requestAnimationFrame so notifications are delivered in the next frame.
+// 2) Cache contentRect sizes and skip the callback when nothing actually changed —
+//    this prevents the layout-thrashing loop that triggers the browser warning.
 if (typeof ResizeObserver !== 'undefined') {
   const _OrigRO = window.ResizeObserver;
+  const _sizeCache = new WeakMap();
   window.ResizeObserver = function (cb) {
     let ticking = false;
     let pendingEntries = [];
@@ -34,7 +36,18 @@ if (typeof ResizeObserver !== 'undefined') {
       const obs = pendingObserver;
       pendingEntries = [];
       pendingObserver = null;
-      try { cb(entries, obs); }
+      // Filter out entries whose size hasn't actually changed — this is what
+      // breaks the synchronous resize loop that triggers the browser warning.
+      const changed = entries.filter((entry) => {
+        const cr = entry.contentRect;
+        const key = `${cr.width}|${cr.height}`;
+        const prev = _sizeCache.get(entry.target);
+        if (prev === key) return false;
+        _sizeCache.set(entry.target, key);
+        return true;
+      });
+      if (changed.length === 0) return;
+      try { cb(changed, obs); }
       catch (err) {
         if (err?.message !== 'ResizeObserver loop completed with undelivered notifications.') throw err;
       }
@@ -44,7 +57,8 @@ if (typeof ResizeObserver !== 'undefined') {
       pendingObserver = observer;
       if (!ticking) { ticking = true; requestAnimationFrame(flush); }
     };
-    return new _OrigRO(wrapped);
+    const ro = new _OrigRO(wrapped);
+    return ro;
   };
   window.ResizeObserver.prototype = _OrigRO.prototype;
 }
