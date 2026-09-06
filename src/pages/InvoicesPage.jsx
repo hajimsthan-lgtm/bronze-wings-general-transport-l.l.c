@@ -96,6 +96,7 @@ export default function InvoicesPage() {
   const { undoStack, redoStack, canUndo, canRedo, pushAction, undo, redo, busy: undoBusy } = useUndoRedo({ refetch, toast });
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [lastManualEdit, setLastManualEdit] = useState(null);
 
   useEffect(() => {
     base44.entities.Client.list('-created_date', 500).catch(() => []).then((c) => {setClients(c);setInvoicesClients(c);});
@@ -133,6 +134,9 @@ export default function InvoicesPage() {
           changedBy: me,
         });
       } catch { /* non-blocking */ }
+      if (fromNumber && toNumber && fromNumber !== toNumber) {
+        setLastManualEdit({ invoiceId, fromNumber, toNumber });
+      }
       setHistoryRefresh((r) => r + 1);
     };
     window.addEventListener('invoice:number-changed', onNumberChanged);
@@ -790,7 +794,8 @@ export default function InvoicesPage() {
       <SequenceErrorBanner
         errors={sequenceErrors}
         currentUser={currentUser}
-        onAllocated={() => { refetch(); setHistoryRefresh((r) => r + 1); }}
+        recentManualEdit={lastManualEdit}
+        onAllocated={() => { refetch(); setHistoryRefresh((r) => r + 1); setLastManualEdit(null); }}
       />
 
       {/* Two-pane layout */}

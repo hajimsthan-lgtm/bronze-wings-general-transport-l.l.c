@@ -422,5 +422,196 @@ export async function smartAllocateKeepChanged(year, lockedInvoiceIds) {
   return { updates, snapshot, reallocated };
 }
 
+/**
+ * Cascade Renumber: compute a renumbering plan around a manually-edited anchor invoice.
+ * The anchor keeps its exact number; invoices before it count backward (anchor-1, anchor-2, ...),
+ * invoices after it count forward (anchor+1, anchor+2, ...).
+ * Does NOT apply any changes — returns a preview plan for confirmation.
+ *
+ * "Sequence order" = current numeric order of invoice numbers within that year
+ * (sorted by seq), NOT created_date or issue_date.
+ *
+ * @param {string} anchorInvoiceId - The ID of the manually-edited invoice (the anchor)
+ * @returns {Promise<{ updates, reallocated, collisions, hasNegativeSeq, anchorInfo, snapshot }>}
+ */
+export async function computeCascadeRenumber(anchorInvoiceId) {
+  const all = await base44.entities.Invoice.list('-created_date', 2000).catch(() => []);
+
+  const anchor = (all || []).find((inv) => inv.id === anchorInvoiceId);
+  if (!anchor) return { updates: [], reallocated: [], collisions: [], hasNegativeSeq: false, anchorInfo: null, snapshot: {} };
+
+  const anchorParsed = parseInvoiceNumber(anchor.invoice_number);
+  if (!anchorParsed) return { updates: [], reallocated: [], collisions: [], hasNegativeSeq: false, anchorInfo: null, snapshot: {} };
+
+  const year = anchorParsed.year;
+  const anchorSeq = anchorParsed.seq;
+
+  // All non-voided, new-format invoices in the same year (excluding anchor), sorted by current seq
+  const eligible = (all || [])
+    .filter((inv) => {
+      if (inv.id === anchorInvoiceId) return false;
+      if (inv.voided) return false;
+      const p = parseInvoiceNumber(inv.invoice_number);
+      return p && p.year === year;
+    })
+    .map((inv) => {
+      const p = parseInvoiceNumber(inv.invoice_number);
+      return { id: inv.id, seq: p.seq, oldNumber: inv.invoice_number, client_name: inv.client_name };
+    })
+    .sort((a, b) => a.seq - b.seq);
+
+  // Find anchor's position: count how many eligible invoices have a lower seq
+  let anchorPos = 0;
+  for (const inv of eligible) {
+    if (inv.seq < anchorSeq) anchorPos++;
+    else break;
+  }
+
+  const beforeCount = anchorPos;
+  const afterCount = eligible.length - anchorPos;
+
+  // Check for negative sequence numbers (counting backward would go below 1)
+  const minNewSeq = beforeCount > 0 ? anchorSeq - beforeCount : anchorSeq;
+  const hasNegativeSeq = minNewSeq < 1;
+
+  // Build updates and reallocated arrays
+  const updates = [];
+  const reallocated = [];
+  const snapshot = {};
+
+  // Snapshot includes anchor and all eligible invoices
+  snapshot[anchor.id] = anchor.invoice_number;
+  eligible.forEach((inv) => { snapshot[inv.id] = inv.oldNumber; });
+
+  // Before invoices: anchorSeq - beforeCount, ..., anchorSeq - 1
+  for (let i = 0; i < beforeCount; i++) {
+    const newSeq = anchorSeq - (beforeCount - i);
+    const newNumber = formatInvoiceNumber(year, newSeq);
+    if (eligible[i].oldNumber !== newNumber) {
+      updates.push({ id: eligible[i].id, invoice_number: newNumber });
+      reallocated.push({ invoice_id: eligible[i].id, from_number: eligible[i].oldNumber, to_number: newNumber });
+    }
+  }
+
+  // After invoices: anchorSeq + 1, ..., anchorSeq + afterCount
+  for (let i = 0; i < afterCount; i++) {
+    const idx = beforeCount + i;
+    const newSeq = anchorSeq + (i + 1);
+    const newNumber = formatInvoiceNumber(year, newSeq);
+    if (eligible[idx].oldNumber !== newNumber) {
+      updates.push({ id: eligible[idx].id, invoice_number: newNumber });
+      reallocated.push({ invoice_id: eligible[idx].id, from_number: eligible[idx].oldNumber, to_number: newNumber });
+    }
+  }
+
+  // Collision check: verify new numbers don't collide with invoices OUTSIDE the cascade
+  // (voided, old-format, or different year invoices that happen to use one of our new numbers)
+  const newNumbers = new Set(updates.map((u) => u.invoice_number));
+  const eligibleIds = new Set(eligible.map((e) => e.id));
+  const collisions = [];
+
+  (all || []).forEach((inv) => {
+    if (inv.id === anchorInvoiceId) return;
+    if (eligibleIds.has(inv.id)) return;
+    // This invoice is NOT part of the cascade — check if its number collides
+    if (newNumbers.has(inv.invoice_number)) {
+      collisions.push({ invoice_id: inv.id, invoice_number: inv.invoice_number, client_name: inv.client_name });
+    }
+  });
+
+  return {
+    updates,
+    reallocated,
+    collisions,
+    hasNegativeSeq,
+    anchorInfo: {
+      id: anchor.id,
+      number: anchor.invoice_number,
+      year,
+      seq: anchorSeq,
+      position: anchorPos + 1,
+      total: eligible.length + 1,
+      client_name: anchor.client_name,
+    },
+    snapshot,
+  };
+}
+
+/**
+ * Apply a cascade renumber plan: update invoice numbers, linked records (signed documents,
+ * payment allocations), company settings counter, and audit trail.
+ */
+export async function applyCascadeRenumber(plan, changedBy) {
+  if (!plan || !plan.anchorInfo || plan.collisions.length > 0 || plan.hasNegativeSeq) return;
+
+  // 1. Update invoice numbers
+  if (plan.updates.length > 0) {
+    await base44.entities.Invoice.bulkUpdate(plan.updates);
+  }
+
+  // 2. Update linked SignedDocuments (invoice_number field follows the renumber)
+  const signedDocs = await base44.entities.SignedDocument.list('-created_date', 500).catch(() => []);
+  const docUpdates = [];
+  for (const r of plan.reallocated) {
+    const docs = (signedDocs || []).filter((d) => d.invoice_id === r.invoice_id);
+    for (const doc of docs) {
+      docUpdates.push({ id: doc.id, invoice_number: r.to_number });
+    }
+  }
+  if (docUpdates.length > 0) {
+    await base44.entities.SignedDocument.bulkUpdate(docUpdates);
+  }
+
+  // 3. Update linked ClientPayments (allocated_invoices[].invoice_number follows the renumber)
+  const payments = await base44.entities.ClientPayment.list('-created_date', 500).catch(() => []);
+  const paymentUpdates = [];
+  for (const p of (payments || [])) {
+    if (!Array.isArray(p.allocated_invoices)) continue;
+    let changed = false;
+    const newAllocations = p.allocated_invoices.map((a) => {
+      const r = plan.reallocated.find((rr) => rr.invoice_id === a.invoice_id);
+      if (r && a.invoice_number !== r.to_number) {
+        changed = true;
+        return { ...a, invoice_number: r.to_number };
+      }
+      return a;
+    });
+    if (changed) {
+      paymentUpdates.push({ id: p.id, allocated_invoices: newAllocations });
+    }
+  }
+  if (paymentUpdates.length > 0) {
+    await base44.entities.ClientPayment.bulkUpdate(paymentUpdates);
+  }
+
+  // 4. Update CompanySettings counter to the highest seq after cascade
+  const settingsList = await base44.entities.CompanySettings.list().catch(() => []);
+  const s = settingsList?.[0];
+  if (s) {
+    const afterCount = plan.anchorInfo.total - plan.anchorInfo.position;
+    const maxSeq = plan.anchorInfo.seq + afterCount;
+    if (s.invoice_last_year !== plan.anchorInfo.year || (s.invoice_last_seq || 0) < maxSeq) {
+      await base44.entities.CompanySettings.update(s.id, {
+        invoice_last_seq: maxSeq,
+        invoice_last_year: plan.anchorInfo.year,
+      });
+    }
+  }
+
+  // 5. Audit trail — log the full before/after mapping
+  await base44.entities.InvoiceNumberChange.create({
+    invoice_id: plan.anchorInfo.id,
+    invoice_number: plan.anchorInfo.number,
+    from_number: 'cascade',
+    to_number: `cascade-allocated (${plan.reallocated.length + 1} invoices)`,
+    reason: `Cascade Renumber: anchored ${plan.anchorInfo.number} at position ${plan.anchorInfo.position}/${plan.anchorInfo.total}, renumbered ${plan.reallocated.length} surrounding invoice(s)`,
+    changed_by: changedBy || 'Unknown',
+    changed_at: new Date().toISOString(),
+    action_type: 'auto_reallocate',
+    reallocated_invoices: plan.reallocated,
+    undo_snapshot: plan.snapshot,
+  }).catch(() => {});
+}
+
 /** Alias — also re-exported by companySettings.js as generateInvoiceNumber */
 export { generateNextInvoiceNumber as generateInvoiceNumber };
