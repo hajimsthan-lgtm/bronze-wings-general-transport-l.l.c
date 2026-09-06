@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Upload, FileText, X, Building2, Route as RouteIcon, CalendarClock, Truck, Package, Wallet, StickyNote, MapPin, Flag, Hash, Ruler, RotateCcw, DollarSign, Gauge, Timer, User, Clock, Store, AlertCircle, Shield, ShieldCheck, Plus, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/formatters';
-import CreateNewCard from './CreateNewCard';
 import DateTimePicker from '@/components/common/DateTimePicker';
 import TripDateTimeInput from './TripDateTimeInput';
 import Section from './Section';
@@ -38,8 +37,6 @@ export default function TripModeFields({ p }) {
     allVehicles, allDrivers, allClients,
     errors = {},
   } = p;
-
-  const [manualClientMode, setManualClientMode] = useState(false);
 
   const errCls = (field) => errors[field] ? ' !border-red-500/70 !ring-2 !ring-red-500/30' : '';
   const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
@@ -96,17 +93,7 @@ export default function TripModeFields({ p }) {
       <Section title={t('client')} icon={Building2} accent="99,102,241" delay={0}>
         <div>
           <Label className="text-xs text-white/60 mb-1.5">{t('client')} <span className="text-red-400">*</span></Label>
-          {manualClientMode ? (
-            <>
-              <IconInput icon={User} list="client-suggestions" value={form.client_name} onChange={(e) => update('client_name', e.target.value)} className={`${inputCls}${errCls('client_name')}`} placeholder="Type client name" />
-              <datalist id="client-suggestions">{clientSuggestions.map((c) => <option key={c} value={c} />)}</datalist>
-              <button type="button" onClick={() => { setManualClientMode(false); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
-                ← Select from list
-              </button>
-            </>
-          ) : (
-            <>
-              <SearchableSelect
+          <SearchableSelect
                 value={form.client_name || ''}
                 onChange={(v) => update('client_name', v)}
                 placeholder="Select client"
@@ -149,16 +136,7 @@ export default function TripModeFields({ p }) {
                   ),
                 }))}
               />
-              <button type="button" onClick={() => { setManualClientMode(true); update('client_name', ''); }} className="text-[10px] text-primary mt-1 flex items-center gap-1 hover:underline">
-                <Plus className="w-3 h-3" /> New client not in list? Type manually
-              </button>
-            </>
-          )}
           {errors.client_name && <p className="text-[10px] text-red-400 mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.client_name}</p>}
-          {isNewClient && (
-            <CreateNewCard label="client" value={form.client_name} created={createdFlags.client} loading={creating === 'client'}
-              onCreate={() => createEntity('Client', { name: form.client_name }, 'client')} />
-          )}
           {form.client_name && fixedCharges.length > 0 && (
             <p className="text-[10px] text-blue-400 mt-1.5">{fixedCharges.length} fixed charge(s) loaded — matching routes auto-fill amount</p>
           )}
